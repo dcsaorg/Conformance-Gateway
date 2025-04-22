@@ -139,8 +139,8 @@ components:
           type: "string"
           description: |-
             Measurement unit in which the `temperatureSetpoint` is expressed
-             - `CEL` - Celsius
-             - `FAH` - Fahrenheit
+             * `CEL` - Celsius
+             * `FAH` - Fahrenheit
           example: "CEL"
         o2Setpoint:
           pattern: "^\\d+(\\.\\d+)?$"
@@ -166,8 +166,8 @@ components:
           type: "string"
           description: |-
             Measurement unit in which the `airExchangeSetpoint` is expressed
-             - `FQH` - Cubic foot per hour
-             - `MQH` - Cubic metre per hour
+             * `FQH` - Cubic foot per hour
+             * `MQH` - Cubic metre per hour
           example: "MQH"
         isVentilationOpen:
           type: "boolean"
@@ -185,7 +185,7 @@ components:
           type: "boolean"
           description: |
             Flag indicating whether the cargo requires cold treatment prior to loading at origin or during transit,
-             but prior arrival at POD
+            but prior arrival at POD
           example: true
         isControlledAtmosphereRequired:
           type: "boolean"
@@ -275,8 +275,8 @@ components:
           type: "string"
           description: |-
             The provider of the code list in which `carrierCode` is defined.
-             - `SMDG` - Ship Message Design Group
-             - `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)
+             * `SMDG` - Ship Message Design Group
+             * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)
           example: "NMFTA"
         carrierContactInformation:
           type: "array"
@@ -314,7 +314,7 @@ components:
           type: "string"
           description: |
             Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
-             e.g. additional required documents to prepare and present for shipment release - country specific.
+            e.g. additional required documents to prepare and present for shipment release - country specific.
           example: "FIRMS code: B986"
         references:
           type: "array"
@@ -330,8 +330,8 @@ components:
           type: "string"
           description: |-
             Type of the transport document for which this arrival notice was created
-             - `BOL` - Bill of Lading
-             - `SWB` - Sea Waybill
+             * `BOL` - Bill of Lading
+             * `SWB` - Sea Waybill
           example: "BOL"
         isElectronic:
           type: "boolean"
@@ -342,18 +342,18 @@ components:
           type: "string"
           description: |-
             Code representing the delivery type offered at destination
-             - `CY` - Container yard (including rail ramp)
-             - `SD` - Store Door
-             - `CFS` - Container Freight Station
+             * `CY` - Container yard (including rail ramp)
+             * `SD` - Store Door
+             * `CFS` - Container Freight Station
           example: "CY"
         cargoMovementTypeAtDestination:
           type: "string"
           description: |-
             Code indicating whether at destination the unloaded cargo occupies an entire container (FCL)
-             or shares the container with other shipments (LCL).
+            or shares the container with other shipments (LCL).
 
-             - `FCL` - Full Container Load
-             - `LCL` - Less than Container Load
+             * `FCL` - Full Container Load
+             * `LCL` - Less than Container Load
           example: "FCL"
         termsAndConditions:
           maxLength: 50000
@@ -368,7 +368,7 @@ components:
             type: "string"
             description: |
               Clause for a specific shipment added by the carrier, subject to local rules / guidelines
-               or certain mandatory information required to be shared with the customer.
+              or certain mandatory information required to be shared with the customer.
             example: "It is not allowed to..."
         documentParties:
           type: "array"
@@ -393,7 +393,7 @@ components:
           type: "object"
           description: |
             Location where the customer will make the payment of ocean freight and charges for the main transport,
-             typically expressed as a UN/LOCODE or just a location name.
+            typically expressed as a UN/LOCODE or just a location name.
           allOf:
           - $ref: "#/components/schemas/Location"
         utilizedTransportEquipments:
@@ -477,10 +477,10 @@ components:
           type: "string"
           description: |
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
-             According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
-             (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
-             If a container does not comply with ISO 6346, it is suggested to follow "Recommendation #2:
-             Containers with non-ISO identification" from SMDG: https://smdg.org/documents/smdg-recommendations
+            According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+            (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+            If a container does not comply with ISO 6346, it is suggested to follow "Recommendation #2:
+            Containers with non-ISO identification" from SMDG: https://smdg.org/documents/smdg-recommendations
           example: "APZU4812090"
         cargoGrossWeight:
           $ref: "#/components/schemas/Weight"
@@ -513,12 +513,12 @@ components:
           type: "string"
           description: |-
             An indicator of whether a charge is prepaid (PRE) or collect (COL).
-             When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf
-             of the shipper (if provided). When collect, the charge is the responsibility of the consignee
-             or the Invoice payer on behalf of the consignee (if provided).
+            When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf
+            of the shipper (if provided). When collect, the charge is the responsibility of the consignee
+            or the Invoice payer on behalf of the consignee (if provided).
 
-             - `COL` - Collect
-             - `PRE` - Prepaid
+             * `COL` - Collect
+             * `PRE` - Prepaid
           example: "PRE"
         chargeAmount:
           pattern: "^\\d+(\\.\\d{1,2})?$"
@@ -537,16 +537,16 @@ components:
           type: "string"
           description: |
             The quotation of the relative value of a currency unit against the unit of another currency
-             in the foreign exchange market applicable to this charge item. The Carrier rate of exchange applicability
-             is defined based on the local jurisdiction. If not provided, the customer should refer to the ROE available
-             on the carrier website or the ROE defined by the competent customs authority, as per local practice.
+            in the foreign exchange market applicable to this charge item. The Carrier rate of exchange applicability
+            is defined based on the local jurisdiction. If not provided, the customer should refer to the ROE available
+            on the carrier website or the ROE defined by the competent customs authority, as per local practice.
           example: "1.00 EUR = 1.08149 USD"
         calculationBasis:
           maxLength: 50
           type: "string"
           description: |
             The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton,
-             per square metre.
+            per square metre.
           example: "Per day"
         unitPrice:
           pattern: "^\\d+(\\.\\d{1,2})?$"
@@ -567,11 +567,11 @@ components:
       description: "Contact details"
     ConsignmentItem:
       required:
-      - "HSCodes"
       - "cargoItems"
       - "carrierBookingReference"
       - "commoditySubReference"
       - "descriptionOfGoods"
+      - "hsCodes"
       type: "object"
       properties:
         carrierBookingReference:
@@ -586,7 +586,7 @@ components:
           type: "string"
           description: |
             Reference to the commodity object assigned by the carrier in the booking confirmation,
-             unique within the context of one booking.
+            unique within the context of one booking.
           example: "XYZ1234"
         descriptionOfGoods:
           type: "array"
@@ -597,7 +597,7 @@ components:
             type: "string"
             description: "One line in the cargo description"
             example: "Plush tiger"
-        HSCodes:
+        hsCodes:
           type: "array"
           description: "List of HS Codes that apply to this consignment item"
           items:
@@ -607,8 +607,8 @@ components:
             type: "string"
             description: |
               Code used by customs to classify the product being shipped.
-               The type of HS code depends on country and customs requirements. More information can be found
-               in the [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools)
+              The type of HS code depends on country and customs requirements. More information can be found
+              in the [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools)
             example: "12345678"
         nationalCommodityCodes:
           type: "array"
@@ -633,10 +633,10 @@ components:
           description: "The list of cargo items grouped in this consignment item."
           items:
             $ref: "#/components/schemas/CargoItem"
-      description: |-
+      description: |
         A list of cargo items belonging together and the associated booking.
-         A consignment item can be split across multiple containers (`UtilizedTransportEquipment`)
-         by referencing multiple cargo items.
+        A consignment item can be split across multiple containers (`UtilizedTransportEquipment`)
+        by referencing multiple cargo items.
     ContactInformation:
       type: "object"
       properties:
@@ -691,7 +691,7 @@ components:
             example: "ABC12345"
       description: |
         Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export
-         or transit of the goods.
+        or transit of the goods.
 
         Examples of possible customs references are:
 
@@ -743,7 +743,7 @@ components:
         properShippingName:
           maxLength: 250
           type: "string"
-          description: |-
+          description: |
             The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code,
             or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to
             the MARPOL Convention.
@@ -751,9 +751,9 @@ components:
         technicalName:
           maxLength: 250
           type: "string"
-          description: |-
+          description: |
             The recognized chemical or biological name or other name currently used for the referenced dangerous goods
-             as described in chapter 3.1.2.8 of the IMDG Code.
+            as described in chapter 3.1.2.8 of the IMDG Code.
           example: "xylene and benzene"
         imoClass:
           type: "string"
@@ -933,13 +933,14 @@ components:
           type: "string"
           description: |-
             Code indicating the type of a document party
-             - `SHIPPER` - The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a
-             carrier, or any person by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier
-             in relation to the contract of carriage by sea.
-             - `CONSIGNEE` - The party to which goods are consigned.
-             - `FIRST_NOTIFY_PARTY` - The first party to be notified of the shipment arrival.
-             - `SECOND_NOTIFY_PARTY` - The second party to be notified of the shipment arrival.
-             - `OTHER_NOTIFY_PARTY` - Other party to be notified of the shipment arrival.
+             * `SHIPPER` - The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a
+            carrier, or any person by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier
+            in relation to the contract of carriage by sea.
+
+             * `CONSIGNEE` - The party to which goods are consigned.
+             * `FIRST_NOTIFY_PARTY` - The first party to be notified of the shipment arrival.
+             * `SECOND_NOTIFY_PARTY` - The second party to be notified of the shipment arrival.
+             * `OTHER_NOTIFY_PARTY` - Other party to be notified of the shipment arrival.
           example: "SHIPPER"
         name:
           maxLength: 70
@@ -951,12 +952,12 @@ components:
           description: |
             One of the person types defined by the Union Customs Code art. 5(4)
 
-             - `NATURAL_PERSON` - A person that is an individual living human being
+             * `NATURAL_PERSON` - A person that is an individual living human being
 
-             - `LEGAL_PERSON` - Person (including a human being and public or private organizations) that can perform legal actions,
-             such as own a property, sue and be sued
+             * `LEGAL_PERSON` - Person (including a human being and public or private organizations) that can perform legal actions,
+            such as own a property, sue and be sued
 
-             - `ASSOCIATION_OF_PERSONS` - Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts
+             * `ASSOCIATION_OF_PERSONS` - Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts
           example: "LEGAL_PERSON"
         address:
           $ref: "#/components/schemas/Address"
@@ -1020,31 +1021,31 @@ components:
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 
             According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of
-             a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number,
-             and a check-digit).
+            a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number,
+            and a check-digit).
 
             If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow
-             [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.
+            [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.
           example: "APZU4812090"
-        ISOEquipmentCode:
+        isoEquipmentCode:
           maxLength: 4
           type: "string"
           description: |
             Unique code for the different equipment size and type used to transport commodities.
 
             The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP)
-             following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
+            following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
           example: "22G1"
         tareWeight:
           $ref: "#/components/schemas/Weight"
       description: |
         Used for storing cargo in/on during transport. The equipment size/type is defined by the ISO 6346 code.
-         The most common equipment size/type is 20'/40'/45' DRY Freight Container, but several different versions exist.
+        The most common equipment size/type is 20'/40'/45' DRY Freight Container, but several different versions exist.
     FreeTime:
       required:
-      - "ISOEquipmentCode"
       - "calculationBasis"
       - "duration"
+      - "isoEquipmentCode"
       - "timeUnit"
       - "typeCode"
       type: "object"
@@ -1053,29 +1054,29 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of free time.
-             - `DEM` - Demurrage
-             - `DET` - Detention
-             - `PDM` - Per Diem
-             - `STO` - Storage
+             * `DEM` - Demurrage
+             * `DET` - Detention
+             * `PDM` - Per Diem
+             * `STO` - Storage
           example: "DEM"
-        ISOEquipmentCode:
+        isoEquipmentCode:
           maxLength: 4
           pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Unique code identifying the equipment size and type used to transport commodities.
-             The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
-             following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
+            The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+            following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
           example: "22GP"
         modeOfTransportCode:
           maxLength: 20
           type: "string"
           description: |-
             The mode of transport, as defined by DCSA, for which the free time object applies
-             - `BARGE` - Barge
-             - `RAIL` - Rail
-             - `TRUCK` - Truck
-             - `VESSEL` - Vessel
+             * `BARGE` - Barge
+             * `RAIL` - Rail
+             * `TRUCK` - Truck
+             * `VESSEL` - Vessel
           example: "VESSEL"
         duration:
           type: "integer"
@@ -1087,17 +1088,17 @@ components:
           type: "string"
           description: |-
             Code identifying the unit in which free time is expressed
-             - `CD` - Calendar days
-             - `WD` - Working days
-             - `HR` - Hours
-             - `DOD` - Day of discharge
+             * `CD` - Calendar days
+             * `WD` - Working days
+             * `HR` - Hours
+             * `DOD` - Day of discharge
           example: "WD"
         calculationBasis:
           maxLength: 1000
           type: "string"
           description: |
             Description of the conditions under which this free time item applies.
-             It can include references to the carrier website or individual charges as per service contract/agreement.
+            It can include references to the carrier website or individual charges as per service contract/agreement.
           example: "Calculated as..."
       description: "Free time condition applicable to this shipment at destination."
     IdentifyingPartyCode:
@@ -1111,24 +1112,24 @@ components:
           description: |-
             Code of the provider of the code list from which a party code is used.
 
-             - `BOLE` - Bolero
-             - `CARX` - CargoX
-             - `DCSA` - Digital Container Shipping Association
-             - `DNB` - Dun and Bradstreet
-             - `EDOX` - EdoxOnline
-             - `ESSD` - EssDOCS
-             - `ETEU` - eTEU
-             - `FMC` - Federal Maritime Commission
-             - `GSBN` - Global Shipping Business Network
-             - `GLEIF` - Global Legal Entity Identifier Foundation
-             - `IDT` - ICE Digital Trade
-             - `IQAX` - IQAX
-             - `SECR` - Secro
-             - `TRGO` - TradeGO
-             - `W3C` - World Wide Web Consortium
-             - `WAVE` - Wave
-             - `WISE` - WiseTech
-             - `ZZZ` - Mutually defined
+             * `BOLE` - Bolero
+             * `CARX` - CargoX
+             * `DCSA` - Digital Container Shipping Association
+             * `DNB` - Dun and Bradstreet
+             * `EDOX` - EdoxOnline
+             * `ESSD` - EssDOCS
+             * `ETEU` - eTEU
+             * `FMC` - Federal Maritime Commission
+             * `GSBN` - Global Shipping Business Network
+             * `GLEIF` - Global Legal Entity Identifier Foundation
+             * `IDT` - ICE Digital Trade
+             * `IQAX` - IQAX
+             * `SECR` - Secro
+             * `TRGO` - TradeGO
+             * `W3C` - World Wide Web Consortium
+             * `WAVE` - Wave
+             * `WISE` - WiseTech
+             * `ZZZ` - Mutually defined
           example: "W3C"
         codeListName:
           type: "string"
@@ -1177,7 +1178,7 @@ components:
           example: "Port of Amsterdam"
         address:
           $ref: "#/components/schemas/Address"
-        UNLocationCode:
+        unLocationCode:
           maxLength: 5
           minLength: 5
           pattern: "^[A-Z]{2}[A-Z2-9]{3}$"
@@ -1199,8 +1200,8 @@ components:
           type: "string"
           description: |-
             The provider of the code list in which `facilityCode` is defined.
-             - `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
-             - `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)
+             * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+             * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)
           example: "BIC"
       description: "Location information"
     NationalCommodityCode:
@@ -1269,7 +1270,7 @@ components:
             IMO packaging code.
 
             Only applicable to dangerous goods if specified in the
-             [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx).
+            [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx).
 
             If not available, the UNECE Recommendation 21 `packageCode` should be used.
           example: "1A2"
@@ -1287,14 +1288,14 @@ components:
           description: |
             Code indicating whether the products, packaging and any other items are made of wood.
 
-             - `NOT_APPLICABLE` - No wood or any other wood product such as packaging and supports are being shipped.
+             * `NOT_APPLICABLE` - No wood or any other wood product such as packaging and supports are being shipped.
 
-             - `NOT_TREATED_AND_NOT_CERTIFIED` - The wood or wooden materials have not been treated nor fumigated and do not include a certificate.
+             * `NOT_TREATED_AND_NOT_CERTIFIED` - The wood or wooden materials have not been treated nor fumigated and do not include a certificate.
 
-             - `PROCESSED` - The wood or wooden materials are entirely made of processed wood, such as plywood, particle board,
-             sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these.
+             * `PROCESSED` - The wood or wooden materials are entirely made of processed wood, such as plywood, particle board,
+            sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these.
 
-             - `TREATED_AND_CERTIFIED` - The wood or wooden materials have been treated and/or fumigated and include a certificate.
+             * `TREATED_AND_CERTIFIED` - The wood or wooden materials have been treated and/or fumigated and include a certificate.
           example: "TREATED_AND_CERTIFIED"
         dangerousGoods:
           type: "array"
@@ -1304,9 +1305,9 @@ components:
       description: |
         Outer packaging / overpack specification.
 
-         Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping
-         or placed in a protective outer packaging such as a box or crate to form one unit
-         for the convenience of handling and stowage during transport.
+        Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping
+        or placed in a protective outer packaging such as a box or crate to form one unit
+        for the convenience of handling and stowage during transport.
     Reference:
       required:
       - "referenceType"
@@ -1352,10 +1353,10 @@ components:
           description: |-
             Code identifying the type of entity that has affixed the seal (the seal "source")
 
-             - `CAR` - Carrier
-             - `CUS` - Customs
-             - `SHI` - Shipper
-             - `VET` - Veterinary
+             * `CAR` - Carrier
+             * `CUS` - Customs
+             * `SHI` - Shipper
+             * `VET` - Veterinary
           example: "VET"
       description: "Specification of the seal put on a container"
     TaxOrLegalReference:
@@ -1407,8 +1408,8 @@ components:
           type: "string"
           description: |-
             The unit in which all temperature limits are expressed
-             - `CEL` - Celsius
-             - `FAH` - Fahrenheit
+             * `CEL` - Celsius
+             * `FAH` - Fahrenheit
           example: "CEL"
         flashPoint:
           type: "number"
@@ -1455,7 +1456,7 @@ components:
           type: "string"
           description: |
             The date of departure from the location where the cargo is handed over by the shipper, or his agent,
-             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
+            to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
           format: "date"
           example: "2025-01-23T00:00:00.000+00:00"
         plannedDepartureDate:
@@ -1512,14 +1513,14 @@ components:
           type: "object"
           description: |
             The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
-             This indicates the point at which the shipping line takes on responsibility for carriage of the container.
+            This indicates the point at which the shipping line takes on responsibility for carriage of the container.
           allOf:
           - $ref: "#/components/schemas/Location"
         placeOfDelivery:
           type: "object"
           description: |
             The location where the cargo is handed over by the shipping line to the consignee or its agent
-             and where responsibility of the shipping line ceases.
+            and where responsibility of the shipping line ceases.
           allOf:
           - $ref: "#/components/schemas/Location"
       description: "Transport info"
@@ -1536,9 +1537,9 @@ components:
       type: "object"
       description: |
         A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.
-         - last 2 digits of the year
-         - 2 alphanumeric characters for the sequence number of the voyage
-         - 1 character for the initial of the direction/haul (North, East, West, South or Roundtrip).
+         * last 2 digits of the year
+         * 2 alphanumeric characters for the sequence number of the voyage
+         * 1 character for the initial of the direction/haul (North, East, West, South or Roundtrip).
       example: "2301W"
     UtilizedTransportEquipment:
       required:
@@ -1557,7 +1558,7 @@ components:
           type: "boolean"
           description: |
             Indicates whether the container with dangerous goods cargo must exit the port immediately after being discharged,
-             based on the destination port and country regulations.
+            based on the destination port and country regulations.
           example: true
         isNonOperatingReefer:
           type: "boolean"
@@ -1587,8 +1588,8 @@ components:
       type: "object"
       description: |
         The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
-         The reference is the International Maritime Organisation (IMO) number,
-         also sometimes known as the Lloyd's register code.
+        The reference is the International Maritime Organisation (IMO) number,
+        also sometimes known as the Lloyd's register code.
       example: 12345678
     VesselVoyage:
       required:
@@ -1602,8 +1603,8 @@ components:
           description: |-
             Code representing the destination type of a vessel voyage.
 
-             - `DC` - destination country
-             - `POD` - port of destination
+             * `DC` - destination country
+             * `POD` - port of destination
           example: "POD"
         vesselName:
           maxLength: 50
@@ -1628,7 +1629,7 @@ components:
           $ref: "#/components/schemas/UniversalVoyageReference"
       description: |
         The details of the last sea-going vessel arriving at the Port of Discharge,
-         which can be either a feeder or the mother vessel.
+        which can be either a feeder or the mother vessel.
     Volume:
       required:
       - "unit"
@@ -1644,9 +1645,9 @@ components:
           type: "string"
           description: |-
             The unit in which the volume `value` is expressed
-             - `FTQ` - Cubic feet
-             - `LTR` - Litres
-             - `MTQ` - Cubic meters
+             * `FTQ` - Cubic feet
+             * `LTR` - Litres
+             * `MTQ` - Cubic meters
           example: "MTQ"
       description: "Representation of a volume including the unit in which it is expressed."
     Weight:
@@ -1664,10 +1665,10 @@ components:
           type: "string"
           description: |-
             The unit in which the weight `value` is expressed
-             - `GRM` - Grams
-             - `KGM` - Kilograms
-             - `LBR` - Pounds
-             - `ONZ` - Ounce
+             * `GRM` - Grams
+             * `KGM` - Kilograms
+             * `LBR` - Pounds
+             * `ONZ` - Ounce
           example: "KGM"
       description: "Representation of a weight including the unit in which it is expressed."
   headers:

@@ -35,10 +35,10 @@ public class Charge {
       description =
 """
 The quotation of the relative value of a currency unit against the unit of another currency
- in the foreign exchange market applicable to this charge item. The Carrier rate of exchange applicability
- is defined based on the local jurisdiction. If not provided, the customer should refer to the ROE available
- on the carrier website or the ROE defined by the competent customs authority, as per local practice.
- """)
+in the foreign exchange market applicable to this charge item. The Carrier rate of exchange applicability
+is defined based on the local jurisdiction. If not provided, the customer should refer to the ROE available
+on the carrier website or the ROE defined by the competent customs authority, as per local practice.
+""")
   private String carrierRateOfExchange;
 
   @Schema(
@@ -47,7 +47,7 @@ The quotation of the relative value of a currency unit against the unit of anoth
       description =
 """
 The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton,
- per square metre.
+per square metre.
 """,
       example = "Per day")
   private String calculationBasis;

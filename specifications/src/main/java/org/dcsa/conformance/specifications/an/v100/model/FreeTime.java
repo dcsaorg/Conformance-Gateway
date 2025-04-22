@@ -15,7 +15,7 @@ public class FreeTime {
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private FreeTimeTypeCode typeCode;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, name = "ISOEquipmentCode")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private IsoEquipmentCode isoEquipmentCode;
 
   @SchemaOverride(
@@ -40,7 +40,7 @@ public class FreeTime {
       description =
 """
 Description of the conditions under which this free time item applies.
- It can include references to the carrier website or individual charges as per service contract/agreement.
+It can include references to the carrier website or individual charges as per service contract/agreement.
 """,
       example = "Calculated as...")
   private String calculationBasis;

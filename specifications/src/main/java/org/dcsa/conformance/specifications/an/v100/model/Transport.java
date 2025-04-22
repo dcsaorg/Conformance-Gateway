@@ -14,7 +14,7 @@ public class Transport {
       description =
 """
 The date of departure from the location where the cargo is handed over by the shipper, or his agent,
- to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
+to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
 """)
   private FormattedDate departureDate;
 
@@ -78,7 +78,7 @@ The location where the cargo is discharged from the last sea-going vessel.
       description =
 """
 The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
- This indicates the point at which the shipping line takes on responsibility for carriage of the container.
+This indicates the point at which the shipping line takes on responsibility for carriage of the container.
 """)
   private Object placeOfReceipt;
 
@@ -87,7 +87,7 @@ The location where the cargo is handed over by the shipper, or his agent, to the
       description =
 """
 The location where the cargo is handed over by the shipping line to the consignee or its agent
- and where responsibility of the shipping line ceases.
+and where responsibility of the shipping line ceases.
 """)
   private Object placeOfDelivery;
 }

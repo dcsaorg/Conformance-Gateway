@@ -25,7 +25,7 @@ The wood or wooden materials have not been treated nor fumigated and do not incl
   PROCESSED(
 """
 The wood or wooden materials are entirely made of processed wood, such as plywood, particle board,
- sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these.
+sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these.
 """),
   TREATED_AND_CERTIFIED(
 """

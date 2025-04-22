@@ -79,7 +79,7 @@ public class ActiveReeferSettings {
       description =
 """
 Flag indicating whether the cargo requires cold treatment prior to loading at origin or during transit,
- but prior arrival at POD
+but prior arrival at POD
 """)
   private String coldTreatmentRequired;
 

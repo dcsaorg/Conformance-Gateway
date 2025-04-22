@@ -71,7 +71,8 @@ Character | Valid Characters | Description
 """
 The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code,
 or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to
-the MARPOL Convention.""")
+the MARPOL Convention.
+""")
   private String properShippingName;
 
   @Schema(
@@ -81,7 +82,8 @@ the MARPOL Convention.""")
       description =
 """
 The recognized chemical or biological name or other name currently used for the referenced dangerous goods
- as described in chapter 3.1.2.8 of the IMDG Code.""")
+as described in chapter 3.1.2.8 of the IMDG Code.
+""")
   private String technicalName;
 
   @Schema(

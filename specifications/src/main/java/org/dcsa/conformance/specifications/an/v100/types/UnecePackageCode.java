@@ -8,7 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
     minLength = 2,
     maxLength = 2,
     example = "5H",
-    description = """
+    description =
+"""
 [UNECE Recommendation 21](https://unece.org/trade/uncefact/cl-recommendations) package code
 """)
 public class UnecePackageCode {}

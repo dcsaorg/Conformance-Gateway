@@ -13,7 +13,7 @@ import org.dcsa.conformance.specifications.an.v100.types.VesselVoyageDestination
     description =
 """
 The details of the last sea-going vessel arriving at the Port of Discharge,
- which can be either a feeder or the mother vessel.
+which can be either a feeder or the mother vessel.
 """)
 public class VesselVoyage {
 

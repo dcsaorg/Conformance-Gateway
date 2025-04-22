@@ -47,7 +47,7 @@ public class ModelValidatorConverter implements ModelConverter {
                         Class.forName(simpleType.getRawClass().getName()).getEnumConstants())
                     .map(
                         enumConstant ->
-                            " - `%s` - %s"
+                            " * `%s` - %s"
                                 .formatted(
                                     ((EnumBase) enumConstant).name(),
                                     ((EnumBase) enumConstant).getValueDescription()))

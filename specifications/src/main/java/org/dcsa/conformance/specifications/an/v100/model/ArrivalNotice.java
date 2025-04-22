@@ -74,7 +74,7 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
       description =
 """
 Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
- e.g. additional required documents to prepare and present for shipment release - country specific.
+e.g. additional required documents to prepare and present for shipment release - country specific.
 """)
   private String additionalInformation;
 
@@ -117,7 +117,7 @@ Flag indicating whether the transport document for which this arrival notice was
       description =
 """
 Code indicating whether at destination the unloaded cargo occupies an entire container (FCL)
- or shares the container with other shipments (LCL).
+or shares the container with other shipments (LCL).
 """,
       example = "FCL")
   private ContainerLoadTypeCode cargoMovementTypeAtDestination;
@@ -152,7 +152,7 @@ Code indicating whether at destination the unloaded cargo occupies an entire con
       description =
 """
 Location where the customer will make the payment of ocean freight and charges for the main transport,
- typically expressed as a UN/LOCODE or just a location name.
+typically expressed as a UN/LOCODE or just a location name.
 """)
   private Object invoicePayableAt;
 

@@ -15,8 +15,9 @@ import org.dcsa.conformance.specifications.an.v100.types.ShippingMark;
     description =
 """
 A list of cargo items belonging together and the associated booking.
- A consignment item can be split across multiple containers (`UtilizedTransportEquipment`)
- by referencing multiple cargo items.""")
+A consignment item can be split across multiple containers (`UtilizedTransportEquipment`)
+by referencing multiple cargo items.
+""")
 public class ConsignmentItem {
 
   @Schema(
@@ -35,7 +36,7 @@ public class ConsignmentItem {
       description =
 """
 Reference to the commodity object assigned by the carrier in the booking confirmation,
- unique within the context of one booking.
+unique within the context of one booking.
 """)
   private String commoditySubReference;
 
@@ -50,7 +51,6 @@ Ordered list of cargo descriptions precise enough for customs services to be abl
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
-      name = "HSCodes",
       description = "List of HS Codes that apply to this consignment item")
   @ArraySchema(minItems = 1)
   private List<HSCode> hsCodes;

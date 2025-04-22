@@ -9,6 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
     description =
 """
 Clause for a specific shipment added by the carrier, subject to local rules / guidelines
- or certain mandatory information required to be shared with the customer.
+or certain mandatory information required to be shared with the customer.
 """)
 public class CarrierClause {}

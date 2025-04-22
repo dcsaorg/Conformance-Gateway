@@ -34,7 +34,7 @@ Specifies whether the container must be returned to the carrier and cannot be re
       description =
 """
 Indicates whether the container with dangerous goods cargo must exit the port immediately after being discharged,
- based on the destination port and country regulations.
+based on the destination port and country regulations.
 """)
   private boolean directDeliveryRequired;
 

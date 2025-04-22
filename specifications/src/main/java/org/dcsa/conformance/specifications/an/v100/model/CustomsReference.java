@@ -12,7 +12,7 @@ import org.dcsa.conformance.specifications.an.v100.types.CustomsReferenceValue;
     description =
 """
 Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export
- or transit of the goods.
+or transit of the goods.
 
 Examples of possible customs references are:
 

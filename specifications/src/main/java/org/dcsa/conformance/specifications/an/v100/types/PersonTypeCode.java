@@ -20,7 +20,7 @@ A person that is an individual living human being
   LEGAL_PERSON(
 """
 Person (including a human being and public or private organizations) that can perform legal actions,
- such as own a property, sue and be sued
+such as own a property, sue and be sued
 """),
   ASSOCIATION_OF_PERSONS(
 """

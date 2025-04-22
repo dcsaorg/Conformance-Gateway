@@ -10,9 +10,9 @@ import lombok.Getter;
     description =
 """
 An indicator of whether a charge is prepaid (PRE) or collect (COL).
- When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf
- of the shipper (if provided). When collect, the charge is the responsibility of the consignee
- or the Invoice payer on behalf of the consignee (if provided).
+When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf
+of the shipper (if provided). When collect, the charge is the responsibility of the consignee
+or the Invoice payer on behalf of the consignee (if provided).
 """)
 @AllArgsConstructor
 public enum PaymentTermCode implements EnumBase {

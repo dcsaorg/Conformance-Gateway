@@ -14,9 +14,9 @@ import org.dcsa.conformance.specifications.an.v100.types.WoodDeclarationTypeCode
 """
 Outer packaging / overpack specification.
 
- Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping
- or placed in a protective outer packaging such as a box or crate to form one unit
- for the convenience of handling and stowage during transport.
+Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping
+or placed in a protective outer packaging such as a box or crate to form one unit
+for the convenience of handling and stowage during transport.
 """)
 public class OuterPackaging {
 
@@ -44,7 +44,7 @@ public class OuterPackaging {
 IMO packaging code.
 
 Only applicable to dangerous goods if specified in the
- [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx).
+[IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx).
 
 If not available, the UNECE Recommendation 21 `packageCode` should be used.
 """)
@@ -55,7 +55,8 @@ If not available, the UNECE Recommendation 21 `packageCode` should be used.
 """
 [UNECE Recommendation 21](https://unece.org/trade/uncefact/cl-recommendations) package code
 
-Only applicable to dangerous goods if the `imoPackagingCode` is not available.""",
+Only applicable to dangerous goods if the `imoPackagingCode` is not available.
+""",
       example = "5H")
   private UnecePackageCode unecePackageCode;
 

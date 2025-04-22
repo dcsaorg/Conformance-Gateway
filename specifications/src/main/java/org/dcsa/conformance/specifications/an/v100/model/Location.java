@@ -20,7 +20,7 @@ public class Location {
   @Schema(description = "Location address")
   private Address address;
 
-  @Schema(name = "UNLocationCode")
+  @Schema()
   private UNLocationCode unLocationCode;
 
   @Schema(

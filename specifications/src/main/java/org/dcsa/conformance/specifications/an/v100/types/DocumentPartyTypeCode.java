@@ -13,8 +13,9 @@ public enum DocumentPartyTypeCode implements EnumBase {
   SHIPPER(
 """
 The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a
- carrier, or any person by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier
- in relation to the contract of carriage by sea."""),
+carrier, or any person by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier
+in relation to the contract of carriage by sea.
+"""),
   CONSIGNEE("The party to which goods are consigned."),
   FIRST_NOTIFY_PARTY("The first party to be notified of the shipment arrival."),
   SECOND_NOTIFY_PARTY("The second party to be notified of the shipment arrival."),

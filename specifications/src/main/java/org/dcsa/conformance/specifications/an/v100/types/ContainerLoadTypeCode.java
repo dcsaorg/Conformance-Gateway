@@ -10,7 +10,7 @@ import lombok.Getter;
     description =
 """
 Code indicating whether the cargo shipment occupies an entire container (FCL)
- or shares the container with other shipments (LCL).
+or shares the container with other shipments (LCL).
 """)
 @AllArgsConstructor
 public enum ContainerLoadTypeCode implements EnumBase {

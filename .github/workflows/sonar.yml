@@ -42,6 +42,10 @@ jobs:
           java-version: 21
           cache: 'maven'
 
+      - name: Build and test Conformance-Gateway
+        run: |
+          ./mvnw package -B -V -DskipTests -Dmaven.test.skip=true
+
       - name: Set Sonar settings for PR build
         if: ${{ (github.event_name == 'pull_request') }}
         run: |

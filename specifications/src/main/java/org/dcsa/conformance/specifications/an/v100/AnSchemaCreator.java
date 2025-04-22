@@ -290,7 +290,7 @@ public class AnSchemaCreator {
                         String csvExample =
                             Objects.requireNonNullElse(attributeSchema.getExample(), "").toString();
                         String csvDescription =
-                            Objects.requireNonNullElse(attributeSchema.getDescription(), "");
+                            Objects.requireNonNullElse(attributeSchema.getDescription(), "").trim();
                         String csvPattern = "";
                         if (csvType.equals("string")) {
                           String schemaPattern = attributeSchema.getPattern();

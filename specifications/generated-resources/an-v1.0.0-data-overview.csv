@@ -7,8 +7,7 @@ ActiveReeferSettings,co2Setpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target CO2 perce
 ActiveReeferSettings,humiditySetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target humidity percentage"
 ActiveReeferSettings,isBulbMode,boolean,,,,true,"Flag indicating whether flower bulb handling mode is active"
 ActiveReeferSettings,isColdTreatmentRequired,boolean,,,,true,"Flag indicating whether the cargo requires cold treatment prior to loading at origin or during transit,
-but prior arrival at POD
-"
+but prior arrival at POD"
 ActiveReeferSettings,"isControlledAtmosphereRequired",boolean,,,,true,"Flag indicating whether the cargo requires controlled atmosphere"
 ActiveReeferSettings,isDrainHolesOpen,boolean,,,,true,"Flag indicating whether the drain holes are open"
 ActiveReeferSettings,isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open"
@@ -20,8 +19,7 @@ ActiveReeferSettings,temperatureUnit,string,,,,CEL,"Measurement unit in which th
 Address,city,string,,35,,Amsterdam,City
 Address,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
-When the country code is required but not applicable, use the code `ZZ`.
-"
+When the country code is required but not applicable, use the code `ZZ`."
 Address,floor,string,,50,,2nd,Floor
 Address,poBox,string,,20,,12345,"P.O. box"
 Address,postCode,string,,10,,"1234 AB","Post code"
@@ -29,8 +27,7 @@ Address,stateRegion,string,,65,,"North Holland","State or region"
 Address,street,string,,70,,"Example St.",Street
 Address,streetNumber,string,,50,,123,"Street number"
 ArrivalNotice,additionalInformation,string,,500,,"FIRMS code: B986","Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
-e.g. additional required documents to prepare and present for shipment release - country specific.
-"
+e.g. additional required documents to prepare and present for shipment release - country specific."
 ArrivalNotice,"cargoMovementTypeAtDestination",string,yes,,,FCL,"Code indicating whether at destination the unloaded cargo occupies an entire container (FCL)
 or shares the container with other shipments (LCL).
 
@@ -42,8 +39,7 @@ ArrivalNotice,carrierCodeListProvider,string,yes,,,NMFTA,"The provider of the co
  * `SMDG` - Ship Message Design Group
  * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)"
 ArrivalNotice,"carrierContactInformation","ContactInformation list",yes,,,,"ATTRIBUTE The party to contact for any inquiries related to this Arrival Notice."
-ArrivalNotice,"carrierInformationForCargoRelease","ContactInformation list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
-"
+ArrivalNotice,"carrierInformationForCargoRelease","ContactInformation list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency)."
 ArrivalNotice,charges,"Charge list",,,,,"List of charges applicable to this shipment"
 ArrivalNotice,consignmentItems,"ConsignmentItem list",yes,,,,"The list of consignment items in the shipment."
 ArrivalNotice,"customsImportDeclarationProcedure",string,,1000,,"The tax must be declared...","Customs import declaration procedure"
@@ -54,16 +50,13 @@ ArrivalNotice,"deliveryTypeAtDestination",string,yes,,,CY,"Code representing the
 ArrivalNotice,documentParties,"DocumentParty list",yes,,,,"Document parties"
 ArrivalNotice,freeTime,"FreeTime list",,,,,"List of free time conditions applicable to this shipment at destination"
 ArrivalNotice,invoicePayableAt,Location,,,,,"Location where the customer will make the payment of ocean freight and charges for the main transport,
-typically expressed as a UN/LOCODE or just a location name.
-"
-ArrivalNotice,isElectronic,boolean,yes,,,true,"Flag indicating whether the transport document for which this arrival notice was created is electronically transferred
-"
+typically expressed as a UN/LOCODE or just a location name."
+ArrivalNotice,isElectronic,boolean,yes,,,true,"Flag indicating whether the transport document for which this arrival notice was created is electronically transferred"
 ArrivalNotice,issueDate,string,yes,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The date when the Arrival Notice was issued."
 ArrivalNotice,pickupLocation,Location,,,,,"Pickup location"
 ArrivalNotice,references,"Reference list",,,,,"References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
 Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
-on the B/L. Customers can use these references to track shipments in their internal systems.
-"
+on the B/L. Customers can use these references to track shipments in their internal systems."
 ArrivalNotice,returnInstructions,string,,500,,"Please place the container...","Return instructions"
 ArrivalNotice,returnLocation,Location,,,,,"Return location"
 ArrivalNotice,termsAndConditions,string,yes,50000,,"These terms and conditions define...","Carrier terms and conditions of transport."
@@ -74,15 +67,11 @@ ArrivalNotice,"transportDocumentTypeCode",string,yes,,,BOL,"Type of the transpor
  * `SWB` - Sea Waybill"
 ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",yes,,,,"The equipments being used."
 ArrivalNotice,vesselVoyage,VesselVoyage,,,,,
-ArrivalNoticeDigest,etaAtPlaceOfDeliveryDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at place of delivery
-"
-ArrivalNoticeDigest,etaAtPortOfDischargeDate,string,yes,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the port of discharge
-"
+ArrivalNoticeDigest,etaAtPlaceOfDeliveryDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at place of delivery"
+ArrivalNoticeDigest,etaAtPortOfDischargeDate,string,yes,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the port of discharge"
 ArrivalNoticeDigest,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
-responsibility of the shipping line ceases
-"
-ArrivalNoticeDigest,portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel
-"
+responsibility of the shipping line ceases"
+ArrivalNoticeDigest,portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel"
 ArrivalNoticeDigest,"transportDocumentReference","TransportDocumentReference",yes,,,,
 "ArrivalNoticeDigestsMessage",arrivalNoticeDigests,"ArrivalNoticeDigest list",,,,,"List of Arrival Notice digests."
 ArrivalNoticesMessage,arrivalNotices,"ArrivalNotice list",,,,,"List of arrival notices."
@@ -93,18 +82,16 @@ CargoItem,cargoNetWeight,Weight,,,,,
 CargoItem,equipmentReference,string,yes,11,"^\S(?:.*\S)?$",APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
 (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
-If a container does not comply with ISO 6346, it is suggested to follow ""Recommendation #2:
-Containers with non-ISO identification"" from SMDG: https://smdg.org/documents/smdg-recommendations
-"
+If a container does not comply with ISO 6346, it is suggested to follow
+[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+from SMDG."
 CargoItem,outerPackaging,OuterPackaging,yes,,,,
 Charge,calculationBasis,string,yes,50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton,
-per square metre.
-"
+per square metre."
 Charge,carrierRateOfExchange,string,,50,,"1.00 EUR = 1.08149 USD","The quotation of the relative value of a currency unit against the unit of another currency
 in the foreign exchange market applicable to this charge item. The Carrier rate of exchange applicability
 is defined based on the local jurisdiction. If not provided, the customer should refer to the ROE available
-on the carrier website or the ROE defined by the competent customs authority, as per local practice.
-"
+on the carrier website or the ROE defined by the competent customs authority, as per local practice."
 Charge,chargeAmount,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The monetary value of this charge, expressed with a maximum of 2 decimal digits"
 Charge,chargeCurrency,string,yes,3,"^[A-Z]{3}$",EUR,"Currency code as defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
 Charge,chargeDescription,string,yes,50,,"Documentation fee - Destination","Description of the charge"
@@ -117,16 +104,13 @@ or the Invoice payer on behalf of the consignee (if provided).
  * `COL` - Collect
  * `PRE` - Prepaid"
 Charge,quantity,string,yes,,"^\d+(\.\d+)?$",123.456,"The quantity of this charge item in units at `unitPrice`"
-Charge,unitPrice,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The unit price of this charge item in the `chargeCurrency`, expressed with a maximum of 2 decimal digits
-"
+Charge,unitPrice,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The unit price of this charge item in the `chargeCurrency`, expressed with a maximum of 2 decimal digits"
 ConsignmentItem,cargoItems,"CargoItem list",yes,,,,"The list of cargo items grouped in this consignment item."
 ConsignmentItem,carrierBookingReference,string,yes,35,"^\S(?:.*\S)?$",XYZ1234,"The booking number corresponding to this consignment item"
 ConsignmentItem,commoditySubReference,string,yes,100,"^\S(?:.*\S)?$",XYZ1234,"Reference to the commodity object assigned by the carrier in the booking confirmation,
-unique within the context of one booking.
-"
+unique within the context of one booking."
 ConsignmentItem,customsReferences,"CustomsReference list",,,,,"The list of customs references applicable to this consignment item."
-ConsignmentItem,descriptionOfGoods,"string list",yes,,,,"Ordered list of cargo descriptions precise enough for customs services to be able to identify the goods.
-"
+ConsignmentItem,descriptionOfGoods,"string list",yes,,,,"Ordered list of cargo descriptions precise enough for customs services to be able to identify the goods."
 ConsignmentItem,hsCodes,"string list",yes,,,,"List of HS Codes that apply to this consignment item"
 ConsignmentItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"The list of national commodity codes applicable to this consignment item."
 ConsignmentItem,shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package"
@@ -135,8 +119,7 @@ ContactInformation,name,string,,100,"^\S+(\s+\S+)*$","Jane Doe","Contact name"
 ContactInformation,phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number"
 CustomsReference,countryCode,string,yes,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
-When the country code is required but not applicable, use the code `ZZ`.
-"
+When the country code is required but not applicable, use the code `ZZ`."
 CustomsReference,crType,string,yes,,,CUS,"The reference type code as defined in the relevant customs jurisdiction."
 CustomsReference,values,"string list",yes,,,,"List of customs reference values"
 DangerousGoods,codedVariantList,string,,4,"^[0-3][0-9A-Z]{3}$",2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant
@@ -146,10 +129,8 @@ Character | Valid Characters | Description
 :--------:|------------------|------------
 1| 0, 1, 2, 3|The packing group. Code 0 indicates there is no packing group
 2|0 to 9 and A to Z|A sequence letter for the PSN, or 0 if there were no alternative PSNs
-3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.
-"
-DangerousGoods,"competentAuthorityApproval",string,,70,,,"Name and reference number of the competent authority providing the approval
-"
+3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc."
+DangerousGoods,"competentAuthorityApproval",string,,70,,,"Name and reference number of the competent authority providing the approval"
 DangerousGoods,emergencyContactDetails,EmergencyContactDetails,,,,,
 DangerousGoods,emsNumber,string,,7,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures
 for Ships Carrying Dangerous Goods.
@@ -158,8 +139,7 @@ Comprises 2 values: 1 for spillage and 1 for fire.
 
 Possible values spillage: S-A to S-Z.
 
-Possible values fire: F-A to F-Z.
-"
+Possible values fire: F-A to F-Z."
 DangerousGoods,endOfHoldingTime,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","Date by when the refrigerated liquid needs to be delivered"
 DangerousGoods,fumigationDateTime,string,,,yyyy-MM-dd,2025-01-23T01:23:45Z,"Date & time when the container was fumigated."
 DangerousGoods,grossWeight,Weight,,,,,
@@ -169,58 +149,40 @@ Examples of possible values are:
  * 1.1A (Substances and articles which have a mass explosion hazard)
  * 1.6N (Extremely insensitive articles which do not have a mass explosion hazard)
  * 2.1 (Flammable gases)
- * 8 (Corrosive substances)
-"
+ * 8 (Corrosive substances)"
 DangerousGoods,inhalationZone,string,,,,,
-DangerousGoods,innerPackagings,"InnerPackaging list",,,,,"List of inner packagings contained inside this outer packaging / overpack
-"
-DangerousGoods,"isCompetentAuthorityApprovalRequired",boolean,,,,false,"Indicates if the cargo require approval from authorities.
-"
-DangerousGoods,isEmptyUncleanedResidue,boolean,,,,false,"Indicates if the cargo is residue.
-"
+DangerousGoods,innerPackagings,"InnerPackaging list",,,,,"List of inner packagings contained inside this outer packaging / overpack"
+DangerousGoods,"isCompetentAuthorityApprovalRequired",boolean,,,,false,"Indicates if the cargo require approval from authorities."
+DangerousGoods,isEmptyUncleanedResidue,boolean,,,,false,"Indicates if the cargo is residue."
 DangerousGoods,isExceptedQuantity,boolean,,,,false,"Indicates if the dangerous goods can be transported as excepted quantity
-in accordance with Chapter 3.5 of the IMO IMDG Code.
-"
-DangerousGoods,isHot,boolean,,,,false,"Indicates if high temperature cargo is being shipped.
-"
+in accordance with Chapter 3.5 of the IMO IMDG Code."
+DangerousGoods,isHot,boolean,,,,false,"Indicates if high temperature cargo is being shipped."
 DangerousGoods,isLimitedQuantity,boolean,,,,false,"Indicates if the dangerous goods can be transported as limited quantity
-in accordance with Chapter 3.4 of the IMO IMDG Code.
-"
+in accordance with Chapter 3.4 of the IMO IMDG Code."
 DangerousGoods,isMarinePollutant,boolean,,,,false,"Indicates whether the goods belong to the classification of Marine Pollutant."
 DangerousGoods,isReportableQuantity,boolean,,,,false,"Indicates if a container of hazardous material is at the reportable quantity level.
-If true, a report to the relevant authority must be made in case of spill.
-"
+If true, a report to the relevant authority must be made in case of spill."
 DangerousGoods,isSalvagePackings,boolean,,,,false,"Indicates if the cargo has special packaging for the transport, recovery or disposal of damaged, defective,
-leaking or nonconforming hazardous materials packages, or hazardous materials that have spilled or leaked.
-"
-DangerousGoods,isWaste,boolean,,,,true,"Indicates if waste is being shipped.
-"
+leaking or nonconforming hazardous materials packages, or hazardous materials that have spilled or leaked."
+DangerousGoods,isWaste,boolean,,,,true,"Indicates if waste is being shipped."
 DangerousGoods,limits,TemperatureLimits,,,,,
 DangerousGoods,naNumber,string,,4,"^\d{4}$",9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States
-Department of Transportation.
-"
+Department of Transportation."
 DangerousGoods,netExplosiveContent,Weight,,,,,
 DangerousGoods,netVolume,Volume,,,,,
 DangerousGoods,netWeight,Weight,,,,,
-DangerousGoods,packingGroup,integer,,,,3,"The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code.
-"
+DangerousGoods,packingGroup,integer,,,,3,"The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code."
 DangerousGoods,properShippingName,string,,250,,"Chromium Trioxide, anhydrous","The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code,
 or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to
-the MARPOL Convention.
-"
+the MARPOL Convention."
 DangerousGoods,segregationGroups,"string list",,,,,"List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.
-(Only applicable to specific hazardous goods.)
-"
-DangerousGoods,subsidiaryRisk1,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.
-"
-DangerousGoods,subsidiaryRisk2,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.
-"
+(Only applicable to specific hazardous goods.)"
+DangerousGoods,subsidiaryRisk1,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code."
+DangerousGoods,subsidiaryRisk2,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code."
 DangerousGoods,technicalName,string,,250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods
-as described in chapter 3.1.2.8 of the IMDG Code.
-"
+as described in chapter 3.1.2.8 of the IMDG Code."
 DangerousGoods,unNumber,string,,4,"^\d{4}$",1463,"United Nations Dangerous Goods (UNDG) Identifier assigned by the UN Sub-Committee of Experts on the
-Transport of Dangerous Goods and shown in the IMO IMDG.
-"
+Transport of Dangerous Goods and shown in the IMO IMDG."
 DocumentParty,address,Address,,,,,
 DocumentParty,contactDetails,"ContactInformation list",,,,,"Party contact details"
 DocumentParty,identifyingCodes,"IdentifyingPartyCode list",,,,,"List of codes identifying the party"
@@ -241,18 +203,13 @@ DocumentParty,personType,string,,,,LEGAL_PERSON,"One of the person types defined
  * `LEGAL_PERSON` - Person (including a human being and public or private organizations) that can perform legal actions,
 such as own a property, sue and be sued
 
- * `ASSOCIATION_OF_PERSONS` - Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts
-"
+ * `ASSOCIATION_OF_PERSONS` - Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts"
 DocumentParty,taxOrLegalReferences,"TaxOrLegalReference list",,,,,"List of tax or legal references relevant to the party"
-EmergencyContactDetails,name,string,yes,255,,"Jane Doe","Name of the person to contact during an emergency
-"
+EmergencyContactDetails,name,string,yes,255,,"Jane Doe","Name of the person to contact during an emergency"
 EmergencyContactDetails,phone,string,yes,30,,"+1 555-123-456","Phone number of the emergency contact person.
-It MUST be an international phone number as defined in the ITU-T recommendation E.123.
-"
-EmergencyContactDetails,provider,string,,255,,"Acme Inc.","Name of the third party vendor providing emergency support
-"
-EmergencyContactDetails,referenceNumber,string,,255,,1234,"Contract reference for the emergency support provided by the external third party vendor
-"
+It MUST be an international phone number as defined in the ITU-T recommendation E.123."
+EmergencyContactDetails,provider,string,,255,,"Acme Inc.","Name of the third party vendor providing emergency support"
+EmergencyContactDetails,referenceNumber,string,,255,,1234,"Contract reference for the emergency support provided by the external third party vendor"
 Equipment,equipmentReference,string,yes,11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 
 According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of
@@ -260,22 +217,18 @@ a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a cat
 and a check-digit).
 
 If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow
-[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.
-"
+[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG."
 Equipment,isoEquipmentCode,string,,4,,22G1,"Unique code for the different equipment size and type used to transport commodities.
 
 The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP)
-following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
-"
+following the [ISO 6346](https://www.iso.org/standard/83558.html) standard."
 Equipment,tareWeight,Weight,,,,,
 FreeTime,calculationBasis,string,yes,1000,,"Calculated as...","Description of the conditions under which this free time item applies.
-It can include references to the carrier website or individual charges as per service contract/agreement.
-"
+It can include references to the carrier website or individual charges as per service contract/agreement."
 FreeTime,duration,integer,yes,,,123,"The duration expressed in `timeUnit`s for which this free time item applies."
 FreeTime,isoEquipmentCode,string,yes,4,"^\S(?:.*\S)?$",22GP,"Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
-following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
-"
+following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard."
 FreeTime,modeOfTransportCode,string,,20,,VESSEL,"The mode of transport, as defined by DCSA, for which the free time object applies
  * `BARGE` - Barge
  * `RAIL` - Rail
@@ -296,8 +249,7 @@ IdentifyingPartyCode,codeListName,string,,,,DID,"The name of the `partyCode` lis
 This is a very limited list of examples:
  * DID (Decenbtralized Identifier) for `codeListProvider` W3C
  * LEI (Legal Entity Identifier) for `codeListProvider` GLEIF
- * DUNS (Data Universal Numbering System) for `codeListProvider` DNB
-"
+ * DUNS (Data Universal Numbering System) for `codeListProvider` DNB"
 IdentifyingPartyCode,codeListProvider,string,yes,,,W3C,"Code of the provider of the code list from which a party code is used.
 
  * `BOLE` - Bolero
@@ -332,20 +284,17 @@ Location,unLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location
 * 2 characters for the country code using ISO 3166-1 alpha-2
 * 3 characters to code a location within that country (using letters A-Z and numbers from 2-9)
 
-Additional information can be found [here](https://unece.org/trade/cefact/UNLOCODE-Download).
-"
+Additional information can be found [here](https://unece.org/trade/cefact/UNLOCODE-Download)."
 NationalCommodityCode,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
-When the country code is required but not applicable, use the code `ZZ`.
-"
+When the country code is required but not applicable, use the code `ZZ`."
 NationalCommodityCode,nccType,string,yes,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
  * NCM (Nomenclatura Comum do Mercosul)
  * HTS (Harmonized Tariff Schedule)
  * SCHEDULE_B ( Schedule B)
  * TARIC (Integrated Tariff of the European Communities)
  * CN (Combined Nomenclature)
- * CUS (Customs Union and Statistics)
-"
+ * CUS (Customs Union and Statistics)"
 NationalCommodityCode,nccValues,"string list",yes,,,,"List of national commodity code values"
 OuterPackaging,dangerousGoods,"DangerousGoods list",,,,,"List of dangerous goods specifications"
 OuterPackaging,description,string,yes,100,,"Drum, steel","Description of the outer packaging / overpack"
@@ -354,11 +303,9 @@ OuterPackaging,imoPackagingCode,string,,5,"^[A-Z0-9]{1,5}$",1A2,"IMO packaging c
 Only applicable to dangerous goods if specified in the
 [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx).
 
-If not available, the UNECE Recommendation 21 `packageCode` should be used.
-"
+If not available, the UNECE Recommendation 21 `packageCode` should be used."
 OuterPackaging,numberOfPackages,integer,yes,,,123,"Specifies the number of outer packagings / overpacks associated with this Cargo Item."
-OuterPackaging,unecePackageCode,string,,2,"^[A-Z0-9]{2}$",5H,"[UNECE Recommendation 21](https://unece.org/trade/uncefact/cl-recommendations) package code
-"
+OuterPackaging,unecePackageCode,string,,2,"^[A-Z0-9]{2}$",5H,"[UNECE Recommendation 21](https://unece.org/trade/uncefact/cl-recommendations) package code"
 OuterPackaging,woodDeclaration,string,,30,,TREATED_AND_CERTIFIED,"Code indicating whether the products, packaging and any other items are made of wood.
 
  * `NOT_APPLICABLE` - No wood or any other wood product such as packaging and supports are being shipped.
@@ -368,8 +315,7 @@ OuterPackaging,woodDeclaration,string,,30,,TREATED_AND_CERTIFIED,"Code indicatin
  * `PROCESSED` - The wood or wooden materials are entirely made of processed wood, such as plywood, particle board,
 sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these.
 
- * `TREATED_AND_CERTIFIED` - The wood or wooden materials have been treated and/or fumigated and include a certificate.
-"
+ * `TREATED_AND_CERTIFIED` - The wood or wooden materials have been treated and/or fumigated and include a certificate."
 Reference,referenceType,string,yes,3,,FF,"One of the reference type codes defined by DCSA. Possible values are:
  * FF (Freight Forwarder's Reference)
  * SI (Shipper's Reference)
@@ -381,8 +327,7 @@ Reference,referenceType,string,yes,3,,FF,"One of the reference type codes define
  * CSI (Customer shipment ID)
  * BPR (Booking party reference number)
  * BID (Booking Request ID)
- * SAC (Shipping Agency Code)
-"
+ * SAC (Shipping Agency Code)"
 Reference,value,string,yes,100,,XYZ1234,"Reference value"
 Seal,sealNumber,string,yes,15,,VET123,"Seal number"
 Seal,source,string,,,,VET,"Code identifying the type of entity that has affixed the seal (the seal ""source"")
@@ -393,56 +338,39 @@ Seal,source,string,,,,VET,"Code identifying the type of entity that has affixed 
  * `VET` - Veterinary"
 TaxOrLegalReference,countryCode,string,yes,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
-When the country code is required but not applicable, use the code `ZZ`.
-"
+When the country code is required but not applicable, use the code `ZZ`."
 TaxOrLegalReference,referenceType,string,yes,50,,PAN,"The reference type code as defined by the relevant tax and/or legal authority."
 TaxOrLegalReference,value,string,yes,35,,ABC1234,"The name or title of the tax or legal reference"
 TemperatureLimits,flashPoint,number,,,,42,"Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.
-(Only applicable to specific hazardous goods according to the IMO IMDG Code.)
-"
-TemperatureLimits,sadt,number,,,,54.1,"Lowest temperature in which self-accelerating decomposition may occur in a substance
-"
-TemperatureLimits,sapt,number,,,,70,"Lowest temperature in which self-accelerating polymerization may occur in a substance
-"
+(Only applicable to specific hazardous goods according to the IMO IMDG Code.)"
+TemperatureLimits,sadt,number,,,,54.1,"Lowest temperature in which self-accelerating decomposition may occur in a substance"
+TemperatureLimits,sapt,number,,,,70,"Lowest temperature in which self-accelerating polymerization may occur in a substance"
 TemperatureLimits,temperatureUnit,string,,,,CEL,"The unit in which all temperature limits are expressed
  * `CEL` - Celsius
  * `FAH` - Fahrenheit"
 TemperatureLimits,"transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances)
-can be safely transported for a prolonged period.
-"
+can be safely transported for a prolonged period."
 TemperatureLimits,"transportEmergencyTemperature",number,,,,74.1,"Temperature at which emergency procedures shall be implemented"
 Transport,departureDate,string,yes,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The date of departure from the location where the cargo is handed over by the shipper, or his agent,
-to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
-"
-Transport,dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country.
-"
+to the shipping line. This can refer either to the Place of Receipt or the Port of Loading."
+Transport,dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country."
 Transport,etaAtPlaceOfDeliveryDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at Place of Delivery."
 Transport,etaAtPortOfDischargeDate,string,yes,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the Port of Discharge."
-Transport,loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country.
-"
+Transport,loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country."
 Transport,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent
-and where responsibility of the shipping line ceases.
-"
+and where responsibility of the shipping line ceases."
 Transport,placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
-This indicates the point at which the shipping line takes on responsibility for carriage of the container.
-"
-Transport,plannedArrivalDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the first mother vessel arriving at the destination country.
-"
-Transport,plannedDepartureDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of departure of the first mother vessel arriving at the destination country.
-"
-Transport,portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel.
-"
-Transport,portOfLoading,Location,yes,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.
-"
+This indicates the point at which the shipping line takes on responsibility for carriage of the container."
+Transport,plannedArrivalDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the first mother vessel arriving at the destination country."
+Transport,plannedDepartureDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of departure of the first mother vessel arriving at the destination country."
+Transport,portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel."
+Transport,portOfLoading,Location,yes,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation."
 "UtilizedTransportEquipment",activeReeferSettings,ActiveReeferSettings,,,,,
 "UtilizedTransportEquipment",equipment,Equipment,yes,,,,
 "UtilizedTransportEquipment",isDirectDeliveryRequired,boolean,,,,true,"Indicates whether the container with dangerous goods cargo must exit the port immediately after being discharged,
-based on the destination port and country regulations.
-"
-"UtilizedTransportEquipment",isExemptOfReuse,boolean,,,,true,"Specifies whether the container must be returned to the carrier and cannot be reused by the consignee for export.
-"
-"UtilizedTransportEquipment",isNonOperatingReefer,boolean,,,,true,"Indicates whether the equipment is a reefer container that should be treated as a dry container.
-"
+based on the destination port and country regulations."
+"UtilizedTransportEquipment",isExemptOfReuse,boolean,,,,true,"Specifies whether the container must be returned to the carrier and cannot be reused by the consignee for export."
+"UtilizedTransportEquipment",isNonOperatingReefer,boolean,,,,true,"Indicates whether the equipment is a reefer container that should be treated as a dry container."
 "UtilizedTransportEquipment",seals,"Seal list",yes,,,,"The seal-related information associated with this equipment."
 "UtilizedTransportEquipment",shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package"
 VesselVoyage,"carrierImportVoyageNumber",string,yes,50,,1234N,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage."

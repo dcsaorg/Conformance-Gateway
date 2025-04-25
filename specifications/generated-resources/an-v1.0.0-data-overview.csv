@@ -52,7 +52,7 @@ ArrivalNotice,freeTime,"FreeTime list",,,,,"List of free time conditions applica
 ArrivalNotice,invoicePayableAt,Location,,,,,"Location where the customer will make the payment of ocean freight and charges for the main transport,
 typically expressed as a UN/LOCODE or just a location name."
 ArrivalNotice,isElectronic,boolean,yes,,,true,"Flag indicating whether the transport document for which this arrival notice was created is electronically transferred"
-ArrivalNotice,issueDate,string,yes,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The date when the Arrival Notice was issued."
+ArrivalNotice,issueDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the Arrival Notice was issued."
 ArrivalNotice,pickupLocation,Location,,,,,"Pickup location"
 ArrivalNotice,references,"Reference list",,,,,"References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
 Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
@@ -67,8 +67,8 @@ ArrivalNotice,"transportDocumentTypeCode",string,yes,,,BOL,"Type of the transpor
  * `SWB` - Sea Waybill"
 ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",yes,,,,"The equipments being used."
 ArrivalNotice,vesselVoyage,VesselVoyage,,,,,
-ArrivalNoticeDigest,etaAtPlaceOfDeliveryDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at place of delivery"
-ArrivalNoticeDigest,etaAtPortOfDischargeDate,string,yes,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the port of discharge"
+ArrivalNoticeDigest,etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery"
+ArrivalNoticeDigest,etaAtPortOfDischargeDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the port of discharge"
 ArrivalNoticeDigest,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases"
 ArrivalNoticeDigest,portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel"
@@ -140,8 +140,8 @@ Comprises 2 values: 1 for spillage and 1 for fire.
 Possible values spillage: S-A to S-Z.
 
 Possible values fire: F-A to F-Z."
-DangerousGoods,endOfHoldingTime,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","Date by when the refrigerated liquid needs to be delivered"
-DangerousGoods,fumigationDateTime,string,,,yyyy-MM-dd,2025-01-23T01:23:45Z,"Date & time when the container was fumigated."
+DangerousGoods,endOfHoldingTime,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"Date by when the refrigerated liquid needs to be delivered"
+DangerousGoods,fumigationDateTime,string,,,,2025-01-23T01:23:45Z,"Date & time when the container was fumigated."
 DangerousGoods,grossWeight,Weight,,,,,
 DangerousGoods,imoClass,string,,,,1.4S,"The hazard class code of the referenced dangerous goods according to the specified regulation.
 
@@ -351,18 +351,18 @@ TemperatureLimits,temperatureUnit,string,,,,CEL,"The unit in which all temperatu
 TemperatureLimits,"transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances)
 can be safely transported for a prolonged period."
 TemperatureLimits,"transportEmergencyTemperature",number,,,,74.1,"Temperature at which emergency procedures shall be implemented"
-Transport,departureDate,string,yes,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The date of departure from the location where the cargo is handed over by the shipper, or his agent,
+Transport,departureDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading."
 Transport,dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country."
-Transport,etaAtPlaceOfDeliveryDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at Place of Delivery."
-Transport,etaAtPortOfDischargeDate,string,yes,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the Port of Discharge."
+Transport,etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at Place of Delivery."
+Transport,etaAtPortOfDischargeDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge."
 Transport,loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country."
 Transport,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent
 and where responsibility of the shipping line ceases."
 Transport,placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
 This indicates the point at which the shipping line takes on responsibility for carriage of the container."
-Transport,plannedArrivalDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the first mother vessel arriving at the destination country."
-Transport,plannedDepartureDate,string,,,yyyy-MM-dd,"Thu Jan 23 01:00:00 CET 2025","The expected date of departure of the first mother vessel arriving at the destination country."
+Transport,plannedArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the first mother vessel arriving at the destination country."
+Transport,plannedDepartureDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of departure of the first mother vessel arriving at the destination country."
 Transport,portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel."
 Transport,portOfLoading,Location,yes,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation."
 "UtilizedTransportEquipment",activeReeferSettings,ActiveReeferSettings,,,,,

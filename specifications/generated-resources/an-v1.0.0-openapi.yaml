@@ -260,11 +260,10 @@ components:
       type: "object"
       properties:
         issueDate:
-          pattern: "yyyy-MM-dd"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: "The date when the Arrival Notice was issued."
-          format: "date"
-          example: "2025-01-23T00:00:00.000+00:00"
+          example: "2025-01-23"
         carrierCode:
           maxLength: 4
           pattern: "^\\S+$"
@@ -423,12 +422,11 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
         etaAtPortOfDischargeDate:
-          pattern: "yyyy-MM-dd"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of arrival of the vessel at the port of discharge
-          format: "date"
-          example: "2025-01-23T00:00:00.000+00:00"
+          example: "2025-01-23"
         placeOfDelivery:
           type: "object"
           description: |
@@ -437,12 +435,11 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
         etaAtPlaceOfDeliveryDate:
-          pattern: "yyyy-MM-dd"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of arrival of the shipment at place of delivery
-          format: "date"
-          example: "2025-01-23T00:00:00.000+00:00"
+          example: "2025-01-23"
       description: |
         Minimal relevant information that can be published about an Arrival Notice
     ArrivalNoticeDigestsMessage:
@@ -893,13 +890,11 @@ components:
             Possible values fire: F-A to F-Z.
           example: "F-A S-Q"
         endOfHoldingTime:
-          pattern: "yyyy-MM-dd"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: "Date by when the refrigerated liquid needs to be delivered"
-          format: "date"
-          example: "2025-01-23T00:00:00.000+00:00"
+          example: "2025-01-23"
         fumigationDateTime:
-          pattern: "yyyy-MM-dd"
           type: "string"
           description: "Date & time when the container was fumigated."
           format: "date-time"
@@ -1453,39 +1448,34 @@ components:
       type: "object"
       properties:
         departureDate:
-          pattern: "yyyy-MM-dd"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The date of departure from the location where the cargo is handed over by the shipper, or his agent,
             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
-          format: "date"
-          example: "2025-01-23T00:00:00.000+00:00"
+          example: "2025-01-23"
         plannedDepartureDate:
-          pattern: "yyyy-MM-dd"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of departure of the first mother vessel arriving at the destination country.
-          format: "date"
-          example: "2025-01-23T00:00:00.000+00:00"
+          example: "2025-01-23"
         plannedArrivalDate:
-          pattern: "yyyy-MM-dd"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of arrival of the first mother vessel arriving at the destination country.
-          format: "date"
-          example: "2025-01-23T00:00:00.000+00:00"
+          example: "2025-01-23"
         etaAtPortOfDischargeDate:
-          pattern: "yyyy-MM-dd"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: "The expected date of arrival of the vessel at the Port of Discharge."
-          format: "date"
-          example: "2025-01-23T00:00:00.000+00:00"
+          example: "2025-01-23"
         etaAtPlaceOfDeliveryDate:
-          pattern: "yyyy-MM-dd"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: "The expected date of arrival of the shipment at Place of Delivery."
-          format: "date"
-          example: "2025-01-23T00:00:00.000+00:00"
+          example: "2025-01-23"
         loadLocation:
           type: "object"
           description: |

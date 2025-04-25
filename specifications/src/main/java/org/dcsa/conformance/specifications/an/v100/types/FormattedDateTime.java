@@ -7,7 +7,6 @@ import lombok.Data;
 @Schema(
     type = "string",
     format = "date-time",
-    pattern = "yyyy-MM-dd",
     example = "2025-01-23T01:23:45Z",
     description =
 """

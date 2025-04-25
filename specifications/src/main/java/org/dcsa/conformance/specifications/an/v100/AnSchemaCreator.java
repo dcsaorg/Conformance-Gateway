@@ -55,6 +55,7 @@ import org.dcsa.conformance.specifications.an.v100.model.ContactInformation;
 import org.dcsa.conformance.specifications.an.v100.model.CustomsReference;
 import org.dcsa.conformance.specifications.an.v100.model.DangerousGoods;
 import org.dcsa.conformance.specifications.an.v100.model.DocumentParty;
+import org.dcsa.conformance.specifications.an.v100.model.EmbeddedDocument;
 import org.dcsa.conformance.specifications.an.v100.model.EmergencyContactDetails;
 import org.dcsa.conformance.specifications.an.v100.model.Equipment;
 import org.dcsa.conformance.specifications.an.v100.model.FreeTime;
@@ -344,6 +345,7 @@ public class AnSchemaCreator {
         DestinationDeliveryTypeCode.class,
         DocumentParty.class,
         DocumentPartyTypeCode.class,
+        EmbeddedDocument.class,
         EmergencyContactDetails.class,
         Equipment.class,
         EquipmentReference.class,

@@ -165,4 +165,7 @@ typically expressed as a UN/LOCODE or just a location name.
       description = "The list of consignment items in the shipment.")
   @ArraySchema(minItems = 1)
   private List<ConsignmentItem> consignmentItems;
+
+  @SchemaOverride(description = "Visualization of an arrival notice, as an embedded document")
+  private EmbeddedDocument arrivalNoticeVisualization;
 }

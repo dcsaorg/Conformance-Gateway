@@ -402,6 +402,8 @@ components:
           description: "The list of consignment items in the shipment."
           items:
             $ref: "#/components/schemas/ConsignmentItem"
+        arrivalNoticeVisualization:
+          $ref: "#/components/schemas/EmbeddedDocument"
       description: "Full content of an Arrival Notice document."
     ArrivalNoticeNotification:
       required:
@@ -991,6 +993,26 @@ components:
           items:
             $ref: "#/components/schemas/ContactInformation"
       description: "Document party"
+    EmbeddedDocument:
+      required:
+      - "content"
+      - "name"
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          description: "Document name"
+          example: "20250123 AN XYZ01234.docx"
+        content:
+          type: "string"
+          description: "Base64 representation of the binary document content"
+          example: "RXhhbXBsZSBBTiBjb250ZW50"
+        contentType:
+          type: "string"
+          description: "Content type of document"
+          example: "application/msword"
+          default: "application/pdf"
+      description: "Name, Base64-encoded content and content type of an embedded document"
     EmergencyContactDetails:
       required:
       - "name"

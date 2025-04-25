@@ -28,6 +28,7 @@ Address,street,string,,70,,"Example St.",Street
 Address,streetNumber,string,,50,,123,"Street number"
 ArrivalNotice,additionalInformation,string,,500,,"FIRMS code: B986","Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
 e.g. additional required documents to prepare and present for shipment release - country specific."
+ArrivalNotice,"arrivalNoticeVisualization",EmbeddedDocument,,,,,
 ArrivalNotice,"cargoMovementTypeAtDestination",string,yes,,,FCL,"Code indicating whether at destination the unloaded cargo occupies an entire container (FCL)
 or shares the container with other shipments (LCL).
 
@@ -208,6 +209,9 @@ such as own a property, sue and be sued
 
  * `ASSOCIATION_OF_PERSONS` - Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts"
 DocumentParty,taxOrLegalReferences,"TaxOrLegalReference list",,,,,"List of tax or legal references relevant to the party"
+EmbeddedDocument,content,string,yes,,,RXhhbXBsZSBBTiBjb250ZW50,"Base64 representation of the binary document content"
+EmbeddedDocument,contentType,string,,,,application/msword,"Content type of document"
+EmbeddedDocument,name,string,yes,,,"20250123 AN XYZ01234.docx","Document name"
 EmergencyContactDetails,name,string,yes,255,,"Jane Doe","Name of the person to contact during an emergency"
 EmergencyContactDetails,phone,string,yes,30,,"+1 555-123-456","Phone number of the emergency contact person.
 It MUST be an international phone number as defined in the ITU-T recommendation E.123."

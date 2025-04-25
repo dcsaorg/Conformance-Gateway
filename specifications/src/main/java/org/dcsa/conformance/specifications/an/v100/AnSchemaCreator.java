@@ -92,7 +92,7 @@ import org.dcsa.conformance.specifications.an.v100.types.ImoPackagingCode;
 import org.dcsa.conformance.specifications.an.v100.types.InhalationZoneTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.IsoEquipmentCode;
 import org.dcsa.conformance.specifications.an.v100.types.ModeOfTransportCode;
-import org.dcsa.conformance.specifications.an.v100.types.NationalCommodityCode;
+import org.dcsa.conformance.specifications.an.v100.model.NationalCommodityCode;
 import org.dcsa.conformance.specifications.an.v100.types.NationalCommodityCodeValue;
 import org.dcsa.conformance.specifications.an.v100.types.PartyCodeListProvider;
 import org.dcsa.conformance.specifications.an.v100.types.PaymentTermCode;

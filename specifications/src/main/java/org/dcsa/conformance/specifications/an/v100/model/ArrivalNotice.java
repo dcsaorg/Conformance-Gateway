@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.an.v100.types.CarrierClause;
-import org.dcsa.conformance.specifications.an.v100.types.SchemaOverride;
+import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
 import org.dcsa.conformance.specifications.an.v100.types.CarrierCodeListProvider;
 import org.dcsa.conformance.specifications.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.DestinationDeliveryTypeCode;

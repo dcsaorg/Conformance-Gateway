@@ -4,10 +4,9 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.an.v100.types.StringPatterns;
+import org.dcsa.conformance.specifications.an.v100.StringPatterns;
 import org.dcsa.conformance.specifications.an.v100.types.CargoDescriptionLine;
 import org.dcsa.conformance.specifications.an.v100.types.HSCode;
-import org.dcsa.conformance.specifications.an.v100.types.NationalCommodityCode;
 import org.dcsa.conformance.specifications.an.v100.types.ShippingMark;
 
 @Data

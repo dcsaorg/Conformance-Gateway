@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.an.v100.types;
+package org.dcsa.conformance.specifications.an.v100;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -2,7 +2,7 @@ package org.dcsa.conformance.specifications.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.an.v100.types.SchemaOverride;
+import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
 import org.dcsa.conformance.specifications.an.v100.types.AirExchangeUnitCode;
 import org.dcsa.conformance.specifications.an.v100.types.TemperatureUnitCode;
 

@@ -1,9 +1,12 @@
-package org.dcsa.conformance.specifications.an.v100.types;
+package org.dcsa.conformance.specifications.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.an.v100.StringPatterns;
+import org.dcsa.conformance.specifications.an.v100.types.CountryCode;
+import org.dcsa.conformance.specifications.an.v100.types.NationalCommodityCodeValue;
 
 @Data
 @Schema(

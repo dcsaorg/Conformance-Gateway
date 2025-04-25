@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.specifications.an.v100.types.EnumBase;
-import org.dcsa.conformance.specifications.an.v100.types.SchemaOverride;
 
 @Slf4j
 public class ModelValidatorConverter implements ModelConverter {

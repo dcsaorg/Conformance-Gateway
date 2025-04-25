@@ -3,6 +3,7 @@ package org.dcsa.conformance.specifications.an.v100.types;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(
+    type = "string",
     pattern = "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
     minLength = 5,
     maxLength = 5,

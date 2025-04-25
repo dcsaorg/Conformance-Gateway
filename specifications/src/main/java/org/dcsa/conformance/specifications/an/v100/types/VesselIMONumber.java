@@ -3,6 +3,7 @@ package org.dcsa.conformance.specifications.an.v100.types;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(
+    type = "string",
     pattern = "^\\d{7,8}$",
     minLength = 7,
     maxLength = 8,

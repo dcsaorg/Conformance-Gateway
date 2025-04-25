@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.an.v100.model;
+package org.dcsa.conformance.specifications.an.v100.types;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

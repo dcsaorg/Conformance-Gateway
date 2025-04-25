@@ -48,7 +48,7 @@ import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticeNotificati
 import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticeNotificationsMessage;
 import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticesMessage;
 import org.dcsa.conformance.specifications.an.v100.model.CargoItem;
-import org.dcsa.conformance.specifications.an.v100.model.CarrierClause;
+import org.dcsa.conformance.specifications.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.an.v100.model.Charge;
 import org.dcsa.conformance.specifications.an.v100.model.ConsignmentItem;
 import org.dcsa.conformance.specifications.an.v100.model.ContactInformation;

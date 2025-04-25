@@ -37,6 +37,7 @@
 
 	<modules>
 		<module>core</module>
+		<module>arrival-notice</module>
 		<module>booking</module>
 		<module>commercial-schedules</module>
 		<module>ebl</module>
@@ -50,6 +51,7 @@
 		<module>cdk</module>
 		<module>lambda</module>
 		<module>sandbox</module>
+		<module>specifications</module>
 		<module>spring-boot</module>
 	</modules>
 

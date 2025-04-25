@@ -2,6 +2,7 @@ package org.dcsa.conformance.specifications.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.an.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.an.v100.types.SchemaOverride;
 
 @Data
@@ -13,22 +14,8 @@ The most common equipment size/type is 20'/40'/45' DRY Freight Container, but se
 """)
 public class Equipment {
 
-  @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
-      maxLength = 11,
-      example = "APZU4812090",
-      description =
-"""
-The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
-
-According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of
-a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number,
-and a check-digit).
-
-If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow
-[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.
-""")
-  private String equipmentReference;
+  @Schema()
+  private EquipmentReference equipmentReference;
 
   @Schema(
       maxLength = 4,

@@ -44,8 +44,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.specifications.an.v100.model.ActiveReeferSettings;
 import org.dcsa.conformance.specifications.an.v100.model.Address;
 import org.dcsa.conformance.specifications.an.v100.model.ArrivalNotice;
-import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticeDigest;
-import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticeDigestsMessage;
+import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticeNotification;
+import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticeNotificationsMessage;
 import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticesMessage;
 import org.dcsa.conformance.specifications.an.v100.model.CargoItem;
 import org.dcsa.conformance.specifications.an.v100.model.CarrierClause;
@@ -61,12 +61,6 @@ import org.dcsa.conformance.specifications.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.an.v100.model.IdentifyingPartyCode;
 import org.dcsa.conformance.specifications.an.v100.model.InnerPackaging;
 import org.dcsa.conformance.specifications.an.v100.model.Location;
-import org.dcsa.conformance.specifications.an.v100.types.EquipmentReference;
-import org.dcsa.conformance.specifications.an.v100.types.FormattedDate;
-import org.dcsa.conformance.specifications.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.an.v100.types.ImoPackagingCode;
-import org.dcsa.conformance.specifications.an.v100.types.InhalationZoneTypeCode;
-import org.dcsa.conformance.specifications.an.v100.types.NationalCommodityCode;
 import org.dcsa.conformance.specifications.an.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.an.v100.model.Reference;
 import org.dcsa.conformance.specifications.an.v100.model.Seal;
@@ -86,12 +80,18 @@ import org.dcsa.conformance.specifications.an.v100.types.CurrencyCode;
 import org.dcsa.conformance.specifications.an.v100.types.CustomsReferenceValue;
 import org.dcsa.conformance.specifications.an.v100.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.DocumentPartyTypeCode;
+import org.dcsa.conformance.specifications.an.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.an.v100.types.FacilityCodeListProvider;
+import org.dcsa.conformance.specifications.an.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.an.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.HSCode;
+import org.dcsa.conformance.specifications.an.v100.types.ImoPackagingCode;
+import org.dcsa.conformance.specifications.an.v100.types.InhalationZoneTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.IsoEquipmentCode;
 import org.dcsa.conformance.specifications.an.v100.types.ModeOfTransportCode;
+import org.dcsa.conformance.specifications.an.v100.types.NationalCommodityCode;
 import org.dcsa.conformance.specifications.an.v100.types.NationalCommodityCodeValue;
 import org.dcsa.conformance.specifications.an.v100.types.PartyCodeListProvider;
 import org.dcsa.conformance.specifications.an.v100.types.PaymentTermCode;
@@ -127,7 +127,8 @@ public class AnSchemaCreator {
                 new Info()
                     .version("1.0.0")
                     .title("DCSA Arrival Notice API")
-                    .description(readResourceFile("conformance/specifications/an/v100/openapi-root.md"))
+                    .description(
+                        readResourceFile("conformance/specifications/an/v100/openapi-root.md"))
                     .license(
                         new License()
                             .name("Apache 2.0")
@@ -141,12 +142,12 @@ public class AnSchemaCreator {
                 new Tag()
                     .name(TAG_ARRIVAL_NOTICE_PUBLISHERS)
                     .description(
-                        "Endpoints implemented by the adopters who publish Arrival Notices"))
+                        "Endpoints implemented by the adopters who publish arrival notices"))
             .addTagsItem(
                 new Tag()
                     .name(TAG_ARRIVAL_NOTICE_SUBSCRIBERS)
                     .description(
-                        "Endpoints implemented by the adopters who receive Arrival Notices"));
+                        "Endpoints implemented by the adopters who receive arrival notices"));
 
     // Extract and register Java class schemas: add Parameters, Headers, and Schemas.
     Components components = new Components();
@@ -168,7 +169,9 @@ public class AnSchemaCreator {
     openAPI.path(
         "/arrival-notices",
         new PathItem().get(operationArrivalNoticesGet()).put(operationArrivalNoticesPut()));
-    openAPI.path("/arrival-notice-digests", new PathItem().put(operationArrivalNoticeDigestsPut()));
+    openAPI.path(
+        "/arrival-notice-notifications",
+        new PathItem().put(operationArrivalNoticeNotificationsPut()));
 
     YAMLFactory yamlFactory =
         YAMLFactory.builder()
@@ -322,8 +325,8 @@ public class AnSchemaCreator {
         Address.class,
         AirExchangeUnitCode.class,
         ArrivalNotice.class,
-        ArrivalNoticeDigest.class,
-        ArrivalNoticeDigestsMessage.class,
+        ArrivalNoticeNotification.class,
+        ArrivalNoticeNotificationsMessage.class,
         ArrivalNoticesMessage.class,
         CargoDescriptionLine.class,
         CargoItem.class,
@@ -403,8 +406,8 @@ public class AnSchemaCreator {
 
   private static Operation operationArrivalNoticesGet() {
     return new Operation()
-        .summary("Retrieves a list of Arrival Notices")
-        .description("TODO endpoint description")
+        .summary("Retrieves a list of arrival notices")
+        .description("")
         .operationId("get-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_PUBLISHERS))
         .parameters(
@@ -413,49 +416,49 @@ public class AnSchemaCreator {
                     .in("query")
                     .name("transportDocumentReference")
                     .description(
-                        "Reference of the transport document for which to return the associated Arrival Notices")
+                        "Reference of the transport document for which to return the associated arrival notices")
                     .example("TDR0123456")
                     .schema(new Schema<String>().type("string")),
                 new Parameter()
                     .in("query")
                     .name("equipmentReference")
                     .description(
-                        "Reference(s) of the equipment for which to return the associated Arrival Notices")
+                        "Reference(s) of the equipment for which to return the associated arrival notices")
                     .example("APZU4812090,APZU4812091")
                     .schema(stringListQueryParameterSchema()),
                 new Parameter()
                     .in("query")
                     .name("portOfDischarge")
                     .description(
-                        "UN location of the port of discharge for which to retrieve available Arrival Notices")
+                        "UN location of the port of discharge for which to retrieve available arrival notices")
                     .example("NLRTM")
                     .schema(new Schema<String>().type("string")),
                 new Parameter()
                     .in("query")
                     .name("vesselIMONumber")
                     .description(
-                        "IMO number of the vessel for which to retrieve available Arrival Notices")
+                        "IMO number of the vessel for which to retrieve available arrival notices")
                     .example("12345678")
                     .schema(new Schema<String>().type("string")),
                 new Parameter()
                     .in("query")
                     .name("minEtaAtPortOfDischargeDate")
                     .description(
-                        "Retrieve Arrival Notices with an ETA at port of discharge on or after this date")
+                        "Retrieve arrival notices with an ETA at port of discharge on or after this date")
                     .example("2025-01-23")
                     .schema(new Schema<String>().type("string").format("date")),
                 new Parameter()
                     .in("query")
                     .name("maxEtaAtPortOfDischargeDate")
                     .description(
-                        "Retrieve Arrival Notices with an ETA at port of discharge on or before this date")
+                        "Retrieve arrival notices with an ETA at port of discharge on or before this date")
                     .example("2025-01-23")
                     .schema(new Schema<String>().type("string").format("date")),
                 new Parameter()
                     .in("query")
                     .name("includeCharges")
                     .description(
-                        "Flag indicating whether to include Arrival Notice charges (default: true).")
+                        "Flag indicating whether to include arrival notice charges (default: true).")
                     .example(true)
                     .schema(new Schema<Boolean>().type("boolean"))))
         .responses(
@@ -463,7 +466,7 @@ public class AnSchemaCreator {
                 .addApiResponse(
                     "200",
                     new ApiResponse()
-                        .description("TODO response description")
+                        .description("List of arrival notices matching the query parameters")
                         .headers(
                             new LinkedHashMap<>(
                                 Map.ofEntries(
@@ -478,7 +481,8 @@ public class AnSchemaCreator {
                                         .schema(
                                             new Schema<>()
                                                 .$ref(
-                                                    "#/components/schemas/ArrivalNoticesMessage"))))));
+                                                    getComponentSchema$ref(
+                                                        ArrivalNoticesMessage.class)))))));
   }
 
   @SuppressWarnings("unchecked")
@@ -488,45 +492,13 @@ public class AnSchemaCreator {
 
   private static Operation operationArrivalNoticesPut() {
     return new Operation()
-        .summary("Sends a list of Arrival Notices")
-        .description("TODO description")
+        .summary("Sends a list of arrival notices")
+        .description("")
         .operationId("put-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
         .requestBody(
             new RequestBody()
-                .description("TODO request description")
-                .required(true)
-                .content(
-                    new Content()
-                        .addMediaType(
-                            "application/json",
-                            new MediaType()
-                                .schema(
-                                    new Schema<>()
-                                        .$ref("#/components/schemas/ArrivalNoticesMessage")))))
-        .responses(
-            new ApiResponses()
-                .addApiResponse(
-                    "204",
-                    new ApiResponse()
-                        .description("TODO response description")
-                        .headers(
-                            new LinkedHashMap<>(
-                                Map.ofEntries(
-                                    Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))));
-  }
-
-  private static Operation operationArrivalNoticeDigestsPut() {
-    return new Operation()
-        .summary("Sends a list of Arrival Notice digests")
-        .description("TODO description")
-        .operationId("put-arrival-notice-digests")
-        .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
-        .requestBody(
-            new RequestBody()
-                .description("TODO request description")
+                .description("List of arrival notices")
                 .required(true)
                 .content(
                     new Content()
@@ -536,18 +508,56 @@ public class AnSchemaCreator {
                                 .schema(
                                     new Schema<>()
                                         .$ref(
-                                            "#/components/schemas/ArrivalNoticeDigestsMessage")))))
+                                            getComponentSchema$ref(ArrivalNoticesMessage.class))))))
         .responses(
             new ApiResponses()
                 .addApiResponse(
                     "204",
                     new ApiResponse()
-                        .description("TODO response description")
+                        .description("Empty response")
                         .headers(
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
                                         "API-Version",
                                         new Header().$ref("#/components/headers/API-Version")))))));
+  }
+
+  private static Operation operationArrivalNoticeNotificationsPut() {
+    return new Operation()
+        .summary("Sends a list of arrival notice lightweight notifications")
+        .description("")
+        .operationId("put-arrival-notice-notifications")
+        .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
+        .requestBody(
+            new RequestBody()
+                .description("List of arrival notice lightweight notifications")
+                .required(true)
+                .content(
+                    new Content()
+                        .addMediaType(
+                            "application/json",
+                            new MediaType()
+                                .schema(
+                                    new Schema<>()
+                                        .$ref(
+                                            getComponentSchema$ref(
+                                                ArrivalNoticeNotificationsMessage.class))))))
+        .responses(
+            new ApiResponses()
+                .addApiResponse(
+                    "204",
+                    new ApiResponse()
+                        .description("Empty response")
+                        .headers(
+                            new LinkedHashMap<>(
+                                Map.ofEntries(
+                                    Map.entry(
+                                        "API-Version",
+                                        new Header().$ref("#/components/headers/API-Version")))))));
+  }
+
+  private static String getComponentSchema$ref(Class<?> schemaClass) {
+    return "#/components/schemas/%s".formatted(schemaClass.getSimpleName());
   }
 }

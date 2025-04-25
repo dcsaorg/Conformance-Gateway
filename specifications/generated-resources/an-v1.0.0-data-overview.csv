@@ -67,21 +67,24 @@ ArrivalNotice,"transportDocumentTypeCode",string,yes,,,BOL,"Type of the transpor
  * `SWB` - Sea Waybill"
 ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",yes,,,,"The equipments being used."
 ArrivalNotice,vesselVoyage,VesselVoyage,,,,,
-ArrivalNoticeDigest,etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery"
-ArrivalNoticeDigest,etaAtPortOfDischargeDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the port of discharge"
-ArrivalNoticeDigest,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
+"ArrivalNoticeNotification",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created"
+"ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery"
+"ArrivalNoticeNotification",etaAtPortOfDischargeDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the port of discharge"
+"ArrivalNoticeNotification",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases"
-ArrivalNoticeDigest,portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel"
-ArrivalNoticeDigest,"transportDocumentReference","TransportDocumentReference",yes,,,,
-"ArrivalNoticeDigestsMessage",arrivalNoticeDigests,"ArrivalNoticeDigest list",,,,,"List of Arrival Notice digests."
+"ArrivalNoticeNotification",portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel"
+"ArrivalNoticeNotification","transportDocumentReference","TransportDocumentReference",yes,,,,
+"ArrivalNoticeNotificationsMessage","arrivalNoticeNotifications","ArrivalNoticeNotification list",,,,,"List of Arrival Notice lightweight notifications."
 ArrivalNoticesMessage,arrivalNotices,"ArrivalNotice list",,,,,"List of arrival notices."
 CargoItem,cargoGrossVolume,Volume,,,,,
 CargoItem,cargoGrossWeight,Weight,yes,,,,
 CargoItem,cargoNetVolume,Volume,,,,,
 CargoItem,cargoNetWeight,Weight,,,,,
 CargoItem,equipmentReference,string,yes,11,"^\S(?:.*\S)?$",APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
 According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
 (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
 If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG."
@@ -210,14 +213,14 @@ EmergencyContactDetails,phone,string,yes,30,,"+1 555-123-456","Phone number of t
 It MUST be an international phone number as defined in the ITU-T recommendation E.123."
 EmergencyContactDetails,provider,string,,255,,"Acme Inc.","Name of the third party vendor providing emergency support"
 EmergencyContactDetails,referenceNumber,string,,255,,1234,"Contract reference for the emergency support provided by the external third party vendor"
-Equipment,equipmentReference,string,yes,11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+Equipment,equipmentReference,string,,11,"^\S(?:.*\S)?$",APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 
-According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of
-a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number,
-and a check-digit).
+According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
 
-If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow
-[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG."
+If a container does not comply with ISO 6346, it is suggested to follow
+[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+from SMDG."
 Equipment,isoEquipmentCode,string,,4,,22G1,"Unique code for the different equipment size and type used to transport commodities.
 
 The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP)

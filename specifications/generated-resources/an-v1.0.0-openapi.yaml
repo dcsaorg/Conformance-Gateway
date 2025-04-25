@@ -18,27 +18,26 @@ info:
   version: "1.0.0"
 tags:
 - name: "AN Publisher Endpoints"
-  description: "Endpoints implemented by the adopters who publish Arrival Notices"
+  description: "Endpoints implemented by the adopters who publish arrival notices"
 - name: "AN Subscriber Endpoints"
-  description: "Endpoints implemented by the adopters who receive Arrival Notices"
+  description: "Endpoints implemented by the adopters who receive arrival notices"
 paths:
   /arrival-notices:
     get:
       tags:
       - "AN Publisher Endpoints"
-      summary: "Retrieves a list of Arrival Notices"
-      description: "TODO endpoint description"
+      summary: "Retrieves a list of arrival notices"
       operationId: "get-arrival-notices"
       parameters:
       - name: "transportDocumentReference"
         in: "query"
-        description: "Reference of the transport document for which to return the associated Arrival Notices"
+        description: "Reference of the transport document for which to return the associated arrival notices"
         schema:
           type: "string"
         example: "TDR0123456"
       - name: "equipmentReference"
         in: "query"
-        description: "Reference(s) of the equipment for which to return the associated Arrival Notices"
+        description: "Reference(s) of the equipment for which to return the associated arrival notices"
         schema:
           type: "array"
           items:
@@ -46,39 +45,39 @@ paths:
         example: "APZU4812090,APZU4812091"
       - name: "portOfDischarge"
         in: "query"
-        description: "UN location of the port of discharge for which to retrieve available Arrival Notices"
+        description: "UN location of the port of discharge for which to retrieve available arrival notices"
         schema:
           type: "string"
         example: "NLRTM"
       - name: "vesselIMONumber"
         in: "query"
-        description: "IMO number of the vessel for which to retrieve available Arrival Notices"
+        description: "IMO number of the vessel for which to retrieve available arrival notices"
         schema:
           type: "string"
         example: "12345678"
       - name: "minEtaAtPortOfDischargeDate"
         in: "query"
-        description: "Retrieve Arrival Notices with an ETA at port of discharge on or after this date"
+        description: "Retrieve arrival notices with an ETA at port of discharge on or after this date"
         schema:
           type: "string"
           format: "date"
         example: "2025-01-23"
       - name: "maxEtaAtPortOfDischargeDate"
         in: "query"
-        description: "Retrieve Arrival Notices with an ETA at port of discharge on or before this date"
+        description: "Retrieve arrival notices with an ETA at port of discharge on or before this date"
         schema:
           type: "string"
           format: "date"
         example: "2025-01-23"
       - name: "includeCharges"
         in: "query"
-        description: "Flag indicating whether to include Arrival Notice charges (default: true)."
+        description: "Flag indicating whether to include arrival notice charges (default: true)."
         schema:
           type: "boolean"
         example: true
       responses:
         "200":
-          description: "TODO response description"
+          description: "List of arrival notices matching the query parameters"
           headers:
             API-Version:
               $ref: "#/components/headers/API-Version"
@@ -89,11 +88,10 @@ paths:
     put:
       tags:
       - "AN Subscriber Endpoints"
-      summary: "Sends a list of Arrival Notices"
-      description: "TODO description"
+      summary: "Sends a list of arrival notices"
       operationId: "put-arrival-notices"
       requestBody:
-        description: "TODO request description"
+        description: "List of arrival notices"
         content:
           application/json:
             schema:
@@ -101,27 +99,26 @@ paths:
         required: true
       responses:
         "204":
-          description: "TODO response description"
+          description: "Empty response"
           headers:
             API-Version:
               $ref: "#/components/headers/API-Version"
-  /arrival-notice-digests:
+  /arrival-notice-notifications:
     put:
       tags:
       - "AN Subscriber Endpoints"
-      summary: "Sends a list of Arrival Notice digests"
-      description: "TODO description"
-      operationId: "put-arrival-notice-digests"
+      summary: "Sends a list of arrival notice lightweight notifications"
+      operationId: "put-arrival-notice-notifications"
       requestBody:
-        description: "TODO request description"
+        description: "List of arrival notice lightweight notifications"
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ArrivalNoticeDigestsMessage"
+              $ref: "#/components/schemas/ArrivalNoticeNotificationsMessage"
         required: true
       responses:
         "204":
-          description: "TODO response description"
+          description: "Empty response"
           headers:
             API-Version:
               $ref: "#/components/headers/API-Version"
@@ -406,7 +403,7 @@ components:
           items:
             $ref: "#/components/schemas/ConsignmentItem"
       description: "Full content of an Arrival Notice document."
-    ArrivalNoticeDigest:
+    ArrivalNoticeNotification:
       required:
       - "etaAtPortOfDischargeDate"
       - "portOfDischarge"
@@ -415,6 +412,25 @@ components:
       properties:
         transportDocumentReference:
           $ref: "#/components/schemas/TransportDocumentReference"
+        equipmentReferences:
+          type: "array"
+          description: |
+            References of the equipments for which this arrival notice was created
+          items:
+            maxLength: 11
+            minLength: 1
+            pattern: "^\\S(?:.*\\S)?$"
+            type: "string"
+            description: |
+              The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+              According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+              (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+              If a container does not comply with ISO 6346, it is suggested to follow
+              [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+              from SMDG.
+            example: "APZU4812090"
         portOfDischarge:
           type: "object"
           description: |
@@ -441,16 +457,16 @@ components:
             The expected date of arrival of the shipment at place of delivery
           example: "2025-01-23"
       description: |
-        Minimal relevant information that can be published about an Arrival Notice
-    ArrivalNoticeDigestsMessage:
+        Lightweight notification that can be sent when a new or updated Arrival Notice is available
+    ArrivalNoticeNotificationsMessage:
       type: "object"
       properties:
-        arrivalNoticeDigests:
+        arrivalNoticeNotifications:
           type: "array"
-          description: "List of Arrival Notice digests."
+          description: "List of Arrival Notice lightweight notifications."
           items:
-            $ref: "#/components/schemas/ArrivalNoticeDigest"
-      description: "API message containing a list of Arrival Notice digests."
+            $ref: "#/components/schemas/ArrivalNoticeNotification"
+      description: "API message containing a list of Arrival Notice lightweight notifications."
     ArrivalNoticesMessage:
       type: "object"
       properties:
@@ -474,8 +490,10 @@ components:
           type: "string"
           description: |
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
             According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
             (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
             If a container does not comply with ISO 6346, it is suggested to follow
             [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
             from SMDG.
@@ -1006,22 +1024,22 @@ components:
           example: "1234"
       description: "24-hour emergency contact details"
     Equipment:
-      required:
-      - "equipmentReference"
       type: "object"
       properties:
         equipmentReference:
           maxLength: 11
+          minLength: 1
+          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 
-            According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of
-            a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number,
-            and a check-digit).
+            According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+            (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
 
-            If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow
-            [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.
+            If a container does not comply with ISO 6346, it is suggested to follow
+            [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+            from SMDG.
           example: "APZU4812090"
         isoEquipmentCode:
           maxLength: 4

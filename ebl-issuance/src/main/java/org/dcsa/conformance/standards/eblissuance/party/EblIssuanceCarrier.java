@@ -5,12 +5,16 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -54,28 +58,27 @@ public class EblIssuanceCarrier extends ConformanceParty {
   }
 
   private static byte[] generateDocument() {
-    byte[] pdf;
     String filepath = "/standards/eblissuance/messages/test-iss-document.pdf";
     try (InputStream inputStream = EblIssuanceCarrier.class.getResourceAsStream(filepath)) {
       if (inputStream == null) {
         throw new IllegalArgumentException("File not found: " + filepath);
       }
-      pdf = inputStream.readAllBytes();
+      RandomAccessReadBuffer randomAccessReadBuffer = new RandomAccessReadBuffer(inputStream);
+      try (PDDocument document = Loader.loadPDF(randomAccessReadBuffer);
+          ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        // Updating the title of the document
+        String uuidHex = UUID.randomUUID().toString();
+        String newTitle = "DCSA - " + uuidHex + " shipping";
+
+        PDDocumentInformation info = document.getDocumentInformation();
+        info.setTitle(newTitle);
+        document.setDocumentInformation(info);
+        document.save(outputStream);
+        return outputStream.toByteArray();
+      }
     } catch (IOException e) {
-      throw new IllegalArgumentException(
-          "Generating document failed. Could not load file: " + filepath);
+      throw new IllegalArgumentException("Generating document failed: " + filepath, e);
     }
-    String uuidHex = UUID.randomUUID().toString();
-    String pdfString = new String(pdf, StandardCharsets.ISO_8859_1);
-    String title = "/Title (DCSA - Driving digitalisation in container shipping)";
-    int titleStart = pdfString.indexOf(title);
-
-    int titleEnd = pdfString.indexOf(")", titleStart);
-    String newTitle = "DCSA - " + uuidHex + " shipping";
-
-    String updatedPdfContent =
-        pdfString.substring(0, titleStart + 7) + newTitle + ")" + pdfString.substring(titleEnd + 1);
-    return updatedPdfContent.getBytes(StandardCharsets.ISO_8859_1);
   }
 
   @Override

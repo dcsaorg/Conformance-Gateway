@@ -32,15 +32,18 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(
-            "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
-        .replace(
-            "BOOKING_TYPE_PLACEHOLDER",
-            switch (getDspSupplier().get().scenarioType()) {
-              case DG -> "DG";
-              case REEFER, REEFER_TEMP_CHANGE -> "Reefer";
-              default -> "Dry Cargo";
-            });
+    String prompt =
+        getMarkdownHumanReadablePrompt(
+                "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
+            .replace(
+                "BOOKING_TYPE_PLACEHOLDER",
+                switch (getDspSupplier().get().scenarioType()) {
+                  case DG -> "DG";
+                  case REEFER, REEFER_TEMP_CHANGE -> "Reefer";
+                  default -> "Dry Cargo";
+                });
+    return prompt.replace(
+        "CARRIER_SCENARIO_PARAMETERS", getCspSupplier().get().toJson().toString());
   }
 
   @Override

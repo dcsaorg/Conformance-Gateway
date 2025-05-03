@@ -4,8 +4,11 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.an.v100.types.CarrierClause;
+import org.dcsa.conformance.specifications.an.v100.OpenApiToolkit;
 import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
+import org.dcsa.conformance.specifications.an.v100.constraints.AttributeOneRequiresAttributeTwo;
+import org.dcsa.conformance.specifications.an.v100.constraints.SchemaConstraint;
+import org.dcsa.conformance.specifications.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.an.v100.types.CarrierCodeListProvider;
 import org.dcsa.conformance.specifications.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.DestinationDeliveryTypeCode;
@@ -169,4 +172,11 @@ typically expressed as a UN/LOCODE or just a location name.
 
   @SchemaOverride(description = "Visualization of an arrival notice, as an embedded document")
   private EmbeddedDocument arrivalNoticeVisualization;
+
+  public static List<SchemaConstraint> getConstraints() {
+    return List.of(
+      new AttributeOneRequiresAttributeTwo(
+        OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCodeListProvider"),
+        OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCode")));
+  }
 }

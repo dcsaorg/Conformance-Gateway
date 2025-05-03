@@ -26,6 +26,7 @@ This is a very limited list of examples:
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
+      example = "MSK",
       description =
           "Identifier of the party in the list `codeListName` provided by `codeListProvider`")
   private String partyCode;

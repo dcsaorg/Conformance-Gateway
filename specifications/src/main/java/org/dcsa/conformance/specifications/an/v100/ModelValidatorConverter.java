@@ -54,6 +54,11 @@ public class ModelValidatorConverter implements ModelConverter {
     } else {
       log.debug("Object: {}", annotatedType.getType());
     }
+    OpenApiToolkit.getClassConstraints(annotatedType.getType().getTypeName())
+        .forEach(
+            schemaConstraint ->
+                schema.setDescription(
+                    schema.getDescription() + "\n\n" + schemaConstraint.getDescription()));
     return schema;
   }
 }

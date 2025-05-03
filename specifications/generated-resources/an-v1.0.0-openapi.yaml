@@ -408,7 +408,10 @@ components:
             $ref: "#/components/schemas/ConsignmentItem"
         arrivalNoticeVisualization:
           $ref: "#/components/schemas/EmbeddedDocument"
-      description: "Full content of an Arrival Notice document."
+      description: |-
+        Full content of an Arrival Notice document.
+
+        Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
     ArrivalNoticeNotification:
       required:
       - "etaAtPortOfDischargeDate"

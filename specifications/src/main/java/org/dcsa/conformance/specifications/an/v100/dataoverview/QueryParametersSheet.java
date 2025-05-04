@@ -9,14 +9,16 @@ public class QueryParametersSheet extends DataOverviewSheet {
         "Query parameters",
         "QueryParametersTable",
         List.of("Name", "Type", "Description", "Example"),
+        List.of(32, 16, 120, 32),
+        List.of(false, false, true, false),
         queryParameters.stream()
             .map(
                 queryParameter ->
                     List.of(
                         queryParameter.getName(),
                         queryParameter.getSchema().getType(),
-                        queryParameter.getDescription(),
-                        String.valueOf(queryParameter.getExample())))
+                        queryParameter.getDescription().trim(),
+                        String.valueOf(queryParameter.getExample()).trim()))
             .toList());
   }
 }

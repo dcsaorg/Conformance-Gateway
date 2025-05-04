@@ -2,9 +2,8 @@ package org.dcsa.conformance.specifications.an.v100;
 
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GetArrivalNoticesEndpoint {
 
@@ -134,97 +133,97 @@ and can be used in combination with any such filter.
         includeCharges);
   }
 
-  public LinkedHashMap<Boolean, List<List<Parameter>>> getRequiredAndOptionalFilters() {
-    LinkedHashMap<Boolean, List<List<Parameter>>> filters = new LinkedHashMap<>();
-    filters.put(
-        Boolean.TRUE,
-        List.of(
-            // TDR only
-            List.of(transportDocumentReference)));
-    filters.put(
-        Boolean.FALSE,
-        List.of(
-            // TDR + EQR
-            List.of(transportDocumentReference, equipmentReference),
-            // EQR
-            List.of(equipmentReference, minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate),
-            // POD
-            List.of(portOfDischarge, minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate),
-            // vessel
-            List.of(vesselIMONumber, minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate),
-            List.of(vesselName, minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate),
-            // vessel IMO + voyage
+  public Map<Boolean, List<List<Parameter>>> getRequiredAndOptionalFilters() {
+    return Map.ofEntries(
+        Map.entry(
+            Boolean.TRUE,
             List.of(
-                vesselIMONumber,
-                carrierImportVoyageNumber,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
+                // TDR only
+                List.of(transportDocumentReference))),
+        Map.entry(
+            Boolean.FALSE,
             List.of(
-                vesselIMONumber,
-                universalImportVoyageReference,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            // vessel name + voyage
-            List.of(
-                vesselName,
-                carrierImportVoyageNumber,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            List.of(
-                vesselName,
-                universalImportVoyageReference,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            // vessel IMO + voyage + service
-            List.of(
-                vesselIMONumber,
-                carrierImportVoyageNumber,
-                carrierServiceCode,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            List.of(
-                vesselIMONumber,
-                carrierImportVoyageNumber,
-                universalServiceReference,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            List.of(
-                vesselIMONumber,
-                universalImportVoyageReference,
-                carrierServiceCode,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            List.of(
-                vesselIMONumber,
-                universalImportVoyageReference,
-                universalServiceReference,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            // vessel name + voyage + service
-            List.of(
-                vesselName,
-                carrierImportVoyageNumber,
-                carrierServiceCode,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            List.of(
-                vesselName,
-                carrierImportVoyageNumber,
-                universalServiceReference,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            List.of(
-                vesselName,
-                universalImportVoyageReference,
-                carrierServiceCode,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate),
-            List.of(
-                vesselName,
-                universalImportVoyageReference,
-                universalServiceReference,
-                minEtaAtPortOfDischargeDate,
-                maxEtaAtPortOfDischargeDate)));
-    return filters;
+                // TDR + EQR
+                List.of(transportDocumentReference, equipmentReference),
+                // EQR
+                List.of(
+                    equipmentReference, minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate),
+                // POD
+                List.of(portOfDischarge, minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate),
+                // vessel
+                List.of(vesselIMONumber, minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate),
+                List.of(vesselName, minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate),
+                // vessel IMO + voyage
+                List.of(
+                    vesselIMONumber,
+                    carrierImportVoyageNumber,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                List.of(
+                    vesselIMONumber,
+                    universalImportVoyageReference,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                // vessel name + voyage
+                List.of(
+                    vesselName,
+                    carrierImportVoyageNumber,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                List.of(
+                    vesselName,
+                    universalImportVoyageReference,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                // vessel IMO + voyage + service
+                List.of(
+                    vesselIMONumber,
+                    carrierImportVoyageNumber,
+                    carrierServiceCode,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                List.of(
+                    vesselIMONumber,
+                    carrierImportVoyageNumber,
+                    universalServiceReference,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                List.of(
+                    vesselIMONumber,
+                    universalImportVoyageReference,
+                    carrierServiceCode,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                List.of(
+                    vesselIMONumber,
+                    universalImportVoyageReference,
+                    universalServiceReference,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                // vessel name + voyage + service
+                List.of(
+                    vesselName,
+                    carrierImportVoyageNumber,
+                    carrierServiceCode,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                List.of(
+                    vesselName,
+                    carrierImportVoyageNumber,
+                    universalServiceReference,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                List.of(
+                    vesselName,
+                    universalImportVoyageReference,
+                    carrierServiceCode,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate),
+                List.of(
+                    vesselName,
+                    universalImportVoyageReference,
+                    universalServiceReference,
+                    minEtaAtPortOfDischargeDate,
+                    maxEtaAtPortOfDischargeDate))));
   }
 }

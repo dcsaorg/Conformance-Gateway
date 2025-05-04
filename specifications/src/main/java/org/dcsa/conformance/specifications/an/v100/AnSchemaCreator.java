@@ -121,8 +121,11 @@ public class AnSchemaCreator {
 
   @SneakyThrows
   public static void createSchema() {
-    new DataOverview(new GetArrivalNoticesEndpoint().getQueryParameters())
-        .exportToExcelFile("./generated-resources/playground.xlsx");
+    GetArrivalNoticesEndpoint getArrivalNoticesEndpoint = new GetArrivalNoticesEndpoint();
+    new DataOverview(
+            getArrivalNoticesEndpoint.getQueryParameters(),
+            getArrivalNoticesEndpoint.getRequiredAndOptionalFilters())
+        .exportToExcelFile("./generated-resources/an-v1.0.0-data-overview.xlsx");
     if (System.currentTimeMillis() > 0) return; // FIXME
 
     OpenAPI openAPI =

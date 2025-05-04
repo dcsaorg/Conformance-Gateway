@@ -22,4 +22,9 @@ public enum OpenApiToolkit {
   public static List<Schema<?>> parameterizeRawSchemaList(List<Schema> rawSchemaList) {
     return (ArrayList) new ArrayList<>(rawSchemaList);
   }
+
+  @SuppressWarnings("unchecked")
+  public static Schema<List<String>> stringListQueryParameterSchema() {
+    return new Schema<List<String>>().type("array").items(new Schema<String>().type("string"));
+  }
 }

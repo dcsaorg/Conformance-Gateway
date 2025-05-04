@@ -19,7 +19,6 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -41,6 +40,7 @@ import java.util.TreeSet;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.specifications.an.v100.dataoverview.DataOverview;
 import org.dcsa.conformance.specifications.an.v100.model.ActiveReeferSettings;
 import org.dcsa.conformance.specifications.an.v100.model.Address;
 import org.dcsa.conformance.specifications.an.v100.model.ArrivalNotice;
@@ -48,7 +48,6 @@ import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticeNotificati
 import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticeNotificationsMessage;
 import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticesMessage;
 import org.dcsa.conformance.specifications.an.v100.model.CargoItem;
-import org.dcsa.conformance.specifications.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.an.v100.model.Charge;
 import org.dcsa.conformance.specifications.an.v100.model.ConsignmentItem;
 import org.dcsa.conformance.specifications.an.v100.model.ContactInformation;
@@ -62,6 +61,7 @@ import org.dcsa.conformance.specifications.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.an.v100.model.IdentifyingPartyCode;
 import org.dcsa.conformance.specifications.an.v100.model.InnerPackaging;
 import org.dcsa.conformance.specifications.an.v100.model.Location;
+import org.dcsa.conformance.specifications.an.v100.model.NationalCommodityCode;
 import org.dcsa.conformance.specifications.an.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.an.v100.model.Reference;
 import org.dcsa.conformance.specifications.an.v100.model.Seal;
@@ -74,6 +74,7 @@ import org.dcsa.conformance.specifications.an.v100.model.Volume;
 import org.dcsa.conformance.specifications.an.v100.model.Weight;
 import org.dcsa.conformance.specifications.an.v100.types.AirExchangeUnitCode;
 import org.dcsa.conformance.specifications.an.v100.types.CargoDescriptionLine;
+import org.dcsa.conformance.specifications.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.CountryCode;
 import org.dcsa.conformance.specifications.an.v100.types.CurrencyAmount;
@@ -92,7 +93,6 @@ import org.dcsa.conformance.specifications.an.v100.types.ImoPackagingCode;
 import org.dcsa.conformance.specifications.an.v100.types.InhalationZoneTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.IsoEquipmentCode;
 import org.dcsa.conformance.specifications.an.v100.types.ModeOfTransportCode;
-import org.dcsa.conformance.specifications.an.v100.model.NationalCommodityCode;
 import org.dcsa.conformance.specifications.an.v100.types.NationalCommodityCodeValue;
 import org.dcsa.conformance.specifications.an.v100.types.PartyCodeListProvider;
 import org.dcsa.conformance.specifications.an.v100.types.PaymentTermCode;
@@ -121,6 +121,10 @@ public class AnSchemaCreator {
 
   @SneakyThrows
   public static void createSchema() {
+    new DataOverview(new GetArrivalNoticesEndpoint().getQueryParameters())
+        .exportToExcelFile("./generated-resources/playground.xlsx");
+    if (System.currentTimeMillis() > 0) return; // FIXME
+
     OpenAPI openAPI =
         new OpenAPI()
             .openapi("3.0.3")
@@ -412,57 +416,7 @@ public class AnSchemaCreator {
         .description("")
         .operationId("get-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_PUBLISHERS))
-        .parameters(
-            List.of(
-                new Parameter()
-                    .in("query")
-                    .name("transportDocumentReference")
-                    .description(
-                        "Reference of the transport document for which to return the associated arrival notices")
-                    .example("TDR0123456")
-                    .schema(new Schema<String>().type("string")),
-                new Parameter()
-                    .in("query")
-                    .name("equipmentReference")
-                    .description(
-                        "Reference(s) of the equipment for which to return the associated arrival notices")
-                    .example("APZU4812090,APZU4812091")
-                    .schema(stringListQueryParameterSchema()),
-                new Parameter()
-                    .in("query")
-                    .name("portOfDischarge")
-                    .description(
-                        "UN location of the port of discharge for which to retrieve available arrival notices")
-                    .example("NLRTM")
-                    .schema(new Schema<String>().type("string")),
-                new Parameter()
-                    .in("query")
-                    .name("vesselIMONumber")
-                    .description(
-                        "IMO number of the vessel for which to retrieve available arrival notices")
-                    .example("12345678")
-                    .schema(new Schema<String>().type("string")),
-                new Parameter()
-                    .in("query")
-                    .name("minEtaAtPortOfDischargeDate")
-                    .description(
-                        "Retrieve arrival notices with an ETA at port of discharge on or after this date")
-                    .example("2025-01-23")
-                    .schema(new Schema<String>().type("string").format("date")),
-                new Parameter()
-                    .in("query")
-                    .name("maxEtaAtPortOfDischargeDate")
-                    .description(
-                        "Retrieve arrival notices with an ETA at port of discharge on or before this date")
-                    .example("2025-01-23")
-                    .schema(new Schema<String>().type("string").format("date")),
-                new Parameter()
-                    .in("query")
-                    .name("includeCharges")
-                    .description(
-                        "Flag indicating whether to include arrival notice charges (default: true).")
-                    .example(true)
-                    .schema(new Schema<Boolean>().type("boolean"))))
+        .parameters(new GetArrivalNoticesEndpoint().getQueryParameters())
         .responses(
             new ApiResponses()
                 .addApiResponse(
@@ -485,11 +439,6 @@ public class AnSchemaCreator {
                                                 .$ref(
                                                     getComponentSchema$ref(
                                                         ArrivalNoticesMessage.class)))))));
-  }
-
-  @SuppressWarnings("unchecked")
-  private static Schema<List<String>> stringListQueryParameterSchema() {
-    return new Schema<List<String>>().type("array").items(new Schema<String>().type("string"));
   }
 
   private static Operation operationArrivalNoticesPut() {

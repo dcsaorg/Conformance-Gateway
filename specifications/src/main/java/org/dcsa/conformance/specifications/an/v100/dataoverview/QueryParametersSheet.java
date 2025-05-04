@@ -1,0 +1,22 @@
+package org.dcsa.conformance.specifications.an.v100.dataoverview;
+
+import io.swagger.v3.oas.models.parameters.Parameter;
+import java.util.List;
+
+public class QueryParametersSheet extends DataOverviewSheet {
+  protected QueryParametersSheet(List<Parameter> queryParameters) {
+    super(
+        "Query parameters",
+        "QueryParametersTable",
+        List.of("Name", "Type", "Description", "Example"),
+        queryParameters.stream()
+            .map(
+                queryParameter ->
+                    List.of(
+                        queryParameter.getName(),
+                        queryParameter.getSchema().getType(),
+                        queryParameter.getDescription(),
+                        String.valueOf(queryParameter.getExample())))
+            .toList());
+  }
+}

@@ -121,13 +121,6 @@ public class AnSchemaCreator {
 
   @SneakyThrows
   public static void createSchema() {
-    GetArrivalNoticesEndpoint getArrivalNoticesEndpoint = new GetArrivalNoticesEndpoint();
-    new DataOverview(
-            getArrivalNoticesEndpoint.getQueryParameters(),
-            getArrivalNoticesEndpoint.getRequiredAndOptionalFilters())
-        .exportToExcelFile("./generated-resources/an-v1.0.0-data-overview.xlsx");
-    if (System.currentTimeMillis() > 0) return; // FIXME
-
     OpenAPI openAPI =
         new OpenAPI()
             .openapi("3.0.3")
@@ -203,6 +196,15 @@ public class AnSchemaCreator {
     log.info("OpenAPI spec exported to {}", yamlFilePath);
 
     exportDataOverviewCsv(openAPI, exportFileDir + "an-v1.0.0-data-overview.csv");
+
+    GetArrivalNoticesEndpoint getArrivalNoticesEndpoint = new GetArrivalNoticesEndpoint();
+    String excelFilePath = exportFileDir + "an-v1.0.0-data-overview.xlsx";
+    new DataOverview(
+            openAPI,
+            getArrivalNoticesEndpoint.getQueryParameters(),
+            getArrivalNoticesEndpoint.getRequiredAndOptionalFilters())
+        .exportToExcelFile(excelFilePath);
+    log.info("Data Overview exported to {}", excelFilePath);
   }
 
   private static void exportDataOverviewCsv(OpenAPI openApi, String csvFilePath)

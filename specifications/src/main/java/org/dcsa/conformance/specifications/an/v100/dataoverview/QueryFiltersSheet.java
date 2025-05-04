@@ -24,7 +24,7 @@ public class QueryFiltersSheet extends DataOverviewSheet {
                                     parameterList.stream()
                                         .map(Parameter::getName)
                                         .collect(Collectors.joining(", ")),
-                                    required ? "YES" : "no")))
+                                    required ? "yes" : "")))
             .toList());
   }
 }

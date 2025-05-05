@@ -14,7 +14,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import org.dcsa.conformance.specifications.an.v100.AnSchemaCreator;
 import org.dcsa.conformance.specifications.an.v100.OpenApiToolkit;
+import org.dcsa.conformance.specifications.an.v100.constraints.SchemaConstraint;
 
 public class AttributesData {
   private final ArrayList<AttributeInfo> attributeInfoList = new ArrayList<>();
@@ -111,7 +114,23 @@ public class AttributesData {
                         attributeInfo.setDescription(
                             Objects.requireNonNullElse(attributeSchema.getDescription(), "")
                                 .trim());
-                        attributeInfo.setConstraints("");
+                        attributeInfo.setConstraints(
+                            AnSchemaCreator.constraintsByClassAndField
+                                .getOrDefault(attributeInfo.getObjectType(), Map.of())
+                                .getOrDefault(attributeInfo.getAttributeName(), List.of())
+                                .stream()
+                                .map(SchemaConstraint::getDescription)
+                                .collect(Collectors.joining("\n\n")));
+                        if (!attributeInfo.getConstraints().isEmpty()) {
+                          attributeInfo.setDescription(
+                              attributeInfo
+                                  .getDescription()
+                                  .substring(
+                                      0,
+                                      attributeInfo.getDescription().length()
+                                          - attributeInfo.getConstraints().length())
+                                  .trim());
+                        }
                         attributeInfo.setPattern("");
                         if (attributeInfo.getAttributeType().equals("string")) {
                           String schemaPattern = attributeSchema.getPattern();

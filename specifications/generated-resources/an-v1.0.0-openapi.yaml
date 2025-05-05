@@ -298,7 +298,10 @@ components:
           maxLength: 4
           pattern: "^\\S+$"
           type: "string"
-          description: "Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice"
+          description: |-
+            Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice
+
+            Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
           example: "HLCU"
         carrierCodeListProvider:
           type: "string"
@@ -306,6 +309,8 @@ components:
             The provider of the code list in which `carrierCode` is defined.
              * `SMDG` - Ship Message Design Group
              * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)
+
+            Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
           example: "NMFTA"
         carrierContactInformation:
           type: "array"
@@ -441,10 +446,7 @@ components:
             $ref: "#/components/schemas/ConsignmentItem"
         arrivalNoticeVisualization:
           $ref: "#/components/schemas/EmbeddedDocument"
-      description: |-
-        Full content of an Arrival Notice document.
-
-        Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
+      description: "Full content of an Arrival Notice document."
     ArrivalNoticeNotification:
       required:
       - "etaAtPortOfDischargeDate"
@@ -972,6 +974,14 @@ components:
           example: false
         inhalationZone:
           type: "string"
+          description: |-
+            Code for the zone classification of the toxicity of an inhalant
+
+             * `A` - Hazard Zone A (can be assigned to specific gases and liquids)
+             * `B` - Hazard Zone B (can be assigned to specific gases and liquids)
+             * `C` - Hazard Zone C (can only be assigned to specific gases)
+             * `D` - Hazard Zone D (can only be assigned to specific gases)
+          example: "BOL"
         grossWeight:
           $ref: "#/components/schemas/Weight"
         netWeight:
@@ -1225,6 +1235,7 @@ components:
         partyCode:
           type: "string"
           description: "Identifier of the party in the list `codeListName` provided by `codeListProvider`"
+          example: "MSK"
       description: "Identifying code for a party"
     InnerPackaging:
       required:

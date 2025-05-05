@@ -35,10 +35,14 @@ or shares the container with other shipments (LCL).
  * `FCL` - Full Container Load
  * `LCL` - Less than Container Load"
 ArrivalNotice,carrierClauses,"string list",,,,,"List of carrier clauses"
-ArrivalNotice,carrierCode,string,yes,4,"^\S+$",HLCU,"Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice"
+ArrivalNotice,carrierCode,string,yes,4,"^\S+$",HLCU,"Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice
+
+Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
 ArrivalNotice,carrierCodeListProvider,string,yes,,,NMFTA,"The provider of the code list in which `carrierCode` is defined.
  * `SMDG` - Ship Message Design Group
- * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)"
+ * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)
+
+Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
 ArrivalNotice,"carrierContactInformation","ContactInformation list",yes,,,,"ATTRIBUTE The party to contact for any inquiries related to this Arrival Notice."
 ArrivalNotice,"carrierInformationForCargoRelease","ContactInformation list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency)."
 ArrivalNotice,charges,"Charge list",,,,,"List of charges applicable to this shipment"
@@ -154,7 +158,12 @@ Examples of possible values are:
  * 1.6N (Extremely insensitive articles which do not have a mass explosion hazard)
  * 2.1 (Flammable gases)
  * 8 (Corrosive substances)"
-DangerousGoods,inhalationZone,string,,,,,
+DangerousGoods,inhalationZone,string,,,,BOL,"Code for the zone classification of the toxicity of an inhalant
+
+ * `A` - Hazard Zone A (can be assigned to specific gases and liquids)
+ * `B` - Hazard Zone B (can be assigned to specific gases and liquids)
+ * `C` - Hazard Zone C (can only be assigned to specific gases)
+ * `D` - Hazard Zone D (can only be assigned to specific gases)"
 DangerousGoods,innerPackagings,"InnerPackaging list",,,,,"List of inner packagings contained inside this outer packaging / overpack"
 DangerousGoods,"isCompetentAuthorityApprovalRequired",boolean,,,,false,"Indicates if the cargo require approval from authorities."
 DangerousGoods,isEmptyUncleanedResidue,boolean,,,,false,"Indicates if the cargo is residue."
@@ -277,7 +286,7 @@ IdentifyingPartyCode,codeListProvider,string,yes,,,W3C,"Code of the provider of 
  * `WAVE` - Wave
  * `WISE` - WiseTech
  * `ZZZ` - Mutually defined"
-IdentifyingPartyCode,partyCode,string,yes,,,,"Identifier of the party in the list `codeListName` provided by `codeListProvider`"
+IdentifyingPartyCode,partyCode,string,yes,,,MSK,"Identifier of the party in the list `codeListName` provided by `codeListProvider`"
 InnerPackaging,description,string,yes,100,,"Woven plastic water resistant bag","Description of the Inner Packaging."
 InnerPackaging,material,string,yes,100,,Plastic,"The material used for the Inner Packaging."
 InnerPackaging,quantity,integer,yes,,,20,"Number of inner packagings."

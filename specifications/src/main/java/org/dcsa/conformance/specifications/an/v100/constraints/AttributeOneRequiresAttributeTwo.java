@@ -3,6 +3,7 @@ package org.dcsa.conformance.specifications.an.v100.constraints;
 import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class AttributeOneRequiresAttributeTwo implements SchemaConstraint {
@@ -13,5 +14,10 @@ public class AttributeOneRequiresAttributeTwo implements SchemaConstraint {
   public String getDescription() {
     return "Specifying attribute '%s' requires specifying attribute '%s'."
         .formatted(attributeFieldOne.getName(), attributeFieldTwo.getName());
+  }
+
+  @Override
+  public List<Field> getTargetFields() {
+    return List.of(attributeFieldOne, attributeFieldTwo);
   }
 }

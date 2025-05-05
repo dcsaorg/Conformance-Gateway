@@ -7,6 +7,8 @@ import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +31,10 @@ public class ModelValidatorConverter implements ModelConverter {
 
     if (annotatedType.getType() instanceof SimpleType simpleType) {
       log.debug(
-          "  attribute: {} {}",
-          simpleType.getRawClass().getSimpleName(),
-          annotatedType.getPropertyName());
+          "  attribute: {} {} {}",
+          annotatedType.getParent().getName(),
+          annotatedType.getPropertyName(),
+          simpleType.getRawClass().getSimpleName());
       Arrays.stream(annotatedType.getCtxAnnotations())
           .filter(annotation -> annotation instanceof SchemaOverride)
           .map(annotation -> (SchemaOverride) annotation)
@@ -51,14 +54,16 @@ public class ModelValidatorConverter implements ModelConverter {
                                     ((EnumBase) enumConstant).getValueDescription()))
                     .collect(Collectors.joining("\n")));
       }
+      AnSchemaCreator.constraintsByClassAndField
+          .getOrDefault(annotatedType.getParent().getName(), Map.of())
+          .getOrDefault(annotatedType.getPropertyName(), List.of())
+          .forEach(
+              schemaConstraint ->
+                  schema.setDescription(
+                      schema.getDescription() + "\n\n" + schemaConstraint.getDescription()));
     } else {
       log.debug("Object: {}", annotatedType.getType());
     }
-    OpenApiToolkit.getClassConstraints(annotatedType.getType().getTypeName())
-        .forEach(
-            schemaConstraint ->
-                schema.setDescription(
-                    schema.getDescription() + "\n\n" + schemaConstraint.getDescription()));
     return schema;
   }
 }

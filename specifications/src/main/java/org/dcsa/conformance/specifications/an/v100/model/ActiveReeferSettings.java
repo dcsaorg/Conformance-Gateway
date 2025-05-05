@@ -2,9 +2,14 @@ package org.dcsa.conformance.specifications.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.an.v100.OpenApiToolkit;
 import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
+import org.dcsa.conformance.specifications.an.v100.constraints.AttributeOneRequiresAttributeTwo;
+import org.dcsa.conformance.specifications.an.v100.constraints.SchemaConstraint;
 import org.dcsa.conformance.specifications.an.v100.types.AirExchangeUnitCode;
 import org.dcsa.conformance.specifications.an.v100.types.TemperatureUnitCode;
+
+import java.util.List;
 
 @Data
 @Schema(description = "Settings for an active reefer equipment")
@@ -89,4 +94,14 @@ but prior arrival at POD
       example = "true",
       description = "Flag indicating whether the cargo requires controlled atmosphere")
   private String controlledAtmosphereRequired;
+
+  public static List<SchemaConstraint> getConstraints() {
+    return List.of(
+        new AttributeOneRequiresAttributeTwo(
+            OpenApiToolkit.getClassField(ActiveReeferSettings.class, "temperatureSetpoint"),
+            OpenApiToolkit.getClassField(ActiveReeferSettings.class, "temperatureUnit")),
+        new AttributeOneRequiresAttributeTwo(
+            OpenApiToolkit.getClassField(ActiveReeferSettings.class, "airExchangeSetpoint"),
+            OpenApiToolkit.getClassField(ActiveReeferSettings.class, "airExchangeUnit")));
+  }
 }

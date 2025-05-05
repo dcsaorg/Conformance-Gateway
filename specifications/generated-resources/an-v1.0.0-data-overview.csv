@@ -1,8 +1,12 @@
 Object,Attribute,Type,Required,Size,Pattern,Example,Description
-ActiveReeferSettings,airExchangeSetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target rate at which outdoor air replaces indoor air"
+ActiveReeferSettings,airExchangeSetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target rate at which outdoor air replaces indoor air
+
+Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'."
 ActiveReeferSettings,airExchangeUnit,string,,,,MQH,"Measurement unit in which the `airExchangeSetpoint` is expressed
  * `FQH` - Cubic foot per hour
- * `MQH` - Cubic metre per hour"
+ * `MQH` - Cubic metre per hour
+
+Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'."
 ActiveReeferSettings,co2Setpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target CO2 percentage"
 ActiveReeferSettings,humiditySetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target humidity percentage"
 ActiveReeferSettings,isBulbMode,boolean,,,,true,"Flag indicating whether flower bulb handling mode is active"
@@ -12,10 +16,14 @@ ActiveReeferSettings,"isControlledAtmosphereRequired",boolean,,,,true,"Flag indi
 ActiveReeferSettings,isDrainHolesOpen,boolean,,,,true,"Flag indicating whether the drain holes are open"
 ActiveReeferSettings,isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open"
 ActiveReeferSettings,o2Setpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target O2 percentage"
-ActiveReeferSettings,temperatureSetpoint,string,,,"^-?\d+(\.\d+)?$",-12.3,"Target temperature"
+ActiveReeferSettings,temperatureSetpoint,string,,,"^-?\d+(\.\d+)?$",-12.3,"Target temperature
+
+Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'."
 ActiveReeferSettings,temperatureUnit,string,,,,CEL,"Measurement unit in which the `temperatureSetpoint` is expressed
  * `CEL` - Celsius
- * `FAH` - Fahrenheit"
+ * `FAH` - Fahrenheit
+
+Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'."
 Address,city,string,,35,,Amsterdam,City
 Address,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 

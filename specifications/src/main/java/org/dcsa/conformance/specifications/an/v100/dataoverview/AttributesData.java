@@ -121,7 +121,10 @@ public class AttributesData {
                                 .stream()
                                 .map(SchemaConstraint::getDescription)
                                 .collect(Collectors.joining("\n\n")));
-                        if (!attributeInfo.getConstraints().isEmpty()) {
+                        if (!attributeInfo.getConstraints().isEmpty()
+                            && attributeInfo
+                                .getDescription()
+                                .endsWith(attributeInfo.getConstraints())) {
                           attributeInfo.setDescription(
                               attributeInfo
                                   .getDescription()

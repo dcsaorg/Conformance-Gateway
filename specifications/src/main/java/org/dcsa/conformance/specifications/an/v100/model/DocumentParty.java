@@ -1,7 +1,11 @@
 package org.dcsa.conformance.specifications.an.v100.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.an.v100.OpenApiToolkit;
+import org.dcsa.conformance.specifications.an.v100.constraints.AtLeastOneAttributeIsRequired;
+import org.dcsa.conformance.specifications.an.v100.constraints.SchemaConstraint;
 import org.dcsa.conformance.specifications.an.v100.types.DocumentPartyTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.PersonTypeCode;
 
@@ -26,6 +30,7 @@ public class DocumentParty {
   @Schema() private Address address;
 
   @Schema(description = "List of codes identifying the party")
+  @ArraySchema(minItems = 1)
   private List<IdentifyingPartyCode> identifyingCodes;
 
   @Schema(description = "List of tax or legal references relevant to the party")
@@ -33,4 +38,12 @@ public class DocumentParty {
 
   @Schema(description = "Party contact details")
   private List<ContactInformation> contactDetails;
+
+  public static List<SchemaConstraint> getConstraints() {
+    return List.of(
+        new AtLeastOneAttributeIsRequired(
+            List.of(
+                OpenApiToolkit.getClassField(DocumentParty.class, "address"),
+                OpenApiToolkit.getClassField(DocumentParty.class, "identifyingCodes"))));
+  }
 }

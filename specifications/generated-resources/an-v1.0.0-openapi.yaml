@@ -163,7 +163,10 @@ components:
         temperatureSetpoint:
           pattern: "^-?\\d+(\\.\\d+)?$"
           type: "string"
-          description: "Target temperature"
+          description: |-
+            Target temperature
+
+            Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'.
           example: "-12.3"
         temperatureUnit:
           type: "string"
@@ -171,6 +174,8 @@ components:
             Measurement unit in which the `temperatureSetpoint` is expressed
              * `CEL` - Celsius
              * `FAH` - Fahrenheit
+
+            Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'.
           example: "CEL"
         o2Setpoint:
           pattern: "^\\d+(\\.\\d+)?$"
@@ -190,7 +195,10 @@ components:
         airExchangeSetpoint:
           pattern: "^\\d+(\\.\\d+)?$"
           type: "string"
-          description: "Target rate at which outdoor air replaces indoor air"
+          description: |-
+            Target rate at which outdoor air replaces indoor air
+
+            Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'.
           example: "12.3"
         airExchangeUnit:
           type: "string"
@@ -198,6 +206,8 @@ components:
             Measurement unit in which the `airExchangeSetpoint` is expressed
              * `FQH` - Cubic foot per hour
              * `MQH` - Cubic metre per hour
+
+            Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'.
           example: "MQH"
         isVentilationOpen:
           type: "boolean"

@@ -122,9 +122,13 @@ ConsignmentItem,descriptionOfGoods,"string list",yes,,,,"Ordered list of cargo d
 ConsignmentItem,hsCodes,"string list",yes,,,,"List of HS Codes that apply to this consignment item"
 ConsignmentItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"The list of national commodity codes applicable to this consignment item."
 ConsignmentItem,shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package"
-ContactInformation,email,string,,100,"^\S+(\s+\S+)*$",jane.doe@example.com,"Email address"
+ContactInformation,email,string,,100,"^\S+(\s+\S+)*$",jane.doe@example.com,"Email address
+
+At least one of these attributes is required: 'phone', 'email'."
 ContactInformation,name,string,,100,"^\S+(\s+\S+)*$","Jane Doe","Contact name"
-ContactInformation,phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number"
+ContactInformation,phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number
+
+At least one of these attributes is required: 'phone', 'email'."
 CustomsReference,countryCode,string,yes,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
 When the country code is required but not applicable, use the code `ZZ`."

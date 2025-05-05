@@ -715,13 +715,19 @@ components:
           maxLength: 30
           pattern: "^\\S+(\\s+\\S+)*$"
           type: "string"
-          description: "Phone number"
+          description: |-
+            Phone number
+
+            At least one of these attributes is required: 'phone', 'email'.
           example: "+1 555-123-4567"
         email:
           maxLength: 100
           pattern: "^\\S+(\\s+\\S+)*$"
           type: "string"
-          description: "Email address"
+          description: |-
+            Email address
+
+            At least one of these attributes is required: 'phone', 'email'.
           example: "jane.doe@example.com"
       description: "Contact information"
     CustomsReference:

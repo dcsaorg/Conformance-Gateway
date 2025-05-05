@@ -1,7 +1,11 @@
 package org.dcsa.conformance.specifications.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.an.v100.OpenApiToolkit;
+import org.dcsa.conformance.specifications.an.v100.constraints.AtLeastOneAttributeIsRequired;
+import org.dcsa.conformance.specifications.an.v100.constraints.SchemaConstraint;
 
 @Data
 @Schema(description = "Contact information")
@@ -27,4 +31,12 @@ public class ContactInformation {
       maxLength = 100,
       example = "jane.doe@example.com")
   private String email;
+
+  public static List<SchemaConstraint> getConstraints() {
+    return List.of(
+        new AtLeastOneAttributeIsRequired(
+            List.of(
+                OpenApiToolkit.getClassField(ContactInformation.class, "phone"),
+                OpenApiToolkit.getClassField(ContactInformation.class, "email"))));
+  }
 }

@@ -1,8 +1,12 @@
 Object,Attribute,Type,Required,Size,Pattern,Example,Description
-ActiveReeferSettings,airExchangeSetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target rate at which outdoor air replaces indoor air"
+ActiveReeferSettings,airExchangeSetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target rate at which outdoor air replaces indoor air
+
+Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'."
 ActiveReeferSettings,airExchangeUnit,string,,,,MQH,"Measurement unit in which the `airExchangeSetpoint` is expressed
  * `FQH` - Cubic foot per hour
- * `MQH` - Cubic metre per hour"
+ * `MQH` - Cubic metre per hour
+
+Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'."
 ActiveReeferSettings,co2Setpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target CO2 percentage"
 ActiveReeferSettings,humiditySetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target humidity percentage"
 ActiveReeferSettings,isBulbMode,boolean,,,,true,"Flag indicating whether flower bulb handling mode is active"
@@ -12,10 +16,14 @@ ActiveReeferSettings,"isControlledAtmosphereRequired",boolean,,,,true,"Flag indi
 ActiveReeferSettings,isDrainHolesOpen,boolean,,,,true,"Flag indicating whether the drain holes are open"
 ActiveReeferSettings,isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open"
 ActiveReeferSettings,o2Setpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target O2 percentage"
-ActiveReeferSettings,temperatureSetpoint,string,,,"^-?\d+(\.\d+)?$",-12.3,"Target temperature"
+ActiveReeferSettings,temperatureSetpoint,string,,,"^-?\d+(\.\d+)?$",-12.3,"Target temperature
+
+Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'."
 ActiveReeferSettings,temperatureUnit,string,,,,CEL,"Measurement unit in which the `temperatureSetpoint` is expressed
  * `CEL` - Celsius
- * `FAH` - Fahrenheit"
+ * `FAH` - Fahrenheit
+
+Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'."
 Address,city,string,,35,,Amsterdam,City
 Address,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
@@ -35,10 +43,14 @@ or shares the container with other shipments (LCL).
  * `FCL` - Full Container Load
  * `LCL` - Less than Container Load"
 ArrivalNotice,carrierClauses,"string list",,,,,"List of carrier clauses"
-ArrivalNotice,carrierCode,string,yes,4,"^\S+$",HLCU,"Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice"
+ArrivalNotice,carrierCode,string,yes,4,"^\S+$",HLCU,"Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice
+
+Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
 ArrivalNotice,carrierCodeListProvider,string,yes,,,NMFTA,"The provider of the code list in which `carrierCode` is defined.
  * `SMDG` - Ship Message Design Group
- * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)"
+ * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)
+
+Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
 ArrivalNotice,"carrierContactInformation","ContactInformation list",yes,,,,"ATTRIBUTE The party to contact for any inquiries related to this Arrival Notice."
 ArrivalNotice,"carrierInformationForCargoRelease","ContactInformation list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency)."
 ArrivalNotice,charges,"Charge list",,,,,"List of charges applicable to this shipment"
@@ -118,9 +130,13 @@ ConsignmentItem,descriptionOfGoods,"string list",yes,,,,"Ordered list of cargo d
 ConsignmentItem,hsCodes,"string list",yes,,,,"List of HS Codes that apply to this consignment item"
 ConsignmentItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"The list of national commodity codes applicable to this consignment item."
 ConsignmentItem,shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package"
-ContactInformation,email,string,,100,"^\S+(\s+\S+)*$",jane.doe@example.com,"Email address"
+ContactInformation,email,string,,100,"^\S+(\s+\S+)*$",jane.doe@example.com,"Email address
+
+At least one of these attributes is required: 'phone', 'email'."
 ContactInformation,name,string,,100,"^\S+(\s+\S+)*$","Jane Doe","Contact name"
-ContactInformation,phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number"
+ContactInformation,phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number
+
+At least one of these attributes is required: 'phone', 'email'."
 CustomsReference,countryCode,string,yes,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
 When the country code is required but not applicable, use the code `ZZ`."
@@ -154,7 +170,12 @@ Examples of possible values are:
  * 1.6N (Extremely insensitive articles which do not have a mass explosion hazard)
  * 2.1 (Flammable gases)
  * 8 (Corrosive substances)"
-DangerousGoods,inhalationZone,string,,,,,
+DangerousGoods,inhalationZone,string,,,,BOL,"Code for the zone classification of the toxicity of an inhalant
+
+ * `A` - Hazard Zone A (can be assigned to specific gases and liquids)
+ * `B` - Hazard Zone B (can be assigned to specific gases and liquids)
+ * `C` - Hazard Zone C (can only be assigned to specific gases)
+ * `D` - Hazard Zone D (can only be assigned to specific gases)"
 DangerousGoods,innerPackagings,"InnerPackaging list",,,,,"List of inner packagings contained inside this outer packaging / overpack"
 DangerousGoods,"isCompetentAuthorityApprovalRequired",boolean,,,,false,"Indicates if the cargo require approval from authorities."
 DangerousGoods,isEmptyUncleanedResidue,boolean,,,,false,"Indicates if the cargo is residue."
@@ -277,7 +298,7 @@ IdentifyingPartyCode,codeListProvider,string,yes,,,W3C,"Code of the provider of 
  * `WAVE` - Wave
  * `WISE` - WiseTech
  * `ZZZ` - Mutually defined"
-IdentifyingPartyCode,partyCode,string,yes,,,,"Identifier of the party in the list `codeListName` provided by `codeListProvider`"
+IdentifyingPartyCode,partyCode,string,yes,,,MSK,"Identifier of the party in the list `codeListName` provided by `codeListProvider`"
 InnerPackaging,description,string,yes,100,,"Woven plastic water resistant bag","Description of the Inner Packaging."
 InnerPackaging,material,string,yes,100,,Plastic,"The material used for the Inner Packaging."
 InnerPackaging,quantity,integer,yes,,,20,"Number of inner packagings."

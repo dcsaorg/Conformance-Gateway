@@ -163,7 +163,10 @@ components:
         temperatureSetpoint:
           pattern: "^-?\\d+(\\.\\d+)?$"
           type: "string"
-          description: "Target temperature"
+          description: |-
+            Target temperature
+
+            Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'.
           example: "-12.3"
         temperatureUnit:
           type: "string"
@@ -171,6 +174,8 @@ components:
             Measurement unit in which the `temperatureSetpoint` is expressed
              * `CEL` - Celsius
              * `FAH` - Fahrenheit
+
+            Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'.
           example: "CEL"
         o2Setpoint:
           pattern: "^\\d+(\\.\\d+)?$"
@@ -190,7 +195,10 @@ components:
         airExchangeSetpoint:
           pattern: "^\\d+(\\.\\d+)?$"
           type: "string"
-          description: "Target rate at which outdoor air replaces indoor air"
+          description: |-
+            Target rate at which outdoor air replaces indoor air
+
+            Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'.
           example: "12.3"
         airExchangeUnit:
           type: "string"
@@ -198,6 +206,8 @@ components:
             Measurement unit in which the `airExchangeSetpoint` is expressed
              * `FQH` - Cubic foot per hour
              * `MQH` - Cubic metre per hour
+
+            Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'.
           example: "MQH"
         isVentilationOpen:
           type: "boolean"
@@ -298,7 +308,10 @@ components:
           maxLength: 4
           pattern: "^\\S+$"
           type: "string"
-          description: "Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice"
+          description: |-
+            Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice
+
+            Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
           example: "HLCU"
         carrierCodeListProvider:
           type: "string"
@@ -306,6 +319,8 @@ components:
             The provider of the code list in which `carrierCode` is defined.
              * `SMDG` - Ship Message Design Group
              * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)
+
+            Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
           example: "NMFTA"
         carrierContactInformation:
           type: "array"
@@ -710,13 +725,19 @@ components:
           maxLength: 30
           pattern: "^\\S+(\\s+\\S+)*$"
           type: "string"
-          description: "Phone number"
+          description: |-
+            Phone number
+
+            At least one of these attributes is required: 'phone', 'email'.
           example: "+1 555-123-4567"
         email:
           maxLength: 100
           pattern: "^\\S+(\\s+\\S+)*$"
           type: "string"
-          description: "Email address"
+          description: |-
+            Email address
+
+            At least one of these attributes is required: 'phone', 'email'.
           example: "jane.doe@example.com"
       description: "Contact information"
     CustomsReference:
@@ -969,6 +990,14 @@ components:
           example: false
         inhalationZone:
           type: "string"
+          description: |-
+            Code for the zone classification of the toxicity of an inhalant
+
+             * `A` - Hazard Zone A (can be assigned to specific gases and liquids)
+             * `B` - Hazard Zone B (can be assigned to specific gases and liquids)
+             * `C` - Hazard Zone C (can only be assigned to specific gases)
+             * `D` - Hazard Zone D (can only be assigned to specific gases)
+          example: "BOL"
         grossWeight:
           $ref: "#/components/schemas/Weight"
         netWeight:
@@ -1222,6 +1251,7 @@ components:
         partyCode:
           type: "string"
           description: "Identifier of the party in the list `codeListName` provided by `codeListProvider`"
+          example: "MSK"
       description: "Identifying code for a party"
     InnerPackaging:
       required:

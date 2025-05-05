@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ import java.util.TreeSet;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.specifications.an.v100.constraints.SchemaConstraint;
 import org.dcsa.conformance.specifications.an.v100.dataoverview.DataOverview;
 import org.dcsa.conformance.specifications.an.v100.model.ActiveReeferSettings;
 import org.dcsa.conformance.specifications.an.v100.model.Address;
@@ -118,6 +120,30 @@ public class AnSchemaCreator {
 
   public static final String TAG_ARRIVAL_NOTICE_PUBLISHERS = "AN Publisher Endpoints";
   public static final String TAG_ARRIVAL_NOTICE_SUBSCRIBERS = "AN Subscriber Endpoints";
+
+  public static final Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField =
+      new HashMap<>();
+
+  static {
+    AnSchemaCreator.modelClassesStream()
+        .forEach(
+            modelClass ->
+                OpenApiToolkit.getClassConstraints(modelClass.getName())
+                    .forEach(
+                        schemaConstraint ->
+                            schemaConstraint
+                                .getTargetFields()
+                                .forEach(
+                                    targetField ->
+                                        constraintsByClassAndField
+                                            .computeIfAbsent(
+                                                modelClass.getSimpleName(),
+                                                ignoredClassName -> new HashMap<>())
+                                            .computeIfAbsent(
+                                                targetField.getName(),
+                                                ignoredFieldName -> new ArrayList<>())
+                                            .add(schemaConstraint))));
+  }
 
   @SneakyThrows
   public static void createSchema() {

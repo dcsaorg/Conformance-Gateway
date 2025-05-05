@@ -5,6 +5,7 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
 import org.dcsa.conformance.specifications.an.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.an.v100.types.FormattedDateTime;
+import org.dcsa.conformance.specifications.an.v100.types.InhalationZoneTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.SegregationGroupCode;
 import org.dcsa.conformance.specifications.an.v100.types.SubsidiaryRisk;
 
@@ -257,7 +258,7 @@ If true, a report to the relevant authority must be made in case of spill.
   private String reportableQuantity;
 
   @Schema()
-  private String inhalationZone;
+  private InhalationZoneTypeCode inhalationZone;
 
   @SchemaOverride(description = "Total weight of the goods carried, including packaging.")
   private Weight grossWeight;

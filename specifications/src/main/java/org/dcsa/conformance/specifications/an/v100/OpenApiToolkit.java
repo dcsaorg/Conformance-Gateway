@@ -29,6 +29,11 @@ public enum OpenApiToolkit {
     return (ArrayList) new ArrayList<>(rawSchemaList);
   }
 
+  @SuppressWarnings("unchecked")
+  public static Schema<List<String>> stringListQueryParameterSchema() {
+    return new Schema<List<String>>().type("array").items(new Schema<String>().type("string"));
+  }
+
   @SneakyThrows
   public static Field getClassField(Class<?> classObject, String fieldName) {
     return classObject.getDeclaredField(fieldName);

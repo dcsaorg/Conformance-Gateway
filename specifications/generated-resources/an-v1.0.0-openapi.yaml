@@ -55,6 +55,36 @@ paths:
         schema:
           type: "string"
         example: "12345678"
+      - name: "vesselName"
+        in: "query"
+        description: "Name of the vessel for which to retrieve available arrival notices"
+        schema:
+          type: "string"
+        example: "King of the Seas"
+      - name: "carrierImportVoyageNumber"
+        in: "query"
+        description: "The identifier of an import voyage. The carrier-specific identifier of the import Voyage."
+        schema:
+          type: "string"
+        example: "1234N"
+      - name: "universalImportVoyageReference"
+        in: "query"
+        description: "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
+        schema:
+          type: "string"
+        example: "2301W"
+      - name: "carrierServiceCode"
+        in: "query"
+        description: "The carrier specific code of the service for which the schedule details are published."
+        schema:
+          type: "string"
+        example: "FE1"
+      - name: "universalServiceReference"
+        in: "query"
+        description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
+        schema:
+          type: "string"
+        example: "SR12345A"
       - name: "minEtaAtPortOfDischargeDate"
         in: "query"
         description: "Retrieve arrival notices with an ETA at port of discharge on or after this date"
@@ -71,7 +101,10 @@ paths:
         example: "2025-01-23"
       - name: "includeCharges"
         in: "query"
-        description: "Flag indicating whether to include arrival notice charges (default: true)."
+        description: |
+          Flag indicating whether to include arrival notice charges. If not specified, the default value is `true`.
+          This flag is separate from the mandatory and optional lists of query parameters that can be used as filters
+          and can be used in combination with any such filter.
         schema:
           type: "boolean"
         example: true

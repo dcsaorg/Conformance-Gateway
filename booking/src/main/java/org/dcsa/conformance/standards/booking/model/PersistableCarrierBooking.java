@@ -282,26 +282,12 @@ public class PersistableCarrierBooking {
     }
     copyMetadataFields(getBooking(), newBookingData);
     if (isAmendment) {
-      ensureFeedbacksExist(newBookingData);
       ensureConfirmedBookingHasCarrierFields(newBookingData);
       setAmendedBooking(newBookingData);
     } else {
       setBooking(newBookingData);
     }
 
-  }
-
-  private void ensureFeedbacksExist(ObjectNode booking) {
-    booking
-        .putArray(FEEDBACKS)
-        .addObject()
-        .put("severity", "INFO")
-        .put("code", "PROPERTY_VALUE_HAS_BEEN_CHANGED")
-        .put(
-            "message",
-            "Please change any one of the attributes for the conformance for example change VesselName to 'King of the Seas'")
-        .put("jsonPath", "$.vessel.name")
-        .put("property", "name");
   }
 
   public BookingState getOriginalBookingState() {

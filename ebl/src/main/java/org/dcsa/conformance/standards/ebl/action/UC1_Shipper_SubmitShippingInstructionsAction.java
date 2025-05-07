@@ -34,7 +34,11 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of("SCENARIO_TYPE", getScenarioType()),
+        Map.of(
+            "SCENARIO_TYPE",
+            getScenarioType(),
+            "CARRIER_SCENARIO_PARAMETERS",
+            getCspSupplier().get().toJson().toString()),
         "prompt-shipper-uc1.md",
         "prompt-shipper-refresh-complete.md");
   }

@@ -27,8 +27,7 @@ public class UC2_Carrier_RequestUpdateToInvalidBookingRequestAction extends Stat
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(
-        "prompt-carrier-uc2.md", "prompt-carrier-notification.md");
+    return "This action will be done by the synthetic carrier and so no prompt is needed";
   }
 
   @Override

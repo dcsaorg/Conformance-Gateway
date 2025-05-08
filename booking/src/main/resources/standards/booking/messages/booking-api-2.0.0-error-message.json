@@ -3,14 +3,14 @@
   "requestUri": "REQUEST_URI_PLACEHOLDER",
   "statusCode": 404,
   "statusCodeText": "Not Found",
-  "statusCodeMessage": "portCallServiceID not found",
+  "statusCodeMessage": "booking reference not found",
   "providerCorrelationReference": "REFERENCE_PLACEHOLDER",
   "errorDateTime": "ERROR_DATE_TIME_PLACEHOLDER",
   "errors": [
     {
       "errorCode": 7006,
-      "errorCodeText": "portCallServiceID not found",
-      "errorCodeMessage": "The Port Call Service does not exist"
+      "errorCodeText": "booking reference not found",
+      "errorCodeMessage": "The booking reference does not exist"
     }
   ]
 }

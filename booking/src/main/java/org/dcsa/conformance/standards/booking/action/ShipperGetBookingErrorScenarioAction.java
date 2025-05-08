@@ -36,9 +36,7 @@ public class ShipperGetBookingErrorScenarioAction extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(
-            "prompt-shipper-get.md", "prompt-shipper-refresh-complete.md")
-        .replace("ORIGINAL_OR_AMENDED_PLACEHOLDER","ORIGINAL");
+    return "This action will be done by the synthetic shipper and so no prompt is needed";
   }
 
   @Override
@@ -46,13 +44,7 @@ public class ShipperGetBookingErrorScenarioAction extends BookingAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var dsp = getDspSupplier().get();
-        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
         return Stream.of(
-            new UrlPathCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                "/v2/bookings/" + reference),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

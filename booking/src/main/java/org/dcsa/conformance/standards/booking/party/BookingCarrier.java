@@ -100,7 +100,7 @@ public class BookingCarrier extends ConformanceParty {
             this::processConfirmedBookingCancellation),
         Map.entry(
             UC2_Carrier_RequestUpdateToInvalidBookingRequestAction.class,
-            this::processConfirmedBookingCancellation));
+            this::requestUpdateToBookingRequest));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -434,10 +434,6 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   private ConformanceResponse return404(ConformanceRequest request, String message) {
-    /*return request.createResponse(
-    404,
-    Map.of(API_VERSION, List.of(apiVersion)),
-    new ConformanceMessageBody(getErrorResponse(request)));*/
     ObjectNode response =
         (ObjectNode)
             JsonToolkit.templateFileToJsonNode(

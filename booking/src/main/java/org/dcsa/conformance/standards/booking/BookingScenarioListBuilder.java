@@ -213,12 +213,12 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                             .then(
                                                                 shipperGetBooking(COMPLETED)))))))),
             Map.entry(
-                "Error Case Scenario (for Carrier)",
+                "Error Case Scenario (Only for Carrier - Checks carrier responds correctly to an invalid request)",
                 carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
                     .then(
                         uc1_shipper_SubmitBookingRequest().then(shipperGetBookingErrorScenario()))),
             Map.entry(
-                "Error Case Scenario (for Shipper)",
+                "Error Case Scenario (Only for Shipper - Checks shipper responds correctly to an invalid request)",
                 carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
                     .then(
                         uc1_shipper_SubmitBookingRequest()

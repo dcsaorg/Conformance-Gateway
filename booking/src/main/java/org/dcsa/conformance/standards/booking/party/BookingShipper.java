@@ -254,11 +254,13 @@ public class BookingShipper extends ConformanceParty {
                       "HTTP_METHOD_PLACEHOLDER",
                       request.method(),
                       "REQUEST_URI_PLACEHOLDER",
-                      "jjjj",
+                      request.url(),
                       "REFERENCE_PLACEHOLDER",
                       UUID.randomUUID().toString(),
                       "ERROR_DATE_TIME_PLACEHOLDER",
-                      LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT)));
+                      LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
+                      "ERROR_MESSAGE_PLACEHOLDER",
+                      "Invalid request body"));
       return request.createResponse(
           400, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
     }

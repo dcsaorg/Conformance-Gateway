@@ -10,7 +10,7 @@
     {
       "errorCode": 7006,
       "errorCodeText": "booking reference not found",
-      "errorCodeMessage": "The booking reference does not exist"
+      "errorCodeMessage": "ERROR_MESSAGE_PLACEHOLDER"
     }
   ]
 }

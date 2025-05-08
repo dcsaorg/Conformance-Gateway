@@ -442,33 +442,18 @@ public class BookingCarrier extends ConformanceParty {
                     "HTTP_METHOD_PLACEHOLDER",
                     request.method(),
                     "REQUEST_URI_PLACEHOLDER",
-                    "jjjj",
+                    request.url(),
                     "REFERENCE_PLACEHOLDER",
                     UUID.randomUUID().toString(),
                     "ERROR_DATE_TIME_PLACEHOLDER",
-                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT)));
+                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
+                    "ERROR_MESSAGE_PLACEHOLDER",
+                    message));
 
     return request.createResponse(
         404, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 
-  /*
-    private ObjectNode getErrorResponse(ConformanceRequest request) {
-      ObjectNode response =
-          (ObjectNode)
-              JsonToolkit.templateFileToJsonNode(
-                  "/standards/jit/messages/jit-200-error-message.json",
-                  Map.of(
-                      "HTTP_METHOD_PLACEHOLDER",
-                      request.method(),
-                      "REQUEST_URI_PLACEHOLDER",
-                      "jjjj",
-                      "REFERENCE_PLACEHOLDER",
-                      UUID.randomUUID().toString(),
-                      "ERROR_DATE_TIME_PLACEHOLDER",
-                      LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT)));
-    }
-  */
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(

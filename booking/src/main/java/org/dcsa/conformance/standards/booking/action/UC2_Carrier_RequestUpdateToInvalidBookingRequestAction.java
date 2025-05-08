@@ -64,11 +64,11 @@ public class UC2_Carrier_RequestUpdateToInvalidBookingRequestAction extends Stat
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 requestSchemaValidator),
-          new JsonSchemaCheck(
-            BookingRole::isShipper,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            responseSchemaValidator));
+            new JsonSchemaCheck(
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator));
       }
     };
   }

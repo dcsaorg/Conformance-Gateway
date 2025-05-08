@@ -36,7 +36,7 @@ public class ShipperGetBookingErrorScenarioAction extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "This action will be done by the synthetic shipper and so no prompt is needed";
+    return getMarkdownHumanReadablePrompt("prompt-shipper-get-booking-error-scenario.md");
   }
 
   @Override

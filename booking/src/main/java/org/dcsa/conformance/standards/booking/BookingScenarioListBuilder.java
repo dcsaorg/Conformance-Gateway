@@ -213,18 +213,10 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                             .then(
                                                                 shipperGetBooking(COMPLETED)))))))),
             Map.entry(
-                "Error Case Scenario (Only for Carrier - Checks carrier responds correctly to an invalid request)",
+                "Carrier error response conformance",
                 carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
                     .then(
-                        uc1_shipper_SubmitBookingRequest().then(shipperGetBookingErrorScenario()))),
-            Map.entry(
-                "Error Case Scenario (Only for Shipper - Checks shipper responds correctly to an invalid request)",
-                carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
-                    .then(
-                        uc1_shipper_SubmitBookingRequest()
-                            .then(
-                                shipperGetBooking(RECEIVED)
-                                    .then(uc2_carrier_invalidBookingRequest())))))
+                        uc1_shipper_SubmitBookingRequest().then(shipperGetBookingErrorScenario()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -548,21 +540,6 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                 (BookingAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static BookingScenarioListBuilder uc2_carrier_invalidBookingRequest() {
-    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-        previousAction ->
-            new UC2_Carrier_RequestUpdateToInvalidBookingRequestAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-                componentFactory.getMessageSchemaValidator(BOOKING_API, "ErrorResponse")));
   }
 
   private static BookingScenarioListBuilder uc2_carrier_requestUpdateToBookingRequest() {

@@ -4,7 +4,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -87,6 +86,7 @@ public class BookingShipper extends ConformanceParty {
       : Collections.emptyMap();
     if (errorScenario) {
       syncCounterpartGet("/v2/bookings/" + "ABC123", queryParams);
+      cbrr = "ABC123";
     } else {
       syncCounterpartGet("/v2/bookings/" + reference, queryParams);
     }
@@ -242,28 +242,6 @@ public class BookingShipper extends ConformanceParty {
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("Shipper.handleRequest(%s)".formatted(request));
-    JsonNode body = request.message().body().getJsonBody();
-
-    if (body.get("data").get("carrierBookingRequestReference") == null
-        && body.get("data").get("carrierBookingReference") == null) {
-      ObjectNode response =
-          (ObjectNode)
-              JsonToolkit.templateFileToJsonNode(
-                  "/standards/booking/messages/booking-api-2.0.0-error-message.json",
-                  Map.of(
-                      "HTTP_METHOD_PLACEHOLDER",
-                      request.method(),
-                      "REQUEST_URI_PLACEHOLDER",
-                      request.url(),
-                      "REFERENCE_PLACEHOLDER",
-                      UUID.randomUUID().toString(),
-                      "ERROR_DATE_TIME_PLACEHOLDER",
-                      LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
-                      "ERROR_MESSAGE_PLACEHOLDER",
-                      "Invalid request body"));
-      return request.createResponse(
-          400, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
-    }
     ConformanceResponse response =
         request.createResponse(
             204,

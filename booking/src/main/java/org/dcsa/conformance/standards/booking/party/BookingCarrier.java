@@ -97,10 +97,7 @@ public class BookingCarrier extends ConformanceParty {
         Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted),
         Map.entry(
             UC14CarrierProcessBookingCancellationAction.class,
-            this::processConfirmedBookingCancellation),
-        Map.entry(
-            UC2_Carrier_RequestUpdateToInvalidBookingRequestAction.class,
-            this::requestUpdateToBookingRequest));
+            this::processConfirmedBookingCancellation));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -313,19 +310,13 @@ public class BookingCarrier extends ConformanceParty {
                     MESSAGE,
                     "Please perform the changes requested by the Conformance orchestrator");
     String cbr = actionPrompt.path("cbr").asText(null);
-    boolean invalidRequest = actionPrompt.path("invalidRequest").asBoolean(false);
     String cbrr = actionPrompt.required("cbrr").asText();
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
 
     persistableCarrierBooking.requestUpdateToBooking(cbrr, bookingMutator);
     persistableCarrierBooking.save(persistentMap);
-    if (invalidRequest) {
-      generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, false);
-    } else {
-      generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
-    }
-
+    generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
     addOperatorLogEntry(
         BookingAction.createMessageForUIPrompt(
             "Requested update to the booking request", cbr, cbrr));

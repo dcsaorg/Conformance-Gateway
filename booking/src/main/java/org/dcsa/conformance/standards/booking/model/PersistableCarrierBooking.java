@@ -218,6 +218,7 @@ public class PersistableCarrierBooking {
   public void cancelConfirmedBooking(String bookingReference) {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_CONFIRMED);
+    changeState(BOOKING_STATUS, CANCELLED);
   }
 
   public void updateCancelConfirmedBooking(String bookingReference) {

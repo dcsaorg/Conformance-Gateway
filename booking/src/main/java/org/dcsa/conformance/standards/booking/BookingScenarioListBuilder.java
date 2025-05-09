@@ -481,9 +481,9 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
           then(
               shipperGetBooking(bookingStatus, amendedBookingStatus, CANCELLATION_RECEIVED)
                   .thenEither(
-                      uc14CarrierBookingCancellationConfirmed(bookingStatus, amendedBookingStatus)
+                      uc14CarrierBookingCancellationConfirmed(CANCELLED, amendedBookingStatus)
                           .thenAllPathsFrom(
-                              CANCELLATION_CONFIRMED, bookingStatus, amendedBookingStatus),
+                              CANCELLATION_CONFIRMED, CANCELLED, amendedBookingStatus),
                       uc14CarrierBookingCancellationDeclined(bookingStatus, amendedBookingStatus)
                           .thenAllPathsFrom(
                               CANCELLATION_DECLINED, bookingStatus, amendedBookingStatus)));

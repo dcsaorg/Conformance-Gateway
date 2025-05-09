@@ -10,13 +10,13 @@ import org.dcsa.conformance.specifications.an.v100.EnumBase;
     example = "POD",
     description =
 """
-Code representing the destination type of a vessel voyage.
+Code representing the type of a vessel voyage.
 """)
 @AllArgsConstructor
-public enum VesselVoyageDestinationTypeCode implements EnumBase {
-  DC("destination country"),
-  POD("port of destination");
+public enum VesselVoyageTypeCode implements EnumBase {
+  DC("Destination country"),
+  POD("Port of destination"),
+  POL("Port of loading");
 
-  @Getter
-  private final String valueDescription;
+  @Getter private final String valueDescription;
 }

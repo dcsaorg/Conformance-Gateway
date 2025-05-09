@@ -438,8 +438,6 @@ components:
           description: "Document parties"
           items:
             $ref: "#/components/schemas/DocumentParty"
-        vesselVoyage:
-          $ref: "#/components/schemas/VesselVoyage"
         transport:
           $ref: "#/components/schemas/Transport"
         freeTime:
@@ -1684,6 +1682,12 @@ components:
              * `BARGE` - Barge
              * `MULTIMODAL` - Multimodal
           example: "VESSEL"
+        vesselVoyages:
+          maxItems: 3
+          minItems: 1
+          type: "array"
+          items:
+            $ref: "#/components/schemas/VesselVoyage"
       description: "Transport info"
     UtilizedTransportEquipment:
       required:
@@ -1727,7 +1731,7 @@ components:
       description: "The container (equipment), total weight, total volume, active reefer settings, seals and references."
     VesselVoyage:
       required:
-      - "carrierImportVoyageNumber"
+      - "carrierVoyageNumber"
       - "typeCode"
       - "vesselName"
       type: "object"
@@ -1735,10 +1739,11 @@ components:
         typeCode:
           type: "string"
           description: |-
-            Code representing the destination type of a vessel voyage.
+            Code representing the type of a vessel voyage.
 
-             * `DC` - destination country
-             * `POD` - port of destination
+             * `DC` - Destination country
+             * `POD` - Port of destination
+             * `POL` - Port of loading
           example: "POD"
         vesselName:
           maxLength: 50
@@ -1762,25 +1767,36 @@ components:
             The reference is the International Maritime Organisation (IMO) number,
             also sometimes known as the Lloyd's register code.
           example: "12345678"
-        carrierImportVoyageNumber:
+        carrierVoyageNumber:
           maxLength: 50
           type: "string"
-          description: "The identifier of an import voyage. The carrier-specific identifier of the import Voyage."
+          description: |
+            Carrier-specific identifier of a voyage:
+            * the import voyage (if `typeCode` is `POD` or `DC`)
+            * the export voyage (if `typeCode` is `POL`)
           example: "1234N"
-        universalImportVoyageReference:
+        universalVoyageReference:
           maxLength: 5
           minLength: 5
           pattern: "^\\d{2}[0-9A-Z]{2}[NEWSR]$"
           type: "string"
           description: |
-            A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.
-             * last 2 digits of the year
-             * 2 alphanumeric characters for the sequence number of the voyage
-             * 1 character for the initial of the direction/haul (North, East, West, South or Roundtrip).
+            Universal identifier of a voyage:
+            * the import voyage (if `typeCode` is `POD` or `DC`)
+            * the export voyage (if `typeCode` is `POL`)
           example: "2301W"
       description: |
-        The details of the last sea-going vessel arriving at the Port of Discharge,
+        Details of a vessel voyage.
+
+        When `typeCode` is `POL` (port of loading), these are the details of
+        the first sea going vessel where the container was initially loaded.
+
+        When `typeCode` is `POD` (port of destination), these are the details of
+        the last sea-going vessel arriving at the Port of Discharge,
         which can be either a feeder or the mother vessel.
+
+        When `typeCode` is `DC` (destination country), these are the details of
+        the first mother vessel arriving at the destination country.
     Volume:
       required:
       - "unit"

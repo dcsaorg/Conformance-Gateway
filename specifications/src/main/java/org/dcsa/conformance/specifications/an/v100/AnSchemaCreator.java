@@ -103,7 +103,7 @@ import org.dcsa.conformance.specifications.an.v100.types.UNLocationCode;
 import org.dcsa.conformance.specifications.an.v100.types.UnecePackageCode;
 import org.dcsa.conformance.specifications.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.an.v100.types.VesselIMONumber;
-import org.dcsa.conformance.specifications.an.v100.types.VesselVoyageDestinationTypeCode;
+import org.dcsa.conformance.specifications.an.v100.types.VesselVoyageTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.VolumeUnitCode;
 import org.dcsa.conformance.specifications.an.v100.types.WeightUnitCode;
 import org.dcsa.conformance.specifications.an.v100.types.WoodDeclarationTypeCode;
@@ -291,7 +291,7 @@ public class AnSchemaCreator {
         UtilizedTransportEquipment.class,
         VesselIMONumber.class,
         VesselVoyage.class,
-        VesselVoyageDestinationTypeCode.class,
+        VesselVoyageTypeCode.class,
         Volume.class,
         VolumeUnitCode.class,
         Weight.class,

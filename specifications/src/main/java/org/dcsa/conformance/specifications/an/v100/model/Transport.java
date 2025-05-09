@@ -1,11 +1,14 @@
 package org.dcsa.conformance.specifications.an.v100.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
 import org.dcsa.conformance.specifications.an.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.an.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.an.v100.types.ModeOfTransportCode;
+
+import java.util.List;
 
 @Data
 @Schema(description = "Transport info")
@@ -117,4 +120,12 @@ and where responsibility of the shipping line ceases.
 
   @Schema()
   private ModeOfTransportCode modeOfTransport;
+
+  @ArraySchema(minItems = 1, maxItems = 3)
+  @SchemaOverride(
+    description =
+      """
+      Details of the POD, POL or DC vessel voyages
+      """)
+  private List<VesselVoyage> vesselVoyages;
 }

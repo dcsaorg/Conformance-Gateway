@@ -549,6 +549,23 @@ When the country code is required but not applicable, use the code `ZZ`.",
 * 3 characters to code a location within that country (using letters A-Z and numbers from 2-9)
 
 Additional information can be found [here](https://unece.org/trade/cefact/UNLOCODE-Download).",
+"ArrivalNotice / transport / vesselVoyages",vesselVoyages,"VesselVoyage list",,,,,,
+"ArrivalNotice / transport / vesselVoyages / carrierVoyageNumber",carrierVoyageNumber,string,yes,50,,1234N,"Carrier-specific identifier of a voyage:
+* the import voyage (if `typeCode` is `POD` or `DC`)
+* the export voyage (if `typeCode` is `POL`)",
+"ArrivalNotice / transport / vesselVoyages / typeCode",typeCode,string,yes,,,POD,"Code representing the type of a vessel voyage.
+
+ * `DC` - Destination country
+ * `POD` - Port of destination
+ * `POL` - Port of loading",
+"ArrivalNotice / transport / vesselVoyages / universalVoyageReference",universalVoyageReference,string,,5,"^\d{2}[0-9A-Z]{2}[NEWSR]$",2301W,"Universal identifier of a voyage:
+* the import voyage (if `typeCode` is `POD` or `DC`)
+* the export voyage (if `typeCode` is `POL`)",
+"ArrivalNotice / transport / vesselVoyages / vesselFlag",vesselFlag,string,,2,"^[A-Z]{2}$",NL,"Vessel flag",
+"ArrivalNotice / transport / vesselVoyages / vesselIMONumber",vesselIMONumber,string,,8,"^\d{7,8}$",12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+The reference is the International Maritime Organisation (IMO) number,
+also sometimes known as the Lloyd's register code.",
+"ArrivalNotice / transport / vesselVoyages / vesselName",vesselName,string,yes,50,,"King of the Seas","Vessel name",
 "ArrivalNotice / transportDocumentReference","transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",XYZ1234,"Reference of the transport document for which this arrival notice was created",
 "ArrivalNotice / transportDocumentTypeCode","transportDocumentTypeCode",string,yes,,,BOL,"Type of the transport document for which this arrival notice was created
  * `BOL` - Bill of Lading
@@ -605,21 +622,6 @@ based on the destination port and country regulations.",
  * `SHI` - Shipper
  * `VET` - Veterinary",
 "ArrivalNotice / utilizedTransportEquipments / shippingMarks",shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package",
-"ArrivalNotice / vesselVoyage",vesselVoyage,VesselVoyage,,,,,,
-"ArrivalNotice / vesselVoyage / carrierImportVoyageNumber","carrierImportVoyageNumber",string,yes,50,,1234N,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage.",
-"ArrivalNotice / vesselVoyage / typeCode",typeCode,string,yes,,,POD,"Code representing the destination type of a vessel voyage.
-
- * `DC` - destination country
- * `POD` - port of destination",
-"ArrivalNotice / vesselVoyage / universalImportVoyageReference","universalImportVoyageReference",string,,5,"^\d{2}[0-9A-Z]{2}[NEWSR]$",2301W,"A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.
- * last 2 digits of the year
- * 2 alphanumeric characters for the sequence number of the voyage
- * 1 character for the initial of the direction/haul (North, East, West, South or Roundtrip).",
-"ArrivalNotice / vesselVoyage / vesselFlag",vesselFlag,string,,2,"^[A-Z]{2}$",NL,"Vessel flag",
-"ArrivalNotice / vesselVoyage / vesselIMONumber",vesselIMONumber,string,,8,"^\d{7,8}$",12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
-The reference is the International Maritime Organisation (IMO) number,
-also sometimes known as the Lloyd's register code.",
-"ArrivalNotice / vesselVoyage / vesselName",vesselName,string,yes,50,,"King of the Seas","Vessel name",
 "ArrivalNoticeNotification",,,,,,,,
 "ArrivalNoticeNotification / equipmentReferences",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created",
 "ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery",

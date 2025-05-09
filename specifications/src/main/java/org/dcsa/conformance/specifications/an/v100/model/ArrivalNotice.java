@@ -162,8 +162,6 @@ and the carrier commits to a certain rate or rate schedule.
   @ArraySchema(minItems = 1)
   private List<DocumentParty> documentParties;
 
-  @Schema() private VesselVoyage vesselVoyage;
-
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private Transport transport;
 

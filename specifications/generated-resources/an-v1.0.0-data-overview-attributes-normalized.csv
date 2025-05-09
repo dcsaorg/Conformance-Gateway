@@ -71,7 +71,6 @@ ArrivalNotice,"transportDocumentTypeCode",string,yes,,,BOL,"Type of the transpor
  * `BOL` - Bill of Lading
  * `SWB` - Sea Waybill",
 ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",yes,,,,"The equipments being used.",
-ArrivalNotice,vesselVoyage,VesselVoyage,,,,,,
 "ArrivalNoticeNotification",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created",
 "ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery",
 "ArrivalNoticeNotification",etaAtPortOfDischargeDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
@@ -395,6 +394,7 @@ Transport,plannedArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expe
 Transport,plannedDepartureDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of departure of the first mother vessel arriving at the destination country.",
 Transport,portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 Transport,portOfLoading,Location,yes,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
+Transport,vesselVoyages,"VesselVoyage list",,,,,,
 "UtilizedTransportEquipment",activeReeferSettings,ActiveReeferSettings,,,,,,
 "UtilizedTransportEquipment",equipment,Equipment,yes,,,,,
 "UtilizedTransportEquipment",isDirectDeliveryRequired,boolean,,,,true,"Indicates whether the container with dangerous goods cargo must exit the port immediately after being discharged,
@@ -403,15 +403,17 @@ based on the destination port and country regulations.",
 "UtilizedTransportEquipment",isNonOperatingReefer,boolean,,,,true,"Indicates whether the equipment is a reefer container that should be treated as a dry container.",
 "UtilizedTransportEquipment",seals,"Seal list",yes,,,,"The seal-related information associated with this equipment.",
 "UtilizedTransportEquipment",shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package",
-VesselVoyage,"carrierImportVoyageNumber",string,yes,50,,1234N,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage.",
-VesselVoyage,typeCode,string,yes,,,POD,"Code representing the destination type of a vessel voyage.
+VesselVoyage,carrierVoyageNumber,string,yes,50,,1234N,"Carrier-specific identifier of a voyage:
+* the import voyage (if `typeCode` is `POD` or `DC`)
+* the export voyage (if `typeCode` is `POL`)",
+VesselVoyage,typeCode,string,yes,,,POD,"Code representing the type of a vessel voyage.
 
- * `DC` - destination country
- * `POD` - port of destination",
-VesselVoyage,"universalImportVoyageReference",string,,5,"^\d{2}[0-9A-Z]{2}[NEWSR]$",2301W,"A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.
- * last 2 digits of the year
- * 2 alphanumeric characters for the sequence number of the voyage
- * 1 character for the initial of the direction/haul (North, East, West, South or Roundtrip).",
+ * `DC` - Destination country
+ * `POD` - Port of destination
+ * `POL` - Port of loading",
+VesselVoyage,universalVoyageReference,string,,5,"^\d{2}[0-9A-Z]{2}[NEWSR]$",2301W,"Universal identifier of a voyage:
+* the import voyage (if `typeCode` is `POD` or `DC`)
+* the export voyage (if `typeCode` is `POL`)",
 VesselVoyage,vesselFlag,string,,2,"^[A-Z]{2}$",NL,"Vessel flag",
 VesselVoyage,vesselIMONumber,string,,8,"^\d{7,8}$",12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
 The reference is the International Maritime Organisation (IMO) number,

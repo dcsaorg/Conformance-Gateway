@@ -1,6 +1,6 @@
 # Arrival Notice v1.0.0 Changelog
 
-## Snapshot v1.0.0-design-20250509
+## Snapshot v1.0.0-20250509-design
 
 Extended the data overview with a hierarchical attribute view and with the list of query parameters and filters.
 
@@ -22,6 +22,6 @@ Added in object `IdentifyingPartyCode` the missing example of attribute `partyCo
 
 
 
-## Snapshot v1.0.0-design-20250425
+## Snapshot v1.0.0-20250425-design
 
 Initial v1.0.0 design stage snapshot.

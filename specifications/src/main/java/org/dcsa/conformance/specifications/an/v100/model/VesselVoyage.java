@@ -6,19 +6,28 @@ import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
 import org.dcsa.conformance.specifications.an.v100.types.CountryCode;
 import org.dcsa.conformance.specifications.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.an.v100.types.VesselIMONumber;
-import org.dcsa.conformance.specifications.an.v100.types.VesselVoyageDestinationTypeCode;
+import org.dcsa.conformance.specifications.an.v100.types.VesselVoyageTypeCode;
 
 @Data
 @Schema(
     description =
 """
-The details of the last sea-going vessel arriving at the Port of Discharge,
+Details of a vessel voyage.
+
+When `typeCode` is `POL` (port of loading), these are the details of
+the first sea going vessel where the container was initially loaded.
+
+When `typeCode` is `POD` (port of destination), these are the details of
+the last sea-going vessel arriving at the Port of Discharge,
 which can be either a feeder or the mother vessel.
+
+When `typeCode` is `DC` (destination country), these are the details of
+the first mother vessel arriving at the destination country.
 """)
 public class VesselVoyage {
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  private VesselVoyageDestinationTypeCode typeCode;
+  private VesselVoyageTypeCode typeCode;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
@@ -37,9 +46,19 @@ public class VesselVoyage {
       maxLength = 50,
       example = "1234N",
       description =
-          "The identifier of an import voyage. The carrier-specific identifier of the import Voyage.")
-  private String carrierImportVoyageNumber;
+"""
+Carrier-specific identifier of a voyage:
+* the import voyage (if `typeCode` is `POD` or `DC`)
+* the export voyage (if `typeCode` is `POL`)
+""")
+  private String carrierVoyageNumber;
 
-  @Schema()
-  private UniversalVoyageReference universalImportVoyageReference;
+  @SchemaOverride(
+      description =
+"""
+Universal identifier of a voyage:
+* the import voyage (if `typeCode` is `POD` or `DC`)
+* the export voyage (if `typeCode` is `POL`)
+""")
+  private UniversalVoyageReference universalVoyageReference;
 }

@@ -5,10 +5,11 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
 import org.dcsa.conformance.specifications.an.v100.types.CurrencyAmount;
 import org.dcsa.conformance.specifications.an.v100.types.CurrencyCode;
+import org.dcsa.conformance.specifications.an.v100.types.FreightPaymentStatus;
 import org.dcsa.conformance.specifications.an.v100.types.PaymentTermCode;
 
 @Data
-@Schema(description = "Contact details")
+@Schema(description = "Charge details")
 public class Charge {
 
   @Schema(
@@ -74,4 +75,7 @@ The unit price of this charge item in the `chargeCurrency`, expressed with a max
       example = "INV51XX80YY",
       description = "Reference of the invoice towards the consignee for this shipment charge")
   private String invoiceReference;
+
+  @Schema()
+  private FreightPaymentStatus freightPaymentStatus;
 }

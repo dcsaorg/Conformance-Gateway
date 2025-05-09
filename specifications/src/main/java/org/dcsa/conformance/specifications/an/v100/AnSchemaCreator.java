@@ -103,7 +103,7 @@ import org.dcsa.conformance.specifications.an.v100.types.UNLocationCode;
 import org.dcsa.conformance.specifications.an.v100.types.UnecePackageCode;
 import org.dcsa.conformance.specifications.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.an.v100.types.VesselIMONumber;
-import org.dcsa.conformance.specifications.an.v100.types.VesselVoyageDestinationTypeCode;
+import org.dcsa.conformance.specifications.an.v100.types.VesselVoyageTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.VolumeUnitCode;
 import org.dcsa.conformance.specifications.an.v100.types.WeightUnitCode;
 import org.dcsa.conformance.specifications.an.v100.types.WoodDeclarationTypeCode;
@@ -206,7 +206,6 @@ public class AnSchemaCreator {
     // Prevent date-time example values getting converted to unix timestamps.
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     mapper.addMixIn(Schema.class, SchemaMixin.class);
-    mapper.addMixIn(Object.class, ValueSetFlagIgnoreMixin.class); // Remove valueSetFlag attribute.
 
     String yamlContent = mapper.writeValueAsString(openAPI);
     String exportFileDir = "./generated-resources/";
@@ -267,9 +266,9 @@ public class AnSchemaCreator {
         InnerPackaging.class,
         IsoEquipmentCode.class,
         Location.class,
+        ModeOfTransportCode.class,
         NationalCommodityCode.class,
         NationalCommodityCodeValue.class,
-        ModeOfTransportCode.class,
         OuterPackaging.class,
         PartyCodeListProvider.class,
         PaymentTermCode.class,
@@ -292,7 +291,7 @@ public class AnSchemaCreator {
         UtilizedTransportEquipment.class,
         VesselIMONumber.class,
         VesselVoyage.class,
-        VesselVoyageDestinationTypeCode.class,
+        VesselVoyageTypeCode.class,
         Volume.class,
         VolumeUnitCode.class,
         Weight.class,

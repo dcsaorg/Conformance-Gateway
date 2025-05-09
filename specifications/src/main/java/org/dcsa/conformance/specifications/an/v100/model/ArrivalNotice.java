@@ -12,7 +12,7 @@ import org.dcsa.conformance.specifications.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.an.v100.types.CarrierCodeListProvider;
 import org.dcsa.conformance.specifications.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.DestinationDeliveryTypeCode;
-import org.dcsa.conformance.specifications.an.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.an.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.an.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.an.v100.types.TransportDocumentTypeCode;
 
@@ -21,8 +21,19 @@ import org.dcsa.conformance.specifications.an.v100.types.TransportDocumentTypeCo
 public class ArrivalNotice {
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(description = "The date when the Arrival Notice was issued.")
-  private FormattedDate issueDate;
+  @SchemaOverride(description = "The date and time when the Arrival Notice was issued.")
+  private FormattedDateTime issueDateTime;
+
+  @Schema(
+      type = "string",
+      maxLength = 1000,
+      example = "Warning",
+      description =
+"""
+Free text used to indicate a certain version or type of arrival notice,
+for example "Warning", "Updated", "Second", "Third" etc.
+""")
+  private String label;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
@@ -127,6 +138,17 @@ or shares the container with other shipments (LCL).
   private ContainerLoadTypeCode cargoMovementTypeAtDestination;
 
   @Schema(
+      maxLength = 100,
+      description =
+"""
+Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
+quantity commitment (usually referred as "MQC") of cargo that the shipper commits to over a fixed period,
+and the carrier commits to a certain rate or rate schedule.
+""",
+      example = "SCN12345")
+  private String serviceContractNumber;
+
+  @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 50000,
       description = "Carrier terms and conditions of transport.",
@@ -140,8 +162,6 @@ or shares the container with other shipments (LCL).
   @ArraySchema(minItems = 1)
   private List<DocumentParty> documentParties;
 
-  @Schema() private VesselVoyage vesselVoyage;
-
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private Transport transport;
 
@@ -151,14 +171,14 @@ or shares the container with other shipments (LCL).
   @Schema(description = "List of charges applicable to this shipment")
   private List<Charge> charges;
 
-  @Schema(allOf = Location.class)
-  @SchemaOverride(
+  @Schema(
+      maxLength = 100,
       description =
 """
-Location where the customer will make the payment of ocean freight and charges for the main transport,
-typically expressed as a UN/LOCODE or just a location name.
-""")
-  private Object invoicePayableAt;
+Name identifying the entity responsible for freight payment.
+""",
+      example = "Acme Inc.")
+  private String payerCode;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The equipments being used.")
   @ArraySchema(minItems = 1)
@@ -175,8 +195,8 @@ typically expressed as a UN/LOCODE or just a location name.
 
   public static List<SchemaConstraint> getConstraints() {
     return List.of(
-      new AttributeOneRequiresAttributeTwo(
-        OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCodeListProvider"),
-        OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCode")));
+        new AttributeOneRequiresAttributeTwo(
+            OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCodeListProvider"),
+            OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCode")));
   }
 }

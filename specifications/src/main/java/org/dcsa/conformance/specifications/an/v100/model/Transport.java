@@ -1,13 +1,25 @@
 package org.dcsa.conformance.specifications.an.v100.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
 import org.dcsa.conformance.specifications.an.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.an.v100.types.FormattedDateTime;
+import org.dcsa.conformance.specifications.an.v100.types.ModeOfTransportCode;
+
+import java.util.List;
 
 @Data
 @Schema(description = "Transport info")
 public class Transport {
+
+  @SchemaOverride(
+    description =
+"""
+The date when the container was loaded onto the vessel at the port of origin.
+""")
+  private FormattedDate onBoardDate;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(
@@ -40,6 +52,21 @@ The expected date of arrival of the first mother vessel arriving at the destinat
   @SchemaOverride(
       description = "The expected date of arrival of the shipment at Place of Delivery.")
   private FormattedDate etaAtPlaceOfDeliveryDate;
+
+  @SchemaOverride(
+      description =
+"""
+The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+""")
+  private FormattedDate inlandArrivalDate;
+
+  @SchemaOverride(
+    description =
+"""
+The estimated date and time when the shipment will be placed under General Order status
+(shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
+""")
+  private FormattedDateTime estimatedGeneralOrderDateTime;
 
   @Schema(allOf = Location.class)
   @SchemaOverride(
@@ -90,4 +117,15 @@ The location where the cargo is handed over by the shipping line to the consigne
 and where responsibility of the shipping line ceases.
 """)
   private Object placeOfDelivery;
+
+  @Schema()
+  private ModeOfTransportCode modeOfTransport;
+
+  @ArraySchema(minItems = 1, maxItems = 3)
+  @SchemaOverride(
+    description =
+      """
+      Details of the POD, POL or DC vessel voyages
+      """)
+  private List<VesselVoyage> vesselVoyages;
 }

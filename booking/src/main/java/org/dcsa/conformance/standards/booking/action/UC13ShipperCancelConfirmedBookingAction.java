@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -44,11 +43,6 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
         "prompt-shipper-uc13.md", "prompt-shipper-refresh-complete.md");
-  }
-
-  @Override
-  public JsonNode getJsonForHumanReadablePrompt() {
-    return getCspSupplier().get().toJson();
   }
 
   @Override

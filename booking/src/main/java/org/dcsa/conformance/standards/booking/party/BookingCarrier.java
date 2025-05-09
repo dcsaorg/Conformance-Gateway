@@ -327,7 +327,7 @@ public class BookingCarrier extends ConformanceParty {
 
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    persistableCarrierBooking.confirmBookingCompleted(cbrr, true);
+    persistableCarrierBooking.confirmBookingCompleted(cbrr, true, true);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, false);
 

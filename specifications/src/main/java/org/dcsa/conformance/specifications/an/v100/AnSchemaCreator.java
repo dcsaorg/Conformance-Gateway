@@ -2,10 +2,7 @@ package org.dcsa.conformance.specifications.an.v100;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import io.swagger.v3.core.converter.ModelConverters;
@@ -24,20 +21,16 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -221,138 +214,15 @@ public class AnSchemaCreator {
     Files.writeString(Paths.get(yamlFilePath), yamlContent);
     log.info("OpenAPI spec exported to {}", yamlFilePath);
 
-    exportDataOverviewCsv(openAPI, exportFileDir + "an-v1.0.0-data-overview.csv");
-
     GetArrivalNoticesEndpoint getArrivalNoticesEndpoint = new GetArrivalNoticesEndpoint();
     String excelFilePath = exportFileDir + "an-v1.0.0-data-overview.xlsx";
-    new DataOverview(
+    DataOverview dataOverview =
+        new DataOverview(
             openAPI,
             getArrivalNoticesEndpoint.getQueryParameters(),
-            getArrivalNoticesEndpoint.getRequiredAndOptionalFilters())
-        .exportToExcelFile(excelFilePath);
-    log.info("Data Overview exported to {}", excelFilePath);
-  }
-
-  private static void exportDataOverviewCsv(OpenAPI openApi, String csvFilePath)
-      throws IOException {
-    Map<String, Schema<?>> schemas =
-        OpenApiToolkit.parameterizeStringRawSchemaMap(openApi.getComponents().getSchemas());
-    CsvMapper csvMapper = new CsvMapper();
-    String objectColumnTitle = "Object";
-    String attributeColumnTitle = "Attribute";
-    String typeColumnTitle = "Type";
-    String requiredColumnTitle = "Required";
-    String sizeColumnTitle = "Size";
-    String patternColumnTitle = "Pattern";
-    String exampleColumnTitle = "Example";
-    String descriptionColumnTitle = "Description";
-    CsvSchema csvSchema =
-        CsvSchema.builder()
-            .addColumn(objectColumnTitle)
-            .addColumn(attributeColumnTitle)
-            .addColumn(typeColumnTitle)
-            .addColumn(requiredColumnTitle)
-            .addColumn(sizeColumnTitle)
-            .addColumn(patternColumnTitle)
-            .addColumn(exampleColumnTitle)
-            .addColumn(descriptionColumnTitle)
-            .build()
-            .withHeader();
-    ObjectWriter csvWriter = csvMapper.writer(csvSchema);
-    List<Map<String, Object>> csvRows = new ArrayList<>();
-    new TreeSet<>(schemas.keySet())
-        .forEach(
-            typeName -> {
-              Schema<?> typeSchema = schemas.get(typeName);
-              Set<String> requiredAttributes =
-                  new HashSet<>(
-                      Objects.requireNonNullElse(typeSchema.getRequired(), Collections.emptySet()));
-              Map<String, Schema<?>> typeAttributeProperties =
-                  OpenApiToolkit.parameterizeStringRawSchemaMap(typeSchema.getProperties());
-              new TreeSet<>(typeAttributeProperties.keySet())
-                  .forEach(
-                      attributeName -> {
-                        Schema<?> attributeSchema = typeAttributeProperties.get(attributeName);
-                        String attributeSchemaType = attributeSchema.getType();
-                        String csvType = "UNKNOWN";
-                        String csvRequired = requiredAttributes.remove(attributeName) ? "yes" : "";
-                        Integer maxLength = attributeSchema.getMaxLength();
-                        String csvSize =
-                            maxLength == null || maxLength == Integer.MAX_VALUE
-                                ? ""
-                                : maxLength.toString(); // FIXME range, array items
-                        switch (attributeSchemaType) {
-                          case "array":
-                            {
-                              Schema<?> itemSchema = attributeSchema.getItems();
-                              String itemType = itemSchema.getType();
-                              if (itemType == null) {
-                                String $ref = itemSchema.get$ref();
-                                if ($ref != null) {
-                                  itemType = $ref.substring("#/components/schemas/".length());
-                                } else {
-                                  itemType = "UNKNOWN";
-                                }
-                              }
-                              csvType = "%s list".formatted(itemType);
-                              break;
-                            }
-                          case "object":
-                            {
-                              List<Schema<?>> allOf =
-                                  OpenApiToolkit.parameterizeRawSchemaList(
-                                      attributeSchema.getAllOf());
-                              if (allOf.size() == 1) {
-                                String $ref = allOf.getFirst().get$ref();
-                                if ($ref != null) {
-                                  csvType = $ref.substring("#/components/schemas/".length());
-                                }
-                              }
-                              break;
-                            }
-                          case null:
-                            {
-                              String $ref = attributeSchema.get$ref();
-                              if ($ref != null) {
-                                csvType = $ref.substring("#/components/schemas/".length());
-                              } else {
-                                csvType = "string";
-                              }
-                              break;
-                            }
-                          default:
-                            {
-                              csvType = attributeSchemaType;
-                              break;
-                            }
-                        }
-                        String csvExample =
-                            Objects.requireNonNullElse(attributeSchema.getExample(), "").toString();
-                        String csvDescription =
-                            Objects.requireNonNullElse(attributeSchema.getDescription(), "").trim();
-                        String csvPattern = "";
-                        if (csvType.equals("string")) {
-                          String schemaPattern = attributeSchema.getPattern();
-                          if (schemaPattern != null) {
-                            csvPattern = schemaPattern;
-                          }
-                        }
-                        csvRows.add(
-                            Map.ofEntries(
-                                Map.entry(objectColumnTitle, typeName),
-                                Map.entry(attributeColumnTitle, attributeName),
-                                Map.entry(typeColumnTitle, csvType),
-                                Map.entry(requiredColumnTitle, csvRequired),
-                                Map.entry(sizeColumnTitle, csvSize),
-                                Map.entry(patternColumnTitle, csvPattern),
-                                Map.entry(exampleColumnTitle, csvExample),
-                                Map.entry(descriptionColumnTitle, csvDescription)));
-                      });
-            });
-    StringWriter stringWriter = new StringWriter();
-    csvWriter.writeValue(stringWriter, csvRows);
-    Files.writeString(Paths.get(csvFilePath), stringWriter.toString());
-    log.info("Data overview exported to {}", csvFilePath);
+            getArrivalNoticesEndpoint.getRequiredAndOptionalFilters());
+    dataOverview.exportToExcelFile(excelFilePath);
+    dataOverview.exportToCsvFiles(exportFileDir + "an-v1.0.0-data-overview-%s.csv");
   }
 
   private static Stream<Class<?>> modelClassesStream() {

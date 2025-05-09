@@ -1,0 +1,15 @@
+Name,Type,Description,Example
+"transportDocumentReference",string,"Reference of the transport document for which to return the associated arrival notices",TDR0123456
+equipmentReference,array,"Reference(s) of the equipment for which to return the associated arrival notices","APZU4812090,APZU4812091"
+portOfDischarge,string,"UN location of the port of discharge for which to retrieve available arrival notices",NLRTM
+vesselIMONumber,string,"IMO number of the vessel for which to retrieve available arrival notices",12345678
+vesselName,string,"Name of the vessel for which to retrieve available arrival notices","King of the Seas"
+"carrierImportVoyageNumber",string,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage.",1234N
+"universalImportVoyageReference",string,"A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",2301W
+carrierServiceCode,string,"The carrier specific code of the service for which the schedule details are published.",FE1
+"universalServiceReference",string,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",SR12345A
+"minEtaAtPortOfDischargeDate",string,"Retrieve arrival notices with an ETA at port of discharge on or after this date",2025-01-23
+"maxEtaAtPortOfDischargeDate",string,"Retrieve arrival notices with an ETA at port of discharge on or before this date",2025-01-23
+includeCharges,boolean,"Flag indicating whether to include arrival notice charges. If not specified, the default value is `true`.
+This flag is separate from the mandatory and optional lists of query parameters that can be used as filters
+and can be used in combination with any such filter.",true

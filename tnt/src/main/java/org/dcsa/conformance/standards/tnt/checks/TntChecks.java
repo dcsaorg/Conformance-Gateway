@@ -61,7 +61,7 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "If present, at least event attribute must match the corresponding query parameters",
+            "If present, at least one event attribute must match the corresponding query parameters",
             body -> {
               Map<TntFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
               Set<String> validationErrors = new LinkedHashSet<>();

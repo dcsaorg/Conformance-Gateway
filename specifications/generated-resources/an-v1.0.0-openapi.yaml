@@ -756,11 +756,11 @@ components:
     CustomsReference:
       required:
       - "countryCode"
-      - "crType"
-      - "values"
+      - "referenceValues"
+      - "typeCode"
       type: "object"
       properties:
-        crType:
+        typeCode:
           type: "string"
           description: "The reference type code as defined in the relevant customs jurisdiction."
           example: "CUS"
@@ -774,7 +774,7 @@ components:
 
             When the country code is required but not applicable, use the code `ZZ`.
           example: "NL"
-        values:
+        referenceValues:
           type: "array"
           description: "List of customs reference values"
           items:
@@ -819,7 +819,7 @@ components:
             Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States
             Department of Transportation.
           example: "9037"
-        codedVariantList:
+        codedVariant:
           maxLength: 4
           minLength: 4
           pattern: "^[0-3][0-9A-Z]{3}$"
@@ -1316,11 +1316,11 @@ components:
       description: "Location information"
     NationalCommodityCode:
       required:
-      - "nccType"
-      - "nccValues"
+      - "codeValues"
+      - "typeCode"
       type: "object"
       properties:
-        nccType:
+        typeCode:
           maxLength: 10
           pattern: "^\\S(?:.*\\S)?$"
           type: "string"
@@ -1343,7 +1343,7 @@ components:
 
             When the country code is required but not applicable, use the code `ZZ`.
           example: "NL"
-        nccValues:
+        codeValues:
           type: "array"
           description: "List of national commodity code values"
           items:

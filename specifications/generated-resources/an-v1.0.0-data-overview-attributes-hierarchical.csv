@@ -82,7 +82,7 @@ If a container does not comply with ISO 6346, it is suggested to follow
 from SMDG.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging",outerPackaging,OuterPackaging,yes,,,,,
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods",dangerousGoods,"DangerousGoods list",,,,,"List of dangerous goods specifications",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / codedVariantList",codedVariantList,string,,4,"^[0-3][0-9A-Z]{3}$",2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / codedVariant",codedVariant,string,,4,"^[0-3][0-9A-Z]{3}$",2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant
 within a single UN number or NA number that may occur when two companies exchange DG information:
 
 Character | Valid Characters | Description
@@ -215,22 +215,22 @@ unique within the context of one booking.",
 "ArrivalNotice / consignmentItems / customsReferences / countryCode",countryCode,string,yes,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
 When the country code is required but not applicable, use the code `ZZ`.",
-"ArrivalNotice / consignmentItems / customsReferences / crType",crType,string,yes,,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",
-"ArrivalNotice / consignmentItems / customsReferences / values",values,"string list",yes,,,,"List of customs reference values",
+"ArrivalNotice / consignmentItems / customsReferences / referenceValues",referenceValues,"string list",yes,,,,"List of customs reference values",
+"ArrivalNotice / consignmentItems / customsReferences / typeCode",typeCode,string,yes,,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",
 "ArrivalNotice / consignmentItems / descriptionOfGoods",descriptionOfGoods,"string list",yes,,,,"Ordered list of cargo descriptions precise enough for customs services to be able to identify the goods.",
 "ArrivalNotice / consignmentItems / hsCodes",hsCodes,"string list",yes,,,,"List of HS Codes that apply to this consignment item",
 "ArrivalNotice / consignmentItems / nationalCommodityCodes",nationalCommodityCodes,"NationalCommodityCode list",,,,,"The list of national commodity codes applicable to this consignment item.",
+"ArrivalNotice / consignmentItems / nationalCommodityCodes / codeValues",codeValues,"string list",yes,,,,"List of national commodity code values",
 "ArrivalNotice / consignmentItems / nationalCommodityCodes / countryCode",countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
 When the country code is required but not applicable, use the code `ZZ`.",
-"ArrivalNotice / consignmentItems / nationalCommodityCodes / nccType",nccType,string,yes,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
+"ArrivalNotice / consignmentItems / nationalCommodityCodes / typeCode",typeCode,string,yes,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
  * NCM (Nomenclatura Comum do Mercosul)
  * HTS (Harmonized Tariff Schedule)
  * SCHEDULE_B ( Schedule B)
  * TARIC (Integrated Tariff of the European Communities)
  * CN (Combined Nomenclature)
  * CUS (Customs Union and Statistics)",
-"ArrivalNotice / consignmentItems / nationalCommodityCodes / nccValues",nccValues,"string list",yes,,,,"List of national commodity code values",
 "ArrivalNotice / consignmentItems / shippingMarks",shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package",
 "ArrivalNotice / customsImportDeclarationProcedure","customsImportDeclarationProcedure",string,,1000,,"The tax must be declared...","Customs import declaration procedure",
 "ArrivalNotice / deliveryTypeAtDestination","deliveryTypeAtDestination",string,yes,,,CY,"Code representing the delivery type offered at destination

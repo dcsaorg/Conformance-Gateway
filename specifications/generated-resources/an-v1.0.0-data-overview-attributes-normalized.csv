@@ -127,9 +127,9 @@ ContactInformation,phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone nu
 CustomsReference,countryCode,string,yes,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
 When the country code is required but not applicable, use the code `ZZ`.",
-CustomsReference,crType,string,yes,,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",
-CustomsReference,values,"string list",yes,,,,"List of customs reference values",
-DangerousGoods,codedVariantList,string,,4,"^[0-3][0-9A-Z]{3}$",2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant
+CustomsReference,referenceValues,"string list",yes,,,,"List of customs reference values",
+CustomsReference,typeCode,string,yes,,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",
+DangerousGoods,codedVariant,string,,4,"^[0-3][0-9A-Z]{3}$",2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant
 within a single UN number or NA number that may occur when two companies exchange DG information:
 
 Character | Valid Characters | Description
@@ -294,17 +294,17 @@ Location,unLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location
 * 3 characters to code a location within that country (using letters A-Z and numbers from 2-9)
 
 Additional information can be found [here](https://unece.org/trade/cefact/UNLOCODE-Download).",
+NationalCommodityCode,codeValues,"string list",yes,,,,"List of national commodity code values",
 NationalCommodityCode,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
 When the country code is required but not applicable, use the code `ZZ`.",
-NationalCommodityCode,nccType,string,yes,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
+NationalCommodityCode,typeCode,string,yes,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
  * NCM (Nomenclatura Comum do Mercosul)
  * HTS (Harmonized Tariff Schedule)
  * SCHEDULE_B ( Schedule B)
  * TARIC (Integrated Tariff of the European Communities)
  * CN (Combined Nomenclature)
  * CUS (Customs Union and Statistics)",
-NationalCommodityCode,nccValues,"string list",yes,,,,"List of national commodity code values",
 OuterPackaging,dangerousGoods,"DangerousGoods list",,,,,"List of dangerous goods specifications",
 OuterPackaging,description,string,yes,100,,"Drum, steel","Description of the outer packaging / overpack",
 OuterPackaging,imoPackagingCode,string,,5,"^[A-Z0-9]{1,5}$",1A2,"IMO packaging code.

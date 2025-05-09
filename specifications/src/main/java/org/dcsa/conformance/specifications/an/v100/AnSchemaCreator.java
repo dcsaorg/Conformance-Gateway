@@ -205,7 +205,6 @@ public class AnSchemaCreator {
     // Prevent date-time example values getting converted to unix timestamps.
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     mapper.addMixIn(Schema.class, SchemaMixin.class);
-    mapper.addMixIn(Object.class, ValueSetFlagIgnoreMixin.class); // Remove valueSetFlag attribute.
 
     String yamlContent = mapper.writeValueAsString(openAPI);
     String exportFileDir = "./generated-resources/";

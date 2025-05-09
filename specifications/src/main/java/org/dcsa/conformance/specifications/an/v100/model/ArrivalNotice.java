@@ -12,7 +12,7 @@ import org.dcsa.conformance.specifications.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.an.v100.types.CarrierCodeListProvider;
 import org.dcsa.conformance.specifications.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.DestinationDeliveryTypeCode;
-import org.dcsa.conformance.specifications.an.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.an.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.an.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.an.v100.types.TransportDocumentTypeCode;
 
@@ -21,8 +21,19 @@ import org.dcsa.conformance.specifications.an.v100.types.TransportDocumentTypeCo
 public class ArrivalNotice {
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(description = "The date when the Arrival Notice was issued.")
-  private FormattedDate issueDate;
+  @SchemaOverride(description = "The date and time when the Arrival Notice was issued.")
+  private FormattedDateTime issueDateTime;
+
+  @Schema(
+      type = "string",
+      maxLength = 1000,
+      example = "Warning",
+      description =
+"""
+Free text used to indicate a certain version or type of arrival notice,
+for example "Warning", "Updated", "Second", "Third" etc.
+""")
+  private String label;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
@@ -151,15 +162,6 @@ or shares the container with other shipments (LCL).
   @Schema(description = "List of charges applicable to this shipment")
   private List<Charge> charges;
 
-  @Schema(allOf = Location.class)
-  @SchemaOverride(
-      description =
-"""
-Location where the customer will make the payment of ocean freight and charges for the main transport,
-typically expressed as a UN/LOCODE or just a location name.
-""")
-  private Object invoicePayableAt;
-
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The equipments being used.")
   @ArraySchema(minItems = 1)
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;
@@ -175,8 +177,8 @@ typically expressed as a UN/LOCODE or just a location name.
 
   public static List<SchemaConstraint> getConstraints() {
     return List.of(
-      new AttributeOneRequiresAttributeTwo(
-        OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCodeListProvider"),
-        OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCode")));
+        new AttributeOneRequiresAttributeTwo(
+            OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCodeListProvider"),
+            OpenApiToolkit.getClassField(ArrivalNotice.class, "carrierCode")));
   }
 }

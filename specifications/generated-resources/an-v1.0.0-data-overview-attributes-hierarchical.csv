@@ -312,11 +312,6 @@ It can include references to the carrier website or individual charges as per se
 "ArrivalNotice / freeTime / isoEquipmentCode",isoEquipmentCode,string,yes,4,"^\S(?:.*\S)?$",22GP,"Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
-"ArrivalNotice / freeTime / modeOfTransportCode",modeOfTransportCode,string,,20,,VESSEL,"The mode of transport, as defined by DCSA, for which the free time object applies
- * `BARGE` - Barge
- * `RAIL` - Rail
- * `TRUCK` - Truck
- * `VESSEL` - Vessel",
 "ArrivalNotice / freeTime / timeUnit",timeUnit,string,yes,3,,WD,"Code identifying the unit in which free time is expressed
  * `CD` - Calendar days
  * `WD` - Working days
@@ -326,31 +321,10 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
  * `DET` - Detention
  * `PDM` - Per Diem
  * `STO` - Storage",
-"ArrivalNotice / invoicePayableAt",invoicePayableAt,Location,,,,,"Location where the customer will make the payment of ocean freight and charges for the main transport,
-typically expressed as a UN/LOCODE or just a location name.",
-"ArrivalNotice / invoicePayableAt / address",address,Address,,,,,,
-"ArrivalNotice / invoicePayableAt / address / city",city,string,,35,,Amsterdam,City,
-"ArrivalNotice / invoicePayableAt / address / countryCode",countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-
-When the country code is required but not applicable, use the code `ZZ`.",
-"ArrivalNotice / invoicePayableAt / address / floor",floor,string,,50,,2nd,Floor,
-"ArrivalNotice / invoicePayableAt / address / poBox",poBox,string,,20,,12345,"P.O. box",
-"ArrivalNotice / invoicePayableAt / address / postCode",postCode,string,,10,,"1234 AB","Post code",
-"ArrivalNotice / invoicePayableAt / address / stateRegion",stateRegion,string,,65,,"North Holland","State or region",
-"ArrivalNotice / invoicePayableAt / address / street",street,string,,70,,"Example St.",Street,
-"ArrivalNotice / invoicePayableAt / address / streetNumber",streetNumber,string,,50,,123,"Street number",
-"ArrivalNotice / invoicePayableAt / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
-"ArrivalNotice / invoicePayableAt / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
-"ArrivalNotice / invoicePayableAt / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
-"ArrivalNotice / invoicePayableAt / unLocationCode",unLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code identifying a certain location. The pattern used must be:
-* 2 characters for the country code using ISO 3166-1 alpha-2
-* 3 characters to code a location within that country (using letters A-Z and numbers from 2-9)
-
-Additional information can be found [here](https://unece.org/trade/cefact/UNLOCODE-Download).",
 "ArrivalNotice / isElectronic",isElectronic,boolean,yes,,,true,"Flag indicating whether the transport document for which this arrival notice was created is electronically transferred",
-"ArrivalNotice / issueDate",issueDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the Arrival Notice was issued.",
+"ArrivalNotice / issueDateTime",issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
+"ArrivalNotice / label",label,string,,1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
+for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNotice / pickupLocation",pickupLocation,Location,,,,,"Pickup location",
 "ArrivalNotice / pickupLocation / address",address,Address,,,,,,
 "ArrivalNotice / pickupLocation / address / city",city,string,,35,,Amsterdam,City,
@@ -629,6 +603,9 @@ also sometimes known as the Lloyd's register code.",
 "ArrivalNoticeNotification / equipmentReferences",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created",
 "ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery",
 "ArrivalNoticeNotification / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
+"ArrivalNoticeNotification / issueDateTime",issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
+"ArrivalNoticeNotification / label",label,string,,1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
+for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNoticeNotification / placeOfDelivery",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases",
 "ArrivalNoticeNotification / placeOfDelivery / address",address,Address,,,,,,

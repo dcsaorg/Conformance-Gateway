@@ -291,7 +291,7 @@ components:
       - "deliveryTypeAtDestination"
       - "documentParties"
       - "isElectronic"
-      - "issueDate"
+      - "issueDateTime"
       - "termsAndConditions"
       - "transport"
       - "transportDocumentReference"
@@ -299,11 +299,18 @@ components:
       - "utilizedTransportEquipments"
       type: "object"
       properties:
-        issueDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+        issueDateTime:
           type: "string"
-          description: "The date when the Arrival Notice was issued."
-          example: "2025-01-23"
+          description: "The date and time when the Arrival Notice was issued."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        label:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Free text used to indicate a certain version or type of arrival notice,
+            for example "Warning", "Updated", "Second", "Third" etc.
+          example: "Warning"
         carrierCode:
           maxLength: 4
           pattern: "^\\S+$"
@@ -437,13 +444,6 @@ components:
           description: "List of charges applicable to this shipment"
           items:
             $ref: "#/components/schemas/Charge"
-        invoicePayableAt:
-          type: "object"
-          description: |
-            Location where the customer will make the payment of ocean freight and charges for the main transport,
-            typically expressed as a UN/LOCODE or just a location name.
-          allOf:
-          - $ref: "#/components/schemas/Location"
         utilizedTransportEquipments:
           type: "array"
           description: "The equipments being used."
@@ -460,10 +460,23 @@ components:
     ArrivalNoticeNotification:
       required:
       - "etaAtPortOfDischargeDate"
+      - "issueDateTime"
       - "portOfDischarge"
       - "transportDocumentReference"
       type: "object"
       properties:
+        issueDateTime:
+          type: "string"
+          description: "The date and time when the Arrival Notice was issued."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        label:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Free text used to indicate a certain version or type of arrival notice,
+            for example "Warning", "Updated", "Second", "Third" etc.
+          example: "Warning"
         transportDocumentReference:
           maxLength: 20
           pattern: "^\\S(?:.*\\S)?$"
@@ -1175,16 +1188,6 @@ components:
             The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
             following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
           example: "22GP"
-        modeOfTransportCode:
-          maxLength: 20
-          type: "string"
-          description: |-
-            The mode of transport, as defined by DCSA, for which the free time object applies
-             * `BARGE` - Barge
-             * `RAIL` - Rail
-             * `TRUCK` - Truck
-             * `VESSEL` - Vessel
-          example: "VESSEL"
         duration:
           type: "integer"
           description: "The duration expressed in `timeUnit`s for which this free time item applies."

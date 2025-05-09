@@ -113,7 +113,8 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     boolean isPendingUpdate = BookingState.PENDING_UPDATE.name().equals(bookingStatus);
     boolean isPendingAmendment = BookingState.PENDING_AMENDMENT.name().equals(bookingStatus);
     if ((isPendingUpdate || isPendingAmendment)
-        && responsePayload.path(FEEDBACKS).isMissingNode()) {
+        && (responsePayload.path(FEEDBACKS).isMissingNode()
+            || responsePayload.path(FEEDBACKS).isEmpty())) {
       errors.add("feedbacks property is required in the booking state %s".formatted(bookingStatus));
     }
     return errors;

@@ -326,7 +326,7 @@ public class BookingChecks {
             var issues = new LinkedHashSet<String>();
             if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
                     || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)))
-                && body.path(FEEDBACKS).isMissingNode()) {
+                && (body.path(FEEDBACKS).isMissingNode() || body.path(FEEDBACKS).isEmpty())) {
               issues.add("feedbacks is missing in the booking state %s".formatted(bookingStatus));
             }
             return issues;

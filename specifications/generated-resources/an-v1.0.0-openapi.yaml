@@ -410,6 +410,14 @@ components:
              * `FCL` - Full Container Load
              * `LCL` - Less than Container Load
           example: "FCL"
+        serviceContractNumber:
+          maxLength: 100
+          type: "string"
+          description: |
+            Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
+            quantity commitment (usually referred as "MQC") of cargo that the shipper commits to over a fixed period,
+            and the carrier commits to a certain rate or rate schedule.
+          example: "SCN12345"
         termsAndConditions:
           maxLength: 50000
           type: "string"
@@ -444,6 +452,12 @@ components:
           description: "List of charges applicable to this shipment"
           items:
             $ref: "#/components/schemas/Charge"
+        payerCode:
+          maxLength: 100
+          type: "string"
+          description: |
+            Name identifying the entity responsible for freight payment.
+          example: "Acme Inc."
         utilizedTransportEquipments:
           type: "array"
           description: "The equipments being used."
@@ -652,7 +666,18 @@ components:
           type: "string"
           description: "Reference of the invoice towards the consignee for this shipment charge"
           example: "INV51XX80YY"
-      description: "Contact details"
+        freightPaymentStatus:
+          maxLength: 50
+          type: "string"
+          description: |-
+            Payment status of the freight charges.
+
+             * `ZERO_PAID` - Zero Paid
+             * `PARTIALLY_PAID` - Partially Paid
+             * `FULLY_PAID` - Fully Paid
+             * `OVERPAID` - Overpaid
+          example: "FULLY_PAID"
+      description: "Charge details"
     ConsignmentItem:
       required:
       - "cargoItems"
@@ -1561,6 +1586,12 @@ components:
       - "portOfLoading"
       type: "object"
       properties:
+        onBoardDate:
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          type: "string"
+          description: |
+            The date when the container was loaded onto the vessel at the port of origin.
+          example: "2025-01-23"
         departureDate:
           pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
@@ -1590,6 +1621,19 @@ components:
           type: "string"
           description: "The expected date of arrival of the shipment at Place of Delivery."
           example: "2025-01-23"
+        inlandArrivalDate:
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          type: "string"
+          description: |
+            The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+          example: "2025-01-23"
+        estimatedGeneralOrderDateTime:
+          type: "string"
+          description: |
+            The estimated date and time when the shipment will be placed under General Order status
+            (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
         loadLocation:
           type: "object"
           description: |
@@ -1628,6 +1672,18 @@ components:
             and where responsibility of the shipping line ceases.
           allOf:
           - $ref: "#/components/schemas/Location"
+        modeOfTransport:
+          maxLength: 20
+          type: "string"
+          description: |-
+            Code defined by DCSA to identify a mode of transport.
+
+             * `VESSEL` - Vessel
+             * `RAIL` - Rail
+             * `TRUCK` - Truck
+             * `BARGE` - Barge
+             * `MULTIMODAL` - Multimodal
+          example: "VESSEL"
       description: "Transport info"
     UtilizedTransportEquipment:
       required:

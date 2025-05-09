@@ -87,6 +87,7 @@ import org.dcsa.conformance.specifications.an.v100.types.HSCode;
 import org.dcsa.conformance.specifications.an.v100.types.ImoPackagingCode;
 import org.dcsa.conformance.specifications.an.v100.types.InhalationZoneTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.IsoEquipmentCode;
+import org.dcsa.conformance.specifications.an.v100.types.ModeOfTransportCode;
 import org.dcsa.conformance.specifications.an.v100.types.NationalCommodityCodeValue;
 import org.dcsa.conformance.specifications.an.v100.types.PartyCodeListProvider;
 import org.dcsa.conformance.specifications.an.v100.types.PaymentTermCode;
@@ -265,6 +266,7 @@ public class AnSchemaCreator {
         InnerPackaging.class,
         IsoEquipmentCode.class,
         Location.class,
+        ModeOfTransportCode.class,
         NationalCommodityCode.class,
         NationalCommodityCodeValue.class,
         OuterPackaging.class,

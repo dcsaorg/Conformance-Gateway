@@ -138,6 +138,17 @@ or shares the container with other shipments (LCL).
   private ContainerLoadTypeCode cargoMovementTypeAtDestination;
 
   @Schema(
+      maxLength = 100,
+      description =
+"""
+Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
+quantity commitment (usually referred as "MQC") of cargo that the shipper commits to over a fixed period,
+and the carrier commits to a certain rate or rate schedule.
+""",
+      example = "SCN12345")
+  private String serviceContractNumber;
+
+  @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 50000,
       description = "Carrier terms and conditions of transport.",
@@ -161,6 +172,15 @@ or shares the container with other shipments (LCL).
 
   @Schema(description = "List of charges applicable to this shipment")
   private List<Charge> charges;
+
+  @Schema(
+      maxLength = 100,
+      description =
+"""
+Name identifying the entity responsible for freight payment.
+""",
+      example = "Acme Inc.")
+  private String payerCode;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The equipments being used.")
   @ArraySchema(minItems = 1)

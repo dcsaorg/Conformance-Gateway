@@ -54,12 +54,16 @@ ArrivalNotice,isElectronic,boolean,yes,,,true,"Flag indicating whether the trans
 ArrivalNotice,issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 ArrivalNotice,label,string,,1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
+ArrivalNotice,payerCode,string,,100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
 ArrivalNotice,pickupLocation,Location,,,,,"Pickup location",
 ArrivalNotice,references,"Reference list",,,,,"References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
 Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
 on the B/L. Customers can use these references to track shipments in their internal systems.",
 ArrivalNotice,returnInstructions,string,,500,,"Please place the container...","Return instructions",
 ArrivalNotice,returnLocation,Location,,,,,"Return location",
+ArrivalNotice,serviceContractNumber,string,,100,,SCN12345,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
+quantity commitment (usually referred as ""MQC"") of cargo that the shipper commits to over a fixed period,
+and the carrier commits to a certain rate or rate schedule.",
 ArrivalNotice,termsAndConditions,string,yes,50000,,"These terms and conditions define...","Carrier terms and conditions of transport.",
 ArrivalNotice,transport,Transport,yes,,,,,
 ArrivalNotice,"transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",XYZ1234,"Reference of the transport document for which this arrival notice was created",
@@ -102,6 +106,12 @@ on the carrier website or the ROE defined by the competent customs authority, as
 Charge,chargeAmount,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The monetary value of this charge, expressed with a maximum of 2 decimal digits",
 Charge,chargeCurrency,string,yes,3,"^[A-Z]{3}$",EUR,"Currency code as defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)",
 Charge,chargeDescription,string,yes,50,,"Documentation fee - Destination","Description of the charge",
+Charge,freightPaymentStatus,string,,50,,FULLY_PAID,"Payment status of the freight charges.
+
+ * `ZERO_PAID` - Zero Paid
+ * `PARTIALLY_PAID` - Partially Paid
+ * `FULLY_PAID` - Fully Paid
+ * `OVERPAID` - Overpaid",
 Charge,invoiceReference,string,,100,,INV51XX80YY,"Reference of the invoice towards the consignee for this shipment charge",
 Charge,paymentTermCode,string,yes,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL).
 When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf
@@ -363,9 +373,20 @@ TemperatureLimits,"transportEmergencyTemperature",number,,,,74.1,"Temperature at
 Transport,departureDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
 Transport,dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country.",
+Transport,"estimatedGeneralOrderDateTime",string,,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
+(shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
 Transport,etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
 Transport,etaAtPortOfDischargeDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
+Transport,inlandArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 Transport,loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country.",
+Transport,modeOfTransport,string,,20,,VESSEL,"Code defined by DCSA to identify a mode of transport.
+
+ * `VESSEL` - Vessel
+ * `RAIL` - Rail
+ * `TRUCK` - Truck
+ * `BARGE` - Barge
+ * `MULTIMODAL` - Multimodal",
+Transport,onBoardDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
 Transport,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent
 and where responsibility of the shipping line ceases.",
 Transport,placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.

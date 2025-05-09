@@ -249,8 +249,7 @@ FreeTime,modeOfTransportCode,string,,20,,VESSEL,"The mode of transport, as defin
 FreeTime,timeUnit,string,yes,3,,WD,"Code identifying the unit in which free time is expressed
  * `CD` - Calendar days
  * `WD` - Working days
- * `HR` - Hours
- * `DOD` - Day of discharge",
+ * `HR` - Hours",
 FreeTime,typeCode,string,yes,,,DEM,"Code used to denote the type of free time.
  * `DEM` - Demurrage
  * `DET` - Detention

@@ -320,8 +320,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 "ArrivalNotice / freeTime / timeUnit",timeUnit,string,yes,3,,WD,"Code identifying the unit in which free time is expressed
  * `CD` - Calendar days
  * `WD` - Working days
- * `HR` - Hours
- * `DOD` - Day of discharge",
+ * `HR` - Hours",
 "ArrivalNotice / freeTime / typeCode",typeCode,string,yes,,,DEM,"Code used to denote the type of free time.
  * `DEM` - Demurrage
  * `DET` - Detention

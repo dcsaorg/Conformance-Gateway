@@ -1,12 +1,24 @@
 package org.dcsa.conformance.specifications.an.v100.dataoverview;
 
+import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -22,6 +34,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableColumns;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableStyleInfo;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STTableType;
 
+@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class DataOverviewSheet {
   private final String sheetName;
@@ -101,5 +114,27 @@ public abstract class DataOverviewSheet {
 
     CTAutoFilter autoFilter = ctTable.addNewAutoFilter();
     autoFilter.setRef(tableRange);
+  }
+
+  @SneakyThrows
+  public void exportToCsvFile(String csvFilePattern) {
+    CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
+    headerTitles.forEach(csvSchemaBuilder::addColumn);
+    CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
+    CsvMapper csvMapper = new CsvMapper();
+    List<Map<String, String>> csvRows =
+        dataValues.stream()
+            .map(
+                dataRow ->
+                    IntStream.range(0, headerTitles.size())
+                        .boxed()
+                        .collect(Collectors.toMap(headerTitles::get, dataRow::get)))
+            .toList();
+    ObjectWriter csvWriter = csvMapper.writer(csvSchema);
+    StringWriter stringWriter = new StringWriter();
+    csvWriter.writeValue(stringWriter, csvRows);
+    String csvFilePath = csvFilePattern.formatted(sheetName.toLowerCase().replaceAll(" ", "-"));
+    Files.writeString(Paths.get(csvFilePath), stringWriter.toString());
+    log.info("Data overview {} exported to {}", sheetName.toLowerCase(), csvFilePath);
   }
 }

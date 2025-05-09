@@ -9,11 +9,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dcsa.conformance.specifications.an.v100.model.ArrivalNotice;
 import org.dcsa.conformance.specifications.an.v100.model.ArrivalNoticeNotification;
 
+@Slf4j
 public class DataOverview {
 
   private final AttributesHierarchicalSheet attributesHierarchicalSheet;
@@ -51,5 +53,15 @@ public class DataOverview {
         workbook.write(fileOut);
       }
     }
+    log.info("Data Overview exported to {}", excelFilePath);
+  }
+
+  public void exportToCsvFiles(String csvFilePattern) {
+    Stream.of(
+            attributesHierarchicalSheet,
+            attributesNormalizedSheet,
+            queryParametersSheet,
+            queryFiltersSheet)
+        .forEach(sheet -> sheet.exportToCsvFile(csvFilePattern));
   }
 }

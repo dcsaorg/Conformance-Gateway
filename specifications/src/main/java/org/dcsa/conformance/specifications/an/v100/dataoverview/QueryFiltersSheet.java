@@ -11,6 +11,7 @@ public class QueryFiltersSheet extends DataOverviewSheet {
     super(
         "Query filters",
         "QueryFiltersTable",
+        1,
         List.of("FilterParameters", "Required"),
         List.of(128, 16),
         List.of(true, false),
@@ -25,6 +26,9 @@ public class QueryFiltersSheet extends DataOverviewSheet {
                                         .map(Parameter::getName)
                                         .collect(Collectors.joining(", ")),
                                     required ? "yes" : "")))
-            .toList());
+            .toList(),
+        importFromCsvFile(
+            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/bd25914e5526aa7c8a67aba8a28010555c82d1ad/specifications/generated-resources/an-v1.0.0-data-overview-query-filters.csv"),
+        Map.ofEntries());
   }
 }

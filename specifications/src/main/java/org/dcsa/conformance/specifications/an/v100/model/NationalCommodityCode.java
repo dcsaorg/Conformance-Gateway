@@ -28,7 +28,7 @@ The national commodity classification code, which can be one of the following va
  * CN (Combined Nomenclature)
  * CUS (Customs Union and Statistics)
 """)
-  private String nccType;
+  private String typeCode;
 
   @Schema() private CountryCode countryCode;
 
@@ -36,5 +36,5 @@ The national commodity classification code, which can be one of the following va
       requiredMode = Schema.RequiredMode.REQUIRED,
       description = "List of national commodity code values")
   @ArraySchema(minItems = 1)
-  private List<NationalCommodityCodeValue> nccValues;
+  private List<NationalCommodityCodeValue> codeValues;
 }

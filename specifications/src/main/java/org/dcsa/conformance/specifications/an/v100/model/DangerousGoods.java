@@ -62,7 +62,7 @@ Character | Valid Characters | Description
 2|0 to 9 and A to Z|A sequence letter for the PSN, or 0 if there were no alternative PSNs
 3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.
 """)
-  private String codedVariantList;
+  private String codedVariant;
 
   @Schema(
       type = "string",

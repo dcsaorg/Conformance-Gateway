@@ -1,0 +1,60 @@
+name: Sonar
+
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  SONAR_PARAMS: -Dsonar.branch.name=$BRANCH_NAME
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      # Disabled again until SD-2092 is fixed
+      - NOT_dev
+      - NOT_test
+      - NOT_master
+    paths-ignore:
+      - "**.md"
+#  pull_request:
+#    types: [opened, synchronize, reopened]
+#    paths-ignore:
+#      - "**.md"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Number of commits to fetch. 0 indicates all history for all branches and tags, for SonarCloud.
+          fetch-depth: 0
+
+      - name: Print commit sha
+        shell: bash
+        env:
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "sha: $COMMIT_SHA"
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: 21
+          cache: 'maven'
+
+      - name: Build Conformance-Gateway
+        run: |
+          ./mvnw package -B -V -DskipTests -Dmaven.test.skip=true
+
+      - name: Set Sonar settings for PR build
+        if: ${{ (github.event_name == 'pull_request') }}
+        run: |
+          echo "SONAR_PARAMS=-Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME -Dsonar.pullrequest.provider=GitHub -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=90" >> $GITHUB_ENV
+
+      - name: Run SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
+        run: |
+          ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -B ${{env.SONAR_PARAMS}}

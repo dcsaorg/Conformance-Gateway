@@ -68,8 +68,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     getCspConsumer().accept(CarrierScenarioParameters.fromJson(partyInput.get("input")));
   }
 

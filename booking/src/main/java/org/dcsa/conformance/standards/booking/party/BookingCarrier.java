@@ -5,6 +5,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.Builder;
@@ -17,6 +18,7 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -93,7 +95,9 @@ public class BookingCarrier extends ConformanceParty {
         Map.entry(UC8_Carrier_ProcessAmendmentAction.class, this::processBookingAmendment),
         Map.entry(UC10_Carrier_DeclineBookingAction.class, this::declineBooking),
         Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted),
-        Map.entry(UC14CarrierProcessBookingCancellationAction.class, this::processConfirmedBookingCancellation));
+        Map.entry(
+            UC14CarrierProcessBookingCancellationAction.class,
+            this::processConfirmedBookingCancellation));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -316,7 +320,6 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.requestUpdateToBooking(cbrr, bookingMutator);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
-
     addOperatorLogEntry(
         BookingAction.createMessageForUIPrompt(
             "Requested update to the booking request", cbr, cbrr));
@@ -427,11 +430,26 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   private ConformanceResponse return404(ConformanceRequest request, String message) {
+    ObjectNode response =
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/booking/messages/booking-api-2.0.0-error-message.json",
+                Map.of(
+                    "HTTP_METHOD_PLACEHOLDER",
+                    request.method(),
+                    "REQUEST_URI_PLACEHOLDER",
+                    request.url(),
+                    "REFERENCE_PLACEHOLDER",
+                    UUID.randomUUID().toString(),
+                    "ERROR_DATE_TIME_PLACEHOLDER",
+                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
+                    "ERROR_MESSAGE_PLACEHOLDER",
+                    message));
+
     return request.createResponse(
-        404,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put(MESSAGE, message)));
+        404, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
+
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(

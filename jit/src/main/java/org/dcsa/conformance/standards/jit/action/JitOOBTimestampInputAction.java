@@ -51,9 +51,8 @@ public class JitOOBTimestampInputAction extends JitAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
+  protected void doHandlePartyInput(JsonNode partyInput) {
     log.info("JitOOBTimestampInputAction.handlePartyInput({})", partyInput.toPrettyString());
-    super.handlePartyInput(partyInput);
     if (dsp == null) dsp = ((JitAction) previousAction).dsp;
 
     // Store supplied timestamp into the DSP

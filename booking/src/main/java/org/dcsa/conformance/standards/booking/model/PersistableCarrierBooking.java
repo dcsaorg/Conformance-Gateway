@@ -282,12 +282,22 @@ public class PersistableCarrierBooking {
     }
     copyMetadataFields(getBooking(), newBookingData);
     if (isAmendment) {
+      ensureFeedbacksExist(newBookingData);
       ensureConfirmedBookingHasCarrierFields(newBookingData);
       setAmendedBooking(newBookingData);
     } else {
       setBooking(newBookingData);
     }
 
+  }
+
+  private void ensureFeedbacksExist(ObjectNode booking) {
+    booking
+        .putArray("feedbacks")
+        .addObject()
+        .put("severity", "WARN")
+        .put("code", "PROPERTY_VALUE_HAS_BEEN_CHANGED")
+        .put("message", "Please perform the changes requested by the Conformance orchestrator");
   }
 
   public BookingState getOriginalBookingState() {

@@ -32,7 +32,7 @@ public class CustomsReference {
       requiredMode = Schema.RequiredMode.REQUIRED,
       example = "CUS",
       description = "The reference type code as defined in the relevant customs jurisdiction.")
-  private String crType;
+  private String typeCode;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private CountryCode countryCode;
@@ -41,5 +41,5 @@ public class CustomsReference {
     requiredMode = Schema.RequiredMode.REQUIRED,
     description = "List of customs reference values")
   @ArraySchema(minItems = 1)
-  private List<CustomsReferenceValue> values;
+  private List<CustomsReferenceValue> referenceValues;
 }

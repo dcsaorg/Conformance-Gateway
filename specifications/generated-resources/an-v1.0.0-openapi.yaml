@@ -291,7 +291,7 @@ components:
       - "deliveryTypeAtDestination"
       - "documentParties"
       - "isElectronic"
-      - "issueDate"
+      - "issueDateTime"
       - "termsAndConditions"
       - "transport"
       - "transportDocumentReference"
@@ -299,11 +299,18 @@ components:
       - "utilizedTransportEquipments"
       type: "object"
       properties:
-        issueDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+        issueDateTime:
           type: "string"
-          description: "The date when the Arrival Notice was issued."
-          example: "2025-01-23"
+          description: "The date and time when the Arrival Notice was issued."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        label:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Free text used to indicate a certain version or type of arrival notice,
+            for example "Warning", "Updated", "Second", "Third" etc.
+          example: "Warning"
         carrierCode:
           maxLength: 4
           pattern: "^\\S+$"
@@ -403,6 +410,14 @@ components:
              * `FCL` - Full Container Load
              * `LCL` - Less than Container Load
           example: "FCL"
+        serviceContractNumber:
+          maxLength: 100
+          type: "string"
+          description: |
+            Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
+            quantity commitment (usually referred as "MQC") of cargo that the shipper commits to over a fixed period,
+            and the carrier commits to a certain rate or rate schedule.
+          example: "SCN12345"
         termsAndConditions:
           maxLength: 50000
           type: "string"
@@ -423,8 +438,6 @@ components:
           description: "Document parties"
           items:
             $ref: "#/components/schemas/DocumentParty"
-        vesselVoyage:
-          $ref: "#/components/schemas/VesselVoyage"
         transport:
           $ref: "#/components/schemas/Transport"
         freeTime:
@@ -437,13 +450,12 @@ components:
           description: "List of charges applicable to this shipment"
           items:
             $ref: "#/components/schemas/Charge"
-        invoicePayableAt:
-          type: "object"
+        payerCode:
+          maxLength: 100
+          type: "string"
           description: |
-            Location where the customer will make the payment of ocean freight and charges for the main transport,
-            typically expressed as a UN/LOCODE or just a location name.
-          allOf:
-          - $ref: "#/components/schemas/Location"
+            Name identifying the entity responsible for freight payment.
+          example: "Acme Inc."
         utilizedTransportEquipments:
           type: "array"
           description: "The equipments being used."
@@ -460,10 +472,23 @@ components:
     ArrivalNoticeNotification:
       required:
       - "etaAtPortOfDischargeDate"
+      - "issueDateTime"
       - "portOfDischarge"
       - "transportDocumentReference"
       type: "object"
       properties:
+        issueDateTime:
+          type: "string"
+          description: "The date and time when the Arrival Notice was issued."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        label:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Free text used to indicate a certain version or type of arrival notice,
+            for example "Warning", "Updated", "Second", "Third" etc.
+          example: "Warning"
         transportDocumentReference:
           maxLength: 20
           pattern: "^\\S(?:.*\\S)?$"
@@ -639,7 +664,18 @@ components:
           type: "string"
           description: "Reference of the invoice towards the consignee for this shipment charge"
           example: "INV51XX80YY"
-      description: "Contact details"
+        freightPaymentStatus:
+          maxLength: 50
+          type: "string"
+          description: |-
+            Payment status of the freight charges.
+
+             * `ZERO_PAID` - Zero Paid
+             * `PARTIALLY_PAID` - Partially Paid
+             * `FULLY_PAID` - Fully Paid
+             * `OVERPAID` - Overpaid
+          example: "FULLY_PAID"
+      description: "Charge details"
     ConsignmentItem:
       required:
       - "cargoItems"
@@ -743,11 +779,11 @@ components:
     CustomsReference:
       required:
       - "countryCode"
-      - "crType"
-      - "values"
+      - "referenceValues"
+      - "typeCode"
       type: "object"
       properties:
-        crType:
+        typeCode:
           type: "string"
           description: "The reference type code as defined in the relevant customs jurisdiction."
           example: "CUS"
@@ -761,7 +797,7 @@ components:
 
             When the country code is required but not applicable, use the code `ZZ`.
           example: "NL"
-        values:
+        referenceValues:
           type: "array"
           description: "List of customs reference values"
           items:
@@ -806,7 +842,7 @@ components:
             Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States
             Department of Transportation.
           example: "9037"
-        codedVariantList:
+        codedVariant:
           maxLength: 4
           minLength: 4
           pattern: "^[0-3][0-9A-Z]{3}$"
@@ -1175,16 +1211,6 @@ components:
             The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
             following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
           example: "22GP"
-        modeOfTransportCode:
-          maxLength: 20
-          type: "string"
-          description: |-
-            The mode of transport, as defined by DCSA, for which the free time object applies
-             * `BARGE` - Barge
-             * `RAIL` - Rail
-             * `TRUCK` - Truck
-             * `VESSEL` - Vessel
-          example: "VESSEL"
         duration:
           type: "integer"
           description: "The duration expressed in `timeUnit`s for which this free time item applies."
@@ -1198,7 +1224,6 @@ components:
              * `CD` - Calendar days
              * `WD` - Working days
              * `HR` - Hours
-             * `DOD` - Day of discharge
           example: "WD"
         calculationBasis:
           maxLength: 1000
@@ -1314,11 +1339,11 @@ components:
       description: "Location information"
     NationalCommodityCode:
       required:
-      - "nccType"
-      - "nccValues"
+      - "codeValues"
+      - "typeCode"
       type: "object"
       properties:
-        nccType:
+        typeCode:
           maxLength: 10
           pattern: "^\\S(?:.*\\S)?$"
           type: "string"
@@ -1341,7 +1366,7 @@ components:
 
             When the country code is required but not applicable, use the code `ZZ`.
           example: "NL"
-        nccValues:
+        codeValues:
           type: "array"
           description: "List of national commodity code values"
           items:
@@ -1559,6 +1584,12 @@ components:
       - "portOfLoading"
       type: "object"
       properties:
+        onBoardDate:
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          type: "string"
+          description: |
+            The date when the container was loaded onto the vessel at the port of origin.
+          example: "2025-01-23"
         departureDate:
           pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
@@ -1588,6 +1619,19 @@ components:
           type: "string"
           description: "The expected date of arrival of the shipment at Place of Delivery."
           example: "2025-01-23"
+        inlandArrivalDate:
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          type: "string"
+          description: |
+            The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+          example: "2025-01-23"
+        estimatedGeneralOrderDateTime:
+          type: "string"
+          description: |
+            The estimated date and time when the shipment will be placed under General Order status
+            (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
         loadLocation:
           type: "object"
           description: |
@@ -1626,6 +1670,24 @@ components:
             and where responsibility of the shipping line ceases.
           allOf:
           - $ref: "#/components/schemas/Location"
+        modeOfTransport:
+          maxLength: 20
+          type: "string"
+          description: |-
+            Code defined by DCSA to identify a mode of transport.
+
+             * `VESSEL` - Vessel
+             * `RAIL` - Rail
+             * `TRUCK` - Truck
+             * `BARGE` - Barge
+             * `MULTIMODAL` - Multimodal
+          example: "VESSEL"
+        vesselVoyages:
+          maxItems: 3
+          minItems: 1
+          type: "array"
+          items:
+            $ref: "#/components/schemas/VesselVoyage"
       description: "Transport info"
     UtilizedTransportEquipment:
       required:
@@ -1669,7 +1731,7 @@ components:
       description: "The container (equipment), total weight, total volume, active reefer settings, seals and references."
     VesselVoyage:
       required:
-      - "carrierImportVoyageNumber"
+      - "carrierVoyageNumber"
       - "typeCode"
       - "vesselName"
       type: "object"
@@ -1677,10 +1739,11 @@ components:
         typeCode:
           type: "string"
           description: |-
-            Code representing the destination type of a vessel voyage.
+            Code representing the type of a vessel voyage.
 
-             * `DC` - destination country
-             * `POD` - port of destination
+             * `DC` - Destination country
+             * `POD` - Port of destination
+             * `POL` - Port of loading
           example: "POD"
         vesselName:
           maxLength: 50
@@ -1704,25 +1767,36 @@ components:
             The reference is the International Maritime Organisation (IMO) number,
             also sometimes known as the Lloyd's register code.
           example: "12345678"
-        carrierImportVoyageNumber:
+        carrierVoyageNumber:
           maxLength: 50
           type: "string"
-          description: "The identifier of an import voyage. The carrier-specific identifier of the import Voyage."
+          description: |
+            Carrier-specific identifier of a voyage:
+            * the import voyage (if `typeCode` is `POD` or `DC`)
+            * the export voyage (if `typeCode` is `POL`)
           example: "1234N"
-        universalImportVoyageReference:
+        universalVoyageReference:
           maxLength: 5
           minLength: 5
           pattern: "^\\d{2}[0-9A-Z]{2}[NEWSR]$"
           type: "string"
           description: |
-            A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.
-             * last 2 digits of the year
-             * 2 alphanumeric characters for the sequence number of the voyage
-             * 1 character for the initial of the direction/haul (North, East, West, South or Roundtrip).
+            Universal identifier of a voyage:
+            * the import voyage (if `typeCode` is `POD` or `DC`)
+            * the export voyage (if `typeCode` is `POL`)
           example: "2301W"
       description: |
-        The details of the last sea-going vessel arriving at the Port of Discharge,
+        Details of a vessel voyage.
+
+        When `typeCode` is `POL` (port of loading), these are the details of
+        the first sea going vessel where the container was initially loaded.
+
+        When `typeCode` is `POD` (port of destination), these are the details of
+        the last sea-going vessel arriving at the Port of Discharge,
         which can be either a feeder or the mother vessel.
+
+        When `typeCode` is `DC` (destination country), these are the details of
+        the first mother vessel arriving at the destination country.
     Volume:
       required:
       - "unit"

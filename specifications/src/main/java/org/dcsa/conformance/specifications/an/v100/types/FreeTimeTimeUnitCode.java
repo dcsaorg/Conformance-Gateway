@@ -14,8 +14,7 @@ import org.dcsa.conformance.specifications.an.v100.EnumBase;
 public enum FreeTimeTimeUnitCode implements EnumBase {
   CD("Calendar days"),
   WD("Working days"),
-  HR("Hours"),
-  DOD("Day of discharge");
+  HR("Hours");
 
   @Getter private final String valueDescription;
 }

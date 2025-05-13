@@ -7,19 +7,18 @@ import org.dcsa.conformance.specifications.an.v100.EnumBase;
 
 @Schema(
     type = "string",
-    maxLength = 20,
-    example = "VESSEL",
+    maxLength = 50,
+    example = "FULLY_PAID",
     description =
 """
-Code defined by DCSA to identify a mode of transport.
+Payment status of the freight charges.
 """)
 @AllArgsConstructor
-public enum ModeOfTransportCode implements EnumBase {
-  VESSEL("Vessel"),
-  RAIL("Rail"),
-  TRUCK("Truck"),
-  BARGE("Barge"),
-  MULTIMODAL("Multimodal");
+public enum FreightPaymentStatus implements EnumBase {
+  ZERO_PAID("Zero Paid"),
+  PARTIALLY_PAID("Partially Paid"),
+  FULLY_PAID("Fully Paid"),
+  OVERPAID("Overpaid");
 
   @Getter private final String valueDescription;
 }

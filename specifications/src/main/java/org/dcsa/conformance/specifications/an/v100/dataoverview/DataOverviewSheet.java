@@ -1,25 +1,33 @@
 package org.dcsa.conformance.specifications.an.v100.dataoverview;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -35,42 +43,183 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableStyleInfo;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STTableType;
 
 @Slf4j
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class DataOverviewSheet {
   private final String sheetName;
   private final String tableName;
-  private final List<String> headerTitles;
-  private final List<Integer> columnWidths;
-  private final List<Boolean> wrapCellText;
-  private final List<List<String>> dataValues;
+  private final int primaryKeyColumnCount;
+  private final List<String> csvHeaderTitles;
+  private final List<String> excelHeaderTitles;
+  private final List<Integer> excelColumnWidths;
+  private final List<Boolean> excelWrapCellText;
+  private final List<List<String>> csvDataValues;
+  private final List<Map.Entry<DataOverviewDiffStatus, List<String>>> excelDataValues;
+
+  protected DataOverviewSheet(
+      String sheetName,
+      String tableName,
+      int primaryKeyColumnCount,
+      List<String> headerTitles,
+      List<Integer> columnWidths,
+      List<Boolean> wrapCellText,
+      List<List<String>> dataValues,
+      List<List<String>> oldDataValues,
+      Map<String, String> changedPrimaryKeyByOldPrimaryKey) {
+    this.sheetName = sheetName;
+    this.tableName = tableName;
+    this.primaryKeyColumnCount = primaryKeyColumnCount;
+    this.csvHeaderTitles = headerTitles;
+    this.excelHeaderTitles = Stream.concat(Stream.of("Diff"), headerTitles.stream()).toList();
+    this.excelColumnWidths = Stream.concat(Stream.of(12), columnWidths.stream()).toList();
+    this.excelWrapCellText =
+        Stream.concat(Stream.of(Boolean.FALSE), wrapCellText.stream()).toList();
+    this.csvDataValues = dataValues;
+
+    excelDataValues = new ArrayList<>();
+    Map<String, List<String>> oldRowValuesByPrimaryKey = rowValuesByPrimaryKey(oldDataValues);
+    Map<String, List<String>> newRowValuesByPrimaryKey = rowValuesByPrimaryKey(dataValues);
+
+    Map<String, String> oldPrimaryKeysByNewPrimaryKey =
+        changedPrimaryKeyByOldPrimaryKey.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
+    Set<String> sortedPrimaryKeys =
+        Stream.concat(
+                oldRowValuesByPrimaryKey.keySet().stream(),
+                newRowValuesByPrimaryKey.keySet().stream())
+            .collect(Collectors.toCollection(TreeSet::new));
+    sortedPrimaryKeys.stream()
+        .filter(
+            key ->
+                !changedPrimaryKeyByOldPrimaryKey.containsKey(
+                    key)) // skip the old values of modified PKs
+        .forEach(
+            primaryKey -> {
+              if ("ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / codedVariant"
+                  .equals(primaryKey)) {
+                System.out.println(":)");
+              }
+              String newPrimaryKey =
+                  newRowValuesByPrimaryKey.containsKey(primaryKey) ? primaryKey : null;
+              List<String> newRowValues =
+                  newPrimaryKey == null ? null : newRowValuesByPrimaryKey.get(newPrimaryKey);
+              String oldPrimaryKey =
+                  oldPrimaryKeysByNewPrimaryKey.computeIfAbsent(primaryKey, Function.identity());
+              List<String> oldRowValues =
+                  oldRowValuesByPrimaryKey.getOrDefault(oldPrimaryKey, null);
+              if (newRowValues == null) {
+                excelDataValues.add(Map.entry(DataOverviewDiffStatus.REMOVED, oldRowValues));
+              } else if (oldRowValues == null) {
+                excelDataValues.add(Map.entry(DataOverviewDiffStatus.ADDED, newRowValues));
+              } else {
+                AtomicBoolean anyValuesUpdated = new AtomicBoolean(false);
+                AtomicInteger columnIndex = new AtomicInteger(0);
+                List<String> updatedOldRowValues =
+                    oldRowValues.stream()
+                        .map(
+                            oldValue -> {
+                              String newValue = newRowValues.get(columnIndex.getAndIncrement());
+                              if (newValue.equals(oldValue)) {
+                                return "";
+                              } else {
+                                anyValuesUpdated.set(true);
+                                return oldValue;
+                              }
+                            })
+                        .toList();
+                if (anyValuesUpdated.get()) {
+                  excelDataValues.add(
+                      Map.entry(DataOverviewDiffStatus.OLD_VALUE, updatedOldRowValues));
+                  excelDataValues.add(Map.entry(DataOverviewDiffStatus.NEW_VALUE, newRowValues));
+                } else {
+                  excelDataValues.add(Map.entry(DataOverviewDiffStatus.UNMODIFIED, newRowValues));
+                }
+              }
+            });
+  }
+
+  private Map<String, List<String>> rowValuesByPrimaryKey(List<List<String>> dataValues) {
+    return dataValues.stream()
+        .collect(
+            Collectors.toMap(
+                rowValues ->
+                    primaryKeyColumnCount == 1
+                        ? rowValues.getFirst()
+                        : rowValues.stream()
+                            .limit(primaryKeyColumnCount)
+                            .collect(Collectors.joining(",")),
+                Function.identity()));
+  }
 
   public void addToExcelWorkbook(Workbook workbook, Supplier<Long> idSupplier) {
     Sheet sheet = workbook.createSheet(sheetName);
 
-    XSSFCellStyle wrapStyle = (XSSFCellStyle) workbook.createCellStyle();
-    wrapStyle.setWrapText(true);
-    ArrayList<Boolean> doWrapCellText = new ArrayList<>(wrapCellText);
+    Map<Boolean, Map<DataOverviewDiffStatus, XSSFCellStyle>> cellStylesByWrapAndDiffStatus =
+        Stream.of(Boolean.FALSE, Boolean.TRUE)
+            .collect(
+                Collectors.toMap(
+                    Function.identity(),
+                    wrap ->
+                        Arrays.stream(DataOverviewDiffStatus.values())
+                            .collect(
+                                Collectors.toMap(
+                                    Function.identity(),
+                                    diffStatus -> {
+                                      XSSFCellStyle cellStyle =
+                                          (XSSFCellStyle) workbook.createCellStyle();
+                                      if (wrap) {
+                                        cellStyle.setWrapText(true);
+                                      }
+                                      var font = workbook.createFont();
+                                      switch (diffStatus) {
+                                        case ADDED:
+                                          font.setColor(IndexedColors.GREEN.getIndex());
+                                          break;
+                                        case REMOVED:
+                                          font.setColor(IndexedColors.RED.getIndex());
+                                          font.setStrikeout(true);
+                                          break;
+                                        case OLD_VALUE:
+                                          font.setColor(IndexedColors.LIGHT_BLUE.getIndex());
+                                          font.setStrikeout(true);
+                                          break;
+                                        case NEW_VALUE:
+                                          font.setColor(IndexedColors.BLUE.getIndex());
+                                          break;
+                                      }
+                                      cellStyle.setFont(font);
+                                      return cellStyle;
+                                    }))));
 
     AtomicInteger rowIndexReference = new AtomicInteger(0);
-    Stream.concat(Stream.of(headerTitles), dataValues.stream())
+    Stream.concat(
+            Stream.of(Map.entry(DataOverviewDiffStatus.UNMODIFIED, excelHeaderTitles)),
+            excelDataValues.stream())
         .forEach(
-            rowValues -> {
+            diffStatusAndValues -> {
+              DataOverviewDiffStatus diffStatus = diffStatusAndValues.getKey();
+              List<String> rowValues = diffStatusAndValues.getValue();
               int rowIndex = rowIndexReference.getAndIncrement();
               Row row = sheet.createRow(rowIndex);
               row.setHeight((short) -1);
               AtomicInteger columnIndexReference = new AtomicInteger(0);
-              rowValues.forEach(
-                  value -> {
-                    int columnIndex = columnIndexReference.getAndIncrement();
-                    Cell cell = row.createCell(columnIndex);
-                    cell.setCellValue(value);
-                    if (rowIndex > 0 && doWrapCellText.get(columnIndex)) {
-                      cell.setCellStyle(wrapStyle);
-                    }
-                  });
+              Stream.concat(
+                      rowIndex == 0 ? Stream.of() : Stream.of(diffStatus.getDisplayName()),
+                      rowValues.stream())
+                  .forEach(
+                      value -> {
+                        int columnIndex = columnIndexReference.getAndIncrement();
+                        Cell cell = row.createCell(columnIndex);
+                        cell.setCellValue(value);
+                        if (rowIndex > 0) {
+                          cell.setCellStyle(
+                              cellStylesByWrapAndDiffStatus
+                                  .get(excelWrapCellText.get(columnIndex))
+                                  .get(diffStatus));
+                        }
+                      });
             });
     AtomicInteger columnIndexReference = new AtomicInteger(0);
-    columnWidths.forEach(
+    excelColumnWidths.forEach(
         width -> {
           int columnIndex = columnIndexReference.getAndIncrement();
           if (width > 0) {
@@ -86,8 +235,8 @@ public abstract class DataOverviewSheet {
     String tableRange =
         "A1:%s%d"
             .formatted(
-                CellReference.convertNumToColString(headerTitles.size() - 1),
-                1 + dataValues.size());
+                CellReference.convertNumToColString(excelHeaderTitles.size() - 1),
+                1 + excelDataValues.size());
 
     CTTable ctTable = table.getCTTable();
     ctTable.setDisplayName(tableName); // does not support spaces
@@ -99,8 +248,8 @@ public abstract class DataOverviewSheet {
     ctTable.setTableType(STTableType.WORKSHEET);
 
     CTTableColumns columns = ctTable.addNewTableColumns();
-    columns.setCount(headerTitles.size());
-    headerTitles.forEach(
+    columns.setCount(excelHeaderTitles.size());
+    excelHeaderTitles.forEach(
         title -> {
           CTTableColumn tableColumn = columns.addNewTableColumn();
           tableColumn.setId(idSupplier.get());
@@ -119,16 +268,16 @@ public abstract class DataOverviewSheet {
   @SneakyThrows
   public void exportToCsvFile(String csvFilePattern) {
     CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
-    headerTitles.forEach(csvSchemaBuilder::addColumn);
+    csvHeaderTitles.forEach(csvSchemaBuilder::addColumn);
     CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
     CsvMapper csvMapper = new CsvMapper();
     List<Map<String, String>> csvRows =
-        dataValues.stream()
+        csvDataValues.stream()
             .map(
                 dataRow ->
-                    IntStream.range(0, headerTitles.size())
+                    IntStream.range(0, csvHeaderTitles.size())
                         .boxed()
-                        .collect(Collectors.toMap(headerTitles::get, dataRow::get)))
+                        .collect(Collectors.toMap(csvHeaderTitles::get, dataRow::get)))
             .toList();
     ObjectWriter csvWriter = csvMapper.writer(csvSchema);
     StringWriter stringWriter = new StringWriter();
@@ -136,5 +285,30 @@ public abstract class DataOverviewSheet {
     String csvFilePath = csvFilePattern.formatted(sheetName.toLowerCase().replaceAll(" ", "-"));
     Files.writeString(Paths.get(csvFilePath), stringWriter.toString());
     log.info("Data overview {} exported to {}", sheetName.toLowerCase(), csvFilePath);
+  }
+
+  @SneakyThrows
+  public static List<List<String>> importFromCsvFile(String csvFileUrl) {
+    String oldCsvContent;
+    try (HttpClient httpClient = HttpClient.newHttpClient()) {
+      oldCsvContent =
+          httpClient
+              .send(
+                  HttpRequest.newBuilder(URI.create(csvFileUrl)).build(),
+                  HttpResponse.BodyHandlers.ofString())
+              .body();
+    }
+    List<List<String>> csvRows;
+    try (MappingIterator<Map<String, String>> iterator =
+        new CsvMapper()
+            .readerFor(Map.class)
+            .with(CsvSchema.builder().setUseHeader(true).build())
+            .readValues(oldCsvContent)) {
+      csvRows =
+          iterator.readAll().stream()
+              .map(row -> new ArrayList<>(row.values()))
+              .collect(Collectors.toList());
+    }
+    return csvRows;
   }
 }

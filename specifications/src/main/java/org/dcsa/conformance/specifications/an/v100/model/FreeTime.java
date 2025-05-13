@@ -2,11 +2,9 @@ package org.dcsa.conformance.specifications.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.an.v100.SchemaOverride;
 import org.dcsa.conformance.specifications.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.an.v100.types.IsoEquipmentCode;
-import org.dcsa.conformance.specifications.an.v100.types.ModeOfTransportCode;
 
 @Data
 @Schema(description = "Free time condition applicable to this shipment at destination.")
@@ -17,11 +15,6 @@ public class FreeTime {
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private IsoEquipmentCode isoEquipmentCode;
-
-  @SchemaOverride(
-      description =
-          "The mode of transport, as defined by DCSA, for which the free time object applies")
-  private ModeOfTransportCode modeOfTransportCode;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,

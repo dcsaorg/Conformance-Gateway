@@ -272,7 +272,12 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                     .then(
                                                         uc12_carrier_confirmBookingCompleted()
                                                             .then(
-                                                                shipperGetBooking(COMPLETED)))))))))
+                                                                shipperGetBooking(COMPLETED)))))))),
+            Map.entry(
+                "Carrier error response conformance",
+                carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
+                    .then(
+                        uc1_shipper_SubmitBookingRequest().then(shipperGetBookingErrorScenario()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -614,6 +619,19 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                 expectedCancellationState,
                 componentFactory.getMessageSchemaValidator(BOOKING_API, GET_BOOKING_SCHEMA_NAME),
                 requestAmendedContent));
+  }
+
+  private static BookingScenarioListBuilder shipperGetBookingErrorScenario() {
+    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingScenarioListBuilder(
+        previousAction ->
+            new ShipperGetBookingErrorScenarioAction(
+                carrierPartyName,
+                shipperPartyName,
+                (BookingAction) previousAction,
+                componentFactory.getMessageSchemaValidator(BOOKING_API, "ErrorResponse")));
   }
 
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest() {

@@ -53,4 +53,8 @@ public enum ScenarioType {
   public boolean isCarriersAgentAtDestinationRequired() {
     return this == REGULAR_CLAD;
   }
+
+  public boolean isSWB() {
+    return this == REGULAR_SWB || this == REGULAR_SWB_AMF || this == REGULAR_SWB_SOC_AND_REFERENCES;
+  }
 }

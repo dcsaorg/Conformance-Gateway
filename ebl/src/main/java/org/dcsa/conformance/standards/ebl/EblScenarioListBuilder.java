@@ -109,10 +109,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           noAction()
             .thenEither(
               Arrays.stream(ScenarioType.values())
-                .map(
-                  scenarioType ->
-                    carrier_SupplyScenarioParameters(scenarioType)
-                      .then(_uc6_get(true, _uc8_get(_uc12_get(_uc13_get())))))
+                .map(EblScenarioListBuilder::buildScenarioForType)
                 .toList()
                 .toArray(new EblScenarioListBuilder[] {}))),
         Map.entry(
@@ -124,6 +121,15 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       .collect(
         Collectors.toMap(
           Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  private static EblScenarioListBuilder buildScenarioForType(ScenarioType type) {
+    if (type.isSWB()) {
+      return carrier_SupplyScenarioParameters(type)
+              .then(_uc6_get(true, _uc7_get(_uc8_get())));
+    }
+    return carrier_SupplyScenarioParameters(type)
+        .then(_uc6_get(true, _uc8_get(_uc12_get(_uc13_get()))));
   }
 
   @SuppressWarnings("unused")

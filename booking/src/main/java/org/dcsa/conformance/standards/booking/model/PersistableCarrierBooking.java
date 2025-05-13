@@ -135,6 +135,10 @@ public class PersistableCarrierBooking {
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
   }
 
+  private void resetCancellationBookingState() {
+    mutateBookingAndAmendment(b -> b.remove(CANCELLATION_BOOKING_STATUS));
+  }
+
   private void ensureConfirmedBookingHasCarrierFields(ObjectNode booking) {
     var clauses = booking.putArray("carrierClauses");
     booking.put("termsAndConditions", termsAndConditions());
@@ -175,12 +179,16 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, REJECTED);
   }
 
-  public void confirmBookingCompleted(String reference, boolean resetAmendedBooking) {
+  public void confirmBookingCompleted(
+      String reference, boolean resetAmendedBooking, boolean resetCancellationBookingState) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(COMPLETED);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, COMPLETED);
     if (resetAmendedBooking) {
       resetAmendedBookingState();
+    }
+    if (resetCancellationBookingState) {
+      resetCancellationBookingState();
     }
   }
 
@@ -208,6 +216,7 @@ public class PersistableCarrierBooking {
   public void cancelConfirmedBooking(String bookingReference) {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_CONFIRMED);
+    changeState(BOOKING_STATUS, CANCELLED);
   }
 
   public void updateCancelConfirmedBooking(String bookingReference) {

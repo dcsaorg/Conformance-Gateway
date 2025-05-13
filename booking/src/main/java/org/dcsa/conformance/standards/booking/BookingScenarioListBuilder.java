@@ -89,11 +89,45 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                         uc5_carrier_confirmBookingRequest()
                                                             .then(
                                                                 shipperGetBooking(CONFIRMED)
-                                                                    .then(
+                                                                    .thenEither(
                                                                         uc12_carrier_confirmBookingCompleted()
                                                                             .then(
                                                                                 shipperGetBooking(
-                                                                                    COMPLETED)))))),
+                                                                                    COMPLETED)),
+                                                                        uc13ShipperCancelConfirmedBooking(
+                                                                                CONFIRMED,
+                                                                                null,
+                                                                                CANCELLATION_RECEIVED)
+                                                                            .then(
+                                                                                shipperGetBooking(
+                                                                                        CONFIRMED,
+                                                                                        null,
+                                                                                        CANCELLATION_RECEIVED,
+                                                                                        false)
+                                                                                    .thenEither(
+                                                                                        uc14CarrierBookingCancellationConfirmed(
+                                                                                                CANCELLED,
+                                                                                                null)
+                                                                                            .then(
+                                                                                                shipperGetBooking(
+                                                                                                    CANCELLED,
+                                                                                                    null,
+                                                                                                    CANCELLATION_CONFIRMED,
+                                                                                                    false)),
+                                                                                        uc14CarrierBookingCancellationDeclined(
+                                                                                                CONFIRMED,
+                                                                                                null)
+                                                                                            .then(
+                                                                                                shipperGetBooking(
+                                                                                                        CONFIRMED,
+                                                                                                        null,
+                                                                                                        CANCELLATION_DECLINED,
+                                                                                                        false)
+                                                                                                    .then(
+                                                                                                        uc12_carrier_confirmBookingCompleted()
+                                                                                                            .then(
+                                                                                                                shipperGetBooking(
+                                                                                                                    COMPLETED)))))))))),
                                         uc4_carrier_rejectBookingRequest()
                                             .then(shipperGetBooking(REJECTED)),
                                         uc5_carrier_confirmBookingRequest()
@@ -452,9 +486,9 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
           then(
               shipperGetBooking(bookingStatus, amendedBookingStatus, CANCELLATION_RECEIVED)
                   .thenEither(
-                      uc14CarrierBookingCancellationConfirmed(bookingStatus, amendedBookingStatus)
+                      uc14CarrierBookingCancellationConfirmed(CANCELLED, amendedBookingStatus)
                           .thenAllPathsFrom(
-                              CANCELLATION_CONFIRMED, bookingStatus, amendedBookingStatus),
+                              CANCELLATION_CONFIRMED, CANCELLED, amendedBookingStatus),
                       uc14CarrierBookingCancellationDeclined(bookingStatus, amendedBookingStatus)
                           .thenAllPathsFrom(
                               CANCELLATION_DECLINED, bookingStatus, amendedBookingStatus)));

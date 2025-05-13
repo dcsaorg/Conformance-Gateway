@@ -295,9 +295,13 @@ public class PersistableCarrierBooking {
     booking
         .putArray("feedbacks")
         .addObject()
-        .put("severity", "WARN")
-        .put("code", "PROPERTY_VALUE_HAS_BEEN_CHANGED")
-        .put("message", "Please perform the changes requested by the Conformance orchestrator");
+        .put("severity", "ERROR")
+        .put("code", "PROPERTY_VALUE_MUST_CHANGE")
+        .put(
+            "message",
+            "Please change any one of the attributes in the request payload for conformance. For example, change VesselName to 'King of the Seas'")
+        .put("jsonPath", "$.vessel.name")
+        .put("property", "name");
   }
 
   public BookingState getOriginalBookingState() {

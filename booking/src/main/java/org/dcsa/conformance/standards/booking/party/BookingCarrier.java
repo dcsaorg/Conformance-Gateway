@@ -307,8 +307,11 @@ public class BookingCarrier extends ConformanceParty {
                 .put("severity", "ERROR")
                 .put("code", "PROPERTY_VALUE_MUST_CHANGE")
                 .put(
-                    MESSAGE,
-                    "Please perform the changes requested by the Conformance orchestrator");
+                    "message",
+                    "Please change any one of the attributes in the request payload for conformance. For example, change VesselName to 'King of the Seas'")
+                .put("jsonPath", "$.vessel.name")
+                .put("property", "name");
+
     String cbr = actionPrompt.path("cbr").asText(null);
     String cbrr = actionPrompt.required("cbrr").asText();
     var persistableCarrierBooking =
@@ -352,8 +355,10 @@ public class BookingCarrier extends ConformanceParty {
                 .put("severity", "ERROR")
                 .put("code", "PROPERTY_VALUE_MUST_CHANGE")
                 .put(
-                    MESSAGE,
-                    "Please perform the changes requested by the Conformance orchestrator");
+                    "message",
+                    "Please change any one of the attributes in the request payload for conformance. For example, change VesselName to 'King of the Seas'")
+                .put("jsonPath", "$.vessel.name")
+                .put("property", "name");
 
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
@@ -543,6 +548,10 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(booking)
+            .feedbacks(
+                persistableCarrierBooking.getfeedbacks() != null
+                    ? persistableCarrierBooking.getfeedbacks()
+                    : OBJECT_MAPPER.createArrayNode())
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode());
@@ -589,6 +598,10 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
+            .feedbacks(
+                persistableCarrierBooking.getfeedbacks() != null
+                    ? persistableCarrierBooking.getfeedbacks()
+                    : OBJECT_MAPPER.createArrayNode())
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode());

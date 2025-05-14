@@ -1,20 +1,19 @@
 package org.dcsa.conformance.standards.booking.checks;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.Set;
-
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.dcsa.conformance.standards.booking.checks.BookingChecks.FEEDBACKS_PRESENCE;
 import static org.dcsa.conformance.standards.booking.checks.BookingChecks.IS_EXPORT_DECLARATION_REFERENCE_PRESENCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Set;
+import org.dcsa.conformance.core.check.JsonContentCheck;
+import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class BookingChecksTest {
 
@@ -150,7 +149,6 @@ public class BookingChecksTest {
     assertTrue(FEEDBACKS_PRESENCE.validate(booking).isEmpty());
 
     booking.put("bookingStatus", BookingState.PENDING_AMENDMENT.name());
-    booking.put("amendedBookingStatus", "");
     assertTrue(FEEDBACKS_PRESENCE.validate(booking).isEmpty());
 
     booking.remove("feedbacks");

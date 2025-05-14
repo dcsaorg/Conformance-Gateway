@@ -35,30 +35,23 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck extend
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
-      createSubCheck(
-        "[Notification] Validate 'data.bookingStatus' is correct",
-        at("/data", this::ensureBookingStatusIsCorrect)
-      ),
-      createSubCheck(
-        "[Notification] Validate 'data.amendedBookingStatus' is correct",
-        at("/data", this::ensureAmendedBookingStatusIsCorrect)
-      ),
-      createSubCheck(
-        "[Notification] Validate 'data.bookingCancellationStatus' is correct",
-        at("/data", this::ensureBookingCancellationStatusIsCorrect)
-      ),
-      createSubCheck(
-        "[Notification] Validate 'data.carrierBookingReference' is conditionally present",
-        at("/data", this::ensureCarrierBookingReferenceCompliance)
-      ),
-      createSubCheck(
-        "[Notification] Validate 'data.feedbacks' is present for booking states where it is allowed",
-        at("/data", this::ensureFeedbacksIsPresent)
-      ),
-      createSubCheck(
-        "[Notification] Validate 'data.feedbacks' severity and code are valid",
-        at("/data", this::ensureFeedbackSeverityAndCodeCompliance)
-      )
-    );
+        createSubCheck(
+            "[Notification] Validate 'data.bookingStatus' is correct",
+            at("/data", this::ensureBookingStatusIsCorrect)),
+        createSubCheck(
+            "[Notification] Validate 'data.amendedBookingStatus' is correct",
+            at("/data", this::ensureAmendedBookingStatusIsCorrect)),
+        createSubCheck(
+            "[Notification] Validate 'data.bookingCancellationStatus' is correct",
+            at("/data", this::ensureBookingCancellationStatusIsCorrect)),
+        createSubCheck(
+            "[Notification] Validate 'data.carrierBookingReference' is conditionally present",
+            at("/data", this::ensureCarrierBookingReferenceCompliance)),
+        createSubCheck(
+            "[Notification] Validate 'data.feedbacks' is present for booking states where it is required",
+            at("/data", this::ensureFeedbacksIsPresent)),
+        createSubCheck(
+            "[Notification] Validate 'data.feedbacks' severity and code are valid",
+            at("/data", this::ensureFeedbackSeverityAndCodeCompliance)));
   }
 }

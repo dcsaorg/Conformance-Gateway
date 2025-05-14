@@ -109,8 +109,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                     .thenEither(
                         Arrays.stream(ScenarioType.values())
                             .map(EblScenarioListBuilder::buildScenarioForType)
-                            .toList()
-                            .toArray(new EblScenarioListBuilder[] {}))),
+                            .toArray(EblScenarioListBuilder[]::new))),
             Map.entry(
                 "Shipper interactions with transport document",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL)

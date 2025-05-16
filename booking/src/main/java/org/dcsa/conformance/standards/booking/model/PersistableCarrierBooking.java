@@ -116,7 +116,6 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, CONFIRMED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
-    removeFeedbacks();
   }
 
   public void confirmBooking(String reference, Supplier<String> cbrGenerator) {
@@ -129,12 +128,15 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
-    removeFeedbacks();
   }
 
   private void resetAmendedBookingState() {
     state.remove(AMENDED_BOOKING_DATA_FIELD);
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
+  }
+
+  private void resetCancellationBookingState() {
+    mutateBookingAndAmendment(b -> b.remove(CANCELLATION_BOOKING_STATUS));
   }
 
   private void ensureConfirmedBookingHasCarrierFields(ObjectNode booking) {
@@ -177,12 +179,16 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, REJECTED);
   }
 
-  public void confirmBookingCompleted(String reference, boolean resetAmendedBooking) {
+  public void confirmBookingCompleted(
+      String reference, boolean resetAmendedBooking, boolean resetCancellationBookingState) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(COMPLETED);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, COMPLETED);
     if (resetAmendedBooking) {
       resetAmendedBookingState();
+    }
+    if (resetCancellationBookingState) {
+      resetCancellationBookingState();
     }
   }
 
@@ -210,6 +216,7 @@ public class PersistableCarrierBooking {
   public void cancelConfirmedBooking(String bookingReference) {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_CONFIRMED);
+    changeState(BOOKING_STATUS, CANCELLED);
   }
 
   public void updateCancelConfirmedBooking(String bookingReference) {
@@ -259,11 +266,6 @@ public class PersistableCarrierBooking {
     }
   }
 
-  private void removeFeedbacks() {
-    getBooking().remove("feedbacks");
-    getAmendedBooking().ifPresent(amendedBooking -> amendedBooking.remove("feedbacks"));
-  }
-
   public void putBooking(String bookingReference, ObjectNode newBookingData) {
     var currentState = getOriginalBookingState();
     var amendedBookingState = getBookingAmendedState();
@@ -295,21 +297,20 @@ public class PersistableCarrierBooking {
     } else {
       setBooking(newBookingData);
     }
-    var bookingState = getOriginalBookingState();
-    if(!(PENDING_UPDATE.equals(bookingState) || PENDING_AMENDMENT.equals(bookingState) )) {
-      removeFeedbacks();
-    }
+
   }
 
   private void ensureFeedbacksExist(ObjectNode booking) {
     booking
-      .putArray("feedbacks")
-      .addObject()
-      .put("severity", "WARN")
-      .put("code", "PROPERTY_VALUE_HAS_BEEN_CHANGED")
-      .put(
-        "message",
-        "Please perform the changes requested by the Conformance orchestrator");
+        .putArray("feedbacks")
+        .addObject()
+        .put("severity", "ERROR")
+        .put("code", "PROPERTY_VALUE_MUST_CHANGE")
+        .put(
+            "message",
+            "Please change any one of the attributes in the request payload for conformance. For example, change VesselName to 'King of the Seas'")
+        .put("jsonPath", "$.vessel.name")
+        .put("property", "name");
   }
 
   public BookingState getOriginalBookingState() {

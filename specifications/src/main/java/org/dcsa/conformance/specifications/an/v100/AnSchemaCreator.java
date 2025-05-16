@@ -208,7 +208,7 @@ public class AnSchemaCreator {
     mapper.addMixIn(Schema.class, SchemaMixin.class);
 
     String yamlContent = mapper.writeValueAsString(openAPI);
-    String exportFileDir = "./generated-resources/";
+    String exportFileDir = "./generated-resources/an/v100/";
     String yamlFilePath = exportFileDir + "an-v1.0.0-openapi.yaml";
     Files.writeString(Paths.get(yamlFilePath), yamlContent);
     log.info("OpenAPI spec exported to {}", yamlFilePath);

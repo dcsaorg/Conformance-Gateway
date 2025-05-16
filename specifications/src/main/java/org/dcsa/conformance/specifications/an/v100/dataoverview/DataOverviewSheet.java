@@ -94,10 +94,6 @@ public abstract class DataOverviewSheet {
                     key)) // skip the old values of modified PKs
         .forEach(
             primaryKey -> {
-              if ("ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / codedVariant"
-                  .equals(primaryKey)) {
-                System.out.println(":)");
-              }
               String newPrimaryKey =
                   newRowValuesByPrimaryKey.containsKey(primaryKey) ? primaryKey : null;
               List<String> newRowValues =

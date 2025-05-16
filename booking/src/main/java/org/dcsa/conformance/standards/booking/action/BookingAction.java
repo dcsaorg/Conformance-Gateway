@@ -170,7 +170,12 @@ public abstract class BookingAction extends ConformanceAction {
             new ResponseStatusCheck(
                 titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedNotificationExchangeUuid(), bookingState, amendedBookingState, bookingCancellationState),
+                getMatchedNotificationExchangeUuid(),
+                bookingState,
+                amendedBookingState,
+                bookingCancellationState,
+                getCspSupplier(),
+                getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,
                 BookingRole::isCarrier,
@@ -226,14 +231,14 @@ public abstract class BookingAction extends ConformanceAction {
                     JsonPointer.compile("/data/amendedBookingStatus"),
                     amendedBookingState.name()),
             bookingCancellationState == null
-              ? null
-              : new JsonAttributeCheck(
-              titlePrefix,
-              BookingRole::isCarrier,
-              getMatchedNotificationExchangeUuid(),
-              HttpMessageType.REQUEST,
-              JsonPointer.compile("/data/bookingCancellationStatus"),
-              bookingCancellationState.name()))
-            .filter(Objects::nonNull);
+                ? null
+                : new JsonAttributeCheck(
+                    titlePrefix,
+                    BookingRole::isCarrier,
+                    getMatchedNotificationExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    JsonPointer.compile("/data/bookingCancellationStatus"),
+                    bookingCancellationState.name()))
+        .filter(Objects::nonNull);
   }
 }

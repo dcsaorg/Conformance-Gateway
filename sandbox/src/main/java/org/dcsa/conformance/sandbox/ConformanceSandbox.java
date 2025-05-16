@@ -322,6 +322,8 @@ public class ConformanceSandbox {
           persistenceProvider, deferredSandboxTaskConsumer, sandboxId, true);
     } else if (remainingUri.equals("/reset")) {
       return _handleReset(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+    } else if (remainingUri.equals("/dev/empty")) {
+      return new ConformanceWebResponse(200, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
     }
     throw new IllegalArgumentException("Unhandled URI: " + webRequest.url());
   }

@@ -1,0 +1,34 @@
+package org.dcsa.conformance.specifications.standards.an.v100.model;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
+import org.dcsa.conformance.specifications.generator.SchemaOverride;
+
+@Data
+@Schema(
+    description =
+"""
+Used for storing cargo in/on during transport. The equipment size/type is defined by the ISO 6346 code.
+The most common equipment size/type is 20'/40'/45' DRY Freight Container, but several different versions exist.
+""")
+public class Equipment {
+
+  @Schema()
+  private EquipmentReference equipmentReference;
+
+  @Schema(
+      maxLength = 4,
+      example = "22G1",
+      description =
+"""
+Unique code for the different equipment size and type used to transport commodities.
+
+The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP)
+following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
+""")
+  private String isoEquipmentCode;
+
+  @SchemaOverride(description = "The weight of an empty container (gross container weight).")
+  private Weight tareWeight;
+}

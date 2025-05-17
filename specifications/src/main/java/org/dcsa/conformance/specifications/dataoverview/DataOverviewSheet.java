@@ -5,22 +5,18 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import java.io.StringWriter;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -32,11 +28,13 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
+import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableColumn;
@@ -48,7 +46,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.STTableType;
 public abstract class DataOverviewSheet {
   private final String sheetName;
   private final String tableName;
-  private final int primaryKeyColumnCount;
   private final List<String> csvHeaderTitles;
   private final List<String> excelHeaderTitles;
   private final List<Integer> excelColumnWidths;
@@ -66,10 +63,10 @@ public abstract class DataOverviewSheet {
       List<List<String>> dataValues,
       Map<Class<? extends DataOverviewSheet>, List<List<String>>> oldDataValuesBySheetClass,
       Map<Class<? extends DataOverviewSheet>, Map<String, String>>
-          changedPrimaryKeyByOldPrimaryKeyBySheetClass) {
+          changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+      boolean swapOldAndNew) {
     this.sheetName = sheetName;
     this.tableName = tableName;
-    this.primaryKeyColumnCount = primaryKeyColumnCount;
     this.csvHeaderTitles = headerTitles;
     this.excelHeaderTitles = Stream.concat(Stream.of("Diff"), headerTitles.stream()).toList();
     this.excelColumnWidths = Stream.concat(Stream.of(12), columnWidths.stream()).toList();
@@ -77,13 +74,32 @@ public abstract class DataOverviewSheet {
         Stream.concat(Stream.of(Boolean.FALSE), wrapCellText.stream()).toList();
     this.csvDataValues = dataValues;
 
-    excelDataValues = new ArrayList<>();
     Map<String, List<String>> oldRowValuesByPrimaryKey =
-        rowValuesByPrimaryKey(oldDataValuesBySheetClass.get(getClass()));
-    Map<String, List<String>> newRowValuesByPrimaryKey = rowValuesByPrimaryKey(dataValues);
+        rowValuesByPrimaryKey(primaryKeyColumnCount, oldDataValuesBySheetClass.get(getClass()));
+    Map<String, List<String>> newRowValuesByPrimaryKey =
+        rowValuesByPrimaryKey(primaryKeyColumnCount, dataValues);
 
-    Map<String, String> changedPrimaryKeyByOldPrimaryKey =
-        new HashMap<>(changedPrimaryKeyByOldPrimaryKeyBySheetClass.get(getClass()));
+    excelDataValues =
+        swapOldAndNew
+            ? diff(
+                newRowValuesByPrimaryKey,
+                oldRowValuesByPrimaryKey,
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass.get(getClass()).entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)))
+            : diff(
+                oldRowValuesByPrimaryKey,
+                newRowValuesByPrimaryKey,
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass.get(getClass()));
+  }
+
+  private static List<Map.Entry<DataOverviewDiffStatus, List<String>>> diff(
+      Map<String, List<String>> oldRowValuesByPrimaryKey,
+      Map<String, List<String>> newRowValuesByPrimaryKey,
+      Map<String, String> changedPrimaryKeyByOldPrimaryKey) {
+    List<Map.Entry<DataOverviewDiffStatus, List<String>>> diffDataValues = new ArrayList<>();
+
+    Map<String, String> expandedChangedPrimaryKeyByOldPrimaryKey =
+        new TreeMap<>(changedPrimaryKeyByOldPrimaryKey);
     // expand old key - new key prefix mappings (skipping specified existing key mappings)
     changedPrimaryKeyByOldPrimaryKey.entrySet().stream()
         .filter(oldKeyNewKeyEntry -> oldKeyNewKeyEntry.getKey().endsWith("/"))
@@ -104,21 +120,57 @@ public abstract class DataOverviewSheet {
         .toList()
         .forEach(
             expandedEntry ->
-                changedPrimaryKeyByOldPrimaryKey.put(
+                expandedChangedPrimaryKeyByOldPrimaryKey.put(
                     expandedEntry.getKey(), expandedEntry.getValue()));
 
     Map<String, String> oldPrimaryKeysByNewPrimaryKey =
-        changedPrimaryKeyByOldPrimaryKey.entrySet().stream()
+        expandedChangedPrimaryKeyByOldPrimaryKey.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 
     Set<String> sortedPrimaryKeys =
         Stream.concat(
                 oldRowValuesByPrimaryKey.keySet().stream(),
                 newRowValuesByPrimaryKey.keySet().stream())
-            .collect(Collectors.toCollection(TreeSet::new));
+            .collect(
+                Collectors.toCollection(
+                    () ->
+                        new TreeSet<>(
+                            (leftPrimaryKey, rightPrimaryKey) -> {
+                              AtomicReference<String> leftPKReference =
+                                  new AtomicReference<>(leftPrimaryKey);
+                              AtomicReference<String> rightPKReference =
+                                  new AtomicReference<>(rightPrimaryKey);
+                              changedPrimaryKeyByOldPrimaryKey.entrySet().stream()
+                                  .filter(entry -> entry.getKey().endsWith("/"))
+                                  .forEach(
+                                      entry -> {
+                                        if (leftPrimaryKey.startsWith(entry.getKey())) {
+                                          leftPKReference.set(
+                                              entry.getValue()
+                                                  + leftPrimaryKey.substring(
+                                                      entry.getKey().length()));
+                                        }
+                                        if (rightPrimaryKey.startsWith(entry.getKey())) {
+                                          rightPKReference.set(
+                                              entry.getValue()
+                                                  + rightPrimaryKey.substring(
+                                                      entry.getKey().length()));
+                                        }
+                                      });
+                              int newPKComparison =
+                                  leftPKReference.get().compareTo(rightPKReference.get());
+                              return newPKComparison != 0
+                                  ? newPKComparison
+                                  : leftPrimaryKey.compareTo(rightPrimaryKey);
+                            })));
+
     sortedPrimaryKeys.stream()
         // skip the old values of modified PKs
-        .filter(key -> !changedPrimaryKeyByOldPrimaryKey.containsKey(key))
+        .filter(
+            key ->
+                !expandedChangedPrimaryKeyByOldPrimaryKey.containsKey(key)
+                    || !sortedPrimaryKeys.contains(
+                        expandedChangedPrimaryKeyByOldPrimaryKey.get(key)))
         .forEach(
             primaryKey -> {
               String newPrimaryKey =
@@ -130,9 +182,9 @@ public abstract class DataOverviewSheet {
               List<String> oldRowValues =
                   oldRowValuesByPrimaryKey.getOrDefault(oldPrimaryKey, null);
               if (newRowValues == null) {
-                excelDataValues.add(Map.entry(DataOverviewDiffStatus.REMOVED, oldRowValues));
+                diffDataValues.add(Map.entry(DataOverviewDiffStatus.REMOVED, oldRowValues));
               } else if (oldRowValues == null) {
-                excelDataValues.add(Map.entry(DataOverviewDiffStatus.ADDED, newRowValues));
+                diffDataValues.add(Map.entry(DataOverviewDiffStatus.ADDED, newRowValues));
               } else {
                 AtomicBoolean anyValuesUpdated = new AtomicBoolean(false);
                 AtomicInteger columnIndex = new AtomicInteger(0);
@@ -141,9 +193,7 @@ public abstract class DataOverviewSheet {
                         .map(
                             oldValue -> {
                               String newValue = newRowValues.get(columnIndex.getAndIncrement());
-                              if (newValue.equals(oldValue)
-                                  || Objects.equals(
-                                      oldValue, oldPrimaryKeysByNewPrimaryKey.get(newValue))) {
+                              if (newValue.equals(oldValue)) {
                                 return "";
                               } else {
                                 anyValuesUpdated.set(true);
@@ -152,17 +202,24 @@ public abstract class DataOverviewSheet {
                             })
                         .toList();
                 if (anyValuesUpdated.get()) {
-                  excelDataValues.add(
-                      Map.entry(DataOverviewDiffStatus.OLD_VALUE, updatedOldRowValues));
-                  excelDataValues.add(Map.entry(DataOverviewDiffStatus.NEW_VALUE, newRowValues));
+                  if (updatedOldRowValues.size() > 3
+                      && updatedOldRowValues.get(2).equals(UnspecifiedType.class.getSimpleName())) {
+                    diffDataValues.add(Map.entry(DataOverviewDiffStatus.UNMODIFIED, newRowValues));
+                  } else {
+                    diffDataValues.add(
+                        Map.entry(DataOverviewDiffStatus.OLD_VALUE, updatedOldRowValues));
+                    diffDataValues.add(Map.entry(DataOverviewDiffStatus.NEW_VALUE, newRowValues));
+                  }
                 } else {
-                  excelDataValues.add(Map.entry(DataOverviewDiffStatus.UNMODIFIED, newRowValues));
+                  diffDataValues.add(Map.entry(DataOverviewDiffStatus.UNMODIFIED, newRowValues));
                 }
               }
             });
+    return diffDataValues;
   }
 
-  private Map<String, List<String>> rowValuesByPrimaryKey(List<List<String>> dataValues) {
+  private static Map<String, List<String>> rowValuesByPrimaryKey(
+      int primaryKeyColumnCount, List<List<String>> dataValues) {
     return dataValues.stream()
         .collect(
             Collectors.toMap(
@@ -191,6 +248,7 @@ public abstract class DataOverviewSheet {
                                     diffStatus -> {
                                       XSSFCellStyle cellStyle =
                                           (XSSFCellStyle) workbook.createCellStyle();
+                                      cellStyle.setVerticalAlignment(VerticalAlignment.TOP);
                                       if (wrap) {
                                         cellStyle.setWrapText(true);
                                       }
@@ -313,27 +371,15 @@ public abstract class DataOverviewSheet {
   }
 
   @SneakyThrows
-  public static List<List<String>> importFromCsvFile(String csvFileUrl) {
-    String oldCsvContent;
-    try (HttpClient httpClient = HttpClient.newHttpClient()) {
-      oldCsvContent =
-          httpClient
-              .send(
-                  HttpRequest.newBuilder(URI.create(csvFileUrl)).build(),
-                  HttpResponse.BodyHandlers.ofString())
-              .body();
-    }
-    List<List<String>> csvRows;
+  public static List<List<String>> importFromString(String csvContent) {
     try (MappingIterator<Map<String, String>> iterator =
         new CsvMapper()
             .readerFor(Map.class)
             .with(CsvSchema.builder().setUseHeader(true).build())
-            .readValues(oldCsvContent)) {
-      csvRows =
-          iterator.readAll().stream()
-              .map(row -> new ArrayList<>(row.values()))
-              .collect(Collectors.toList());
+            .readValues(csvContent)) {
+      return iterator.readAll().stream()
+          .map(row -> new ArrayList<>(row.values()))
+          .collect(Collectors.toList());
     }
-    return csvRows;
   }
 }

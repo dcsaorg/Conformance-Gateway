@@ -18,8 +18,8 @@ import org.dcsa.conformance.specifications.dataoverview.DataOverviewSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
-import org.dcsa.conformance.specifications.standards.dt.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.TransportDocument;
+import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
 
 public class EBLStandardSpecification extends StandardSpecification {
 
@@ -37,7 +37,7 @@ public class EBLStandardSpecification extends StandardSpecification {
 
   @Override
   protected Stream<Class<?>> modelClassesStream() {
-    return Stream.of(TransportDocument.class, TransportDocumentReference.class);
+    return Stream.of(TransportDocument.class, UnspecifiedType.class);
   }
 
   @Override
@@ -48,6 +48,7 @@ public class EBLStandardSpecification extends StandardSpecification {
   @Override
   protected Map<Class<? extends DataOverviewSheet>, List<List<String>>>
       getOldDataValuesBySheetClass() {
+    // there's typically more than one entry in this map
     return Map.ofEntries(Map.entry(AttributesHierarchicalSheet.class, "attributes-hierarchical"))
         .entrySet()
         .stream()
@@ -55,9 +56,13 @@ public class EBLStandardSpecification extends StandardSpecification {
             Collectors.toMap(
                 Map.Entry::getKey,
                 entry ->
-                    DataOverviewSheet.importFromCsvFile(
-                        "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/refs/heads/SD-2173-an-vs-ebl/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
-                            .formatted(entry.getValue()))));
+                    DataOverviewSheet.importFromString(
+                            SpecificationToolkit.readLocalFile(
+                                "./generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                                    .formatted(entry.getValue())))
+                        .stream()
+                        .filter(row -> !row.getFirst().startsWith("ArrivalNoticeNotification"))
+                        .toList()));
   }
 
   @Override
@@ -74,6 +79,11 @@ public class EBLStandardSpecification extends StandardSpecification {
 
   protected QueryParametersFilterEndpoint getQueryParametersFilterEndpoint() {
     return getTransportDocumentEndpoint;
+  }
+
+  @Override
+  protected boolean swapOldAndNewInDataOverview() {
+    return true;
   }
 
   private static Operation operationTransportDocumentGet() {

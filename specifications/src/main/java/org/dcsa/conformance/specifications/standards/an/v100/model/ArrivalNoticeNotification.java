@@ -6,7 +6,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentRefe
 import org.dcsa.conformance.specifications.generator.SchemaOverride;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.dt.v100.types.TransportDocumentReference;
+import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
 
 import java.util.List;
 

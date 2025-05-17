@@ -30,7 +30,8 @@ public class DataOverview {
       Map<Boolean, List<List<Parameter>>> requiredAndOptionalFilters,
       Map<Class<? extends DataOverviewSheet>, List<List<String>>> oldDataValuesBySheetClass,
       Map<Class<? extends DataOverviewSheet>, Map<String, String>>
-          changedPrimaryKeyByOldPrimaryKeyBySheetClass) {
+          changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+      boolean swapOldAndNew) {
     AttributesData attributesData =
         new AttributesData(constraintsByClassAndField, schemas, rootTypeNames);
     attributesHierarchicalSheet =
@@ -38,28 +39,32 @@ public class DataOverview {
             ? new AttributesHierarchicalSheet(
                 attributesData,
                 oldDataValuesBySheetClass,
-                changedPrimaryKeyByOldPrimaryKeyBySheetClass)
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+                swapOldAndNew)
             : null;
     attributesNormalizedSheet =
         oldDataValuesBySheetClass.containsKey(AttributesNormalizedSheet.class)
             ? new AttributesNormalizedSheet(
                 attributesData,
                 oldDataValuesBySheetClass,
-                changedPrimaryKeyByOldPrimaryKeyBySheetClass)
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+                swapOldAndNew)
             : null;
     queryParametersSheet =
         oldDataValuesBySheetClass.containsKey(QueryParametersSheet.class)
             ? new QueryParametersSheet(
                 queryParameters,
                 oldDataValuesBySheetClass,
-                changedPrimaryKeyByOldPrimaryKeyBySheetClass)
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+                swapOldAndNew)
             : null;
     queryFiltersSheet =
         oldDataValuesBySheetClass.containsKey(QueryFiltersSheet.class)
             ? new QueryFiltersSheet(
                 requiredAndOptionalFilters,
                 oldDataValuesBySheetClass,
-                changedPrimaryKeyByOldPrimaryKeyBySheetClass)
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+                swapOldAndNew)
             : null;
   }
 

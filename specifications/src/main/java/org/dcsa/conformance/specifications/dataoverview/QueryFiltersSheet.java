@@ -11,7 +11,8 @@ public class QueryFiltersSheet extends DataOverviewSheet {
       Map<Boolean, List<List<Parameter>>> requiredAndOptionalFilters,
       Map<Class<? extends DataOverviewSheet>, List<List<String>>> oldDataValuesBySheetClass,
       Map<Class<? extends DataOverviewSheet>, Map<String, String>>
-          changedPrimaryKeyByOldPrimaryKeyBySheetClass) {
+          changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+      boolean swapOldAndNew) {
     super(
         "Query filters",
         "QueryFiltersTable",
@@ -32,6 +33,7 @@ public class QueryFiltersSheet extends DataOverviewSheet {
                                     required ? "yes" : "")))
             .toList(),
         oldDataValuesBySheetClass,
-        changedPrimaryKeyByOldPrimaryKeyBySheetClass);
+        changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+        swapOldAndNew);
   }
 }

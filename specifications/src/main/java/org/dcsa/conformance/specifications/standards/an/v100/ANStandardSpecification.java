@@ -85,7 +85,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.SegregationGr
 import org.dcsa.conformance.specifications.standards.an.v100.types.ShippingMark;
 import org.dcsa.conformance.specifications.standards.an.v100.types.SubsidiaryRisk;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TemperatureUnitCode;
-import org.dcsa.conformance.specifications.standards.dt.v100.types.TransportDocumentReference;
+import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UNLocationCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UnecePackageCode;
@@ -221,9 +221,10 @@ public class ANStandardSpecification extends StandardSpecification {
             Collectors.toMap(
                 Map.Entry::getKey,
                 entry ->
-                    DataOverviewSheet.importFromCsvFile(
-                        "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/bd25914e5526aa7c8a67aba8a28010555c82d1ad/specifications/generated-resources/an-v1.0.0-data-overview-%s.csv"
-                            .formatted(entry.getValue()))));
+                    DataOverviewSheet.importFromString(
+                        SpecificationToolkit.readRemoteFile(
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/bd25914e5526aa7c8a67aba8a28010555c82d1ad/specifications/generated-resources/an-v1.0.0-data-overview-%s.csv"
+                                .formatted(entry.getValue())))));
   }
 
   @Override
@@ -289,6 +290,11 @@ public class ANStandardSpecification extends StandardSpecification {
 
   protected QueryParametersFilterEndpoint getQueryParametersFilterEndpoint() {
     return getArrivalNoticesEndpoint;
+  }
+
+  @Override
+  protected boolean swapOldAndNewInDataOverview() {
+    return false;
   }
 
   private static Operation operationArrivalNoticesGet() {

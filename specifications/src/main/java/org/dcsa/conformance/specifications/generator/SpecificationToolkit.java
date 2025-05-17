@@ -11,7 +11,11 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -74,14 +78,35 @@ public enum SpecificationToolkit {
     return (List<SchemaConstraint>) invocationResult;
   }
 
-  public static String readResourceFile(@SuppressWarnings("SameParameterValue") String fileName) {
+  public static String readLocalFile(String filePath) {
+    try {
+      return Files.readString(Paths.get(filePath));
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to read local file: " + filePath, e);
+    }
+  }
+
+  public static String readRemoteFile(@SuppressWarnings("SameParameterValue") String fileUrl) {
+    try (HttpClient httpClient = HttpClient.newHttpClient()) {
+      return httpClient
+          .send(
+              HttpRequest.newBuilder(URI.create(fileUrl)).build(),
+              HttpResponse.BodyHandlers.ofString())
+          .body();
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException("Failed to read remote file: " + fileUrl, e);
+    }
+  }
+
+  public static String readResourceFile(@SuppressWarnings("SameParameterValue") String filePath) {
     try {
       return Files.readString(
           Paths.get(
-              Objects.requireNonNull(SpecificationToolkit.class.getClassLoader().getResource(fileName))
+              Objects.requireNonNull(
+                      SpecificationToolkit.class.getClassLoader().getResource(filePath))
                   .toURI()));
     } catch (IOException | URISyntaxException e) {
-      throw new RuntimeException("Failed to read file from resources: " + fileName, e);
+      throw new RuntimeException("Failed to read file from resources: " + filePath, e);
     }
   }
 

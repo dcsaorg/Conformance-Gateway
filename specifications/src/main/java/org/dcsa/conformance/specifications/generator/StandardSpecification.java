@@ -30,9 +30,7 @@ public abstract class StandardSpecification {
   private final Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField;
 
   protected StandardSpecification(
-      String standardName,
-      String standardAbbreviation,
-      String standardVersion) {
+      String standardName, String standardAbbreviation, String standardVersion) {
     this.standardAbbreviation = standardAbbreviation;
     this.standardVersion = standardVersion;
     openAPI =
@@ -110,6 +108,8 @@ public abstract class StandardSpecification {
 
   protected abstract QueryParametersFilterEndpoint getQueryParametersFilterEndpoint();
 
+  protected abstract boolean swapOldAndNewInDataOverview();
+
   @SneakyThrows
   public void generateArtifacts() {
     String yamlContent = SpecificationToolkit.createYamlObjectMapper().writeValueAsString(openAPI);
@@ -131,7 +131,8 @@ public abstract class StandardSpecification {
             getQueryParametersFilterEndpoint().getQueryParameters(),
             getQueryParametersFilterEndpoint().getRequiredAndOptionalFilters(),
             getOldDataValuesBySheetClass(),
-            getChangedPrimaryKeyByOldPrimaryKeyBySheetClass());
+            getChangedPrimaryKeyByOldPrimaryKeyBySheetClass(),
+            swapOldAndNewInDataOverview());
     dataOverview.exportToExcelFile(
         exportFileDir + "%s-data-overview.xlsx".formatted(fileNamePrefix));
     dataOverview.exportToCsvFiles(

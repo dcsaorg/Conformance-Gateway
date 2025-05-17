@@ -8,7 +8,8 @@ public class AttributesHierarchicalSheet extends DataOverviewSheet {
       AttributesData attributesData,
       Map<Class<? extends DataOverviewSheet>, List<List<String>>> oldDataValuesBySheetClass,
       Map<Class<? extends DataOverviewSheet>, Map<String, String>>
-          changedPrimaryKeyByOldPrimaryKeyBySheetClass) {
+          changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+      boolean swapOldAndNew) {
     super(
         "Attributes hierarchical",
         "AttributesHierarchicalTable",
@@ -27,6 +28,7 @@ public class AttributesHierarchicalSheet extends DataOverviewSheet {
         List.of(false, false, false, false, false, false, true, true, true),
         attributesData.getHierarchicalRows(),
         oldDataValuesBySheetClass,
-        changedPrimaryKeyByOldPrimaryKeyBySheetClass);
+        changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+        swapOldAndNew);
   }
 }

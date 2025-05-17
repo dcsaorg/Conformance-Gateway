@@ -8,7 +8,8 @@ public class AttributesNormalizedSheet extends DataOverviewSheet {
       AttributesData attributesData,
       Map<Class<? extends DataOverviewSheet>, List<List<String>>> oldDataValuesBySheetClass,
       Map<Class<? extends DataOverviewSheet>, Map<String, String>>
-          changedPrimaryKeyByOldPrimaryKeyBySheetClass) {
+          changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+      boolean swapOldAndNew) {
     super(
         "Attributes normalized",
         "AttributesNormalizedTable",
@@ -27,6 +28,7 @@ public class AttributesNormalizedSheet extends DataOverviewSheet {
         List.of(false, false, false, false, false, false, true, true, true),
         attributesData.getNormalizedRows(),
         oldDataValuesBySheetClass,
-        changedPrimaryKeyByOldPrimaryKeyBySheetClass);
+        changedPrimaryKeyByOldPrimaryKeyBySheetClass,
+        swapOldAndNew);
   }
 }

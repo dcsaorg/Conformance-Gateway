@@ -2,8 +2,7 @@ package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.generator.SchemaOverride;
-import org.dcsa.conformance.specifications.standards.dt.v100.types.TransportDocumentReference;
+import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
 
 @Data
 @Schema(
@@ -13,102 +12,95 @@ Simplified definition of a Transport Document meant to be used exclusively for A
 """)
 public class TransportDocument {
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(description = "Reference of the transport document")
-  private TransportDocumentReference transportDocumentReference;
+  private UnspecifiedType transportDocumentReference;
 
-  @Schema() private String transportDocumentSubReference;
+  private UnspecifiedType transportDocumentSubReference;
 
-  @Schema() private String shippingInstructionsReference;
+  private UnspecifiedType shippingInstructionsReference;
 
-  @Schema() private String transportDocumentStatus;
+  private UnspecifiedType transportDocumentStatus;
 
-  @Schema() private String transportDocumentTypeCode;
+  private UnspecifiedType transportDocumentTypeCode;
 
-  @Schema() private String isShippedOnBoardType;
+  private UnspecifiedType isShippedOnBoardType;
 
-  @Schema() private String freightPaymentTermCode;
+  private UnspecifiedType freightPaymentTermCode;
 
-  @Schema() private String isElectronic;
+  private UnspecifiedType isElectronic;
 
-  @Schema() private String isToOrder;
+  private UnspecifiedType isToOrder;
 
-  @Schema() private String numberOfCopiesWithCharges;
+  private UnspecifiedType numberOfCopiesWithCharges;
 
-  @Schema() private String numberOfCopiesWithoutCharges;
+  private UnspecifiedType numberOfCopiesWithoutCharges;
 
-  @Schema() private String numberOfOriginalsWithCharges;
+  private UnspecifiedType numberOfOriginalsWithCharges;
 
-  @Schema() private String numberOfOriginalsWithoutCharges;
+  private UnspecifiedType numberOfOriginalsWithoutCharges;
 
-  @Schema() private String displayedNameForPlaceOfReceipt;
+  private UnspecifiedType displayedNameForPlaceOfReceipt;
 
-  @Schema() private String displayedNameForPortOfLoad;
+  private UnspecifiedType displayedNameForPortOfLoad;
 
-  @Schema() private String displayedNameForPortOfDischarge;
+  private UnspecifiedType displayedNameForPortOfDischarge;
 
-  @Schema() private String displayedNameForPlaceOfDelivery;
+  private UnspecifiedType displayedNameForPlaceOfDelivery;
 
-  @Schema() private String shippedOnBoardDate;
+  private UnspecifiedType shippedOnBoardDate;
 
-  @Schema() private String displayedShippedOnBoardReceivedForShipment;
+  private UnspecifiedType displayedShippedOnBoardReceivedForShipment;
 
-  @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
-      maxLength = 50000,
-      description = "Carrier terms and conditions of transport.",
-      example = "Any reference in...")
-  private String termsAndConditions;
+  private UnspecifiedType termsAndConditions;
 
-  @Schema() private String receiptTypeAtOrigin;
+  private UnspecifiedType receiptTypeAtOrigin;
 
-  @Schema() private String deliveryTypeAtDestination;
+  private UnspecifiedType deliveryTypeAtDestination;
 
-  @Schema() private String cargoMovementTypeAtOrigin;
+  private UnspecifiedType cargoMovementTypeAtOrigin;
 
-  @Schema() private String cargoMovementTypeAtDestination;
+  private UnspecifiedType cargoMovementTypeAtDestination;
 
-  @Schema() private String issueDate;
+  private UnspecifiedType issueDate;
 
-  @Schema() private String receivedForShipmentDate;
+  private UnspecifiedType receivedForShipmentDate;
 
-  @Schema() private String serviceContractReference;
+  private UnspecifiedType serviceContractReference;
 
-  @Schema() private String contractQuotationReference;
+  private UnspecifiedType contractQuotationReference;
 
-  @Schema() private String declaredValue;
+  private UnspecifiedType declaredValue;
 
-  @Schema() private String declaredValueCurrency;
+  private UnspecifiedType declaredValueCurrency;
 
-  @Schema() private String carrierCode;
+  private UnspecifiedType carrierCode;
 
-  @Schema() private String carrierCodeListProvider;
+  private UnspecifiedType carrierCodeListProvider;
 
-  @Schema() private String carrierClauses;
+  private UnspecifiedType carrierClauses;
 
-  @Schema() private String numberOfRiderPages;
+  private UnspecifiedType numberOfRiderPages;
 
-  @Schema() private String transports;
+  private UnspecifiedType transports;
 
-  @Schema() private String charges;
+  private UnspecifiedType charges;
 
-  @Schema() private String placeOfIssue;
+  private UnspecifiedType placeOfIssue;
 
-  @Schema() private String invoicePayableAt;
+  private UnspecifiedType invoicePayableAt;
 
-  @Schema() private String partyContactDetails;
+  private UnspecifiedType partyContactDetails;
 
-  @Schema() private String documentParties;
+  private UnspecifiedType documentParties;
 
-  @Schema() private String consignmentItems;
+  private UnspecifiedType consignmentItems;
 
-  @Schema() private String utilizedTransportEquipments;
+  private UnspecifiedType utilizedTransportEquipments;
 
-  @Schema() private String exportLicense;
+  private UnspecifiedType exportLicense;
 
-  @Schema() private String importLicense;
+  private UnspecifiedType importLicense;
 
-  @Schema() private String references;
+  private UnspecifiedType references;
 
-  @Schema() private String customsReferences;
+  private UnspecifiedType customsReferences;
 }

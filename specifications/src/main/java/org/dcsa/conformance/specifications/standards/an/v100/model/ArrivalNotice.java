@@ -13,7 +13,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierCodeLi
 import org.dcsa.conformance.specifications.standards.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.dt.v100.types.TransportDocumentReference;
+import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
 
 @Data

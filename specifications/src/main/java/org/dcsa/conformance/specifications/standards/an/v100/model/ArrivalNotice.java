@@ -13,7 +13,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierCodeLi
 import org.dcsa.conformance.specifications.standards.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
 
 @Data
@@ -152,7 +152,7 @@ and the carrier commits to a certain rate or rate schedule.
       requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 50000,
       description = "Carrier terms and conditions of transport.",
-      example = "These terms and conditions define...")
+      example = "Any reference in...")
   private String termsAndConditions;
 
   @Schema(description = "List of carrier clauses")

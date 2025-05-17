@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
-import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.dataoverview.AttributesHierarchicalSheet;
 import org.dcsa.conformance.specifications.dataoverview.AttributesNormalizedSheet;
 import org.dcsa.conformance.specifications.dataoverview.DataOverviewSheet;
 import org.dcsa.conformance.specifications.dataoverview.QueryFiltersSheet;
 import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
+import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
+import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ActiveReeferSettings;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Address;
@@ -85,7 +85,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.SegregationGr
 import org.dcsa.conformance.specifications.standards.an.v100.types.ShippingMark;
 import org.dcsa.conformance.specifications.standards.an.v100.types.SubsidiaryRisk;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TemperatureUnitCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UNLocationCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UnecePackageCode;
@@ -96,19 +96,15 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.VolumeUnitCod
 import org.dcsa.conformance.specifications.standards.an.v100.types.WeightUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.WoodDeclarationTypeCode;
 
-public class ANStandardSpecification
-    extends StandardSpecification {
+public class ANStandardSpecification extends StandardSpecification {
 
   public static final String TAG_ARRIVAL_NOTICE_PUBLISHERS = "AN Publisher Endpoints";
   public static final String TAG_ARRIVAL_NOTICE_SUBSCRIBERS = "AN Subscriber Endpoints";
 
-  private static final String API_DESCRIPTION =
-      SpecificationToolkit.readResourceFile("conformance/specifications/an/v100/openapi-root.md");
-
   private final GetArrivalNoticesEndpoint getArrivalNoticesEndpoint;
 
   public ANStandardSpecification() {
-    super("Arrival Notice", "AN", "1.0.0", API_DESCRIPTION);
+    super("Arrival Notice", "AN", "1.0.0");
 
     openAPI.addTagsItem(
         new Tag()
@@ -206,13 +202,19 @@ public class ANStandardSpecification
   }
 
   @Override
+  protected List<String> getRootTypeNames() {
+    return List.of(
+        ArrivalNotice.class.getSimpleName(), ArrivalNoticeNotification.class.getSimpleName());
+  }
+
+  @Override
   protected Map<Class<? extends DataOverviewSheet>, List<List<String>>>
       getOldDataValuesBySheetClass() {
     return Map.ofEntries(
-            Map.entry(AttributesHierarchicalSheet.class, "attributes-hierarchical.csv"),
-            Map.entry(AttributesNormalizedSheet.class, "attributes-normalized.csv"),
-            Map.entry(QueryParametersSheet.class, "query-parameters.csv"),
-            Map.entry(QueryFiltersSheet.class, "query-filters.csv"))
+            Map.entry(AttributesHierarchicalSheet.class, "attributes-hierarchical"),
+            Map.entry(AttributesNormalizedSheet.class, "attributes-normalized"),
+            Map.entry(QueryParametersSheet.class, "query-parameters"),
+            Map.entry(QueryFiltersSheet.class, "query-filters"))
         .entrySet()
         .stream()
         .collect(
@@ -224,6 +226,7 @@ public class ANStandardSpecification
                             .formatted(entry.getValue()))));
   }
 
+  @Override
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(

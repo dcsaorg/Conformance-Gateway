@@ -422,7 +422,7 @@ components:
           maxLength: 50000
           type: "string"
           description: "Carrier terms and conditions of transport."
-          example: "These terms and conditions define..."
+          example: "Any reference in..."
         carrierClauses:
           type: "array"
           description: "List of carrier clauses"

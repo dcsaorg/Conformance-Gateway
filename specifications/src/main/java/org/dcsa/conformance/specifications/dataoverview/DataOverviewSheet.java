@@ -13,8 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -81,7 +83,29 @@ public abstract class DataOverviewSheet {
     Map<String, List<String>> newRowValuesByPrimaryKey = rowValuesByPrimaryKey(dataValues);
 
     Map<String, String> changedPrimaryKeyByOldPrimaryKey =
-        changedPrimaryKeyByOldPrimaryKeyBySheetClass.get(getClass());
+        new HashMap<>(changedPrimaryKeyByOldPrimaryKeyBySheetClass.get(getClass()));
+    // expand old key - new key prefix mappings (skipping specified existing key mappings)
+    changedPrimaryKeyByOldPrimaryKey.entrySet().stream()
+        .filter(oldKeyNewKeyEntry -> oldKeyNewKeyEntry.getKey().endsWith("/"))
+        .flatMap(
+            oldKeyPrefixNewKeyPrefixEntry ->
+                oldRowValuesByPrimaryKey.keySet().stream()
+                    .filter(
+                        oldKey ->
+                            (oldKey.startsWith(oldKeyPrefixNewKeyPrefixEntry.getKey()))
+                                && !changedPrimaryKeyByOldPrimaryKey.containsKey(oldKey))
+                    .map(
+                        oldKey ->
+                            Map.entry(
+                                oldKey,
+                                oldKeyPrefixNewKeyPrefixEntry.getValue()
+                                    + oldKey.substring(
+                                        oldKeyPrefixNewKeyPrefixEntry.getKey().length()))))
+        .toList()
+        .forEach(
+            expandedEntry ->
+                changedPrimaryKeyByOldPrimaryKey.put(
+                    expandedEntry.getKey(), expandedEntry.getValue()));
 
     Map<String, String> oldPrimaryKeysByNewPrimaryKey =
         changedPrimaryKeyByOldPrimaryKey.entrySet().stream()
@@ -93,10 +117,8 @@ public abstract class DataOverviewSheet {
                 newRowValuesByPrimaryKey.keySet().stream())
             .collect(Collectors.toCollection(TreeSet::new));
     sortedPrimaryKeys.stream()
-        .filter(
-            key ->
-                !changedPrimaryKeyByOldPrimaryKey.containsKey(
-                    key)) // skip the old values of modified PKs
+        // skip the old values of modified PKs
+        .filter(key -> !changedPrimaryKeyByOldPrimaryKey.containsKey(key))
         .forEach(
             primaryKey -> {
               String newPrimaryKey =
@@ -119,7 +141,9 @@ public abstract class DataOverviewSheet {
                         .map(
                             oldValue -> {
                               String newValue = newRowValues.get(columnIndex.getAndIncrement());
-                              if (newValue.equals(oldValue)) {
+                              if (newValue.equals(oldValue)
+                                  || Objects.equals(
+                                      oldValue, oldPrimaryKeysByNewPrimaryKey.get(newValue))) {
                                 return "";
                               } else {
                                 anyValuesUpdated.set(true);

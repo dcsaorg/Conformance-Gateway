@@ -396,7 +396,7 @@ Additional information can be found [here](https://unece.org/trade/cefact/UNLOCO
 "ArrivalNotice / serviceContractNumber",serviceContractNumber,string,,100,,SCN12345,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
 quantity commitment (usually referred as ""MQC"") of cargo that the shipper commits to over a fixed period,
 and the carrier commits to a certain rate or rate schedule.",
-"ArrivalNotice / termsAndConditions",termsAndConditions,string,yes,50000,,"These terms and conditions define...","Carrier terms and conditions of transport.",
+"ArrivalNotice / termsAndConditions",termsAndConditions,string,yes,50000,,"Any reference in...","Carrier terms and conditions of transport.",
 "ArrivalNotice / transport",transport,Transport,yes,,,,,
 "ArrivalNotice / transport / departureDate",departureDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",

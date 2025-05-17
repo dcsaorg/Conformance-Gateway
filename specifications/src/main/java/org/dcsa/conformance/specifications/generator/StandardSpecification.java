@@ -32,8 +32,7 @@ public abstract class StandardSpecification {
   protected StandardSpecification(
       String standardName,
       String standardAbbreviation,
-      String standardVersion,
-      String apiDescription) {
+      String standardVersion) {
     this.standardAbbreviation = standardAbbreviation;
     this.standardVersion = standardVersion;
     openAPI =
@@ -43,7 +42,12 @@ public abstract class StandardSpecification {
                 new Info()
                     .version(standardVersion)
                     .title("DCSA %s API".formatted(standardName))
-                    .description(apiDescription)
+                    .description(
+                        SpecificationToolkit.readResourceFile(
+                            "conformance/specifications/%s/v%s/openapi-root.md"
+                                .formatted(
+                                    standardAbbreviation.toLowerCase(),
+                                    standardVersion.replaceAll("\\.", ""))))
                     .license(
                         new License()
                             .name("Apache 2.0")
@@ -96,6 +100,8 @@ public abstract class StandardSpecification {
 
   protected abstract Stream<Class<?>> modelClassesStream();
 
+  protected abstract List<String> getRootTypeNames();
+
   protected abstract Map<Class<? extends DataOverviewSheet>, List<List<String>>>
       getOldDataValuesBySheetClass();
 
@@ -121,6 +127,7 @@ public abstract class StandardSpecification {
             constraintsByClassAndField,
             SpecificationToolkit.parameterizeStringRawSchemaMap(
                 openAPI.getComponents().getSchemas()),
+            getRootTypeNames(),
             getQueryParametersFilterEndpoint().getQueryParameters(),
             getQueryParametersFilterEndpoint().getRequiredAndOptionalFilters(),
             getOldDataValuesBySheetClass(),

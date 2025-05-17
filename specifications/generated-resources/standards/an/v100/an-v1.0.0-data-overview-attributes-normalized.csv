@@ -64,7 +64,7 @@ ArrivalNotice,returnLocation,Location,,,,,"Return location",
 ArrivalNotice,serviceContractNumber,string,,100,,SCN12345,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
 quantity commitment (usually referred as ""MQC"") of cargo that the shipper commits to over a fixed period,
 and the carrier commits to a certain rate or rate schedule.",
-ArrivalNotice,termsAndConditions,string,yes,50000,,"These terms and conditions define...","Carrier terms and conditions of transport.",
+ArrivalNotice,termsAndConditions,string,yes,50000,,"Any reference in...","Carrier terms and conditions of transport.",
 ArrivalNotice,transport,Transport,yes,,,,,
 ArrivalNotice,"transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",XYZ1234,"Reference of the transport document for which this arrival notice was created",
 ArrivalNotice,"transportDocumentTypeCode",string,yes,,,BOL,"Type of the transport document for which this arrival notice was created

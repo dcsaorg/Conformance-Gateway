@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
@@ -12,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
-import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNotice;
-import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotification;
 
 @Slf4j
 public class DataOverview {
@@ -26,38 +25,42 @@ public class DataOverview {
   public DataOverview(
       Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField,
       Map<String, Schema<?>> schemas,
+      List<String> rootTypeNames,
       List<Parameter> queryParameters,
       Map<Boolean, List<List<Parameter>>> requiredAndOptionalFilters,
       Map<Class<? extends DataOverviewSheet>, List<List<String>>> oldDataValuesBySheetClass,
       Map<Class<? extends DataOverviewSheet>, Map<String, String>>
           changedPrimaryKeyByOldPrimaryKeyBySheetClass) {
     AttributesData attributesData =
-        new AttributesData(
-            constraintsByClassAndField,
-            schemas,
-            List.of(
-                ArrivalNotice.class.getSimpleName(),
-                ArrivalNoticeNotification.class.getSimpleName()));
+        new AttributesData(constraintsByClassAndField, schemas, rootTypeNames);
     attributesHierarchicalSheet =
-        new AttributesHierarchicalSheet(
-            attributesData,
-            oldDataValuesBySheetClass,
-            changedPrimaryKeyByOldPrimaryKeyBySheetClass);
+        oldDataValuesBySheetClass.containsKey(AttributesHierarchicalSheet.class)
+            ? new AttributesHierarchicalSheet(
+                attributesData,
+                oldDataValuesBySheetClass,
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass)
+            : null;
     attributesNormalizedSheet =
-        new AttributesNormalizedSheet(
-            attributesData,
-            oldDataValuesBySheetClass,
-            changedPrimaryKeyByOldPrimaryKeyBySheetClass);
+        oldDataValuesBySheetClass.containsKey(AttributesNormalizedSheet.class)
+            ? new AttributesNormalizedSheet(
+                attributesData,
+                oldDataValuesBySheetClass,
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass)
+            : null;
     queryParametersSheet =
-        new QueryParametersSheet(
-            queryParameters,
-            oldDataValuesBySheetClass,
-            changedPrimaryKeyByOldPrimaryKeyBySheetClass);
+        oldDataValuesBySheetClass.containsKey(QueryParametersSheet.class)
+            ? new QueryParametersSheet(
+                queryParameters,
+                oldDataValuesBySheetClass,
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass)
+            : null;
     queryFiltersSheet =
-        new QueryFiltersSheet(
-            requiredAndOptionalFilters,
-            oldDataValuesBySheetClass,
-            changedPrimaryKeyByOldPrimaryKeyBySheetClass);
+        oldDataValuesBySheetClass.containsKey(QueryFiltersSheet.class)
+            ? new QueryFiltersSheet(
+                requiredAndOptionalFilters,
+                oldDataValuesBySheetClass,
+                changedPrimaryKeyByOldPrimaryKeyBySheetClass)
+            : null;
   }
 
   @SneakyThrows
@@ -69,6 +72,7 @@ public class DataOverview {
               attributesNormalizedSheet,
               queryParametersSheet,
               queryFiltersSheet)
+          .filter(Objects::nonNull)
           .forEach(sheet -> sheet.addToExcelWorkbook(workbook, nextId::incrementAndGet));
       try (FileOutputStream fileOut = new FileOutputStream(excelFilePath)) {
         workbook.write(fileOut);
@@ -83,6 +87,7 @@ public class DataOverview {
             attributesNormalizedSheet,
             queryParametersSheet,
             queryFiltersSheet)
+        .filter(Objects::nonNull)
         .forEach(sheet -> sheet.exportToCsvFile(csvFilePattern));
   }
 }

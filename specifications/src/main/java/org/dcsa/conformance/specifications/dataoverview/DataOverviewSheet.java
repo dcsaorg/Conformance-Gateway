@@ -101,27 +101,43 @@ public abstract class DataOverviewSheet {
     Map<String, String> expandedChangedPrimaryKeyByOldPrimaryKey =
         new TreeMap<>(changedPrimaryKeyByOldPrimaryKey);
     // expand old key - new key prefix mappings (skipping specified existing key mappings)
-    changedPrimaryKeyByOldPrimaryKey.entrySet().stream()
-        .filter(oldKeyNewKeyEntry -> oldKeyNewKeyEntry.getKey().endsWith("/"))
-        .flatMap(
-            oldKeyPrefixNewKeyPrefixEntry ->
-                oldRowValuesByPrimaryKey.keySet().stream()
-                    .filter(
-                        oldKey ->
-                            (oldKey.startsWith(oldKeyPrefixNewKeyPrefixEntry.getKey()))
-                                && !changedPrimaryKeyByOldPrimaryKey.containsKey(oldKey))
-                    .map(
-                        oldKey ->
+    new TreeSet<>(changedPrimaryKeyByOldPrimaryKey.keySet())
+        .reversed().stream()
+            .filter(oldKey -> oldKey.endsWith("/"))
+            .flatMap(
+                oldKeyPrefix ->
+                    Stream.concat(
+                        Stream.of(
                             Map.entry(
-                                oldKey,
-                                oldKeyPrefixNewKeyPrefixEntry.getValue()
-                                    + oldKey.substring(
-                                        oldKeyPrefixNewKeyPrefixEntry.getKey().length()))))
-        .toList()
-        .forEach(
-            expandedEntry ->
-                expandedChangedPrimaryKeyByOldPrimaryKey.put(
-                    expandedEntry.getKey(), expandedEntry.getValue()));
+                                oldKeyPrefix.substring(0, oldKeyPrefix.length() - 2),
+                                changedPrimaryKeyByOldPrimaryKey
+                                    .get(oldKeyPrefix)
+                                    .substring(
+                                        0,
+                                        changedPrimaryKeyByOldPrimaryKey.get(oldKeyPrefix).length()
+                                            - 2))),
+                        oldRowValuesByPrimaryKey.keySet().stream()
+                            .filter(
+                                oldKey ->
+                                    (oldKey.startsWith(oldKeyPrefix))
+                                        && !changedPrimaryKeyByOldPrimaryKey.containsKey(oldKey)
+                                        && changedPrimaryKeyByOldPrimaryKey.keySet().stream()
+                                            .filter(
+                                                otherOldKeyPrefix ->
+                                                    otherOldKeyPrefix.startsWith(oldKeyPrefix)
+                                                        && !otherOldKeyPrefix.equals(oldKeyPrefix))
+                                            .noneMatch(oldKey::startsWith))
+                            .map(
+                                oldKey ->
+                                    Map.entry(
+                                        oldKey,
+                                        changedPrimaryKeyByOldPrimaryKey.get(oldKeyPrefix)
+                                            + oldKey.substring(oldKeyPrefix.length())))))
+            .toList()
+            .forEach(
+                expandedEntry ->
+                    expandedChangedPrimaryKeyByOldPrimaryKey.put(
+                        expandedEntry.getKey(), expandedEntry.getValue()));
 
     Map<String, String> oldPrimaryKeysByNewPrimaryKey =
         expandedChangedPrimaryKeyByOldPrimaryKey.entrySet().stream()

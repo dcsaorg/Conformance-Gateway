@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
 
+import java.util.List;
+
 @Data
 @Schema(
     description =
@@ -80,27 +82,27 @@ public class TransportDocument {
 
   private UnspecifiedType numberOfRiderPages;
 
-  private UnspecifiedType transports;
+  private Transports transports; // NOT a list
 
-  private UnspecifiedType charges;
+  private List<Charge> charges;
 
-  private UnspecifiedType placeOfIssue;
+  private PlaceOfIssue placeOfIssue;
 
-  private UnspecifiedType invoicePayableAt;
+  private InvoicePayableAt invoicePayableAt;
 
-  private UnspecifiedType partyContactDetails;
+  private List<PartyContactDetail> partyContactDetails;
 
-  private UnspecifiedType documentParties;
+  private DocumentParties documentParties; // NOT a list
 
-  private UnspecifiedType consignmentItems;
+  private UnspecifiedType consignmentItems; // FIXME
 
-  private UnspecifiedType utilizedTransportEquipments;
+  private UnspecifiedType utilizedTransportEquipments; // FIXME
 
-  private UnspecifiedType exportLicense;
+  private UnspecifiedType exportLicense; // FIXME
 
-  private UnspecifiedType importLicense;
+  private UnspecifiedType importLicense; // FIXME
 
-  private UnspecifiedType references;
+  private UnspecifiedType references; // FIXME
 
-  private UnspecifiedType customsReferences;
+  private UnspecifiedType customsReferences; // FIXME
 }

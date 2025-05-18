@@ -18,7 +18,34 @@ import org.dcsa.conformance.specifications.dataoverview.DataOverviewSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.Address;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.CarriersAgentAtDestination;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.Charge;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.City;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.Consignee;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.DocumentParties;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.Endorsee;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.Facility;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.GeoCoordinate;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.IdentifyingCode;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.InvoicePayableAt;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.IssuingParty;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.NotifyParty;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.OnwardInlandRouting;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.OtherDocumentParty;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.Party;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.PartyAddress;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.PartyContactDetail;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.PlaceOfDelivery;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.PlaceOfIssue;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.PlaceOfReceipt;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.PortOfDischarge;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.PortOfLoading;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.Shipper;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.TaxLegalReference;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.TransportDocument;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.Transports;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.VesselVoyage;
 import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
 
 public class EBLStandardSpecification extends StandardSpecification {
@@ -37,7 +64,36 @@ public class EBLStandardSpecification extends StandardSpecification {
 
   @Override
   protected Stream<Class<?>> modelClassesStream() {
-    return Stream.of(TransportDocument.class, UnspecifiedType.class);
+    return Stream.of(
+        Address.class,
+        CarriersAgentAtDestination.class,
+        Charge.class,
+        City.class,
+        Consignee.class,
+        DocumentParties.class,
+        Endorsee.class,
+        Facility.class,
+        GeoCoordinate.class,
+        IdentifyingCode.class,
+        InvoicePayableAt.class,
+        IssuingParty.class,
+        NotifyParty.class,
+        OnwardInlandRouting.class,
+        OtherDocumentParty.class,
+        Party.class,
+        PartyAddress.class,
+        PartyContactDetail.class,
+        PlaceOfDelivery.class,
+        PlaceOfIssue.class,
+        PlaceOfReceipt.class,
+        PortOfDischarge.class,
+        PortOfLoading.class,
+        Shipper.class,
+        TaxLegalReference.class,
+        TransportDocument.class,
+        Transports.class,
+        UnspecifiedType.class,
+        VesselVoyage.class);
   }
 
   @Override
@@ -72,9 +128,9 @@ public class EBLStandardSpecification extends StandardSpecification {
         Map.entry(
             AttributesHierarchicalSheet.class,
             Map.ofEntries(
-                Map.entry("ArrivalNotice", "TransportDocument"),
                 Map.entry("ArrivalNotice /", "TransportDocument /"),
-                Map.entry("ArrivalNotice / issueDateTime", "TransportDocument / issueDate"))));
+                Map.entry("ArrivalNotice / issueDateTime", "TransportDocument / issueDate"),
+                Map.entry("ArrivalNotice / transport /", "TransportDocument / transports /"))));
   }
 
   protected QueryParametersFilterEndpoint getQueryParametersFilterEndpoint() {

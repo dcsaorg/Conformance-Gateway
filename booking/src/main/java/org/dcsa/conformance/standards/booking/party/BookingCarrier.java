@@ -41,6 +41,8 @@ public class BookingCarrier extends ConformanceParty {
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
+  private static final String BOOKING = "booking";
+  private static final String AMENDED_BOOKING = "amendedBooking";
 
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
@@ -394,6 +396,7 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
+            .amendedBooking(persistableCarrierBooking.getAmendedBooking().orElse(null))
             .feedbacks(
                 persistableCarrierBooking.getfeedbacks() != null
                     ? persistableCarrierBooking.getfeedbacks()
@@ -541,6 +544,7 @@ public class BookingCarrier extends ConformanceParty {
     // readTree(json.toString()) because we want a deep copy
     persistableCarrierBooking.save(persistentMap);
     var booking = persistableCarrierBooking.getBooking();
+    var amendedBooking = persistableCarrierBooking.getAmendedBooking().orElse(null);
 
     asyncCounterpartNotification(
         null,
@@ -548,6 +552,7 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(booking)
+            .amendedBooking(amendedBooking)
             .feedbacks(
                 persistableCarrierBooking.getfeedbacks() != null
                     ? persistableCarrierBooking.getfeedbacks()
@@ -598,6 +603,7 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
+            .amendedBooking(persistableCarrierBooking.getAmendedBooking().orElse(null))
             .feedbacks(
                 persistableCarrierBooking.getfeedbacks() != null
                     ? persistableCarrierBooking.getfeedbacks()
@@ -698,6 +704,7 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
+            .amendedBooking(persistableCarrierBooking.getAmendedBooking().orElse(null))
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode());
@@ -723,9 +730,8 @@ public class BookingCarrier extends ConformanceParty {
     private String amendedBookingStatus;
     private String bookingCancellationStatus;
     private JsonNode feedbacks;
-
-
     private JsonNode booking;
+    private JsonNode amendedBooking;
     @Builder.Default private boolean includeCarrierBookingRequestReference = true;
     @Builder.Default private boolean includeCarrierBookingReference = false;
 
@@ -763,9 +769,15 @@ public class BookingCarrier extends ConformanceParty {
       setBookingProvidedField(data, BOOKING_STATUS, bookingStatus);
       setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);
       setBookingProvidedField(data, BOOKING_CANCELLATION_STATUS, bookingCancellationStatus);
-      if (feedbacks != null && feedbacks.size() > 0) {
+      if (feedbacks != null && !feedbacks.isEmpty()) {
         data.set(PersistableCarrierBooking.FEEDBACKS, feedbacks);
       }
+
+      data.set(BOOKING, booking);
+      if (amendedBooking != null && !amendedBooking.isEmpty()) {
+        data.set(AMENDED_BOOKING, amendedBooking);
+      }
+
       notification.set("data", data);
 
       return notification;

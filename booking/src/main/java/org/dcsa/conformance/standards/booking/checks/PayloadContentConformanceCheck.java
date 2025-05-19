@@ -33,13 +33,7 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   protected Function<JsonNode, Set<String>> at(String path, Function<JsonNode, Set<String>> subCheck) {
     // Eagerly compile to the pointer to weed out syntax errors early.
     var pointer = JsonPointer.compile(path);
-    return payload -> {
-      JsonNode target = payload.at(pointer);
-      if (target.isMissingNode() || target.isNull()) {
-        return Set.of();
-      }
-      return subCheck.apply(target);
-    };
+    return payload -> subCheck.apply(payload.at(pointer));
   }
 
   protected ConformanceCheck createSubCheck(String subtitle, Function<JsonNode, Set<String>> subCheck) {

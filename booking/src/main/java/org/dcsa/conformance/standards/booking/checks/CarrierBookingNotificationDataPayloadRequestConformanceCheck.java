@@ -92,7 +92,9 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck extend
                         + "Validate 'data.feedbacks' severity and code are valid",
                     at(DATA_PATH, this::ensureFeedbackSeverityAndCodeCompliance))),
             createFullNotificationChecksAt(BOOKING_PATH, BOOKING),
-            createFullNotificationChecksAt(AMENDED_BOOKING_PATH, AMENDED_BOOKING))
+            expectedAmendedBookingStatus != null
+                ? createFullNotificationChecksAt(AMENDED_BOOKING_PATH, AMENDED_BOOKING)
+                : Stream.<ConformanceCheck>empty())
         .flatMap(Function.identity());
   }
 

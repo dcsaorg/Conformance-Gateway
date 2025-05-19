@@ -17,8 +17,14 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck extend
   private static final String BOOKING_PATH = DATA_PATH + "/booking";
   private static final String AMENDED_BOOKING_PATH = DATA_PATH + "/amendedBooking";
 
-  private Supplier<CarrierScenarioParameters> cspSupplier;
-  private Supplier<DynamicScenarioParameters> dspSupplier;
+  private static final String BOOKING = "Booking";
+  private static final String AMENDED_BOOKING = "Amended Booking";
+
+  private static final String NOTIFICATION_WITH_PREFIX = "[%s Notification]";
+  private static final String NOTIFICATION_NO_PREFIX = "[Notification]";
+
+  private final Supplier<CarrierScenarioParameters> cspSupplier;
+  private final Supplier<DynamicScenarioParameters> dspSupplier;
 
   public CarrierBookingNotificationDataPayloadRequestConformanceCheck(
       UUID matchedExchangeUuid,
@@ -65,29 +71,33 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck extend
     return Stream.of(
             Stream.of(
                 createSubCheck(
-                    "[Notification] Validate 'data.bookingStatus' is correct",
+                    NOTIFICATION_NO_PREFIX + "Validate 'data.bookingStatus' is correct",
                     at(DATA_PATH, this::ensureBookingStatusIsCorrect)),
                 createSubCheck(
-                    "[Notification] Validate 'data.amendedBookingStatus' is correct",
+                    NOTIFICATION_NO_PREFIX + "Validate 'data.amendedBookingStatus' is correct",
                     at(DATA_PATH, this::ensureAmendedBookingStatusIsCorrect)),
                 createSubCheck(
-                    "[Notification] Validate 'data.bookingCancellationStatus' is correct",
+                    NOTIFICATION_NO_PREFIX + "Validate 'data.bookingCancellationStatus' is correct",
                     at(DATA_PATH, this::ensureBookingCancellationStatusIsCorrect)),
                 createSubCheck(
-                    "[Notification] Validate 'data.carrierBookingReference' is conditionally present",
+                    NOTIFICATION_NO_PREFIX
+                        + "Validate 'data.carrierBookingReference' is conditionally present",
                     at(DATA_PATH, this::ensureCarrierBookingReferenceCompliance)),
                 createSubCheck(
-                    "[Notification] Validate 'data.feedbacks' is present for booking states where it is required",
+                    NOTIFICATION_NO_PREFIX
+                        + "Validate 'data.feedbacks' is present for booking states where it is required",
                     at(DATA_PATH, this::ensureFeedbacksIsPresent)),
                 createSubCheck(
-                    "[Notification] Validate 'data.feedbacks' severity and code are valid",
+                    NOTIFICATION_NO_PREFIX
+                        + "Validate 'data.feedbacks' severity and code are valid",
                     at(DATA_PATH, this::ensureFeedbackSeverityAndCodeCompliance))),
-            createFullNotificationChecksAt(BOOKING_PATH),
-            createFullNotificationChecksAt(AMENDED_BOOKING_PATH))
+            createFullNotificationChecksAt(BOOKING_PATH, BOOKING),
+            createFullNotificationChecksAt(AMENDED_BOOKING_PATH, AMENDED_BOOKING))
         .flatMap(Function.identity());
   }
 
-  private Stream<ConformanceCheck> createFullNotificationChecksAt(String jsonPath) {
+  private Stream<ConformanceCheck> createFullNotificationChecksAt(
+      String jsonPath, String entityName) {
     return BookingChecks.fullPayloadChecks(
             cspSupplier,
             dspSupplier,
@@ -99,6 +109,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck extend
         .map(
             jsonContentCheck ->
                 createSubCheck(
-                    jsonContentCheck.description(), at(jsonPath, jsonContentCheck::validate)));
+                    NOTIFICATION_WITH_PREFIX.formatted(entityName) + jsonContentCheck.description(),
+                    at(jsonPath, jsonContentCheck::validate)));
   }
 }

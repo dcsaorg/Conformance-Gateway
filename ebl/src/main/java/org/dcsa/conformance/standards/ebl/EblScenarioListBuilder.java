@@ -128,7 +128,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     if (type.isSWB()) {
       return carrierSupplyScenarioParameters(type).then(uc6Get(true, uc7Get(uc8Get())));
     }
-    return carrierSupplyScenarioParameters(type).then(uc6Get(true, uc8Get(uc12Get(uc13Get()))));
+    return carrierSupplyScenarioParameters(type)
+        .then(uc6Get(true, uc7Get(uc8Get(uc12Get(uc13Get())))));
   }
 
   @SuppressWarnings("unused")

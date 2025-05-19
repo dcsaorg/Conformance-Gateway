@@ -1,7 +1,5 @@
 Send an issuance request for an eBL of type EBL_TYPE that has not yet been issued and to get response code
-RESPONSE_CODE with the following values:
-
-- SUPPLY_SCENARIO_PARAMETERS
+RESPONSE_CODE.
 
 Process an automatic response from the platform.
 

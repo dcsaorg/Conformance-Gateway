@@ -110,22 +110,10 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
 
     return tdr == null
         ? getMarkdownHumanReadablePrompt(
-            Map.of(
-                "EBL_TYPE",
-                eblType.name(),
-                "RESPONSE_CODE",
-                issuanceResponseCode.standardCode,
-                "SUPPLY_SCENARIO_PARAMETERS",
-                getSspSupplier().get().toJson().toString()),
+            Map.of("EBL_TYPE", eblType.name(), "RESPONSE_CODE", issuanceResponseCode.standardCode),
             "prompt-iss-reqres-ebltype.md")
         : getMarkdownHumanReadablePrompt(
-            Map.of(
-                "REFERENCE",
-                tdr,
-                "RESPONSE_CODE",
-                issuanceResponseCode.standardCode,
-                "SUPPLY_SCENARIO_PARAMETERS",
-                getSspSupplier().get().toJson().toString()),
+            Map.of("REFERENCE", tdr, "RESPONSE_CODE", issuanceResponseCode.standardCode),
             "prompt-iss-reqres-tdr.md");
   }
 

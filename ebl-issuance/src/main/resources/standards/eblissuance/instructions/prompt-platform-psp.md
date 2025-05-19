@@ -16,12 +16,12 @@ RESPONSE_CODE:
   as the value of attribute `partyCode`
 * `issueToCodeListName` (optional): copied into the first element of the `identifyingCodes` array in `/issueTo` object
   as the value of attribute `codeListName`
-* `consigneeOrEndorseeLegalName` (optional): copied into `/documentParties/consignees` as the value of attribute
+* `consigneeOrEndorseeLegalName` (optional): copied into `/documentParties/consignee` object as the value of attribute
   `partyName`
 * `consigneeOrEndorseePartyCode` (optional): copied into the first element of the `identifyingCodes` array in
-  `/documentParties/consignees` object as the value of attribute `partyCode`
+  `/documentParties/consignee` object as the value of attribute `partyCode`
 * `consigneeOrEndorseeCodeListName` (optional): copied into the first element of the `identifyingCodes` array in
-  `/documentParties/consignees` object as the value of attribute `codeListName`
+  `/documentParties/consignee` object as the value of attribute `codeListName`
 
 Provide the scenario parameters in this JSON format, adjusting the value of each parameter as needed so that your
 carrier application can complete the scenario normally and deleting any optional attributes that are not needed:

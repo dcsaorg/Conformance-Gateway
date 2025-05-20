@@ -391,17 +391,9 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   private void generateAndEmitNotificationFromBooking(
-    JsonNode actionPrompt,
-    PersistableCarrierBooking persistableCarrierBooking,
-    boolean includeCbrr) {
-    generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, includeCbrr,false);
-  }
-
-  private void generateAndEmitNotificationFromBooking(
       JsonNode actionPrompt,
       PersistableCarrierBooking persistableCarrierBooking,
-      boolean includeCbrr,
-      boolean includeCbr) {
+      boolean includeCbrr) {
     var notification =
         BookingNotification.builder()
             .apiVersion(apiVersion)
@@ -412,7 +404,6 @@ public class BookingCarrier extends ConformanceParty {
                     ? persistableCarrierBooking.getfeedbacks()
                     : OBJECT_MAPPER.createArrayNode())
             .includeCarrierBookingRequestReference(includeCbrr)
-            .includeCarrierBookingReference(includeCbr)
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode();
@@ -744,7 +735,6 @@ public class BookingCarrier extends ConformanceParty {
     private JsonNode booking;
     private JsonNode amendedBooking;
     @Builder.Default private boolean includeCarrierBookingRequestReference = true;
-    @Builder.Default private boolean includeCarrierBookingReference = false;
 
     private String computedType() {
       if (type != null) {
@@ -775,12 +765,10 @@ public class BookingCarrier extends ConformanceParty {
       setBookingProvidedField(data, AMENDED_BOOKING_STATUS, amendedBookingStatus);
       setBookingProvidedField(data, BOOKING_CANCELLATION_STATUS, bookingCancellationStatus);
 
+      setBookingProvidedField(data, CARRIER_BOOKING_REFERENCE, carrierBookingReference);
       if (includeCarrierBookingRequestReference) {
         setBookingProvidedField(
             data, CARRIER_BOOKING_REQUEST_REFERENCE, carrierBookingRequestReference);
-      }
-      if (includeCarrierBookingReference) {
-        setBookingProvidedField(data, CARRIER_BOOKING_REFERENCE, carrierBookingReference);
       }
       if (feedbacks != null && !feedbacks.isEmpty()) {
         data.set(PersistableCarrierBooking.FEEDBACKS, feedbacks);

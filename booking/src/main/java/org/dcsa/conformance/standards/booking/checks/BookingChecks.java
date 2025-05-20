@@ -618,8 +618,6 @@ public class BookingChecks {
             expectedCancelledBookingStatus,
             requestAmendedContent);
 
-    generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
-
     return JsonAttribute.contentChecks(
         BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }

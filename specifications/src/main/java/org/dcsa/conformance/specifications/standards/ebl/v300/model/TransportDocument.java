@@ -1,108 +1,148 @@
 package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
-
 import java.util.List;
+import lombok.Data;
 
+@Schema(description = "The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:\n- Bill of Lading\n- Sea Waybill.")
 @Data
-@Schema(
-    description =
-"""
-Simplified definition of a Transport Document meant to be used exclusively for AN - eBL mapping
-""")
 public class TransportDocument {
 
-  private UnspecifiedType transportDocumentReference;
+  @Schema(description = "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.", example = "HHL71800000", maxLength = 20, pattern = "^\\S(?:.*\\S)?$")
+  private String transportDocumentReference;
 
-  private UnspecifiedType transportDocumentSubReference;
+  @Schema(description = "Additional reference that can be optionally used alongside the `transportDocumentReference` in order to distinguish between versions of the same `Transport Document`.", example = "Version_1", maxLength = 100, pattern = "^\\S(?:.*\\S)?$")
+  private String transportDocumentSubReference;
 
-  private UnspecifiedType shippingInstructionsReference;
+  @Schema(description = "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.", example = "e0559d83-00e2-438e-afd9-fdd610c1a008", maxLength = 100, pattern = "^\\S(?:.*\\S)?$")
+  private String shippingInstructionsReference;
 
-  private UnspecifiedType transportDocumentStatus;
+  @Schema(description = "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED", example = "DRAFT", maxLength = 50)
+  private String transportDocumentStatus;
 
-  private UnspecifiedType transportDocumentTypeCode;
+  @Schema(description = "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)", example = "SWB", allowableValues = {"BOL", "SWB"})
+  private String transportDocumentTypeCode;
 
-  private UnspecifiedType isShippedOnBoardType;
+  @Schema(description = "Specifies whether the Transport Document is a received for shipment, or shipped on board.", example = "true")
+  private Boolean isShippedOnBoardType;
 
-  private UnspecifiedType freightPaymentTermCode;
+  @Schema(description = "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)", example = "PRE", allowableValues = {"PRE", "COL"})
+  private String freightPaymentTermCode;
 
-  private UnspecifiedType isElectronic;
+  @Schema(description = "An indicator whether the transport document is electronically transferred.", example = "true")
+  private Boolean isElectronic;
 
-  private UnspecifiedType isToOrder;
+  @Schema(description = "Indicates whether the B/L is issued `to order` or not.", example = "false")
+  private Boolean isToOrder;
 
-  private UnspecifiedType numberOfCopiesWithCharges;
+  @Schema(description = "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.", example = "2", minimum = "0", format = "int32")
+  private Integer numberOfCopiesWithCharges;
 
-  private UnspecifiedType numberOfCopiesWithoutCharges;
+  @Schema(description = "The requested number of copies of the `Transport Document` to be issued by the carrier NOT including charges.", example = "2", minimum = "0", format = "int32")
+  private Integer numberOfCopiesWithoutCharges;
 
-  private UnspecifiedType numberOfOriginalsWithCharges;
+  @Schema(description = "Number of originals of the Bill of Lading with charges.", example = "1", minimum = "0", format = "int32")
+  private Integer numberOfOriginalsWithCharges;
 
-  private UnspecifiedType numberOfOriginalsWithoutCharges;
+  @Schema(description = "Number of originals of the Bill of Lading without charges.", example = "1", minimum = "0", format = "int32")
+  private Integer numberOfOriginalsWithoutCharges;
 
-  private UnspecifiedType displayedNameForPlaceOfReceipt;
+  @Schema(description = "Display name for Place of Receipt.")
+  private List<String> displayedNameForPlaceOfReceipt;
 
-  private UnspecifiedType displayedNameForPortOfLoad;
+  @Schema(description = "Display name for Port of Load.")
+  private List<String> displayedNameForPortOfLoad;
 
-  private UnspecifiedType displayedNameForPortOfDischarge;
+  @Schema(description = "Display name for Port of Discharge.")
+  private List<String> displayedNameForPortOfDischarge;
 
-  private UnspecifiedType displayedNameForPlaceOfDelivery;
+  @Schema(description = "Display name for Place of Delivery.")
+  private List<String> displayedNameForPlaceOfDelivery;
 
-  private UnspecifiedType shippedOnBoardDate;
+  @Schema(description = "Date goods were shipped on board.", example = "2020-12-12", format = "date")
+  private String shippedOnBoardDate;
 
-  private UnspecifiedType displayedShippedOnBoardReceivedForShipment;
+  @Schema(description = "Text to be displayed as shipped/received evidence.", example = "Received for Shipment CMA CGM CONCORDE 28-Jul-2022...", maxLength = 250, pattern = "^\\S(?:.*\\S)?$")
+  private String displayedShippedOnBoardReceivedForShipment;
 
-  private UnspecifiedType termsAndConditions;
+  @Schema(description = "Carrier terms and conditions of transport.", example = "Any reference in...", maxLength = 50000)
+  private String termsAndConditions;
 
-  private UnspecifiedType receiptTypeAtOrigin;
+  @Schema(description = "Type of service offered at Origin.", example = "CY", maxLength = 3, allowableValues = {"CY", "SD", "CFS"})
+  private String receiptTypeAtOrigin;
 
-  private UnspecifiedType deliveryTypeAtDestination;
+  @Schema(description = "Type of service offered at Destination.", example = "CY", maxLength = 3, allowableValues = {"CY", "SD", "CFS"})
+  private String deliveryTypeAtDestination;
 
-  private UnspecifiedType cargoMovementTypeAtOrigin;
+  @Schema(description = "Shipment term at loading.", example = "FCL", maxLength = 3)
+  private String cargoMovementTypeAtOrigin;
 
-  private UnspecifiedType cargoMovementTypeAtDestination;
+  @Schema(description = "Shipment term at unloading.", example = "FCL", maxLength = 3)
+  private String cargoMovementTypeAtDestination;
 
-  private UnspecifiedType issueDate;
+  @Schema(description = "Issue date of the document.", example = "2020-12-12", format = "date")
+  private String issueDate;
 
-  private UnspecifiedType receivedForShipmentDate;
+  @Schema(description = "Date goods were received for shipment.", example = "2020-12-12", format = "date")
+  private String receivedForShipmentDate;
 
-  private UnspecifiedType serviceContractReference;
+  @Schema(description = "Reference number for the service contract.", example = "HHL51800000", maxLength = 30)
+  private String serviceContractReference;
 
-  private UnspecifiedType contractQuotationReference;
+  @Schema(description = "Contract or quotation reference.", example = "HHL1401", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
+  private String contractQuotationReference;
 
-  private UnspecifiedType declaredValue;
+  @Schema(description = "Declared value of cargo.", example = "1231.1", minimum = "0", format = "float")
+  private Double declaredValue;
 
-  private UnspecifiedType declaredValueCurrency;
+  @Schema(description = "Currency for declared value.", example = "DKK", maxLength = 3, minLength = 3, pattern = "^[A-Z]{3}$")
+  private String declaredValueCurrency;
 
-  private UnspecifiedType carrierCode;
+  @Schema(description = "SCAC or SMDG code of the carrier.", example = "MMCU", maxLength = 4, pattern = "^\\S+$")
+  private String carrierCode;
 
-  private UnspecifiedType carrierCodeListProvider;
+  @Schema(description = "Code list provider for the carrier.", example = "NMFTA", allowableValues = {"SMDG", "NMFTA"})
+  private String carrierCodeListProvider;
 
-  private UnspecifiedType carrierClauses;
+  @Schema(description = "Additional clauses by the carrier.")
+  private List<String> carrierClauses;
 
-  private UnspecifiedType numberOfRiderPages;
+  @Schema(description = "Number of additional pages required.", example = "2", minimum = "0", format = "int32")
+  private Integer numberOfRiderPages;
 
-  private Transports transports; // NOT a list
+  @Schema
+  private Transports transports;
 
-  private List<Charge> charges;
+  @Schema(description = "A list of Charges.")
+  private List<String> charges;
 
+  @Schema
   private PlaceOfIssue placeOfIssue;
 
+  @Schema
   private InvoicePayableAt invoicePayableAt;
 
-  private List<PartyContactDetail> partyContactDetails;
+  @Schema(description = "Contact details related to the document.")
+  private List<String> partyContactDetails;
 
-  private DocumentParties documentParties; // NOT a list
+  @Schema(description = "All `Parties` with associated roles.")
+  private DocumentParties documentParties;
 
-  private UnspecifiedType consignmentItems; // FIXME
+  @Schema(description = "A list of ConsignmentItems.")
+  private List<String> consignmentItems;
 
-  private UnspecifiedType utilizedTransportEquipments; // FIXME
+  @Schema(description = "A list of utilized transport equipments.")
+  private List<String> utilizedTransportEquipments;
 
-  private UnspecifiedType exportLicense; // FIXME
+  @Schema
+  private ExportLicense exportLicense;
 
-  private UnspecifiedType importLicense; // FIXME
+  @Schema
+  private ImportLicense importLicense;
 
-  private UnspecifiedType references; // FIXME
+  @Schema(description = "A list of references.")
+  private List<String> references;
 
-  private UnspecifiedType customsReferences; // FIXME
+  @Schema(description = "A list of customs references.")
+  private List<String> customsReferences;
 }

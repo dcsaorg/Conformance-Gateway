@@ -2,12 +2,14 @@ package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
 
+@Schema(description = "An object used to express a location using `latitude` and `longitude`.")
 @Data
-@Schema()
 public class GeoCoordinate {
-  private UnspecifiedType latitude;
 
-  private UnspecifiedType longitude;
+  @Schema(description = "Geographic coordinate that specifies the north–south position of a point on Earth's surface.", example = "48.8585500", maxLength = 10)
+  private String latitude;
+
+  @Schema(description = "Geographic coordinate that specifies the east–west position of a point on Earth's surface.", example = "2.294492036", maxLength = 11)
+  private String longitude;
 }

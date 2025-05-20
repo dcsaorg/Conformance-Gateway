@@ -1,22 +1,29 @@
 package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
 
+@Schema(description = "Refers to a company or a legal entity. Either `address` or an `identifyingCode` must be provided.")
 @Data
-@Schema()
 public class Party {
-  private UnspecifiedType partyName;
 
+  @Schema(description = "Name of the party.", example = "Asseco Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
+  private String partyName;
+
+  @Schema(description = "Address of the party.")
   private PartyAddress address;
 
+  @ArraySchema(schema = @Schema(description = "Party identifying codes. Either this or address must be provided."))
   private List<IdentifyingCode> identifyingCodes;
 
+  @ArraySchema(schema = @Schema(description = "Tax references for the party."))
   private List<TaxLegalReference> taxLegalReferences;
 
+  @ArraySchema(schema = @Schema(description = "Contact details for the party."))
   private List<PartyContactDetail> partyContactDetails;
 
-  private UnspecifiedType reference;
+  @Schema(description = "A reference linked to the `Party`.", example = "HHL007", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
+  private String reference;
 }

@@ -2,14 +2,17 @@ package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
 
+@Schema(description = "An object for storing city, state/region, and country related information.")
 @Data
-@Schema()
 public class City {
-  private UnspecifiedType city;
 
-  private UnspecifiedType stateRegion;
+  @Schema(description = "The name of the city.", example = "Amsterdam", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
+  private String city;
 
-  private UnspecifiedType countryCode;
+  @Schema(description = "The name of the state or region.", example = "North Holland", maxLength = 65)
+  private String stateRegion;
+
+  @Schema(description = "The 2-character ISO 3166-1 alpha-2 country code.", example = "NL", minLength = 2, maxLength = 2, pattern = "^[A-Z]{2}$")
+  private String countryCode;
 }

@@ -10,7 +10,7 @@ public class GetTransportDocumentEndpoint implements QueryParametersFilterEndpoi
 
   private final Parameter transportDocumentReference =
       new Parameter()
-          .in("url")
+          .in("path")
           .name("transportDocumentReference")
           .description("Reference of the transport document to return")
           .example("TDR0123456")

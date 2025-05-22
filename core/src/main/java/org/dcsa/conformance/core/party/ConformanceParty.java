@@ -230,7 +230,6 @@ public abstract class ConformanceParty implements StatefulEntity {
                                 partyConfiguration.getName(), StandardCharsets.UTF_8)),
                 Collections.emptyMap(),
                 jsonBody));
-        // asyncOrchestratorPostPartyInput(actionId, OBJECT_MAPPER.createObjectNode());
       } else {
         log.info(
             "Party {} NOT sending a notification and NOT notifying orchestrator either: no counterpart URL is configured",

@@ -264,7 +264,7 @@ public class ConformanceSandbox {
 
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
-    if (!sandboxConfiguration.getAuthHeaderName().isBlank()) {
+    if (!sandboxConfiguration.getAuthHeaderName().isBlank() && !remainingUri.contains("/empty")) {
       Collection<String> authHeaderValues =
           webRequest.headers().get(sandboxConfiguration.getAuthHeaderName());
       if (authHeaderValues == null || authHeaderValues.isEmpty()) {
@@ -294,7 +294,10 @@ public class ConformanceSandbox {
       String partyName =
           URLDecoder.decode(remainingUri.substring(0, endOfPartyName), StandardCharsets.UTF_8);
       remainingUri = remainingUri.substring(endOfPartyName);
-
+      if (remainingUri.contains("empty")) {
+        return new ConformanceWebResponse(
+            204, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
+      }
       if (remainingUri.equals("/api/conformance/notification")) {
         return _handlePartyNotification(
             persistenceProvider, deferredSandboxTaskConsumer, sandboxId, partyName);
@@ -322,8 +325,6 @@ public class ConformanceSandbox {
           persistenceProvider, deferredSandboxTaskConsumer, sandboxId, true);
     } else if (remainingUri.equals("/reset")) {
       return _handleReset(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
-    } else if (remainingUri.equals("/dev/empty")) {
-      return new ConformanceWebResponse(200, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
     }
     throw new IllegalArgumentException("Unhandled URI: " + webRequest.url());
   }

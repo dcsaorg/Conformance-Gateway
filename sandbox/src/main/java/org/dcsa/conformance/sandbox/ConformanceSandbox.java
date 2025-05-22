@@ -262,7 +262,7 @@ public class ConformanceSandbox {
     String sandboxId = remainingUri.substring(0, endOfSandboxId);
     remainingUri = remainingUri.substring(endOfSandboxId);
 
-    if (remainingUri.contains("dev/empty")) {
+    if (remainingUri.contains("dev/null")) {
       return new ConformanceWebResponse(204, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
     }
     SandboxConfiguration sandboxConfiguration =

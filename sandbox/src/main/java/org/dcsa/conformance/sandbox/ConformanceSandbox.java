@@ -297,10 +297,6 @@ public class ConformanceSandbox {
       String partyName =
           URLDecoder.decode(remainingUri.substring(0, endOfPartyName), StandardCharsets.UTF_8);
       remainingUri = remainingUri.substring(endOfPartyName);
-      if (remainingUri.contains("empty")) {
-        return new ConformanceWebResponse(
-            204, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
-      }
       if (remainingUri.equals("/api/conformance/notification")) {
         return _handlePartyNotification(
             persistenceProvider, deferredSandboxTaskConsumer, sandboxId, partyName);

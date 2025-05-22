@@ -262,9 +262,12 @@ public class ConformanceSandbox {
     String sandboxId = remainingUri.substring(0, endOfSandboxId);
     remainingUri = remainingUri.substring(endOfSandboxId);
 
+    if (remainingUri.contains("dev/empty")) {
+      return new ConformanceWebResponse(204, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
+    }
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
-    if (!sandboxConfiguration.getAuthHeaderName().isBlank() && !remainingUri.contains("/empty")) {
+    if (!sandboxConfiguration.getAuthHeaderName().isBlank()) {
       Collection<String> authHeaderValues =
           webRequest.headers().get(sandboxConfiguration.getAuthHeaderName());
       if (authHeaderValues == null || authHeaderValues.isEmpty()) {

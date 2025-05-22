@@ -223,11 +223,7 @@ public abstract class ConformanceParty implements StatefulEntity {
             _createConformanceRequest(
                 true,
                 "POST",
-                partyConfiguration.getOrchestratorUrl()
-                    + "/party/%s/input/dev/empty"
-                        .formatted(
-                            URLEncoder.encode(
-                                partyConfiguration.getName(), StandardCharsets.UTF_8)),
+                partyConfiguration.getOrchestratorUrl() + "/dev/empty",
                 Collections.emptyMap(),
                 jsonBody));
       } else {

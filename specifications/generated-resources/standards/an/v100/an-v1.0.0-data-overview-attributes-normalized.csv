@@ -20,16 +20,14 @@ ActiveReeferSettings,temperatureUnit,string,,,,CEL,"The unit for temperature in 
 - `FAH` (Fahrenheit)
 
 **Condition:** Mandatory to provide if `temperatureSetpoint` is provided",
-Address,city,string,,35,,Amsterdam,City,
-Address,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-
-When the country code is required but not applicable, use the code `ZZ`.",
-Address,floor,string,,50,,2nd,Floor,
-Address,poBox,string,,20,,12345,"P.O. box",
-Address,postCode,string,,10,,"1234 AB","Post code",
-Address,stateRegion,string,,65,,"North Holland","State or region",
-Address,street,string,,70,,"Example St.",Street,
-Address,streetNumber,string,,50,,123,"Street number",
+Address,POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+Address,city,string,,35,"^\S(?:.*\S)?$",Amsterdam,"The name of the city.",
+Address,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+Address,floor,string,,50,"^\S(?:.*\S)?$",N/A,"The floor of the street number.",
+Address,postCode,string,,10,,"1047 HM","The post code of the address.",
+Address,stateRegion,string,,65,,"North Holland","The name of the state/region.",
+Address,street,string,,70,,Ruijggoordweg,"The name of the street.",
+Address,streetNumber,string,,50,,100,"The number of the street.",
 ArrivalNotice,additionalInformation,string,,500,,"FIRMS code: B986","Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
 e.g. additional required documents to prepare and present for shipment release - country specific.",
 ArrivalNotice,"arrivalNoticeVisualization",EmbeddedDocument,,,,,,

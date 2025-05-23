@@ -19,7 +19,7 @@ import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoi
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ActiveReeferSettings;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.Address;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoGrossVolume;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoGrossWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoItem;

@@ -2,6 +2,7 @@ package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
 
 @Schema(description = "End location of inland movement after delivery to port of discharge/place of delivery for merchant haulage. May be specified via UN Location Code, Facility, or Address.")
 @Data

@@ -6,6 +6,7 @@ import org.dcsa.conformance.specifications.generator.SchemaOverride;
 import org.dcsa.conformance.specifications.generator.StringPatterns;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FacilityCodeListProvider;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UNLocationCode;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
 
 @Data
 @Schema(description = "Location information")

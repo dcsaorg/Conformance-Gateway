@@ -233,6 +233,54 @@ components:
           description: "Indicator of whether cargo requires Controlled Atmosphere."
           example: true
       description: "The specifications for a Reefer equipment. Only applicable when `isNonOperatingReefer` is false."
+    Address:
+      type: "object"
+      properties:
+        street:
+          maxLength: 70
+          type: "string"
+          description: "The name of the street."
+          example: "Ruijggoordweg"
+        streetNumber:
+          maxLength: 50
+          type: "string"
+          description: "The number of the street."
+          example: "100"
+        floor:
+          maxLength: 50
+          pattern: "^\\S(?:.*\\S)?$"
+          type: "string"
+          description: "The floor of the street number."
+          example: "N/A"
+        postCode:
+          maxLength: 10
+          type: "string"
+          description: "The post code of the address."
+          example: "1047 HM"
+        POBox:
+          maxLength: 20
+          type: "string"
+          description: "A numbered box at a post office where a person or business can have mail or parcels delivered."
+          example: "123"
+        city:
+          maxLength: 35
+          pattern: "^\\S(?:.*\\S)?$"
+          type: "string"
+          description: "The name of the city."
+          example: "Amsterdam"
+        stateRegion:
+          maxLength: 65
+          type: "string"
+          description: "The name of the state/region."
+          example: "North Holland"
+        countryCode:
+          maxLength: 2
+          minLength: 2
+          pattern: "^[A-Z]{2}$"
+          type: "string"
+          description: "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)"
+          example: "NL"
+      description: "An object for storing address-related information."
     CargoGrossVolume:
       type: "object"
       properties:
@@ -1109,55 +1157,6 @@ components:
           items:
             $ref: "#/components/schemas/CustomsReference"
       description: "Specifies the container (`equipment`), total `weight`, `volume`, possible `ActiveReeferSettings`, `seals` and `references`."
-    Address:
-      type: "object"
-      properties:
-        street:
-          maxLength: 70
-          type: "string"
-          description: "Street"
-          example: "Example St."
-        streetNumber:
-          maxLength: 50
-          type: "string"
-          description: "Street number"
-          example: "123"
-        floor:
-          maxLength: 50
-          type: "string"
-          description: "Floor"
-          example: "2nd"
-        postCode:
-          maxLength: 10
-          type: "string"
-          description: "Post code"
-          example: "1234 AB"
-        poBox:
-          maxLength: 20
-          type: "string"
-          description: "P.O. box"
-          example: "12345"
-        city:
-          maxLength: 35
-          type: "string"
-          description: "City"
-          example: "Amsterdam"
-        stateRegion:
-          maxLength: 65
-          type: "string"
-          description: "State or region"
-          example: "North Holland"
-        countryCode:
-          maxLength: 2
-          minLength: 2
-          pattern: "^[A-Z]{2}$"
-          type: "string"
-          description: |
-            The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-
-            When the country code is required but not applicable, use the code `ZZ`.
-          example: "NL"
-      description: "Address information"
     ArrivalNotice:
       required:
       - "cargoMovementTypeAtDestination"

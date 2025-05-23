@@ -24,7 +24,6 @@ import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNotice;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotification;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotificationsMessage;
@@ -77,6 +76,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.VolumeUnitCod
 import org.dcsa.conformance.specifications.standards.an.v100.types.WeightUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.WoodDeclarationTypeCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ActiveReeferSettings;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoGrossVolume;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoGrossWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoItem;
@@ -137,6 +137,7 @@ public class ANStandardSpecification extends StandardSpecification {
     return Stream.of(
         // DT
         ActiveReeferSettings.class,
+        Address.class,
         CargoGrossVolume.class,
         CargoGrossWeight.class,
         CargoItem.class,
@@ -163,7 +164,6 @@ public class ANStandardSpecification extends StandardSpecification {
         TareWeight.class,
         UtilizedTransportEquipment.class,
         // AN
-        Address.class,
         ArrivalNotice.class,
         ArrivalNoticeNotification.class,
         ArrivalNoticeNotificationsMessage.class,

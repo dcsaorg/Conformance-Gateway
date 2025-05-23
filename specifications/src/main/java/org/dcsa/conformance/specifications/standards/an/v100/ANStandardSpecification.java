@@ -29,7 +29,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNotice
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotification;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotificationsMessage;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticesMessage;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ContactInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.DocumentParty;
 import org.dcsa.conformance.specifications.standards.an.v100.model.EmbeddedDocument;
@@ -83,6 +82,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoGrossWei
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoItem;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoNetVolume;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoNetWeight;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CustomsReference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.DangerousGoods;
@@ -142,6 +142,7 @@ public class ANStandardSpecification extends StandardSpecification {
         CargoItem.class,
         CargoNetVolume.class,
         CargoNetWeight.class,
+        Charge.class,
         ConsignmentItem.class,
         CustomsReference.class,
         DangerousGoods.class,
@@ -168,7 +169,6 @@ public class ANStandardSpecification extends StandardSpecification {
         ArrivalNoticeNotificationsMessage.class,
         ArrivalNoticesMessage.class,
         CarrierClause.class,
-        Charge.class,
         ContactInformation.class,
         ContainerLoadTypeCode.class,
         CountryCode.class,

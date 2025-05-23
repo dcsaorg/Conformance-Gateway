@@ -3,6 +3,7 @@ package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense;
 

@@ -115,31 +115,16 @@ CargoNetWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in
 - `KGM` (Kilograms)
 - `LBR` (Pounds)",
 CargoNetWeight,value,number,,,,2400,"The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
-Charge,calculationBasis,string,yes,50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton,
-per square metre.",
-Charge,carrierRateOfExchange,string,,50,,"1.00 EUR = 1.08149 USD","The quotation of the relative value of a currency unit against the unit of another currency
-in the foreign exchange market applicable to this charge item. The Carrier rate of exchange applicability
-is defined based on the local jurisdiction. If not provided, the customer should refer to the ROE available
-on the carrier website or the ROE defined by the competent customs authority, as per local practice.",
-Charge,chargeAmount,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The monetary value of this charge, expressed with a maximum of 2 decimal digits",
-Charge,chargeCurrency,string,yes,3,"^[A-Z]{3}$",EUR,"Currency code as defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)",
-Charge,chargeDescription,string,yes,50,,"Documentation fee - Destination","Description of the charge",
-Charge,freightPaymentStatus,string,,50,,FULLY_PAID,"Payment status of the freight charges.
+Charge,calculationBasis,string,,50,"^\S(?:.*\S)?$","Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
+Charge,chargeName,string,,50,"^\S(?:.*\S)?$","Documentation fee - Destination","Free text field describing the charge to apply",
+Charge,currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
+Charge,currencyCode,string,,3,"^[A-Z]{3}$",DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+Charge,paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
 
- * `ZERO_PAID` - Zero Paid
- * `PARTIALLY_PAID` - Partially Paid
- * `FULLY_PAID` - Fully Paid
- * `OVERPAID` - Overpaid",
-Charge,invoiceReference,string,,100,,INV51XX80YY,"Reference of the invoice towards the consignee for this shipment charge",
-Charge,paymentTermCode,string,yes,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL).
-When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf
-of the shipper (if provided). When collect, the charge is the responsibility of the consignee
-or the Invoice payer on behalf of the consignee (if provided).
-
- * `COL` - Collect
- * `PRE` - Prepaid",
-Charge,quantity,string,yes,,"^\d+(\.\d+)?$",123.456,"The quantity of this charge item in units at `unitPrice`",
-Charge,unitPrice,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The unit price of this charge item in the `chargeCurrency`, expressed with a maximum of 2 decimal digits",
+- `PRE` (Prepaid)
+- `COL` (Collect)",
+Charge,quantity,number,,,,34.4,"The amount of unit for this charge item.",
+Charge,unitPrice,number,,,,3456.6,"The unit price of this charge item in the currency of the charge.",
 ConsignmentItem,HSCodes,"string list",,,,,"A list of `HS Codes` that apply to this `consignmentItem`",
 ConsignmentItem,cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",
 ConsignmentItem,carrierBookingReference,string,,35,"^\S(?:.*\S)?$",ABC709951,"The associated booking number provided by the carrier for this `Consignment Item`.",

@@ -26,7 +26,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoItem;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoNetVolume;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoNetWeight;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.CarriersAgentAtDestination;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.Charge;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.City;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Consignee;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;

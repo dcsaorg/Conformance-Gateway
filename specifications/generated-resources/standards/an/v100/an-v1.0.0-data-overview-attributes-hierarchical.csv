@@ -25,31 +25,16 @@ or shares the container with other shipments (LCL).
 "ArrivalNotice / carrierInformationForCargoRelease / name",name,string,,100,"^\S+(\s+\S+)*$","Jane Doe","Contact name",
 "ArrivalNotice / carrierInformationForCargoRelease / phone",phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number","At least one of these attributes is required: 'phone', 'email'."
 "ArrivalNotice / charges",charges,"Charge list",,,,,"List of charges applicable to this shipment",
-"ArrivalNotice / charges / calculationBasis",calculationBasis,string,yes,50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton,
-per square metre.",
-"ArrivalNotice / charges / carrierRateOfExchange",carrierRateOfExchange,string,,50,,"1.00 EUR = 1.08149 USD","The quotation of the relative value of a currency unit against the unit of another currency
-in the foreign exchange market applicable to this charge item. The Carrier rate of exchange applicability
-is defined based on the local jurisdiction. If not provided, the customer should refer to the ROE available
-on the carrier website or the ROE defined by the competent customs authority, as per local practice.",
-"ArrivalNotice / charges / chargeAmount",chargeAmount,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The monetary value of this charge, expressed with a maximum of 2 decimal digits",
-"ArrivalNotice / charges / chargeCurrency",chargeCurrency,string,yes,3,"^[A-Z]{3}$",EUR,"Currency code as defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)",
-"ArrivalNotice / charges / chargeDescription",chargeDescription,string,yes,50,,"Documentation fee - Destination","Description of the charge",
-"ArrivalNotice / charges / freightPaymentStatus",freightPaymentStatus,string,,50,,FULLY_PAID,"Payment status of the freight charges.
+"ArrivalNotice / charges / calculationBasis",calculationBasis,string,,50,"^\S(?:.*\S)?$","Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
+"ArrivalNotice / charges / chargeName",chargeName,string,,50,"^\S(?:.*\S)?$","Documentation fee - Destination","Free text field describing the charge to apply",
+"ArrivalNotice / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
+"ArrivalNotice / charges / currencyCode",currencyCode,string,,3,"^[A-Z]{3}$",DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+"ArrivalNotice / charges / paymentTermCode",paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
 
- * `ZERO_PAID` - Zero Paid
- * `PARTIALLY_PAID` - Partially Paid
- * `FULLY_PAID` - Fully Paid
- * `OVERPAID` - Overpaid",
-"ArrivalNotice / charges / invoiceReference",invoiceReference,string,,100,,INV51XX80YY,"Reference of the invoice towards the consignee for this shipment charge",
-"ArrivalNotice / charges / paymentTermCode",paymentTermCode,string,yes,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL).
-When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf
-of the shipper (if provided). When collect, the charge is the responsibility of the consignee
-or the Invoice payer on behalf of the consignee (if provided).
-
- * `COL` - Collect
- * `PRE` - Prepaid",
-"ArrivalNotice / charges / quantity",quantity,string,yes,,"^\d+(\.\d+)?$",123.456,"The quantity of this charge item in units at `unitPrice`",
-"ArrivalNotice / charges / unitPrice",unitPrice,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The unit price of this charge item in the `chargeCurrency`, expressed with a maximum of 2 decimal digits",
+- `PRE` (Prepaid)
+- `COL` (Collect)",
+"ArrivalNotice / charges / quantity",quantity,number,,,,34.4,"The amount of unit for this charge item.",
+"ArrivalNotice / charges / unitPrice",unitPrice,number,,,,3456.6,"The unit price of this charge item in the currency of the charge.",
 "ArrivalNotice / consignmentItems",consignmentItems,"ConsignmentItem list",yes,,,,"The list of consignment items in the shipment.",
 "ArrivalNotice / consignmentItems / HSCodes",HSCodes,"string list",,,,,"A list of `HS Codes` that apply to this `consignmentItem`",
 "ArrivalNotice / consignmentItems / cargoItems",cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",

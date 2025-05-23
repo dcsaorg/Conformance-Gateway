@@ -118,7 +118,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ArrivalNoticesMessage"
-    put:
+    post:
       tags:
       - "AN Subscriber Endpoints"
       summary: "Sends a list of arrival notices"
@@ -137,7 +137,7 @@ paths:
             API-Version:
               $ref: "#/components/headers/API-Version"
   /arrival-notice-notifications:
-    put:
+    post:
       tags:
       - "AN Subscriber Endpoints"
       summary: "Sends a list of arrival notice lightweight notifications"

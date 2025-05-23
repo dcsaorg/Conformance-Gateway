@@ -122,10 +122,10 @@ public class ANStandardSpecification extends StandardSpecification {
 
     openAPI.path(
         "/arrival-notices",
-        new PathItem().get(operationArrivalNoticesGet()).put(operationArrivalNoticesPut()));
+        new PathItem().get(operationArrivalNoticesGet()).post(operationArrivalNoticesPut()));
     openAPI.path(
         "/arrival-notice-notifications",
-        new PathItem().put(operationArrivalNoticeNotificationsPut()));
+        new PathItem().post(operationArrivalNoticeNotificationsPut()));
 
     getArrivalNoticesEndpoint = new GetArrivalNoticesEndpoint();
   }

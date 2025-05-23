@@ -65,13 +65,12 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
 """)
   private List<ContactInformation> carrierInformationForCargoRelease;
 
-  @Schema(allOf = Location.class)
   @SchemaOverride(description = "Pickup location")
-  private Object pickupLocation;
+  private Location pickupLocation;
 
-  @Schema(allOf = Location.class)
+  @Schema()
   @SchemaOverride(description = "Return location")
-  private Object returnLocation;
+  private Location returnLocation;
 
   @Schema(
       maxLength = 500,

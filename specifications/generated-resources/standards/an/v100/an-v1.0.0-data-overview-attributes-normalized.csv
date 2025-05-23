@@ -59,12 +59,12 @@ ArrivalNotice,issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time
 ArrivalNotice,label,string,,1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 ArrivalNotice,payerCode,string,,100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
-ArrivalNotice,pickupLocation,Location,,,,,"Pickup location",
+ArrivalNotice,pickupLocation,Location,,,,,,
 ArrivalNotice,references,"Reference list",,,,,"References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
 Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
 on the B/L. Customers can use these references to track shipments in their internal systems.",
 ArrivalNotice,returnInstructions,string,,500,,"Please place the container...","Return instructions",
-ArrivalNotice,returnLocation,Location,,,,,"Return location",
+ArrivalNotice,returnLocation,Location,,,,,,
 ArrivalNotice,serviceContractNumber,string,,100,,SCN12345,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
 quantity commitment (usually referred as ""MQC"") of cargo that the shipper commits to over a fixed period,
 and the carrier commits to a certain rate or rate schedule.",
@@ -81,9 +81,8 @@ ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",ye
 "ArrivalNoticeNotification",issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNoticeNotification",label,string,,1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
-"ArrivalNoticeNotification",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
-responsibility of the shipping line ceases",
-"ArrivalNoticeNotification",portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel",
+"ArrivalNoticeNotification",placeOfDelivery,Location,,,,,,
+"ArrivalNoticeNotification",portOfDischarge,Location,yes,,,,,
 "ArrivalNoticeNotification","transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",XYZ1234,"Reference of the transport document for which this arrival notice was created",
 "ArrivalNoticeNotificationsMessage","arrivalNoticeNotifications","ArrivalNoticeNotification list",,,,,"List of Arrival Notice lightweight notifications.",
 ArrivalNoticesMessage,arrivalNotices,"ArrivalNotice list",,,,,"List of arrival notices.",
@@ -404,13 +403,13 @@ TaxOrLegalReference,referenceType,string,yes,50,,PAN,"The reference type code as
 TaxOrLegalReference,value,string,yes,35,,ABC1234,"The name or title of the tax or legal reference",
 Transport,departureDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
-Transport,dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country.",
+Transport,dischargeLocation,Location,,,,,,
 Transport,"estimatedGeneralOrderDateTime",string,,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
 Transport,etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
 Transport,etaAtPortOfDischargeDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
 Transport,inlandArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
-Transport,loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country.",
+Transport,loadLocation,Location,,,,,,
 Transport,modeOfTransport,string,,20,,VESSEL,"Code defined by DCSA to identify a mode of transport.
 
  * `VESSEL` - Vessel
@@ -419,14 +418,12 @@ Transport,modeOfTransport,string,,20,,VESSEL,"Code defined by DCSA to identify a
  * `BARGE` - Barge
  * `MULTIMODAL` - Multimodal",
 Transport,onBoardDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
-Transport,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent
-and where responsibility of the shipping line ceases.",
-Transport,placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
-This indicates the point at which the shipping line takes on responsibility for carriage of the container.",
+Transport,placeOfDelivery,Location,,,,,,
+Transport,placeOfReceipt,Location,,,,,,
 Transport,plannedArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the first mother vessel arriving at the destination country.",
 Transport,plannedDepartureDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of departure of the first mother vessel arriving at the destination country.",
-Transport,portOfDischarge,Location,yes,,,,"The location where the cargo is discharged from the last sea-going vessel.",
-Transport,portOfLoading,Location,yes,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
+Transport,portOfDischarge,Location,yes,,,,,
+Transport,portOfLoading,Location,yes,,,,,
 Transport,vesselVoyages,"VesselVoyage list",,,,,,
 "UtilizedTransportEquipment",activeReeferSettings,ActiveReeferSettings,,,,,,
 "UtilizedTransportEquipment",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",

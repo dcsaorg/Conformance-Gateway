@@ -6,6 +6,12 @@ import org.junit.jupiter.api.Test;
 class ANStandardSpecificationTest {
   @Test
   void testANStandardSpecification() {
-    new ANStandardSpecification().generateArtifacts();
+    ANStandardSpecification anStandardSpecification = new ANStandardSpecification();
+    anStandardSpecification.generateArtifacts();
+
+    StandardSpecificationTestToolkit.verifyTypeExport(
+      "ArrivalNotice",
+      "../specifications/generated-resources/standards/an/v100/an-v1.0.0-openapi.yaml",
+      anStandardSpecification);
   }
 }

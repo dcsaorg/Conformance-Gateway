@@ -48,13 +48,13 @@ References of the equipments for which this arrival notice was created
 """)
   private List<EquipmentReference> equipmentReferences;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allOf = Location.class)
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(
       description =
 """
 The location where the cargo is discharged from the last sea-going vessel
 """)
-  private Object portOfDischarge;
+  private Location portOfDischarge;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(
@@ -64,14 +64,14 @@ The expected date of arrival of the vessel at the port of discharge
 """)
   private FormattedDate etaAtPortOfDischargeDate;
 
-  @Schema(allOf = Location.class)
+  @Schema()
   @SchemaOverride(
       description =
 """
 The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases
 """)
-  private Object placeOfDelivery;
+  private Location placeOfDelivery;
 
   @SchemaOverride(
       description =

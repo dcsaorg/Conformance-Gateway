@@ -68,55 +68,55 @@ The estimated date and time when the shipment will be placed under General Order
 """)
   private FormattedDateTime estimatedGeneralOrderDateTime;
 
-  @Schema(allOf = Location.class)
+  @Schema()
   @SchemaOverride(
       description =
 """
 The location where the equipment is loaded on the first mother vessel arriving at the destination country.
 """)
-  private Object loadLocation;
+  private Location loadLocation;
 
-  @Schema(allOf = Location.class)
+  @Schema()
   @SchemaOverride(
       description =
 """
 The location where the equipment is discharged from the last mother vessel arriving at the destination country.
 """)
-  private Object dischargeLocation;
+  private Location dischargeLocation;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allOf = Location.class)
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(
       description =
 """
 The location where the cargo is loaded onto a first sea-going vessel for water transportation.
 """)
-  private Object portOfLoading;
+  private Location portOfLoading;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allOf = Location.class)
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(
       description =
 """
 The location where the cargo is discharged from the last sea-going vessel.
 """)
-  private Object portOfDischarge;
+  private Location portOfDischarge;
 
-  @Schema(allOf = Location.class)
+  @Schema()
   @SchemaOverride(
       description =
 """
 The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
 This indicates the point at which the shipping line takes on responsibility for carriage of the container.
 """)
-  private Object placeOfReceipt;
+  private Location placeOfReceipt;
 
-  @Schema(allOf = Location.class)
+  @Schema()
   @SchemaOverride(
       description =
 """
 The location where the cargo is handed over by the shipping line to the consignee or its agent
 and where responsibility of the shipping line ceases.
 """)
-  private Object placeOfDelivery;
+  private Location placeOfDelivery;
 
   @Schema()
   private ModeOfTransportCode modeOfTransport;

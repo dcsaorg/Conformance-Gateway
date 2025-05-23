@@ -1163,15 +1163,9 @@ components:
           items:
             $ref: "#/components/schemas/ContactInformation"
         pickupLocation:
-          type: "object"
-          description: "Pickup location"
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         returnLocation:
-          type: "object"
-          description: "Return location"
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         returnInstructions:
           maxLength: 500
           type: "string"
@@ -1338,11 +1332,7 @@ components:
               from SMDG.
             example: "APZU4812090"
         portOfDischarge:
-          type: "object"
-          description: |
-            The location where the cargo is discharged from the last sea-going vessel
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         etaAtPortOfDischargeDate:
           pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
@@ -1350,12 +1340,7 @@ components:
             The expected date of arrival of the vessel at the port of discharge
           example: "2025-01-23"
         placeOfDelivery:
-          type: "object"
-          description: |
-            The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
-            responsibility of the shipping line ceases
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         etaAtPlaceOfDeliveryDate:
           pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
@@ -1826,43 +1811,17 @@ components:
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         loadLocation:
-          type: "object"
-          description: |
-            The location where the equipment is loaded on the first mother vessel arriving at the destination country.
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         dischargeLocation:
-          type: "object"
-          description: |
-            The location where the equipment is discharged from the last mother vessel arriving at the destination country.
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         portOfLoading:
-          type: "object"
-          description: |
-            The location where the cargo is loaded onto a first sea-going vessel for water transportation.
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         portOfDischarge:
-          type: "object"
-          description: |
-            The location where the cargo is discharged from the last sea-going vessel.
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         placeOfReceipt:
-          type: "object"
-          description: |
-            The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
-            This indicates the point at which the shipping line takes on responsibility for carriage of the container.
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         placeOfDelivery:
-          type: "object"
-          description: |
-            The location where the cargo is handed over by the shipping line to the consignee or its agent
-            and where responsibility of the shipping line ceases.
-          allOf:
-          - $ref: "#/components/schemas/Location"
+          $ref: "#/components/schemas/Location"
         modeOfTransport:
           maxLength: 20
           type: "string"

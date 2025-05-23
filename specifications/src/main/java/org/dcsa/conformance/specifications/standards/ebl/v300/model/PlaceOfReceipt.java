@@ -3,6 +3,7 @@ package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.GeoCoordinate;
 
 @Schema(description = "Location where the cargo is handed over to the carrier. May be specified via UN Location Code, Facility, Address, or Geo Coordinate.")
 @Data

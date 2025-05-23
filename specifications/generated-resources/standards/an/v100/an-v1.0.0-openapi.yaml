@@ -989,42 +989,69 @@ components:
       description: "Specification for `Dangerous Goods`. It is mandatory to provide one of `UNNumber` or `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**."
     DocumentParty:
       required:
-      - "name"
-      - "partyType"
+      - "partyName"
       type: "object"
       properties:
-        partyType:
+        partyFunction:
+          maxLength: 3
           type: "string"
-          description: |-
-            Code indicating the type of a document party
-             * `SHIPPER` - The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a
-            carrier, or any person by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier
-            in relation to the contract of carriage by sea.
+          description: |
+            Specifies the role of the party in a given context. Possible values are:
 
-             * `CONSIGNEE` - The party to which goods are consigned.
-             * `FIRST_NOTIFY_PARTY` - The first party to be notified of the shipment arrival.
-             * `SECOND_NOTIFY_PARTY` - The second party to be notified of the shipment arrival.
-             * `OTHER_NOTIFY_PARTY` - Other party to be notified of the shipment arrival.
-          example: "SHIPPER"
-        name:
+            - `SHP` (Shipper)
+            - `CSG` (Consignee)
+            - `CSG` (Endorsee)
+            - `ISS` (Issuing Party)
+            - `CAG` (Carrier's Agent at Destination)
+            - `NP1` (First Notify Party)
+            - `NP2` (Second Notify Party)
+            - `NPX` (Other Notify Party)
+            - `SCO` (Service Contract Owner)
+            - `DDR` (Consignor's freight forwarder)
+            - `DDS` (Consignee's freight forwarder)
+            - `COW` (Invoice payer on behalf of the consignor (shipper))
+            - `COX` (Invoice payer on behalf of the consignee)
+            - `CS` (Consolidator)
+            - `MF` (Manufacturer)
+            - `WH` (Warehouse Keeper)
+          example: "DDS"
+        partyName:
           maxLength: 70
           type: "string"
           description: "Party name"
           example: "Acme Inc."
-        personType:
+        typeOfPerson:
+          maxLength: 50
+          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
-            One of the person types defined by the Union Customs Code art. 5(4)
+            Can be one of the following values as per the Union Customs Code art. 5(4):
+            - `NATURAL_PERSON` (A person that is an individual living human being)
+            - `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
+            - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
+          example: "NATURAL_PERSON"
+        location:
+          $ref: "#/components/schemas/Location"
+        displayedAddress:
+          type: "array"
+          description: |
+            The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
 
-             * `NATURAL_PERSON` - A person that is an individual living human being
+            **Conditions:** If provided:
+              - the displayed address must be included in the `Transport Document`.
+              - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
+              - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
+              - the order of the items in this array **MUST** be preserved as by the provider of the API.
+          items:
+            type: "string"
+            description: |
+              The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
 
-             * `LEGAL_PERSON` - Person (including a human being and public or private organizations) that can perform legal actions,
-            such as own a property, sue and be sued
-
-             * `ASSOCIATION_OF_PERSONS` - Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts
-          example: "LEGAL_PERSON"
-        address:
-          $ref: "#/components/schemas/Address"
+              **Conditions:** If provided:
+                - the displayed address must be included in the `Transport Document`.
+                - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
+                - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
+                - the order of the items in this array **MUST** be preserved as by the provider of the API.
         identifyingCodes:
           type: "array"
           description: "List of codes identifying the party"
@@ -1035,11 +1062,23 @@ components:
           description: "List of tax or legal references relevant to the party"
           items:
             $ref: "#/components/schemas/TaxLegalReference"
-        contactDetails:
+        partyContactDetails:
           type: "array"
           description: "Party contact details"
           items:
             $ref: "#/components/schemas/PartyContactDetail"
+        reference:
+          maxLength: 35
+          pattern: "^\\S(?:.*\\S)?$"
+          type: "string"
+          description: "A reference linked to the `Consignee`."
+          example: "HHL007"
+        purchaseOrderReferences:
+          type: "array"
+          description: "A list of `Purchase Order Reference`s linked to the `Consignee`."
+          items:
+            type: "string"
+            description: "A list of `Purchase Order Reference`s linked to the `Consignee`."
       description: "Document party"
     EmbeddedDocument:
       required:
@@ -1190,6 +1229,22 @@ components:
             It can include references to the carrier website or individual charges as per service contract/agreement.
           example: "Calculated as..."
       description: "Free time condition applicable to this shipment at destination."
+    GeoCoordinate:
+      type: "object"
+      properties:
+        latitude:
+          maxLength: 10
+          type: "string"
+          description: |
+            Geographic coordinate that specifies the north–south position of a point on the Earth's surface.
+          example: "48.85855"
+        longitude:
+          maxLength: 11
+          type: "string"
+          description: |
+            Geographic coordinate that specifies the east–west position of a point on the Earth's surface.
+          example: "2.294492036"
+      description: "An object used to express a location using `latitude` and `longitude`."
     GrossWeight:
       type: "object"
       properties:
@@ -1354,17 +1409,16 @@ components:
           example: "Port of Amsterdam"
         address:
           $ref: "#/components/schemas/Address"
-        unLocationCode:
+        UNLocationCode:
           maxLength: 5
           minLength: 5
           pattern: "^[A-Z]{2}[A-Z2-9]{3}$"
           type: "string"
           description: |
-            The UN Location code identifying a certain location. The pattern used must be:
-            * 2 characters for the country code using ISO 3166-1 alpha-2
-            * 3 characters to code a location within that country (using letters A-Z and numbers from 2-9)
-
-            Additional information can be found [here](https://unece.org/trade/cefact/UNLOCODE-Download).
+            The UN Location code specifying where the carrier booking office is located. The pattern used must be
+            - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+            - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+            More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: "NLAMS"
         facilityCode:
           maxLength: 6
@@ -1379,6 +1433,8 @@ components:
              * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
              * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)
           example: "BIC"
+        geoCoordinate:
+          $ref: "#/components/schemas/GeoCoordinate"
       description: "Location information"
     NationalCommodityCode:
       type: "object"

@@ -189,28 +189,42 @@ DangerousGoods,segregationGroups,"string list",,,,,"List of the segregation grou
 DangerousGoods,subsidiaryRisk1,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,subsidiaryRisk2,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,technicalName,string,,250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
-DocumentParty,address,Address,,,,,,"At least one of these attributes is required: 'address', 'identifyingCodes'."
-DocumentParty,contactDetails,"PartyContactDetail list",,,,,"Party contact details",
-DocumentParty,identifyingCodes,"IdentifyingCode list",,,,,"List of codes identifying the party","At least one of these attributes is required: 'address', 'identifyingCodes'."
-DocumentParty,name,string,yes,70,,"Acme Inc.","Party name",
-DocumentParty,partyType,string,yes,,,SHIPPER,"Code indicating the type of a document party
- * `SHIPPER` - The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a
-carrier, or any person by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier
-in relation to the contract of carriage by sea.
+DocumentParty,displayedAddress,"string list",,,,,"The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
 
- * `CONSIGNEE` - The party to which goods are consigned.
- * `FIRST_NOTIFY_PARTY` - The first party to be notified of the shipment arrival.
- * `SECOND_NOTIFY_PARTY` - The second party to be notified of the shipment arrival.
- * `OTHER_NOTIFY_PARTY` - Other party to be notified of the shipment arrival.",
-DocumentParty,personType,string,,,,LEGAL_PERSON,"One of the person types defined by the Union Customs Code art. 5(4)
+**Conditions:** If provided:
+  - the displayed address must be included in the `Transport Document`.
+  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
+  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
+  - the order of the items in this array **MUST** be preserved as by the provider of the API.",
+DocumentParty,identifyingCodes,"IdentifyingCode list",,,,,"List of codes identifying the party",
+DocumentParty,location,Location,,,,,,
+DocumentParty,partyContactDetails,"PartyContactDetail list",,,,,"Party contact details",
+DocumentParty,partyFunction,string,,3,,DDS,"Specifies the role of the party in a given context. Possible values are:
 
- * `NATURAL_PERSON` - A person that is an individual living human being
-
- * `LEGAL_PERSON` - Person (including a human being and public or private organizations) that can perform legal actions,
-such as own a property, sue and be sued
-
- * `ASSOCIATION_OF_PERSONS` - Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts",
+- `SHP` (Shipper)
+- `CSG` (Consignee)
+- `CSG` (Endorsee)
+- `ISS` (Issuing Party)
+- `CAG` (Carrier's Agent at Destination)
+- `NP1` (First Notify Party)
+- `NP2` (Second Notify Party)
+- `NPX` (Other Notify Party)
+- `SCO` (Service Contract Owner)
+- `DDR` (Consignor's freight forwarder)
+- `DDS` (Consignee's freight forwarder)
+- `COW` (Invoice payer on behalf of the consignor (shipper))
+- `COX` (Invoice payer on behalf of the consignee)
+- `CS` (Consolidator)
+- `MF` (Manufacturer)
+- `WH` (Warehouse Keeper)",
+DocumentParty,partyName,string,yes,70,,"Acme Inc.","Party name",
+DocumentParty,purchaseOrderReferences,"string list",,,,,"A list of `Purchase Order Reference`s linked to the `Consignee`.",
+DocumentParty,reference,string,,35,"^\S(?:.*\S)?$",HHL007,"A reference linked to the `Consignee`.",
 DocumentParty,taxLegalReferences,"TaxLegalReference list",,,,,"List of tax or legal references relevant to the party",
+DocumentParty,typeOfPerson,string,,50,"^\S(?:.*\S)?$",NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):
+- `NATURAL_PERSON` (A person that is an individual living human being)
+- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
+- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)",
 EmbeddedDocument,content,string,yes,,,RXhhbXBsZSBBTiBjb250ZW50,"Base64 representation of the binary document content",
 EmbeddedDocument,contentType,string,,,,application/msword,"Content type of document",
 EmbeddedDocument,name,string,yes,,,"20250123 AN XYZ01234.docx","Document name",
@@ -245,6 +259,8 @@ FreeTime,typeCode,string,yes,,,DEM,"Code used to denote the type of free time.
  * `DET` - Detention
  * `PDM` - Per Diem
  * `STO` - Storage",
+GeoCoordinate,latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+GeoCoordinate,longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 GrossWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)",
@@ -295,17 +311,17 @@ Limits,temperatureUnit,string,,,,CEL,"The unit for **all attributes in the limit
 - `FAH` (Fahrenheit)",
 Limits,"transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.",
 Limits,"transportEmergencyTemperature",number,,,,74.1,"Temperature at which emergency procedures shall be implemented",
+Location,UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 Location,address,Address,,,,,,
 Location,facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 Location,facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
  * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
  * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+Location,geoCoordinate,GeoCoordinate,,,,,,
 Location,locationName,string,,100,,"Port of Amsterdam","Location name",
-Location,unLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code identifying a certain location. The pattern used must be:
-* 2 characters for the country code using ISO 3166-1 alpha-2
-* 3 characters to code a location within that country (using letters A-Z and numbers from 2-9)
-
-Additional information can be found [here](https://unece.org/trade/cefact/UNLOCODE-Download).",
 NationalCommodityCode,countryCode,string,,2,"^[A-Z]{2}$",BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 NationalCommodityCode,type,string,,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
 - `NCM` (Nomenclatura Comum do Mercosul)

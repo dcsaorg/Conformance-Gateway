@@ -43,7 +43,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.CurrencyAmoun
 import org.dcsa.conformance.specifications.standards.an.v100.types.CurrencyCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CustomsReferenceValue;
 import org.dcsa.conformance.specifications.standards.an.v100.types.DestinationDeliveryTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.DocumentPartyTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FacilityCodeListProvider;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
@@ -58,12 +57,10 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTranspo
 import org.dcsa.conformance.specifications.standards.an.v100.types.NationalCommodityCodeValue;
 import org.dcsa.conformance.specifications.standards.an.v100.types.PartyCodeListProvider;
 import org.dcsa.conformance.specifications.standards.an.v100.types.PaymentTermCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.PersonTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.SegregationGroupCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.SubsidiaryRisk;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.UNLocationCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UnecePackageCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
@@ -85,6 +82,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.DangerousGood
 import org.dcsa.conformance.specifications.standards.dt.v100.model.EmergencyContactDetails;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Equipment;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense;
@@ -150,6 +148,7 @@ public class ANStandardSpecification extends StandardSpecification {
         EmergencyContactDetails.class,
         Equipment.class,
         ExportLicense.class,
+        GeoCoordinate.class,
         GrossWeight.class,
         IdentifyingCode.class,
         ImportLicense.class,
@@ -180,7 +179,6 @@ public class ANStandardSpecification extends StandardSpecification {
         CustomsReferenceValue.class,
         DestinationDeliveryTypeCode.class,
         DocumentParty.class,
-        DocumentPartyTypeCode.class,
         EmbeddedDocument.class,
         EquipmentReference.class,
         FacilityCodeListProvider.class,
@@ -198,7 +196,6 @@ public class ANStandardSpecification extends StandardSpecification {
         NationalCommodityCodeValue.class,
         PartyCodeListProvider.class,
         PaymentTermCode.class,
-        PersonTypeCode.class,
         SegregationGroupCode.class,
         SubsidiaryRisk.class,
         Transport.class,
@@ -206,7 +203,6 @@ public class ANStandardSpecification extends StandardSpecification {
         TransportDocumentTypeCode.class,
         UniversalVoyageReference.class,
         UnecePackageCode.class,
-        UNLocationCode.class,
         VesselIMONumber.class,
         VesselVoyage.class,
         VesselVoyageTypeCode.class,

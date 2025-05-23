@@ -1550,35 +1550,23 @@ components:
             $ref: "#/components/schemas/DangerousGoods"
       description: "Outer packaging or overpack specification, such as palletized or crated groupings of packages."
     Reference:
-      required:
-      - "referenceType"
-      - "value"
       type: "object"
       properties:
-        referenceType:
+        type:
           maxLength: 3
           type: "string"
           description: |
-            One of the reference type codes defined by DCSA. Possible values are:
-             * FF (Freight Forwarder's Reference)
-             * SI (Shipper's Reference)
-             * SPO (Shippers Purchase Order Reference)
-             * CPO (Consignees Purchase Order Reference)
-             * CR (Customer's Reference)
-             * AAO (Consignee's Reference)
-             * ECR (Empty container release reference)
-             * CSI (Customer shipment ID)
-             * BPR (Booking party reference number)
-             * BID (Booking Request ID)
-             * SAC (Shipping Agency Code)
-          example: "FF"
+            The reference type codes defined by DCSA. Possible values are:
+            - `CR` (Customer’s Reference)
+            - `AKG` (Vehicle Identification Number)
+          example: "CR"
         value:
-          maxLength: 100
+          maxLength: 35
+          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
-          description: "Reference value"
-          example: "XYZ1234"
-      description: |
-        Reference used by customers to track shipment within their own systems.
+          description: "The value of the reference."
+          example: "HHL00103004"
+      description: "References provided by the shipper or freight forwarder at the time of Booking or Shipping Instructions. Carriers share them back during Track & Trace and they may appear on the Bill of Lading."
     ReferenceConsignmentItem:
       type: "object"
       properties:

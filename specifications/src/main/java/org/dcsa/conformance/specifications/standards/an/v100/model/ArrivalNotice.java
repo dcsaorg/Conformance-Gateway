@@ -17,6 +17,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocu
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
 
 @Data

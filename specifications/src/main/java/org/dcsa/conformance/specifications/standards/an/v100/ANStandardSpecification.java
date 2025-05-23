@@ -34,7 +34,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.EmbeddedDocum
 import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.IdentifyingPartyCode;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Location;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
 import org.dcsa.conformance.specifications.standards.an.v100.model.VesselVoyage;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Volume;
@@ -97,6 +96,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.NetExplosiveC
 import org.dcsa.conformance.specifications.standards.dt.v100.model.NetVolume;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.NetWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.OuterPackaging;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ReferenceConsignmentItem;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Seal;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TareWeight;
@@ -159,6 +159,7 @@ public class ANStandardSpecification extends StandardSpecification {
         NetVolume.class,
         NetWeight.class,
         OuterPackaging.class,
+        Reference.class,
         ReferenceConsignmentItem.class,
         Seal.class,
         TareWeight.class,
@@ -198,7 +199,6 @@ public class ANStandardSpecification extends StandardSpecification {
         PartyCodeListProvider.class,
         PaymentTermCode.class,
         PersonTypeCode.class,
-        Reference.class,
         SegregationGroupCode.class,
         SubsidiaryRisk.class,
         Transport.class,

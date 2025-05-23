@@ -348,19 +348,10 @@ OuterPackaging,woodDeclaration,string,,30,,TREATED_AND_CERTIFIED,"Property to cl
 - `NOT_TREATED_AND_NOT_CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)
 - `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)
 - `TREATED_AND_CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)",
-Reference,referenceType,string,yes,3,,FF,"One of the reference type codes defined by DCSA. Possible values are:
- * FF (Freight Forwarder's Reference)
- * SI (Shipper's Reference)
- * SPO (Shippers Purchase Order Reference)
- * CPO (Consignees Purchase Order Reference)
- * CR (Customer's Reference)
- * AAO (Consignee's Reference)
- * ECR (Empty container release reference)
- * CSI (Customer shipment ID)
- * BPR (Booking party reference number)
- * BID (Booking Request ID)
- * SAC (Shipping Agency Code)",
-Reference,value,string,yes,100,,XYZ1234,"Reference value",
+Reference,type,string,,3,,CR,"The reference type codes defined by DCSA. Possible values are:
+- `CR` (Customer’s Reference)
+- `AKG` (Vehicle Identification Number)",
+Reference,value,string,,35,"^\S(?:.*\S)?$",HHL00103004,"The value of the reference.",
 ReferenceConsignmentItem,type,string,,3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)

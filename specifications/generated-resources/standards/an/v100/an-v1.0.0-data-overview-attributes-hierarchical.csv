@@ -346,19 +346,10 @@ Additional information can be found [here](https://unece.org/trade/cefact/UNLOCO
 "ArrivalNotice / references",references,"Reference list",,,,,"References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
 Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
 on the B/L. Customers can use these references to track shipments in their internal systems.",
-"ArrivalNotice / references / referenceType",referenceType,string,yes,3,,FF,"One of the reference type codes defined by DCSA. Possible values are:
- * FF (Freight Forwarder's Reference)
- * SI (Shipper's Reference)
- * SPO (Shippers Purchase Order Reference)
- * CPO (Consignees Purchase Order Reference)
- * CR (Customer's Reference)
- * AAO (Consignee's Reference)
- * ECR (Empty container release reference)
- * CSI (Customer shipment ID)
- * BPR (Booking party reference number)
- * BID (Booking Request ID)
- * SAC (Shipping Agency Code)",
-"ArrivalNotice / references / value",value,string,yes,100,,XYZ1234,"Reference value",
+"ArrivalNotice / references / type",type,string,,3,,CR,"The reference type codes defined by DCSA. Possible values are:
+- `CR` (Customer’s Reference)
+- `AKG` (Vehicle Identification Number)",
+"ArrivalNotice / references / value",value,string,,35,"^\S(?:.*\S)?$",HHL00103004,"The value of the reference.",
 "ArrivalNotice / returnInstructions",returnInstructions,string,,500,,"Please place the container...","Return instructions",
 "ArrivalNotice / returnLocation",returnLocation,Location,,,,,,
 "ArrivalNotice / returnLocation / address",address,Address,,,,,,
@@ -586,19 +577,10 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
 **Condition:** Only applicable if `ISOEquipmentCode` shows a Reefer type.",
 "ArrivalNotice / utilizedTransportEquipments / isShipperOwned",isShipperOwned,boolean,,,,true,"Indicates whether the container is shipper owned (SOC).",
 "ArrivalNotice / utilizedTransportEquipments / references",references,"Reference list",,,,,"A list of `References`",
-"ArrivalNotice / utilizedTransportEquipments / references / referenceType",referenceType,string,yes,3,,FF,"One of the reference type codes defined by DCSA. Possible values are:
- * FF (Freight Forwarder's Reference)
- * SI (Shipper's Reference)
- * SPO (Shippers Purchase Order Reference)
- * CPO (Consignees Purchase Order Reference)
- * CR (Customer's Reference)
- * AAO (Consignee's Reference)
- * ECR (Empty container release reference)
- * CSI (Customer shipment ID)
- * BPR (Booking party reference number)
- * BID (Booking Request ID)
- * SAC (Shipping Agency Code)",
-"ArrivalNotice / utilizedTransportEquipments / references / value",value,string,yes,100,,XYZ1234,"Reference value",
+"ArrivalNotice / utilizedTransportEquipments / references / type",type,string,,3,,CR,"The reference type codes defined by DCSA. Possible values are:
+- `CR` (Customer’s Reference)
+- `AKG` (Vehicle Identification Number)",
+"ArrivalNotice / utilizedTransportEquipments / references / value",value,string,,35,"^\S(?:.*\S)?$",HHL00103004,"The value of the reference.",
 "ArrivalNotice / utilizedTransportEquipments / seals",seals,"Seal list",,,,,"A list of `Seals`",
 "ArrivalNotice / utilizedTransportEquipments / seals / number",number,string,,15,,VET123,"Identifies a seal affixed to the container.",
 "ArrivalNotice / utilizedTransportEquipments / seals / source",source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.

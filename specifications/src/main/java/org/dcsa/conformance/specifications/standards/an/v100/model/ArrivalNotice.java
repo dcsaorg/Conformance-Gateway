@@ -17,6 +17,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocu
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
 
@@ -56,16 +57,16 @@ for example "Warning", "Updated", "Second", "Third" etc.
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
       description =
-          "ATTRIBUTE The party to contact for any inquiries related to this Arrival Notice.")
+          "The party to contact for any inquiries related to this Arrival Notice.")
   @ArraySchema(minItems = 1)
-  private List<ContactInformation> carrierContactInformation;
+  private List<PartyContactDetail> carrierContactInformation;
 
   @Schema(
       description =
 """
 The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
 """)
-  private List<ContactInformation> carrierInformationForCargoRelease;
+  private List<PartyContactDetail> carrierInformationForCargoRelease;
 
   @SchemaOverride(description = "Pickup location")
   private Location pickupLocation;

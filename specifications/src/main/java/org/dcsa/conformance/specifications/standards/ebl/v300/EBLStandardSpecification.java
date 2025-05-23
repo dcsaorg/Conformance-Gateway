@@ -56,7 +56,7 @@ import org.dcsa.conformance.specifications.standards.ebl.v300.model.OtherDocumen
 import org.dcsa.conformance.specifications.standards.dt.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Party;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.PartyAddress;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.PartyContactDetail;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.PlaceOfDelivery;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.PlaceOfIssue;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.PlaceOfReceipt;

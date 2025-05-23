@@ -331,15 +331,15 @@ components:
           example: "NMFTA"
         carrierContactInformation:
           type: "array"
-          description: "ATTRIBUTE The party to contact for any inquiries related to this Arrival Notice."
+          description: "The party to contact for any inquiries related to this Arrival Notice."
           items:
-            $ref: "#/components/schemas/ContactInformation"
+            $ref: "#/components/schemas/PartyContactDetail"
         carrierInformationForCargoRelease:
           type: "array"
           description: |
             The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
           items:
-            $ref: "#/components/schemas/ContactInformation"
+            $ref: "#/components/schemas/PartyContactDetail"
         pickupLocation:
           $ref: "#/components/schemas/Location"
         returnLocation:
@@ -778,34 +778,6 @@ components:
           items:
             $ref: "#/components/schemas/CustomsReference"
       description: "Defines a list of `CargoItems` belonging together and the associated `Booking`. A `ConsignmentItem` can be split across multiple containers by referencing multiple `CargoItems`."
-    ContactInformation:
-      type: "object"
-      properties:
-        name:
-          maxLength: 100
-          pattern: "^\\S+(\\s+\\S+)*$"
-          type: "string"
-          description: "Contact name"
-          example: "Jane Doe"
-        phone:
-          maxLength: 30
-          pattern: "^\\S+(\\s+\\S+)*$"
-          type: "string"
-          description: |-
-            Phone number
-
-            At least one of these attributes is required: 'phone', 'email'.
-          example: "+1 555-123-4567"
-        email:
-          maxLength: 100
-          pattern: "^\\S+(\\s+\\S+)*$"
-          type: "string"
-          description: |-
-            Email address
-
-            At least one of these attributes is required: 'phone', 'email'.
-          example: "jane.doe@example.com"
-      description: "Contact information"
     CustomsReference:
       type: "object"
       properties:
@@ -1067,7 +1039,7 @@ components:
           type: "array"
           description: "Party contact details"
           items:
-            $ref: "#/components/schemas/ContactInformation"
+            $ref: "#/components/schemas/PartyContactDetail"
       description: "Document party"
     EmbeddedDocument:
       required:
@@ -1549,6 +1521,29 @@ components:
           items:
             $ref: "#/components/schemas/DangerousGoods"
       description: "Outer packaging or overpack specification, such as palletized or crated groupings of packages."
+    PartyContactDetail:
+      type: "object"
+      properties:
+        name:
+          maxLength: 35
+          pattern: "^\\S(?:.*\\S)?$"
+          type: "string"
+          description: "Name of the contact"
+          example: "Henrik"
+        phone:
+          maxLength: 30
+          pattern: "^\\S(?:.*\\S)?$"
+          type: "string"
+          description: |
+            Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
+          example: "+45 70262970"
+        email:
+          maxLength: 100
+          pattern: "^.+@\\S+$"
+          type: "string"
+          description: "`E-mail` address to be used"
+          example: "info@dcsa.org"
+      description: "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided."
     Reference:
       type: "object"
       properties:

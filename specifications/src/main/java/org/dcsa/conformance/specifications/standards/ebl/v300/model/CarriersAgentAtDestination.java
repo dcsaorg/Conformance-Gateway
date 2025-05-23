@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 
 @Schema(description = "The party on the import side assigned by the carrier to whom the customer should contact for cargo release.")
 @Data

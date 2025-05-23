@@ -10,6 +10,7 @@ import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.standards.an.v100.types.DocumentPartyTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.PersonTypeCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
 
 @Data
@@ -38,7 +39,7 @@ public class DocumentParty {
   private List<TaxLegalReference> taxLegalReferences;
 
   @Schema(description = "Party contact details")
-  private List<ContactInformation> contactDetails;
+  private List<PartyContactDetail> contactDetails;
 
   public static List<SchemaConstraint> getConstraints() {
     return List.of(

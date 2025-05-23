@@ -41,8 +41,8 @@ ArrivalNotice,carrierCode,string,yes,4,"^\S+$",HLCU,"Code in the list provided b
 ArrivalNotice,carrierCodeListProvider,string,yes,,,NMFTA,"The provider of the code list in which `carrierCode` is defined.
  * `SMDG` - Ship Message Design Group
  * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
-ArrivalNotice,"carrierContactInformation","ContactInformation list",yes,,,,"ATTRIBUTE The party to contact for any inquiries related to this Arrival Notice.",
-ArrivalNotice,"carrierInformationForCargoRelease","ContactInformation list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
+ArrivalNotice,"carrierContactInformation","PartyContactDetail list",yes,,,,"The party to contact for any inquiries related to this Arrival Notice.",
+ArrivalNotice,"carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
 ArrivalNotice,charges,"Charge list",,,,,"List of charges applicable to this shipment",
 ArrivalNotice,consignmentItems,"ConsignmentItem list",yes,,,,"The list of consignment items in the shipment.",
 ArrivalNotice,"customsImportDeclarationProcedure",string,,1000,,"The tax must be declared...","Customs import declaration procedure",
@@ -137,9 +137,6 @@ ConsignmentItem,references,"ReferenceConsignmentItem list",,,,,"A list of `Refer
 ConsignmentItem,shippingMarks,"string list",,,,,"A list of the `ShippingMarks` applicable to this `consignmentItem`
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.",
-ContactInformation,email,string,,100,"^\S+(\s+\S+)*$",jane.doe@example.com,"Email address","At least one of these attributes is required: 'phone', 'email'."
-ContactInformation,name,string,,100,"^\S+(\s+\S+)*$","Jane Doe","Contact name",
-ContactInformation,phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number","At least one of these attributes is required: 'phone', 'email'."
 CustomsReference,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 CustomsReference,type,string,,50,"^\S(?:.*\S)?$",CUS,"The reference type code as defined in the relevant customs jurisdiction.",
 CustomsReference,values,"string list",,,,,,
@@ -193,7 +190,7 @@ DangerousGoods,subsidiaryRisk1,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in ad
 DangerousGoods,subsidiaryRisk2,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,technicalName,string,,250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
 DocumentParty,address,Address,,,,,,"At least one of these attributes is required: 'address', 'identifyingCodes'."
-DocumentParty,contactDetails,"ContactInformation list",,,,,"Party contact details",
+DocumentParty,contactDetails,"PartyContactDetail list",,,,,"Party contact details",
 DocumentParty,identifyingCodes,"IdentifyingPartyCode list",,,,,"List of codes identifying the party","At least one of these attributes is required: 'address', 'identifyingCodes'."
 DocumentParty,name,string,yes,70,,"Acme Inc.","Party name",
 DocumentParty,partyType,string,yes,,,SHIPPER,"Code indicating the type of a document party
@@ -348,6 +345,9 @@ OuterPackaging,woodDeclaration,string,,30,,TREATED_AND_CERTIFIED,"Property to cl
 - `NOT_TREATED_AND_NOT_CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)
 - `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)
 - `TREATED_AND_CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)",
+PartyContactDetail,email,string,,100,"^.+@\S+$",info@dcsa.org,"`E-mail` address to be used",
+PartyContactDetail,name,string,,35,"^\S(?:.*\S)?$",Henrik,"Name of the contact",
+PartyContactDetail,phone,string,,30,"^\S(?:.*\S)?$","+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 Reference,type,string,,3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)",

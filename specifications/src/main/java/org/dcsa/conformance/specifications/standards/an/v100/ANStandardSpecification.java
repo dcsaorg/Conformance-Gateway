@@ -28,7 +28,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNotice
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotification;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotificationsMessage;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticesMessage;
-import org.dcsa.conformance.specifications.standards.an.v100.model.ContactInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.DocumentParty;
 import org.dcsa.conformance.specifications.standards.an.v100.model.EmbeddedDocument;
 import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
@@ -96,6 +95,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.NetExplosiveC
 import org.dcsa.conformance.specifications.standards.dt.v100.model.NetVolume;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.NetWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.OuterPackaging;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ReferenceConsignmentItem;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Seal;
@@ -159,6 +159,7 @@ public class ANStandardSpecification extends StandardSpecification {
         NetVolume.class,
         NetWeight.class,
         OuterPackaging.class,
+        PartyContactDetail.class,
         Reference.class,
         ReferenceConsignmentItem.class,
         Seal.class,
@@ -171,7 +172,6 @@ public class ANStandardSpecification extends StandardSpecification {
         ArrivalNoticeNotificationsMessage.class,
         ArrivalNoticesMessage.class,
         CarrierClause.class,
-        ContactInformation.class,
         ContainerLoadTypeCode.class,
         CountryCode.class,
         CurrencyAmount.class,

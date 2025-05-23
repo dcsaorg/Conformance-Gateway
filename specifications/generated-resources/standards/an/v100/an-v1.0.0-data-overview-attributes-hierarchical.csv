@@ -16,14 +16,14 @@ or shares the container with other shipments (LCL).
 "ArrivalNotice / carrierCodeListProvider",carrierCodeListProvider,string,yes,,,NMFTA,"The provider of the code list in which `carrierCode` is defined.
  * `SMDG` - Ship Message Design Group
  * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
-"ArrivalNotice / carrierContactInformation","carrierContactInformation","ContactInformation list",yes,,,,"ATTRIBUTE The party to contact for any inquiries related to this Arrival Notice.",
-"ArrivalNotice / carrierContactInformation / email",email,string,,100,"^\S+(\s+\S+)*$",jane.doe@example.com,"Email address","At least one of these attributes is required: 'phone', 'email'."
-"ArrivalNotice / carrierContactInformation / name",name,string,,100,"^\S+(\s+\S+)*$","Jane Doe","Contact name",
-"ArrivalNotice / carrierContactInformation / phone",phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number","At least one of these attributes is required: 'phone', 'email'."
-"ArrivalNotice / carrierInformationForCargoRelease","carrierInformationForCargoRelease","ContactInformation list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
-"ArrivalNotice / carrierInformationForCargoRelease / email",email,string,,100,"^\S+(\s+\S+)*$",jane.doe@example.com,"Email address","At least one of these attributes is required: 'phone', 'email'."
-"ArrivalNotice / carrierInformationForCargoRelease / name",name,string,,100,"^\S+(\s+\S+)*$","Jane Doe","Contact name",
-"ArrivalNotice / carrierInformationForCargoRelease / phone",phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number","At least one of these attributes is required: 'phone', 'email'."
+"ArrivalNotice / carrierContactInformation","carrierContactInformation","PartyContactDetail list",yes,,,,"The party to contact for any inquiries related to this Arrival Notice.",
+"ArrivalNotice / carrierContactInformation / email",email,string,,100,"^.+@\S+$",info@dcsa.org,"`E-mail` address to be used",
+"ArrivalNotice / carrierContactInformation / name",name,string,,35,"^\S(?:.*\S)?$",Henrik,"Name of the contact",
+"ArrivalNotice / carrierContactInformation / phone",phone,string,,30,"^\S(?:.*\S)?$","+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+"ArrivalNotice / carrierInformationForCargoRelease","carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
+"ArrivalNotice / carrierInformationForCargoRelease / email",email,string,,100,"^.+@\S+$",info@dcsa.org,"`E-mail` address to be used",
+"ArrivalNotice / carrierInformationForCargoRelease / name",name,string,,35,"^\S(?:.*\S)?$",Henrik,"Name of the contact",
+"ArrivalNotice / carrierInformationForCargoRelease / phone",phone,string,,30,"^\S(?:.*\S)?$","+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 "ArrivalNotice / charges",charges,"Charge list",,,,,"List of charges applicable to this shipment",
 "ArrivalNotice / charges / calculationBasis",calculationBasis,string,,50,"^\S(?:.*\S)?$","Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
 "ArrivalNotice / charges / chargeName",chargeName,string,,50,"^\S(?:.*\S)?$","Documentation fee - Destination","Free text field describing the charge to apply",
@@ -248,10 +248,10 @@ Character | Valid Characters | Description
 "ArrivalNotice / documentParties / address / stateRegion",stateRegion,string,,65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / documentParties / address / street",street,string,,70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / documentParties / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
-"ArrivalNotice / documentParties / contactDetails",contactDetails,"ContactInformation list",,,,,"Party contact details",
-"ArrivalNotice / documentParties / contactDetails / email",email,string,,100,"^\S+(\s+\S+)*$",jane.doe@example.com,"Email address","At least one of these attributes is required: 'phone', 'email'."
-"ArrivalNotice / documentParties / contactDetails / name",name,string,,100,"^\S+(\s+\S+)*$","Jane Doe","Contact name",
-"ArrivalNotice / documentParties / contactDetails / phone",phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number","At least one of these attributes is required: 'phone', 'email'."
+"ArrivalNotice / documentParties / contactDetails",contactDetails,"PartyContactDetail list",,,,,"Party contact details",
+"ArrivalNotice / documentParties / contactDetails / email",email,string,,100,"^.+@\S+$",info@dcsa.org,"`E-mail` address to be used",
+"ArrivalNotice / documentParties / contactDetails / name",name,string,,35,"^\S(?:.*\S)?$",Henrik,"Name of the contact",
+"ArrivalNotice / documentParties / contactDetails / phone",phone,string,,30,"^\S(?:.*\S)?$","+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 "ArrivalNotice / documentParties / identifyingCodes",identifyingCodes,"IdentifyingPartyCode list",,,,,"List of codes identifying the party","At least one of these attributes is required: 'address', 'identifyingCodes'."
 "ArrivalNotice / documentParties / identifyingCodes / codeListName",codeListName,string,,,,DID,"The name of the `partyCode` list, code generation mechanism or code authority from the `codeListProvider`.
 

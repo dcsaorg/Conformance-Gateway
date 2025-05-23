@@ -219,7 +219,13 @@ public abstract class ConformanceParty implements StatefulEntity {
             "Party {} notifying orchestrator that action {} is completed instead of sending notification: no counterpart URL is configured",
             actionId,
             partyConfiguration.getName());
-        asyncOrchestratorPostPartyInput(actionId, OBJECT_MAPPER.createObjectNode());
+        webClient.asyncRequest(
+            _createConformanceRequest(
+                true,
+                "POST",
+                partyConfiguration.getOrchestratorUrl() + "/dev/null",
+                Collections.emptyMap(),
+                jsonBody));
       } else {
         log.info(
             "Party {} NOT sending a notification and NOT notifying orchestrator either: no counterpart URL is configured",

@@ -34,14 +34,9 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
 import org.dcsa.conformance.specifications.standards.an.v100.model.VesselVoyage;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Volume;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Weight;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.standards.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.CurrencyAmount;
-import org.dcsa.conformance.specifications.standards.an.v100.types.CurrencyCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.CustomsReferenceValue;
 import org.dcsa.conformance.specifications.standards.an.v100.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FacilityCodeListProvider;
@@ -49,25 +44,13 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.HSCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ImoPackagingCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.InhalationZoneTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.NationalCommodityCodeValue;
-import org.dcsa.conformance.specifications.standards.an.v100.types.PartyCodeListProvider;
-import org.dcsa.conformance.specifications.standards.an.v100.types.PaymentTermCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.SegregationGroupCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.SubsidiaryRisk;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.UnecePackageCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselVoyageTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.VolumeUnitCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.WeightUnitCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.WoodDeclarationTypeCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ActiveReeferSettings;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoGrossVolume;
@@ -174,9 +157,6 @@ public class ANStandardSpecification extends StandardSpecification {
         CarrierClause.class,
         ContainerLoadTypeCode.class,
         CountryCode.class,
-        CurrencyAmount.class,
-        CurrencyCode.class,
-        CustomsReferenceValue.class,
         DestinationDeliveryTypeCode.class,
         DocumentParty.class,
         EmbeddedDocument.class,
@@ -187,30 +167,16 @@ public class ANStandardSpecification extends StandardSpecification {
         FreeTime.class,
         FreeTimeTimeUnitCode.class,
         FreeTimeTypeCode.class,
-        HSCode.class,
-        ImoPackagingCode.class,
-        InhalationZoneTypeCode.class,
         IsoEquipmentCode.class,
         Location.class,
         ModeOfTransportCode.class,
-        NationalCommodityCodeValue.class,
-        PartyCodeListProvider.class,
-        PaymentTermCode.class,
-        SegregationGroupCode.class,
-        SubsidiaryRisk.class,
         Transport.class,
         TransportDocumentReference.class,
         TransportDocumentTypeCode.class,
         UniversalVoyageReference.class,
-        UnecePackageCode.class,
         VesselIMONumber.class,
         VesselVoyage.class,
-        VesselVoyageTypeCode.class,
-        Volume.class,
-        VolumeUnitCode.class,
-        Weight.class,
-        WeightUnitCode.class,
-        WoodDeclarationTypeCode.class);
+        VesselVoyageTypeCode.class);
   }
 
   @Override

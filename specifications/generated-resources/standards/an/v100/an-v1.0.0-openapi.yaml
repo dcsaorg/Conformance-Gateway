@@ -1902,47 +1902,6 @@ components:
 
         When `typeCode` is `DC` (destination country), these are the details of
         the first mother vessel arriving at the destination country.
-    Volume:
-      required:
-      - "unit"
-      - "value"
-      type: "object"
-      properties:
-        value:
-          pattern: "^\\d+(\\.\\d+)?$"
-          type: "string"
-          description: "The volume expressed in the selected `unit`"
-          example: "123.456"
-        unit:
-          type: "string"
-          description: |-
-            The unit in which the volume `value` is expressed
-             * `FTQ` - Cubic feet
-             * `LTR` - Litres
-             * `MTQ` - Cubic meters
-          example: "MTQ"
-      description: "Representation of a volume including the unit in which it is expressed."
-    Weight:
-      required:
-      - "unit"
-      - "value"
-      type: "object"
-      properties:
-        value:
-          pattern: "^\\d+(\\.\\d+)?$"
-          type: "string"
-          description: "The weight expressed in the selected `unit`"
-          example: "123.456"
-        unit:
-          type: "string"
-          description: |-
-            The unit in which the weight `value` is expressed
-             * `GRM` - Grams
-             * `KGM` - Kilograms
-             * `LBR` - Pounds
-             * `ONZ` - Ounce
-          example: "KGM"
-      description: "Representation of a weight including the unit in which it is expressed."
   headers:
     API-Version:
       description: "SemVer used to indicate the version of the contract (API version) returned."

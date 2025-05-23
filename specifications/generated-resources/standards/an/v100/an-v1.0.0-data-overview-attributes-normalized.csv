@@ -440,14 +440,3 @@ VesselVoyage,vesselIMONumber,string,,8,"^\d{7,8}$",12345678,"The unique referenc
 The reference is the International Maritime Organisation (IMO) number,
 also sometimes known as the Lloyd's register code.",
 VesselVoyage,vesselName,string,yes,50,,"King of the Seas","Vessel name",
-Volume,unit,string,yes,,,MTQ,"The unit in which the volume `value` is expressed
- * `FTQ` - Cubic feet
- * `LTR` - Litres
- * `MTQ` - Cubic meters",
-Volume,value,string,yes,,"^\d+(\.\d+)?$",123.456,"The volume expressed in the selected `unit`",
-Weight,unit,string,yes,,,KGM,"The unit in which the weight `value` is expressed
- * `GRM` - Grams
- * `KGM` - Kilograms
- * `LBR` - Pounds
- * `ONZ` - Ounce",
-Weight,value,string,yes,,"^\d+(\.\d+)?$",123.456,"The weight expressed in the selected `unit`",

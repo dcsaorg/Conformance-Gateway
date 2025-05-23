@@ -51,193 +51,203 @@ or the Invoice payer on behalf of the consignee (if provided).
 "ArrivalNotice / charges / quantity",quantity,string,yes,,"^\d+(\.\d+)?$",123.456,"The quantity of this charge item in units at `unitPrice`",
 "ArrivalNotice / charges / unitPrice",unitPrice,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The unit price of this charge item in the `chargeCurrency`, expressed with a maximum of 2 decimal digits",
 "ArrivalNotice / consignmentItems",consignmentItems,"ConsignmentItem list",yes,,,,"The list of consignment items in the shipment.",
-"ArrivalNotice / consignmentItems / cargoItems",cargoItems,"CargoItem list",yes,,,,"The list of cargo items grouped in this consignment item.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume",cargoGrossVolume,Volume,,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume / unit",unit,string,yes,,,MTQ,"The unit in which the volume `value` is expressed
- * `FTQ` - Cubic feet
- * `LTR` - Litres
- * `MTQ` - Cubic meters",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume / value",value,string,yes,,"^\d+(\.\d+)?$",123.456,"The volume expressed in the selected `unit`",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight",cargoGrossWeight,Weight,yes,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / unit",unit,string,yes,,,KGM,"The unit in which the weight `value` is expressed
- * `GRM` - Grams
- * `KGM` - Kilograms
- * `LBR` - Pounds
- * `ONZ` - Ounce",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / value",value,string,yes,,"^\d+(\.\d+)?$",123.456,"The weight expressed in the selected `unit`",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume",cargoNetVolume,Volume,,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume / unit",unit,string,yes,,,MTQ,"The unit in which the volume `value` is expressed
- * `FTQ` - Cubic feet
- * `LTR` - Litres
- * `MTQ` - Cubic meters",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume / value",value,string,yes,,"^\d+(\.\d+)?$",123.456,"The volume expressed in the selected `unit`",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight",cargoNetWeight,Weight,,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / unit",unit,string,yes,,,KGM,"The unit in which the weight `value` is expressed
- * `GRM` - Grams
- * `KGM` - Kilograms
- * `LBR` - Pounds
- * `ONZ` - Ounce",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / value",value,string,yes,,"^\d+(\.\d+)?$",123.456,"The weight expressed in the selected `unit`",
-"ArrivalNotice / consignmentItems / cargoItems / equipmentReference",equipmentReference,string,yes,11,"^\S(?:.*\S)?$",APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+"ArrivalNotice / consignmentItems / HSCodes",HSCodes,"string list",,,,,"A list of `HS Codes` that apply to this `consignmentItem`",
+"ArrivalNotice / consignmentItems / cargoItems",cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume",cargoGrossVolume,CargoGrossVolume,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume / unit",unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
+- `FTQ` (Cubic foot)
+- `MTQ` (Cubic meter)",
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume / value",value,number,,,,2.4,"Calculated by multiplying the width, height, and length of the packed cargo. A maximum of 4 decimals should be provided.",
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight",cargoGrossWeight,CargoGrossWeight,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+- `KGM` (Kilograms)
+- `LBR` (Pounds)",
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / value",value,number,,,,2400,"The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume",cargoNetVolume,CargoNetVolume,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume / unit",unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
+- `FTQ` (Cubic foot)
+- `MTQ` (Cubic meter)",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume / value",value,number,,,,2.4,"Calculated by multiplying the width, height, and length of the cargo, excluding packaging.",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight",cargoNetWeight,CargoNetWeight,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+- `KGM` (Kilograms)
+- `LBR` (Pounds)",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / value",value,number,,,,2400,"The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
+"ArrivalNotice / consignmentItems / cargoItems / customsReferences",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
+"ArrivalNotice / consignmentItems / cargoItems / customsReferences / countryCode",countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / consignmentItems / cargoItems / customsReferences / type",type,string,,50,"^\S(?:.*\S)?$",CUS,"The reference type code as defined in the relevant customs jurisdiction.",
+"ArrivalNotice / consignmentItems / cargoItems / customsReferences / values",values,"string list",,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / equipmentReference",equipmentReference,string,,11,"^\S(?:.*\S)?$",APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
 
-According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
-(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
+"ArrivalNotice / consignmentItems / cargoItems / exportLicense",exportLicense,ExportLicense,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / exportLicense / expiryDate",expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Export License`.",
+"ArrivalNotice / consignmentItems / cargoItems / exportLicense / isRequired",isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
 
-If a container does not comply with ISO 6346, it is suggested to follow
-[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
-from SMDG.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging",outerPackaging,OuterPackaging,yes,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods",dangerousGoods,"DangerousGoods list",,,,,"List of dangerous goods specifications",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / codedVariant",codedVariant,string,,4,"^[0-3][0-9A-Z]{3}$",2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant
-within a single UN number or NA number that may occur when two companies exchange DG information:
+**Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
+"ArrivalNotice / consignmentItems / cargoItems / exportLicense / issueDate",issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Export License`.",
+"ArrivalNotice / consignmentItems / cargoItems / exportLicense / reference",reference,string,,35,"^\S(?:.*\S)?$",EMC007123,"Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.",
+"ArrivalNotice / consignmentItems / cargoItems / importLicense",importLicense,ImportLicense,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / importLicense / expiryDate",expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Import License`.",
+"ArrivalNotice / consignmentItems / cargoItems / importLicense / isRequired",isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
+
+**Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
+"ArrivalNotice / consignmentItems / cargoItems / importLicense / issueDate",issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Import License`.",
+"ArrivalNotice / consignmentItems / cargoItems / importLicense / reference",reference,string,,35,"^\S(?:.*\S)?$",EMC007123,"Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.",
+"ArrivalNotice / consignmentItems / cargoItems / nationalCommodityCodes",nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list of `National Commodity Codes` that apply to this `cargoItem`",
+"ArrivalNotice / consignmentItems / cargoItems / nationalCommodityCodes / countryCode",countryCode,string,,2,"^[A-Z]{2}$",BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / consignmentItems / cargoItems / nationalCommodityCodes / type",type,string,,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
+- `NCM` (Nomenclatura Comum do Mercosul)
+- `HTS` (Harmonized Tariff Schedule)
+- `SCHEDULE_B` ( Schedule B)
+- `TARIC` (Integrated Tariff of the European Communities)
+- `CN` (Combined Nomenclature)
+- `CUS` (Customs Union and Statistics)",
+"ArrivalNotice / consignmentItems / cargoItems / nationalCommodityCodes / values",values,"string list",,,,,"A list of `national commodity codes` values.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging",outerPackaging,OuterPackaging,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods",dangerousGoods,"DangerousGoods list",,,,,"A list of `Dangerous Goods`",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / EMSNumber",EMSNumber,string,,7,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / NANumber",NANumber,string,,4,"^\d{4}$",9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / UNNumber",UNNumber,string,,4,"^\d{4}$",1463,"United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / codedVariantList",codedVariantList,string,,4,"^[0-3][0-9A-Z]{3}$",2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.
 
 Character | Valid Characters | Description
 :--------:|------------------|------------
 1| 0, 1, 2, 3|The packing group. Code 0 indicates there is no packing group
 2|0 to 9 and A to Z|A sequence letter for the PSN, or 0 if there were no alternative PSNs
 3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / competentAuthorityApproval","competentAuthorityApproval",string,,70,,,"Name and reference number of the competent authority providing the approval",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / competentAuthorityApproval","competentAuthorityApproval",string,,70,"^\S(?:.*\S)?$","{Name and reference...}","Name and reference number of the competent authority providing the approval.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails",emergencyContactDetails,EmergencyContactDetails,,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / name",name,string,yes,255,,"Jane Doe","Name of the person to contact during an emergency",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / phone",phone,string,yes,30,,"+1 555-123-456","Phone number of the emergency contact person.
-It MUST be an international phone number as defined in the ITU-T recommendation E.123.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / provider",provider,string,,255,,"Acme Inc.","Name of the third party vendor providing emergency support",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / referenceNumber",referenceNumber,string,,255,,1234,"Contract reference for the emergency support provided by the external third party vendor",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emsNumber",emsNumber,string,,7,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures
-for Ships Carrying Dangerous Goods.
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / contact",contact,string,,255,,"Henrik Larsen","Name of the Contact person during an emergency.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / phone",phone,string,,30,"^\S(?:.*\S)?$","+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / provider",provider,string,,255,,GlobeTeam,"Name of the third party vendor providing emergency support",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / referenceNumber",referenceNumber,string,,255,,12234,"Contract reference for the emergency support provided by an external third party vendor.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / endOfHoldingTime",endOfHoldingTime,string,,,,"Fri Sep 03 02:00:00 CEST 2021","Date by when the refrigerated liquid needs to be delivered.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / fumigationDateTime",fumigationDateTime,string,,,,2024-09-04T09:41Z,"Date & time when the container was fumigated",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight",grossWeight,GrossWeight,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+- `KGM` (Kilograms)
+- `LBR` (Pounds)",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / value",value,number,,,,12000.3,"The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / imoClass",imoClass,string,,4,,1.4S,"The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:
 
-Comprises 2 values: 1 for spillage and 1 for fire.
+- `1.1A` (Substances and articles which have a mass explosion hazard)
+- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)
+- `2.1` (Flammable gases)
+- `8` (Corrosive substances)",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / inhalationZone",inhalationZone,string,,1,,A,"The zone classification of the toxicity of the inhalant. Possible values are:
 
-Possible values spillage: S-A to S-Z.
-
-Possible values fire: F-A to F-Z.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / endOfHoldingTime",endOfHoldingTime,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"Date by when the refrigerated liquid needs to be delivered",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / fumigationDateTime",fumigationDateTime,string,,,,2025-01-23T01:23:45Z,"Date & time when the container was fumigated.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight",grossWeight,Weight,,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / unit",unit,string,yes,,,KGM,"The unit in which the weight `value` is expressed
- * `GRM` - Grams
- * `KGM` - Kilograms
- * `LBR` - Pounds
- * `ONZ` - Ounce",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / value",value,string,yes,,"^\d+(\.\d+)?$",123.456,"The weight expressed in the selected `unit`",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / imoClass",imoClass,string,,,,1.4S,"The hazard class code of the referenced dangerous goods according to the specified regulation.
-
-Examples of possible values are:
- * 1.1A (Substances and articles which have a mass explosion hazard)
- * 1.6N (Extremely insensitive articles which do not have a mass explosion hazard)
- * 2.1 (Flammable gases)
- * 8 (Corrosive substances)",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / inhalationZone",inhalationZone,string,,,,BOL,"Code for the zone classification of the toxicity of an inhalant
-
- * `A` - Hazard Zone A (can be assigned to specific gases and liquids)
- * `B` - Hazard Zone B (can be assigned to specific gases and liquids)
- * `C` - Hazard Zone C (can only be assigned to specific gases)
- * `D` - Hazard Zone D (can only be assigned to specific gases)",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / innerPackagings",innerPackagings,"InnerPackaging list",,,,,"List of inner packagings contained inside this outer packaging / overpack",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / innerPackagings / description",description,string,yes,100,,"Woven plastic water resistant bag","Description of the Inner Packaging.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / innerPackagings / material",material,string,yes,100,,Plastic,"The material used for the Inner Packaging.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / innerPackagings / quantity",quantity,integer,yes,,,20,"Number of inner packagings.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isCompetentAuthorityApprovalRequired","isCompetentAuthorityApprovalRequired",boolean,,,,false,"Indicates if the cargo require approval from authorities.",
+- `A` (Hazard Zone A) can be assigned to specific gases and liquids
+- `B` (Hazard Zone B) can be assigned to specific gases and liquids
+- `C` (Hazard Zone C) can **only** be assigned to specific gases
+- `D` (Hazard Zone D) can **only** be assigned to specific gases",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / innerPackagings",innerPackagings,"InnerPackaging list",,,,,"A list of `Inner Packings` contained inside this `outer packaging/overpack`.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / innerPackagings / description",description,string,,100,,"Woven plastic water resistant Bag","Description of the packaging.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / innerPackagings / material",material,string,,100,,Plastic,"The `material` used for the `Inner Packaging` of the referenced `Dangerous Goods`.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / innerPackagings / quantity",quantity,integer,,,,20,"Count of `Inner Packagings` of the referenced `Dangerous Goods`.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isCompetentAuthorityApprovalRequired","isCompetentAuthorityApprovalRequired",boolean,,,,false,"Indicates if the cargo require approval from authorities",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isEmptyUncleanedResidue",isEmptyUncleanedResidue,boolean,,,,false,"Indicates if the cargo is residue.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isExceptedQuantity",isExceptedQuantity,boolean,,,,false,"Indicates if the dangerous goods can be transported as excepted quantity
-in accordance with Chapter 3.5 of the IMO IMDG Code.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isHot",isHot,boolean,,,,false,"Indicates if high temperature cargo is being shipped.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isLimitedQuantity",isLimitedQuantity,boolean,,,,false,"Indicates if the dangerous goods can be transported as limited quantity
-in accordance with Chapter 3.4 of the IMO IMDG Code.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isMarinePollutant",isMarinePollutant,boolean,,,,false,"Indicates whether the goods belong to the classification of Marine Pollutant.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isReportableQuantity",isReportableQuantity,boolean,,,,false,"Indicates if a container of hazardous material is at the reportable quantity level.
-If true, a report to the relevant authority must be made in case of spill.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isSalvagePackings",isSalvagePackings,boolean,,,,false,"Indicates if the cargo has special packaging for the transport, recovery or disposal of damaged, defective,
-leaking or nonconforming hazardous materials packages, or hazardous materials that have spilled or leaked.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isWaste",isWaste,boolean,,,,true,"Indicates if waste is being shipped.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits",limits,TemperatureLimits,,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / flashPoint",flashPoint,number,,,,42,"Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.
-(Only applicable to specific hazardous goods according to the IMO IMDG Code.)",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / sadt",sadt,number,,,,54.1,"Lowest temperature in which self-accelerating decomposition may occur in a substance",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / sapt",sapt,number,,,,70,"Lowest temperature in which self-accelerating polymerization may occur in a substance",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / temperatureUnit",temperatureUnit,string,,,,CEL,"The unit in which all temperature limits are expressed
- * `CEL` - Celsius
- * `FAH` - Fahrenheit",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / transportControlTemperature","transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances)
-can be safely transported for a prolonged period.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isExceptedQuantity",isExceptedQuantity,boolean,,,,false,"Indicates if the dangerous goods can be transported as excepted quantity in accordance with Chapter 3.5 of the IMO IMDG Code.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isHot",isHot,boolean,,,,false,"Indicates if high temperature cargo is shipped.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isLimitedQuantity",isLimitedQuantity,boolean,,,,false,"Indicates if the dangerous goods can be transported as limited quantity in accordance with Chapter 3.4 of the IMO IMDG Code.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isMarinePollutant",isMarinePollutant,boolean,,,,false,"Indicates if the goods belong to the classification of Marine Pollutant.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isReportableQuantity",isReportableQuantity,boolean,,,,false,"Indicates if a container of hazardous material is at the reportable quantity level. If `true`, a report to the relevant authority must be made in case of spill.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isSalvagePackings",isSalvagePackings,boolean,,,,false,"Indicates if the cargo has special packaging for the transport, recovery or disposal of damaged, defective, leaking or nonconforming hazardous materials packages, or hazardous materials that have spilled or leaked.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / isWaste",isWaste,boolean,,,,false,"Indicates if waste is being shipped",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits",limits,Limits,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / SADT",SADT,number,,,,54.1,"Lowest temperature in which self-accelerating decomposition may occur in a substance",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / SAPT",SAPT,number,,,,70.0,"Lowest temperature in which self-accelerating polymerization may occur in a substance",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / flashPoint",flashPoint,number,,,,42.0,"Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.
+
+**Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / temperatureUnit",temperatureUnit,string,,,,CEL,"The unit for **all attributes in the limits structure** in Celsius or Fahrenheit
+
+- `CEL` (Celsius)
+- `FAH` (Fahrenheit)",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / transportControlTemperature","transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / transportEmergencyTemperature","transportEmergencyTemperature",number,,,,74.1,"Temperature at which emergency procedures shall be implemented",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / naNumber",naNumber,string,,4,"^\d{4}$",9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States
-Department of Transportation.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent",netExplosiveContent,Weight,,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / unit",unit,string,yes,,,KGM,"The unit in which the weight `value` is expressed
- * `GRM` - Grams
- * `KGM` - Kilograms
- * `LBR` - Pounds
- * `ONZ` - Ounce",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / value",value,string,yes,,"^\d+(\.\d+)?$",123.456,"The weight expressed in the selected `unit`",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume",netVolume,Volume,,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume / unit",unit,string,yes,,,MTQ,"The unit in which the volume `value` is expressed
- * `FTQ` - Cubic feet
- * `LTR` - Litres
- * `MTQ` - Cubic meters",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume / value",value,string,yes,,"^\d+(\.\d+)?$",123.456,"The volume expressed in the selected `unit`",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight",netWeight,Weight,,,,,,
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / unit",unit,string,yes,,,KGM,"The unit in which the weight `value` is expressed
- * `GRM` - Grams
- * `KGM` - Kilograms
- * `LBR` - Pounds
- * `ONZ` - Ounce",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / value",value,string,yes,,"^\d+(\.\d+)?$",123.456,"The weight expressed in the selected `unit`",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent",netExplosiveContent,NetExplosiveContent,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+- `KGM` (Kilograms)
+- `LBR` (Pounds)
+- `GRM` (Grams)
+- `ONZ` (Ounce)",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / value",value,number,,,,2.4,"The total weight of the explosive substances, without the packaging’s, casings, etc.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume",netVolume,NetVolume,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume / unit",unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
+- `FTQ` (Cubic foot)
+- `MTQ` (Cubic meter)
+- `LTR` (Litre)",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume / value",value,number,,,,2.4,"The volume of the referenced dangerous goods.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight",netWeight,NetWeight,,,,,,
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+- `KGM` (Kilograms)
+- `LBR` (Pounds)",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / value",value,number,,,,2.4,"Total weight of the goods carried, excluding packaging.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / packingGroup",packingGroup,integer,,,,3,"The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / properShippingName",properShippingName,string,,250,,"Chromium Trioxide, anhydrous","The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code,
-or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to
-the MARPOL Convention.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / properShippingName",properShippingName,string,,250,,"Chromium Trioxide, anhydrous","The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code, or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to the MARPOL Convention.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / segregationGroups",segregationGroups,"string list",,,,,"List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.
-(Only applicable to specific hazardous goods.)",
+
+**Condition:** only applicable to specific hazardous goods.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / subsidiaryRisk1",subsidiaryRisk1,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / subsidiaryRisk2",subsidiaryRisk2,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / technicalName",technicalName,string,,250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods
-as described in chapter 3.1.2.8 of the IMDG Code.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / unNumber",unNumber,string,,4,"^\d{4}$",1463,"United Nations Dangerous Goods (UNDG) Identifier assigned by the UN Sub-Committee of Experts on the
-Transport of Dangerous Goods and shown in the IMO IMDG.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / description",description,string,yes,100,,"Drum, steel","Description of the outer packaging / overpack",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / imoPackagingCode",imoPackagingCode,string,,5,"^[A-Z0-9]{1,5}$",1A2,"IMO packaging code.
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / technicalName",technicalName,string,,250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / description",description,string,,100,,"Drum, steel","Description of the outer packaging/overpack.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / imoPackagingCode",imoPackagingCode,string,,5,"^[A-Z0-9]{1,5}$",1A2,"The code of the packaging as per IMO.
 
-Only applicable to dangerous goods if specified in the
-[IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx).
+**Condition:** only applicable to dangerous goods if specified in the [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx). If not available, the `packageCode` as per UN recommendation 21 should be used.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / numberOfPackages",numberOfPackages,integer,,,,18,"Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / packageCode",packageCode,string,,2,"^[A-Z0-9]{2}$",5H,"A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
 
-If not available, the UNECE Recommendation 21 `packageCode` should be used.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / numberOfPackages",numberOfPackages,integer,yes,,,123,"Specifies the number of outer packagings / overpacks associated with this Cargo Item.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / unecePackageCode",unecePackageCode,string,,2,"^[A-Z0-9]{2}$",5H,"[UNECE Recommendation 21](https://unece.org/trade/uncefact/cl-recommendations) package code",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / woodDeclaration",woodDeclaration,string,,30,,TREATED_AND_CERTIFIED,"Code indicating whether the products, packaging and any other items are made of wood.
+**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / woodDeclaration",woodDeclaration,string,,30,,TREATED_AND_CERTIFIED,"Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:
+- `NOT_APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)
+- `NOT_TREATED_AND_NOT_CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)
+- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)
+- `TREATED_AND_CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)",
+"ArrivalNotice / consignmentItems / carrierBookingReference",carrierBookingReference,string,,35,"^\S(?:.*\S)?$",ABC709951,"The associated booking number provided by the carrier for this `Consignment Item`.",
+"ArrivalNotice / consignmentItems / customsReferences",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
+"ArrivalNotice / consignmentItems / customsReferences / countryCode",countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / consignmentItems / customsReferences / type",type,string,,50,"^\S(?:.*\S)?$",CUS,"The reference type code as defined in the relevant customs jurisdiction.",
+"ArrivalNotice / consignmentItems / customsReferences / values",values,"string list",,,,,,
+"ArrivalNotice / consignmentItems / descriptionOfGoods",descriptionOfGoods,"string list",,,,,"A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.
 
- * `NOT_APPLICABLE` - No wood or any other wood product such as packaging and supports are being shipped.
+**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.",
+"ArrivalNotice / consignmentItems / exportLicense",exportLicense,ExportLicense,,,,,,
+"ArrivalNotice / consignmentItems / exportLicense / expiryDate",expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Export License`.",
+"ArrivalNotice / consignmentItems / exportLicense / isRequired",isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
 
- * `NOT_TREATED_AND_NOT_CERTIFIED` - The wood or wooden materials have not been treated nor fumigated and do not include a certificate.
+**Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
+"ArrivalNotice / consignmentItems / exportLicense / issueDate",issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Export License`.",
+"ArrivalNotice / consignmentItems / exportLicense / reference",reference,string,,35,"^\S(?:.*\S)?$",EMC007123,"Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.",
+"ArrivalNotice / consignmentItems / importLicense",importLicense,ImportLicense,,,,,,
+"ArrivalNotice / consignmentItems / importLicense / expiryDate",expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Import License`.",
+"ArrivalNotice / consignmentItems / importLicense / isRequired",isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
 
- * `PROCESSED` - The wood or wooden materials are entirely made of processed wood, such as plywood, particle board,
-sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these.
+**Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
+"ArrivalNotice / consignmentItems / importLicense / issueDate",issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Import License`.",
+"ArrivalNotice / consignmentItems / importLicense / reference",reference,string,,35,"^\S(?:.*\S)?$",EMC007123,"Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.",
+"ArrivalNotice / consignmentItems / nationalCommodityCodes",nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list of `National Commodity Codes` that apply to this `commodity`",
+"ArrivalNotice / consignmentItems / nationalCommodityCodes / countryCode",countryCode,string,,2,"^[A-Z]{2}$",BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / consignmentItems / nationalCommodityCodes / type",type,string,,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
+- `NCM` (Nomenclatura Comum do Mercosul)
+- `HTS` (Harmonized Tariff Schedule)
+- `SCHEDULE_B` ( Schedule B)
+- `TARIC` (Integrated Tariff of the European Communities)
+- `CN` (Combined Nomenclature)
+- `CUS` (Customs Union and Statistics)",
+"ArrivalNotice / consignmentItems / nationalCommodityCodes / values",values,"string list",,,,,"A list of `national commodity codes` values.",
+"ArrivalNotice / consignmentItems / references",references,"ReferenceConsignmentItem list",,,,,"A list of `References`",
+"ArrivalNotice / consignmentItems / references / type",type,string,,3,,CR,"The reference type codes defined by DCSA. Possible values are:
+- `CR` (Customer’s Reference)
+- `AKG` (Vehicle Identification Number)
+- `SPO` (Shipper's Purchase Order)
+- `CPO` (Consignee's Purchase Order)",
+"ArrivalNotice / consignmentItems / references / values",values,"string list",,,,,"List of `referenceValues` for a given `referenceType`.",
+"ArrivalNotice / consignmentItems / shippingMarks",shippingMarks,"string list",,,,,"A list of the `ShippingMarks` applicable to this `consignmentItem`
 
- * `TREATED_AND_CERTIFIED` - The wood or wooden materials have been treated and/or fumigated and include a certificate.",
-"ArrivalNotice / consignmentItems / carrierBookingReference",carrierBookingReference,string,yes,35,"^\S(?:.*\S)?$",XYZ1234,"The booking number corresponding to this consignment item",
-"ArrivalNotice / consignmentItems / commoditySubReference",commoditySubReference,string,yes,100,"^\S(?:.*\S)?$",XYZ1234,"Reference to the commodity object assigned by the carrier in the booking confirmation,
-unique within the context of one booking.",
-"ArrivalNotice / consignmentItems / customsReferences",customsReferences,"CustomsReference list",,,,,"The list of customs references applicable to this consignment item.",
-"ArrivalNotice / consignmentItems / customsReferences / countryCode",countryCode,string,yes,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-
-When the country code is required but not applicable, use the code `ZZ`.",
-"ArrivalNotice / consignmentItems / customsReferences / referenceValues",referenceValues,"string list",yes,,,,"List of customs reference values",
-"ArrivalNotice / consignmentItems / customsReferences / typeCode",typeCode,string,yes,,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",
-"ArrivalNotice / consignmentItems / descriptionOfGoods",descriptionOfGoods,"string list",yes,,,,"Ordered list of cargo descriptions precise enough for customs services to be able to identify the goods.",
-"ArrivalNotice / consignmentItems / hsCodes",hsCodes,"string list",yes,,,,"List of HS Codes that apply to this consignment item",
-"ArrivalNotice / consignmentItems / nationalCommodityCodes",nationalCommodityCodes,"NationalCommodityCode list",,,,,"The list of national commodity codes applicable to this consignment item.",
-"ArrivalNotice / consignmentItems / nationalCommodityCodes / codeValues",codeValues,"string list",yes,,,,"List of national commodity code values",
-"ArrivalNotice / consignmentItems / nationalCommodityCodes / countryCode",countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-
-When the country code is required but not applicable, use the code `ZZ`.",
-"ArrivalNotice / consignmentItems / nationalCommodityCodes / typeCode",typeCode,string,yes,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
- * NCM (Nomenclatura Comum do Mercosul)
- * HTS (Harmonized Tariff Schedule)
- * SCHEDULE_B ( Schedule B)
- * TARIC (Integrated Tariff of the European Communities)
- * CN (Combined Nomenclature)
- * CUS (Customs Union and Statistics)",
-"ArrivalNotice / consignmentItems / shippingMarks",shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package",
+**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.",
 "ArrivalNotice / customsImportDeclarationProcedure","customsImportDeclarationProcedure",string,,1000,,"The tax must be declared...","Customs import declaration procedure",
 "ArrivalNotice / deliveryTypeAtDestination","deliveryTypeAtDestination",string,yes,,,CY,"Code representing the delivery type offered at destination
  * `CY` - Container yard (including rail ramp)
@@ -572,56 +582,72 @@ also sometimes known as the Lloyd's register code.",
  * `SWB` - Sea Waybill",
 "ArrivalNotice / utilizedTransportEquipments","utilizedTransportEquipments","UtilizedTransportEquipment list",yes,,,,"The equipments being used.",
 "ArrivalNotice / utilizedTransportEquipments / activeReeferSettings",activeReeferSettings,ActiveReeferSettings,,,,,,
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / airExchangeSetpoint",airExchangeSetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target rate at which outdoor air replaces indoor air","Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'."
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / airExchangeUnit",airExchangeUnit,string,,,,MQH,"Measurement unit in which the `airExchangeSetpoint` is expressed
- * `FQH` - Cubic foot per hour
- * `MQH` - Cubic metre per hour","Specifying attribute 'airExchangeSetpoint' requires specifying attribute 'airExchangeUnit'."
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / co2Setpoint",co2Setpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target CO2 percentage",
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / humiditySetpoint",humiditySetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target humidity percentage",
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isBulbMode",isBulbMode,boolean,,,,true,"Flag indicating whether flower bulb handling mode is active",
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isColdTreatmentRequired",isColdTreatmentRequired,boolean,,,,true,"Flag indicating whether the cargo requires cold treatment prior to loading at origin or during transit,
-but prior arrival at POD",
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isControlledAtmosphereRequired","isControlledAtmosphereRequired",boolean,,,,true,"Flag indicating whether the cargo requires controlled atmosphere",
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isDrainHolesOpen",isDrainHolesOpen,boolean,,,,true,"Flag indicating whether the drain holes are open",
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isVentilationOpen",isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open",
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / o2Setpoint",o2Setpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target O2 percentage",
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / temperatureSetpoint",temperatureSetpoint,string,,,"^-?\d+(\.\d+)?$",-12.3,"Target temperature","Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'."
-"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / temperatureUnit",temperatureUnit,string,,,,CEL,"Measurement unit in which the `temperatureSetpoint` is expressed
- * `CEL` - Celsius
- * `FAH` - Fahrenheit","Specifying attribute 'temperatureSetpoint' requires specifying attribute 'temperatureUnit'."
-"ArrivalNotice / utilizedTransportEquipments / equipment",equipment,Equipment,yes,,,,,
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / airExchangeSetpoint",airExchangeSetpoint,number,,,,15.4,"Target value for the air exchange rate which is the rate at which outdoor air replaces indoor air within a Reefer container",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / airExchangeUnit",airExchangeUnit,string,,,,MQH,"The unit for `airExchange` in metrics- or imperial- units per hour
+- `MQH` (Cubic metre per hour)
+- `FQH` (Cubic foot per hour)
+
+**Condition:** Mandatory to provide if `airExchange` is provided",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / co2Setpoint",co2Setpoint,number,,,,25,"The percentage of the controlled atmosphere CO<sub>2</sub> target value",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / humiditySetpoint",humiditySetpoint,number,,,,95.6,"The percentage of the controlled atmosphere humidity target value",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isBulbMode",isBulbMode,boolean,,,,true,"Is special container setting for handling flower bulbs active",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isColdTreatmentRequired",isColdTreatmentRequired,boolean,,,,true,"Indicator whether cargo requires cold treatment prior to loading at origin or during transit, but prior arrival at POD",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isControlledAtmosphereRequired","isControlledAtmosphereRequired",boolean,,,,true,"Indicator of whether cargo requires Controlled Atmosphere.",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isDrainholesOpen",isDrainholesOpen,boolean,,,,true,"Is drain holes open on the container",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / isVentilationOpen",isVentilationOpen,boolean,,,,true,"If `true` the ventilation orifice is `Open` - if `false` the ventilation orifice is `closed`",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / o2Setpoint",o2Setpoint,number,,,,25,"The percentage of the controlled atmosphere O<sub>2</sub> target value",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / temperatureSetpoint",temperatureSetpoint,number,,,,-15,"Target value of the temperature for the Reefer based on the cargo requirement.",
+"ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / temperatureUnit",temperatureUnit,string,,,,CEL,"The unit for temperature in Celsius or Fahrenheit
+
+- `CEL` (Celsius)
+- `FAH` (Fahrenheit)
+
+**Condition:** Mandatory to provide if `temperatureSetpoint` is provided",
+"ArrivalNotice / utilizedTransportEquipments / customsReferences",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
+"ArrivalNotice / utilizedTransportEquipments / customsReferences / countryCode",countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / utilizedTransportEquipments / customsReferences / type",type,string,,50,"^\S(?:.*\S)?$",CUS,"The reference type code as defined in the relevant customs jurisdiction.",
+"ArrivalNotice / utilizedTransportEquipments / customsReferences / values",values,"string list",,,,,,
+"ArrivalNotice / utilizedTransportEquipments / equipment",equipment,Equipment,,,,,,
+"ArrivalNotice / utilizedTransportEquipments / equipment / ISOEquipmentCode",ISOEquipmentCode,string,,4,"^\S(?:.*\S)?$",22G1,"Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.",
 "ArrivalNotice / utilizedTransportEquipments / equipment / equipmentReference",equipmentReference,string,,11,"^\S(?:.*\S)?$",APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
 
-According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
-(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
+"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight",tareWeight,TareWeight,,,,,,
+"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms
+- `KGM` (Kilograms)
+- `LBR` (Pounds)",
+"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / value",value,number,,,,4800,"The weight of an empty container (gross container weight).",
+"ArrivalNotice / utilizedTransportEquipments / isNonOperatingReefer",isNonOperatingReefer,boolean,,,,false,"If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.
 
-If a container does not comply with ISO 6346, it is suggested to follow
-[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
-from SMDG.",
-"ArrivalNotice / utilizedTransportEquipments / equipment / isoEquipmentCode",isoEquipmentCode,string,,4,,22G1,"Unique code for the different equipment size and type used to transport commodities.
+**Condition:** Only applicable if `ISOEquipmentCode` shows a Reefer type.",
+"ArrivalNotice / utilizedTransportEquipments / isShipperOwned",isShipperOwned,boolean,,,,true,"Indicates whether the container is shipper owned (SOC).",
+"ArrivalNotice / utilizedTransportEquipments / references",references,"Reference list",,,,,"A list of `References`",
+"ArrivalNotice / utilizedTransportEquipments / references / referenceType",referenceType,string,yes,3,,FF,"One of the reference type codes defined by DCSA. Possible values are:
+ * FF (Freight Forwarder's Reference)
+ * SI (Shipper's Reference)
+ * SPO (Shippers Purchase Order Reference)
+ * CPO (Consignees Purchase Order Reference)
+ * CR (Customer's Reference)
+ * AAO (Consignee's Reference)
+ * ECR (Empty container release reference)
+ * CSI (Customer shipment ID)
+ * BPR (Booking party reference number)
+ * BID (Booking Request ID)
+ * SAC (Shipping Agency Code)",
+"ArrivalNotice / utilizedTransportEquipments / references / value",value,string,yes,100,,XYZ1234,"Reference value",
+"ArrivalNotice / utilizedTransportEquipments / seals",seals,"Seal list",,,,,"A list of `Seals`",
+"ArrivalNotice / utilizedTransportEquipments / seals / number",number,string,,15,,VET123,"Identifies a seal affixed to the container.",
+"ArrivalNotice / utilizedTransportEquipments / seals / source",source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
+- `CAR` (Carrier)
+- `SHI` (Shipper)
+- `VET` (Veterinary)
+- `CUS` (Customs)
 
-The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP)
-following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.",
-"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight",tareWeight,Weight,,,,,,
-"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / unit",unit,string,yes,,,KGM,"The unit in which the weight `value` is expressed
- * `GRM` - Grams
- * `KGM` - Kilograms
- * `LBR` - Pounds
- * `ONZ` - Ounce",
-"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / value",value,string,yes,,"^\d+(\.\d+)?$",123.456,"The weight expressed in the selected `unit`",
-"ArrivalNotice / utilizedTransportEquipments / isDirectDeliveryRequired",isDirectDeliveryRequired,boolean,,,,true,"Indicates whether the container with dangerous goods cargo must exit the port immediately after being discharged,
-based on the destination port and country regulations.",
-"ArrivalNotice / utilizedTransportEquipments / isExemptOfReuse",isExemptOfReuse,boolean,,,,true,"Specifies whether the container must be returned to the carrier and cannot be reused by the consignee for export.",
-"ArrivalNotice / utilizedTransportEquipments / isNonOperatingReefer",isNonOperatingReefer,boolean,,,,true,"Indicates whether the equipment is a reefer container that should be treated as a dry container.",
-"ArrivalNotice / utilizedTransportEquipments / seals",seals,"Seal list",yes,,,,"The seal-related information associated with this equipment.",
-"ArrivalNotice / utilizedTransportEquipments / seals / sealNumber",sealNumber,string,yes,15,,VET123,"Seal number",
-"ArrivalNotice / utilizedTransportEquipments / seals / source",source,string,,,,VET,"Code identifying the type of entity that has affixed the seal (the seal ""source"")
+**Condition:** Seal source may be required depending on the type of commodity being shipped.",
+"ArrivalNotice / utilizedTransportEquipments / shippingMarks",shippingMarks,"string list",,,,,"A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
 
- * `CAR` - Carrier
- * `CUS` - Customs
- * `SHI` - Shipper
- * `VET` - Veterinary",
-"ArrivalNotice / utilizedTransportEquipments / shippingMarks",shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package",
+**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.",
 "ArrivalNoticeNotification",,,,,,,,
 "ArrivalNoticeNotification / equipmentReferences",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created",
 "ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery",

@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
@@ -25,6 +27,7 @@ public abstract class StandardSpecification {
   private final String standardAbbreviation;
   private final String standardVersion;
 
+  @Getter()
   protected final OpenAPI openAPI;
 
   private final Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField;

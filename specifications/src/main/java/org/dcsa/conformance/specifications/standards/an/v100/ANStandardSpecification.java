@@ -24,39 +24,24 @@ import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
-import org.dcsa.conformance.specifications.standards.an.v100.model.ActiveReeferSettings;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNotice;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotification;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotificationsMessage;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticesMessage;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CargoItem;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Charge;
-import org.dcsa.conformance.specifications.standards.an.v100.model.ConsignmentItem;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ContactInformation;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsReference;
-import org.dcsa.conformance.specifications.standards.an.v100.model.DangerousGoods;
 import org.dcsa.conformance.specifications.standards.an.v100.model.DocumentParty;
 import org.dcsa.conformance.specifications.standards.an.v100.model.EmbeddedDocument;
-import org.dcsa.conformance.specifications.standards.an.v100.model.EmergencyContactDetails;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Equipment;
 import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.IdentifyingPartyCode;
-import org.dcsa.conformance.specifications.standards.an.v100.model.InnerPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Location;
-import org.dcsa.conformance.specifications.standards.an.v100.model.NationalCommodityCode;
-import org.dcsa.conformance.specifications.standards.an.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Reference;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Seal;
 import org.dcsa.conformance.specifications.standards.an.v100.model.TaxOrLegalReference;
-import org.dcsa.conformance.specifications.standards.an.v100.model.TemperatureLimits;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
-import org.dcsa.conformance.specifications.standards.an.v100.model.UtilizedTransportEquipment;
 import org.dcsa.conformance.specifications.standards.an.v100.model.VesselVoyage;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Volume;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Weight;
-import org.dcsa.conformance.specifications.standards.an.v100.types.AirExchangeUnitCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.CargoDescriptionLine;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.standards.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
@@ -80,11 +65,8 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.NationalCommo
 import org.dcsa.conformance.specifications.standards.an.v100.types.PartyCodeListProvider;
 import org.dcsa.conformance.specifications.standards.an.v100.types.PaymentTermCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.PersonTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.SealSourceCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.SegregationGroupCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ShippingMark;
 import org.dcsa.conformance.specifications.standards.an.v100.types.SubsidiaryRisk;
-import org.dcsa.conformance.specifications.standards.an.v100.types.TemperatureUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UNLocationCode;
@@ -95,6 +77,31 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.VesselVoyageT
 import org.dcsa.conformance.specifications.standards.an.v100.types.VolumeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.WeightUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.WoodDeclarationTypeCode;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.ActiveReeferSettings;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoGrossVolume;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoGrossWeight;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoItem;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoNetVolume;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.CargoNetWeight;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.CustomsReference;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.DangerousGoods;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.EmergencyContactDetails;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Equipment;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.GrossWeight;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.InnerPackaging;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Limits;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.NationalCommodityCode;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.NetExplosiveContent;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.NetVolume;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.NetWeight;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.OuterPackaging;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.ReferenceConsignmentItem;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Seal;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.TareWeight;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
 
 public class ANStandardSpecification extends StandardSpecification {
 
@@ -128,32 +135,50 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
+        // DT
         ActiveReeferSettings.class,
+        CargoGrossVolume.class,
+        CargoGrossWeight.class,
+        CargoItem.class,
+        CargoNetVolume.class,
+        CargoNetWeight.class,
+        ConsignmentItem.class,
+        CustomsReference.class,
+        DangerousGoods.class,
+        EmergencyContactDetails.class,
+        Equipment.class,
+        ExportLicense.class,
+        GrossWeight.class,
+        ImportLicense.class,
+        InnerPackaging.class,
+        Limits.class,
+        NationalCommodityCode.class,
+        NetExplosiveContent.class,
+        NetVolume.class,
+        NetWeight.class,
+        OuterPackaging.class,
+        ReferenceConsignmentItem.class,
+        Seal.class,
+        TareWeight.class,
+        UtilizedTransportEquipment.class,
+        // AN
         Address.class,
-        AirExchangeUnitCode.class,
         ArrivalNotice.class,
         ArrivalNoticeNotification.class,
         ArrivalNoticeNotificationsMessage.class,
         ArrivalNoticesMessage.class,
-        CargoDescriptionLine.class,
-        CargoItem.class,
         CarrierClause.class,
         Charge.class,
-        ConsignmentItem.class,
         ContactInformation.class,
         ContainerLoadTypeCode.class,
         CountryCode.class,
         CurrencyAmount.class,
         CurrencyCode.class,
-        CustomsReference.class,
         CustomsReferenceValue.class,
-        DangerousGoods.class,
         DestinationDeliveryTypeCode.class,
         DocumentParty.class,
         DocumentPartyTypeCode.class,
         EmbeddedDocument.class,
-        EmergencyContactDetails.class,
-        Equipment.class,
         EquipmentReference.class,
         FacilityCodeListProvider.class,
         FormattedDate.class,
@@ -165,32 +190,23 @@ public class ANStandardSpecification extends StandardSpecification {
         IdentifyingPartyCode.class,
         ImoPackagingCode.class,
         InhalationZoneTypeCode.class,
-        InnerPackaging.class,
         IsoEquipmentCode.class,
         Location.class,
         ModeOfTransportCode.class,
-        NationalCommodityCode.class,
         NationalCommodityCodeValue.class,
-        OuterPackaging.class,
         PartyCodeListProvider.class,
         PaymentTermCode.class,
         PersonTypeCode.class,
         Reference.class,
-        Seal.class,
-        SealSourceCode.class,
         SegregationGroupCode.class,
-        ShippingMark.class,
         SubsidiaryRisk.class,
         TaxOrLegalReference.class,
-        TemperatureLimits.class,
-        TemperatureUnitCode.class,
         Transport.class,
         TransportDocumentReference.class,
         TransportDocumentTypeCode.class,
         UniversalVoyageReference.class,
         UnecePackageCode.class,
         UNLocationCode.class,
-        UtilizedTransportEquipment.class,
         VesselIMONumber.class,
         VesselVoyage.class,
         VesselVoyageTypeCode.class,

@@ -7,12 +7,37 @@ import lombok.Data;
 @Data
 public class VesselVoyage {
 
-  @Schema(description = "The name of the sea-going vessel on which the cargo is loaded.", example = "King of the Seas", maxLength = 50, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(
+      description =
+"""
+The name of the first sea going Vessel on board which the cargo is loaded or intended to be loaded
+""",
+      example = "King of the Seas",
+      maxLength = 50,
+      pattern = "^\\S(?:.*\\S)?$")
   private String vesselName;
 
-  @Schema(description = "Carrier-specific identifier of the export voyage.", example = "2103S", maxLength = 50, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(
+      description =
+"""
+The identifier of an export voyage. The carrier-specific identifier of the export Voyage.
+""",
+      example = "2103S",
+      maxLength = 50,
+      pattern = "^\\S(?:.*\\S)?$")
   private String carrierExportVoyageNumber;
 
-  @Schema(description = "DCSA universal export voyage reference. Format: 2 digits year, 2 alphanumeric, 1 direction (`N`, `E`, `W`, `S`, `R`).", example = "2103N", minLength = 5, maxLength = 5, pattern = "^\\d{2}[0-9A-Z]{2}[NEWSR]$")
+  @Schema(
+      description =
+"""
+A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`
+- `2 digits` for the year
+- `2 alphanumeric characters` for the sequence number of the voyage
+- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).
+""",
+      example = "2103N",
+      minLength = 5,
+      maxLength = 5,
+      pattern = "^\\d{2}[0-9A-Z]{2}[NEWSR]$")
   private String universalExportVoyageReference;
 }

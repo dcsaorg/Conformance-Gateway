@@ -15,13 +15,23 @@ public class Party {
   @Schema(description = "Address of the party.")
   private PartyAddress address;
 
-  @ArraySchema(schema = @Schema(description = "Party identifying codes. Either this or address must be provided."))
+  @Schema(
+      description =
+"""
+**Condition:** Either the `address` or a party `identifyingCode` must be provided.
+""")
+  @ArraySchema(
+      schema =
+          @Schema(
+              description = "Party identifying codes. Either this or address must be provided."))
   private List<IdentifyingCode> identifyingCodes;
 
+  @Schema(description = "A list of `Tax References` for a `Party`")
   @ArraySchema(schema = @Schema(description = "Tax references for the party."))
   private List<TaxLegalReference> taxLegalReferences;
 
-  @ArraySchema(schema = @Schema(description = "Contact details for the party."))
+  @Schema(description = "A list of contact details")
+  @ArraySchema(schema = @Schema(description = "A list of contact details"))
   private List<PartyContactDetail> partyContactDetails;
 
   @Schema(description = "A reference linked to the `Party`.", example = "HHL007", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")

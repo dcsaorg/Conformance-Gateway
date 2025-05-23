@@ -10,9 +10,16 @@ public class PartyContactDetail {
   @Schema(description = "Name of the contact", example = "Henrik", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
   private String name;
 
-  @Schema(description = "Phone number for the contact. Must be in international format as per ITU-T E.123.", example = "+45 70262970", maxLength = 30, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(
+      description =
+"""
+Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
+""",
+      example = "+45 70262970",
+      maxLength = 30,
+      pattern = "^\\S(?:.*\\S)?$")
   private String phone;
 
-  @Schema(description = "E-mail address to be used", example = "info@dcsa.org", maxLength = 100, pattern = "^.+@\\S+$")
+  @Schema(description = "`E-mail` address to be used", example = "info@dcsa.org", maxLength = 100, pattern = "^.+@\\S+$")
   private String email;
 }

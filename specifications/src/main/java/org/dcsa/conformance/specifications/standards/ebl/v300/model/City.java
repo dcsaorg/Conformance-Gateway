@@ -10,9 +10,17 @@ public class City {
   @Schema(description = "The name of the city.", example = "Amsterdam", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
   private String city;
 
-  @Schema(description = "The name of the state or region.", example = "North Holland", maxLength = 65)
+  @Schema(description = "The name of the state/region.", example = "North Holland", maxLength = 65)
   private String stateRegion;
 
-  @Schema(description = "The 2-character ISO 3166-1 alpha-2 country code.", example = "NL", minLength = 2, maxLength = 2, pattern = "^[A-Z]{2}$")
+  @Schema(
+      description =
+"""
+The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+""",
+      example = "NL",
+      minLength = 2,
+      maxLength = 2,
+      pattern = "^[A-Z]{2}$")
   private String countryCode;
 }

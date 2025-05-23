@@ -14,12 +14,12 @@ public class IssuingParty {
   @Schema(description = "Physical address of the issuing party.")
   private PartyAddress address;
 
-  @Schema(description = "List of identifying codes for the issuing party.")
+  @Schema()
   private List<IdentifyingCode> identifyingCodes;
 
-  @Schema(description = "List of tax/legal references for the issuing party.")
+  @Schema(description = "A list of `Tax References` for a `Party`")
   private List<TaxLegalReference> taxLegalReferences;
 
-  @Schema(description = "Contact details for the issuing party.")
+  @Schema(description = "A list of contact details")
   private List<PartyContactDetail> partyContactDetails;
 }

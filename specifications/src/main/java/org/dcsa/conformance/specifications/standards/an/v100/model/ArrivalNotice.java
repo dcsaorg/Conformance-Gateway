@@ -15,6 +15,8 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.DestinationDe
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
 
 @Data
 @Schema(description = "Full content of an Arrival Notice document.")

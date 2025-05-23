@@ -10,9 +10,31 @@ public class PlaceOfIssue {
   @Schema(description = "The name of the location.", example = "Port of Amsterdam", maxLength = 100, pattern = "^\\S(?:.*\\S)?$")
   private String locationName;
 
-  @Schema(description = "The UN Location code specifying where the place is located. Must be 2-character country code (ISO 3166-1 alpha-2) + 3-character location code (A-Z or 2-9).", example = "NLAMS", minLength = 5, maxLength = 5, pattern = "^[A-Z]{2}[A-Z2-9]{3}$")
-  private String UNLocationCode;
+  @Schema(
+      name = "UNLocationCode",
+      description =
+"""
+The UN Location code specifying where the place is located. The pattern used must be
 
-  @Schema(description = "The 2-character country code using ISO 3166-1 alpha-2.", example = "NL", minLength = 2, maxLength = 2, pattern = "^[A-Z]{2}$")
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
+""",
+      example = "NLAMS",
+      minLength = 5,
+      maxLength = 5,
+      pattern = "^[A-Z]{2}[A-Z2-9]{3}$")
+  private String unLocationCode;
+
+  @Schema(
+      description =
+"""
+The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+""",
+      example = "NL",
+      minLength = 2,
+      maxLength = 2,
+      pattern = "^[A-Z]{2}$")
   private String countryCode;
 }

@@ -19,8 +19,8 @@ public class Address {
   @Schema(description = "The post code of the address.", example = "1047 HM", maxLength = 10)
   private String postCode;
 
-  @Schema(description = "Post office box number.", example = "123", maxLength = 20)
-  private String POBox;
+  @Schema(name = "POBox", description = "A numbered box at a post office where a person or business can have mail or parcels delivered.", example = "123", maxLength = 20)
+  private String poBox;
 
   @Schema(description = "The name of the city.", example = "Amsterdam", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
   private String city;
@@ -28,6 +28,6 @@ public class Address {
   @Schema(description = "The name of the state/region.", example = "North Holland", maxLength = 65)
   private String stateRegion;
 
-  @Schema(description = "Country code (ISO 3166-1 alpha-2).", example = "NL", minLength = 2, maxLength = 2, pattern = "^[A-Z]{2}$")
+  @Schema(description = "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)", example = "NL", minLength = 2, maxLength = 2, pattern = "^[A-Z]{2}$")
   private String countryCode;
 }

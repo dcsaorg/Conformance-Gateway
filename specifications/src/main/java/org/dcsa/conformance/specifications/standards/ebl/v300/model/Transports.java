@@ -15,10 +15,32 @@ public class Transports {
   @Schema(description = "The planned date of departure.", example = "2024-06-03", format = "date")
   private String plannedDepartureDate;
 
-  @Schema(description = "Mode of transportation for pre-carriage when transport to the port of loading is organized by the carrier. The currently supported values include:\n- `VESSEL`\n- `RAIL`\n- `TRUCK`\n- `BARGE`\n- `MULTIMODAL`", example = "RAIL", maxLength = 50)
+  @Schema(
+      description =
+"""
+Mode of transportation for pre-carriage when transport to the port of loading is organized by the carrier. If this attributes is populated, then a Place of Receipt must also be defined. The currently supported values include:
+- `VESSEL` (Vessel)
+- `RAIL` (Rail)
+- `TRUCK` (Truck)
+- `BARGE` (Barge)
+- `MULTIMODAL` (if multiple modes are used)
+""",
+      example = "RAIL",
+      maxLength = 50)
   private String preCarriageBy;
 
-  @Schema(description = "Mode of transportation for on-carriage when transport from the port of discharge is organized by the carrier. The currently supported values include:\n- `VESSEL`\n- `RAIL`\n- `TRUCK`\n- `BARGE`\n- `MULTIMODAL`", example = "TRUCK", maxLength = 50)
+  @Schema(
+      description =
+"""
+Mode of transportation for on-carriage when transport from the port of discharge is organized by the carrier. If this attributes is populated, then a Place of Delivery must also be defined. The currently supported values include:
+- `VESSEL` (Vessel)
+- `RAIL` (Rail)
+- `TRUCK` (Truck)
+- `BARGE` (Barge)
+- `MULTIMODAL` (if multiple modes are used)
+""",
+      example = "TRUCK",
+      maxLength = 50)
   private String onCarriageBy;
 
   @Schema(description = "The place where the carrier takes receipt of the goods for transportation.")
@@ -36,7 +58,11 @@ public class Transports {
   @Schema(description = "Optional information about the onward inland routing.")
   private OnwardInlandRouting onwardInlandRouting;
 
-  @Schema(description = "List of vessels/voyages relevant for the transport.")
+  @Schema(
+      description =
+"""
+Allow the possibility to include multiple vessels/voyages in the `Transport Document` (e.g. the first sea going vessel and the mother vessel). At least one is mandatory to provide.
+""")
   @ArraySchema(minItems = 1)
   private List<VesselVoyage> vesselVoyages;
 }

@@ -12,27 +12,55 @@ public class Consignee {
   @Schema(description = "Name of the party.", example = "IKEA Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
   private String partyName;
 
-  @Schema(description = "Legal classification of the party.\n- `NATURAL_PERSON`\n- `LEGAL_PERSON`\n- `ASSOCIATION_OF_PERSONS`", example = "NATURAL_PERSON", maxLength = 50, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(
+      description =
+"""
+Can be one of the following values as per the Union Customs Code art. 5(4):
+- `NATURAL_PERSON` (A person that is an individual living human being)
+- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
+- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
+""",
+      example = "NATURAL_PERSON",
+      maxLength = 50,
+      pattern = "^\\S(?:.*\\S)?$")
   private String typeOfPerson;
 
   @Schema(description = "Physical address of the party.")
   private PartyAddress address;
 
-  @ArraySchema(schema = @Schema(description = "A line of the displayed address for the BL.", example = "Strawinskylaan 4117", maxLength = 35), maxItems = 6)
+  @Schema(
+      description =
+"""
+The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
+
+**Conditions:** If provided:
+  - the displayed address must be included in the `Transport Document`.
+  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
+  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
+  - the order of the items in this array **MUST** be preserved as by the provider of the API.
+""")
+  @ArraySchema(
+      schema =
+          @Schema(
+              description = "A line of the displayed address for the BL.",
+              example = "Strawinskylaan 4117",
+              maxLength = 35),
+      maxItems = 6)
   private List<String> displayedAddress;
 
-  @Schema(description = "Identifying codes for this party.")
+  @Schema()
   private List<IdentifyingCode> identifyingCodes;
 
-  @Schema(description = "Tax and legal references.")
+  @Schema(description = "A list of `Tax References` for a `Party`")
   private List<TaxLegalReference> taxLegalReferences;
 
-  @Schema(description = "List of contact details for this party.")
+  @Schema(description = "A list of contact details")
   private List<PartyContactDetail> partyContactDetails;
 
-  @Schema(description = "Reference linked to the Consignee.", example = "HHL007", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(description = "A reference linked to the `Consignee`.", example = "HHL007", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
   private String reference;
 
+  @Schema(description = "A list of `Purchase Order Reference`s linked to the `Consignee`.")
   @ArraySchema(schema = @Schema(description = "Purchase order reference linked to the Consignee.", example = "HHL007", maxLength = 35, pattern = "^\\S(?:.*\\S)?$"))
   private List<String> purchaseOrderReferences;
 }

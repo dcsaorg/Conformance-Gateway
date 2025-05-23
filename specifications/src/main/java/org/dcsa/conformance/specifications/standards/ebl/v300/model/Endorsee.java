@@ -5,25 +5,48 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 
-@Schema(description = "The party to whom the title to the goods is transferred by means of endorsement. Only applicable for negotiable BLs (`isToOrder=true`).")
+@Schema(
+    description =
+        "The party to whom the title to the goods is transferred by means of endorsement. Only applicable for negotiable BLs (`isToOrder=true`).")
 @Data
 public class Endorsee {
 
-  @Schema(description = "Name of the party.", example = "IKEA Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(
+      description = "Name of the party.",
+      example = "IKEA Denmark",
+      maxLength = 70,
+      pattern = "^\\S(?:.*\\S)?$")
   private String partyName;
 
   @Schema(description = "Physical address of the party.")
   private PartyAddress address;
 
-  @ArraySchema(schema = @Schema(description = "A line of the displayed address for the BL.", example = "Strawinskylaan 4117", maxLength = 35), maxItems = 6)
+  @Schema(
+      description =
+"""
+The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
+
+**Conditions:** If provided:
+  - the displayed address must be included in the `Transport Document`.
+  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
+  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
+  - the order of the items in this array **MUST** be preserved as by the provider of the API.
+""")
+  @ArraySchema(
+      schema =
+          @Schema(
+              description = "A line of the displayed address for the BL.",
+              example = "Strawinskylaan 4117",
+              maxLength = 35),
+      maxItems = 6)
   private List<String> displayedAddress;
 
-  @Schema(description = "Identifying codes for this party.")
+  @Schema()
   private List<IdentifyingCode> identifyingCodes;
 
-  @Schema(description = "Tax and legal references.")
+  @Schema(description = "A list of `Tax References` for a `Party`")
   private List<TaxLegalReference> taxLegalReferences;
 
-  @Schema(description = "List of contact details for this party.")
+  @Schema(description = "A list of contact details")
   private List<PartyContactDetail> partyContactDetails;
 }

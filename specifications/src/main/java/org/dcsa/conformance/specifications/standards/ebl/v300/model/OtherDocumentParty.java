@@ -10,6 +10,21 @@ public class OtherDocumentParty {
   @Schema(description = "The party involved in the document.")
   private Party party;
 
-  @Schema(description = "Specifies the party's role.\n\n- `SCO` (Service Contract Owner)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `COW` (Invoice payer for consignor)\n- `COX` (Invoice payer for consignee)\n- `CS` (Consolidator)\n- `MF` (Manufacturer)\n- `WH` (Warehouse Keeper)", example = "DDS", maxLength = 3)
+  @Schema(
+      description =
+"""
+Specifies the role of the party in a given context. Possible values are:
+
+- `SCO` (Service Contract Owner)
+- `DDR` (Consignor's freight forwarder)
+- `DDS` (Consignee's freight forwarder)
+- `COW` (Invoice payer on behalf of the consignor (shipper))
+- `COX` (Invoice payer on behalf of the consignee)
+- `CS` (Consolidator)
+- `MF` (Manufacturer)
+- `WH` (Warehouse Keeper)
+""",
+      example = "DDS",
+      maxLength = 3)
   private String partyFunction;
 }

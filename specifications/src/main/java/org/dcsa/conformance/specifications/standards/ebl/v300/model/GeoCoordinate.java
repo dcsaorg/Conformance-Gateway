@@ -7,9 +7,21 @@ import lombok.Data;
 @Data
 public class GeoCoordinate {
 
-  @Schema(description = "Geographic coordinate that specifies the north–south position of a point on Earth's surface.", example = "48.8585500", maxLength = 10)
+  @Schema(
+      description =
+"""
+Geographic coordinate that specifies the north–south position of a point on the Earth's surface.
+""",
+      example = "48.8585500",
+      maxLength = 10)
   private String latitude;
 
-  @Schema(description = "Geographic coordinate that specifies the east–west position of a point on Earth's surface.", example = "2.294492036", maxLength = 11)
+  @Schema(
+      description =
+"""
+Geographic coordinate that specifies the east–west position of a point on the Earth's surface.
+""",
+      example = "2.294492036",
+      maxLength = 11)
   private String longitude;
 }

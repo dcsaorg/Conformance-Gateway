@@ -67,7 +67,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.ReferenceCons
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Seal;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Shipper;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TareWeight;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.TaxLegalReference;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.TransportDocument;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Transports;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;

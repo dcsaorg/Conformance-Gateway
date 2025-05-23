@@ -298,12 +298,10 @@ in relation to the contract of carriage by sea.
 such as own a property, sue and be sued
 
  * `ASSOCIATION_OF_PERSONS` - Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts",
-"ArrivalNotice / documentParties / taxOrLegalReferences",taxOrLegalReferences,"TaxOrLegalReference list",,,,,"List of tax or legal references relevant to the party",
-"ArrivalNotice / documentParties / taxOrLegalReferences / countryCode",countryCode,string,yes,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-
-When the country code is required but not applicable, use the code `ZZ`.",
-"ArrivalNotice / documentParties / taxOrLegalReferences / referenceType",referenceType,string,yes,50,,PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
-"ArrivalNotice / documentParties / taxOrLegalReferences / value",value,string,yes,35,,ABC1234,"The name or title of the tax or legal reference",
+"ArrivalNotice / documentParties / taxLegalReferences",taxLegalReferences,"TaxLegalReference list",,,,,"List of tax or legal references relevant to the party",
+"ArrivalNotice / documentParties / taxLegalReferences / countryCode",countryCode,string,,2,"^[A-Z]{2}$",IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / documentParties / taxLegalReferences / type",type,string,,50,"^\S(?:.*\S)?$",PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
+"ArrivalNotice / documentParties / taxLegalReferences / value",value,string,,35,"^\S(?:.*\S)?$",AAAAA0000A,"The value of the `taxLegalReference`",
 "ArrivalNotice / freeTime",freeTime,"FreeTime list",,,,,"List of free time conditions applicable to this shipment at destination",
 "ArrivalNotice / freeTime / calculationBasis",calculationBasis,string,yes,1000,,"Calculated as...","Description of the conditions under which this free time item applies.
 It can include references to the carrier website or individual charges as per service contract/agreement.",

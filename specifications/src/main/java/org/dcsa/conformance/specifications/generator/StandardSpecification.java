@@ -10,6 +10,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,7 @@ public abstract class StandardSpecification {
   private final String standardAbbreviation;
   private final String standardVersion;
 
-  @Getter()
-  protected final OpenAPI openAPI;
+  @Getter() protected final OpenAPI openAPI;
 
   private final Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField;
 
@@ -92,6 +92,7 @@ public abstract class StandardSpecification {
     ModelConverters.getInstance()
         .addConverter(new ModelValidatorConverter(constraintsByClassAndField));
     modelClassesStream()
+        .sorted(Comparator.comparing(Class::getSimpleName))
         .forEach(
             modelClass ->
                 ModelConverters.getInstance()

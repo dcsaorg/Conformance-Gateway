@@ -35,7 +35,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.IdentifyingPartyCode;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Reference;
-import org.dcsa.conformance.specifications.standards.an.v100.model.TaxOrLegalReference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
 import org.dcsa.conformance.specifications.standards.an.v100.model.VesselVoyage;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Volume;
@@ -101,6 +100,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.OuterPackagin
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ReferenceConsignmentItem;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Seal;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TareWeight;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
 
 public class ANStandardSpecification extends StandardSpecification {
@@ -162,6 +162,7 @@ public class ANStandardSpecification extends StandardSpecification {
         ReferenceConsignmentItem.class,
         Seal.class,
         TareWeight.class,
+        TaxLegalReference.class,
         UtilizedTransportEquipment.class,
         // AN
         ArrivalNotice.class,
@@ -200,7 +201,6 @@ public class ANStandardSpecification extends StandardSpecification {
         Reference.class,
         SegregationGroupCode.class,
         SubsidiaryRisk.class,
-        TaxOrLegalReference.class,
         Transport.class,
         TransportDocumentReference.class,
         TransportDocumentTypeCode.class,

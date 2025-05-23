@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
 
 @Schema(description = "Party by whom or in whose name a contract of carriage by sea has been concluded. May also be the party who delivers the goods to the carrier.")
 @Data

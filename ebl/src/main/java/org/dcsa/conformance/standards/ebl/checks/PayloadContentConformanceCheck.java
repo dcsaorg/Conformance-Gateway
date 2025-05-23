@@ -1,0 +1,60 @@
+package org.dcsa.conformance.standards.ebl.checks;
+
+import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
+
+public abstract class PayloadContentConformanceCheck extends ActionCheck {
+
+  protected PayloadContentConformanceCheck(
+      String title,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType) {
+    super(title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
+  }
+
+  @Override
+  protected final Set<String> checkConformance(
+      Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    // All checks are delegated to sub-checks; nothing to do in here.
+    return Collections.emptySet();
+  }
+
+  @Override
+  protected abstract Stream<? extends ConformanceCheck> createSubChecks();
+
+  protected ConformanceCheck createSubCheck(
+      String subtitle, Function<JsonNode, Set<String>> subCheck) {
+    return new ActionCheck(
+        subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
+      @Override
+      protected Set<String> checkConformance(
+          Function<UUID, ConformanceExchange> getExchangeByUuid) {
+        ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
+        if (exchange == null) return Collections.emptySet();
+        var conformanceMessage =
+            this.httpMessageType == HttpMessageType.RESPONSE
+                ? exchange.getResponse().message()
+                : exchange.getRequest().message();
+        var payload = conformanceMessage.body().getJsonBody();
+        return subCheck.apply(payload);
+      }
+    };
+  }
+
+  protected Function<JsonNode, Set<String>> at(
+      String path, Function<JsonNode, Set<String>> subCheck) {
+    var pointer = JsonPointer.compile(path);
+    return payload -> subCheck.apply(payload.at(pointer));
+  }
+}

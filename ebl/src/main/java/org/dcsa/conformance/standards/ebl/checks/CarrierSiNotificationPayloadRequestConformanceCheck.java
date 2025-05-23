@@ -16,9 +16,6 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 public class CarrierSiNotificationPayloadRequestConformanceCheck
     extends PayloadContentConformanceCheck {
 
-  private static final String CHECK_TITLE =
-      "[Notification] The HTTP request has valid content (conditional validation rules)";
-
   private static final String DATA_PATH = "/data";
   private static final String SHIPPING_INSTRUCTIONS_PATH = "/data/shippingInstructions";
   private static final String UPDATED_SHIPPING_INSTRUCTIONS_PATH =
@@ -44,7 +41,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
       Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier,
       JsonContentCheck... extraChecks) {
-    super(CHECK_TITLE, EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
+    super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
     this.standardsVersion = standardsVersion;
     this.shippingInstructionsStatus = shippingInstructionsStatus;
     this.updatedShippingInstructionsStatus = updatedShippingInstructionsStatus;

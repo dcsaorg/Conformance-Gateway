@@ -16,9 +16,6 @@ import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 public class CarrierTdNotificationPayloadRequestConformanceCheck
     extends PayloadContentConformanceCheck {
 
-  private static final String CHECK_TITLE =
-      "[Notification] The HTTP request has valid content (conditional validation rules)";
-
   private static final String DATA_PATH = "/data";
   private static final String TRANSPORT_DOCUMENT_PATH = "/data/transportDocument";
 
@@ -39,7 +36,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
       Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
 
-    super(CHECK_TITLE, EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
+    super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
     this.standardVersion = standardVersion;
     this.transportDocumentStatus = transportDocumentStatus;
     this.tdrIsKnown = Boolean.TRUE.equals(tdrIsKnown);

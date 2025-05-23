@@ -15,12 +15,13 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public abstract class PayloadContentConformanceCheck extends ActionCheck {
 
+  public static final String VALIDATE_PAYLOAD_TITLE = "Validate the carrier payload";
+
   protected PayloadContentConformanceCheck(
-      String title,
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
       HttpMessageType httpMessageType) {
-    super(title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
+    super(VALIDATE_PAYLOAD_TITLE, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
   }
 
   @Override

@@ -1029,7 +1029,7 @@ components:
           type: "array"
           description: "List of codes identifying the party"
           items:
-            $ref: "#/components/schemas/IdentifyingPartyCode"
+            $ref: "#/components/schemas/IdentifyingCode"
         taxLegalReferences:
           type: "array"
           description: "List of tax or legal references relevant to the party"
@@ -1209,51 +1209,50 @@ components:
             - `LBR` (Pounds)
           example: "KGM"
       description: "Total weight of the goods carried, including packaging."
-    IdentifyingPartyCode:
-      required:
-      - "codeListProvider"
-      - "partyCode"
+    IdentifyingCode:
       type: "object"
       properties:
         codeListProvider:
-          type: "string"
-          description: |-
-            Code of the provider of the code list from which a party code is used.
-
-             * `BOLE` - Bolero
-             * `CARX` - CargoX
-             * `DCSA` - Digital Container Shipping Association
-             * `DNB` - Dun and Bradstreet
-             * `EDOX` - EdoxOnline
-             * `ESSD` - EssDOCS
-             * `ETEU` - eTEU
-             * `FMC` - Federal Maritime Commission
-             * `GSBN` - Global Shipping Business Network
-             * `GLEIF` - Global Legal Entity Identifier Foundation
-             * `IDT` - ICE Digital Trade
-             * `IQAX` - IQAX
-             * `SECR` - Secro
-             * `TRGO` - TradeGO
-             * `W3C` - World Wide Web Consortium
-             * `WAVE` - Wave
-             * `WISE` - WiseTech
-             * `ZZZ` - Mutually defined
-          example: "W3C"
-        codeListName:
+          maxLength: 100
           type: "string"
           description: |
-            The name of the `partyCode` list, code generation mechanism or code authority from the `codeListProvider`.
-
-            This is a very limited list of examples:
-             * DID (Decenbtralized Identifier) for `codeListProvider` W3C
-             * LEI (Legal Entity Identifier) for `codeListProvider` GLEIF
-             * DUNS (Data Universal Numbering System) for `codeListProvider` DNB
-          example: "DID"
+            A list of codes identifying a party. Possible values are:
+            - `WAVE` (Wave)
+            - `CARX` (CargoX)
+            - `ESSD` (EssDOCS)
+            - `IDT` (ICE Digital Trade)
+            - `BOLE` (Bolero)
+            - `EDOX` (EdoxOnline)
+            - `IQAX` (IQAX)
+            - `SECR` (Secro)
+            - `TRGO` (TradeGO)
+            - `ETEU` (eTEU)
+            - `TRAC` (Enigio trace:original)
+            - `BRIT` (BRITC eBL)
+            - `GSBN` (Global Shipping Business Network)
+            - `WISE` (WiseTech)
+            - `GLEIF` (Global Legal Entity Identifier Foundation)
+            - `W3C` (World Wide Web Consortium)
+            - `DNB` (Dun and Bradstreet)
+            - `FMC` (Federal Maritime Commission)
+            - `DCSA` (Digital Container Shipping Association)
+            - `ZZZ` (Mutually defined)
+          example: "W3C"
         partyCode:
+          maxLength: 150
           type: "string"
-          description: "Identifier of the party in the list `codeListName` provided by `codeListProvider`"
+          description: "Code to identify the party as provided by the code list provider"
           example: "MSK"
-      description: "Identifying code for a party"
+        codeListName:
+          maxLength: 100
+          type: "string"
+          description: |
+            The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:
+            - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+            - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+            - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`
+          example: "DID"
+      description: "Code-based identifier for a party. Includes the provider, code, and list name."
     ImportLicense:
       type: "object"
       properties:

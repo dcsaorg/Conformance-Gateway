@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
 

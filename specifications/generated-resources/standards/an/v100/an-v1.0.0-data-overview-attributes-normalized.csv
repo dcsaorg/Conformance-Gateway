@@ -191,7 +191,7 @@ DangerousGoods,subsidiaryRisk2,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in ad
 DangerousGoods,technicalName,string,,250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
 DocumentParty,address,Address,,,,,,"At least one of these attributes is required: 'address', 'identifyingCodes'."
 DocumentParty,contactDetails,"PartyContactDetail list",,,,,"Party contact details",
-DocumentParty,identifyingCodes,"IdentifyingPartyCode list",,,,,"List of codes identifying the party","At least one of these attributes is required: 'address', 'identifyingCodes'."
+DocumentParty,identifyingCodes,"IdentifyingCode list",,,,,"List of codes identifying the party","At least one of these attributes is required: 'address', 'identifyingCodes'."
 DocumentParty,name,string,yes,70,,"Acme Inc.","Party name",
 DocumentParty,partyType,string,yes,,,SHIPPER,"Code indicating the type of a document party
  * `SHIPPER` - The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a
@@ -249,33 +249,32 @@ GrossWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in im
 - `KGM` (Kilograms)
 - `LBR` (Pounds)",
 GrossWeight,value,number,,,,12000.3,"The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.",
-IdentifyingPartyCode,codeListName,string,,,,DID,"The name of the `partyCode` list, code generation mechanism or code authority from the `codeListProvider`.
-
-This is a very limited list of examples:
- * DID (Decenbtralized Identifier) for `codeListProvider` W3C
- * LEI (Legal Entity Identifier) for `codeListProvider` GLEIF
- * DUNS (Data Universal Numbering System) for `codeListProvider` DNB",
-IdentifyingPartyCode,codeListProvider,string,yes,,,W3C,"Code of the provider of the code list from which a party code is used.
-
- * `BOLE` - Bolero
- * `CARX` - CargoX
- * `DCSA` - Digital Container Shipping Association
- * `DNB` - Dun and Bradstreet
- * `EDOX` - EdoxOnline
- * `ESSD` - EssDOCS
- * `ETEU` - eTEU
- * `FMC` - Federal Maritime Commission
- * `GSBN` - Global Shipping Business Network
- * `GLEIF` - Global Legal Entity Identifier Foundation
- * `IDT` - ICE Digital Trade
- * `IQAX` - IQAX
- * `SECR` - Secro
- * `TRGO` - TradeGO
- * `W3C` - World Wide Web Consortium
- * `WAVE` - Wave
- * `WISE` - WiseTech
- * `ZZZ` - Mutually defined",
-IdentifyingPartyCode,partyCode,string,yes,,,MSK,"Identifier of the party in the list `codeListName` provided by `codeListProvider`",
+IdentifyingCode,codeListName,string,,100,,DID,"The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+IdentifyingCode,codeListProvider,string,,100,,W3C,"A list of codes identifying a party. Possible values are:
+- `WAVE` (Wave)
+- `CARX` (CargoX)
+- `ESSD` (EssDOCS)
+- `IDT` (ICE Digital Trade)
+- `BOLE` (Bolero)
+- `EDOX` (EdoxOnline)
+- `IQAX` (IQAX)
+- `SECR` (Secro)
+- `TRGO` (TradeGO)
+- `ETEU` (eTEU)
+- `TRAC` (Enigio trace:original)
+- `BRIT` (BRITC eBL)
+- `GSBN` (Global Shipping Business Network)
+- `WISE` (WiseTech)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `W3C` (World Wide Web Consortium)
+- `DNB` (Dun and Bradstreet)
+- `FMC` (Federal Maritime Commission)
+- `DCSA` (Digital Container Shipping Association)
+- `ZZZ` (Mutually defined)",
+IdentifyingCode,partyCode,string,,150,,MSK,"Code to identify the party as provided by the code list provider",
 ImportLicense,expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Import License`.",
 ImportLicense,isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
 

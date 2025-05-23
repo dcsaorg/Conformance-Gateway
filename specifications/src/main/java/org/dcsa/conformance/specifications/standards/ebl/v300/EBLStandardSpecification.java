@@ -40,7 +40,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Facility;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GrossWeight;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.IdentifyingCode;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.InnerPackaging;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.InvoicePayableAt;

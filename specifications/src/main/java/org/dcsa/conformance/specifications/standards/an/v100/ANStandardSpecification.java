@@ -31,7 +31,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNotice
 import org.dcsa.conformance.specifications.standards.an.v100.model.DocumentParty;
 import org.dcsa.conformance.specifications.standards.an.v100.model.EmbeddedDocument;
 import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
-import org.dcsa.conformance.specifications.standards.an.v100.model.IdentifyingPartyCode;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
 import org.dcsa.conformance.specifications.standards.an.v100.model.VesselVoyage;
@@ -87,6 +86,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.EmergencyCont
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Equipment;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GrossWeight;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.InnerPackaging;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Limits;
@@ -151,6 +151,7 @@ public class ANStandardSpecification extends StandardSpecification {
         Equipment.class,
         ExportLicense.class,
         GrossWeight.class,
+        IdentifyingCode.class,
         ImportLicense.class,
         InnerPackaging.class,
         Limits.class,
@@ -189,7 +190,6 @@ public class ANStandardSpecification extends StandardSpecification {
         FreeTimeTimeUnitCode.class,
         FreeTimeTypeCode.class,
         HSCode.class,
-        IdentifyingPartyCode.class,
         ImoPackagingCode.class,
         InhalationZoneTypeCode.class,
         IsoEquipmentCode.class,

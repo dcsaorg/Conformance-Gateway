@@ -10,6 +10,7 @@ import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.standards.an.v100.types.DocumentPartyTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.PersonTypeCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
 
@@ -33,7 +34,7 @@ public class DocumentParty {
 
   @Schema(description = "List of codes identifying the party")
   @ArraySchema(minItems = 1)
-  private List<IdentifyingPartyCode> identifyingCodes;
+  private List<IdentifyingCode> identifyingCodes;
 
   @Schema(description = "List of tax or legal references relevant to the party")
   private List<TaxLegalReference> taxLegalReferences;

@@ -6,16 +6,15 @@ e.g. additional required documents to prepare and present for shipment release -
 "ArrivalNotice / arrivalNoticeVisualization / content",content,string,yes,,,RXhhbXBsZSBBTiBjb250ZW50,"Base64 representation of the binary document content",
 "ArrivalNotice / arrivalNoticeVisualization / contentType",contentType,string,,,,application/msword,"Content type of document",
 "ArrivalNotice / arrivalNoticeVisualization / name",name,string,yes,,,"20250123 AN XYZ01234.docx","Document name",
-"ArrivalNotice / cargoMovementTypeAtDestination","cargoMovementTypeAtDestination",string,yes,,,FCL,"Code indicating whether at destination the unloaded cargo occupies an entire container (FCL)
-or shares the container with other shipments (LCL).
+"ArrivalNotice / cargoMovementTypeAtDestination","cargoMovementTypeAtDestination",string,,3,,FCL,"Refers to the shipment term at the **unloading** of the cargo out of the container. Possible values are:
 
- * `FCL` - Full Container Load
- * `LCL` - Less than Container Load",
-"ArrivalNotice / carrierClauses",carrierClauses,"string list",,,,,"List of carrier clauses",
-"ArrivalNotice / carrierCode",carrierCode,string,yes,4,"^\S+$",HLCU,"Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
-"ArrivalNotice / carrierCodeListProvider",carrierCodeListProvider,string,yes,,,NMFTA,"The provider of the code list in which `carrierCode` is defined.
- * `SMDG` - Ship Message Design Group
- * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
+- `FCL` (Full Container Load)
+- `LCL` (Less than Container Load)",
+"ArrivalNotice / carrierClauses",carrierClauses,"string list",,,,,"Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.",
+"ArrivalNotice / carrierCode",carrierCode,string,,4,"^\S+$",MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
+"ArrivalNotice / carrierCodeListProvider",carrierCodeListProvider,string,,,,NMFTA,"The code list provider for the `carrierCode`. Possible values are:
+- `SMDG` (Ship Message Design Group)
+- `NMFTA` (National Motor Freight Traffic Association)","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
 "ArrivalNotice / carrierContactInformation","carrierContactInformation","PartyContactDetail list",yes,,,,"The party to contact for any inquiries related to this Arrival Notice.",
 "ArrivalNotice / carrierContactInformation / email",email,string,,100,"^.+@\S+$",info@dcsa.org,"`E-mail` address to be used",
 "ArrivalNotice / carrierContactInformation / name",name,string,,35,"^\S(?:.*\S)?$",Henrik,"Name of the contact",
@@ -24,7 +23,7 @@ or shares the container with other shipments (LCL).
 "ArrivalNotice / carrierInformationForCargoRelease / email",email,string,,100,"^.+@\S+$",info@dcsa.org,"`E-mail` address to be used",
 "ArrivalNotice / carrierInformationForCargoRelease / name",name,string,,35,"^\S(?:.*\S)?$",Henrik,"Name of the contact",
 "ArrivalNotice / carrierInformationForCargoRelease / phone",phone,string,,30,"^\S(?:.*\S)?$","+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
-"ArrivalNotice / charges",charges,"Charge list",,,,,"List of charges applicable to this shipment",
+"ArrivalNotice / charges",charges,"Charge list",,,,,"A list of `Charges`",
 "ArrivalNotice / charges / calculationBasis",calculationBasis,string,,50,"^\S(?:.*\S)?$","Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
 "ArrivalNotice / charges / chargeName",chargeName,string,,50,"^\S(?:.*\S)?$","Documentation fee - Destination","Free text field describing the charge to apply",
 "ArrivalNotice / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
@@ -35,7 +34,7 @@ or shares the container with other shipments (LCL).
 - `COL` (Collect)",
 "ArrivalNotice / charges / quantity",quantity,number,,,,34.4,"The amount of unit for this charge item.",
 "ArrivalNotice / charges / unitPrice",unitPrice,number,,,,3456.6,"The unit price of this charge item in the currency of the charge.",
-"ArrivalNotice / consignmentItems",consignmentItems,"ConsignmentItem list",yes,,,,"The list of consignment items in the shipment.",
+"ArrivalNotice / consignmentItems",consignmentItems,"ConsignmentItem list",,,,,"A list of `ConsignmentItems`",
 "ArrivalNotice / consignmentItems / HSCodes",HSCodes,"string list",,,,,"A list of `HS Codes` that apply to this `consignmentItem`",
 "ArrivalNotice / consignmentItems / cargoItems",cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",
 "ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume",cargoGrossVolume,CargoGrossVolume,,,,,,
@@ -234,10 +233,11 @@ Character | Valid Characters | Description
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.",
 "ArrivalNotice / customsImportDeclarationProcedure","customsImportDeclarationProcedure",string,,1000,,"The tax must be declared...","Customs import declaration procedure",
-"ArrivalNotice / deliveryTypeAtDestination","deliveryTypeAtDestination",string,yes,,,CY,"Code representing the delivery type offered at destination
- * `CY` - Container yard (including rail ramp)
- * `SD` - Store Door
- * `CFS` - Container Freight Station",
+"ArrivalNotice / deliveryTypeAtDestination","deliveryTypeAtDestination",string,,3,,CY,"Indicates the type of service offered at `Destination`. The options are:
+
+- `CY` (Container yard (incl. rail ramp))
+- `SD` (Store Door)
+- `CFS` (Container Freight Station)",
 "ArrivalNotice / documentParties",documentParties,"DocumentParty list",yes,,,,"Document parties",
 "ArrivalNotice / documentParties / displayedAddress",displayedAddress,"string list",,,,,"The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
 
@@ -274,9 +274,11 @@ Character | Valid Characters | Description
 - `ZZZ` (Mutually defined)",
 "ArrivalNotice / documentParties / identifyingCodes / partyCode",partyCode,string,,150,,MSK,"Code to identify the party as provided by the code list provider",
 "ArrivalNotice / documentParties / location",location,Location,,,,,,
-"ArrivalNotice / documentParties / location / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNotice / documentParties / location / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / documentParties / location / address",address,Address,,,,,,
 "ArrivalNotice / documentParties / location / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -289,12 +291,12 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / documentParties / location / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNotice / documentParties / location / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNotice / documentParties / location / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNotice / documentParties / location / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNotice / documentParties / location / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / documentParties / location / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / documentParties / location / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
+"ArrivalNotice / documentParties / location / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / documentParties / partyContactDetails",partyContactDetails,"PartyContactDetail list",,,,,"Party contact details",
 "ArrivalNotice / documentParties / partyContactDetails / email",email,string,,100,"^.+@\S+$",info@dcsa.org,"`E-mail` address to be used",
 "ArrivalNotice / documentParties / partyContactDetails / name",name,string,,35,"^\S(?:.*\S)?$",Henrik,"Name of the contact",
@@ -336,23 +338,25 @@ It can include references to the carrier website or individual charges as per se
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 "ArrivalNotice / freeTime / timeUnit",timeUnit,string,yes,3,,WD,"Code identifying the unit in which free time is expressed
- * `CD` - Calendar days
- * `WD` - Working days
- * `HR` - Hours",
+- `CD` - Calendar days
+- `WD` - Working days
+- `HR` - Hours",
 "ArrivalNotice / freeTime / typeCode",typeCode,string,yes,,,DEM,"Code used to denote the type of free time.
- * `DEM` - Demurrage
- * `DET` - Detention
- * `PDM` - Per Diem
- * `STO` - Storage",
-"ArrivalNotice / isElectronic",isElectronic,boolean,yes,,,true,"Flag indicating whether the transport document for which this arrival notice was created is electronically transferred",
+- `DEM` - Demurrage
+- `DET` - Detention
+- `PDM` - Per Diem
+- `STO` - Storage",
+"ArrivalNotice / isElectronic",isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 "ArrivalNotice / issueDateTime",issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNotice / label",label,string,,1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNotice / payerCode",payerCode,string,,100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
 "ArrivalNotice / pickupLocation",pickupLocation,Location,,,,,,
-"ArrivalNotice / pickupLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNotice / pickupLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / pickupLocation / address",address,Address,,,,,,
 "ArrivalNotice / pickupLocation / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -365,24 +369,24 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / pickupLocation / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNotice / pickupLocation / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNotice / pickupLocation / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNotice / pickupLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNotice / pickupLocation / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / pickupLocation / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / pickupLocation / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
-"ArrivalNotice / references",references,"Reference list",,,,,"References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
-Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
-on the B/L. Customers can use these references to track shipments in their internal systems.",
+"ArrivalNotice / pickupLocation / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / references",references,"Reference list",,,,,"A list of `References`",
 "ArrivalNotice / references / type",type,string,,3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)",
 "ArrivalNotice / references / value",value,string,,35,"^\S(?:.*\S)?$",HHL00103004,"The value of the reference.",
 "ArrivalNotice / returnInstructions",returnInstructions,string,,500,,"Please place the container...","Return instructions",
 "ArrivalNotice / returnLocation",returnLocation,Location,,,,,,
-"ArrivalNotice / returnLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNotice / returnLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / returnLocation / address",address,Address,,,,,,
 "ArrivalNotice / returnLocation / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -395,12 +399,12 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / returnLocation / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNotice / returnLocation / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNotice / returnLocation / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNotice / returnLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNotice / returnLocation / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / returnLocation / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / returnLocation / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
+"ArrivalNotice / returnLocation / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / serviceContractNumber",serviceContractNumber,string,,100,,SCN12345,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
 quantity commitment (usually referred as ""MQC"") of cargo that the shipper commits to over a fixed period,
 and the carrier commits to a certain rate or rate schedule.",
@@ -409,9 +413,11 @@ and the carrier commits to a certain rate or rate schedule.",
 "ArrivalNotice / transport / departureDate",departureDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
 "ArrivalNotice / transport / dischargeLocation",dischargeLocation,Location,,,,,,
-"ArrivalNotice / transport / dischargeLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNotice / transport / dischargeLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / transport / dischargeLocation / address",address,Address,,,,,,
 "ArrivalNotice / transport / dischargeLocation / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -424,21 +430,23 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / dischargeLocation / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNotice / transport / dischargeLocation / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNotice / transport / dischargeLocation / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNotice / transport / dischargeLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNotice / transport / dischargeLocation / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / dischargeLocation / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / transport / dischargeLocation / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
+"ArrivalNotice / transport / dischargeLocation / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / estimatedGeneralOrderDateTime","estimatedGeneralOrderDateTime",string,,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
 "ArrivalNotice / transport / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
 "ArrivalNotice / transport / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
 "ArrivalNotice / transport / inlandArrivalDate",inlandArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 "ArrivalNotice / transport / loadLocation",loadLocation,Location,,,,,,
-"ArrivalNotice / transport / loadLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNotice / transport / loadLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / transport / loadLocation / address",address,Address,,,,,,
 "ArrivalNotice / transport / loadLocation / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -451,24 +459,26 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / loadLocation / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNotice / transport / loadLocation / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNotice / transport / loadLocation / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNotice / transport / loadLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNotice / transport / loadLocation / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / loadLocation / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / transport / loadLocation / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
+"ArrivalNotice / transport / loadLocation / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / modeOfTransport",modeOfTransport,string,,20,,VESSEL,"Code defined by DCSA to identify a mode of transport.
 
- * `VESSEL` - Vessel
- * `RAIL` - Rail
- * `TRUCK` - Truck
- * `BARGE` - Barge
- * `MULTIMODAL` - Multimodal",
+- `VESSEL` - Vessel
+- `RAIL` - Rail
+- `TRUCK` - Truck
+- `BARGE` - Barge
+- `MULTIMODAL` - Multimodal",
 "ArrivalNotice / transport / onBoardDate",onBoardDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
 "ArrivalNotice / transport / placeOfDelivery",placeOfDelivery,Location,,,,,,
-"ArrivalNotice / transport / placeOfDelivery / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNotice / transport / placeOfDelivery / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / transport / placeOfDelivery / address",address,Address,,,,,,
 "ArrivalNotice / transport / placeOfDelivery / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -481,16 +491,18 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / placeOfDelivery / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNotice / transport / placeOfDelivery / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNotice / transport / placeOfDelivery / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNotice / transport / placeOfDelivery / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNotice / transport / placeOfDelivery / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfDelivery / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / transport / placeOfDelivery / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
+"ArrivalNotice / transport / placeOfDelivery / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / placeOfReceipt",placeOfReceipt,Location,,,,,,
-"ArrivalNotice / transport / placeOfReceipt / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNotice / transport / placeOfReceipt / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / transport / placeOfReceipt / address",address,Address,,,,,,
 "ArrivalNotice / transport / placeOfReceipt / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -503,18 +515,20 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / placeOfReceipt / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNotice / transport / placeOfReceipt / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNotice / transport / placeOfReceipt / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / transport / placeOfReceipt / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
+"ArrivalNotice / transport / placeOfReceipt / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / plannedArrivalDate",plannedArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the first mother vessel arriving at the destination country.",
 "ArrivalNotice / transport / plannedDepartureDate",plannedDepartureDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of departure of the first mother vessel arriving at the destination country.",
 "ArrivalNotice / transport / portOfDischarge",portOfDischarge,Location,yes,,,,,
-"ArrivalNotice / transport / portOfDischarge / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNotice / transport / portOfDischarge / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / transport / portOfDischarge / address",address,Address,,,,,,
 "ArrivalNotice / transport / portOfDischarge / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -527,16 +541,18 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / portOfDischarge / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNotice / transport / portOfDischarge / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNotice / transport / portOfDischarge / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNotice / transport / portOfDischarge / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNotice / transport / portOfDischarge / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfDischarge / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / transport / portOfDischarge / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
+"ArrivalNotice / transport / portOfDischarge / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / portOfLoading",portOfLoading,Location,yes,,,,,
-"ArrivalNotice / transport / portOfLoading / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNotice / transport / portOfLoading / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / transport / portOfLoading / address",address,Address,,,,,,
 "ArrivalNotice / transport / portOfLoading / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -549,21 +565,21 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / portOfLoading / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNotice / transport / portOfLoading / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNotice / transport / portOfLoading / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNotice / transport / portOfLoading / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNotice / transport / portOfLoading / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfLoading / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / transport / portOfLoading / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
+"ArrivalNotice / transport / portOfLoading / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / vesselVoyages",vesselVoyages,"VesselVoyage list",,,,,,
 "ArrivalNotice / transport / vesselVoyages / carrierVoyageNumber",carrierVoyageNumber,string,yes,50,,1234N,"Carrier-specific identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",
 "ArrivalNotice / transport / vesselVoyages / typeCode",typeCode,string,yes,,,POD,"Code representing the type of a vessel voyage.
 
- * `DC` - Destination country
- * `POD` - Port of destination
- * `POL` - Port of loading",
+- `DC` - Destination country
+- `POD` - Port of destination
+- `POL` - Port of loading",
 "ArrivalNotice / transport / vesselVoyages / universalVoyageReference",universalVoyageReference,string,,5,"^\d{2}[0-9A-Z]{2}[NEWSR]$",2301W,"Universal identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",
@@ -572,10 +588,10 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 The reference is the International Maritime Organisation (IMO) number,
 also sometimes known as the Lloyd's register code.",
 "ArrivalNotice / transport / vesselVoyages / vesselName",vesselName,string,yes,50,,"King of the Seas","Vessel name",
-"ArrivalNotice / transportDocumentReference","transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",XYZ1234,"Reference of the transport document for which this arrival notice was created",
-"ArrivalNotice / transportDocumentTypeCode","transportDocumentTypeCode",string,yes,,,BOL,"Type of the transport document for which this arrival notice was created
- * `BOL` - Bill of Lading
- * `SWB` - Sea Waybill",
+"ArrivalNotice / transportDocumentReference","transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
+"ArrivalNotice / transportDocumentTypeCode","transportDocumentTypeCode",string,yes,,,SWB,"Specifies the type of the transport document
+- `BOL` (Bill of Lading)
+- `SWB` (Sea Waybill)",
 "ArrivalNotice / utilizedTransportEquipments","utilizedTransportEquipments","UtilizedTransportEquipment list",yes,,,,"The equipments being used.",
 "ArrivalNotice / utilizedTransportEquipments / activeReeferSettings",activeReeferSettings,ActiveReeferSettings,,,,,,
 "ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / airExchangeSetpoint",airExchangeSetpoint,number,,,,15.4,"Target value for the air exchange rate which is the rate at which outdoor air replaces indoor air within a Reefer container",
@@ -643,9 +659,11 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
 "ArrivalNoticeNotification / label",label,string,,1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNoticeNotification / placeOfDelivery",placeOfDelivery,Location,,,,,,
-"ArrivalNoticeNotification / placeOfDelivery / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNoticeNotification / placeOfDelivery / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNoticeNotification / placeOfDelivery / address",address,Address,,,,,,
 "ArrivalNoticeNotification / placeOfDelivery / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -658,16 +676,18 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNoticeNotification / placeOfDelivery / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNoticeNotification / placeOfDelivery / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNoticeNotification / placeOfDelivery / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNoticeNotification / placeOfDelivery / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNoticeNotification / placeOfDelivery / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNoticeNotification / placeOfDelivery / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNoticeNotification / placeOfDelivery / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
+"ArrivalNoticeNotification / placeOfDelivery / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNoticeNotification / portOfDischarge",portOfDischarge,Location,yes,,,,,
-"ArrivalNoticeNotification / portOfDischarge / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+"ArrivalNoticeNotification / portOfDischarge / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNoticeNotification / portOfDischarge / address",address,Address,,,,,,
 "ArrivalNoticeNotification / portOfDischarge / address / POBox",POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
@@ -680,10 +700,10 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNoticeNotification / portOfDischarge / address / streetNumber",streetNumber,string,,50,,100,"The number of the street.",
 "ArrivalNoticeNotification / portOfDischarge / facilityCode",facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 "ArrivalNoticeNotification / portOfDischarge / facilityCodeListProvider",facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 "ArrivalNoticeNotification / portOfDischarge / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,,
 "ArrivalNoticeNotification / portOfDischarge / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNoticeNotification / portOfDischarge / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNoticeNotification / portOfDischarge / locationName",locationName,string,,100,,"Port of Amsterdam","Location name",
-"ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",XYZ1234,"Reference of the transport document for which this arrival notice was created",
+"ArrivalNoticeNotification / portOfDischarge / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",

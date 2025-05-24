@@ -109,7 +109,10 @@ public enum StandardSpecificationTestToolkit {
         "name",
         comparableDescription(originalAttributeSchema.getDescription()),
         comparableDescription(generatedAttributeSchema.getDescription()));
-    softAssertEquals("type", originalAttributeSchema.getType(), generatedAttributeSchema.getType());
+    softAssertEquals(
+        "type",
+        getAttributeTypeName(originalAttributeSchema),
+        getAttributeTypeName(generatedAttributeSchema));
     softAssertEquals(
         "pattern", originalAttributeSchema.getPattern(), generatedAttributeSchema.getPattern());
     softAssertEquals(

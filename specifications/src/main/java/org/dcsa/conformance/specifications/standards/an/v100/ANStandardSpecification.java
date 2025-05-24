@@ -34,10 +34,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
 import org.dcsa.conformance.specifications.standards.an.v100.model.VesselVoyage;
-import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FacilityCodeListProvider;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
@@ -46,8 +43,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeU
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselVoyageTypeCode;
@@ -154,10 +149,7 @@ public class ANStandardSpecification extends StandardSpecification {
         ArrivalNoticeNotification.class,
         ArrivalNoticeNotificationsMessage.class,
         ArrivalNoticesMessage.class,
-        CarrierClause.class,
-        ContainerLoadTypeCode.class,
         CountryCode.class,
-        DestinationDeliveryTypeCode.class,
         DocumentParty.class,
         EmbeddedDocument.class,
         EquipmentReference.class,
@@ -171,8 +163,6 @@ public class ANStandardSpecification extends StandardSpecification {
         Location.class,
         ModeOfTransportCode.class,
         Transport.class,
-        TransportDocumentReference.class,
-        TransportDocumentTypeCode.class,
         UniversalVoyageReference.class,
         VesselIMONumber.class,
         VesselVoyage.class,

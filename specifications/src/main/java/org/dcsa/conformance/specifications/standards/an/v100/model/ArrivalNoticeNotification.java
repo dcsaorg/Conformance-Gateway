@@ -1,14 +1,12 @@
 package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.generator.SchemaOverride;
+import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
-
-import java.util.List;
 
 @Data
 @Schema(
@@ -33,13 +31,14 @@ public class ArrivalNoticeNotification {
       """)
   private String label;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(
-      description =
-"""
-Reference of the transport document for which this arrival notice was created
-""")
-  private TransportDocumentReference transportDocumentReference;
+  @Schema(
+    requiredMode = Schema.RequiredMode.REQUIRED,
+    description =
+      "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
+    example = "HHL71800000",
+    maxLength = 20,
+    pattern = "^\\S(?:.*\\S)?$")
+  private String transportDocumentReference;
 
   @Schema(
       description =

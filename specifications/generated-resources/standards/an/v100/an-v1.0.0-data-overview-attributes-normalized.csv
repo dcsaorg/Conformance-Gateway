@@ -31,36 +31,34 @@ Address,streetNumber,string,,50,,100,"The number of the street.",
 ArrivalNotice,additionalInformation,string,,500,,"FIRMS code: B986","Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
 e.g. additional required documents to prepare and present for shipment release - country specific.",
 ArrivalNotice,"arrivalNoticeVisualization",EmbeddedDocument,,,,,,
-ArrivalNotice,"cargoMovementTypeAtDestination",string,yes,,,FCL,"Code indicating whether at destination the unloaded cargo occupies an entire container (FCL)
-or shares the container with other shipments (LCL).
+ArrivalNotice,"cargoMovementTypeAtDestination",string,,3,,FCL,"Refers to the shipment term at the **unloading** of the cargo out of the container. Possible values are:
 
- * `FCL` - Full Container Load
- * `LCL` - Less than Container Load",
-ArrivalNotice,carrierClauses,"string list",,,,,"List of carrier clauses",
-ArrivalNotice,carrierCode,string,yes,4,"^\S+$",HLCU,"Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
-ArrivalNotice,carrierCodeListProvider,string,yes,,,NMFTA,"The provider of the code list in which `carrierCode` is defined.
- * `SMDG` - Ship Message Design Group
- * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
+- `FCL` (Full Container Load)
+- `LCL` (Less than Container Load)",
+ArrivalNotice,carrierClauses,"string list",,,,,"Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.",
+ArrivalNotice,carrierCode,string,,4,"^\S+$",MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
+ArrivalNotice,carrierCodeListProvider,string,,,,NMFTA,"The code list provider for the `carrierCode`. Possible values are:
+- `SMDG` (Ship Message Design Group)
+- `NMFTA` (National Motor Freight Traffic Association)","Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'."
 ArrivalNotice,"carrierContactInformation","PartyContactDetail list",yes,,,,"The party to contact for any inquiries related to this Arrival Notice.",
 ArrivalNotice,"carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
-ArrivalNotice,charges,"Charge list",,,,,"List of charges applicable to this shipment",
-ArrivalNotice,consignmentItems,"ConsignmentItem list",yes,,,,"The list of consignment items in the shipment.",
+ArrivalNotice,charges,"Charge list",,,,,"A list of `Charges`",
+ArrivalNotice,consignmentItems,"ConsignmentItem list",,,,,"A list of `ConsignmentItems`",
 ArrivalNotice,"customsImportDeclarationProcedure",string,,1000,,"The tax must be declared...","Customs import declaration procedure",
-ArrivalNotice,"deliveryTypeAtDestination",string,yes,,,CY,"Code representing the delivery type offered at destination
- * `CY` - Container yard (including rail ramp)
- * `SD` - Store Door
- * `CFS` - Container Freight Station",
+ArrivalNotice,"deliveryTypeAtDestination",string,,3,,CY,"Indicates the type of service offered at `Destination`. The options are:
+
+- `CY` (Container yard (incl. rail ramp))
+- `SD` (Store Door)
+- `CFS` (Container Freight Station)",
 ArrivalNotice,documentParties,"DocumentParty list",yes,,,,"Document parties",
 ArrivalNotice,freeTime,"FreeTime list",,,,,"List of free time conditions applicable to this shipment at destination",
-ArrivalNotice,isElectronic,boolean,yes,,,true,"Flag indicating whether the transport document for which this arrival notice was created is electronically transferred",
+ArrivalNotice,isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 ArrivalNotice,issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 ArrivalNotice,label,string,,1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 ArrivalNotice,payerCode,string,,100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
 ArrivalNotice,pickupLocation,Location,,,,,,
-ArrivalNotice,references,"Reference list",,,,,"References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
-Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
-on the B/L. Customers can use these references to track shipments in their internal systems.",
+ArrivalNotice,references,"Reference list",,,,,"A list of `References`",
 ArrivalNotice,returnInstructions,string,,500,,"Please place the container...","Return instructions",
 ArrivalNotice,returnLocation,Location,,,,,,
 ArrivalNotice,serviceContractNumber,string,,100,,SCN12345,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
@@ -68,10 +66,10 @@ quantity commitment (usually referred as ""MQC"") of cargo that the shipper comm
 and the carrier commits to a certain rate or rate schedule.",
 ArrivalNotice,termsAndConditions,string,yes,50000,,"Any reference in...","Carrier terms and conditions of transport.",
 ArrivalNotice,transport,Transport,yes,,,,,
-ArrivalNotice,"transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",XYZ1234,"Reference of the transport document for which this arrival notice was created",
-ArrivalNotice,"transportDocumentTypeCode",string,yes,,,BOL,"Type of the transport document for which this arrival notice was created
- * `BOL` - Bill of Lading
- * `SWB` - Sea Waybill",
+ArrivalNotice,"transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
+ArrivalNotice,"transportDocumentTypeCode",string,yes,,,SWB,"Specifies the type of the transport document
+- `BOL` (Bill of Lading)
+- `SWB` (Sea Waybill)",
 ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",yes,,,,"The equipments being used.",
 "ArrivalNoticeNotification",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created",
 "ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery",
@@ -81,7 +79,7 @@ ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",ye
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNoticeNotification",placeOfDelivery,Location,,,,,,
 "ArrivalNoticeNotification",portOfDischarge,Location,yes,,,,,
-"ArrivalNoticeNotification","transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",XYZ1234,"Reference of the transport document for which this arrival notice was created",
+"ArrivalNoticeNotification","transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
 "ArrivalNoticeNotificationsMessage","arrivalNoticeNotifications","ArrivalNoticeNotification list",,,,,"List of Arrival Notice lightweight notifications.",
 ArrivalNoticesMessage,arrivalNotices,"ArrivalNotice list",,,,,"List of arrival notices.",
 CargoGrossVolume,unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
@@ -251,14 +249,14 @@ FreeTime,isoEquipmentCode,string,yes,4,"^\S(?:.*\S)?$",22GP,"Unique code identif
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 FreeTime,timeUnit,string,yes,3,,WD,"Code identifying the unit in which free time is expressed
- * `CD` - Calendar days
- * `WD` - Working days
- * `HR` - Hours",
+- `CD` - Calendar days
+- `WD` - Working days
+- `HR` - Hours",
 FreeTime,typeCode,string,yes,,,DEM,"Code used to denote the type of free time.
- * `DEM` - Demurrage
- * `DET` - Detention
- * `PDM` - Per Diem
- * `STO` - Storage",
+- `DEM` - Demurrage
+- `DET` - Detention
+- `PDM` - Per Diem
+- `STO` - Storage",
 GeoCoordinate,latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 GeoCoordinate,longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 GrossWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
@@ -311,17 +309,19 @@ Limits,temperatureUnit,string,,,,CEL,"The unit for **all attributes in the limit
 - `FAH` (Fahrenheit)",
 Limits,"transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.",
 Limits,"transportEmergencyTemperature",number,,,,74.1,"Temperature at which emergency procedures shall be implemented",
-Location,UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the carrier booking office is located. The pattern used must be
+Location,UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 Location,address,Address,,,,,,
 Location,facilityCode,string,,6,"^\S(?:.*\S)?$",CTA,"Facility code in the list provided by `facilityCodeListProvider`",
 Location,facilityCodeListProvider,string,,,,BIC,"The provider of the code list in which `facilityCode` is defined.
- * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
- * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
+- `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+- `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)",
 Location,geoCoordinate,GeoCoordinate,,,,,,
-Location,locationName,string,,100,,"Port of Amsterdam","Location name",
+Location,locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 NationalCommodityCode,countryCode,string,,2,"^[A-Z]{2}$",BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 NationalCommodityCode,type,string,,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
 - `NCM` (Nomenclatura Comum do Mercosul)
@@ -399,11 +399,11 @@ Transport,inlandArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date 
 Transport,loadLocation,Location,,,,,,
 Transport,modeOfTransport,string,,20,,VESSEL,"Code defined by DCSA to identify a mode of transport.
 
- * `VESSEL` - Vessel
- * `RAIL` - Rail
- * `TRUCK` - Truck
- * `BARGE` - Barge
- * `MULTIMODAL` - Multimodal",
+- `VESSEL` - Vessel
+- `RAIL` - Rail
+- `TRUCK` - Truck
+- `BARGE` - Barge
+- `MULTIMODAL` - Multimodal",
 Transport,onBoardDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
 Transport,placeOfDelivery,Location,,,,,,
 Transport,placeOfReceipt,Location,,,,,,
@@ -429,9 +429,9 @@ VesselVoyage,carrierVoyageNumber,string,yes,50,,1234N,"Carrier-specific identifi
 * the export voyage (if `typeCode` is `POL`)",
 VesselVoyage,typeCode,string,yes,,,POD,"Code representing the type of a vessel voyage.
 
- * `DC` - Destination country
- * `POD` - Port of destination
- * `POL` - Port of loading",
+- `DC` - Destination country
+- `POD` - Port of destination
+- `POL` - Port of loading",
 VesselVoyage,universalVoyageReference,string,,5,"^\d{2}[0-9A-Z]{2}[NEWSR]$",2301W,"Universal identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",

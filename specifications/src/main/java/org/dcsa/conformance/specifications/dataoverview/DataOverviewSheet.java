@@ -83,11 +83,13 @@ public abstract class DataOverviewSheet {
     excelDataValues =
         swapOldAndNew
             ? diff(
+                primaryKeyColumnCount,
                 newRowValuesByPrimaryKey,
                 oldRowValuesByPrimaryKey,
                 changedPrimaryKeyByOldPrimaryKeyBySheetClass.get(getClass()).entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)))
             : diff(
+                primaryKeyColumnCount,
                 oldRowValuesByPrimaryKey,
                 newRowValuesByPrimaryKey,
                 changedPrimaryKeyByOldPrimaryKeyBySheetClass.get(getClass()));
@@ -126,10 +128,12 @@ public abstract class DataOverviewSheet {
       this.newValues = newValues;
     }
 
-    DataOverviewDiffStatus getDiffStatus() {
+    DataOverviewDiffStatus getDiffStatus(int primaryKeyColumnCount) {
       if (oldPrimaryKey == null) return DataOverviewDiffStatus.ADDED;
       if (newValues == null) return DataOverviewDiffStatus.REMOVED;
       if (newValues.equals(oldValues)) return DataOverviewDiffStatus.UNMODIFIED;
+      if (getOldValuesThatChanged().stream().skip(primaryKeyColumnCount).allMatch(""::equals))
+        return DataOverviewDiffStatus.UNMODIFIED;
       return DataOverviewDiffStatus.NEW_VALUE;
     }
 
@@ -144,6 +148,7 @@ public abstract class DataOverviewSheet {
   }
 
   private static List<Map.Entry<DataOverviewDiffStatus, List<String>>> diff(
+      int primaryKeyColumnCount,
       Map<String, List<String>> oldRowValuesByPrimaryKey,
       Map<String, List<String>> newRowValuesByPrimaryKey,
       Map<String, String> changedPrimaryKeyByOldPrimaryKey) {
@@ -189,7 +194,7 @@ public abstract class DataOverviewSheet {
         .values()
         .forEach(
             diffEntry -> {
-              DataOverviewDiffStatus diffStatus = diffEntry.getDiffStatus();
+              DataOverviewDiffStatus diffStatus = diffEntry.getDiffStatus(primaryKeyColumnCount);
               switch (diffStatus) {
                 case ADDED:
                 case UNMODIFIED:

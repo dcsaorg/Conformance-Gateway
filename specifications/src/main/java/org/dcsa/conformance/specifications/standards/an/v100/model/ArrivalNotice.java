@@ -4,17 +4,11 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
-import org.dcsa.conformance.specifications.generator.SchemaOverride;
 import org.dcsa.conformance.specifications.constraints.AttributeOneRequiresAttributeTwo;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
-import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
-import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierCodeListProvider;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ContainerLoadTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.DestinationDeliveryTypeCode;
+import org.dcsa.conformance.specifications.generator.SchemaOverride;
+import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
@@ -41,23 +35,27 @@ for example "Warning", "Updated", "Second", "Third" etc.
   private String label;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
-      type = "string",
-      pattern = "^\\S+$",
-      maxLength = 4,
-      example = "HLCU",
       description =
-          "Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice")
+          "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
+      example = "MMCU",
+      maxLength = 4,
+      pattern = "^\\S+$")
   private String carrierCode;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(description = "The provider of the code list in which `carrierCode` is defined.")
-  private CarrierCodeListProvider carrierCodeListProvider;
+  @Schema(
+      description =
+          """
+      The code list provider for the `carrierCode`. Possible values are:
+      - `SMDG` (Ship Message Design Group)
+      - `NMFTA` (National Motor Freight Traffic Association)
+      """,
+      example = "NMFTA",
+      allowableValues = {"SMDG", "NMFTA"})
+  private String carrierCodeListProvider;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
-      description =
-          "The party to contact for any inquiries related to this Arrival Notice.")
+      description = "The party to contact for any inquiries related to this Arrival Notice.")
   @ArraySchema(minItems = 1)
   private List<PartyContactDetail> carrierContactInformation;
 
@@ -97,49 +95,56 @@ e.g. additional required documents to prepare and present for shipment release -
 """)
   private String additionalInformation;
 
-  @Schema(
-      description =
-"""
-References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
-Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
-on the B/L. Customers can use these references to track shipments in their internal systems.
-""")
+  @Schema(description = "A list of `References`")
   private List<Reference> references;
-
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(
-      description = "Reference of the transport document for which this arrival notice was created")
-  private TransportDocumentReference transportDocumentReference;
-
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(
-      description = "Type of the transport document for which this arrival notice was created")
-  private TransportDocumentTypeCode transportDocumentTypeCode;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
-      name = "isElectronic",
-      type = "boolean",
-      example = "true",
       description =
-"""
-Flag indicating whether the transport document for which this arrival notice was created is electronically transferred
-""")
-  private boolean electronic;
+          "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
+      example = "HHL71800000",
+      maxLength = 20,
+      pattern = "^\\S(?:.*\\S)?$")
+  private String transportDocumentReference;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(description = "Code representing the delivery type offered at destination")
-  private DestinationDeliveryTypeCode deliveryTypeAtDestination;
-
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
-"""
-Code indicating whether at destination the unloaded cargo occupies an entire container (FCL)
-or shares the container with other shipments (LCL).
-""",
-      example = "FCL")
-  private ContainerLoadTypeCode cargoMovementTypeAtDestination;
+          "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)",
+      example = "SWB",
+      allowableValues = {"BOL", "SWB"})
+  private String transportDocumentTypeCode;
+
+  @Schema(
+      description = "An indicator whether the transport document is electronically transferred.",
+      example = "true")
+  private Boolean isElectronic;
+
+  @Schema(
+      description =
+          """
+      Indicates the type of service offered at `Destination`. The options are:
+
+      - `CY` (Container yard (incl. rail ramp))
+      - `SD` (Store Door)
+      - `CFS` (Container Freight Station)
+      """,
+      example = "CY",
+      maxLength = 3,
+      allowableValues = {"CY", "SD", "CFS"})
+  private String deliveryTypeAtDestination;
+
+  @Schema(
+      description =
+          """
+      Refers to the shipment term at the **unloading** of the cargo out of the container. Possible values are:
+
+      - `FCL` (Full Container Load)
+      - `LCL` (Less than Container Load)
+      """,
+      example = "FCL",
+      maxLength = 3)
+  private String cargoMovementTypeAtDestination;
 
   @Schema(
       maxLength = 100,
@@ -159,8 +164,10 @@ and the carrier commits to a certain rate or rate schedule.
       example = "Any reference in...")
   private String termsAndConditions;
 
-  @Schema(description = "List of carrier clauses")
-  private List<CarrierClause> carrierClauses;
+  @Schema(
+      description =
+          "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
+  private List<String> carrierClauses;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Document parties")
   @ArraySchema(minItems = 1)
@@ -172,7 +179,7 @@ and the carrier commits to a certain rate or rate schedule.
   @Schema(description = "List of free time conditions applicable to this shipment at destination")
   private List<FreeTime> freeTime;
 
-  @Schema(description = "List of charges applicable to this shipment")
+  @Schema(description = "A list of `Charges`")
   private List<Charge> charges;
 
   @Schema(
@@ -188,10 +195,7 @@ Name identifying the entity responsible for freight payment.
   @ArraySchema(minItems = 1)
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;
 
-  @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
-      description = "The list of consignment items in the shipment.")
-  @ArraySchema(minItems = 1)
+  @Schema(description = "A list of `ConsignmentItems`")
   private List<ConsignmentItem> consignmentItems;
 
   @SchemaOverride(description = "Visualization of an arrival notice, as an embedded document")

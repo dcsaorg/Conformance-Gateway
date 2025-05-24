@@ -283,14 +283,8 @@ components:
       description: "An object for storing address-related information."
     ArrivalNotice:
       required:
-      - "cargoMovementTypeAtDestination"
-      - "carrierCode"
-      - "carrierCodeListProvider"
       - "carrierContactInformation"
-      - "consignmentItems"
-      - "deliveryTypeAtDestination"
       - "documentParties"
-      - "isElectronic"
       - "issueDateTime"
       - "termsAndConditions"
       - "transport"
@@ -316,19 +310,23 @@ components:
           pattern: "^\\S+$"
           type: "string"
           description: |-
-            Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice
+            The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.
 
             Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
-          example: "HLCU"
+          example: "MMCU"
         carrierCodeListProvider:
           type: "string"
           description: |-
-            The provider of the code list in which `carrierCode` is defined.
-             * `SMDG` - Ship Message Design Group
-             * `NMFTA` - National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)
+            The code list provider for the `carrierCode`. Possible values are:
+            - `SMDG` (Ship Message Design Group)
+            - `NMFTA` (National Motor Freight Traffic Association)
+
 
             Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
           example: "NMFTA"
+          enum:
+          - "SMDG"
+          - "NMFTA"
         carrierContactInformation:
           type: "array"
           description: "The party to contact for any inquiries related to this Arrival Notice."
@@ -363,46 +361,51 @@ components:
           example: "FIRMS code: B986"
         references:
           type: "array"
-          description: |
-            References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
-            Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
-            on the B/L. Customers can use these references to track shipments in their internal systems.
+          description: "A list of `References`"
           items:
             $ref: "#/components/schemas/Reference"
         transportDocumentReference:
           maxLength: 20
           pattern: "^\\S(?:.*\\S)?$"
           type: "string"
-          description: "Reference of the transport document for which this arrival notice was created"
-          example: "XYZ1234"
+          description: "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment."
+          example: "HHL71800000"
         transportDocumentTypeCode:
           type: "string"
           description: |-
-            Type of the transport document for which this arrival notice was created
-             * `BOL` - Bill of Lading
-             * `SWB` - Sea Waybill
-          example: "BOL"
+            Specifies the type of the transport document
+            - `BOL` (Bill of Lading)
+            - `SWB` (Sea Waybill)
+          example: "SWB"
+          enum:
+          - "BOL"
+          - "SWB"
         isElectronic:
           type: "boolean"
-          description: |
-            Flag indicating whether the transport document for which this arrival notice was created is electronically transferred
+          description: "An indicator whether the transport document is electronically transferred."
           example: true
         deliveryTypeAtDestination:
+          maxLength: 3
           type: "string"
-          description: |-
-            Code representing the delivery type offered at destination
-             * `CY` - Container yard (including rail ramp)
-             * `SD` - Store Door
-             * `CFS` - Container Freight Station
-          example: "CY"
-        cargoMovementTypeAtDestination:
-          type: "string"
-          description: |-
-            Code indicating whether at destination the unloaded cargo occupies an entire container (FCL)
-            or shares the container with other shipments (LCL).
+          description: |
+            Indicates the type of service offered at `Destination`. The options are:
 
-             * `FCL` - Full Container Load
-             * `LCL` - Less than Container Load
+            - `CY` (Container yard (incl. rail ramp))
+            - `SD` (Store Door)
+            - `CFS` (Container Freight Station)
+          example: "CY"
+          enum:
+          - "CY"
+          - "SD"
+          - "CFS"
+        cargoMovementTypeAtDestination:
+          maxLength: 3
+          type: "string"
+          description: |
+            Refers to the shipment term at the **unloading** of the cargo out of the container. Possible values are:
+
+            - `FCL` (Full Container Load)
+            - `LCL` (Less than Container Load)
           example: "FCL"
         serviceContractNumber:
           maxLength: 100
@@ -419,14 +422,10 @@ components:
           example: "Any reference in..."
         carrierClauses:
           type: "array"
-          description: "List of carrier clauses"
+          description: "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer."
           items:
-            maxLength: 20000
             type: "string"
-            description: |
-              Clause for a specific shipment added by the carrier, subject to local rules / guidelines
-              or certain mandatory information required to be shared with the customer.
-            example: "It is not allowed to..."
+            description: "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer."
         documentParties:
           type: "array"
           description: "Document parties"
@@ -441,7 +440,7 @@ components:
             $ref: "#/components/schemas/FreeTime"
         charges:
           type: "array"
-          description: "List of charges applicable to this shipment"
+          description: "A list of `Charges`"
           items:
             $ref: "#/components/schemas/Charge"
         payerCode:
@@ -457,7 +456,7 @@ components:
             $ref: "#/components/schemas/UtilizedTransportEquipment"
         consignmentItems:
           type: "array"
-          description: "The list of consignment items in the shipment."
+          description: "A list of `ConsignmentItems`"
           items:
             $ref: "#/components/schemas/ConsignmentItem"
         arrivalNoticeVisualization:
@@ -487,9 +486,8 @@ components:
           maxLength: 20
           pattern: "^\\S(?:.*\\S)?$"
           type: "string"
-          description: |
-            Reference of the transport document for which this arrival notice was created
-          example: "XYZ1234"
+          description: "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment."
+          example: "HHL71800000"
         equipmentReferences:
           type: "array"
           description: |
@@ -1193,10 +1191,10 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of free time.
-             * `DEM` - Demurrage
-             * `DET` - Detention
-             * `PDM` - Per Diem
-             * `STO` - Storage
+            - `DEM` - Demurrage
+            - `DET` - Detention
+            - `PDM` - Per Diem
+            - `STO` - Storage
           example: "DEM"
         isoEquipmentCode:
           maxLength: 4
@@ -1217,9 +1215,9 @@ components:
           type: "string"
           description: |-
             Code identifying the unit in which free time is expressed
-             * `CD` - Calendar days
-             * `WD` - Working days
-             * `HR` - Hours
+            - `CD` - Calendar days
+            - `WD` - Working days
+            - `HR` - Hours
           example: "WD"
         calculationBasis:
           maxLength: 1000
@@ -1405,7 +1403,7 @@ components:
         locationName:
           maxLength: 100
           type: "string"
-          description: "Location name"
+          description: "The name of the location."
           example: "Port of Amsterdam"
         address:
           $ref: "#/components/schemas/Address"
@@ -1415,9 +1413,11 @@ components:
           pattern: "^[A-Z]{2}[A-Z2-9]{3}$"
           type: "string"
           description: |
-            The UN Location code specifying where the carrier booking office is located. The pattern used must be
+            The UN Location code specifying where the place is located. The pattern used must be
+
             - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
             - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
             More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: "NLAMS"
         facilityCode:
@@ -1430,8 +1430,8 @@ components:
           type: "string"
           description: |-
             The provider of the code list in which `facilityCode` is defined.
-             * `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
-             * `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)
+            - `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
+            - `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)
           example: "BIC"
         geoCoordinate:
           $ref: "#/components/schemas/GeoCoordinate"
@@ -1775,11 +1775,11 @@ components:
           description: |-
             Code defined by DCSA to identify a mode of transport.
 
-             * `VESSEL` - Vessel
-             * `RAIL` - Rail
-             * `TRUCK` - Truck
-             * `BARGE` - Barge
-             * `MULTIMODAL` - Multimodal
+            - `VESSEL` - Vessel
+            - `RAIL` - Rail
+            - `TRUCK` - Truck
+            - `BARGE` - Barge
+            - `MULTIMODAL` - Multimodal
           example: "VESSEL"
         vesselVoyages:
           maxItems: 3
@@ -1846,9 +1846,9 @@ components:
           description: |-
             Code representing the type of a vessel voyage.
 
-             * `DC` - Destination country
-             * `POD` - Port of destination
-             * `POL` - Port of loading
+            - `DC` - Destination country
+            - `POD` - Port of destination
+            - `POL` - Port of loading
           example: "POD"
         vesselName:
           maxLength: 50

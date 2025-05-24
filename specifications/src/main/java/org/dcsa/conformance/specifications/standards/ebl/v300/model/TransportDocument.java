@@ -4,8 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Charge;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.CustomsReference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
 
 @Schema(description = "The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:\n- Bill of Lading\n- Sea Waybill.")
 @Data
@@ -281,7 +286,12 @@ The currency used for the declared value, using the 3-character code defined by 
       pattern = "^[A-Z]{3}$")
   private String declaredValueCurrency;
 
-  @Schema(description = "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.", example = "MMCU", maxLength = 4, pattern = "^\\S+$")
+  @Schema(
+      description =
+          "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
+      example = "MMCU",
+      maxLength = 4,
+      pattern = "^\\S+$")
   private String carrierCode;
 
   @Schema(
@@ -321,16 +331,16 @@ The number of additional pages required to contain the goods description on a tr
   private InvoicePayableAt invoicePayableAt;
 
   @Schema(description = "The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.)")
-  private List<String> partyContactDetails;
+  private List<PartyContactDetail> partyContactDetails;
 
   @Schema(description = "All `Parties` with associated roles.")
   private DocumentParties documentParties;
 
   @Schema(description = "A list of `ConsignmentItems`")
-  private List<String> consignmentItems;
+  private List<ConsignmentItem> consignmentItems;
 
   @Schema(description = "A list of `Utilized Transport Equipments` describing the equipment being used.")
-  private List<String> utilizedTransportEquipments;
+  private List<UtilizedTransportEquipment> utilizedTransportEquipments;
 
   @Schema
   private ExportLicense exportLicense;
@@ -339,8 +349,8 @@ The number of additional pages required to contain the goods description on a tr
   private ImportLicense importLicense;
 
   @Schema(description = "A list of `References`")
-  private List<String> references;
+  private List<Reference> references;
 
   @Schema(description = "A list of `Customs references`")
-  private List<String> customsReferences;
+  private List<CustomsReference> customsReferences;
 }

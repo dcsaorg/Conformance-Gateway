@@ -9,20 +9,22 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
+import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -34,7 +36,6 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
-import org.dcsa.conformance.specifications.standards.ebl.v300.types.UnspecifiedType;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableColumn;
@@ -92,143 +93,118 @@ public abstract class DataOverviewSheet {
                 changedPrimaryKeyByOldPrimaryKeyBySheetClass.get(getClass()));
   }
 
+  @Getter
+  @Accessors(chain = true)
+  @Setter
+  private static class DiffEntry {
+    private String oldPrimaryKey;
+    private String newPrimaryKey;
+    private List<String> oldValues;
+    private List<String> newValues;
+
+    DiffEntry(
+        String oldPrimaryKey,
+        List<String> oldValues,
+        Map<String, String> changedPrimaryKeyByOldPrimaryKey) {
+      this.oldPrimaryKey = oldPrimaryKey;
+      this.oldValues = oldValues;
+      changedPrimaryKeyByOldPrimaryKey.keySet().stream()
+          .filter(oldPrimaryKey::startsWith)
+          .max(Comparator.comparing(String::length))
+          .ifPresentOrElse(
+              oldPrefix ->
+                  this.newPrimaryKey =
+                      "%s%s"
+                          .formatted(
+                              changedPrimaryKeyByOldPrimaryKey.get(oldPrefix),
+                              oldPrimaryKey.substring(oldPrefix.length())),
+              () -> this.newPrimaryKey = this.oldPrimaryKey);
+    }
+
+    DiffEntry(String newPrimaryKey, List<String> newValues) {
+      this.newPrimaryKey = newPrimaryKey;
+      this.newValues = newValues;
+    }
+
+    DataOverviewDiffStatus getDiffStatus() {
+      if (oldPrimaryKey == null) return DataOverviewDiffStatus.ADDED;
+      if (newValues == null) return DataOverviewDiffStatus.REMOVED;
+      if (newValues.equals(oldValues)) return DataOverviewDiffStatus.UNMODIFIED;
+      return DataOverviewDiffStatus.NEW_VALUE;
+    }
+
+    List<String> getOldValuesThatChanged() {
+      AtomicInteger index = new AtomicInteger();
+      return oldValues.stream()
+          .map(
+              oldValue ->
+                  Objects.equals(oldValue, newValues.get(index.getAndIncrement())) ? "" : oldValue)
+          .toList();
+    }
+  }
+
   private static List<Map.Entry<DataOverviewDiffStatus, List<String>>> diff(
       Map<String, List<String>> oldRowValuesByPrimaryKey,
       Map<String, List<String>> newRowValuesByPrimaryKey,
       Map<String, String> changedPrimaryKeyByOldPrimaryKey) {
-    List<Map.Entry<DataOverviewDiffStatus, List<String>>> diffDataValues = new ArrayList<>();
-
-    Map<String, String> expandedChangedPrimaryKeyByOldPrimaryKey =
-        new TreeMap<>(changedPrimaryKeyByOldPrimaryKey);
-    // expand old key - new key prefix mappings (skipping specified existing key mappings)
-    new TreeSet<>(changedPrimaryKeyByOldPrimaryKey.keySet())
-        .reversed().stream()
-            .filter(oldKey -> oldKey.endsWith("/"))
-            .flatMap(
-                oldKeyPrefix ->
-                    Stream.concat(
-                        Stream.of(
-                            Map.entry(
-                                oldKeyPrefix.substring(0, oldKeyPrefix.length() - 2),
-                                changedPrimaryKeyByOldPrimaryKey
-                                    .get(oldKeyPrefix)
-                                    .substring(
-                                        0,
-                                        changedPrimaryKeyByOldPrimaryKey.get(oldKeyPrefix).length()
-                                            - 2))),
-                        oldRowValuesByPrimaryKey.keySet().stream()
-                            .filter(
-                                oldKey ->
-                                    (oldKey.startsWith(oldKeyPrefix))
-                                        && !changedPrimaryKeyByOldPrimaryKey.containsKey(oldKey)
-                                        && changedPrimaryKeyByOldPrimaryKey.keySet().stream()
-                                            .filter(
-                                                otherOldKeyPrefix ->
-                                                    otherOldKeyPrefix.startsWith(oldKeyPrefix)
-                                                        && !otherOldKeyPrefix.equals(oldKeyPrefix))
-                                            .noneMatch(oldKey::startsWith))
-                            .map(
-                                oldKey ->
-                                    Map.entry(
-                                        oldKey,
-                                        changedPrimaryKeyByOldPrimaryKey.get(oldKeyPrefix)
-                                            + oldKey.substring(oldKeyPrefix.length())))))
-            .toList()
-            .forEach(
-                expandedEntry ->
-                    expandedChangedPrimaryKeyByOldPrimaryKey.put(
-                        expandedEntry.getKey(), expandedEntry.getValue()));
-
-    Map<String, String> oldPrimaryKeysByNewPrimaryKey =
-        expandedChangedPrimaryKeyByOldPrimaryKey.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-
-    Set<String> sortedPrimaryKeys =
-        Stream.concat(
-                oldRowValuesByPrimaryKey.keySet().stream(),
-                newRowValuesByPrimaryKey.keySet().stream())
-            .collect(
-                Collectors.toCollection(
-                    () ->
-                        new TreeSet<>(
-                            (leftPrimaryKey, rightPrimaryKey) -> {
-                              AtomicReference<String> leftPKReference =
-                                  new AtomicReference<>(leftPrimaryKey);
-                              AtomicReference<String> rightPKReference =
-                                  new AtomicReference<>(rightPrimaryKey);
-                              changedPrimaryKeyByOldPrimaryKey.entrySet().stream()
-                                  .filter(entry -> entry.getKey().endsWith("/"))
-                                  .forEach(
-                                      entry -> {
-                                        if (leftPrimaryKey.startsWith(entry.getKey())) {
-                                          leftPKReference.set(
-                                              entry.getValue()
-                                                  + leftPrimaryKey.substring(
-                                                      entry.getKey().length()));
-                                        }
-                                        if (rightPrimaryKey.startsWith(entry.getKey())) {
-                                          rightPKReference.set(
-                                              entry.getValue()
-                                                  + rightPrimaryKey.substring(
-                                                      entry.getKey().length()));
-                                        }
-                                      });
-                              int newPKComparison =
-                                  leftPKReference.get().compareTo(rightPKReference.get());
-                              return newPKComparison != 0
-                                  ? newPKComparison
-                                  : leftPrimaryKey.compareTo(rightPrimaryKey);
-                            })));
-
-    sortedPrimaryKeys.stream()
-        // skip the old values of modified PKs
-        .filter(
-            key ->
-                !expandedChangedPrimaryKeyByOldPrimaryKey.containsKey(key)
-                    || !sortedPrimaryKeys.contains(
-                        expandedChangedPrimaryKeyByOldPrimaryKey.get(key)))
+    changedPrimaryKeyByOldPrimaryKey.keySet().stream()
+        .filter(oldPrefix -> oldPrefix.endsWith(" /"))
+        .toList()
         .forEach(
-            primaryKey -> {
-              String newPrimaryKey =
-                  newRowValuesByPrimaryKey.containsKey(primaryKey) ? primaryKey : null;
-              List<String> newRowValues =
-                  newPrimaryKey == null ? null : newRowValuesByPrimaryKey.get(newPrimaryKey);
-              String oldPrimaryKey =
-                  oldPrimaryKeysByNewPrimaryKey.computeIfAbsent(primaryKey, Function.identity());
-              List<String> oldRowValues =
-                  oldRowValuesByPrimaryKey.getOrDefault(oldPrimaryKey, null);
-              if (newRowValues == null) {
-                diffDataValues.add(Map.entry(DataOverviewDiffStatus.REMOVED, oldRowValues));
-              } else if (oldRowValues == null) {
-                diffDataValues.add(Map.entry(DataOverviewDiffStatus.ADDED, newRowValues));
-              } else {
-                AtomicBoolean anyValuesUpdated = new AtomicBoolean(false);
-                AtomicInteger columnIndex = new AtomicInteger(0);
-                List<String> updatedOldRowValues =
-                    oldRowValues.stream()
-                        .map(
-                            oldValue -> {
-                              String newValue = newRowValues.get(columnIndex.getAndIncrement());
-                              if (newValue.equals(oldValue)) {
-                                return "";
-                              } else {
-                                anyValuesUpdated.set(true);
-                                return oldValue;
-                              }
-                            })
-                        .toList();
-                if (anyValuesUpdated.get()) {
-                  if (updatedOldRowValues.size() > 3
-                      && updatedOldRowValues.get(2).equals(UnspecifiedType.class.getSimpleName())) {
-                    diffDataValues.add(Map.entry(DataOverviewDiffStatus.UNMODIFIED, newRowValues));
-                  } else {
-                    diffDataValues.add(
-                        Map.entry(DataOverviewDiffStatus.OLD_VALUE, updatedOldRowValues));
-                    diffDataValues.add(Map.entry(DataOverviewDiffStatus.NEW_VALUE, newRowValues));
-                  }
-                } else {
-                  diffDataValues.add(Map.entry(DataOverviewDiffStatus.UNMODIFIED, newRowValues));
-                }
+            oldPrefix ->
+                changedPrimaryKeyByOldPrimaryKey.put(
+                    oldPrefix.substring(0, oldPrefix.length() - 2),
+                    changedPrimaryKeyByOldPrimaryKey
+                        .get(oldPrefix)
+                        .substring(
+                            0, changedPrimaryKeyByOldPrimaryKey.get(oldPrefix).length() - 2)));
+
+    SortedMap<String, DiffEntry> diffEntriesByNewPrimaryKey =
+        new TreeMap<>(
+            oldRowValuesByPrimaryKey.keySet().stream()
+                .map(
+                    oldPrimaryKey ->
+                        new DiffEntry(
+                            oldPrimaryKey,
+                            oldRowValuesByPrimaryKey.get(oldPrimaryKey),
+                            changedPrimaryKeyByOldPrimaryKey))
+                .collect(Collectors.toMap(DiffEntry::getNewPrimaryKey, Function.identity())));
+
+    newRowValuesByPrimaryKey
+        .keySet()
+        .forEach(
+            newKey -> {
+              DiffEntry diffEntry =
+                  diffEntriesByNewPrimaryKey.computeIfAbsent(
+                      newKey,
+                      theNewKey ->
+                          new DiffEntry(theNewKey, newRowValuesByPrimaryKey.get(theNewKey)));
+              if (diffEntry.getOldPrimaryKey() != null) {
+                diffEntry.setNewValues(newRowValuesByPrimaryKey.get(newKey));
+              }
+            });
+
+    List<Map.Entry<DataOverviewDiffStatus, List<String>>> diffDataValues = new ArrayList<>();
+    diffEntriesByNewPrimaryKey
+        .values()
+        .forEach(
+            diffEntry -> {
+              DataOverviewDiffStatus diffStatus = diffEntry.getDiffStatus();
+              switch (diffStatus) {
+                case ADDED:
+                case UNMODIFIED:
+                  diffDataValues.add(Map.entry(diffStatus, diffEntry.getNewValues()));
+                  break;
+                case REMOVED:
+                  diffDataValues.add(Map.entry(diffStatus, diffEntry.getOldValues()));
+                  break;
+                default:
+                  diffDataValues.add(
+                      Map.entry(
+                          DataOverviewDiffStatus.OLD_VALUE, diffEntry.getOldValuesThatChanged()));
+                  diffDataValues.add(
+                      Map.entry(DataOverviewDiffStatus.NEW_VALUE, diffEntry.getNewValues()));
+                  break;
               }
             });
     return diffDataValues;

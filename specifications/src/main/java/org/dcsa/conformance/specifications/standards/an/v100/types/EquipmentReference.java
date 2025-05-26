@@ -1,0 +1,23 @@
+package org.dcsa.conformance.specifications.standards.an.v100.types;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.dcsa.conformance.specifications.generator.StringPatterns;
+
+@Schema(
+    type = "string",
+    pattern = StringPatterns.TRIMMED_NON_EMPTY_STRING,
+    minLength = 1,
+    maxLength = 11,
+    example = "APZU4812090",
+    description =
+"""
+The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+If a container does not comply with ISO 6346, it is suggested to follow
+[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+from SMDG.
+""")
+public class EquipmentReference {}

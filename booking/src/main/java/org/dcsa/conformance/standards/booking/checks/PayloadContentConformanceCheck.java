@@ -18,7 +18,7 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   protected static final String UNSET_MARKER = "<unset>";
 
   protected PayloadContentConformanceCheck(String title, Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType) {
-    super(title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
+    super("[Notification]", title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
   }
 
   @Override
@@ -36,15 +36,19 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
     return payload -> subCheck.apply(payload.at(pointer));
   }
 
-  protected ConformanceCheck createSubCheck(String subtitle, Function<JsonNode, Set<String>> subCheck) {
-    return new ActionCheck(subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
+  protected ConformanceCheck createSubCheck(
+      String prefix, String subtitle, Function<JsonNode, Set<String>> subCheck) {
+    return new ActionCheck(
+        prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
       @Override
-      protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+      protected Set<String> checkConformance(
+          Function<UUID, ConformanceExchange> getExchangeByUuid) {
         ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
         if (exchange == null) return Collections.emptySet();
-        var conformanceMessage = this.httpMessageType == HttpMessageType.RESPONSE
-          ? exchange.getResponse().message()
-          : exchange.getRequest().message();
+        var conformanceMessage =
+            this.httpMessageType == HttpMessageType.RESPONSE
+                ? exchange.getResponse().message()
+                : exchange.getRequest().message();
         var payload = conformanceMessage.body().getJsonBody();
         return subCheck.apply(payload);
       }

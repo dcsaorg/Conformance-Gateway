@@ -245,11 +245,6 @@ public class PersistableCarrierBooking {
     getAmendedBooking().ifPresent(mutator);
   }
 
-  private void mutateBookingAndAmendment(BiConsumer<ObjectNode, Boolean> mutator) {
-    mutator.accept(getBooking(), Boolean.FALSE);
-    getAmendedBooking().ifPresent(b -> mutator.accept(b, Boolean.TRUE));
-  }
-
   private static void checkState(
     String reference, BookingState currentState, Predicate<BookingState> expectedState) {
     if (!expectedState.test(currentState)) {

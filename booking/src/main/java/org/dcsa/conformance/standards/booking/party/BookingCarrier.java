@@ -546,7 +546,6 @@ public class BookingCarrier extends ConformanceParty {
     // readTree(json.toString()) because we want a deep copy
     persistableCarrierBooking.save(persistentMap);
     var booking = persistableCarrierBooking.getBooking();
-    var amendedBooking = persistableCarrierBooking.getAmendedBooking().orElse(null);
 
     asyncCounterpartNotification(
         null,
@@ -554,7 +553,7 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(booking)
-            .amendedBooking(amendedBooking)
+            .amendedBooking(persistableCarrierBooking.getAmendedBooking().orElse(null))
             .feedbacks(
                 persistableCarrierBooking.getfeedbacks() != null
                     ? persistableCarrierBooking.getfeedbacks()

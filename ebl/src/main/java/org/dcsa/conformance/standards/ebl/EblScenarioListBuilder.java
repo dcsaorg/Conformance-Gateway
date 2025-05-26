@@ -116,7 +116,6 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                     .then(
                         uc6Get(
                             true,
-                            uc7Get(uc8Get(uc12Get(uc13Get()))),
                             oobAmendment(uc6Get(false, uc8Get(uc12Get(uc13Get())))),
                             uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get()))))))))))
         .collect(

@@ -1,5 +1,12 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250523-design
+
+Restructured the Arrival Notice information model and API for optimal reuse of Bill of Lading 3.0 components.
+
+Using POST instead of PUT endpoints for pushing arrays of Arrival Notices or notifications.
+
+
 ## Snapshot v1.0.0-20250509-design
 
 Extended the data overview with a hierarchical attribute view and with the list of query parameters and filters.

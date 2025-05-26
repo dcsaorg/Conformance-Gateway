@@ -262,6 +262,9 @@ public class ConformanceSandbox {
     String sandboxId = remainingUri.substring(0, endOfSandboxId);
     remainingUri = remainingUri.substring(endOfSandboxId);
 
+    if (remainingUri.contains("dev/null")) {
+      return new ConformanceWebResponse(204, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
+    }
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (!sandboxConfiguration.getAuthHeaderName().isBlank()) {
@@ -294,7 +297,6 @@ public class ConformanceSandbox {
       String partyName =
           URLDecoder.decode(remainingUri.substring(0, endOfPartyName), StandardCharsets.UTF_8);
       remainingUri = remainingUri.substring(endOfPartyName);
-
       if (remainingUri.equals("/api/conformance/notification")) {
         return _handlePartyNotification(
             persistenceProvider, deferredSandboxTaskConsumer, sandboxId, partyName);

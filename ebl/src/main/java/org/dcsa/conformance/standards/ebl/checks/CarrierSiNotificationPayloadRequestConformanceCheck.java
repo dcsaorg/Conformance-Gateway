@@ -21,7 +21,6 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   private static final String UPDATED_SHIPPING_INSTRUCTIONS_PATH =
       "/data/updatedShippingInstructions";
 
-  private static final String NOTIFICATION_LABEL = "[Notification] ";
   private static final String SHIPPING_INSTRUCTIONS_LABEL = "[Shipping Instructions] ";
   private static final String UPDATED_SHIPPING_INSTRUCTIONS_LABEL =
       "[Updated Shipping Instructions] ";
@@ -54,7 +53,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
             buildChecks(
-                NOTIFICATION_LABEL,
+                "",
                 DATA_PATH,
                 () ->
                     EBLChecks.getSiPayloadSimpleChecks(

@@ -15,13 +15,19 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public abstract class PayloadContentConformanceCheck extends ActionCheck {
 
+  public static final String VALIDATE_PAYLOAD_PREFIX = "[Notification]";
   public static final String VALIDATE_PAYLOAD_TITLE = "Validate the carrier payload";
 
   protected PayloadContentConformanceCheck(
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
       HttpMessageType httpMessageType) {
-    super(VALIDATE_PAYLOAD_TITLE, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
+    super(
+        VALIDATE_PAYLOAD_PREFIX,
+        VALIDATE_PAYLOAD_TITLE,
+        isRelevantForRoleName,
+        matchedExchangeUuid,
+        httpMessageType);
   }
 
   @Override

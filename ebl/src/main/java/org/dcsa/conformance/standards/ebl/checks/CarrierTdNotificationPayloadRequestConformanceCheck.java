@@ -19,7 +19,6 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   private static final String DATA_PATH = "/data";
   private static final String TRANSPORT_DOCUMENT_PATH = "/data/transportDocument";
 
-  private static final String NOTIFICATION_LABEL = "[Notification] ";
   private static final String TRANSPORT_DOCUMENT_LABEL = "[Transport Document] ";
 
   private final String standardVersion;
@@ -48,7 +47,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
             buildChecks(
-                NOTIFICATION_LABEL,
+                "",
                 DATA_PATH,
                 () -> EBLChecks.getTdPayloadSimpleChecks(transportDocumentStatus, getTdrCheck())),
             buildChecks(

@@ -19,7 +19,8 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   private static final String DATA_PATH = "/data";
   private static final String TRANSPORT_DOCUMENT_PATH = "/data/transportDocument";
 
-  private static final String TRANSPORT_DOCUMENT_LABEL = "[Transport Document] ";
+  private static final String DEFAULT_LABEL = "";
+  private static final String TRANSPORT_DOCUMENT_LABEL = "[Transport Document]";
 
   private final String standardVersion;
   private final TransportDocumentStatus transportDocumentStatus;
@@ -47,7 +48,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
             buildChecks(
-                "",
+                DEFAULT_LABEL,
                 DATA_PATH,
                 () -> EBLChecks.getTdPayloadSimpleChecks(transportDocumentStatus, getTdrCheck())),
             buildChecks(
@@ -65,7 +66,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   }
 
   private ConformanceCheck wrapWithSubCheck(String label, String path, JsonContentCheck check) {
-    return createSubCheck(label + check.description(), at(path, check::validate));
+    return createSubCheck(label, check.description(), at(path, check::validate));
   }
 
   private JsonContentCheck getTdrCheck() {

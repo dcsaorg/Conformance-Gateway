@@ -41,9 +41,9 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   protected abstract Stream<? extends ConformanceCheck> createSubChecks();
 
   protected ConformanceCheck createSubCheck(
-      String subtitle, Function<JsonNode, Set<String>> subCheck) {
+      String prefix, String subtitle, Function<JsonNode, Set<String>> subCheck) {
     return new ActionCheck(
-        subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
+        prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
       @Override
       protected Set<String> checkConformance(
           Function<UUID, ConformanceExchange> getExchangeByUuid) {

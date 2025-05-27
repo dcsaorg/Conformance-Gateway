@@ -21,6 +21,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   private static final String UPDATED_SHIPPING_INSTRUCTIONS_PATH =
       "/data/updatedShippingInstructions";
 
+  private static final String DEFAULT_LABEL = "";
   private static final String SHIPPING_INSTRUCTIONS_LABEL = "[Shipping Instructions] ";
   private static final String UPDATED_SHIPPING_INSTRUCTIONS_LABEL =
       "[Updated Shipping Instructions] ";
@@ -53,7 +54,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
             buildChecks(
-                "",
+                DEFAULT_LABEL,
                 DATA_PATH,
                 () ->
                     EBLChecks.getSiPayloadSimpleChecks(
@@ -100,6 +101,6 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   }
 
   private ConformanceCheck wrapWithSubCheck(String label, String path, JsonContentCheck check) {
-    return createSubCheck(label + check.description(), at(path, check::validate));
+    return createSubCheck(label, check.description(), at(path, check::validate));
   }
 }

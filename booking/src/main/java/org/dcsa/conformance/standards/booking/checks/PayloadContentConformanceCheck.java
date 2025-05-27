@@ -17,12 +17,17 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
 
   protected static final String UNSET_MARKER = "<unset>";
 
-  protected PayloadContentConformanceCheck(String title, Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType) {
+  protected PayloadContentConformanceCheck(
+      String title,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType) {
     super("[Notification]", title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
   }
 
   @Override
-  protected final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected final Set<String> checkConformance(
+      Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
     return Collections.emptySet();
   }
@@ -30,7 +35,8 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   @Override
   protected abstract Stream<? extends ConformanceCheck> createSubChecks();
 
-  protected Function<JsonNode, Set<String>> at(String path, Function<JsonNode, Set<String>> subCheck) {
+  protected Function<JsonNode, Set<String>> at(
+      String path, Function<JsonNode, Set<String>> subCheck) {
     // Eagerly compile to the pointer to weed out syntax errors early.
     var pointer = JsonPointer.compile(path);
     return payload -> subCheck.apply(payload.at(pointer));
@@ -53,15 +59,5 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
         return subCheck.apply(payload);
       }
     };
-  }
-
-  protected boolean isNonEmptyNode(JsonNode field) {
-    if (field == null || field.isMissingNode()) {
-      return false;
-    }
-    if (field.isTextual()) {
-      return !field.asText().isBlank();
-    }
-    return !field.isEmpty() || field.isValueNode();
   }
 }

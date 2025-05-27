@@ -18,6 +18,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   private static final String BOOKING_PATH = DATA_PATH + "/booking";
   private static final String AMENDED_BOOKING_PATH = DATA_PATH + "/amendedBooking";
 
+  private static final String DEFAULT_PREFIX = "";
   private static final String BOOKING_PREFIX = "[Booking]";
   private static final String AMENDED_BOOKING_PREFIX = "[Amended Booking]";
 
@@ -69,27 +70,27 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
     return Stream.of(
             Stream.of(
                 createSubCheck(
-                    "",
+                        DEFAULT_PREFIX,
                     "Validate 'data.bookingStatus' is correct",
                     at(DATA_PATH, this::ensureBookingStatusIsCorrect)),
                 createSubCheck(
-                    "",
+                        DEFAULT_PREFIX,
                     "Validate 'data.amendedBookingStatus' is correct",
                     at(DATA_PATH, this::ensureAmendedBookingStatusIsCorrect)),
                 createSubCheck(
-                    "",
+                        DEFAULT_PREFIX,
                     "Validate 'data.bookingCancellationStatus' is correct",
                     at(DATA_PATH, this::ensureBookingCancellationStatusIsCorrect)),
                 createSubCheck(
-                    "",
+                        DEFAULT_PREFIX,
                     "Validate 'data.carrierBookingReference' is conditionally present",
                     at(DATA_PATH, this::ensureCarrierBookingReferenceCompliance)),
                 createSubCheck(
-                    "",
+                        DEFAULT_PREFIX,
                     "Validate 'data.feedbacks' is present for booking states where it is required",
                     at(DATA_PATH, this::ensureFeedbacksIsPresent)),
                 createSubCheck(
-                    "",
+                        DEFAULT_PREFIX,
                     "Validate 'data.feedbacks' severity and code are valid",
                     at(DATA_PATH, this::ensureFeedbackSeverityAndCodeCompliance))),
             createFullNotificationChecksAt(BOOKING_PATH, BOOKING_PREFIX),

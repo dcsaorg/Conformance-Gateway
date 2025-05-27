@@ -609,77 +609,99 @@ public class BookingChecks {
                                                   Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus,
                                                   BookingState expectedAmendedBookingStatus, BookingCancellationState expectedCancelledBookingStatus,
                                                   Boolean requestAmendedContent) {
+    var checks =
+        fullPayloadChecks(
+            cspSupplier,
+            dspSupplier,
+            bookingStatus,
+            expectedAmendedBookingStatus,
+            expectedCancelledBookingStatus,
+            requestAmendedContent);
+
+    return JsonAttribute.contentChecks(
+        BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
+  }
+
+  public static List<JsonContentCheck> fullPayloadChecks(
+      Supplier<CarrierScenarioParameters> cspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      BookingState bookingStatus,
+      BookingState expectedAmendedBookingStatus,
+      BookingCancellationState expectedCancelledBookingStatus,
+      Boolean requestAmendedContent) {
+
     var checks = new ArrayList<JsonContentCheck>();
-    checks.add(JsonAttribute.mustEqual(
-      CARRIER_BOOKING_REQUEST_REFERENCE,
-      () -> dspSupplier.get().carrierBookingRequestReference()
-    ));
-    checks.add(JsonAttribute.mustEqual(
-      BOOKING_STATUS,
-      bookingStatus.name()
-    ));
-    checks.add(JsonAttribute.customValidator(
-      "Validate Amended Booking Status",
-      body -> {
-        String amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
-        if(!amendedBookingStatus.isEmpty()
-          && expectedAmendedBookingStatus!= null
-          && !expectedAmendedBookingStatus.name().equals(amendedBookingStatus)) {
-          return Set.of("The expected amendedBookingStatus %s is not equal to response AmendedBookingStatus %s", expectedAmendedBookingStatus.name(), amendedBookingStatus);
-        }
-        return Set.of();
-      }
-    ));
-    checks.add(JsonAttribute.customValidator(
-      "Validate Booking Cancellation Status",
-      body -> {
-        String bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS).asText("");
-        if(!bookingCancellationStatus.isEmpty()
-          && expectedCancelledBookingStatus!= null
-          && !expectedCancelledBookingStatus.name().equals(bookingCancellationStatus)) {
-          return Set.of("The expected bookingCancellationStatus %s is not equal to response bookingCancellationStatus %s", expectedCancelledBookingStatus.name(), bookingCancellationStatus);
-        }
-        return Set.of();
-      }
-    ));
 
+    checks.add(
+        JsonAttribute.mustEqual(
+            CARRIER_BOOKING_REQUEST_REFERENCE,
+            () -> dspSupplier.get().carrierBookingRequestReference()));
 
+    checks.add(JsonAttribute.mustEqual(BOOKING_STATUS, bookingStatus.name()));
 
+    checks.add(
+        JsonAttribute.customValidator(
+            "Validate Amended Booking Status",
+            body -> {
+              String amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
+              if (!amendedBookingStatus.isEmpty()
+                  && expectedAmendedBookingStatus != null
+                  && !expectedAmendedBookingStatus.name().equals(amendedBookingStatus)) {
+                return Set.of(
+                    "The expected amendedBookingStatus %s is not equal to response AmendedBookingStatus %s",
+                    expectedAmendedBookingStatus.name(), amendedBookingStatus);
+              }
+              return Set.of();
+            }));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "Validate Booking Cancellation Status",
+            body -> {
+              String bookingCancellationStatus =
+                  body.path(ATTR_BOOKING_CANCELLATION_STATUS).asText("");
+              if (!bookingCancellationStatus.isEmpty()
+                  && expectedCancelledBookingStatus != null
+                  && !expectedCancelledBookingStatus.name().equals(bookingCancellationStatus)) {
+                return Set.of(
+                    "The expected bookingCancellationStatus %s is not equal to response bookingCancellationStatus %s",
+                    expectedCancelledBookingStatus.name(), bookingCancellationStatus);
+              }
+              return Set.of();
+            }));
 
     checks.addAll(STATIC_BOOKING_CHECKS);
+
     checks.addAll(RESPONSE_ONLY_CHECKS);
-/* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
-    checks.add(JsonAttribute.lostAttributeCheck(
-      "Validate that shipper provided data was not altered",
-      delayedValue(dspSupplier, dsp -> requestAmendedContent ? dsp.updatedBooking() : dsp.booking())
-    ));
-*/
+
+    /*
+    FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
+        checks.add(JsonAttribute.lostAttributeCheck(
+          "Validate that shipper provided data was not altered",
+          delayedValue(dspSupplier, dsp -> requestAmendedContent ? dsp.updatedBooking() : dsp.booking())
+        ));
+        */
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);
-      checks.add(JsonAttribute.mustBePresent(
-        CARRIER_BOOKING_REFERENCE
-      ));
-      checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
-          "The commoditySubReference is not present for confirmed booking",
-          mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*"),
-          (nodeToValidate, contextPath) -> {
-            var commoditySubReference = nodeToValidate.path("commoditySubReference");
-            if (commoditySubReference.isMissingNode() || commoditySubReference.isNull()) {
-              return Set.of("The commoditySubReference at %s is not present for confirmed booking".formatted(contextPath));
-            }
-            return Set.of();
-          }
-        )
-      );
+      checks.add(JsonAttribute.mustBePresent(CARRIER_BOOKING_REFERENCE));
+      checks.add(
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The commoditySubReference is not present for confirmed booking",
+              mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*"),
+              (nodeToValidate, contextPath) -> {
+                var commoditySubReference = nodeToValidate.path("commoditySubReference");
+                if (commoditySubReference.isMissingNode() || commoditySubReference.isNull()) {
+                  return Set.of(
+                      "The commoditySubReference at %s is not present for confirmed booking"
+                          .formatted(contextPath));
+                }
+                return Set.of();
+              }));
     }
+
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
-    return JsonAttribute.contentChecks(
-      BookingRole::isCarrier,
-      matched,
-      HttpMessageType.RESPONSE,
-      standardVersion,
-      checks
-    );
+
+    return checks;
   }
 
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {

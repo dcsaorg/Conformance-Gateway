@@ -2,8 +2,6 @@ package org.dcsa.conformance.standards.booking.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
@@ -11,20 +9,11 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 
 abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConformanceCheck {
 
-
-  protected static final Set<BookingState> PENDING_CHANGES_STATES = Set.of(
-    BookingState.PENDING_UPDATE,
-    BookingState.PENDING_AMENDMENT
-  );
-
   protected static final Set<BookingState> BOOKING_STATES_WHERE_CBR_IS_OPTIONAL = Set.of(
     BookingState.RECEIVED,
     BookingState.REJECTED,
     BookingState.PENDING_UPDATE,
     BookingState.UPDATE_RECEIVED,
-    /* CANCELLED depends on whether cancel happens before CONFIRMED, but the logic does not track prior
-     * states. Therefore, we just assume it is optional in CANCELLED here.
-     */
     BookingState.CANCELLED
   );
 
@@ -136,51 +125,5 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
       }
     }
     return errors;
-  }
-
-  protected boolean expectedStateMatch(Set<BookingState> states) {
-    return expectedStateMatch(states::contains);
-  }
-
-  protected boolean expectedStateMatch(Predicate<BookingState> check) {
-    var state = Objects.requireNonNullElse(expectedAmendedBookingStatus, expectedBookingStatus);
-    return check.test(state);
-  }
-
-  protected boolean expectedCancellationStateMatch(Predicate<BookingCancellationState> check) {
-    if (expectedBookingCancellationStatus != null) {
-      return check.test(expectedBookingCancellationStatus);
-    }
-    return false;
-  }
-
-  protected Function<JsonNode, Set<String>> requiredOrExcludedByState(Set<BookingState> conditionalInTheseStates, Set<BookingCancellationState> cancellationConditionalStates, String fieldName) {
-    if (expectedCancellationStateMatch(cancellationConditionalStates::contains)) {
-      return jsonNode -> Collections.emptySet();
-    }
-    if (expectedStateMatch(conditionalInTheseStates)) {
-      return payload -> nonEmptyField(payload, fieldName);
-    }
-    return payload -> fieldIsOmitted(payload, fieldName);
-  }
-
-
-  protected Set<String> fieldIsOmitted(JsonNode responsePayload, String key) {
-    if (responsePayload.has(key) || responsePayload.get(key) != null) {
-      return Set.of("The field '%s' must *NOT* be a present for a booking in status '%s'".formatted(
-        key, this.expectedBookingStatus.name()
-      ));
-    }
-    return Collections.emptySet();
-  }
-
-  protected Set<String> nonEmptyField(JsonNode responsePayload, String key) {
-    var field = responsePayload.get(key);
-    if (isNonEmptyNode(field)) {
-      return Collections.emptySet();
-    }
-    return Set.of("The field '%s' must be a present and non-empty for a booking in status '%s'".formatted(
-      key, this.expectedBookingStatus.name()
-    ));
   }
 }

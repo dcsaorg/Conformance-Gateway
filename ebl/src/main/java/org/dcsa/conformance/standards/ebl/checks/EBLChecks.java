@@ -391,8 +391,8 @@ public class EBLChecks {
     return isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""));
   };
 
-  public static final String IS_NON_OPERATING_REEFER = "isNonOperatingReefer";
-  public static final String ACTIVE_REEFER_SETTINGS = "activeReeferSettings";
+  private static final String IS_NON_OPERATING_REEFER = "isNonOperatingReefer";
+  private static final String ACTIVE_REEFER_SETTINGS = "activeReeferSettings";
   private static final JsonRebaseableContentCheck ISO_EQUIPMENT_CODE_IMPLIES_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate utilizedTransportEquipment and reefer attributes",
     ALL_UTE,
@@ -496,7 +496,7 @@ public class EBLChecks {
     return mav -> consumer.accept(mav.path(CONSIGNMENT_ITEMS).all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
   }
 
-  public static final String EQUIPMENT_REFERENCE = "equipmentReference";
+  private static final String EQUIPMENT_REFERENCE = "equipmentReference";
   private static final JsonRebaseableContentCheck CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT = JsonAttribute.customValidator(
     "Equipment References in 'cargoItems' must be present in 'utilizedTransportEquipments'",
     (body, contextPath) -> {

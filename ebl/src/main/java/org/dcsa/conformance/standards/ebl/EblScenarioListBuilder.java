@@ -26,13 +26,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   public static final String SCENARIO_SUITE_CONFORMANCE_SI_ONLY = "Conformance SI-only";
   public static final String SCENARIO_SUITE_CONFORMANCE_TD_ONLY = "Conformance TD-only";
-  static final String SCENARIO_SUITE_RI = "Reference Implementation";
+  static final String SCENARIO_SUITE_SI_TD_COMBINED = "SI and TD Combined";
 
-  static final Set<String> SCENARIOS = Set.of(
-    SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
-    SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
-    SCENARIO_SUITE_RI
-  );
+  static final Set<String> SCENARIOS =
+      Set.of(
+          SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
+          SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
+          SCENARIO_SUITE_SI_TD_COMBINED);
 
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -65,8 +65,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     if (SCENARIO_SUITE_CONFORMANCE_TD_ONLY.equals(componentFactory.getScenarioSuite())) {
       return createConformanceTdOnlyScenarios();
     }
-    if (SCENARIO_SUITE_RI.equals(componentFactory.getScenarioSuite())) {
-      return createReferenceImplementationScenarios();
+    if (SCENARIO_SUITE_SI_TD_COMBINED.equals(componentFactory.getScenarioSuite())) {
+      return createSIandTDCombinedScenarios();
     }
     throw new IllegalArgumentException("Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
   }
@@ -276,6 +276,50 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static EblScenarioListBuilder oobAmendment(EblScenarioListBuilder... thenEither) {
     return oobCarrierProcessOutOfBoundTDUpdateRequest().thenEither(thenEither);
+  }
+
+  private static LinkedHashMap<String, EblScenarioListBuilder> createSIandTDCombinedScenarios() {
+    return Stream.of(
+            Map.entry(
+                "",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL)
+                    .thenEither(
+                        uc1ShipperSubmitShippingInstructions()
+                            .then(
+                                shipperGetShippingInstructions(SI_RECEIVED, false)
+                                    .then(
+                                        uc6CarrierPublishDraftTransportDocument(false)
+                                            .then(
+                                                shipperGetTransportDocument(TD_DRAFT)
+                                                    .then(
+                                                        uc7ShipperApproveDraftTransportDocument()
+                                                            .then(
+                                                                shipperGetTransportDocument(
+                                                                        TD_APPROVED)
+                                                                    .then(
+                                                                        uc8CarrierIssueTransportDocument()
+                                                                            .then(
+                                                                                shipperGetTransportDocument(
+                                                                                        TD_ISSUED)
+                                                                                    .then(
+                                                                                        uc12CarrierAwaitSurrenderRequestForDelivery()
+                                                                                            .then(
+                                                                                                shipperGetTransportDocument(
+                                                                                                        TD_PENDING_SURRENDER_FOR_DELIVERY)
+                                                                                                    .then(
+                                                                                                        uc13aCarrierAcceptSurrenderRequestForDelivery()
+                                                                                                            .then(
+                                                                                                                shipperGetTransportDocument(
+                                                                                                                        TD_SURRENDERED_FOR_DELIVERY)
+                                                                                                                    .then(
+                                                                                                                        uc14CarrierConfirmShippingInstructionsComplete()
+                                                                                                                            .then(
+                                                                                                                                shipperGetShippingInstructions(
+                                                                                                                                    SI_COMPLETED,
+                                                                                                                                    false)))))))))))))))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
   private static LinkedHashMap<String, EblScenarioListBuilder> createReferenceImplementationScenarios() {

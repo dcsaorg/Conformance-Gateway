@@ -46,7 +46,10 @@ public class UC2_Carrier_RequestUpdateToBookingRequestAction extends StateChangi
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(), BookingState.PENDING_UPDATE),
+                getMatchedExchangeUuid(),
+                BookingState.PENDING_UPDATE,
+                getCspSupplier(),
+                getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

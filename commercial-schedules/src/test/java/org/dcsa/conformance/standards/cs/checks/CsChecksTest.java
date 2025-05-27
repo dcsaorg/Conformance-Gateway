@@ -63,4 +63,12 @@ class CsChecksTest {
     rootNodeArray.add(schedule);
     assertFalse(VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray).isEmpty());
   }
+
+  @Test
+  void testValidateNonEmptyResponse() {
+    rootNodeArray.add(objectMapper.createObjectNode());
+    assertTrue(CsChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(rootNodeArray).isEmpty());
+    rootNodeArray.removeAll();
+    assertFalse(CsChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(rootNodeArray).isEmpty());
+  }
 }

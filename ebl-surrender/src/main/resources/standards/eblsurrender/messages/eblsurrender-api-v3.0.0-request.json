@@ -13,7 +13,7 @@
     },
     {
       "actionDateTime": "2024-06-12T14:54:00Z",
-      "actionCode": "SURRENDER_FOR_DELIVERY",
+      "actionCode": "SURRENDER_ACTION_CODE_PLACEHOLDER",
       "actor": SURRENDEREE_PARTY,
       "recipient": CARRIER_PARTY
     }

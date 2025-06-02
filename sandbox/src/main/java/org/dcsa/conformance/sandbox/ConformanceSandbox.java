@@ -387,8 +387,6 @@ public class ConformanceSandbox {
       String sandboxId) {
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
-    if (sandboxConfiguration.getOrchestrator().isActive()) return;
-
     String partyName = sandboxConfiguration.getParties()[0].getName();
     new PartyTask(
             persistenceProvider,

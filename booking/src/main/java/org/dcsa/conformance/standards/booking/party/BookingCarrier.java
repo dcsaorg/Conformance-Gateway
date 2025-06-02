@@ -118,7 +118,8 @@ public class BookingCarrier extends ConformanceParty {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters = getCarrierScenarioParameters(scenarioType);
     asyncOrchestratorPostPartyInput(
-        actionPrompt.get("actionId").asText(), carrierScenarioParameters.toJson());
+        actionPrompt.get("actionId").asText(),
+        CarrierScenarioJsonAdapter.toJson(carrierScenarioParameters, scenarioType));
     addOperatorLogEntry(
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
@@ -203,8 +204,8 @@ public class BookingCarrier extends ConformanceParty {
               EXAMPLE_CARRIER_SERVICE,
               "403W",
               "TA1",
-              "293499",
-              "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+              "293498",
+              null,
               null,
               null,
               DKAAR,

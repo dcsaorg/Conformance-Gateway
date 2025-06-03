@@ -111,7 +111,7 @@ public abstract class AbstractComponentFactory {
             : "%s-%s-%s"
                 .formatted(
                     autoOrManualInfix,
-                    testedPartyRole.toLowerCase(),
+                    testedPartyRole.toLowerCase().replaceAll("\\s+", "-"),
                     isTestingCounterpartsConfig ? "testing-counterparts" : "tested-party");
 
     ObjectNode sandboxNode = JsonToolkit.OBJECT_MAPPER.createObjectNode();

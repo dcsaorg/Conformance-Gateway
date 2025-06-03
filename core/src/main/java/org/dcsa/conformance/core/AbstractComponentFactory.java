@@ -173,7 +173,8 @@ public abstract class AbstractComponentFactory {
                                                 (Objects.equals(testedPartyRole, roleOne)
                                                         ? roleOne
                                                         : roleTwo)
-                                                    .toLowerCase())));
+                                                    .toLowerCase()
+                                                    .replaceAll("\\s+", "-"))));
                 if (isManual && roleName.equals(testedPartyRole))
                   rolePartyNode.put("inManualMode", true);
                 partiesNode.add(rolePartyNode);
@@ -195,7 +196,9 @@ public abstract class AbstractComponentFactory {
                                         ? "all-in-one"
                                         : "%s-%s"
                                             .formatted(
-                                                testedPartyRole.toLowerCase(),
+                                                testedPartyRole
+                                                    .toLowerCase()
+                                                    .replaceAll("\\s+", "-"),
                                                 roleName.equals(testedPartyRole)
                                                     ? "tested-party"
                                                     : "testing-counterparts"),

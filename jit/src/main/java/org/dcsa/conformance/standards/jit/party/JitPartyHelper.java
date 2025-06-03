@@ -269,10 +269,6 @@ public class JitPartyHelper {
     return response;
   }
 
-  static void flushTimestamps(JsonNodeMap persistentMap) {
-    persistentMap.save(JitGetType.TIMESTAMPS.name(), OBJECT_MAPPER.createArrayNode());
-  }
-
   // Save the response for generating GET requests. Add it to the list of timestamps.
   static void storeTimestamp(JsonNodeMap persistentMap, JitTimestamp timestamp) {
     ArrayNode timestamps = (ArrayNode) persistentMap.load(JitGetType.TIMESTAMPS.name());

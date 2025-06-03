@@ -101,7 +101,6 @@ public class JitProvider extends ConformanceParty {
 
     persistentMap.save(
         JitGetType.PORT_CALLS.name(), jsonBody); // Save the response for generating GET requests.
-    JitPartyHelper.flushTimestamps(persistentMap); // Prevent timestamps from being reused (if any).
 
     addOperatorLogEntry(
         "Submitted Port Call request for portCallID: %s".formatted(dsp.portCallID()));

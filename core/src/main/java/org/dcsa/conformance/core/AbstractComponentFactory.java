@@ -62,24 +62,25 @@ public abstract class AbstractComponentFactory {
    *    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
    * </code>
    */
-  protected abstract LinkedHashMap<String, ? extends ScenarioListBuilder<?>>
-      createModuleScenarioListBuilders(
+  protected abstract <T extends ScenarioListBuilder<T>>
+      Map<String, T> createModuleScenarioListBuilders(
           PartyConfiguration[] partyConfigurations,
           CounterpartConfiguration[] counterpartConfigurations);
 
-  public void generateConformanceScenarios(
-    Map<String, List<ConformanceScenario>> scenariosByModuleName,
-    PartyConfiguration[] partyConfigurations,
-    CounterpartConfiguration[] counterpartConfigurations
-  ) {
-    LinkedHashMap<String, ? extends ScenarioListBuilder<?>> moduleScenarioListBuilders =
-      this.createModuleScenarioListBuilders(partyConfigurations, counterpartConfigurations);
+  public <T extends ScenarioListBuilder<T>> void generateConformanceScenarios(
+      Map<String, List<ConformanceScenario>> scenariosByModuleName,
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations) {
+    Map<String, T> moduleScenarioListBuilders =
+        this.createModuleScenarioListBuilders(partyConfigurations, counterpartConfigurations);
     AtomicInteger nextModuleIndex = new AtomicInteger();
     moduleScenarioListBuilders.forEach(
-      (moduleName, scenarioListBuilder) -> {
-        var moduleScenarios = new ArrayList<ConformanceScenario>(scenarioListBuilder.buildScenarioList(nextModuleIndex.getAndIncrement()));
-        scenariosByModuleName.put(moduleName, moduleScenarios);
-      });
+        (moduleName, scenarioListBuilder) -> {
+          var moduleScenarios =
+              new ArrayList<>(
+                  scenarioListBuilder.buildScenarioList(nextModuleIndex.getAndIncrement()));
+          scenariosByModuleName.put(moduleName, moduleScenarios);
+        });
   }
 
   public abstract SortedSet<String> getRoleNames();

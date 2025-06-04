@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import lombok.NonNull;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingCarrier;
+import org.dcsa.conformance.standards.booking.party.CarrierScenarioJsonAdapter;
 import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
 
 public class Carrier_SupplyScenarioParametersAction extends BookingAction {
@@ -59,7 +60,8 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return BookingCarrier.getCarrierScenarioParameters(scenarioType).toJson();
+    carrierScenarioParameters = BookingCarrier.getCarrierScenarioParameters(scenarioType);
+    return CarrierScenarioJsonAdapter.toJson(carrierScenarioParameters, scenarioType);
   }
 
   @Override

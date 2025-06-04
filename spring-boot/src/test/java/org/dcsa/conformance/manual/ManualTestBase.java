@@ -162,6 +162,16 @@ public abstract class ManualTestBase {
     waitForCleanSandboxStatus(otherSandbox);
   }
 
+  void resetParty(SandboxConfig sandbox) {
+    ObjectNode node =
+        mapper
+            .createObjectNode()
+            .put("operation", "resetParty")
+            .put("sandboxId", sandbox.sandboxId);
+    waitForAsyncCalls(150L);
+    assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
+  }
+
   void completeAction(SandboxConfig sandbox) {
     log.debug("Completing current action.");
     ObjectNode node =
@@ -378,6 +388,7 @@ public abstract class ManualTestBase {
   void runScenario(
     SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
     log.debug("Starting scenario '{}'.", scenarioName);
+    resetParty(sandbox2);
     startOrStopScenario(sandbox1, scenarioId);
     notifyAction(sandbox2, sandbox1);
 

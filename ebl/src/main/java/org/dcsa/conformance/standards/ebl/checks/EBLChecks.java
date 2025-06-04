@@ -1473,8 +1473,7 @@ public class EBLChecks {
 
   public static ActionCheck tdPlusScenarioContentChecks(UUID matched, String standardVersion, TransportDocumentStatus transportDocumentStatus, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
-        getTdPayloadChecks(
-            standardVersion, transportDocumentStatus, cspSupplier, dspSupplier);
+        getTdPayloadChecks(standardVersion, transportDocumentStatus, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }

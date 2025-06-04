@@ -1323,7 +1323,7 @@ public class EBLChecks {
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
       boolean requestAmendedStatus) {
     var checks =
-        getSiNotificationPayloadChecks(
+        getSiPayloadChecks(
             standardVersion,
             shippingInstructionsStatus,
             updatedShippingInstructionsStatus,
@@ -1334,7 +1334,7 @@ public class EBLChecks {
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
-  public static List<JsonContentCheck> getSiNotificationPayloadChecks(
+  public static List<JsonContentCheck> getSiPayloadChecks(
       String standardVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
@@ -1473,13 +1473,13 @@ public class EBLChecks {
 
   public static ActionCheck tdPlusScenarioContentChecks(UUID matched, String standardVersion, TransportDocumentStatus transportDocumentStatus, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
-        getTdNotificationPayloadChecks(
+        getTdPayloadChecks(
             standardVersion, transportDocumentStatus, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }
 
-  public static List<JsonContentCheck> getTdNotificationPayloadChecks(
+  public static List<JsonContentCheck> getTdPayloadChecks(
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Supplier<CarrierScenarioParameters> cspSupplier,

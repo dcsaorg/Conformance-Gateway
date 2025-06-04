@@ -65,7 +65,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
                 SHIPPING_INSTRUCTIONS_LABEL,
                 SHIPPING_INSTRUCTIONS_PATH,
                 () ->
-                    EBLChecks.getSiNotificationPayloadChecks(
+                    EBLChecks.getSiPayloadChecks(
                         standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
@@ -77,7 +77,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
                 UPDATED_SHIPPING_INSTRUCTIONS_PATH,
                 updatedShippingInstructionsStatus != null,
                 () ->
-                    EBLChecks.getSiNotificationPayloadChecks(
+                    EBLChecks.getSiPayloadChecks(
                         standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,

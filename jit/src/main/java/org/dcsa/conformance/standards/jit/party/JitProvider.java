@@ -71,7 +71,7 @@ public class JitProvider extends ConformanceParty {
 
   @Override
   protected void doReset() {
-    // No state to reset.
+    JitPartyHelper.flushTimestamps(persistentMap);
   }
 
   @Override

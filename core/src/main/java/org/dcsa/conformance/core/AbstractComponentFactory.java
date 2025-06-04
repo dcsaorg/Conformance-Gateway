@@ -111,7 +111,7 @@ public abstract class AbstractComponentFactory {
             : "%s-%s-%s"
                 .formatted(
                     autoOrManualInfix,
-                    testedPartyRole.toLowerCase().replaceAll("\\s+", "-"),
+                    getFormattedTestedPartyRole(testedPartyRole),
                     isTestingCounterpartsConfig ? "testing-counterparts" : "tested-party");
 
     ObjectNode sandboxNode = JsonToolkit.OBJECT_MAPPER.createObjectNode();
@@ -170,11 +170,10 @@ public abstract class AbstractComponentFactory {
                                         ? "all-in-one"
                                         : "%s-testing-counterparts"
                                             .formatted(
-                                                (Objects.equals(testedPartyRole, roleOne)
+                                                getFormattedTestedPartyRole(
+                                                    (Objects.equals(testedPartyRole, roleOne)
                                                         ? roleOne
-                                                        : roleTwo)
-                                                    .toLowerCase()
-                                                    .replaceAll("\\s+", "-"))));
+                                                        : roleTwo)))));
                 if (isManual && roleName.equals(testedPartyRole))
                   rolePartyNode.put("inManualMode", true);
                 partiesNode.add(rolePartyNode);
@@ -196,9 +195,7 @@ public abstract class AbstractComponentFactory {
                                         ? "all-in-one"
                                         : "%s-%s"
                                             .formatted(
-                                                testedPartyRole
-                                                    .toLowerCase()
-                                                    .replaceAll("\\s+", "-"),
+                                                getFormattedTestedPartyRole(testedPartyRole),
                                                 roleName.equals(testedPartyRole)
                                                     ? "tested-party"
                                                     : "testing-counterparts"),
@@ -217,6 +214,10 @@ public abstract class AbstractComponentFactory {
               }
             });
     return sandboxNode;
+  }
+
+  private static String getFormattedTestedPartyRole(String testedPartyRole) {
+    return testedPartyRole.toLowerCase().replaceAll("\\s+", "-");
   }
 
   protected static String _findPartyOrCounterpartName(

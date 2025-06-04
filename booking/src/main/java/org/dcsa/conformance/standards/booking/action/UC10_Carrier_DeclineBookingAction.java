@@ -53,7 +53,9 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
                 BookingState.DECLINED,
-                expectedAmendedBookingStatus),
+                expectedAmendedBookingStatus,
+                getCspSupplier(),
+                getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

@@ -105,7 +105,10 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry("ISSUE_TO_PARTY", ssp.issueToParty().toString()),
                 Map.entry("SURRENDEREE_PARTY", ssp.surrendereeParty().toString()),
                 Map.entry("CARRIER_PARTY", ssp.carrierParty().toString()),
-                Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString())));
+                Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString()),
+                Map.entry(
+                    "SURRENDER_ACTION_CODE_PLACEHOLDER",
+                    forAmendment ? "SURRENDER_FOR_AMENDMENT" : "SURRENDER_FOR_DELIVERY")));
 
     syncCounterpartPost(
         "/v%s/ebl-surrender-requests".formatted(apiVersion.charAt(0)), jsonRequestBody);
@@ -161,9 +164,6 @@ public class EblSurrenderPlatform extends ConformanceParty {
                           "Rejecting '%s' for document '%s' because it is in state '%s'"
                               .formatted(action, tdr, eblStatesById.get(tdr)))));
     }
-    /*addOperatorLogEntry(
-    "Handling surrender response with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-        .formatted(action, srr, tdr, eblStatesById.get(tdr)));*/
 
     addOperatorLogEntry(
         "Handling notification with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"

@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -19,7 +18,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   private static final String DATA_PATH = "/data";
   private static final String TRANSPORT_DOCUMENT_PATH = "/data/transportDocument";
 
-  private static final String DEFAULT_LABEL = "";
+  private static final String ROOT_LABEL = "";
   private static final String TRANSPORT_DOCUMENT_LABEL = "[Transport Document]";
 
   private final String standardVersion;
@@ -48,25 +47,16 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
             buildChecks(
-                DEFAULT_LABEL,
+                ROOT_LABEL,
                 DATA_PATH,
-                () -> EBLChecks.getTdPayloadSimpleChecks(transportDocumentStatus, getTdrCheck())),
+                () -> EBLChecks.getTdNotificationChecks(transportDocumentStatus, getTdrCheck())),
             buildChecks(
                 TRANSPORT_DOCUMENT_LABEL,
                 TRANSPORT_DOCUMENT_PATH,
                 () ->
-                    EBLChecks.getTdPayloadFullChecks(
+                    EBLChecks.getTdNotificationPayloadChecks(
                         standardVersion, transportDocumentStatus, cspSupplier, dspSupplier)))
         .flatMap(Function.identity());
-  }
-
-  private Stream<ConformanceCheck> buildChecks(
-      String label, String jsonPath, Supplier<List<JsonContentCheck>> checksSupplier) {
-    return checksSupplier.get().stream().map(check -> wrapWithSubCheck(label, jsonPath, check));
-  }
-
-  private ConformanceCheck wrapWithSubCheck(String label, String path, JsonContentCheck check) {
-    return createSubCheck(label, check.description(), at(path, check::validate));
   }
 
   private JsonContentCheck getTdrCheck() {

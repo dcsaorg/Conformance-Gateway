@@ -21,7 +21,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   private static final String UPDATED_SHIPPING_INSTRUCTIONS_PATH =
       "/data/updatedShippingInstructions";
 
-  private static final String DEFAULT_LABEL = "";
+  private static final String ROOT_LABEL = "";
   private static final String SHIPPING_INSTRUCTIONS_LABEL = "[Shipping Instructions] ";
   private static final String UPDATED_SHIPPING_INSTRUCTIONS_LABEL =
       "[Updated Shipping Instructions] ";
@@ -54,10 +54,10 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
             buildChecks(
-                DEFAULT_LABEL,
+                ROOT_LABEL,
                 DATA_PATH,
                 () ->
-                    EBLChecks.getSiPayloadSimpleChecks(
+                    EBLChecks.getSiNotificationChecks(
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
                         extraChecks)),
@@ -65,29 +65,26 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
                 SHIPPING_INSTRUCTIONS_LABEL,
                 SHIPPING_INSTRUCTIONS_PATH,
                 () ->
-                    EBLChecks.getSiPayloadFullChecks(
+                    EBLChecks.getSiNotificationPayloadChecks(
                         standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
                         cspSupplier,
-                        dspSupplier)),
+                        dspSupplier,
+                        false)),
             buildChecksWithCondition(
                 UPDATED_SHIPPING_INSTRUCTIONS_LABEL,
                 UPDATED_SHIPPING_INSTRUCTIONS_PATH,
                 updatedShippingInstructionsStatus != null,
                 () ->
-                    EBLChecks.getSiPayloadFullChecks(
+                    EBLChecks.getSiNotificationPayloadChecks(
                         standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
                         cspSupplier,
-                        dspSupplier)))
+                        dspSupplier,
+                        false)))
         .flatMap(Function.identity());
-  }
-
-  private Stream<ConformanceCheck> buildChecks(
-      String label, String jsonPath, Supplier<List<JsonContentCheck>> checksSupplier) {
-    return checksSupplier.get().stream().map(check -> wrapWithSubCheck(label, jsonPath, check));
   }
 
   private Stream<ConformanceCheck> buildChecksWithCondition(
@@ -98,9 +95,5 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
     return condition
         ? checksSupplier.get().stream().map(check -> wrapWithSubCheck(label, jsonPath, check))
         : Stream.empty();
-  }
-
-  private ConformanceCheck wrapWithSubCheck(String label, String path, JsonContentCheck check) {
-    return createSubCheck(label, check.description(), at(path, check::validate));
   }
 }

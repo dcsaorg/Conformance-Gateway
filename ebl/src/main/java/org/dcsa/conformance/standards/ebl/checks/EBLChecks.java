@@ -1320,24 +1320,27 @@ public class EBLChecks {
       Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier,
       ShippingInstructionsStatus shippingInstructionsStatus,
-      ShippingInstructionsStatus updatedShippingInstructionsStatus) {
+      ShippingInstructionsStatus updatedShippingInstructionsStatus,
+      boolean requestAmendedStatus) {
     var checks =
-        getSiPayloadFullChecks(
+        getSiNotificationPayloadChecks(
             standardVersion,
             shippingInstructionsStatus,
             updatedShippingInstructionsStatus,
             cspSupplier,
-            dspSupplier);
+            dspSupplier,
+            requestAmendedStatus);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
-  public static List<JsonContentCheck> getSiPayloadFullChecks(
+  public static List<JsonContentCheck> getSiNotificationPayloadChecks(
       String standardVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
       Supplier<CarrierScenarioParameters> cspSupplier,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      boolean requestedAmendment) {
     var checks = new ArrayList<JsonContentCheck>();
 
     checks.add(
@@ -1354,6 +1357,7 @@ public class EBLChecks {
     }
 
     checks.addAll(STATIC_SI_CHECKS);
+    
     checks.add(FEEDBACKS_PRESENCE);
     /* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
         checks.add(JsonAttribute.lostAttributeCheck(
@@ -1409,27 +1413,32 @@ public class EBLChecks {
     );
   }
 
-  public static List<JsonContentCheck> getSiPayloadSimpleChecks(
+  public static List<JsonContentCheck> getSiNotificationChecks(
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
       List<JsonContentCheck> extraChecks) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>(extraChecks);
+
     jsonContentChecks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
+
     jsonContentChecks.add(
         getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+
     jsonContentChecks.add(FEEDBACKS_PRESENCE);
     jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY);
     jsonContentChecks.add(VALID_FEEDBACKS_CODE);
     return jsonContentChecks;
   }
 
-  public static List<JsonContentCheck> getTdPayloadSimpleChecks(
+  public static List<JsonContentCheck> getTdNotificationChecks(
       TransportDocumentStatus transportDocumentStatus, JsonContentCheck... extraChecks) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>(Arrays.asList(extraChecks));
 
     jsonContentChecks.add(
         JsonAttribute.mustEqual(TD_REF_TD_STATUS_PTR, transportDocumentStatus.wireName()));
+
+    jsonContentChecks.add(FEEDBACKS_PRESENCE);
     jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY);
     jsonContentChecks.add(VALID_FEEDBACKS_CODE);
     return jsonContentChecks;
@@ -1464,12 +1473,13 @@ public class EBLChecks {
 
   public static ActionCheck tdPlusScenarioContentChecks(UUID matched, String standardVersion, TransportDocumentStatus transportDocumentStatus, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
-        getTdPayloadFullChecks(standardVersion, transportDocumentStatus, cspSupplier, dspSupplier);
+        getTdNotificationPayloadChecks(
+            standardVersion, transportDocumentStatus, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }
 
-  public static List<JsonContentCheck> getTdPayloadFullChecks(
+  public static List<JsonContentCheck> getTdNotificationPayloadChecks(
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Supplier<CarrierScenarioParameters> cspSupplier,

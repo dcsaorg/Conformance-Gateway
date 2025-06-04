@@ -88,6 +88,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
         replacementsMap, "prompt-shipper-get.md", "prompt-shipper-refresh-complete.md");
   }
 
+  @Override
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     if (recordTDR) {
@@ -134,7 +135,8 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                 getCspSupplier(),
                 getDspSupplier(),
                 expectedSiStatus,
-                expectedAmendedSiStatus));
+                expectedAmendedSiStatus,
+                requestAmendedStatus));
       }
     };
   }

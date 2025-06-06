@@ -301,7 +301,6 @@ components:
           example: "Warning"
         carrierCode:
           maxLength: 4
-          pattern: "^\\S+$"
           type: "string"
           description: "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon."
           example: "MMCU"
@@ -358,7 +357,6 @@ components:
             $ref: "#/components/schemas/Reference"
         transportDocumentReference:
           maxLength: 20
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment."
           example: "HHL71800000"
@@ -487,8 +485,6 @@ components:
             References of the equipments for which this arrival notice was created
           items:
             maxLength: 11
-            minLength: 1
-            pattern: "^\\S(?:.*\\S)?$"
             type: "string"
             description: |
               The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -506,11 +502,11 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
         etaAtPortOfDischargeDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of arrival of the vessel at the port of discharge
-          example: "2025-01-23"
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
         placeOfDelivery:
           description: |
             The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
@@ -518,11 +514,11 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
         etaAtPlaceOfDeliveryDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of arrival of the shipment at place of delivery
-          example: "2025-01-23"
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
       description: |
         Lightweight notification that can be sent when a new or updated Arrival Notice is available
     ArrivalNoticeNotificationsMessage:
@@ -1073,7 +1069,6 @@ components:
           example: "Acme Inc."
         typeOfPerson:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Can be one of the following values as per the Union Customs Code art. 5(4):
@@ -1117,7 +1112,6 @@ components:
             $ref: "#/components/schemas/PartyContactDetail"
         reference:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "A reference linked to the `Consignee`."
           example: "HHL007"
@@ -1265,7 +1259,6 @@ components:
           example: "DEM"
         isoEquipmentCode:
           maxLength: 4
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Unique code identifying the equipment size and type used to transport commodities.
@@ -1478,8 +1471,6 @@ components:
           - $ref: "#/components/schemas/Address"
         UNLocationCode:
           maxLength: 5
-          minLength: 5
-          pattern: "^[A-Z]{2}[A-Z2-9]{3}$"
           type: "string"
           description: |
             The UN Location code specifying where the place is located. The pattern used must be
@@ -1773,46 +1764,46 @@ components:
       type: "object"
       properties:
         onBoardDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The date when the container was loaded onto the vessel at the port of origin.
-          example: "2025-01-23"
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
         departureDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The date of departure from the location where the cargo is handed over by the shipper, or his agent,
             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
-          example: "2025-01-23"
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
         plannedDepartureDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of departure of the first mother vessel arriving at the destination country.
-          example: "2025-01-23"
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
         plannedArrivalDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of arrival of the first mother vessel arriving at the destination country.
-          example: "2025-01-23"
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
         etaAtPortOfDischargeDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: "The expected date of arrival of the vessel at the Port of Discharge."
-          example: "2025-01-23"
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
         etaAtPlaceOfDeliveryDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: "The expected date of arrival of the shipment at Place of Delivery."
-          example: "2025-01-23"
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
         inlandArrivalDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
-          example: "2025-01-23"
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
         estimatedGeneralOrderDateTime:
           type: "string"
           description: |
@@ -1940,15 +1931,11 @@ components:
           example: "King of the Seas"
         vesselFlag:
           maxLength: 2
-          minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: "Vessel flag"
           example: "NL"
         vesselIMONumber:
           maxLength: 8
-          minLength: 7
-          pattern: "^\\d{7,8}$"
           type: "string"
           description: |
             The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
@@ -1965,8 +1952,6 @@ components:
           example: "1234N"
         universalVoyageReference:
           maxLength: 5
-          minLength: 5
-          pattern: "^\\d{2}[0-9A-Z]{2}[NEWSR]$"
           type: "string"
           description: |
             Universal identifier of a voyage:

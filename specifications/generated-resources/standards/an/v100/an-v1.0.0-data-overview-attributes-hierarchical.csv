@@ -11,7 +11,7 @@ e.g. additional required documents to prepare and present for shipment release -
 - `FCL` (Full Container Load)
 - `LCL` (Less than Container Load)",
 "ArrivalNotice / carrierClauses",carrierClauses,"string list",,,,,"Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.",
-"ArrivalNotice / carrierCode",carrierCode,string,,4,"^\S+$",MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
+"ArrivalNotice / carrierCode",carrierCode,string,,4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
 "ArrivalNotice / carrierCodeListProvider",carrierCodeListProvider,string,,,,NMFTA,"The code list provider for the `carrierCode`. Possible values are:
 - `SMDG` (Ship Message Design Group)
 - `NMFTA` (National Motor Freight Traffic Association)",
@@ -274,7 +274,7 @@ Character | Valid Characters | Description
 - `ZZZ` (Mutually defined)",
 "ArrivalNotice / documentParties / identifyingCodes / partyCode",partyCode,string,,150,,MSK,"Code to identify the party as provided by the code list provider",
 "ArrivalNotice / documentParties / location",location,Location,,,,,"Party location",
-"ArrivalNotice / documentParties / location / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / documentParties / location / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -325,12 +325,12 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `WH` (Warehouse Keeper)",
 "ArrivalNotice / documentParties / partyName",partyName,string,,70,,"Acme Inc.","Party name",
 "ArrivalNotice / documentParties / purchaseOrderReferences",purchaseOrderReferences,"string list",,,,,"A list of `Purchase Order Reference`s",
-"ArrivalNotice / documentParties / reference",reference,string,,35,"^\S(?:.*\S)?$",HHL007,"A reference linked to the `Consignee`.",
+"ArrivalNotice / documentParties / reference",reference,string,,35,,HHL007,"A reference linked to the `Consignee`.",
 "ArrivalNotice / documentParties / taxLegalReferences",taxLegalReferences,"TaxLegalReference list",,,,,"List of tax or legal references relevant to the party",
 "ArrivalNotice / documentParties / taxLegalReferences / countryCode",countryCode,string,,2,"^[A-Z]{2}$",IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 "ArrivalNotice / documentParties / taxLegalReferences / type",type,string,,50,"^\S(?:.*\S)?$",PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
 "ArrivalNotice / documentParties / taxLegalReferences / value",value,string,,35,"^\S(?:.*\S)?$",AAAAA0000A,"The value of the `taxLegalReference`",
-"ArrivalNotice / documentParties / typeOfPerson",typeOfPerson,string,,50,"^\S(?:.*\S)?$",NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):
+"ArrivalNotice / documentParties / typeOfPerson",typeOfPerson,string,,50,,NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):
 - `NATURAL_PERSON` (A person that is an individual living human being)
 - `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
 - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)",
@@ -338,7 +338,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / freeTimes / calculationBasis",calculationBasis,string,,1000,,"Calculated as...","Description of the conditions under which this free time item applies.
 It can include references to the carrier website or individual charges as per service contract/agreement.",
 "ArrivalNotice / freeTimes / duration",duration,integer,,,,123,"The duration expressed in `timeUnit`s for which this free time item applies.",
-"ArrivalNotice / freeTimes / isoEquipmentCode",isoEquipmentCode,string,,4,"^\S(?:.*\S)?$",22GP,"Unique code identifying the equipment size and type used to transport commodities.
+"ArrivalNotice / freeTimes / isoEquipmentCode",isoEquipmentCode,string,,4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 "ArrivalNotice / freeTimes / timeUnit",timeUnit,string,,3,,WD,"Code identifying the unit in which free time is expressed
@@ -356,7 +356,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNotice / payerCode",payerCode,string,,100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
 "ArrivalNotice / pickupLocation",pickupLocation,Location,,,,,"Pickup location",
-"ArrivalNotice / pickupLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / pickupLocation / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -390,7 +390,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / references / value",value,string,,35,"^\S(?:.*\S)?$",HHL00103004,"The value of the reference.",
 "ArrivalNotice / returnInstructions",returnInstructions,string,,500,,"Please place the container...","Return instructions",
 "ArrivalNotice / returnLocation",returnLocation,Location,,,,,"Return location",
-"ArrivalNotice / returnLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / returnLocation / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -420,10 +420,10 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / serviceContractReference",serviceContractReference,string,,30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 "ArrivalNotice / termsAndConditions",termsAndConditions,string,,50000,,"Any reference in...","Carrier terms and conditions of transport.",
 "ArrivalNotice / transport",transport,Transport,,,,,"Transport info",
-"ArrivalNotice / transport / departureDate",departureDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
+"ArrivalNotice / transport / departureDate",departureDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
 "ArrivalNotice / transport / dischargeLocation",dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country.",
-"ArrivalNotice / transport / dischargeLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / transport / dischargeLocation / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -452,11 +452,11 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / dischargeLocation / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / estimatedGeneralOrderDateTime","estimatedGeneralOrderDateTime",string,,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
-"ArrivalNotice / transport / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
-"ArrivalNotice / transport / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
-"ArrivalNotice / transport / inlandArrivalDate",inlandArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
+"ArrivalNotice / transport / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at Place of Delivery.",
+"ArrivalNotice / transport / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the Port of Discharge.",
+"ArrivalNotice / transport / inlandArrivalDate",inlandArrivalDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 "ArrivalNotice / transport / loadLocation",loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country.",
-"ArrivalNotice / transport / loadLocation / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / transport / loadLocation / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -490,10 +490,10 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `TRUCK` - Truck
 - `BARGE` - Barge
 - `MULTIMODAL` - Multimodal",
-"ArrivalNotice / transport / onBoardDate",onBoardDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
+"ArrivalNotice / transport / onBoardDate",onBoardDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date when the container was loaded onto the vessel at the port of origin.",
 "ArrivalNotice / transport / placeOfDelivery",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent
 and where responsibility of the shipping line ceases.",
-"ArrivalNotice / transport / placeOfDelivery / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / transport / placeOfDelivery / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -522,7 +522,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / placeOfDelivery / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / placeOfReceipt",placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
 This indicates the point at which the shipping line takes on responsibility for carriage of the container.",
-"ArrivalNotice / transport / placeOfReceipt / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / transport / placeOfReceipt / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -549,10 +549,10 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfReceipt / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
-"ArrivalNotice / transport / plannedArrivalDate",plannedArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the first mother vessel arriving at the destination country.",
-"ArrivalNotice / transport / plannedDepartureDate",plannedDepartureDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of departure of the first mother vessel arriving at the destination country.",
+"ArrivalNotice / transport / plannedArrivalDate",plannedArrivalDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the first mother vessel arriving at the destination country.",
+"ArrivalNotice / transport / plannedDepartureDate",plannedDepartureDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of departure of the first mother vessel arriving at the destination country.",
 "ArrivalNotice / transport / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
-"ArrivalNotice / transport / portOfDischarge / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / transport / portOfDischarge / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -580,7 +580,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / portOfDischarge / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfDischarge / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / portOfLoading",portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
-"ArrivalNotice / transport / portOfLoading / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / transport / portOfLoading / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -616,15 +616,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `DC` - Destination country
 - `POD` - Port of destination
 - `POL` - Port of loading",
-"ArrivalNotice / transport / vesselVoyages / universalVoyageReference",universalVoyageReference,string,,5,"^\d{2}[0-9A-Z]{2}[NEWSR]$",2301W,"Universal identifier of a voyage:
+"ArrivalNotice / transport / vesselVoyages / universalVoyageReference",universalVoyageReference,string,,5,,2301W,"Universal identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",
-"ArrivalNotice / transport / vesselVoyages / vesselFlag",vesselFlag,string,,2,"^[A-Z]{2}$",NL,"Vessel flag",
-"ArrivalNotice / transport / vesselVoyages / vesselIMONumber",vesselIMONumber,string,,8,"^\d{7,8}$",12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+"ArrivalNotice / transport / vesselVoyages / vesselFlag",vesselFlag,string,,2,,NL,"Vessel flag",
+"ArrivalNotice / transport / vesselVoyages / vesselIMONumber",vesselIMONumber,string,,8,,12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
 The reference is the International Maritime Organisation (IMO) number,
 also sometimes known as the Lloyd's register code.",
 "ArrivalNotice / transport / vesselVoyages / vesselName",vesselName,string,,50,,"King of the Seas","Vessel name",
-"ArrivalNotice / transportDocumentReference","transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
+"ArrivalNotice / transportDocumentReference","transportDocumentReference",string,yes,20,,HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
 "ArrivalNotice / transportDocumentTypeCode","transportDocumentTypeCode",string,,,,SWB,"Specifies the type of the transport document
 - `BOL` (Bill of Lading)
 - `SWB` (Sea Waybill)",
@@ -689,14 +689,14 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.",
 "ArrivalNoticeNotification",,,,,,,,
 "ArrivalNoticeNotification / equipmentReferences",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created",
-"ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery",
-"ArrivalNoticeNotification / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
+"ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at place of delivery",
+"ArrivalNoticeNotification / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the port of discharge",
 "ArrivalNoticeNotification / issueDateTime",issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNoticeNotification / label",label,string,,,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNoticeNotification / placeOfDelivery",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases",
-"ArrivalNoticeNotification / placeOfDelivery / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNoticeNotification / placeOfDelivery / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -724,7 +724,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNoticeNotification / placeOfDelivery / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNoticeNotification / placeOfDelivery / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNoticeNotification / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel",
-"ArrivalNoticeNotification / portOfDischarge / UNLocationCode",UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNoticeNotification / portOfDischarge / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used

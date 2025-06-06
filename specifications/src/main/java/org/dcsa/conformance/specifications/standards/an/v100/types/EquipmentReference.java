@@ -1,12 +1,9 @@
 package org.dcsa.conformance.specifications.standards.an.v100.types;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.dcsa.conformance.specifications.generator.StringPatterns;
 
 @Schema(
     type = "string",
-    pattern = StringPatterns.TRIMMED_NON_EMPTY_STRING,
-    minLength = 1,
     maxLength = 11,
     example = "APZU4812090",
     description =

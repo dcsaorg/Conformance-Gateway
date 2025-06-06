@@ -109,7 +109,7 @@ and where responsibility of the shipping line ceases.
 
   @Schema() private ModeOfTransportCode modeOfTransport;
 
-  @ArraySchema(minItems = 1, maxItems = 3)
+  @ArraySchema(maxItems = 3)
   @Schema(
       description =
           """

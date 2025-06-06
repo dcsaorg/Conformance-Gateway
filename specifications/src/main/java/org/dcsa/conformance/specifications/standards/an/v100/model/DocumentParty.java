@@ -56,8 +56,7 @@ Specifies the role of the party in a given context. Possible values are:
       - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
       """,
       example = "NATURAL_PERSON",
-      maxLength = 50,
-      pattern = "^\\S(?:.*\\S)?$")
+      maxLength = 50)
   private String typeOfPerson;
 
   @Schema(description = "Party location")
@@ -78,7 +77,6 @@ Specifies the role of the party in a given context. Possible values are:
   private List<DisplayedAddressLine> displayedAddress;
 
   @Schema(description = "List of codes identifying the party")
-  @ArraySchema(minItems = 1)
   private List<IdentifyingCode> identifyingCodes;
 
   @Schema(description = "List of tax or legal references relevant to the party")
@@ -90,8 +88,7 @@ Specifies the role of the party in a given context. Possible values are:
   @Schema(
       description = "A reference linked to the `Consignee`.",
       example = "HHL007",
-      maxLength = 35,
-      pattern = "^\\S(?:.*\\S)?$")
+      maxLength = 35)
   private String reference;
 
   @Schema(description = "A list of `Purchase Order Reference`s")

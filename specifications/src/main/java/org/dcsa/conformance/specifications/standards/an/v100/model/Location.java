@@ -28,9 +28,7 @@ The UN Location code specifying where the place is located. The pattern used mus
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
 """,
       example = "NLAMS",
-      minLength = 5,
-      maxLength = 5,
-      pattern = "^[A-Z]{2}[A-Z2-9]{3}$")
+      maxLength = 5)
   private String unLocationCode;
 
   @Schema()

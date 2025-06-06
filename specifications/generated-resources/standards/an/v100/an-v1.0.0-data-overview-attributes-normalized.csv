@@ -36,7 +36,7 @@ ArrivalNotice,"cargoMovementTypeAtDestination",string,,3,,FCL,"Refers to the shi
 - `FCL` (Full Container Load)
 - `LCL` (Less than Container Load)",
 ArrivalNotice,carrierClauses,"string list",,,,,"Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.",
-ArrivalNotice,carrierCode,string,,4,"^\S+$",MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
+ArrivalNotice,carrierCode,string,,4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
 ArrivalNotice,carrierCodeListProvider,string,,,,NMFTA,"The code list provider for the `carrierCode`. Possible values are:
 - `SMDG` (Ship Message Design Group)
 - `NMFTA` (National Motor Freight Traffic Association)",
@@ -64,14 +64,14 @@ ArrivalNotice,returnLocation,Location,,,,,"Return location",
 ArrivalNotice,serviceContractReference,string,,30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 ArrivalNotice,termsAndConditions,string,,50000,,"Any reference in...","Carrier terms and conditions of transport.",
 ArrivalNotice,transport,Transport,,,,,"Transport info",
-ArrivalNotice,"transportDocumentReference",string,yes,20,"^\S(?:.*\S)?$",HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
+ArrivalNotice,"transportDocumentReference",string,yes,20,,HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
 ArrivalNotice,"transportDocumentTypeCode",string,,,,SWB,"Specifies the type of the transport document
 - `BOL` (Bill of Lading)
 - `SWB` (Sea Waybill)",
 ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",,,,,"The equipments being used.",
 "ArrivalNoticeNotification",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created",
-"ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at place of delivery",
-"ArrivalNoticeNotification",etaAtPortOfDischargeDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
+"ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at place of delivery",
+"ArrivalNoticeNotification",etaAtPortOfDischargeDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the port of discharge",
 "ArrivalNoticeNotification",issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNoticeNotification",label,string,,,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
@@ -216,9 +216,9 @@ DocumentParty,partyFunction,string,,3,,N1,"Specifies the role of the party in a 
 - `WH` (Warehouse Keeper)",
 DocumentParty,partyName,string,,70,,"Acme Inc.","Party name",
 DocumentParty,purchaseOrderReferences,"string list",,,,,"A list of `Purchase Order Reference`s",
-DocumentParty,reference,string,,35,"^\S(?:.*\S)?$",HHL007,"A reference linked to the `Consignee`.",
+DocumentParty,reference,string,,35,,HHL007,"A reference linked to the `Consignee`.",
 DocumentParty,taxLegalReferences,"TaxLegalReference list",,,,,"List of tax or legal references relevant to the party",
-DocumentParty,typeOfPerson,string,,50,"^\S(?:.*\S)?$",NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):
+DocumentParty,typeOfPerson,string,,50,,NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):
 - `NATURAL_PERSON` (A person that is an individual living human being)
 - `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
 - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)",
@@ -251,7 +251,7 @@ Facility,facilityCodeListProvider,string,,,,SMDG,"The provider used for identify
 FreeTime,calculationBasis,string,,1000,,"Calculated as...","Description of the conditions under which this free time item applies.
 It can include references to the carrier website or individual charges as per service contract/agreement.",
 FreeTime,duration,integer,,,,123,"The duration expressed in `timeUnit`s for which this free time item applies.",
-FreeTime,isoEquipmentCode,string,,4,"^\S(?:.*\S)?$",22GP,"Unique code identifying the equipment size and type used to transport commodities.
+FreeTime,isoEquipmentCode,string,,4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 FreeTime,timeUnit,string,,3,,WD,"Code identifying the unit in which free time is expressed
@@ -315,7 +315,7 @@ Limits,temperatureUnit,string,,,,CEL,"The unit for **all attributes in the limit
 - `FAH` (Fahrenheit)",
 Limits,"transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.",
 Limits,"transportEmergencyTemperature",number,,,,74.1,"Temperature at which emergency procedures shall be implemented",
-Location,UNLocationCode,string,,5,"^[A-Z]{2}[A-Z2-9]{3}$",NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+Location,UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
@@ -391,14 +391,14 @@ TareWeight,value,number,,,,4800,"The weight of an empty container (gross contain
 TaxLegalReference,countryCode,string,,2,"^[A-Z]{2}$",IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 TaxLegalReference,type,string,,50,"^\S(?:.*\S)?$",PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
 TaxLegalReference,value,string,,35,"^\S(?:.*\S)?$",AAAAA0000A,"The value of the `taxLegalReference`",
-Transport,departureDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
+Transport,departureDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
 Transport,dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country.",
 Transport,"estimatedGeneralOrderDateTime",string,,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
-Transport,etaAtPlaceOfDeliveryDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
-Transport,etaAtPortOfDischargeDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
-Transport,inlandArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
+Transport,etaAtPlaceOfDeliveryDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at Place of Delivery.",
+Transport,etaAtPortOfDischargeDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the Port of Discharge.",
+Transport,inlandArrivalDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 Transport,loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country.",
 Transport,modeOfTransport,string,,20,,VESSEL,"Code defined by DCSA to identify a mode of transport.
 
@@ -407,13 +407,13 @@ Transport,modeOfTransport,string,,20,,VESSEL,"Code defined by DCSA to identify a
 - `TRUCK` - Truck
 - `BARGE` - Barge
 - `MULTIMODAL` - Multimodal",
-Transport,onBoardDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
+Transport,onBoardDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date when the container was loaded onto the vessel at the port of origin.",
 Transport,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent
 and where responsibility of the shipping line ceases.",
 Transport,placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
 This indicates the point at which the shipping line takes on responsibility for carriage of the container.",
-Transport,plannedArrivalDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of arrival of the first mother vessel arriving at the destination country.",
-Transport,plannedDepartureDate,string,,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The expected date of departure of the first mother vessel arriving at the destination country.",
+Transport,plannedArrivalDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the first mother vessel arriving at the destination country.",
+Transport,plannedDepartureDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of departure of the first mother vessel arriving at the destination country.",
 Transport,portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 Transport,portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
 Transport,vesselVoyages,"VesselVoyage list",,,,,"Details of the POD, POL or DC vessel voyages",
@@ -437,11 +437,11 @@ VesselVoyage,typeCode,string,,,,POD,"Code representing the type of a vessel voya
 - `DC` - Destination country
 - `POD` - Port of destination
 - `POL` - Port of loading",
-VesselVoyage,universalVoyageReference,string,,5,"^\d{2}[0-9A-Z]{2}[NEWSR]$",2301W,"Universal identifier of a voyage:
+VesselVoyage,universalVoyageReference,string,,5,,2301W,"Universal identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",
-VesselVoyage,vesselFlag,string,,2,"^[A-Z]{2}$",NL,"Vessel flag",
-VesselVoyage,vesselIMONumber,string,,8,"^\d{7,8}$",12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+VesselVoyage,vesselFlag,string,,2,,NL,"Vessel flag",
+VesselVoyage,vesselIMONumber,string,,8,,12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
 The reference is the International Maritime Organisation (IMO) number,
 also sometimes known as the Lloyd's register code.",
 VesselVoyage,vesselName,string,,50,,"King of the Seas","Vessel name",

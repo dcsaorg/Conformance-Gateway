@@ -1,6 +1,5 @@
 package org.dcsa.conformance.specifications.standards.an.v100.model;
 
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
@@ -36,8 +35,7 @@ for example "Warning", "Updated", "Second", "Third" etc.
       description =
           "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
       example = "MMCU",
-      maxLength = 4,
-      pattern = "^\\S+$")
+      maxLength = 4)
   private String carrierCode;
 
   @Schema(
@@ -52,7 +50,6 @@ for example "Warning", "Updated", "Second", "Third" etc.
   private String carrierCodeListProvider;
 
   @Schema(description = "The party to contact for any inquiries related to this Arrival Notice.")
-  @ArraySchema(minItems = 1)
   private List<PartyContactDetail> carrierContactInformation;
 
   @Schema(
@@ -98,8 +95,7 @@ e.g. additional required documents to prepare and present for shipment release -
       description =
           "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
       example = "HHL71800000",
-      maxLength = 20,
-      pattern = "^\\S(?:.*\\S)?$")
+      maxLength = 20)
   private String transportDocumentReference;
 
   @Schema(
@@ -161,7 +157,6 @@ Reference number for agreement between shipper and carrier, which optionally inc
   private List<CarrierClause> carrierClauses;
 
   @Schema(description = "Document parties")
-  @ArraySchema(minItems = 1)
   private List<DocumentParty> documentParties;
 
   @Schema()

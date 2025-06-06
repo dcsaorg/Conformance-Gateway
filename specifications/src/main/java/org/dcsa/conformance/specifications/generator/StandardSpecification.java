@@ -90,7 +90,8 @@ public abstract class StandardSpecification {
                                             .add(schemaConstraint))));
 
     ModelConverters.getInstance()
-        .addConverter(new ModelValidatorConverter(constraintsByClassAndField));
+        .addConverter(
+            new ModelValidatorConverter(constraintsByClassAndField, modelClassesStream()));
     modelClassesStream()
         .sorted(Comparator.comparing(Class::getSimpleName))
         .forEach(

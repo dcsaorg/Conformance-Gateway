@@ -4,10 +4,6 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.constraints.AttributeOneRequiresAttributeTwo;
-import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
-import org.dcsa.conformance.specifications.generator.SchemaOverride;
-import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;
@@ -19,8 +15,9 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTrans
 @Schema(description = "Full content of an Arrival Notice document.")
 public class ArrivalNotice {
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  @SchemaOverride(description = "The date and time when the Arrival Notice was issued.")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "The date and time when the Arrival Notice was issued.")
   private FormattedDateTime issueDateTime;
 
   @Schema(
@@ -66,11 +63,10 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
 """)
   private List<PartyContactDetail> carrierInformationForCargoRelease;
 
-  @SchemaOverride(description = "Pickup location")
+  @Schema(description = "Pickup location")
   private Location pickupLocation;
 
-  @Schema()
-  @SchemaOverride(description = "Return location")
+  @Schema(description = "Return location")
   private Location returnLocation;
 
   @Schema(
@@ -177,7 +173,7 @@ and the carrier commits to a certain rate or rate schedule.
   private Transport transport;
 
   @Schema(description = "List of free time conditions applicable to this shipment at destination")
-  private List<FreeTime> freeTime;
+  private List<FreeTime> freeTimes;
 
   @Schema(description = "A list of `Charges`")
   private List<Charge> charges;
@@ -198,13 +194,6 @@ Name identifying the entity responsible for freight payment.
   @Schema(description = "A list of `ConsignmentItems`")
   private List<ConsignmentItem> consignmentItems;
 
-  @SchemaOverride(description = "Visualization of an arrival notice, as an embedded document")
+  @Schema(description = "Visualization of an arrival notice, as an embedded document")
   private EmbeddedDocument arrivalNoticeVisualization;
-
-  public static List<SchemaConstraint> getConstraints() {
-    return List.of(
-        new AttributeOneRequiresAttributeTwo(
-            SpecificationToolkit.getClassField(ArrivalNotice.class, "carrierCodeListProvider"),
-            SpecificationToolkit.getClassField(ArrivalNotice.class, "carrierCode")));
-  }
 }

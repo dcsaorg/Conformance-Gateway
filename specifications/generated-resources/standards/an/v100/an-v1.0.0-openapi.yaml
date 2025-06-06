@@ -309,20 +309,14 @@ components:
           maxLength: 4
           pattern: "^\\S+$"
           type: "string"
-          description: |-
-            The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.
-
-            Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
+          description: "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon."
           example: "MMCU"
         carrierCodeListProvider:
           type: "string"
-          description: |-
+          description: |
             The code list provider for the `carrierCode`. Possible values are:
             - `SMDG` (Ship Message Design Group)
             - `NMFTA` (National Motor Freight Traffic Association)
-
-
-            Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
           example: "NMFTA"
           enum:
           - "SMDG"
@@ -339,9 +333,13 @@ components:
           items:
             $ref: "#/components/schemas/PartyContactDetail"
         pickupLocation:
-          $ref: "#/components/schemas/Location"
+          description: "Pickup location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
         returnLocation:
-          $ref: "#/components/schemas/Location"
+          description: "Return location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
         returnInstructions:
           maxLength: 500
           type: "string"
@@ -432,8 +430,10 @@ components:
           items:
             $ref: "#/components/schemas/DocumentParty"
         transport:
-          $ref: "#/components/schemas/Transport"
-        freeTime:
+          description: "Transport info"
+          allOf:
+          - $ref: "#/components/schemas/Transport"
+        freeTimes:
           type: "array"
           description: "List of free time conditions applicable to this shipment at destination"
           items:
@@ -460,13 +460,13 @@ components:
           items:
             $ref: "#/components/schemas/ConsignmentItem"
         arrivalNoticeVisualization:
-          $ref: "#/components/schemas/EmbeddedDocument"
+          description: "Visualization of an arrival notice, as an embedded document"
+          allOf:
+          - $ref: "#/components/schemas/EmbeddedDocument"
       description: "Full content of an Arrival Notice document."
     ArrivalNoticeNotification:
       required:
-      - "etaAtPortOfDischargeDate"
       - "issueDateTime"
-      - "portOfDischarge"
       - "transportDocumentReference"
       type: "object"
       properties:
@@ -476,18 +476,16 @@ components:
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         label:
-          maxLength: 1000
           type: "string"
           description: |
             Free text used to indicate a certain version or type of arrival notice,
             for example "Warning", "Updated", "Second", "Third" etc.
           example: "Warning"
         transportDocumentReference:
-          maxLength: 20
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
-          description: "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment."
-          example: "HHL71800000"
+          description: |
+            The reference of the transport document for which this arrival notice was created
+          example: "TDR1234"
         equipmentReferences:
           type: "array"
           description: |
@@ -508,7 +506,10 @@ components:
               from SMDG.
             example: "APZU4812090"
         portOfDischarge:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is discharged from the last sea-going vessel
+          allOf:
+          - $ref: "#/components/schemas/Location"
         etaAtPortOfDischargeDate:
           pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
@@ -516,7 +517,11 @@ components:
             The expected date of arrival of the vessel at the port of discharge
           example: "2025-01-23"
         placeOfDelivery:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
+            responsibility of the shipping line ceases
+          allOf:
+          - $ref: "#/components/schemas/Location"
         etaAtPlaceOfDeliveryDate:
           pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
@@ -595,19 +600,33 @@ components:
             If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.
           example: "APZU4812090"
         cargoGrossWeight:
-          $ref: "#/components/schemas/CargoGrossWeight"
+          description: "Gross weight of the cargo."
+          allOf:
+          - $ref: "#/components/schemas/CargoGrossWeight"
         cargoGrossVolume:
-          $ref: "#/components/schemas/CargoGrossVolume"
+          description: "Gross volume of the cargo."
+          allOf:
+          - $ref: "#/components/schemas/CargoGrossVolume"
         cargoNetWeight:
-          $ref: "#/components/schemas/CargoNetWeight"
+          description: "Net weight of the cargo."
+          allOf:
+          - $ref: "#/components/schemas/CargoNetWeight"
         cargoNetVolume:
-          $ref: "#/components/schemas/CargoNetVolume"
+          description: "Net volume of the cargo."
+          allOf:
+          - $ref: "#/components/schemas/CargoNetVolume"
         exportLicense:
-          $ref: "#/components/schemas/ExportLicense"
+          description: "Export license applicable to this cargo item."
+          allOf:
+          - $ref: "#/components/schemas/ExportLicense"
         importLicense:
-          $ref: "#/components/schemas/ImportLicense"
+          description: "Import license applicable to this cargo item."
+          allOf:
+          - $ref: "#/components/schemas/ImportLicense"
         outerPackaging:
-          $ref: "#/components/schemas/OuterPackaging"
+          description: "Packaging information for this cargo item."
+          allOf:
+          - $ref: "#/components/schemas/OuterPackaging"
         nationalCommodityCodes:
           type: "array"
           description: "A list of `National Commodity Codes` that apply to this `cargoItem`"
@@ -762,9 +781,13 @@ components:
           items:
             $ref: "#/components/schemas/CargoItem"
         exportLicense:
-          $ref: "#/components/schemas/ExportLicense"
+          description: "Export license for the consignment item."
+          allOf:
+          - $ref: "#/components/schemas/ExportLicense"
         importLicense:
-          $ref: "#/components/schemas/ImportLicense"
+          description: "Import license for the consignment item."
+          allOf:
+          - $ref: "#/components/schemas/ImportLicense"
         references:
           type: "array"
           description: "A list of `References`"
@@ -940,7 +963,9 @@ components:
           items:
             $ref: "#/components/schemas/InnerPackaging"
         emergencyContactDetails:
-          $ref: "#/components/schemas/EmergencyContactDetails"
+          description: "24 hr emergency contact details"
+          allOf:
+          - $ref: "#/components/schemas/EmergencyContactDetails"
         EMSNumber:
           maxLength: 7
           type: "string"
@@ -975,15 +1000,25 @@ components:
             - `D` (Hazard Zone D) can **only** be assigned to specific gases
           example: "A"
         grossWeight:
-          $ref: "#/components/schemas/GrossWeight"
+          description: "Total weight of the goods carried, including packaging."
+          allOf:
+          - $ref: "#/components/schemas/GrossWeight"
         netWeight:
-          $ref: "#/components/schemas/NetWeight"
+          description: "Total weight of the goods carried, excluding packaging."
+          allOf:
+          - $ref: "#/components/schemas/NetWeight"
         netExplosiveContent:
-          $ref: "#/components/schemas/NetExplosiveContent"
+          description: "The total weight of the explosive substances, without the packaging, casings, etc."
+          allOf:
+          - $ref: "#/components/schemas/NetExplosiveContent"
         netVolume:
-          $ref: "#/components/schemas/NetVolume"
+          description: "The volume of the referenced dangerous goods. Only applicable to liquids and gas."
+          allOf:
+          - $ref: "#/components/schemas/NetVolume"
         limits:
-          $ref: "#/components/schemas/Limits"
+          description: "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure."
+          allOf:
+          - $ref: "#/components/schemas/Limits"
       description: "Specification for `Dangerous Goods`. It is mandatory to provide one of `UNNumber` or `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**."
     DocumentParty:
       required:
@@ -1029,7 +1064,9 @@ components:
             - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
           example: "NATURAL_PERSON"
         location:
-          $ref: "#/components/schemas/Location"
+          description: "Party location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
         displayedAddress:
           type: "array"
           description: |
@@ -1145,7 +1182,9 @@ components:
             Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
           example: "22G1"
         tareWeight:
-          $ref: "#/components/schemas/TareWeight"
+          description: "The tare weight of the container."
+          allOf:
+          - $ref: "#/components/schemas/TareWeight"
       description: "Used for storing cargo during transport. Equipment size/type is defined by the ISO 6346 code. Common sizes include 20'/40'/45' containers."
     ExportLicense:
       type: "object"
@@ -1178,6 +1217,27 @@ components:
         `Export License` requirements.
 
         Condition: Included if the property is provided in the `Shipping Instructions.`
+    Facility:
+      type: "object"
+      properties:
+        facilityCode:
+          maxLength: 6
+          pattern: "^\\S(?:.*\\S)?$"
+          type: "string"
+          description: |
+            The code used for identifying the specific facility. This code does not include the UN Location Code.
+            The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
+            - `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
+            - `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))
+          example: "ADT"
+        facilityCodeListProvider:
+          type: "string"
+          description: |
+            The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+            - `BIC` (Requires a UN Location Code)
+            - `SMDG` (Requires a UN Location Code)
+          example: "SMDG"
+      description: "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC)."
     FreeTime:
       required:
       - "calculationBasis"
@@ -1406,7 +1466,9 @@ components:
           description: "The name of the location."
           example: "Port of Amsterdam"
         address:
-          $ref: "#/components/schemas/Address"
+          description: "Location address"
+          allOf:
+          - $ref: "#/components/schemas/Address"
         UNLocationCode:
           maxLength: 5
           minLength: 5
@@ -1420,21 +1482,14 @@ components:
 
             More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: "NLAMS"
-        facilityCode:
-          maxLength: 6
-          pattern: "^\\S(?:.*\\S)?$"
-          type: "string"
-          description: "Facility code in the list provided by `facilityCodeListProvider`"
-          example: "CTA"
-        facilityCodeListProvider:
-          type: "string"
-          description: |-
-            The provider of the code list in which `facilityCode` is defined.
-            - `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
-            - `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)
-          example: "BIC"
+        facility:
+          description: "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC)."
+          allOf:
+          - $ref: "#/components/schemas/Facility"
         geoCoordinate:
-          $ref: "#/components/schemas/GeoCoordinate"
+          description: "An object used to express a location using `latitude` and `longitude`."
+          allOf:
+          - $ref: "#/components/schemas/GeoCoordinate"
       description: "Location information"
     NationalCommodityCode:
       type: "object"
@@ -1758,17 +1813,37 @@ components:
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         loadLocation:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the equipment is loaded on the first mother vessel arriving at the destination country.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         dischargeLocation:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the equipment is discharged from the last mother vessel arriving at the destination country.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         portOfLoading:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is loaded onto a first sea-going vessel for water transportation.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         portOfDischarge:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is discharged from the last sea-going vessel.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         placeOfReceipt:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
+            This indicates the point at which the shipping line takes on responsibility for carriage of the container.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         placeOfDelivery:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is handed over by the shipping line to the consignee or its agent
+            and where responsibility of the shipping line ceases.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         modeOfTransport:
           maxLength: 20
           type: "string"
@@ -1782,9 +1857,9 @@ components:
             - `MULTIMODAL` - Multimodal
           example: "VESSEL"
         vesselVoyages:
-          maxItems: 3
-          minItems: 1
           type: "array"
+          description: |
+            Details of the POD, POL or DC vessel voyages
           items:
             $ref: "#/components/schemas/VesselVoyage"
       description: "Transport info"
@@ -1792,7 +1867,9 @@ components:
       type: "object"
       properties:
         equipment:
-          $ref: "#/components/schemas/Equipment"
+          description: "The container or transport equipment used."
+          allOf:
+          - $ref: "#/components/schemas/Equipment"
         isShipperOwned:
           type: "boolean"
           description: "Indicates whether the container is shipper owned (SOC)."
@@ -1805,7 +1882,9 @@ components:
             **Condition:** Only applicable if `ISOEquipmentCode` shows a Reefer type.
           example: false
         activeReeferSettings:
-          $ref: "#/components/schemas/ActiveReeferSettings"
+          description: "Active reefer settings applied to this equipment."
+          allOf:
+          - $ref: "#/components/schemas/ActiveReeferSettings"
         shippingMarks:
           type: "array"
           description: |

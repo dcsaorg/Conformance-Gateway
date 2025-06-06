@@ -4,7 +4,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +12,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
+import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 
 public class AttributesData {
   private final ArrayList<AttributeInfo> attributeInfoList = new ArrayList<>();
@@ -93,9 +92,17 @@ public class AttributesData {
                                 attributeInfo.setAttributeBaseType(
                                     attributeInfo.getAttributeType());
                               } else {
-                                attributeInfo.setAttributeType("string");
-                                attributeInfo.setAttributeBaseType(
-                                    attributeInfo.getAttributeType());
+                                if (attributeSchema.getAllOf() != null) {
+                                  $ref = attributeSchema.getAllOf().getFirst().get$ref();
+                                  attributeInfo.setAttributeType(
+                                      $ref.substring("#/components/schemas/".length()));
+                                  attributeInfo.setAttributeBaseType(
+                                      attributeInfo.getAttributeType());
+                                } else {
+                                  attributeInfo.setAttributeType("string");
+                                  attributeInfo.setAttributeBaseType(
+                                      attributeInfo.getAttributeType());
+                                }
                               }
                               break;
                             }
@@ -168,7 +175,7 @@ public class AttributesData {
             attributesByPath.put(
                 "%s:%s".formatted(rootTypeName, rootTypeName), new AttributeInfo()));
 
-    Map<String, List<AttributeInfo>> attributeInfoByObjectType = new HashMap<>();
+    Map<String, List<AttributeInfo>> attributeInfoByObjectType = new TreeMap<>();
     attributeInfoList.forEach(
         attributeInfo ->
             attributeInfoByObjectType

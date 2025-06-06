@@ -4,21 +4,36 @@ import com.fasterxml.jackson.databind.type.SimpleType;
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
 
 @Slf4j
-@RequiredArgsConstructor
 public class ModelValidatorConverter implements ModelConverter {
   private final Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField;
+  private final Map<String, Class<?>> modelClassesBySimpleName;
+  private final Map<String, Map<String, Schema<?>>> originalSchemasByClassAndField =
+      new TreeMap<>();
+
+  public ModelValidatorConverter(
+      Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField,
+      Stream<Class<?>> modelClassesStream) {
+    this.constraintsByClassAndField = constraintsByClassAndField;
+    this.modelClassesBySimpleName =
+        modelClassesStream.collect(Collectors.toMap(Class::getSimpleName, Function.identity()));
+  }
 
   @SneakyThrows
   @Override
@@ -35,16 +50,28 @@ public class ModelValidatorConverter implements ModelConverter {
     if (schema == null) return null;
 
     if (annotatedType.getType() instanceof SimpleType simpleType) {
-      log.debug(
+      log.info(
           "  attribute: {} {} {}",
           annotatedType.getParent().getName(),
           annotatedType.getPropertyName(),
           simpleType.getRawClass().getSimpleName());
-      Arrays.stream(annotatedType.getCtxAnnotations())
-          .filter(annotation -> annotation instanceof SchemaOverride)
-          .map(annotation -> (SchemaOverride) annotation)
-          .filter(schemaOverride -> !schemaOverride.description().isEmpty())
-          .forEach(schemaOverride -> schema.setDescription(schemaOverride.description()));
+
+      if (!java.util.List.class.isAssignableFrom(
+          getJavaFieldWithPropertyName(
+                  modelClassesBySimpleName.get(annotatedType.getParent().getName()),
+                  annotatedType.getPropertyName())
+              .getType())) {
+        Arrays.stream(annotatedType.getCtxAnnotations())
+            .filter(annotation -> annotation instanceof io.swagger.v3.oas.annotations.media.Schema)
+            .map(annotation -> (io.swagger.v3.oas.annotations.media.Schema) annotation)
+            .filter(schemaAnnotation -> !schemaAnnotation.description().isEmpty())
+            .forEach(schemaAnnotation -> schema.setDescription(schemaAnnotation.description()));
+      }
+
+      originalSchemasByClassAndField
+          .computeIfAbsent(annotatedType.getParent().getName(), ignoredKey -> new TreeMap<>())
+          .put(annotatedType.getPropertyName(), schema);
+
       if (simpleType.isEnumType()) {
         schema.setDescription(
             schema.getDescription()
@@ -59,6 +86,7 @@ public class ModelValidatorConverter implements ModelConverter {
                                     ((EnumBase) enumConstant).getValueDescription()))
                     .collect(Collectors.joining("\n")));
       }
+
       constraintsByClassAndField
           .getOrDefault(annotatedType.getParent().getName(), Map.of())
           .getOrDefault(annotatedType.getPropertyName(), List.of())
@@ -67,8 +95,47 @@ public class ModelValidatorConverter implements ModelConverter {
                   schema.setDescription(
                       schema.getDescription() + "\n\n" + schemaConstraint.getDescription()));
     } else {
-      log.debug("Object: {}", annotatedType.getType());
+      log.info("Object: {}", annotatedType.getType());
+      if (schema.getProperties() != null) {
+        new TreeSet<>(schema.getProperties().keySet())
+            .forEach(
+                propertyName -> {
+                  Schema<?> propertySchema = schema.getProperties().get(propertyName);
+                  if (propertySchema.get$ref() != null) {
+                    Schema<?> originalPropertySchema =
+                        originalSchemasByClassAndField
+                            .getOrDefault(getSimpleClassName(annotatedType), Map.of())
+                            .get(propertyName);
+                    schema
+                        .getProperties()
+                        .put(
+                            propertyName,
+                            new ComposedSchema()
+                                .allOf(List.of(new Schema<>().$ref(propertySchema.get$ref())))
+                                .description(originalPropertySchema.getDescription()));
+                  }
+                });
+      }
     }
     return schema;
+  }
+
+  private static Field getJavaFieldWithPropertyName(Class<?> aClass, String propertyName) {
+    return Arrays.stream(aClass.getDeclaredFields())
+        .filter(field -> javaFieldHasPropertyName(field, propertyName))
+        .findFirst()
+        .orElseThrow();
+  }
+
+  private static boolean javaFieldHasPropertyName(Field field, String propertyName) {
+    return field.getName().equals(propertyName)
+        || Arrays.stream(
+                field.getAnnotationsByType(io.swagger.v3.oas.annotations.media.Schema.class))
+            .anyMatch(schemaAnnotation -> schemaAnnotation.name().equals(propertyName));
+  }
+
+  @SneakyThrows
+  private static String getSimpleClassName(AnnotatedType annotatedType) {
+    return Class.forName(annotatedType.getType().getTypeName()).getSimpleName();
   }
 }

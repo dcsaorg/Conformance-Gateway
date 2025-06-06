@@ -37,7 +37,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.EmergencyCont
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Endorsee;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Equipment;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.Facility;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;

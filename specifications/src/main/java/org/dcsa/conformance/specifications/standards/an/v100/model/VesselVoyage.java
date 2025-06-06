@@ -2,7 +2,6 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.generator.SchemaOverride;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
@@ -36,7 +35,7 @@ public class VesselVoyage {
       description = "Vessel name")
   private String vesselName;
 
-  @SchemaOverride(description = "Vessel flag")
+  @Schema(description = "Vessel flag")
   private CountryCode vesselFlag;
 
   @Schema() private VesselIMONumber vesselIMONumber;
@@ -53,7 +52,7 @@ Carrier-specific identifier of a voyage:
 """)
   private String carrierVoyageNumber;
 
-  @SchemaOverride(
+  @Schema(
       description =
 """
 Universal identifier of a voyage:

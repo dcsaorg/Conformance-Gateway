@@ -36,7 +36,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
 import org.dcsa.conformance.specifications.standards.an.v100.model.VesselVoyage;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FacilityCodeListProvider;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
@@ -60,6 +59,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.DangerousGood
 import org.dcsa.conformance.specifications.standards.dt.v100.model.EmergencyContactDetails;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Equipment;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
@@ -126,6 +126,7 @@ public class ANStandardSpecification extends StandardSpecification {
         EmergencyContactDetails.class,
         Equipment.class,
         ExportLicense.class,
+        Facility.class,
         GeoCoordinate.class,
         GrossWeight.class,
         IdentifyingCode.class,
@@ -153,7 +154,6 @@ public class ANStandardSpecification extends StandardSpecification {
         DocumentParty.class,
         EmbeddedDocument.class,
         EquipmentReference.class,
-        FacilityCodeListProvider.class,
         FormattedDate.class,
         FormattedDateTime.class,
         FreeTime.class,
@@ -191,7 +191,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/bd25914e5526aa7c8a67aba8a28010555c82d1ad/specifications/generated-resources/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/0a5f6e4013c71e491a487a3c1c4112ea0b594eec/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 
@@ -201,10 +201,8 @@ public class ANStandardSpecification extends StandardSpecification {
     return Map.ofEntries(
         Map.entry(
             AttributesHierarchicalSheet.class,
-            Map.ofEntries()),
-        Map.entry(
-            AttributesNormalizedSheet.class,
-            Map.ofEntries()),
+            Map.ofEntries(Map.entry("ArrivalNotice / freeTime", "ArrivalNotice / freeTimes"))),
+        Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
   }

@@ -1,5 +1,6 @@
 package org.dcsa.conformance.specifications;
 
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import java.util.Arrays;
@@ -104,7 +105,18 @@ public enum StandardSpecificationTestToolkit {
       String attributeName,
       Schema<?> originalAttributeSchema,
       Schema<?> generatedAttributeSchema) {
-    log.debug("{}Comparing {} {}", indentation, typeName, attributeName);
+    log.info("{}Comparing {} {}", indentation, typeName, attributeName);
+    if (generatedAttributeSchema instanceof ComposedSchema) {
+      if (!(originalAttributeSchema instanceof ComposedSchema)) {
+        compareAttribute(
+            indentation,
+            typeName,
+            attributeName,
+            originalAttributeSchema,
+            generatedAttributeSchema.getAllOf().getFirst());
+        return;
+      }
+    }
     softAssertEquals(
         "name",
         comparableDescription(originalAttributeSchema.getDescription()),

@@ -8,8 +8,8 @@
     {
       "actionDateTime": "2024-06-11T13:54:00Z",
       "actionCode": "ISSUE",
-      "actor": ISSUE_TO_PARTY,
-      "recipient": SURRENDEREE_PARTY
+      "actor": CARRIER_PARTY,
+      "recipient": ISSUE_TO_PARTY
     },
     {
       "actionDateTime": "2024-06-12T14:54:00Z",

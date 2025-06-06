@@ -29,6 +29,9 @@ export class ScenarioComponent implements OnInit, OnDestroy {
   performingAction: string = '';
   activatedRouteSubscription: Subscription | undefined;
 
+   submitAttempted: boolean = false;
+    inlineErrorMessage: string = '';
+
   constructor(
     public activatedRoute: ActivatedRoute,
     public authService: AuthService,
@@ -129,31 +132,36 @@ export class ScenarioComponent implements OnInit, OnDestroy {
 
   async onSubmit(withInput: boolean) {
     this.performingAction = "Processing action input...";
-    var serviceActionInput;
+    this.submitAttempted = true;
+    this.inlineErrorMessage = '';
+
+    let serviceActionInput;
+
     try {
-      serviceActionInput = withInput ? this.scenarioStatus?.jsonForPromptText ?
-        JSON.parse(this.actionInput.trim())
-        : this.actionInput.trim() : undefined;
+      serviceActionInput = withInput
+        ? this.scenarioStatus?.jsonForPromptText
+          ? JSON.parse(this.actionInput.trim())
+          : this.actionInput.trim()
+        : undefined;
     } catch (e) {
+      this.inlineErrorMessage = e instanceof Error ? e.message : "Unknown error parsing JSON";
       this.performingAction = "";
-      await MessageDialog.open(
-        this.dialog,
-        "Error processing action input",
-        e instanceof Error ? e.message : "Unknown error");
-      await this.loadScenarioStatus();
       return;
     }
-    const response:any = await this.conformanceService.handleActionInput(
+
+    const response: any = await this.conformanceService.handleActionInput(
       this.sandbox!.id,
       this.scenario!.id,
       this.scenarioStatus!.promptActionId,
-      serviceActionInput);
+      serviceActionInput
+    );
+
     if (response?.error) {
-      await MessageDialog.open(
-        this.dialog,
-        "Error processing input",
-        response.error)
+      this.inlineErrorMessage = response.error;
+      this.performingAction = "";
+      return;
     }
+
     this.performingAction = "";
     await this.loadScenarioStatus();
   }

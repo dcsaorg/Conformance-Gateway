@@ -405,14 +405,12 @@ components:
             - `FCL` (Full Container Load)
             - `LCL` (Less than Container Load)
           example: "FCL"
-        serviceContractNumber:
-          maxLength: 100
+        serviceContractReference:
+          maxLength: 30
           type: "string"
           description: |
-            Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
-            quantity commitment (usually referred as "MQC") of cargo that the shipper commits to over a fixed period,
-            and the carrier commits to a certain rate or rate schedule.
-          example: "SCN12345"
+            Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.
+          example: "HHL51800000"
         termsAndConditions:
           maxLength: 50000
           type: "string"

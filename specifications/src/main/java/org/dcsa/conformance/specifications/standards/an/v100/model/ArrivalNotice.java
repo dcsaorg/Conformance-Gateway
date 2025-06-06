@@ -143,15 +143,13 @@ e.g. additional required documents to prepare and present for shipment release -
   private String cargoMovementTypeAtDestination;
 
   @Schema(
-      maxLength = 100,
-      description =
+    description =
 """
-Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
-quantity commitment (usually referred as "MQC") of cargo that the shipper commits to over a fixed period,
-and the carrier commits to a certain rate or rate schedule.
+Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.
 """,
-      example = "SCN12345")
-  private String serviceContractNumber;
+    example = "HHL51800000",
+    maxLength = 30)
+  private String serviceContractReference;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,

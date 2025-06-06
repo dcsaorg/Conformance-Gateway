@@ -417,9 +417,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / returnLocation / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / returnLocation / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / returnLocation / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
-"ArrivalNotice / serviceContractNumber",serviceContractNumber,string,,100,,SCN12345,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
-quantity commitment (usually referred as ""MQC"") of cargo that the shipper commits to over a fixed period,
-and the carrier commits to a certain rate or rate schedule.",
+"ArrivalNotice / serviceContractReference",serviceContractReference,string,,30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 "ArrivalNotice / termsAndConditions",termsAndConditions,string,yes,50000,,"Any reference in...","Carrier terms and conditions of transport.",
 "ArrivalNotice / transport",transport,Transport,yes,,,,"Transport info",
 "ArrivalNotice / transport / departureDate",departureDate,string,yes,,"^\d{4}-\d{2}-\d{2}$",2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,

@@ -217,7 +217,7 @@ DocumentParty,partyFunction,string,,3,,DDS,"Specifies the role of the party in a
 - `MF` (Manufacturer)
 - `WH` (Warehouse Keeper)",
 DocumentParty,partyName,string,yes,70,,"Acme Inc.","Party name",
-DocumentParty,purchaseOrderReferences,"string list",,,,,"A list of `Purchase Order Reference`s linked to the `Consignee`.",
+DocumentParty,purchaseOrderReferences,"string list",,,,,"A list of `Purchase Order Reference`s",
 DocumentParty,reference,string,,35,"^\S(?:.*\S)?$",HHL007,"A reference linked to the `Consignee`.",
 DocumentParty,taxLegalReferences,"TaxLegalReference list",,,,,"List of tax or legal references relevant to the party",
 DocumentParty,typeOfPerson,string,,50,"^\S(?:.*\S)?$",NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):

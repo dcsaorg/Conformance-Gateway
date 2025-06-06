@@ -7,6 +7,8 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.DisplayedAddressLine;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.PurchaseOrderReference;
 
 @Schema(description = "Party by whom or in whose name a contract of carriage by sea has been concluded. May also be the party who delivers the goods to the carrier.")
 @Data
@@ -42,14 +44,8 @@ The address of the party to be displayed on the `Transport Document`. The displa
   - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
   - the order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  @ArraySchema(
-      schema =
-          @Schema(
-              description = "A line of the displayed address for the BL.",
-              example = "Strawinskylaan 4117",
-              maxLength = 35),
-      maxItems = 6)
-  private List<String> displayedAddress;
+  @ArraySchema(maxItems = 6)
+  private List<DisplayedAddressLine> displayedAddress;
 
   @Schema(
       description =
@@ -68,6 +64,5 @@ The address of the party to be displayed on the `Transport Document`. The displa
   private String reference;
 
   @Schema(description = "A list of `Purchase Order Reference`s linked to the `Shipper`.")
-  @ArraySchema(schema = @Schema(description = "Purchase order reference linked to the Shipper.", example = "HHL007", maxLength = 35, pattern = "^\\S(?:.*\\S)?$"))
-  private List<String> purchaseOrderReferences;
+  private List<PurchaseOrderReference> purchaseOrderReferences;
 }

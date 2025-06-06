@@ -1,9 +1,9 @@
 package org.dcsa.conformance.specifications.standards.dt.v100.model;
 
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.SegregationGroup;
 
 @Schema(description = "Specification for `Dangerous Goods`. It is mandatory to provide one of `UNNumber` or `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**.")
 @Data
@@ -113,12 +113,7 @@ List of the segregation groups applicable to specific hazardous goods according 
 
 **Condition:** only applicable to specific hazardous goods.
 """)
-  @ArraySchema(
-      schema =
-          @Schema(
-              description =
-                  "List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code."))
-  private List<String> segregationGroups;
+  private List<SegregationGroup> segregationGroups;
 
   @Schema(description = "A list of `Inner Packings` contained inside this `outer packaging/overpack`.")
   private List<InnerPackaging> innerPackagings;

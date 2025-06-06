@@ -7,6 +7,7 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.DisplayedAddressLine;
 
 @Schema(
     description =
@@ -35,14 +36,8 @@ The address of the party to be displayed on the `Transport Document`. The displa
   - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
   - the order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  @ArraySchema(
-      schema =
-          @Schema(
-              description = "A line of the displayed address for the BL.",
-              example = "Strawinskylaan 4117",
-              maxLength = 35),
-      maxItems = 6)
-  private List<String> displayedAddress;
+  @ArraySchema(maxItems = 6)
+  private List<DisplayedAddressLine> displayedAddress;
 
   @Schema()
   private List<IdentifyingCode> identifyingCodes;

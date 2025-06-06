@@ -1,5 +1,6 @@
 package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
@@ -11,6 +12,8 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
+import org.dcsa.conformance.specifications.standards.ebl.v300.types.CarrierClause;
+import org.dcsa.conformance.specifications.standards.ebl.v300.types.DisplayedName;
 
 @Schema(description = "The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:\n- Bill of Lading\n- Sea Waybill.")
 @Data
@@ -126,7 +129,8 @@ The name to be used in order to specify how the `Place of Receipt` should be dis
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  private List<String> displayedNameForPlaceOfReceipt;
+  @ArraySchema(maxItems = 5)
+  private List<DisplayedName> displayedNameForPlaceOfReceipt;
 
   @Schema(
       description =
@@ -135,7 +139,8 @@ The name to be used in order to specify how the `Port of Load` should be display
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  private List<String> displayedNameForPortOfLoad;
+  @ArraySchema(maxItems = 5)
+  private List<DisplayedName> displayedNameForPortOfLoad;
 
   @Schema(
       description =
@@ -144,7 +149,8 @@ The name to be used in order to specify how the `Port of Discharge` should be di
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  private List<String> displayedNameForPortOfDischarge;
+  @ArraySchema(maxItems = 5)
+  private List<DisplayedName> displayedNameForPortOfDischarge;
 
   @Schema(
       description =
@@ -153,7 +159,8 @@ The name to be used in order to specify how the `Place of Delivery` should be di
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  private List<String> displayedNameForPlaceOfDelivery;
+  @ArraySchema(maxItems = 5)
+  private List<DisplayedName> displayedNameForPlaceOfDelivery;
 
   @Schema(
       description =
@@ -305,8 +312,10 @@ The code list provider for the `carrierCode`. Possible values are:
       allowableValues = {"SMDG", "NMFTA"})
   private String carrierCodeListProvider;
 
-  @Schema(description = "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
-  private List<String> carrierClauses;
+  @Schema(
+      description =
+          "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
+  private List<CarrierClause> carrierClauses;
 
   @Schema(
       description =

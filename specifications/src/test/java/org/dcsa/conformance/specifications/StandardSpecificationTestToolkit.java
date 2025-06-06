@@ -1,5 +1,6 @@
 package org.dcsa.conformance.specifications;
 
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -117,6 +118,11 @@ public enum StandardSpecificationTestToolkit {
         return;
       }
     }
+    softAssertEquals(indentation, originalAttributeSchema, generatedAttributeSchema);
+  }
+
+  private static void softAssertEquals(
+      String indentation, Schema<?> originalAttributeSchema, Schema<?> generatedAttributeSchema) {
     softAssertEquals(
         "name",
         comparableDescription(originalAttributeSchema.getDescription()),
@@ -137,6 +143,11 @@ public enum StandardSpecificationTestToolkit {
         generatedAttributeSchema.getMaxLength());
     softAssertEquals(
         "examples", originalAttributeSchema.getExamples(), generatedAttributeSchema.getExamples());
+    if (originalAttributeSchema instanceof ArraySchema) {
+      log.info("{}  Comparing array item schema", indentation);
+      Assertions.assertInstanceOf(ArraySchema.class, generatedAttributeSchema);
+      softAssertEquals(indentation, originalAttributeSchema.getItems(), generatedAttributeSchema.getItems());
+    }
   }
 
   private static void softAssertEquals(String property, Object expected, Object actual) {
@@ -146,9 +157,9 @@ public enum StandardSpecificationTestToolkit {
 WRONG VALUE:
 ================
 {}
-<<<<<<<<<<<<<<<<
+<<<<<<<< expected <<<<<<<<
 {}
->>>>>>>>>>>>>>>>
+>>>>>>>>  actual  >>>>>>>>
 {}
 ================
 """,

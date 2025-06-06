@@ -7,6 +7,8 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.DisplayedAddressLine;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.PurchaseOrderReference;
 
 @Data
 @Schema(description = "Document party")
@@ -72,14 +74,8 @@ Specifies the role of the party in a given context. Possible values are:
         - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
         - the order of the items in this array **MUST** be preserved as by the provider of the API.
       """)
-  @ArraySchema(
-      schema =
-          @Schema(
-              description = "A line of the displayed address for the BL.",
-              example = "Strawinskylaan 4117",
-              maxLength = 35),
-      maxItems = 6)
-  private List<String> displayedAddress;
+  @ArraySchema(maxItems = 6)
+  private List<DisplayedAddressLine> displayedAddress;
 
   @Schema(description = "List of codes identifying the party")
   @ArraySchema(minItems = 1)
@@ -98,13 +94,6 @@ Specifies the role of the party in a given context. Possible values are:
       pattern = "^\\S(?:.*\\S)?$")
   private String reference;
 
-  @Schema(description = "A list of `Purchase Order Reference`s linked to the `Consignee`.")
-  @ArraySchema(
-      schema =
-          @Schema(
-              description = "Purchase order reference linked to the Consignee.",
-              example = "HHL007",
-              maxLength = 35,
-              pattern = "^\\S(?:.*\\S)?$"))
-  private List<String> purchaseOrderReferences;
+  @Schema(description = "A list of `Purchase Order Reference`s")
+  private List<PurchaseOrderReference> purchaseOrderReferences;
 }

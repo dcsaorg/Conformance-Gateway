@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.ShippingMark;
 
 @Schema(description = "Specifies the container (`equipment`), total `weight`, `volume`, possible `ActiveReeferSettings`, `seals` and `references`.")
 @Data
@@ -35,14 +36,8 @@ A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  @ArraySchema(
-      schema =
-          @Schema(
-              description = "Identifying details or markings on the packages.",
-              example = "Made in China",
-              maxLength = 35),
-      maxItems = 50)
-  private List<String> shippingMarks;
+  @ArraySchema(maxItems = 50)
+  private List<ShippingMark> shippingMarks;
 
   @Schema(description = "A list of `Seals`")
   @ArraySchema(minItems = 1)

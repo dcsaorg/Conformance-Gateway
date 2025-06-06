@@ -10,6 +10,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentIt
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.CarrierClause;
 
 @Data
 @Schema(description = "Full content of an Arrival Notice document.")
@@ -143,12 +144,12 @@ e.g. additional required documents to prepare and present for shipment release -
   private String cargoMovementTypeAtDestination;
 
   @Schema(
-    description =
+      description =
 """
 Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.
 """,
-    example = "HHL51800000",
-    maxLength = 30)
+      example = "HHL51800000",
+      maxLength = 30)
   private String serviceContractReference;
 
   @Schema(
@@ -161,7 +162,7 @@ Reference number for agreement between shipper and carrier, which optionally inc
   @Schema(
       description =
           "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
-  private List<String> carrierClauses;
+  private List<CarrierClause> carrierClauses;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Document parties")
   @ArraySchema(minItems = 1)

@@ -14,19 +14,20 @@ import org.dcsa.conformance.specifications.standards.dt.v100.types.PurchaseOrder
 @Schema(description = "Document party")
 public class DocumentParty {
 
+  // https://www.stylusstudio.com/edifact/D03A/3035.htm
   @Schema(
       description =
 """
 Specifies the role of the party in a given context. Possible values are:
 
-- `SHP` (Shipper)
-- `CSG` (Consignee)
-- `CSG` (Endorsee)
-- `ISS` (Issuing Party)
-- `CAG` (Carrier's Agent at Destination)
-- `NP1` (First Notify Party)
-- `NP2` (Second Notify Party)
-- `NPX` (Other Notify Party)
+- `OS` (Shipper)
+- `CN` (Consignee)
+- `ZZZ` (Endorsee)
+- `RW` (Issuing Party)
+- `CG` (Carrier's Agent at Destination)
+- `N1` (First Notify Party)
+- `N2` (Second Notify Party)
+- `NI` (Other Notify Party)
 - `SCO` (Service Contract Owner)
 - `DDR` (Consignor's freight forwarder)
 - `DDS` (Consignee's freight forwarder)
@@ -36,7 +37,7 @@ Specifies the role of the party in a given context. Possible values are:
 - `MF` (Manufacturer)
 - `WH` (Warehouse Keeper)
 """,
-      example = "DDS",
+      example = "N1",
       maxLength = 3)
   private String partyFunction;
 

@@ -12,7 +12,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
-import org.dcsa.conformance.specifications.standards.ebl.v300.types.CarrierClause;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.standards.ebl.v300.types.DisplayedName;
 
 @Schema(description = "The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:\n- Bill of Lading\n- Sea Waybill.")

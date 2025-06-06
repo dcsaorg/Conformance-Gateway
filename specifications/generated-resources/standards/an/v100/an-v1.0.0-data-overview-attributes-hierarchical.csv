@@ -305,16 +305,16 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / documentParties / partyContactDetails / email",email,string,,100,"^.+@\S+$",info@dcsa.org,"`E-mail` address to be used",
 "ArrivalNotice / documentParties / partyContactDetails / name",name,string,,35,"^\S(?:.*\S)?$",Henrik,"Name of the contact",
 "ArrivalNotice / documentParties / partyContactDetails / phone",phone,string,,30,"^\S(?:.*\S)?$","+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
-"ArrivalNotice / documentParties / partyFunction",partyFunction,string,,3,,DDS,"Specifies the role of the party in a given context. Possible values are:
+"ArrivalNotice / documentParties / partyFunction",partyFunction,string,,3,,N1,"Specifies the role of the party in a given context. Possible values are:
 
-- `SHP` (Shipper)
-- `CSG` (Consignee)
-- `CSG` (Endorsee)
-- `ISS` (Issuing Party)
-- `CAG` (Carrier's Agent at Destination)
-- `NP1` (First Notify Party)
-- `NP2` (Second Notify Party)
-- `NPX` (Other Notify Party)
+- `OS` (Shipper)
+- `CN` (Consignee)
+- `ZZZ` (Endorsee)
+- `RW` (Issuing Party)
+- `CG` (Carrier's Agent at Destination)
+- `N1` (First Notify Party)
+- `N2` (Second Notify Party)
+- `NI` (Other Notify Party)
 - `SCO` (Service Contract Owner)
 - `DDR` (Consignor's freight forwarder)
 - `DDS` (Consignee's freight forwarder)

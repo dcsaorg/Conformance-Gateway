@@ -196,16 +196,16 @@ DocumentParty,displayedAddress,"string list",,,,,"The address of the party to be
 DocumentParty,identifyingCodes,"IdentifyingCode list",,,,,"List of codes identifying the party",
 DocumentParty,location,Location,,,,,"Party location",
 DocumentParty,partyContactDetails,"PartyContactDetail list",,,,,"Party contact details",
-DocumentParty,partyFunction,string,,3,,DDS,"Specifies the role of the party in a given context. Possible values are:
+DocumentParty,partyFunction,string,,3,,N1,"Specifies the role of the party in a given context. Possible values are:
 
-- `SHP` (Shipper)
-- `CSG` (Consignee)
-- `CSG` (Endorsee)
-- `ISS` (Issuing Party)
-- `CAG` (Carrier's Agent at Destination)
-- `NP1` (First Notify Party)
-- `NP2` (Second Notify Party)
-- `NPX` (Other Notify Party)
+- `OS` (Shipper)
+- `CN` (Consignee)
+- `ZZZ` (Endorsee)
+- `RW` (Issuing Party)
+- `CG` (Carrier's Agent at Destination)
+- `N1` (First Notify Party)
+- `N2` (Second Notify Party)
+- `NI` (Other Notify Party)
 - `SCO` (Service Contract Owner)
 - `DDR` (Consignor's freight forwarder)
 - `DDS` (Consignee's freight forwarder)

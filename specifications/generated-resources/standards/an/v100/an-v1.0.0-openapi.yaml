@@ -420,8 +420,11 @@ components:
           type: "array"
           description: "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer."
           items:
+            maxLength: 20000
+            pattern: "^\\S(?:.*\\S)?$"
             type: "string"
-            description: "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer."
+            description: "The content of the clause."
+            example: "It is not allowed to..."
         documentParties:
           type: "array"
           description: "Document parties"
@@ -1054,14 +1057,14 @@ components:
           description: |
             Specifies the role of the party in a given context. Possible values are:
 
-            - `SHP` (Shipper)
-            - `CSG` (Consignee)
-            - `CSG` (Endorsee)
-            - `ISS` (Issuing Party)
-            - `CAG` (Carrier's Agent at Destination)
-            - `NP1` (First Notify Party)
-            - `NP2` (Second Notify Party)
-            - `NPX` (Other Notify Party)
+            - `OS` (Shipper)
+            - `CN` (Consignee)
+            - `ZZZ` (Endorsee)
+            - `RW` (Issuing Party)
+            - `CG` (Carrier's Agent at Destination)
+            - `N1` (First Notify Party)
+            - `N2` (Second Notify Party)
+            - `NI` (Other Notify Party)
             - `SCO` (Service Contract Owner)
             - `DDR` (Consignor's freight forwarder)
             - `DDS` (Consignee's freight forwarder)
@@ -1070,7 +1073,7 @@ components:
             - `CS` (Consolidator)
             - `MF` (Manufacturer)
             - `WH` (Warehouse Keeper)
-          example: "DDS"
+          example: "N1"
         partyName:
           maxLength: 70
           type: "string"

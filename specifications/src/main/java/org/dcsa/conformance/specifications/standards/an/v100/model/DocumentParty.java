@@ -42,7 +42,6 @@ Specifies the role of the party in a given context. Possible values are:
   private String partyFunction;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 70,
       description = "Party name",
       example = "Acme Inc.")

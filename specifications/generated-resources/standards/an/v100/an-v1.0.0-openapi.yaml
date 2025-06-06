@@ -283,14 +283,8 @@ components:
       description: "An object for storing address-related information."
     ArrivalNotice:
       required:
-      - "carrierContactInformation"
-      - "documentParties"
       - "issueDateTime"
-      - "termsAndConditions"
-      - "transport"
       - "transportDocumentReference"
-      - "transportDocumentTypeCode"
-      - "utilizedTransportEquipments"
       type: "object"
       properties:
         issueDateTime:
@@ -1047,8 +1041,6 @@ components:
           - $ref: "#/components/schemas/Limits"
       description: "Specification for `Dangerous Goods`. It is mandatory to provide one of `UNNumber` or `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**."
     DocumentParty:
-      required:
-      - "partyName"
       type: "object"
       properties:
         partyFunction:
@@ -1140,9 +1132,6 @@ components:
             example: "HHL007"
       description: "Document party"
     EmbeddedDocument:
-      required:
-      - "content"
-      - "name"
       type: "object"
       properties:
         name:
@@ -1263,12 +1252,6 @@ components:
           example: "SMDG"
       description: "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC)."
     FreeTime:
-      required:
-      - "calculationBasis"
-      - "duration"
-      - "isoEquipmentCode"
-      - "timeUnit"
-      - "typeCode"
       type: "object"
       properties:
         typeCode:
@@ -1787,11 +1770,6 @@ components:
           example: "AAAAA0000A"
       description: "Reference that uniquely identifies a party for tax and/or legal purposes according to local jurisdiction."
     Transport:
-      required:
-      - "departureDate"
-      - "etaAtPortOfDischargeDate"
-      - "portOfDischarge"
-      - "portOfLoading"
       type: "object"
       properties:
         onBoardDate:
@@ -1944,10 +1922,6 @@ components:
             $ref: "#/components/schemas/CustomsReference"
       description: "Specifies the container (`equipment`), total `weight`, `volume`, possible `ActiveReeferSettings`, `seals` and `references`."
     VesselVoyage:
-      required:
-      - "carrierVoyageNumber"
-      - "typeCode"
-      - "vesselName"
       type: "object"
       properties:
         typeCode:

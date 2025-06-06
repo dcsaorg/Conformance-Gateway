@@ -25,11 +25,10 @@ the first mother vessel arriving at the destination country.
 """)
 public class VesselVoyage {
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @Schema()
   private VesselVoyageTypeCode typeCode;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 50,
       example = "King of the Seas",
       description = "Vessel name")
@@ -41,7 +40,6 @@ public class VesselVoyage {
   @Schema() private VesselIMONumber vesselIMONumber;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 50,
       example = "1234N",
       description =

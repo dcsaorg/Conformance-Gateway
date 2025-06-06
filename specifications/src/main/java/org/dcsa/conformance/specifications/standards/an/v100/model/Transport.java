@@ -21,7 +21,6 @@ The date when the container was loaded onto the vessel at the port of origin.
   private FormattedDate onBoardDate;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The date of departure from the location where the cargo is handed over by the shipper, or his agent,
@@ -43,7 +42,7 @@ The expected date of arrival of the first mother vessel arriving at the destinat
 """)
   private FormattedDate plannedArrivalDate;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED,description = "The expected date of arrival of the vessel at the Port of Discharge.")
+  @Schema(description = "The expected date of arrival of the vessel at the Port of Discharge.")
   private FormattedDate etaAtPortOfDischargeDate;
 
   @Schema(description = "The expected date of arrival of the shipment at Place of Delivery.")
@@ -78,14 +77,14 @@ The location where the equipment is discharged from the last mother vessel arriv
 """)
   private Location dischargeLocation;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED,
+  @Schema(
       description =
 """
 The location where the cargo is loaded onto a first sea-going vessel for water transportation.
 """)
   private Location portOfLoading;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED,
+  @Schema(
       description =
 """
 The location where the cargo is discharged from the last sea-going vessel.

@@ -51,9 +51,7 @@ for example "Warning", "Updated", "Second", "Third" etc.
       allowableValues = {"SMDG", "NMFTA"})
   private String carrierCodeListProvider;
 
-  @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
-      description = "The party to contact for any inquiries related to this Arrival Notice.")
+  @Schema(description = "The party to contact for any inquiries related to this Arrival Notice.")
   @ArraySchema(minItems = 1)
   private List<PartyContactDetail> carrierContactInformation;
 
@@ -105,7 +103,6 @@ e.g. additional required documents to prepare and present for shipment release -
   private String transportDocumentReference;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
           "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)",
       example = "SWB",
@@ -153,7 +150,6 @@ Reference number for agreement between shipper and carrier, which optionally inc
   private String serviceContractReference;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 50000,
       description = "Carrier terms and conditions of transport.",
       example = "Any reference in...")
@@ -164,11 +160,11 @@ Reference number for agreement between shipper and carrier, which optionally inc
           "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
   private List<CarrierClause> carrierClauses;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Document parties")
+  @Schema(description = "Document parties")
   @ArraySchema(minItems = 1)
   private List<DocumentParty> documentParties;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @Schema()
   private Transport transport;
 
   @Schema(description = "List of free time conditions applicable to this shipment at destination")
@@ -186,8 +182,7 @@ Name identifying the entity responsible for freight payment.
       example = "Acme Inc.")
   private String payerCode;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The equipments being used.")
-  @ArraySchema(minItems = 1)
+  @Schema(description = "The equipments being used.")
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;
 
   @Schema(description = "A list of `ConsignmentItems`")

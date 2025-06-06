@@ -10,25 +10,23 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentC
 @Schema(description = "Free time condition applicable to this shipment at destination.")
 public class FreeTime {
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @Schema()
   private FreeTimeTypeCode typeCode;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @Schema()
   private IsoEquipmentCode isoEquipmentCode;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       type = "integer",
       format = "int32",
       description = "The duration expressed in `timeUnit`s for which this free time item applies.",
       example = "123")
   private int duration;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @Schema()
   private FreeTimeTimeUnitCode timeUnit;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 1000,
       description =
 """

@@ -199,8 +199,8 @@ DocumentParty,partyFunction,string,,3,,N1,"Specifies the role of the party in a 
 - `MF` (Manufacturer)
 - `WH` (Warehouse Keeper)",
 DocumentParty,partyName,string,,70,,"Acme Inc.","Party name",
-DocumentParty,purchaseOrderReferences,"string list",,,,,"A list of `Purchase Order Reference`s",
-DocumentParty,reference,string,,35,,HHL007,"A reference linked to the `Consignee`.",
+DocumentParty,purchaseOrderReferences,"string list",,,,,"A list of purchase order references",
+DocumentParty,reference,string,,35,,REF1234,"Document party reference",
 DocumentParty,taxLegalReferences,"TaxLegalReference list",,,,,"List of tax or legal references relevant to the party",
 DocumentParty,typeOfPerson,string,,50,,NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):
 - `NATURAL_PERSON` (A person that is an individual living human being)

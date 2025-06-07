@@ -3,13 +3,13 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
-import org.dcsa.conformance.specifications.standards.dt.v100.types.CarrierClause;
 
-@Data
 @Schema(description = "Full content of an Arrival Notice document.")
+@Data
 public class ArrivalNotice {
 
   @Schema(

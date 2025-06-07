@@ -52,7 +52,7 @@ public class ModelValidatorConverter implements ModelConverter {
     if (schema == null) return null;
 
     if (annotatedType.getType() instanceof SimpleType simpleType) {
-      log.info(
+      log.debug(
           "  attribute: {} {} {}",
           annotatedType.getParent().getName(),
           annotatedType.getPropertyName(),
@@ -109,6 +109,20 @@ public class ModelValidatorConverter implements ModelConverter {
                   schema.setDescription(
                       schema.getDescription() + "\n\n" + schemaConstraint.getDescription()));
     } else if (annotatedType.getType() instanceof CollectionType) {
+      log.debug(
+          "  array: {} {}", annotatedType.getParent().getName(), annotatedType.getPropertyName());
+
+      boolean clearSchemaConstraints =
+          modelClassesBySimpleName
+                  .get(annotatedType.getParent().getName())
+                  .getAnnotationsByType(ClearSchemaConstraints.class)
+                  .length
+              > 0;
+      if (clearSchemaConstraints) {
+        schema.getItems().pattern(null);
+        schema.getItems().minLength(null);
+      }
+
       Arrays.stream(annotatedType.getCtxAnnotations())
           .filter(annotation -> annotation instanceof ArraySchema)
           .map(annotation -> (ArraySchema) annotation)
@@ -123,6 +137,7 @@ public class ModelValidatorConverter implements ModelConverter {
               });
     } else {
       log.info("Object: {}", annotatedType.getType());
+
       if (schema.getProperties() != null) {
         boolean clearSchemaConstraints =
             getAnnotatedTypeClass(annotatedType)

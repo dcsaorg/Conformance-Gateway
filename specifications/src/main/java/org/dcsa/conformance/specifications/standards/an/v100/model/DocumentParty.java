@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.an.v100.types.PurchaseOrderReference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
 import org.dcsa.conformance.specifications.standards.dt.v100.types.DisplayedAddressLine;
-import org.dcsa.conformance.specifications.standards.dt.v100.types.PurchaseOrderReference;
 
 @Data
 @Schema(description = "Document party")
@@ -76,11 +76,11 @@ The address of the party to be displayed on the `Transport Document`. The displa
   private List<PartyContactDetail> partyContactDetails;
 
   @Schema(
-      description = "A reference linked to the `Consignee`.",
-      example = "HHL007",
+      description = "Document party reference",
+      example = "REF1234",
       maxLength = 35)
   private String reference;
 
-  @Schema(description = "A list of `Purchase Order Reference`s")
+  @Schema(description = "A list of purchase order references")
   private List<PurchaseOrderReference> purchaseOrderReferences;
 }

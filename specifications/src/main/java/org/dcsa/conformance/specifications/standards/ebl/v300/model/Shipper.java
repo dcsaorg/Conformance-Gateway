@@ -8,7 +8,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCo
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
 import org.dcsa.conformance.specifications.standards.dt.v100.types.DisplayedAddressLine;
-import org.dcsa.conformance.specifications.standards.dt.v100.types.PurchaseOrderReference;
+import org.dcsa.conformance.specifications.standards.ebl.v300.types.PurchaseOrderReference;
 
 @Schema(description = "Party by whom or in whose name a contract of carriage by sea has been concluded. May also be the party who delivers the goods to the carrier.")
 @Data

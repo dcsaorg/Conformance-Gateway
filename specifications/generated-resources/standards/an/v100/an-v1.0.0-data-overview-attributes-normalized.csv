@@ -21,9 +21,9 @@ ActiveReeferSettings,temperatureUnit,string,,,,CEL,"The unit for temperature in 
 
 **Condition:** Mandatory to provide if `temperatureSetpoint` is provided",
 Address,POBox,string,,20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
-Address,city,string,,35,"^\S(?:.*\S)?$",Amsterdam,"The name of the city.",
-Address,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-Address,floor,string,,50,"^\S(?:.*\S)?$",N/A,"The floor of the street number.",
+Address,city,string,,35,,Amsterdam,"The name of the city.",
+Address,countryCode,string,,2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+Address,floor,string,,50,,N/A,"The floor of the street number.",
 Address,postCode,string,,10,,"1047 HM","The post code of the address.",
 Address,stateRegion,string,,65,,"North Holland","The name of the state/region.",
 Address,street,string,,70,,Ruijggoordweg,"The name of the street.",
@@ -94,7 +94,7 @@ CargoItem,cargoGrossWeight,CargoGrossWeight,,,,,"Gross weight of the cargo.",
 CargoItem,cargoNetVolume,CargoNetVolume,,,,,"Net volume of the cargo.",
 CargoItem,cargoNetWeight,CargoNetWeight,,,,,"Net weight of the cargo.",
 CargoItem,customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
-CargoItem,equipmentReference,string,,11,"^\S(?:.*\S)?$",APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+CargoItem,equipmentReference,string,,11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
 
 If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
@@ -110,10 +110,10 @@ CargoNetWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in
 - `KGM` (Kilograms)
 - `LBR` (Pounds)",
 CargoNetWeight,value,number,,,,2400,"The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
-Charge,calculationBasis,string,,50,"^\S(?:.*\S)?$","Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
-Charge,chargeName,string,,50,"^\S(?:.*\S)?$","Documentation fee - Destination","Free text field describing the charge to apply",
+Charge,calculationBasis,string,,50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
+Charge,chargeName,string,,50,,"Documentation fee - Destination","Free text field describing the charge to apply",
 Charge,currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
-Charge,currencyCode,string,,3,"^[A-Z]{3}$",DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+Charge,currencyCode,string,,3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 Charge,paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
 
 - `PRE` (Prepaid)
@@ -122,7 +122,7 @@ Charge,quantity,number,,,,34.4,"The amount of unit for this charge item.",
 Charge,unitPrice,number,,,,3456.6,"The unit price of this charge item in the currency of the charge.",
 ConsignmentItem,HSCodes,"string list",,,,,"A list of `HS Codes` that apply to this `consignmentItem`",
 ConsignmentItem,cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",
-ConsignmentItem,carrierBookingReference,string,,35,"^\S(?:.*\S)?$",ABC709951,"The associated booking number provided by the carrier for this `Consignment Item`.",
+ConsignmentItem,carrierBookingReference,string,,35,,ABC709951,"The associated booking number provided by the carrier for this `Consignment Item`.",
 ConsignmentItem,customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
 ConsignmentItem,descriptionOfGoods,"string list",,,,,"A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.
 
@@ -134,20 +134,20 @@ ConsignmentItem,references,"ReferenceConsignmentItem list",,,,,"A list of `Refer
 ConsignmentItem,shippingMarks,"string list",,,,,"A list of the `ShippingMarks` applicable to this `consignmentItem`
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.",
-CustomsReference,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-CustomsReference,type,string,,50,"^\S(?:.*\S)?$",CUS,"The reference type code as defined in the relevant customs jurisdiction.",
+CustomsReference,countryCode,string,,2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+CustomsReference,type,string,,50,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",
 CustomsReference,values,"string list",,,,,,
 DangerousGoods,EMSNumber,string,,7,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.",
-DangerousGoods,NANumber,string,,4,"^\d{4}$",9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.",
-DangerousGoods,UNNumber,string,,4,"^\d{4}$",1463,"United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.",
-DangerousGoods,codedVariantList,string,,4,"^[0-3][0-9A-Z]{3}$",2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.
+DangerousGoods,NANumber,string,,4,,9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.",
+DangerousGoods,UNNumber,string,,4,,1463,"United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.",
+DangerousGoods,codedVariantList,string,,4,,2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.
 
 Character | Valid Characters | Description
 :--------:|------------------|------------
 1| 0, 1, 2, 3|The packing group. Code 0 indicates there is no packing group
 2|0 to 9 and A to Z|A sequence letter for the PSN, or 0 if there were no alternative PSNs
 3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.",
-DangerousGoods,"competentAuthorityApproval",string,,70,"^\S(?:.*\S)?$","{Name and reference...}","Name and reference number of the competent authority providing the approval.",
+DangerousGoods,"competentAuthorityApproval",string,,70,,"{Name and reference...}","Name and reference number of the competent authority providing the approval.",
 DangerousGoods,emergencyContactDetails,EmergencyContactDetails,,,,,"24 hr emergency contact details",
 DangerousGoods,endOfHoldingTime,string,,,,"Fri Sep 03 02:00:00 CEST 2021","Date by when the refrigerated liquid needs to be delivered.",
 DangerousGoods,fumigationDateTime,string,,,,2024-09-04T09:41Z,"Date & time when the container was fumigated",
@@ -183,8 +183,8 @@ DangerousGoods,properShippingName,string,,250,,"Chromium Trioxide, anhydrous","T
 DangerousGoods,segregationGroups,"string list",,,,,"List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.
 
 **Condition:** only applicable to specific hazardous goods.",
-DangerousGoods,subsidiaryRisk1,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
-DangerousGoods,subsidiaryRisk2,string,,3,"^[0-9](\.[0-9])?$",1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
+DangerousGoods,subsidiaryRisk1,string,,3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
+DangerousGoods,subsidiaryRisk2,string,,3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,technicalName,string,,250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
 DocumentParty,displayedAddress,"string list",,,,,"The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
 
@@ -226,11 +226,11 @@ EmbeddedDocument,content,string,,,,RXhhbXBsZSBBTiBjb250ZW50,"Base64 representati
 EmbeddedDocument,contentType,string,,,,application/msword,"Content type of document",
 EmbeddedDocument,name,string,,,,"20250123 AN XYZ01234.docx","Document name",
 EmergencyContactDetails,contact,string,,255,,"Henrik Larsen","Name of the Contact person during an emergency.",
-EmergencyContactDetails,phone,string,,30,"^\S(?:.*\S)?$","+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+EmergencyContactDetails,phone,string,,30,,"+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 EmergencyContactDetails,provider,string,,255,,GlobeTeam,"Name of the third party vendor providing emergency support",
 EmergencyContactDetails,referenceNumber,string,,255,,12234,"Contract reference for the emergency support provided by an external third party vendor.",
-Equipment,ISOEquipmentCode,string,,4,"^\S(?:.*\S)?$",22G1,"Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.",
-Equipment,equipmentReference,string,,11,"^\S(?:.*\S)?$",APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+Equipment,ISOEquipmentCode,string,,4,,22G1,"Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.",
+Equipment,equipmentReference,string,,11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
 
 If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
@@ -240,8 +240,8 @@ ExportLicense,isRequired,boolean,,,,true,"Information provided by the shipper to
 
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
 ExportLicense,issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Export License`.",
-ExportLicense,reference,string,,35,"^\S(?:.*\S)?$",EMC007123,"Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.",
-Facility,facilityCode,string,,6,"^\S(?:.*\S)?$",ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
+ExportLicense,reference,string,,35,,EMC007123,"Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.",
+Facility,facilityCode,string,,6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
 The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
 - `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
 - `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
@@ -300,7 +300,7 @@ ImportLicense,isRequired,boolean,,,,true,"Information provided by the shipper to
 
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
 ImportLicense,issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Import License`.",
-ImportLicense,reference,string,,35,"^\S(?:.*\S)?$",EMC007123,"Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.",
+ImportLicense,reference,string,,35,,EMC007123,"Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.",
 InnerPackaging,description,string,,100,,"Woven plastic water resistant Bag","Description of the packaging.",
 InnerPackaging,material,string,,100,,Plastic,"The `material` used for the `Inner Packaging` of the referenced `Dangerous Goods`.",
 InnerPackaging,quantity,integer,,,,20,"Count of `Inner Packagings` of the referenced `Dangerous Goods`.",
@@ -325,8 +325,8 @@ Location,address,Address,,,,,"Location address",
 Location,facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
 Location,geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
 Location,locationName,string,,100,,"Port of Amsterdam","The name of the location.",
-NationalCommodityCode,countryCode,string,,2,"^[A-Z]{2}$",BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-NationalCommodityCode,type,string,,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
+NationalCommodityCode,countryCode,string,,2,,BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+NationalCommodityCode,type,string,,10,,NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
 - `NCM` (Nomenclatura Comum do Mercosul)
 - `HTS` (Harmonized Tariff Schedule)
 - `SCHEDULE_B` ( Schedule B)
@@ -351,11 +351,11 @@ NetWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in impe
 NetWeight,value,number,,,,2.4,"Total weight of the goods carried, excluding packaging.",
 OuterPackaging,dangerousGoods,"DangerousGoods list",,,,,"A list of `Dangerous Goods`",
 OuterPackaging,description,string,,100,,"Drum, steel","Description of the outer packaging/overpack.",
-OuterPackaging,imoPackagingCode,string,,5,"^[A-Z0-9]{1,5}$",1A2,"The code of the packaging as per IMO.
+OuterPackaging,imoPackagingCode,string,,5,,1A2,"The code of the packaging as per IMO.
 
 **Condition:** only applicable to dangerous goods if specified in the [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx). If not available, the `packageCode` as per UN recommendation 21 should be used.",
 OuterPackaging,numberOfPackages,integer,,,,18,"Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.",
-OuterPackaging,packageCode,string,,2,"^[A-Z0-9]{2}$",5H,"A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
+OuterPackaging,packageCode,string,,2,,5H,"A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
 
 **Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.",
 OuterPackaging,woodDeclaration,string,,30,,TREATED_AND_CERTIFIED,"Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:
@@ -363,13 +363,13 @@ OuterPackaging,woodDeclaration,string,,30,,TREATED_AND_CERTIFIED,"Property to cl
 - `NOT_TREATED_AND_NOT_CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)
 - `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)
 - `TREATED_AND_CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)",
-PartyContactDetail,email,string,,100,"^.+@\S+$",info@dcsa.org,"`E-mail` address to be used",
-PartyContactDetail,name,string,,35,"^\S(?:.*\S)?$",Henrik,"Name of the contact",
-PartyContactDetail,phone,string,,30,"^\S(?:.*\S)?$","+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+PartyContactDetail,email,string,,100,,info@dcsa.org,"`E-mail` address to be used",
+PartyContactDetail,name,string,,35,,Henrik,"Name of the contact",
+PartyContactDetail,phone,string,,30,,"+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 Reference,type,string,,3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)",
-Reference,value,string,,35,"^\S(?:.*\S)?$",HHL00103004,"The value of the reference.",
+Reference,value,string,,35,,HHL00103004,"The value of the reference.",
 ReferenceConsignmentItem,type,string,,3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)
@@ -388,9 +388,9 @@ TareWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in imp
 - `KGM` (Kilograms)
 - `LBR` (Pounds)",
 TareWeight,value,number,,,,4800,"The weight of an empty container (gross container weight).",
-TaxLegalReference,countryCode,string,,2,"^[A-Z]{2}$",IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-TaxLegalReference,type,string,,50,"^\S(?:.*\S)?$",PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
-TaxLegalReference,value,string,,35,"^\S(?:.*\S)?$",AAAAA0000A,"The value of the `taxLegalReference`",
+TaxLegalReference,countryCode,string,,2,,IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+TaxLegalReference,type,string,,50,,PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
+TaxLegalReference,value,string,,35,,AAAAA0000A,"The value of the `taxLegalReference`",
 Transport,departureDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
 Transport,dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country.",

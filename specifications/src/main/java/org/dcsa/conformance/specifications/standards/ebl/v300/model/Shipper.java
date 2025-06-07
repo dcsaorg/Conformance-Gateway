@@ -14,7 +14,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.types.PurchaseOrder
 @Data
 public class Shipper {
 
-  @Schema(description = "Name of the party.", example = "IKEA Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Name of the party.", example = "IKEA Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
   private String partyName;
 
   @Schema(

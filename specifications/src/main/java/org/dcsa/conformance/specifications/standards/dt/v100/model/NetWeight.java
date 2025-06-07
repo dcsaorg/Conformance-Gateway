@@ -3,14 +3,24 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "Total weight of the goods carried, excluding packaging.")
+@Schema(description = NetWeight.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class NetWeight {
 
-  @Schema(description = "Total weight of the goods carried, excluding packaging.", example = "2.4", minimum = "0", exclusiveMinimum = true, format = "float")
-  private Double value;
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "Total weight of the goods carried, excluding packaging.";
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "Total weight of the goods carried, excluding packaging.",
+      example = "2.4",
+      minimum = "0",
+      exclusiveMinimum = true,
+      format = "float")
+  protected Double value;
+
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The unit of measure which can be expressed in imperial or metric terms:
@@ -18,5 +28,5 @@ The unit of measure which can be expressed in imperial or metric terms:
 - `LBR` (Pounds)
 """,
       example = "KGM")
-  private String unit;
+  protected String unit;
 }

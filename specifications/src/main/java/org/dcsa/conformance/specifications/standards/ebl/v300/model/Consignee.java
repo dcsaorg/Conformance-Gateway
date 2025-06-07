@@ -14,7 +14,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.types.DisplayedAddr
 @Data
 public class Consignee {
 
-  @Schema(description = "Name of the party.", example = "IKEA Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Name of the party.", example = "IKEA Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
   private String partyName;
 
   @Schema(
@@ -47,7 +47,7 @@ The address of the party to be displayed on the `Transport Document`. The displa
   @ArraySchema(maxItems = 6)
   private List<DisplayedAddressLine> displayedAddress;
 
-  @Schema()
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private List<IdentifyingCode> identifyingCodes;
 
   @Schema(description = "A list of `Tax References` for a `Party`")

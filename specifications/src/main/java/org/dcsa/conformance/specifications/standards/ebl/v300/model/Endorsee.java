@@ -16,6 +16,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.types.DisplayedAddr
 public class Endorsee {
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description = "Name of the party.",
       example = "IKEA Denmark",
       maxLength = 70,
@@ -39,7 +40,7 @@ The address of the party to be displayed on the `Transport Document`. The displa
   @ArraySchema(maxItems = 6)
   private List<DisplayedAddressLine> displayedAddress;
 
-  @Schema()
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private List<IdentifyingCode> identifyingCodes;
 
   @Schema(description = "A list of `Tax References` for a `Party`")

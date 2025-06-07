@@ -42,9 +42,11 @@ public enum StandardSpecificationTestToolkit {
     Map<String, Schema<?>> originalProperties = getSchemaProperties(originalTypeSchema);
     Map<String, Schema<?>> generatedProperties = getSchemaProperties(generatedTypeSchema);
     softAssertEquals(
-        "attribute list",
+        "property list",
         new TreeSet<>(originalProperties.keySet()),
         new TreeSet<>(generatedProperties.keySet()));
+    softAssertEquals(
+        "required properties", originalTypeSchema.getRequired(), generatedTypeSchema.getRequired());
 
     originalProperties.keySet().stream()
         .sorted()
@@ -74,30 +76,6 @@ public enum StandardSpecificationTestToolkit {
                     attributeTypeName);
               }
             });
-  }
-
-  private static String getAttributeTypeName(Schema<?> attributeSchema) {
-    if (attributeSchema.getItems() != null) {
-      return getAttributeTypeName(attributeSchema.getItems());
-    }
-    if (attributeSchema.get$ref() != null) {
-      return Arrays.stream(attributeSchema.get$ref().split("/")).toList().getLast();
-    }
-    return null;
-  }
-
-  private static Map<String, Schema<?>> getSchemaProperties(Schema<?> schema) {
-    Map<String, Schema<?>> allProperties =
-        SpecificationToolkit.parameterizeStringRawSchemaMap(schema.getProperties());
-    Stream.of(schema.getAllOf(), schema.getAnyOf(), schema.getOneOf())
-        .filter(Objects::nonNull)
-        .forEach(
-            schemaList ->
-                allProperties.putAll(
-                    schemaList.stream()
-                        .flatMap(subSchema -> getSchemaProperties(subSchema).entrySet().stream())
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
-    return allProperties;
   }
 
   private static void compareAttribute(
@@ -146,7 +124,8 @@ public enum StandardSpecificationTestToolkit {
     if (originalAttributeSchema instanceof ArraySchema) {
       log.info("{}  Comparing array item schema", indentation);
       Assertions.assertInstanceOf(ArraySchema.class, generatedAttributeSchema);
-      softAssertEquals(indentation, originalAttributeSchema.getItems(), generatedAttributeSchema.getItems());
+      softAssertEquals(
+          indentation, originalAttributeSchema.getItems(), generatedAttributeSchema.getItems());
     }
   }
 
@@ -174,5 +153,29 @@ WRONG VALUE:
 
   private static String comparableDescription(String description) {
     return description == null ? "" : description.trim();
+  }
+
+  private static String getAttributeTypeName(Schema<?> attributeSchema) {
+    if (attributeSchema.getItems() != null) {
+      return getAttributeTypeName(attributeSchema.getItems());
+    }
+    if (attributeSchema.get$ref() != null) {
+      return Arrays.stream(attributeSchema.get$ref().split("/")).toList().getLast();
+    }
+    return null;
+  }
+
+  private static Map<String, Schema<?>> getSchemaProperties(Schema<?> schema) {
+    Map<String, Schema<?>> allProperties =
+        SpecificationToolkit.parameterizeStringRawSchemaMap(schema.getProperties());
+    Stream.of(schema.getAllOf(), schema.getAnyOf(), schema.getOneOf())
+        .filter(Objects::nonNull)
+        .forEach(
+            schemaList ->
+                allProperties.putAll(
+                    schemaList.stream()
+                        .flatMap(subSchema -> getSchemaProperties(subSchema).entrySet().stream())
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
+    return allProperties;
   }
 }

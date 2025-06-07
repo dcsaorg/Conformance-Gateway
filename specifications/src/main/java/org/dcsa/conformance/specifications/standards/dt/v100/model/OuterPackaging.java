@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 
-@Schema(description = "Outer packaging or overpack specification, such as palletized or crated groupings of packages.")
+@Schema(description = OuterPackaging.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class OuterPackaging {
+
+  public static final String CLASS_SCHEMA_DESCRIPTION = "Outer packaging or overpack specification, such as palletized or crated groupings of packages.";
 
   @Schema(
       description =
@@ -19,7 +21,7 @@ A code identifying the outer packaging/overpack. `PackageCode` must follow the c
       minLength = 2,
       maxLength = 2,
       pattern = "^[A-Z0-9]{2}$")
-  private String packageCode;
+  protected String packageCode;
 
   @Schema(
       description =
@@ -32,13 +34,13 @@ The code of the packaging as per IMO.
       minLength = 1,
       maxLength = 5,
       pattern = "^[A-Z0-9]{1,5}$")
-  private String imoPackagingCode;
+  protected String imoPackagingCode;
 
-  @Schema(description = "Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.", example = "18", minimum = "1", maximum = "99999999", format = "int32")
-  private Integer numberOfPackages;
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.", example = "18", minimum = "1", maximum = "99999999", format = "int32")
+  protected Integer numberOfPackages;
 
-  @Schema(description = "Description of the outer packaging/overpack.", example = "Drum, steel", maxLength = 100)
-  private String description;
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Description of the outer packaging/overpack.", example = "Drum, steel", maxLength = 100)
+  protected String description;
 
   @Schema(
       description =
@@ -51,8 +53,8 @@ Property to clearly indicate if the products, packaging and any other items are 
 """,
       example = "TREATED_AND_CERTIFIED",
       maxLength = 30)
-  private String woodDeclaration;
+  protected String woodDeclaration;
 
   @Schema(description = "A list of `Dangerous Goods`")
-  private List<DangerousGoods> dangerousGoods;
+  protected List<DangerousGoods> dangerousGoods;
 }

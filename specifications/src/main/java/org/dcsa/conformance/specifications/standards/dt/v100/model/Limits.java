@@ -3,11 +3,15 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure.")
+@Schema(description = Limits.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class Limits {
 
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure.";
+
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The unit for **all attributes in the limits structure** in Celsius or Fahrenheit
@@ -16,7 +20,7 @@ The unit for **all attributes in the limits structure** in Celsius or Fahrenheit
 - `FAH` (Fahrenheit)
 """,
       example = "CEL")
-  private String temperatureUnit;
+  protected String temperatureUnit;
 
   @Schema(
       description =
@@ -27,7 +31,7 @@ Lowest temperature at which a chemical can vaporize to form an ignitable mixture
 """,
       example = "42.0",
       format = "float")
-  private Double flashPoint;
+  protected Double flashPoint;
 
   @Schema(
       description =
@@ -36,14 +40,27 @@ Maximum temperature at which certain substance (such as organic peroxides and se
 """,
       example = "24.1",
       format = "float")
-  private Double transportControlTemperature;
+  protected Double transportControlTemperature;
 
-  @Schema(description = "Temperature at which emergency procedures shall be implemented", example = "74.1", format = "float")
-  private Double transportEmergencyTemperature;
+  @Schema(
+      description = "Temperature at which emergency procedures shall be implemented",
+      example = "74.1",
+      format = "float")
+  protected Double transportEmergencyTemperature;
 
-  @Schema(name = "SADT", description = "Lowest temperature in which self-accelerating decomposition may occur in a substance", example = "54.1", format = "float")
-  private Double sadt;
+  @Schema(
+      name = "SADT",
+      description =
+          "Lowest temperature in which self-accelerating decomposition may occur in a substance",
+      example = "54.1",
+      format = "float")
+  protected Double sadt;
 
-  @Schema(name = "SAPT", description = "Lowest temperature in which self-accelerating polymerization may occur in a substance", example = "70.0", format = "float")
-  private Double sapt;
+  @Schema(
+      name = "SAPT",
+      description =
+          "Lowest temperature in which self-accelerating polymerization may occur in a substance",
+      example = "70.0",
+      format = "float")
+  protected Double sapt;
 }

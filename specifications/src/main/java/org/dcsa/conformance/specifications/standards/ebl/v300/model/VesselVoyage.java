@@ -8,6 +8,7 @@ import lombok.Data;
 public class VesselVoyage {
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The name of the first sea going Vessel on board which the cargo is loaded or intended to be loaded
@@ -18,6 +19,7 @@ The name of the first sea going Vessel on board which the cargo is loaded or int
   private String vesselName;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The identifier of an export voyage. The carrier-specific identifier of the export Voyage.

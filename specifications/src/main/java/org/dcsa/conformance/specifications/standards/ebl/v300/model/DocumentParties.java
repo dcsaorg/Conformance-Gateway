@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class DocumentParties {
 
-  @Schema(description = "The Shipper party.")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The Shipper party.")
   private Shipper shipper;
 
   @Schema(description = "The Consignee party.")
@@ -18,7 +18,7 @@ public class DocumentParties {
   @Schema(description = "The Endorsee party.")
   private Endorsee endorsee;
 
-  @Schema(description = "The Issuing party responsible for signing the document.")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The Issuing party responsible for signing the document.")
   private IssuingParty issuingParty;
 
   @Schema(description = "Carrier’s agent at the destination.")

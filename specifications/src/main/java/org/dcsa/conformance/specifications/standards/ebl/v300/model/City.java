@@ -7,13 +7,19 @@ import lombok.Data;
 @Data
 public class City {
 
-  @Schema(description = "The name of the city.", example = "Amsterdam", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "The name of the city.",
+      example = "Amsterdam",
+      maxLength = 35,
+      pattern = "^\\S(?:.*\\S)?$")
   private String city;
 
   @Schema(description = "The name of the state/region.", example = "North Holland", maxLength = 65)
   private String stateRegion;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)

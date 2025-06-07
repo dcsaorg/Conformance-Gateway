@@ -3,11 +3,14 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "Calculated by multiplying the width, height, and length of the packed cargo.")
+@Schema(description = CargoGrossVolume.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class CargoGrossVolume {
 
+  public static final String CLASS_SCHEMA_DESCRIPTION = "Calculated by multiplying the width, height, and length of the packed cargo.";
+
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 Calculated by multiplying the width, height, and length of the packed cargo. A maximum of 4 decimals should be provided.
@@ -16,9 +19,10 @@ Calculated by multiplying the width, height, and length of the packed cargo. A m
       minimum = "0",
       exclusiveMinimum = true,
       format = "float")
-  private Double value;
+  protected Double value;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The unit of measure which can be expressed in imperial or metric terms:
@@ -27,5 +31,5 @@ The unit of measure which can be expressed in imperial or metric terms:
 """,
       example = "MTQ",
       enumAsRef = true)
-  private String unit;
+  protected String unit;
 }

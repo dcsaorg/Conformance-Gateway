@@ -6,11 +6,15 @@ import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.dt.v100.types.NationalCommodityCodeValue;
 
-@Schema(description = "The national commodity classification code linked to a country with a value. Examples: NCM (Brazil), HTS (US), TARIC (EU).")
+@Schema(description = NationalCommodityCode.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class NationalCommodityCode {
 
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "The national commodity classification code linked to a country with a value. Examples: NCM (Brazil), HTS (US), TARIC (EU).";
+
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The national commodity classification code, which can be one of the following values defined by DCSA:
@@ -37,7 +41,9 @@ The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso
       pattern = "^[A-Z]{2}$")
   private String countryCode;
 
-  @Schema(description = "A list of `national commodity codes` values.")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "A list of `national commodity codes` values.")
   @ArraySchema(minItems = 1)
   private List<NationalCommodityCodeValue> values;
 }

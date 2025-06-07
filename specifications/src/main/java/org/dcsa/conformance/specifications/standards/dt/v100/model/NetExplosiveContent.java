@@ -3,11 +3,15 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "The total weight of the explosive substances, without the packaging, casings, etc.")
+@Schema(description = NetExplosiveContent.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class NetExplosiveContent {
 
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "The total weight of the explosive substances, without the packaging, casings, etc.";
+
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The total weight of the explosive substances, without the packaging’s, casings, etc.
@@ -16,9 +20,10 @@ The total weight of the explosive substances, without the packaging’s, casings
       minimum = "0",
       exclusiveMinimum = true,
       format = "float")
-  private Double value;
+  protected Double value;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The unit of measure which can be expressed in imperial or metric terms:
@@ -28,5 +33,5 @@ The unit of measure which can be expressed in imperial or metric terms:
 - `ONZ` (Ounce)
 """,
       example = "KGM")
-  private String unit;
+  protected String unit;
 }

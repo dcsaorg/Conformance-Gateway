@@ -56,11 +56,12 @@ public class ModelValidatorConverter implements ModelConverter {
           annotatedType.getPropertyName(),
           simpleType.getRawClass().getSimpleName());
 
-      if (!java.util.List.class.isAssignableFrom(
+      Field javaFieldWithThisPropertyName =
           getJavaFieldWithPropertyName(
-                  modelClassesBySimpleName.get(annotatedType.getParent().getName()),
-                  annotatedType.getPropertyName())
-              .getType())) {
+              modelClassesBySimpleName.get(annotatedType.getParent().getName()),
+              annotatedType.getPropertyName());
+      if (javaFieldWithThisPropertyName != null
+          && !java.util.List.class.isAssignableFrom(javaFieldWithThisPropertyName.getType())) {
         Arrays.stream(annotatedType.getCtxAnnotations())
             .filter(annotation -> annotation instanceof io.swagger.v3.oas.annotations.media.Schema)
             .map(annotation -> (io.swagger.v3.oas.annotations.media.Schema) annotation)
@@ -97,14 +98,26 @@ public class ModelValidatorConverter implements ModelConverter {
     } else {
       log.info("Object: {}", annotatedType.getType());
       if (schema.getProperties() != null) {
+        boolean clearSchemaConstraints =
+            getAnnotatedTypeClass(annotatedType)
+                    .getAnnotationsByType(ClearSchemaConstraints.class)
+                    .length
+                > 0;
+        if (clearSchemaConstraints) {
+          schema.required(null);
+        }
         new TreeSet<>(schema.getProperties().keySet())
             .forEach(
                 propertyName -> {
                   Schema<?> propertySchema = schema.getProperties().get(propertyName);
+                  if (clearSchemaConstraints) {
+                    propertySchema.pattern(null);
+                  }
                   if (propertySchema.get$ref() != null) {
                     Schema<?> originalPropertySchema =
                         originalSchemasByClassAndField
-                            .getOrDefault(getSimpleClassName(annotatedType), Map.of())
+                            .getOrDefault(
+                                getAnnotatedTypeClass(annotatedType).getSimpleName(), Map.of())
                             .get(propertyName);
                     schema
                         .getProperties()
@@ -121,10 +134,13 @@ public class ModelValidatorConverter implements ModelConverter {
   }
 
   private static Field getJavaFieldWithPropertyName(Class<?> aClass, String propertyName) {
+    if (java.lang.Object.class.equals(aClass)) {
+      return null;
+    }
     return Arrays.stream(aClass.getDeclaredFields())
         .filter(field -> javaFieldHasPropertyName(field, propertyName))
         .findFirst()
-        .orElseThrow();
+        .orElse(getJavaFieldWithPropertyName(aClass.getSuperclass(), propertyName));
   }
 
   private static boolean javaFieldHasPropertyName(Field field, String propertyName) {
@@ -135,7 +151,7 @@ public class ModelValidatorConverter implements ModelConverter {
   }
 
   @SneakyThrows
-  private static String getSimpleClassName(AnnotatedType annotatedType) {
-    return Class.forName(annotatedType.getType().getTypeName()).getSimpleName();
+  private static Class<?> getAnnotatedTypeClass(AnnotatedType annotatedType) {
+    return Class.forName(annotatedType.getType().getTypeName());
   }
 }

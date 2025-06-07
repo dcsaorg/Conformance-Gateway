@@ -6,11 +6,15 @@ import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.dt.v100.types.ReferenceConsignmentItemValue;
 
-@Schema(description = "References for a consignment item, used by shippers or freight forwarders and shared in events or printed on documents.")
+@Schema(description = ReferenceConsignmentItem.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class ReferenceConsignmentItem {
 
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "References for a consignment item, used by shippers or freight forwarders and shared in events or printed on documents.";
+
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The reference type codes defined by DCSA. Possible values are:
@@ -21,9 +25,11 @@ The reference type codes defined by DCSA. Possible values are:
 """,
       example = "CR",
       maxLength = 3)
-  private String type;
+  protected String type;
 
-  @Schema(description = "List of `referenceValues` for a given `referenceType`.")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "List of `referenceValues` for a given `referenceType`.")
   @ArraySchema(minItems = 1)
-  private List<ReferenceConsignmentItemValue> values;
+  protected List<ReferenceConsignmentItemValue> values;
 }

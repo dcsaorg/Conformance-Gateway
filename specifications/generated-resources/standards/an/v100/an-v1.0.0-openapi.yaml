@@ -248,7 +248,6 @@ components:
           example: "100"
         floor:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The floor of the street number."
           example: "N/A"
@@ -264,7 +263,6 @@ components:
           example: "123"
         city:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The name of the city."
           example: "Amsterdam"
@@ -276,7 +274,6 @@ components:
         countryCode:
           maxLength: 2
           minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)"
           example: "NL"
@@ -582,7 +579,6 @@ components:
       properties:
         equipmentReference:
           maxLength: 11
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -672,7 +668,6 @@ components:
       properties:
         chargeName:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "Free text field describing the charge to apply"
           example: "Documentation fee - Destination"
@@ -686,7 +681,6 @@ components:
         currencyCode:
           maxLength: 3
           minLength: 3
-          pattern: "^[A-Z]{3}$"
           type: "string"
           description: |
             The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).
@@ -704,7 +698,6 @@ components:
           - "COL"
         calculationBasis:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.
@@ -727,7 +720,6 @@ components:
       properties:
         carrierBookingReference:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The associated booking number provided by the carrier for this `Consignment Item`."
           example: "ABC709951"
@@ -802,20 +794,17 @@ components:
       properties:
         type:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The reference type code as defined in the relevant customs jurisdiction."
           example: "CUS"
         countryCode:
           maxLength: 2
           minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
           example: "NL"
         values:
-          minItems: 1
           type: "array"
           items:
             maxLength: 35
@@ -836,7 +825,6 @@ components:
         UNNumber:
           maxLength: 4
           minLength: 4
-          pattern: "^\\d{4}$"
           type: "string"
           description: |
             United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.
@@ -844,7 +832,6 @@ components:
         NANumber:
           maxLength: 4
           minLength: 4
-          pattern: "^\\d{4}$"
           type: "string"
           description: |
             Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.
@@ -852,7 +839,6 @@ components:
         codedVariantList:
           maxLength: 4
           minLength: 4
-          pattern: "^[0-3][0-9A-Z]{3}$"
           type: "string"
           description: |
             Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.
@@ -887,14 +873,12 @@ components:
         subsidiaryRisk1:
           maxLength: 3
           minLength: 1
-          pattern: "^[0-9](\\.[0-9])?$"
           type: "string"
           description: "Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code."
           example: "1.2"
         subsidiaryRisk2:
           maxLength: 3
           minLength: 1
-          pattern: "^[0-9](\\.[0-9])?$"
           type: "string"
           description: "Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code."
           example: "1.2"
@@ -939,7 +923,6 @@ components:
           example: false
         competentAuthorityApproval:
           maxLength: 70
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "Name and reference number of the competent authority providing the approval."
           example: "{Name and reference...}"
@@ -1157,7 +1140,6 @@ components:
           example: "GlobeTeam"
         phone:
           maxLength: 30
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
@@ -1173,7 +1155,6 @@ components:
       properties:
         equipmentReference:
           maxLength: 11
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -1183,7 +1164,6 @@ components:
           example: "APZU4812090"
         ISOEquipmentCode:
           maxLength: 4
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
@@ -1205,7 +1185,6 @@ components:
           example: true
         reference:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.
@@ -1229,7 +1208,6 @@ components:
       properties:
         facilityCode:
           maxLength: 6
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The code used for identifying the specific facility. This code does not include the UN Location Code.
@@ -1378,7 +1356,6 @@ components:
           example: true
         reference:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.
@@ -1494,7 +1471,6 @@ components:
       properties:
         type:
           maxLength: 10
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The national commodity classification code, which can be one of the following values defined by DCSA:
@@ -1508,7 +1484,6 @@ components:
         countryCode:
           maxLength: 2
           minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
@@ -1587,7 +1562,6 @@ components:
         packageCode:
           maxLength: 2
           minLength: 2
-          pattern: "^[A-Z0-9]{2}$"
           type: "string"
           description: |
             A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
@@ -1597,7 +1571,6 @@ components:
         imoPackagingCode:
           maxLength: 5
           minLength: 1
-          pattern: "^[A-Z0-9]{1,5}$"
           type: "string"
           description: |
             The code of the packaging as per IMO.
@@ -1637,20 +1610,17 @@ components:
       properties:
         name:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "Name of the contact"
           example: "Henrik"
         phone:
           maxLength: 30
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
           example: "+45 70262970"
         email:
           maxLength: 100
-          pattern: "^.+@\\S+$"
           type: "string"
           description: "`E-mail` address to be used"
           example: "info@dcsa.org"
@@ -1668,7 +1638,6 @@ components:
           example: "CR"
         value:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The value of the reference."
           example: "HHL00103004"
@@ -1739,7 +1708,6 @@ components:
       properties:
         type:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The reference type code as defined by the relevant tax and/or legal authority.
@@ -1747,14 +1715,12 @@ components:
         countryCode:
           maxLength: 2
           minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
           example: "IN"
         value:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The value of the `taxLegalReference`

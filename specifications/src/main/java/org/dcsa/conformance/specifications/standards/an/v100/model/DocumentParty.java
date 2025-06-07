@@ -40,10 +40,7 @@ Specifies the role of the party in a given context. Possible values are:
       maxLength = 3)
   private String partyFunction;
 
-  @Schema(
-      maxLength = 70,
-      description = "Party name",
-      example = "Acme Inc.")
+  @Schema(maxLength = 70, description = "Party name", example = "Acme Inc.")
   private String partyName;
 
   @Schema(
@@ -63,15 +60,9 @@ Specifies the role of the party in a given context. Possible values are:
 
   @Schema(
       description =
-          """
-      The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-
-      **Conditions:** If provided:
-        - the displayed address must be included in the `Transport Document`.
-        - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
-        - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
-        - the order of the items in this array **MUST** be preserved as by the provider of the API.
-      """)
+"""
+The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
+""")
   @ArraySchema(maxItems = 6)
   private List<DisplayedAddressLine> displayedAddress;
 

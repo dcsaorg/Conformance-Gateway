@@ -112,6 +112,8 @@ public class ModelValidatorConverter implements ModelConverter {
                   Schema<?> propertySchema = schema.getProperties().get(propertyName);
                   if (clearSchemaConstraints) {
                     propertySchema.pattern(null);
+                    propertySchema.minItems(null);
+                    propertySchema.minLength(null);
                   }
                   if (propertySchema.get$ref() != null) {
                     Schema<?> originalPropertySchema =

@@ -3,12 +3,11 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = ImportLicense.CLASS_SCHEMA_DESCRIPTION)
+@Schema(
+    description =
+        "`Import License` requirements.\n\nCondition: Included if the property is provided in the `Shipping Instructions.`")
 @Data
 public class ImportLicense {
-
-  public static final String CLASS_SCHEMA_DESCRIPTION =
-      "`Import License` requirements.\n\nCondition: Included if the property is provided in the `Shipping Instructions.`";
 
   @Schema(
       description =

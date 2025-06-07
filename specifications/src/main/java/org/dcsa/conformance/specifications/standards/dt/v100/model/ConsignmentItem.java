@@ -25,6 +25,7 @@ A plain language description that is precise enough for Customs services to be a
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
+  @ArraySchema(maxItems = 150)
   protected List<DescriptionOfGoodsLine> descriptionOfGoods;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, name = "HSCodes", description = "A list of `HS Codes` that apply to this `consignmentItem`")
@@ -45,6 +46,7 @@ A list of the `ShippingMarks` applicable to this `consignmentItem`
   protected List<ShippingMark> shippingMarks;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "A list of all `cargoItems`")
+  @ArraySchema(minItems = 1)
   protected List<CargoItem> cargoItems;
 
   @Schema(description = "Export license for the consignment item.")

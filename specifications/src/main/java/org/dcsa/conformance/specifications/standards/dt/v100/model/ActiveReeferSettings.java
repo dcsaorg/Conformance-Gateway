@@ -13,7 +13,8 @@ public class ActiveReeferSettings {
   @Schema(
       description =
           "Target value of the temperature for the Reefer based on the cargo requirement.",
-      example = "-15")
+      example = "-15",
+      format = "float")
   protected Double temperatureSetpoint;
 
   @Schema(
@@ -33,21 +34,24 @@ The unit for temperature in Celsius or Fahrenheit
       description = "The percentage of the controlled atmosphere O<sub>2</sub> target value",
       example = "25",
       minimum = "0",
-      maximum = "100")
+      maximum = "100",
+      format = "float")
   protected Double o2Setpoint;
 
   @Schema(
       description = "The percentage of the controlled atmosphere CO<sub>2</sub> target value",
       example = "25",
       minimum = "0",
-      maximum = "100")
+      maximum = "100",
+      format = "float")
   protected Double co2Setpoint;
 
   @Schema(
       description = "The percentage of the controlled atmosphere humidity target value",
       example = "95.6",
       minimum = "0",
-      maximum = "100")
+      maximum = "100",
+      format = "float")
   protected Double humiditySetpoint;
 
   @Schema(
@@ -56,7 +60,8 @@ The unit for temperature in Celsius or Fahrenheit
 Target value for the air exchange rate which is the rate at which outdoor air replaces indoor air within a Reefer container
 """,
       example = "15.4",
-      minimum = "0")
+      minimum = "0",
+      format = "float")
   protected Double airExchangeSetpoint;
 
   @Schema(

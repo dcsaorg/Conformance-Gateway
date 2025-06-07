@@ -1,9 +1,11 @@
 package org.dcsa.conformance.specifications.generator;
 
+import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.SimpleType;
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import java.lang.reflect.Field;
@@ -60,13 +62,24 @@ public class ModelValidatorConverter implements ModelConverter {
           getJavaFieldWithPropertyName(
               modelClassesBySimpleName.get(annotatedType.getParent().getName()),
               annotatedType.getPropertyName());
-      if (javaFieldWithThisPropertyName != null
-          && !java.util.List.class.isAssignableFrom(javaFieldWithThisPropertyName.getType())) {
-        Arrays.stream(annotatedType.getCtxAnnotations())
-            .filter(annotation -> annotation instanceof io.swagger.v3.oas.annotations.media.Schema)
-            .map(annotation -> (io.swagger.v3.oas.annotations.media.Schema) annotation)
-            .filter(schemaAnnotation -> !schemaAnnotation.description().isEmpty())
-            .forEach(schemaAnnotation -> schema.setDescription(schemaAnnotation.description()));
+      if (javaFieldWithThisPropertyName != null) {
+        if (!List.class.isAssignableFrom(javaFieldWithThisPropertyName.getType())) {
+          Arrays.stream(annotatedType.getCtxAnnotations())
+              .filter(
+                  annotation -> annotation instanceof io.swagger.v3.oas.annotations.media.Schema)
+              .map(annotation -> (io.swagger.v3.oas.annotations.media.Schema) annotation)
+              .forEach(
+                  schemaAnnotation -> {
+                    String description = schemaAnnotation.description();
+                    if (description != null && !description.isEmpty()) {
+                      schema.setDescription(description);
+                    }
+                    String format = schemaAnnotation.format();
+                    if (format != null && !format.isEmpty()) {
+                      schema.setFormat(format);
+                    }
+                  });
+        }
       }
 
       originalSchemasByClassAndField
@@ -95,6 +108,19 @@ public class ModelValidatorConverter implements ModelConverter {
               schemaConstraint ->
                   schema.setDescription(
                       schema.getDescription() + "\n\n" + schemaConstraint.getDescription()));
+    } else if (annotatedType.getType() instanceof CollectionType) {
+      Arrays.stream(annotatedType.getCtxAnnotations())
+          .filter(annotation -> annotation instanceof ArraySchema)
+          .map(annotation -> (ArraySchema) annotation)
+          .forEach(
+              arraySchemaAnnotation -> {
+                if (isSetValue(arraySchemaAnnotation.minItems())) {
+                  schema.setMinItems(arraySchemaAnnotation.minItems());
+                }
+                if (isSetValue(arraySchemaAnnotation.maxItems())) {
+                  schema.setMaxItems(arraySchemaAnnotation.maxItems());
+                }
+              });
     } else {
       log.info("Object: {}", annotatedType.getType());
       if (schema.getProperties() != null) {
@@ -155,5 +181,9 @@ public class ModelValidatorConverter implements ModelConverter {
   @SneakyThrows
   private static Class<?> getAnnotatedTypeClass(AnnotatedType annotatedType) {
     return Class.forName(annotatedType.getType().getTypeName());
+  }
+
+  private static boolean isSetValue(Integer value) {
+    return value != null && value != Integer.MIN_VALUE && value != Integer.MAX_VALUE;
   }
 }

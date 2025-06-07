@@ -347,15 +347,18 @@ The number of additional pages required to contain the goods description on a tr
   private InvoicePayableAt invoicePayableAt;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.)")
+  @ArraySchema(minItems = 1)
   private List<PartyContactDetail> partyContactDetails;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "All `Parties` with associated roles.")
   private DocumentParties documentParties;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "A list of `ConsignmentItems`")
+  @ArraySchema(minItems = 1)
   private List<ConsignmentItem> consignmentItems;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "A list of `Utilized Transport Equipments` describing the equipment being used.")
+  @ArraySchema(minItems = 1)
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;
 
   @Schema

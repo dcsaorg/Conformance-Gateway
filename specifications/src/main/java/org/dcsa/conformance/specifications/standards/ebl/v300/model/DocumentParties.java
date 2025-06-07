@@ -47,7 +47,6 @@ List of up to 3 `Notify Parties`. The first item in the list is the **First Noti
 A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.
 """)
   @ArraySchema(
-      schema = @Schema(description = "Optional list of additional document parties."),
-      minItems = 0)
+      schema = @Schema(description = "Optional list of additional document parties."))
   private List<OtherDocumentParty> other;
 }

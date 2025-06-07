@@ -41,6 +41,7 @@ The address of the party to be displayed on the `Transport Document`. The displa
   private List<DisplayedAddressLine> displayedAddress;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @ArraySchema(minItems = 1)
   private List<IdentifyingCode> identifyingCodes;
 
   @Schema(description = "A list of `Tax References` for a `Party`")

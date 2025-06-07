@@ -36,6 +36,7 @@ public enum StandardSpecificationTestToolkit {
       Map<String, Schema<?>> generatedSchemasByType,
       String typeName) {
     log.info("{}Comparing object: {}", indentation, typeName);
+
     Schema<?> originalTypeSchema = originalSchemasByType.get(typeName);
     Schema<?> generatedTypeSchema = generatedSchemasByType.get(typeName);
 
@@ -105,12 +106,16 @@ public enum StandardSpecificationTestToolkit {
         "name",
         comparableDescription(originalAttributeSchema.getDescription()),
         comparableDescription(generatedAttributeSchema.getDescription()));
+
     softAssertEquals(
         "type",
         getAttributeTypeName(originalAttributeSchema),
         getAttributeTypeName(generatedAttributeSchema));
     softAssertEquals(
+        "format", originalAttributeSchema.getFormat(), generatedAttributeSchema.getFormat());
+    softAssertEquals(
         "pattern", originalAttributeSchema.getPattern(), generatedAttributeSchema.getPattern());
+
     softAssertEquals(
         "minLength",
         originalAttributeSchema.getMinLength(),
@@ -119,8 +124,29 @@ public enum StandardSpecificationTestToolkit {
         "maxLength",
         originalAttributeSchema.getMaxLength(),
         generatedAttributeSchema.getMaxLength());
+
+    softAssertEquals(
+        "minItems", originalAttributeSchema.getMinItems(), generatedAttributeSchema.getMinItems());
+    softAssertEquals(
+        "maxItems", originalAttributeSchema.getMaxItems(), generatedAttributeSchema.getMaxItems());
+
+    softAssertEquals(
+        "minimum", originalAttributeSchema.getMinimum(), generatedAttributeSchema.getMinimum());
+    softAssertEquals(
+        "maximum", originalAttributeSchema.getMaximum(), generatedAttributeSchema.getMaximum());
+
+    softAssertEquals(
+        "exclusiveMinimum",
+        originalAttributeSchema.getExclusiveMinimum(),
+        generatedAttributeSchema.getExclusiveMinimum());
+    softAssertEquals(
+        "exclusiveMaximum",
+        originalAttributeSchema.getExclusiveMaximum(),
+        generatedAttributeSchema.getExclusiveMaximum());
+
     softAssertEquals(
         "examples", originalAttributeSchema.getExamples(), generatedAttributeSchema.getExamples());
+
     if (originalAttributeSchema instanceof ArraySchema) {
       log.info("{}  Comparing array item schema", indentation);
       Assertions.assertInstanceOf(ArraySchema.class, generatedAttributeSchema);

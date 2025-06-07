@@ -163,7 +163,7 @@ components:
         temperatureSetpoint:
           type: "number"
           description: "Target value of the temperature for the Reefer based on the cargo requirement."
-          format: "double"
+          format: "float"
           example: -15
         temperatureUnit:
           type: "string"
@@ -178,28 +178,28 @@ components:
           minimum: 0
           type: "number"
           description: "The percentage of the controlled atmosphere O<sub>2</sub> target value"
-          format: "double"
+          format: "float"
           example: 25
         co2Setpoint:
           maximum: 100
           minimum: 0
           type: "number"
           description: "The percentage of the controlled atmosphere CO<sub>2</sub> target value"
-          format: "double"
+          format: "float"
           example: 25
         humiditySetpoint:
           maximum: 100
           minimum: 0
           type: "number"
           description: "The percentage of the controlled atmosphere humidity target value"
-          format: "double"
+          format: "float"
           example: 95.6
         airExchangeSetpoint:
           minimum: 0
           type: "number"
           description: |
             Target value for the air exchange rate which is the rate at which outdoor air replaces indoor air within a Reefer container
-          format: "double"
+          format: "float"
           example: 15.4
         airExchangeUnit:
           type: "string"
@@ -540,7 +540,7 @@ components:
           type: "number"
           description: |
             Calculated by multiplying the width, height, and length of the packed cargo. A maximum of 4 decimals should be provided.
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -559,7 +559,7 @@ components:
           type: "number"
           description: |
             The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
-          format: "double"
+          format: "float"
           example: 2400
         unit:
           type: "string"
@@ -629,7 +629,7 @@ components:
           type: "number"
           description: |
             Calculated by multiplying the width, height, and length of the cargo, excluding packaging.
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -648,7 +648,7 @@ components:
           type: "number"
           description: |
             The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
-          format: "double"
+          format: "float"
           example: 2400
         unit:
           type: "string"
@@ -671,7 +671,7 @@ components:
           type: "number"
           description: |
             The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.
-          format: "double"
+          format: "float"
           example: 1012.12
         currencyCode:
           maxLength: 3
@@ -700,13 +700,13 @@ components:
           minimum: 0
           type: "number"
           description: "The unit price of this charge item in the currency of the charge."
-          format: "double"
+          format: "float"
           example: 3456.6
         quantity:
           minimum: 0
           type: "number"
           description: "The amount of unit for this charge item."
-          format: "double"
+          format: "float"
           example: 34.4
       description: "Addresses the monetary value of freight and other service charges for a `Booking`."
     ConsignmentItem:
@@ -746,6 +746,7 @@ components:
           items:
             $ref: "#/components/schemas/NationalCommodityCode"
         shippingMarks:
+          maxItems: 50
           type: "array"
           description: |
             A list of the `ShippingMarks` applicable to this `consignmentItem`
@@ -1045,6 +1046,7 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
         displayedAddress:
+          maxItems: 6
           type: "array"
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
@@ -1262,7 +1264,7 @@ components:
           type: "number"
           description: |
             The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.
-          format: "double"
+          format: "float"
           example: 12000.3
         unit:
           type: "string"
@@ -1377,28 +1379,28 @@ components:
           type: "number"
           description: |
             Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.
-          format: "double"
+          format: "float"
           example: 42.0
         transportControlTemperature:
           type: "number"
           description: |
             Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.
-          format: "double"
+          format: "float"
           example: 24.1
         transportEmergencyTemperature:
           type: "number"
           description: "Temperature at which emergency procedures shall be implemented"
-          format: "double"
+          format: "float"
           example: 74.1
         SADT:
           type: "number"
           description: "Lowest temperature in which self-accelerating decomposition may occur in a substance"
-          format: "double"
+          format: "float"
           example: 54.1
         SAPT:
           type: "number"
           description: "Lowest temperature in which self-accelerating polymerization may occur in a substance"
-          format: "double"
+          format: "float"
           example: 70.0
       description: "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure."
     Location:
@@ -1473,7 +1475,7 @@ components:
           type: "number"
           description: |
             The total weight of the explosive substances, without the packaging’s, casings, etc.
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -1493,7 +1495,7 @@ components:
           exclusiveMinimum: true
           type: "number"
           description: "The volume of the referenced dangerous goods."
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -1512,7 +1514,7 @@ components:
           exclusiveMinimum: true
           type: "number"
           description: "Total weight of the goods carried, excluding packaging."
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -1651,7 +1653,7 @@ components:
           exclusiveMinimum: true
           type: "number"
           description: "The weight of an empty container (gross container weight)."
-          format: "double"
+          format: "float"
           example: 4800
         unit:
           type: "string"
@@ -1779,6 +1781,7 @@ components:
             - `MULTIMODAL` - Multimodal
           example: "VESSEL"
         vesselVoyages:
+          maxItems: 3
           type: "array"
           description: |
             Details of the POD, POL or DC vessel voyages
@@ -1806,6 +1809,7 @@ components:
           allOf:
           - $ref: "#/components/schemas/ActiveReeferSettings"
         shippingMarks:
+          maxItems: 50
           type: "array"
           description: |
             A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`

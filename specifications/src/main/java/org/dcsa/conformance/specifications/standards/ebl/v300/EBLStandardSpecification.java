@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.specifications.dataoverview.AttributesHierarchicalSheet;
 import org.dcsa.conformance.specifications.dataoverview.DataOverviewSheet;
+import org.dcsa.conformance.specifications.dataoverview.LegendMetadata;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
@@ -85,6 +86,12 @@ public class EBLStandardSpecification extends StandardSpecification {
         new PathItem().get(operationTransportDocumentGet()));
 
     getTransportDocumentEndpoint = new GetTransportDocumentEndpoint();
+  }
+
+  @Override
+  protected LegendMetadata getLegendMetadata() {
+    return new LegendMetadata(
+        "Arrival Notice", "1.0.0-20250606-alpha", "eBL TD", "3.0.0 release", 1);
   }
 
   @Override

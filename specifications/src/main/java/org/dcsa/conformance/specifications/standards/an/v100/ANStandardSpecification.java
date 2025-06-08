@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.specifications.dataoverview.AttributesHierarchicalSheet;
 import org.dcsa.conformance.specifications.dataoverview.AttributesNormalizedSheet;
 import org.dcsa.conformance.specifications.dataoverview.DataOverviewSheet;
+import org.dcsa.conformance.specifications.dataoverview.LegendMetadata;
 import org.dcsa.conformance.specifications.dataoverview.QueryFiltersSheet;
 import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
@@ -106,6 +107,12 @@ public class ANStandardSpecification extends StandardSpecification {
         new PathItem().post(operationArrivalNoticeNotificationsPut()));
 
     getArrivalNoticesEndpoint = new GetArrivalNoticesEndpoint();
+  }
+
+  @Override
+  protected LegendMetadata getLegendMetadata() {
+    return new LegendMetadata(
+        "Arrival Notice", "1.0.0-20250606-alpha", "AN", "1.0.0-20250523-design", 4);
   }
 
   @Override

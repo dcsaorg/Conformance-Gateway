@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
 import org.dcsa.conformance.specifications.dataoverview.DataOverview;
 import org.dcsa.conformance.specifications.dataoverview.DataOverviewSheet;
+import org.dcsa.conformance.specifications.dataoverview.LegendMetadata;
 
 @Slf4j
 public abstract class StandardSpecification {
@@ -101,6 +102,8 @@ public abstract class StandardSpecification {
                     .forEach(openAPI.getComponents()::addSchemas));
   }
 
+  protected abstract LegendMetadata getLegendMetadata();
+
   protected abstract Stream<Class<?>> modelClassesStream();
 
   protected abstract List<String> getRootTypeNames();
@@ -129,6 +132,7 @@ public abstract class StandardSpecification {
 
     DataOverview dataOverview =
         new DataOverview(
+            getLegendMetadata(),
             constraintsByClassAndField,
             SpecificationToolkit.parameterizeStringRawSchemaMap(
                 openAPI.getComponents().getSchemas()),

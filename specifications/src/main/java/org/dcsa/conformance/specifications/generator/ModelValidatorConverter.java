@@ -196,7 +196,7 @@ public class ModelValidatorConverter implements ModelConverter {
   }
 
   private static Field getJavaFieldWithPropertyName(Class<?> aClass, String propertyName) {
-    if (java.lang.Object.class.equals(aClass)) {
+    if (aClass == null || java.lang.Object.class.equals(aClass)) {
       return null;
     }
     return Arrays.stream(aClass.getDeclaredFields())

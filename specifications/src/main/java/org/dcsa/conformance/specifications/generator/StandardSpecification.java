@@ -91,6 +91,15 @@ public abstract class StandardSpecification {
                                             .add(schemaConstraint))));
 
     ModelConverters.getInstance()
+        .getConverters()
+        .forEach(
+            existingConverter -> {
+              if (existingConverter instanceof ModelValidatorConverter) {
+                log.info("Removing {}", existingConverter);
+                ModelConverters.getInstance().removeConverter(existingConverter);
+              }
+            });
+    ModelConverters.getInstance()
         .addConverter(
             new ModelValidatorConverter(constraintsByClassAndField, modelClassesStream()));
     modelClassesStream()

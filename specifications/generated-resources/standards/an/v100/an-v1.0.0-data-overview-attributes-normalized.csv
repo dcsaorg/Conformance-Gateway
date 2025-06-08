@@ -66,8 +66,8 @@ ArrivalNotice,"transportDocumentTypeCode",string,,,,SWB,"Specifies the type of t
 - `SWB` (Sea Waybill)",
 ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",,,,,"The equipments being used.",
 "ArrivalNoticeNotification",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created",
-"ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at place of delivery",
-"ArrivalNoticeNotification",etaAtPortOfDischargeDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the port of discharge",
+"ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,string,,,,2025-01-23,"The expected date of arrival of the shipment at place of delivery",
+"ArrivalNoticeNotification",etaAtPortOfDischargeDate,string,,,,2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
 "ArrivalNoticeNotification",issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNoticeNotification",label,string,,,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
@@ -141,7 +141,7 @@ Character | Valid Characters | Description
 3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.",
 DangerousGoods,"competentAuthorityApproval",string,,70,,"{Name and reference...}","Name and reference number of the competent authority providing the approval.",
 DangerousGoods,emergencyContactDetails,EmergencyContactDetails,,,,,"24 hr emergency contact details",
-DangerousGoods,endOfHoldingTime,string,,,,"Fri Sep 03 02:00:00 CEST 2021","Date by when the refrigerated liquid needs to be delivered.",
+DangerousGoods,endOfHoldingTime,string,,,,2021-09-03,"Date by when the refrigerated liquid needs to be delivered.",
 DangerousGoods,fumigationDateTime,string,,,,2024-09-04T09:41Z,"Date & time when the container was fumigated",
 DangerousGoods,grossWeight,GrossWeight,,,,,"Total weight of the goods carried, including packaging.",
 DangerousGoods,imoClass,string,,4,,1.4S,"The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:
@@ -219,11 +219,11 @@ According to [ISO 6346](https://www.iso.org/standard/83558.html), a container id
 
 If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
 Equipment,tareWeight,TareWeight,,,,,"The tare weight of the container.",
-ExportLicense,expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Export License`.",
+ExportLicense,expiryDate,string,,,,2024-09-21,"Expiry date of the `Export License`.",
 ExportLicense,isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
 
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
-ExportLicense,issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Export License`.",
+ExportLicense,issueDate,string,,,,2024-09-14,"Issue date of the `Export License`.",
 ExportLicense,reference,string,,35,,EMC007123,"Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.",
 Facility,facilityCode,string,,6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
 The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
@@ -279,11 +279,11 @@ IdentifyingCode,codeListProvider,string,,100,,W3C,"A list of codes identifying a
 - `DCSA` (Digital Container Shipping Association)
 - `ZZZ` (Mutually defined)",
 IdentifyingCode,partyCode,string,,150,,MSK,"Code to identify the party as provided by the code list provider",
-ImportLicense,expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Import License`.",
+ImportLicense,expiryDate,string,,,,2024-09-21,"Expiry date of the `Import License`.",
 ImportLicense,isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
 
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
-ImportLicense,issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Import License`.",
+ImportLicense,issueDate,string,,,,2024-09-14,"Issue date of the `Import License`.",
 ImportLicense,reference,string,,35,,EMC007123,"Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.",
 InnerPackaging,description,string,,100,,"Woven plastic water resistant Bag","Description of the packaging.",
 InnerPackaging,material,string,,100,,Plastic,"The `material` used for the `Inner Packaging` of the referenced `Dangerous Goods`.",
@@ -367,14 +367,14 @@ TareWeight,value,number,,,,4800,"The weight of an empty container (gross contain
 TaxLegalReference,countryCode,string,,2,,IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 TaxLegalReference,type,string,,50,,PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
 TaxLegalReference,value,string,,35,,AAAAA0000A,"The value of the `taxLegalReference`",
-Transport,departureDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date of departure from the location where the cargo is handed over by the shipper, or his agent,
+Transport,departureDate,string,,,,2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
 Transport,dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country.",
 Transport,"estimatedGeneralOrderDateTime",string,,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
-Transport,etaAtPlaceOfDeliveryDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at Place of Delivery.",
-Transport,etaAtPortOfDischargeDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the Port of Discharge.",
-Transport,inlandArrivalDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
+Transport,etaAtPlaceOfDeliveryDate,string,,,,2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
+Transport,etaAtPortOfDischargeDate,string,,,,2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
+Transport,inlandArrivalDate,string,,,,2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 Transport,loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country.",
 Transport,modeOfTransport,string,,20,,VESSEL,"Code defined by DCSA to identify a mode of transport.
 
@@ -383,13 +383,13 @@ Transport,modeOfTransport,string,,20,,VESSEL,"Code defined by DCSA to identify a
 - `TRUCK` - Truck
 - `BARGE` - Barge
 - `MULTIMODAL` - Multimodal",
-Transport,onBoardDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date when the container was loaded onto the vessel at the port of origin.",
+Transport,onBoardDate,string,,,,2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
 Transport,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent
 and where responsibility of the shipping line ceases.",
 Transport,placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
 This indicates the point at which the shipping line takes on responsibility for carriage of the container.",
-Transport,plannedArrivalDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the first mother vessel arriving at the destination country.",
-Transport,plannedDepartureDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of departure of the first mother vessel arriving at the destination country.",
+Transport,plannedArrivalDate,string,,,,2025-01-23,"The expected date of arrival of the first mother vessel arriving at the destination country.",
+Transport,plannedDepartureDate,string,,,,2025-01-23,"The expected date of departure of the first mother vessel arriving at the destination country.",
 Transport,portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 Transport,portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
 Transport,vesselVoyages,"VesselVoyage list",,,,,"Details of the POD, POL or DC vessel voyages",

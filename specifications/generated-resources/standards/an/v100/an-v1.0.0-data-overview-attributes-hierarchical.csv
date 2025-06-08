@@ -66,18 +66,18 @@ According to [ISO 6346](https://www.iso.org/standard/83558.html), a container id
 
 If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
 "ArrivalNotice / consignmentItems / cargoItems / exportLicense",exportLicense,ExportLicense,,,,,"Export license applicable to this cargo item.",
-"ArrivalNotice / consignmentItems / cargoItems / exportLicense / expiryDate",expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Export License`.",
+"ArrivalNotice / consignmentItems / cargoItems / exportLicense / expiryDate",expiryDate,string,,,,2024-09-21,"Expiry date of the `Export License`.",
 "ArrivalNotice / consignmentItems / cargoItems / exportLicense / isRequired",isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
 
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
-"ArrivalNotice / consignmentItems / cargoItems / exportLicense / issueDate",issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Export License`.",
+"ArrivalNotice / consignmentItems / cargoItems / exportLicense / issueDate",issueDate,string,,,,2024-09-14,"Issue date of the `Export License`.",
 "ArrivalNotice / consignmentItems / cargoItems / exportLicense / reference",reference,string,,35,,EMC007123,"Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.",
 "ArrivalNotice / consignmentItems / cargoItems / importLicense",importLicense,ImportLicense,,,,,"Import license applicable to this cargo item.",
-"ArrivalNotice / consignmentItems / cargoItems / importLicense / expiryDate",expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Import License`.",
+"ArrivalNotice / consignmentItems / cargoItems / importLicense / expiryDate",expiryDate,string,,,,2024-09-21,"Expiry date of the `Import License`.",
 "ArrivalNotice / consignmentItems / cargoItems / importLicense / isRequired",isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
 
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
-"ArrivalNotice / consignmentItems / cargoItems / importLicense / issueDate",issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Import License`.",
+"ArrivalNotice / consignmentItems / cargoItems / importLicense / issueDate",issueDate,string,,,,2024-09-14,"Issue date of the `Import License`.",
 "ArrivalNotice / consignmentItems / cargoItems / importLicense / reference",reference,string,,35,,EMC007123,"Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.",
 "ArrivalNotice / consignmentItems / cargoItems / nationalCommodityCodes",nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list of `National Commodity Codes` that apply to this `cargoItem`",
 "ArrivalNotice / consignmentItems / cargoItems / nationalCommodityCodes / countryCode",countryCode,string,,2,,BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
@@ -107,7 +107,7 @@ Character | Valid Characters | Description
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / phone",phone,string,,30,,"+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / provider",provider,string,,255,,GlobeTeam,"Name of the third party vendor providing emergency support",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / referenceNumber",referenceNumber,string,,255,,12234,"Contract reference for the emergency support provided by an external third party vendor.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / endOfHoldingTime",endOfHoldingTime,string,,,,"Fri Sep 03 02:00:00 CEST 2021","Date by when the refrigerated liquid needs to be delivered.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / endOfHoldingTime",endOfHoldingTime,string,,,,2021-09-03,"Date by when the refrigerated liquid needs to be delivered.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / fumigationDateTime",fumigationDateTime,string,,,,2024-09-04T09:41Z,"Date & time when the container was fumigated",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight",grossWeight,GrossWeight,,,,,"Total weight of the goods carried, including packaging.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
@@ -189,18 +189,18 @@ Character | Valid Characters | Description
 "ArrivalNotice / consignmentItems / customsReferences / values",values,"string list",,,,,,
 "ArrivalNotice / consignmentItems / descriptionOfGoods",descriptionOfGoods,"string list",,,,,"A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.",
 "ArrivalNotice / consignmentItems / exportLicense",exportLicense,ExportLicense,,,,,"Export license for the consignment item.",
-"ArrivalNotice / consignmentItems / exportLicense / expiryDate",expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Export License`.",
+"ArrivalNotice / consignmentItems / exportLicense / expiryDate",expiryDate,string,,,,2024-09-21,"Expiry date of the `Export License`.",
 "ArrivalNotice / consignmentItems / exportLicense / isRequired",isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
 
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
-"ArrivalNotice / consignmentItems / exportLicense / issueDate",issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Export License`.",
+"ArrivalNotice / consignmentItems / exportLicense / issueDate",issueDate,string,,,,2024-09-14,"Issue date of the `Export License`.",
 "ArrivalNotice / consignmentItems / exportLicense / reference",reference,string,,35,,EMC007123,"Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.",
 "ArrivalNotice / consignmentItems / importLicense",importLicense,ImportLicense,,,,,"Import license for the consignment item.",
-"ArrivalNotice / consignmentItems / importLicense / expiryDate",expiryDate,string,,,,"Sat Sep 21 02:00:00 CEST 2024","Expiry date of the `Import License`.",
+"ArrivalNotice / consignmentItems / importLicense / expiryDate",expiryDate,string,,,,2024-09-21,"Expiry date of the `Import License`.",
 "ArrivalNotice / consignmentItems / importLicense / isRequired",isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
 
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
-"ArrivalNotice / consignmentItems / importLicense / issueDate",issueDate,string,,,,"Sat Sep 14 02:00:00 CEST 2024","Issue date of the `Import License`.",
+"ArrivalNotice / consignmentItems / importLicense / issueDate",issueDate,string,,,,2024-09-14,"Issue date of the `Import License`.",
 "ArrivalNotice / consignmentItems / importLicense / reference",reference,string,,35,,EMC007123,"Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.",
 "ArrivalNotice / consignmentItems / nationalCommodityCodes",nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list of `National Commodity Codes` that apply to this `commodity`",
 "ArrivalNotice / consignmentItems / nationalCommodityCodes / countryCode",countryCode,string,,2,,BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
@@ -402,7 +402,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / serviceContractReference",serviceContractReference,string,,30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 "ArrivalNotice / termsAndConditions",termsAndConditions,string,,50000,,"Any reference in...","Carrier terms and conditions of transport.",
 "ArrivalNotice / transport",transport,Transport,,,,,"Transport info",
-"ArrivalNotice / transport / departureDate",departureDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date of departure from the location where the cargo is handed over by the shipper, or his agent,
+"ArrivalNotice / transport / departureDate",departureDate,string,,,,2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
 "ArrivalNotice / transport / dischargeLocation",dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country.",
 "ArrivalNotice / transport / dischargeLocation / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -434,9 +434,9 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / dischargeLocation / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / estimatedGeneralOrderDateTime","estimatedGeneralOrderDateTime",string,,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
-"ArrivalNotice / transport / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at Place of Delivery.",
-"ArrivalNotice / transport / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the Port of Discharge.",
-"ArrivalNotice / transport / inlandArrivalDate",inlandArrivalDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
+"ArrivalNotice / transport / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,,2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
+"ArrivalNotice / transport / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,,,,2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
+"ArrivalNotice / transport / inlandArrivalDate",inlandArrivalDate,string,,,,2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 "ArrivalNotice / transport / loadLocation",loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country.",
 "ArrivalNotice / transport / loadLocation / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -472,7 +472,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `TRUCK` - Truck
 - `BARGE` - Barge
 - `MULTIMODAL` - Multimodal",
-"ArrivalNotice / transport / onBoardDate",onBoardDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The date when the container was loaded onto the vessel at the port of origin.",
+"ArrivalNotice / transport / onBoardDate",onBoardDate,string,,,,2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
 "ArrivalNotice / transport / placeOfDelivery",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent
 and where responsibility of the shipping line ceases.",
 "ArrivalNotice / transport / placeOfDelivery / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -531,8 +531,8 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / latitude",latitude,string,,10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / longitude",longitude,string,,11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfReceipt / locationName",locationName,string,,100,,"Port of Amsterdam","The name of the location.",
-"ArrivalNotice / transport / plannedArrivalDate",plannedArrivalDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the first mother vessel arriving at the destination country.",
-"ArrivalNotice / transport / plannedDepartureDate",plannedDepartureDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of departure of the first mother vessel arriving at the destination country.",
+"ArrivalNotice / transport / plannedArrivalDate",plannedArrivalDate,string,,,,2025-01-23,"The expected date of arrival of the first mother vessel arriving at the destination country.",
+"ArrivalNotice / transport / plannedDepartureDate",plannedDepartureDate,string,,,,2025-01-23,"The expected date of departure of the first mother vessel arriving at the destination country.",
 "ArrivalNotice / transport / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 "ArrivalNotice / transport / portOfDischarge / UNLocationCode",UNLocationCode,string,,5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -661,8 +661,8 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
 "ArrivalNotice / utilizedTransportEquipments / shippingMarks",shippingMarks,"string list",,,,,"A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`",
 "ArrivalNoticeNotification",,,,,,,,
 "ArrivalNoticeNotification / equipmentReferences",equipmentReferences,"string list",,,,,"References of the equipments for which this arrival notice was created",
-"ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the shipment at place of delivery",
-"ArrivalNoticeNotification / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,,,,"Thu Jan 23 01:00:00 CET 2025","The expected date of arrival of the vessel at the port of discharge",
+"ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,string,,,,2025-01-23,"The expected date of arrival of the shipment at place of delivery",
+"ArrivalNoticeNotification / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,string,,,,2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
 "ArrivalNoticeNotification / issueDateTime",issueDateTime,string,yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNoticeNotification / label",label,string,,,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",

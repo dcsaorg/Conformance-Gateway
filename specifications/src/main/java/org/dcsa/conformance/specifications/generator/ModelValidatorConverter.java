@@ -7,9 +7,12 @@ import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.DateSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +27,7 @@ import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
 
 @Slf4j
 public class ModelValidatorConverter implements ModelConverter {
+  public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
   private final Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField;
   private final Map<String, Class<?>> modelClassesBySimpleName;
   private final Map<String, Map<String, Schema<?>>> originalSchemasByClassAndField =
@@ -169,6 +173,17 @@ public class ModelValidatorConverter implements ModelConverter {
                             new ComposedSchema()
                                 .allOf(List.of(new Schema<>().$ref(propertySchema.get$ref())))
                                 .description(originalPropertySchema.getDescription()));
+                  } else if (propertySchema instanceof DateSchema) {
+                    schema
+                        .getProperties()
+                        .put(
+                            propertyName,
+                            new Schema<String>()
+                                .type("string")
+                                .format("date")
+                                .name(propertyName)
+                                .description(propertySchema.getDescription())
+                                .example(DATE_FORMAT.format((Date) propertySchema.getExample())));
                   }
                 });
       }

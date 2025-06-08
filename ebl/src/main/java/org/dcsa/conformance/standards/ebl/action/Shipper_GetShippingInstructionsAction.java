@@ -88,6 +88,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
         replacementsMap, "prompt-shipper-get.md", "prompt-shipper-refresh-complete.md");
   }
 
+  @Override
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     if (recordTDR) {
@@ -105,14 +106,14 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        var documentReference = useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+        var documentReference =
+            useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
         return Stream.of(
             new UrlPathCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
                 "/v3/shipping-instructions/" + documentReference),
-            new ResponseStatusCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+            new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -124,12 +125,18 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             new JsonSchemaCheck(
-              EblRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              responseSchemaValidator),
-              EBLChecks.siResponseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedSiStatus, expectedAmendedSiStatus, requestAmendedStatus)
-          );
+                EblRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            EBLChecks.siResponseContentChecks(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                getCspSupplier(),
+                getDspSupplier(),
+                expectedSiStatus,
+                expectedAmendedSiStatus,
+                requestAmendedStatus));
       }
     };
   }

@@ -39,14 +39,14 @@ public class UC14_Carrier_ConfirmShippingInstructionsCompleteAction extends Stat
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        // Does the carrier use SI reference, TD Reference or both? Well, both is allowed, and we do not support
+        // Does the carrier use SI reference, TD Reference or both? Well, both is allowed, and we do
+        // not support
         // checking that, so meh.
         return getSINotificationChecks(
-          getMatchedExchangeUuid(),
-          expectedApiVersion,
-          requestSchemaValidator,
-          ShippingInstructionsStatus.SI_COMPLETED
-        );
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            requestSchemaValidator,
+            ShippingInstructionsStatus.SI_COMPLETED);
       }
     };
   }

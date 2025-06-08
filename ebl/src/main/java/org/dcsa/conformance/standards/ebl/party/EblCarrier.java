@@ -416,14 +416,19 @@ public class EblCarrier extends ConformanceParty {
 
   private void generateAndEmitNotificationFromShippingInstructions(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {
     var notification =
-      ShippingInstructionsNotification.builder()
-        .apiVersion(apiVersion)
-        .shippingInstructions(shippingInstructions.getShippingInstructions())
-        .feedbacks(shippingInstructions.getfeedbacks() != null ? shippingInstructions.getfeedbacks() : OBJECT_MAPPER.createArrayNode())
-        .includeShippingInstructionsReference(includeShippingInstructionsReference)
-        .subscriptionReference(shippingInstructions.getSubscriptionReference())
-        .build()
-        .asJsonNode();
+        ShippingInstructionsNotification.builder()
+            .apiVersion(apiVersion)
+            .shippingInstructions(shippingInstructions.getShippingInstructions())
+            .updatedShippingInstructions(
+                shippingInstructions.getUpdatedShippingInstructions().orElse(null))
+            .feedbacks(
+                shippingInstructions.getfeedbacks() != null
+                    ? shippingInstructions.getfeedbacks()
+                    : OBJECT_MAPPER.createArrayNode())
+            .includeShippingInstructionsReference(includeShippingInstructionsReference)
+            .subscriptionReference(shippingInstructions.getSubscriptionReference())
+            .build()
+            .asJsonNode();
     asyncCounterpartNotification(
         actionPrompt.required(ACTION_ID).asText(),
         "/v3/shipping-instructions-notifications",
@@ -580,6 +585,7 @@ public class EblCarrier extends ConformanceParty {
         ShippingInstructionsNotification.builder()
             .apiVersion(apiVersion)
             .shippingInstructions(siData)
+            .updatedShippingInstructions(si.getUpdatedShippingInstructions().orElse(null))
             .subscriptionReference(si.getSubscriptionReference())
             .build()
             .asJsonNode());
@@ -691,6 +697,7 @@ public class EblCarrier extends ConformanceParty {
         ShippingInstructionsNotification.builder()
             .apiVersion(apiVersion)
             .shippingInstructions(si.getShippingInstructions())
+            .updatedShippingInstructions(si.getUpdatedShippingInstructions().orElse(null))
             .subscriptionReference(si.getSubscriptionReference())
             .build()
             .asJsonNode());
@@ -725,6 +732,7 @@ public class EblCarrier extends ConformanceParty {
         ShippingInstructionsNotification.builder()
             .apiVersion(apiVersion)
             .shippingInstructions(si.getShippingInstructions())
+            .updatedShippingInstructions(si.getUpdatedShippingInstructions().orElse(null))
             .subscriptionReference(si.getSubscriptionReference())
             .build()
             .asJsonNode());
@@ -856,7 +864,7 @@ public class EblCarrier extends ConformanceParty {
       } else {
         setDocumentProvidedField(data, "transportDocumentStatus", transportDocumentStatus);
       }
-      if(feedbacks != null && feedbacks.size() > 0) {
+      if (feedbacks != null && !feedbacks.isEmpty()) {
         data.set("feedbacks", feedbacks);
       }
       notification.set("data", data);
@@ -901,13 +909,23 @@ public class EblCarrier extends ConformanceParty {
     protected boolean isSINotification() {
       return false;
     }
+
+    @Override
+    public ObjectNode asJsonNode() {
+      var notification = super.asJsonNode();
+      var data = (ObjectNode) notification.get("data");
+
+      data.set("transportDocument", transportDocument);
+
+      return notification;
+    }
   }
 
   @SuperBuilder
   private static class ShippingInstructionsNotification extends DocumentNotification {
 
-
     private JsonNode shippingInstructions;
+    private JsonNode updatedShippingInstructions;
 
     @Override
     protected JsonNode referenceDocument() {
@@ -922,6 +940,19 @@ public class EblCarrier extends ConformanceParty {
     @Override
     protected boolean isSINotification() {
       return true;
+    }
+
+    @Override
+    public ObjectNode asJsonNode() {
+      var notification = super.asJsonNode();
+      var data = (ObjectNode) notification.get("data");
+
+      data.set("shippingInstructions", shippingInstructions);
+      if (updatedShippingInstructions != null && !updatedShippingInstructions.isEmpty()) {
+        data.set("updatedShippingInstructions", updatedShippingInstructions);
+      }
+
+      return notification;
     }
   }
 }

@@ -5,14 +5,12 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDConte
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 
 import com.fasterxml.jackson.core.JsonPointer;
-
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
@@ -144,7 +142,7 @@ public class IssuanceChecks {
   }
 
   public static ActionCheck tdContentChecks(UUID matched, String standardsVersion) {
-    var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, standardsVersion, null);
+    var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, null);
     return JsonAttribute.contentChecks(
       "Complex validations of transport document",
       EblIssuanceRole::isCarrier,

@@ -145,6 +145,14 @@ public class AttributesData {
                           if (schemaPattern != null) {
                             attributeInfo.setPattern(schemaPattern);
                           }
+                          if (attributeSchema.getFormat() != null
+                              && !attributeSchema.getFormat().isEmpty()) {
+                            attributeInfo.setAttributeType(
+                                "%s(%s)"
+                                    .formatted(
+                                        attributeInfo.getAttributeType(),
+                                        attributeSchema.getFormat()));
+                          }
                         }
                         attributeInfoList.add(attributeInfo);
                       });

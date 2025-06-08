@@ -8,14 +8,12 @@ import lombok.Data;
 public class EmbeddedDocument {
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       type = "string",
       example = "20250123 AN XYZ01234.docx",
       description = "Document name")
   private String name;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       type = "string",
       example = "RXhhbXBsZSBBTiBjb250ZW50",
       description = "Base64 representation of the binary document content")

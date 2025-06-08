@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class DocumentParties {
 
-  @Schema(description = "The Shipper party.")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The Shipper party.")
   private Shipper shipper;
 
   @Schema(description = "The Consignee party.")
@@ -18,7 +18,7 @@ public class DocumentParties {
   @Schema(description = "The Endorsee party.")
   private Endorsee endorsee;
 
-  @Schema(description = "The Issuing party responsible for signing the document.")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The Issuing party responsible for signing the document.")
   private IssuingParty issuingParty;
 
   @Schema(description = "Carrier’s agent at the destination.")
@@ -47,7 +47,6 @@ List of up to 3 `Notify Parties`. The first item in the list is the **First Noti
 A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.
 """)
   @ArraySchema(
-      schema = @Schema(description = "Optional list of additional document parties."),
-      minItems = 0)
+      schema = @Schema(description = "Optional list of additional document parties."))
   private List<OtherDocumentParty> other;
 }

@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(
     type = "string",
-    pattern = "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
-    minLength = 5,
     maxLength = 5,
     example = "2301W",
     description =

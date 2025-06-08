@@ -16,13 +16,14 @@ import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
 
 @Slf4j
 public class DataOverview {
-
+  private final LegendMetadata legendMetadata;
   private final AttributesHierarchicalSheet attributesHierarchicalSheet;
   private final AttributesNormalizedSheet attributesNormalizedSheet;
   private final QueryParametersSheet queryParametersSheet;
   private final QueryFiltersSheet queryFiltersSheet;
 
   public DataOverview(
+      LegendMetadata legendMetadata,
       Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField,
       Map<String, Schema<?>> schemas,
       List<String> rootTypeNames,
@@ -32,6 +33,7 @@ public class DataOverview {
       Map<Class<? extends DataOverviewSheet>, Map<String, String>>
           changedPrimaryKeyByOldPrimaryKeyBySheetClass,
       boolean swapOldAndNew) {
+    this.legendMetadata = legendMetadata;
     AttributesData attributesData =
         new AttributesData(constraintsByClassAndField, schemas, rootTypeNames);
     attributesHierarchicalSheet =
@@ -71,6 +73,7 @@ public class DataOverview {
   @SneakyThrows
   public void exportToExcelFile(String excelFilePath) {
     try (Workbook workbook = new XSSFWorkbook()) {
+      new LegendSheet(workbook, legendMetadata).addToWorkbook();
       AtomicLong nextId = new AtomicLong(0);
       Stream.of(
               attributesHierarchicalSheet,

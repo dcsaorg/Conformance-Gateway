@@ -1,10 +1,11 @@
 package org.dcsa.conformance.specifications.dataoverview;
 
 import io.swagger.v3.oas.models.media.Schema;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
+import java.util.stream.Stream;
+
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
+import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 
 public class AttributesData {
   private final ArrayList<AttributeInfo> attributeInfoList = new ArrayList<>();
@@ -46,11 +49,7 @@ public class AttributesData {
                         attributeInfo.setAttributeType("UNKNOWN");
                         attributeInfo.setAttributeBaseType(attributeInfo.getAttributeType());
                         attributeInfo.setRequired(requiredAttributes.remove(attributeName));
-                        Integer maxLength = attributeSchema.getMaxLength();
-                        attributeInfo.setSize(
-                            maxLength == null || maxLength == Integer.MAX_VALUE
-                                ? ""
-                                : maxLength.toString()); // FIXME range, array items
+                        attributeInfo.setSize(getAttributeSizeInfo(attributeSchema));
                         switch (attributeSchemaType) {
                           case "array":
                             {
@@ -93,9 +92,17 @@ public class AttributesData {
                                 attributeInfo.setAttributeBaseType(
                                     attributeInfo.getAttributeType());
                               } else {
-                                attributeInfo.setAttributeType("string");
-                                attributeInfo.setAttributeBaseType(
-                                    attributeInfo.getAttributeType());
+                                if (attributeSchema.getAllOf() != null) {
+                                  $ref = attributeSchema.getAllOf().getFirst().get$ref();
+                                  attributeInfo.setAttributeType(
+                                      $ref.substring("#/components/schemas/".length()));
+                                  attributeInfo.setAttributeBaseType(
+                                      attributeInfo.getAttributeType());
+                                } else {
+                                  attributeInfo.setAttributeType("string");
+                                  attributeInfo.setAttributeBaseType(
+                                      attributeInfo.getAttributeType());
+                                }
                               }
                               break;
                             }
@@ -133,10 +140,19 @@ public class AttributesData {
                                   .trim());
                         }
                         attributeInfo.setPattern("");
-                        if (attributeInfo.getAttributeType().equals("string")) {
-                          String schemaPattern = attributeSchema.getPattern();
+                        Schema<?> attributeStringSchema = getAttributeStringSchema(attributeSchema);
+                        if (attributeStringSchema != null) {
+                          String schemaPattern = attributeStringSchema.getPattern();
                           if (schemaPattern != null) {
                             attributeInfo.setPattern(schemaPattern);
+                          }
+                          if (attributeStringSchema.getFormat() != null
+                              && !attributeStringSchema.getFormat().isEmpty()) {
+                            attributeInfo.setAttributeType(
+                                "%s(%s)"
+                                    .formatted(
+                                        attributeInfo.getAttributeType(),
+                                      attributeStringSchema.getFormat()));
                           }
                         }
                         attributeInfoList.add(attributeInfo);
@@ -168,7 +184,7 @@ public class AttributesData {
             attributesByPath.put(
                 "%s:%s".formatted(rootTypeName, rootTypeName), new AttributeInfo()));
 
-    Map<String, List<AttributeInfo>> attributeInfoByObjectType = new HashMap<>();
+    Map<String, List<AttributeInfo>> attributeInfoByObjectType = new TreeMap<>();
     attributeInfoList.forEach(
         attributeInfo ->
             attributeInfoByObjectType
@@ -218,5 +234,46 @@ public class AttributesData {
                   Objects.requireNonNullElse(attributeInfo.getConstraints(), ""));
             })
         .toList();
+  }
+
+  private static String getAttributeSizeInfo(Schema<?> attributeSchema) {
+    Schema<?> arraySchema = attributeSchema.getItems() == null ? null : attributeSchema;
+    Schema<?> itemSchema =
+        attributeSchema.getItems() == null ? attributeSchema : attributeSchema.getItems();
+    return Stream.of(
+            arraySchema == null ? null : getConstraintValue("minItems", arraySchema.getMinItems()),
+            arraySchema == null ? null : getConstraintValue("maxItems", arraySchema.getMaxItems()),
+            getConstraintValue("minLength", itemSchema.getMinLength()),
+            getConstraintValue("maxLength", itemSchema.getMaxLength()),
+            getConstraintValue("minimum", itemSchema.getMinimum()),
+            getConstraintValue("maximum", itemSchema.getMaximum()),
+            getConstraintValue("exclMin", itemSchema.getExclusiveMinimumValue()),
+            getConstraintValue("exclMax", itemSchema.getExclusiveMaximumValue()))
+        .filter(Objects::nonNull)
+        .collect(Collectors.joining("\n"));
+  }
+
+  private static String getConstraintValue(String title, BigDecimal constraintValue) {
+    return constraintValue == null ? null : getConstraintValue(title, constraintValue.intValue());
+  }
+
+  private static String getConstraintValue(String title, Integer constraintValue) {
+    return constraintValue == null
+            || constraintValue == Integer.MIN_VALUE
+            || constraintValue == Integer.MAX_VALUE
+        ? null
+        : "%s=%d".formatted(title, constraintValue);
+  }
+
+  private static Schema<?> getAttributeStringSchema(Schema<?> attributeSchema) {
+    if ("string".equals(attributeSchema.getType())) {
+      return attributeSchema;
+    }
+    if (attributeSchema.getItems() != null) {
+      if ("string".equals(attributeSchema.getItems().getType())) {
+        return attributeSchema.getItems();
+      }
+    }
+    return null;
   }
 }

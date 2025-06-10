@@ -3,7 +3,9 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "`Export License` requirements.\n\nCondition: Included if the property is provided in the `Shipping Instructions.`")
+@Schema(
+    description =
+        "`Export License` requirements.\n\nCondition: Included if the property is provided in the `Shipping Instructions.`")
 @Data
 public class ExportLicense {
 
@@ -15,7 +17,7 @@ Information provided by the shipper to indicate whether an `Export License` or p
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
 """,
       example = "true")
-  private Boolean isRequired;
+  protected Boolean isRequired;
 
   @Schema(
       description =
@@ -25,11 +27,17 @@ Reference number assigned to an `Export License` or permit, which authorizes a b
       example = "EMC007123",
       maxLength = 35,
       pattern = "^\\S(?:.*\\S)?$")
-  private String reference;
+  protected String reference;
 
-  @Schema(description = "Issue date of the `Export License`.", example = "2024-09-14", format = "date")
-  private String issueDate;
+  @Schema(
+      description = "Issue date of the `Export License`.",
+      example = "2024-09-14",
+      format = "date")
+  protected String issueDate;
 
-  @Schema(description = "Expiry date of the `Export License`.", example = "2024-09-21", format = "date")
-  private String expiryDate;
+  @Schema(
+      description = "Expiry date of the `Export License`.",
+      example = "2024-09-21",
+      format = "date")
+  protected String expiryDate;
 }

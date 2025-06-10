@@ -12,7 +12,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalRefer
 @Data
 public class Party {
 
-  @Schema(description = "Name of the party.", example = "Asseco Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Name of the party.", example = "Asseco Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
   private String partyName;
 
   @Schema(description = "Address of the party.")

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.specifications.dataoverview.AttributesHierarchicalSheet;
 import org.dcsa.conformance.specifications.dataoverview.DataOverviewSheet;
+import org.dcsa.conformance.specifications.dataoverview.LegendMetadata;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
@@ -37,7 +38,7 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.EmergencyCont
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Endorsee;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Equipment;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.Facility;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
@@ -88,62 +89,68 @@ public class EBLStandardSpecification extends StandardSpecification {
   }
 
   @Override
+  protected LegendMetadata getLegendMetadata() {
+    return new LegendMetadata(
+        "Arrival Notice", "1.0.0-20250606-alpha", "eBL TD", "3.0.0 release", 1);
+  }
+
+  @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
-      ActiveReeferSettings.class,
-      Address.class,
-      CargoGrossVolume.class,
-      CargoGrossWeight.class,
-      CargoItem.class,
-      CargoNetVolume.class,
-      CargoNetWeight.class,
-      CarriersAgentAtDestination.class,
-      Charge.class,
-      City.class,
-      Consignee.class,
-      ConsignmentItem.class,
-      CustomsReference.class,
-      DangerousGoods.class,
-      DocumentParties.class,
-      EmergencyContactDetails.class,
-      Endorsee.class,
-      Equipment.class,
-      ExportLicense.class,
-      Facility.class,
-      GeoCoordinate.class,
-      GrossWeight.class,
-      IdentifyingCode.class,
-      ImportLicense.class,
-      InnerPackaging.class,
-      InvoicePayableAt.class,
-      IssuingParty.class,
-      Limits.class,
-      NationalCommodityCode.class,
-      NetExplosiveContent.class,
-      NetVolume.class,
-      NetWeight.class,
-      NotifyParty.class,
-      OnwardInlandRouting.class,
-      OtherDocumentParty.class,
-      OuterPackaging.class,
-      Party.class,
-      PartyAddress.class,
-      PartyContactDetail.class,
-      PlaceOfDelivery.class,
-      PlaceOfIssue.class,
-      PlaceOfReceipt.class,
-      PortOfDischarge.class,
-      PortOfLoading.class,
-      Reference.class,
-      ReferenceConsignmentItem.class,
-      Seal.class,
-      Shipper.class,
-      TareWeight.class,
-      TaxLegalReference.class,
-      TransportDocument.class,
-      Transports.class,
-      UtilizedTransportEquipment.class,
-      VesselVoyage.class);
+        ActiveReeferSettings.class,
+        Address.class,
+        CargoGrossVolume.class,
+        CargoGrossWeight.class,
+        CargoItem.class,
+        CargoNetVolume.class,
+        CargoNetWeight.class,
+        CarriersAgentAtDestination.class,
+        Charge.class,
+        City.class,
+        Consignee.class,
+        ConsignmentItem.class,
+        CustomsReference.class,
+        DangerousGoods.class,
+        DocumentParties.class,
+        EmergencyContactDetails.class,
+        Endorsee.class,
+        Equipment.class,
+        ExportLicense.class,
+        Facility.class,
+        GeoCoordinate.class,
+        GrossWeight.class,
+        IdentifyingCode.class,
+        ImportLicense.class,
+        InnerPackaging.class,
+        InvoicePayableAt.class,
+        IssuingParty.class,
+        Limits.class,
+        NationalCommodityCode.class,
+        NetExplosiveContent.class,
+        NetVolume.class,
+        NetWeight.class,
+        NotifyParty.class,
+        OnwardInlandRouting.class,
+        OtherDocumentParty.class,
+        OuterPackaging.class,
+        Party.class,
+        PartyAddress.class,
+        PartyContactDetail.class,
+        PlaceOfDelivery.class,
+        PlaceOfIssue.class,
+        PlaceOfReceipt.class,
+        PortOfDischarge.class,
+        PortOfLoading.class,
+        Reference.class,
+        ReferenceConsignmentItem.class,
+        Seal.class,
+        Shipper.class,
+        TareWeight.class,
+        TaxLegalReference.class,
+        TransportDocument.class,
+        Transports.class,
+        UtilizedTransportEquipment.class,
+        VesselVoyage.class);
   }
 
   @Override

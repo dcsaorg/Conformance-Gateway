@@ -6,9 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import io.swagger.v3.oas.models.media.Schema;
-
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -24,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-import lombok.SneakyThrows;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -47,11 +44,6 @@ public enum SpecificationToolkit {
   @SuppressWarnings("unchecked")
   public static Schema<List<String>> stringListQueryParameterSchema() {
     return new Schema<List<String>>().type("array").items(new Schema<String>().type("string"));
-  }
-
-  @SneakyThrows
-  public static Field getClassField(Class<?> classObject, String fieldName) {
-    return classObject.getDeclaredField(fieldName);
   }
 
   public static List<SchemaConstraint> getClassConstraints(String className) {

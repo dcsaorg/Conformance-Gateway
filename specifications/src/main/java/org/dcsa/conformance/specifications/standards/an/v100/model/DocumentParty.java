@@ -4,27 +4,29 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
+import org.dcsa.conformance.specifications.standards.an.v100.types.PurchaseOrderReference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.DisplayedAddressLine;
 
 @Data
 @Schema(description = "Document party")
 public class DocumentParty {
 
+  // https://www.stylusstudio.com/edifact/D03A/3035.htm
   @Schema(
       description =
 """
 Specifies the role of the party in a given context. Possible values are:
 
-- `SHP` (Shipper)
-- `CSG` (Consignee)
-- `CSG` (Endorsee)
-- `ISS` (Issuing Party)
-- `CAG` (Carrier's Agent at Destination)
-- `NP1` (First Notify Party)
-- `NP2` (Second Notify Party)
-- `NPX` (Other Notify Party)
+- `OS` (Shipper)
+- `CN` (Consignee)
+- `ZZZ` (Endorsee)
+- `RW` (Issuing Party)
+- `CG` (Carrier's Agent at Destination)
+- `N1` (First Notify Party)
+- `N2` (Second Notify Party)
+- `NI` (Other Notify Party)
 - `SCO` (Service Contract Owner)
 - `DDR` (Consignor's freight forwarder)
 - `DDS` (Consignee's freight forwarder)
@@ -34,15 +36,11 @@ Specifies the role of the party in a given context. Possible values are:
 - `MF` (Manufacturer)
 - `WH` (Warehouse Keeper)
 """,
-      example = "DDS",
+      example = "N1",
       maxLength = 3)
   private String partyFunction;
 
-  @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
-      maxLength = 70,
-      description = "Party name",
-      example = "Acme Inc.")
+  @Schema(maxLength = 70, description = "Party name", example = "Acme Inc.")
   private String partyName;
 
   @Schema(
@@ -54,8 +52,7 @@ Specifies the role of the party in a given context. Possible values are:
       - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
       """,
       example = "NATURAL_PERSON",
-      maxLength = 50,
-      pattern = "^\\S(?:.*\\S)?$")
+      maxLength = 50)
   private String typeOfPerson;
 
   @Schema(description = "Party location")
@@ -63,26 +60,13 @@ Specifies the role of the party in a given context. Possible values are:
 
   @Schema(
       description =
-          """
-      The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-
-      **Conditions:** If provided:
-        - the displayed address must be included in the `Transport Document`.
-        - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
-        - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
-        - the order of the items in this array **MUST** be preserved as by the provider of the API.
-      """)
-  @ArraySchema(
-      schema =
-          @Schema(
-              description = "A line of the displayed address for the BL.",
-              example = "Strawinskylaan 4117",
-              maxLength = 35),
-      maxItems = 6)
-  private List<String> displayedAddress;
+"""
+The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
+""")
+  @ArraySchema(maxItems = 6)
+  private List<DisplayedAddressLine> displayedAddress;
 
   @Schema(description = "List of codes identifying the party")
-  @ArraySchema(minItems = 1)
   private List<IdentifyingCode> identifyingCodes;
 
   @Schema(description = "List of tax or legal references relevant to the party")
@@ -92,19 +76,11 @@ Specifies the role of the party in a given context. Possible values are:
   private List<PartyContactDetail> partyContactDetails;
 
   @Schema(
-      description = "A reference linked to the `Consignee`.",
-      example = "HHL007",
-      maxLength = 35,
-      pattern = "^\\S(?:.*\\S)?$")
+      description = "Document party reference",
+      example = "REF1234",
+      maxLength = 35)
   private String reference;
 
-  @Schema(description = "A list of `Purchase Order Reference`s linked to the `Consignee`.")
-  @ArraySchema(
-      schema =
-          @Schema(
-              description = "Purchase order reference linked to the Consignee.",
-              example = "HHL007",
-              maxLength = 35,
-              pattern = "^\\S(?:.*\\S)?$"))
-  private List<String> purchaseOrderReferences;
+  @Schema(description = "A list of purchase order references")
+  private List<PurchaseOrderReference> purchaseOrderReferences;
 }

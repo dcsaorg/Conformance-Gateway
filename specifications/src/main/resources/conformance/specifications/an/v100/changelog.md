@@ -1,5 +1,26 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250606-alpha
+
+Started the Alpha Stage with a blank slate by removing all constraints except for the maxLength of strings and the maxItems of arrays.
+
+Enhanced the import / export testing to include all attribute parameters and updated the eBL TD and AN information model accordingly.
+
+Used UN/CEFACT code list values for the `partyFunction` of every `DocumentParty`.
+
+Fixed the naming of `freeTimes` and the name and properties of `serviceContractReference`.
+
+Added a legend sheet to the Data Overview file.
+
+Updated the "Size" column in the attributes sheets of the Data Overview to include the full sizing info of array, string and numeric attributes.
+
+Updated the string array attributes in the Data Overview with information about both the array and the string elements.
+
+Appended the OpenAPI "format" to the Type column for string and string array attributes in the Data Overview.
+
+Fixed the example formatting of attributes of type `string($date)`.
+
+
 ## Snapshot v1.0.0-20250523-design
 
 Restructured the Arrival Notice information model and API for optimal reuse of Bill of Lading 3.0 components.

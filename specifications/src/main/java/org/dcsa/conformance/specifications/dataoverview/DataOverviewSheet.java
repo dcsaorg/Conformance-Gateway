@@ -142,9 +142,14 @@ public abstract class DataOverviewSheet {
       return oldValues.stream()
           .map(
               oldValue ->
-                  Objects.equals(oldValue, newValues.get(index.getAndIncrement())) ? "" : oldValue)
+                  isValueChanged(oldValue, newValues.get(index.getAndIncrement())) ? "" : oldValue)
           .toList();
     }
+  }
+
+  private static boolean isValueChanged(String oldValue, String newValue) {
+    return Objects.equals(oldValue, newValue)
+        || Objects.equals("maxLength=%s".formatted(oldValue), newValue);
   }
 
   private static List<Map.Entry<DataOverviewDiffStatus, List<String>>> diff(

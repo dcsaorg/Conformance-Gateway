@@ -3,11 +3,15 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "Used for storing cargo during transport. Equipment size/type is defined by the ISO 6346 code. Common sizes include 20'/40'/45' containers.")
+@Schema(description = Equipment.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class Equipment {
 
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "Used for storing cargo during transport. Equipment size/type is defined by the ISO 6346 code. Common sizes include 20'/40'/45' containers.";
+
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -18,7 +22,7 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
       example = "APZU4812090",
       maxLength = 11,
       pattern = "^\\S(?:.*\\S)?$")
-  private String equipmentReference;
+  protected String equipmentReference;
 
   @Schema(
       name = "ISOEquipmentCode",
@@ -29,8 +33,8 @@ Unique code for the different equipment size and type used to transport commodit
       example = "22G1",
       maxLength = 4,
       pattern = "^\\S(?:.*\\S)?$")
-  private String isoEquipmentCode;
+  protected String isoEquipmentCode;
 
   @Schema(description = "The tare weight of the container.")
-  private TareWeight tareWeight;
+  protected TareWeight tareWeight;
 }

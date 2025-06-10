@@ -1,5 +1,7 @@
 package org.dcsa.conformance.specifications;
 
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import java.util.Arrays;
@@ -34,15 +36,18 @@ public enum StandardSpecificationTestToolkit {
       Map<String, Schema<?>> generatedSchemasByType,
       String typeName) {
     log.info("{}Comparing object: {}", indentation, typeName);
+
     Schema<?> originalTypeSchema = originalSchemasByType.get(typeName);
     Schema<?> generatedTypeSchema = generatedSchemasByType.get(typeName);
 
     Map<String, Schema<?>> originalProperties = getSchemaProperties(originalTypeSchema);
     Map<String, Schema<?>> generatedProperties = getSchemaProperties(generatedTypeSchema);
     softAssertEquals(
-        "attribute list",
+        "property list",
         new TreeSet<>(originalProperties.keySet()),
         new TreeSet<>(generatedProperties.keySet()));
+    softAssertEquals(
+        "required properties", originalTypeSchema.getRequired(), generatedTypeSchema.getRequired());
 
     originalProperties.keySet().stream()
         .sorted()
@@ -74,6 +79,108 @@ public enum StandardSpecificationTestToolkit {
             });
   }
 
+  private static void compareAttribute(
+      String indentation,
+      String typeName,
+      String attributeName,
+      Schema<?> originalAttributeSchema,
+      Schema<?> generatedAttributeSchema) {
+    log.info("{}Comparing {} {}", indentation, typeName, attributeName);
+    if (generatedAttributeSchema instanceof ComposedSchema) {
+      if (!(originalAttributeSchema instanceof ComposedSchema)) {
+        compareAttribute(
+            indentation,
+            typeName,
+            attributeName,
+            originalAttributeSchema,
+            generatedAttributeSchema.getAllOf().getFirst());
+        return;
+      }
+    }
+    softAssertEquals(indentation, originalAttributeSchema, generatedAttributeSchema);
+  }
+
+  private static void softAssertEquals(
+      String indentation, Schema<?> originalAttributeSchema, Schema<?> generatedAttributeSchema) {
+    softAssertEquals(
+        "name",
+        comparableDescription(originalAttributeSchema.getDescription()),
+        comparableDescription(generatedAttributeSchema.getDescription()));
+
+    softAssertEquals(
+        "type",
+        getAttributeTypeName(originalAttributeSchema),
+        getAttributeTypeName(generatedAttributeSchema));
+    softAssertEquals(
+        "format", originalAttributeSchema.getFormat(), generatedAttributeSchema.getFormat());
+    softAssertEquals(
+        "pattern", originalAttributeSchema.getPattern(), generatedAttributeSchema.getPattern());
+
+    softAssertEquals(
+        "minLength",
+        originalAttributeSchema.getMinLength(),
+        generatedAttributeSchema.getMinLength());
+    softAssertEquals(
+        "maxLength",
+        originalAttributeSchema.getMaxLength(),
+        generatedAttributeSchema.getMaxLength());
+
+    softAssertEquals(
+        "minItems", originalAttributeSchema.getMinItems(), generatedAttributeSchema.getMinItems());
+    softAssertEquals(
+        "maxItems", originalAttributeSchema.getMaxItems(), generatedAttributeSchema.getMaxItems());
+
+    softAssertEquals(
+        "minimum", originalAttributeSchema.getMinimum(), generatedAttributeSchema.getMinimum());
+    softAssertEquals(
+        "maximum", originalAttributeSchema.getMaximum(), generatedAttributeSchema.getMaximum());
+
+    softAssertEquals(
+        "exclusiveMinimum",
+        originalAttributeSchema.getExclusiveMinimum(),
+        generatedAttributeSchema.getExclusiveMinimum());
+    softAssertEquals(
+        "exclusiveMaximum",
+        originalAttributeSchema.getExclusiveMaximum(),
+        generatedAttributeSchema.getExclusiveMaximum());
+
+    softAssertEquals(
+        "examples", originalAttributeSchema.getExamples(), generatedAttributeSchema.getExamples());
+
+    if (originalAttributeSchema instanceof ArraySchema) {
+      log.info("{}  Comparing array item schema", indentation);
+      Assertions.assertInstanceOf(ArraySchema.class, generatedAttributeSchema);
+      softAssertEquals(
+          indentation, originalAttributeSchema.getItems(), generatedAttributeSchema.getItems());
+    }
+  }
+
+  private static void softAssertEquals(String property, Object expected, Object actual) {
+    if (!Objects.equals(expected, actual)) {
+      log.warn(
+"""
+WRONG VALUE:
+================
+{}
+<<<<<<<< expected <<<<<<<<
+{}
+>>>>>>>>  actual  >>>>>>>>
+{}
+================
+""",
+          property,
+          expected,
+          actual);
+    }
+    if (System.currentTimeMillis() > 0) {
+      Assertions.assertEquals(expected, actual, "Wrong value for: " + property);
+    }
+  }
+
+  private static String comparableDescription(String description) {
+    return description == null ? "" : description.trim();
+  }
+
   private static String getAttributeTypeName(Schema<?> attributeSchema) {
     if (attributeSchema.getItems() != null) {
       return getAttributeTypeName(attributeSchema.getItems());
@@ -96,60 +203,5 @@ public enum StandardSpecificationTestToolkit {
                         .flatMap(subSchema -> getSchemaProperties(subSchema).entrySet().stream())
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
     return allProperties;
-  }
-
-  private static void compareAttribute(
-      String indentation,
-      String typeName,
-      String attributeName,
-      Schema<?> originalAttributeSchema,
-      Schema<?> generatedAttributeSchema) {
-    log.debug("{}Comparing {} {}", indentation, typeName, attributeName);
-    softAssertEquals(
-        "name",
-        comparableDescription(originalAttributeSchema.getDescription()),
-        comparableDescription(generatedAttributeSchema.getDescription()));
-    softAssertEquals(
-        "type",
-        getAttributeTypeName(originalAttributeSchema),
-        getAttributeTypeName(generatedAttributeSchema));
-    softAssertEquals(
-        "pattern", originalAttributeSchema.getPattern(), generatedAttributeSchema.getPattern());
-    softAssertEquals(
-        "minLength",
-        originalAttributeSchema.getMinLength(),
-        generatedAttributeSchema.getMinLength());
-    softAssertEquals(
-        "maxLength",
-        originalAttributeSchema.getMaxLength(),
-        generatedAttributeSchema.getMaxLength());
-    softAssertEquals(
-        "examples", originalAttributeSchema.getExamples(), generatedAttributeSchema.getExamples());
-  }
-
-  private static void softAssertEquals(String property, Object expected, Object actual) {
-    if (!Objects.equals(expected, actual)) {
-      log.warn(
-"""
-WRONG VALUE:
-================
-{}
-<<<<<<<<<<<<<<<<
-{}
->>>>>>>>>>>>>>>>
-{}
-================
-""",
-          property,
-          expected,
-          actual);
-    }
-    if (System.currentTimeMillis() > 0) {
-      Assertions.assertEquals(expected, actual, "Wrong value for: " + property);
-    }
-  }
-
-  private static String comparableDescription(String description) {
-    return description == null ? "" : description.trim();
   }
 }

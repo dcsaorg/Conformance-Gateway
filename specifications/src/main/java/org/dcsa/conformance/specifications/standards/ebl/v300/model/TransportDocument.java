@@ -1,5 +1,6 @@
 package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
@@ -11,12 +12,14 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
+import org.dcsa.conformance.specifications.standards.ebl.v300.types.CarrierClause;
+import org.dcsa.conformance.specifications.standards.ebl.v300.types.DisplayedName;
 
 @Schema(description = "The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:\n- Bill of Lading\n- Sea Waybill.")
 @Data
 public class TransportDocument {
 
-  @Schema(description = "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.", example = "HHL71800000", maxLength = 20, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.", example = "HHL71800000", maxLength = 20, pattern = "^\\S(?:.*\\S)?$")
   private String transportDocumentReference;
 
   @Schema(description = "Additional reference that can be optionally used alongside the `transportDocumentReference` in order to distinguish between versions of the same `Transport Document`.", example = "Version_1", maxLength = 100, pattern = "^\\S(?:.*\\S)?$")
@@ -25,13 +28,13 @@ public class TransportDocument {
   @Schema(description = "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.", example = "e0559d83-00e2-438e-afd9-fdd610c1a008", maxLength = 100, pattern = "^\\S(?:.*\\S)?$")
   private String shippingInstructionsReference;
 
-  @Schema(description = "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED", example = "DRAFT", maxLength = 50)
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED", example = "DRAFT", maxLength = 50)
   private String transportDocumentStatus;
 
-  @Schema(description = "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)", example = "SWB", allowableValues = {"BOL", "SWB"})
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)", example = "SWB", allowableValues = {"BOL", "SWB"})
   private String transportDocumentTypeCode;
 
-  @Schema(description = "Specifies whether the Transport Document is a received for shipment, or shipped on board.", example = "true")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Specifies whether the Transport Document is a received for shipment, or shipped on board.", example = "true")
   private Boolean isShippedOnBoardType;
 
   @Schema(
@@ -46,10 +49,11 @@ An indicator of whether freight and ancillary fees for the main transport are pr
       allowableValues = {"PRE", "COL"})
   private String freightPaymentTermCode;
 
-  @Schema(description = "An indicator whether the transport document is electronically transferred.", example = "true")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "An indicator whether the transport document is electronically transferred.", example = "true")
   private Boolean isElectronic;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 Indicates whether the B/L is issued `to order` or not. If `true`, the B/L is considered negotiable and an Endorsee party can be defined in the Document parties. If no Endorsee is defined, the B/L is blank endorsed. If `false`, the B/L is considered non-negotiable (also referred to as `straight`).
@@ -126,7 +130,8 @@ The name to be used in order to specify how the `Place of Receipt` should be dis
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  private List<String> displayedNameForPlaceOfReceipt;
+  @ArraySchema(maxItems = 5)
+  private List<DisplayedName> displayedNameForPlaceOfReceipt;
 
   @Schema(
       description =
@@ -135,7 +140,8 @@ The name to be used in order to specify how the `Port of Load` should be display
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  private List<String> displayedNameForPortOfLoad;
+  @ArraySchema(maxItems = 5)
+  private List<DisplayedName> displayedNameForPortOfLoad;
 
   @Schema(
       description =
@@ -144,7 +150,8 @@ The name to be used in order to specify how the `Port of Discharge` should be di
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  private List<String> displayedNameForPortOfDischarge;
+  @ArraySchema(maxItems = 5)
+  private List<DisplayedName> displayedNameForPortOfDischarge;
 
   @Schema(
       description =
@@ -153,7 +160,8 @@ The name to be used in order to specify how the `Place of Delivery` should be di
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  private List<String> displayedNameForPlaceOfDelivery;
+  @ArraySchema(maxItems = 5)
+  private List<DisplayedName> displayedNameForPlaceOfDelivery;
 
   @Schema(
       description =
@@ -171,10 +179,11 @@ Exactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on
   @Schema(description = "The text to be displayed on the `Transport Document` as evidence that the goods have been received for shipment or shipped on board.", example = "Received for Shipment CMA CGM CONCORDE 28-Jul-2022...", maxLength = 250, pattern = "^\\S(?:.*\\S)?$")
   private String displayedShippedOnBoardReceivedForShipment;
 
-  @Schema(description = "Carrier terms and conditions of transport.", example = "Any reference in...", maxLength = 50000)
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Carrier terms and conditions of transport.", example = "Any reference in...", maxLength = 50000)
   private String termsAndConditions;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 Indicates the type of service offered at `Origin`. The options are:
@@ -188,6 +197,7 @@ Indicates the type of service offered at `Origin`. The options are:
   private String receiptTypeAtOrigin;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 Indicates the type of service offered at `Destination`. The options are:
@@ -202,6 +212,7 @@ Indicates the type of service offered at `Destination`. The options are:
   private String deliveryTypeAtDestination;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 Refers to the shipment term at the **loading** of the cargo into the container. Possible values are:
@@ -214,6 +225,7 @@ Refers to the shipment term at the **loading** of the cargo into the container. 
   private String cargoMovementTypeAtOrigin;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 Refers to the shipment term at the **unloading** of the cargo out of the container. Possible values are:
@@ -287,6 +299,7 @@ The currency used for the declared value, using the 3-character code defined by 
   private String declaredValueCurrency;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
           "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
       example = "MMCU",
@@ -295,6 +308,7 @@ The currency used for the declared value, using the 3-character code defined by 
   private String carrierCode;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The code list provider for the `carrierCode`. Possible values are:
@@ -305,8 +319,10 @@ The code list provider for the `carrierCode`. Possible values are:
       allowableValues = {"SMDG", "NMFTA"})
   private String carrierCodeListProvider;
 
-  @Schema(description = "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
-  private List<String> carrierClauses;
+  @Schema(
+      description =
+          "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
+  private List<CarrierClause> carrierClauses;
 
   @Schema(
       description =
@@ -318,7 +334,7 @@ The number of additional pages required to contain the goods description on a tr
       format = "int32")
   private Integer numberOfRiderPages;
 
-  @Schema
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private Transports transports;
 
   @Schema(description = "A list of `Charges`")
@@ -327,19 +343,22 @@ The number of additional pages required to contain the goods description on a tr
   @Schema
   private PlaceOfIssue placeOfIssue;
 
-  @Schema
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private InvoicePayableAt invoicePayableAt;
 
-  @Schema(description = "The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.)")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.)")
+  @ArraySchema(minItems = 1)
   private List<PartyContactDetail> partyContactDetails;
 
-  @Schema(description = "All `Parties` with associated roles.")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "All `Parties` with associated roles.")
   private DocumentParties documentParties;
 
-  @Schema(description = "A list of `ConsignmentItems`")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "A list of `ConsignmentItems`")
+  @ArraySchema(minItems = 1)
   private List<ConsignmentItem> consignmentItems;
 
-  @Schema(description = "A list of `Utilized Transport Equipments` describing the equipment being used.")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "A list of `Utilized Transport Equipments` describing the equipment being used.")
+  @ArraySchema(minItems = 1)
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;
 
   @Schema

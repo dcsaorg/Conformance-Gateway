@@ -1,13 +1,17 @@
-package org.dcsa.conformance.specifications.standards.ebl.v300.model;
+package org.dcsa.conformance.specifications.standards.dt.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).")
+@Schema(description = Facility.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class Facility {
 
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).";
+
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The code used for identifying the specific facility. This code does not include the UN Location Code.
@@ -18,9 +22,10 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
       example = "ADT",
       maxLength = 6,
       pattern = "^\\S(?:.*\\S)?$")
-  private String facilityCode;
+  protected String facilityCode;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
@@ -29,5 +34,5 @@ The provider used for identifying the facility Code. Some facility codes are onl
 """,
       example = "SMDG",
       enumAsRef = true)
-  private String facilityCodeListProvider;
+  protected String facilityCodeListProvider;
 }

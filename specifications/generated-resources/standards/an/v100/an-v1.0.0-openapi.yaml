@@ -163,7 +163,7 @@ components:
         temperatureSetpoint:
           type: "number"
           description: "Target value of the temperature for the Reefer based on the cargo requirement."
-          format: "double"
+          format: "float"
           example: -15
         temperatureUnit:
           type: "string"
@@ -172,36 +172,27 @@ components:
 
             - `CEL` (Celsius)
             - `FAH` (Fahrenheit)
-
-            **Condition:** Mandatory to provide if `temperatureSetpoint` is provided
           example: "CEL"
         o2Setpoint:
-          maximum: 100
-          minimum: 0
           type: "number"
           description: "The percentage of the controlled atmosphere O<sub>2</sub> target value"
-          format: "double"
+          format: "float"
           example: 25
         co2Setpoint:
-          maximum: 100
-          minimum: 0
           type: "number"
           description: "The percentage of the controlled atmosphere CO<sub>2</sub> target value"
-          format: "double"
+          format: "float"
           example: 25
         humiditySetpoint:
-          maximum: 100
-          minimum: 0
           type: "number"
           description: "The percentage of the controlled atmosphere humidity target value"
-          format: "double"
+          format: "float"
           example: 95.6
         airExchangeSetpoint:
-          minimum: 0
           type: "number"
           description: |
             Target value for the air exchange rate which is the rate at which outdoor air replaces indoor air within a Reefer container
-          format: "double"
+          format: "float"
           example: 15.4
         airExchangeUnit:
           type: "string"
@@ -209,8 +200,6 @@ components:
             The unit for `airExchange` in metrics- or imperial- units per hour
             - `MQH` (Cubic metre per hour)
             - `FQH` (Cubic foot per hour)
-
-            **Condition:** Mandatory to provide if `airExchange` is provided
           example: "MQH"
         isVentilationOpen:
           type: "boolean"
@@ -248,7 +237,6 @@ components:
           example: "100"
         floor:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The floor of the street number."
           example: "N/A"
@@ -264,7 +252,6 @@ components:
           example: "123"
         city:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The name of the city."
           example: "Amsterdam"
@@ -275,22 +262,14 @@ components:
           example: "North Holland"
         countryCode:
           maxLength: 2
-          minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)"
           example: "NL"
       description: "An object for storing address-related information."
     ArrivalNotice:
       required:
-      - "carrierContactInformation"
-      - "documentParties"
       - "issueDateTime"
-      - "termsAndConditions"
-      - "transport"
       - "transportDocumentReference"
-      - "transportDocumentTypeCode"
-      - "utilizedTransportEquipments"
       type: "object"
       properties:
         issueDateTime:
@@ -307,22 +286,15 @@ components:
           example: "Warning"
         carrierCode:
           maxLength: 4
-          pattern: "^\\S+$"
           type: "string"
-          description: |-
-            The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.
-
-            Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
+          description: "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon."
           example: "MMCU"
         carrierCodeListProvider:
           type: "string"
-          description: |-
+          description: |
             The code list provider for the `carrierCode`. Possible values are:
             - `SMDG` (Ship Message Design Group)
             - `NMFTA` (National Motor Freight Traffic Association)
-
-
-            Specifying attribute 'carrierCodeListProvider' requires specifying attribute 'carrierCode'.
           example: "NMFTA"
           enum:
           - "SMDG"
@@ -339,9 +311,13 @@ components:
           items:
             $ref: "#/components/schemas/PartyContactDetail"
         pickupLocation:
-          $ref: "#/components/schemas/Location"
+          description: "Pickup location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
         returnLocation:
-          $ref: "#/components/schemas/Location"
+          description: "Return location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
         returnInstructions:
           maxLength: 500
           type: "string"
@@ -366,7 +342,6 @@ components:
             $ref: "#/components/schemas/Reference"
         transportDocumentReference:
           maxLength: 20
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment."
           example: "HHL71800000"
@@ -407,14 +382,12 @@ components:
             - `FCL` (Full Container Load)
             - `LCL` (Less than Container Load)
           example: "FCL"
-        serviceContractNumber:
-          maxLength: 100
+        serviceContractReference:
+          maxLength: 30
           type: "string"
           description: |
-            Reference number for agreement between shipper and carrier, which optionally includes a certain minimum
-            quantity commitment (usually referred as "MQC") of cargo that the shipper commits to over a fixed period,
-            and the carrier commits to a certain rate or rate schedule.
-          example: "SCN12345"
+            Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.
+          example: "HHL51800000"
         termsAndConditions:
           maxLength: 50000
           type: "string"
@@ -424,16 +397,20 @@ components:
           type: "array"
           description: "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer."
           items:
+            maxLength: 20000
             type: "string"
-            description: "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer."
+            description: "The content of the clause."
+            example: "It is not allowed to..."
         documentParties:
           type: "array"
           description: "Document parties"
           items:
             $ref: "#/components/schemas/DocumentParty"
         transport:
-          $ref: "#/components/schemas/Transport"
-        freeTime:
+          description: "Transport info"
+          allOf:
+          - $ref: "#/components/schemas/Transport"
+        freeTimes:
           type: "array"
           description: "List of free time conditions applicable to this shipment at destination"
           items:
@@ -460,13 +437,13 @@ components:
           items:
             $ref: "#/components/schemas/ConsignmentItem"
         arrivalNoticeVisualization:
-          $ref: "#/components/schemas/EmbeddedDocument"
+          description: "Visualization of an arrival notice, as an embedded document"
+          allOf:
+          - $ref: "#/components/schemas/EmbeddedDocument"
       description: "Full content of an Arrival Notice document."
     ArrivalNoticeNotification:
       required:
-      - "etaAtPortOfDischargeDate"
       - "issueDateTime"
-      - "portOfDischarge"
       - "transportDocumentReference"
       type: "object"
       properties:
@@ -476,26 +453,22 @@ components:
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         label:
-          maxLength: 1000
           type: "string"
           description: |
             Free text used to indicate a certain version or type of arrival notice,
             for example "Warning", "Updated", "Second", "Third" etc.
           example: "Warning"
         transportDocumentReference:
-          maxLength: 20
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
-          description: "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment."
-          example: "HHL71800000"
+          description: |
+            The reference of the transport document for which this arrival notice was created
+          example: "TDR1234"
         equipmentReferences:
           type: "array"
           description: |
             References of the equipments for which this arrival notice was created
           items:
             maxLength: 11
-            minLength: 1
-            pattern: "^\\S(?:.*\\S)?$"
             type: "string"
             description: |
               The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -508,20 +481,27 @@ components:
               from SMDG.
             example: "APZU4812090"
         portOfDischarge:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is discharged from the last sea-going vessel
+          allOf:
+          - $ref: "#/components/schemas/Location"
         etaAtPortOfDischargeDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of arrival of the vessel at the port of discharge
+          format: "date"
           example: "2025-01-23"
         placeOfDelivery:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
+            responsibility of the shipping line ceases
+          allOf:
+          - $ref: "#/components/schemas/Location"
         etaAtPlaceOfDeliveryDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of arrival of the shipment at place of delivery
+          format: "date"
           example: "2025-01-23"
       description: |
         Lightweight notification that can be sent when a new or updated Arrival Notice is available
@@ -547,12 +527,11 @@ components:
       type: "object"
       properties:
         value:
-          minimum: 0
           exclusiveMinimum: true
           type: "number"
           description: |
             Calculated by multiplying the width, height, and length of the packed cargo. A maximum of 4 decimals should be provided.
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -566,12 +545,11 @@ components:
       type: "object"
       properties:
         value:
-          minimum: 0
           exclusiveMinimum: true
           type: "number"
           description: |
             The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
-          format: "double"
+          format: "float"
           example: 2400
         unit:
           type: "string"
@@ -586,7 +564,6 @@ components:
       properties:
         equipmentReference:
           maxLength: 11
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -595,19 +572,33 @@ components:
             If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.
           example: "APZU4812090"
         cargoGrossWeight:
-          $ref: "#/components/schemas/CargoGrossWeight"
+          description: "Gross weight of the cargo."
+          allOf:
+          - $ref: "#/components/schemas/CargoGrossWeight"
         cargoGrossVolume:
-          $ref: "#/components/schemas/CargoGrossVolume"
+          description: "Gross volume of the cargo."
+          allOf:
+          - $ref: "#/components/schemas/CargoGrossVolume"
         cargoNetWeight:
-          $ref: "#/components/schemas/CargoNetWeight"
+          description: "Net weight of the cargo."
+          allOf:
+          - $ref: "#/components/schemas/CargoNetWeight"
         cargoNetVolume:
-          $ref: "#/components/schemas/CargoNetVolume"
+          description: "Net volume of the cargo."
+          allOf:
+          - $ref: "#/components/schemas/CargoNetVolume"
         exportLicense:
-          $ref: "#/components/schemas/ExportLicense"
+          description: "Export license applicable to this cargo item."
+          allOf:
+          - $ref: "#/components/schemas/ExportLicense"
         importLicense:
-          $ref: "#/components/schemas/ImportLicense"
+          description: "Import license applicable to this cargo item."
+          allOf:
+          - $ref: "#/components/schemas/ImportLicense"
         outerPackaging:
-          $ref: "#/components/schemas/OuterPackaging"
+          description: "Packaging information for this cargo item."
+          allOf:
+          - $ref: "#/components/schemas/OuterPackaging"
         nationalCommodityCodes:
           type: "array"
           description: "A list of `National Commodity Codes` that apply to this `cargoItem`"
@@ -623,12 +614,11 @@ components:
       type: "object"
       properties:
         value:
-          minimum: 0
           exclusiveMinimum: true
           type: "number"
           description: |
             Calculated by multiplying the width, height, and length of the cargo, excluding packaging.
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -642,12 +632,11 @@ components:
       type: "object"
       properties:
         value:
-          minimum: 0
           exclusiveMinimum: true
           type: "number"
           description: |
             The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
-          format: "double"
+          format: "float"
           example: 2400
         unit:
           type: "string"
@@ -662,21 +651,17 @@ components:
       properties:
         chargeName:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "Free text field describing the charge to apply"
           example: "Documentation fee - Destination"
         currencyAmount:
-          minimum: 0
           type: "number"
           description: |
             The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.
-          format: "double"
+          format: "float"
           example: 1012.12
         currencyCode:
           maxLength: 3
-          minLength: 3
-          pattern: "^[A-Z]{3}$"
           type: "string"
           description: |
             The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).
@@ -694,22 +679,19 @@ components:
           - "COL"
         calculationBasis:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.
           example: "Per day"
         unitPrice:
-          minimum: 0
           type: "number"
           description: "The unit price of this charge item in the currency of the charge."
-          format: "double"
+          format: "float"
           example: 3456.6
         quantity:
-          minimum: 0
           type: "number"
           description: "The amount of unit for this charge item."
-          format: "double"
+          format: "float"
           example: 34.4
       description: "Addresses the monetary value of freight and other service charges for a `Booking`."
     ConsignmentItem:
@@ -717,7 +699,6 @@ components:
       properties:
         carrierBookingReference:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The associated booking number provided by the carrier for this `Consignment Item`."
           example: "ABC709951"
@@ -725,46 +706,51 @@ components:
           type: "array"
           description: |
             A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.
-
-            **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
           items:
+            maxLength: 35
             type: "string"
-            description: |
-              A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.
-
-              **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
+            description: "A line describing the cargo"
+            example: "blue shoes size 47"
         HSCodes:
           type: "array"
           description: "A list of `HS Codes` that apply to this `consignmentItem`"
           items:
+            maxLength: 10
             type: "string"
-            description: "A list of `HS Codes` that apply to this `consignmentItem`"
+            description: |
+              Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.
+
+              More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
+            example: "851713"
         nationalCommodityCodes:
           type: "array"
           description: "A list of `National Commodity Codes` that apply to this `commodity`"
           items:
             $ref: "#/components/schemas/NationalCommodityCode"
         shippingMarks:
+          maxItems: 50
           type: "array"
           description: |
             A list of the `ShippingMarks` applicable to this `consignmentItem`
-
-            **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
           items:
+            maxLength: 35
             type: "string"
             description: |
-              A list of the `ShippingMarks` applicable to this `consignmentItem`
-
-              **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
+              The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.
+            example: "Made in China"
         cargoItems:
           type: "array"
           description: "A list of all `cargoItems`"
           items:
             $ref: "#/components/schemas/CargoItem"
         exportLicense:
-          $ref: "#/components/schemas/ExportLicense"
+          description: "Export license for the consignment item."
+          allOf:
+          - $ref: "#/components/schemas/ExportLicense"
         importLicense:
-          $ref: "#/components/schemas/ImportLicense"
+          description: "Import license for the consignment item."
+          allOf:
+          - $ref: "#/components/schemas/ImportLicense"
         references:
           type: "array"
           description: "A list of `References`"
@@ -781,26 +767,21 @@ components:
       properties:
         type:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The reference type code as defined in the relevant customs jurisdiction."
           example: "CUS"
         countryCode:
           maxLength: 2
-          minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
           example: "NL"
         values:
-          minItems: 1
           type: "array"
           items:
             maxLength: 35
-            pattern: "^\\S(?:.*\\S)?$"
             type: "string"
-            description: "The value(s) of the customs reference."
+            description: "The value of the `customsReference`"
             example: "4988470982020120017"
       description: |-
         Reference associated with customs and/or excise purposes required by relevant authorities for the import, export, or transit of goods.
@@ -814,24 +795,18 @@ components:
       properties:
         UNNumber:
           maxLength: 4
-          minLength: 4
-          pattern: "^\\d{4}$"
           type: "string"
           description: |
             United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.
           example: "1463"
         NANumber:
           maxLength: 4
-          minLength: 4
-          pattern: "^\\d{4}$"
           type: "string"
           description: |
             Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.
           example: "9037"
         codedVariantList:
           maxLength: 4
-          minLength: 4
-          pattern: "^[0-3][0-9A-Z]{3}$"
           type: "string"
           description: |
             Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.
@@ -865,15 +840,11 @@ components:
           example: "1.4S"
         subsidiaryRisk1:
           maxLength: 3
-          minLength: 1
-          pattern: "^[0-9](\\.[0-9])?$"
           type: "string"
           description: "Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code."
           example: "1.2"
         subsidiaryRisk2:
           maxLength: 3
-          minLength: 1
-          pattern: "^[0-9](\\.[0-9])?$"
           type: "string"
           description: "Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code."
           example: "1.2"
@@ -882,8 +853,6 @@ components:
           description: "Indicates if the goods belong to the classification of Marine Pollutant."
           example: false
         packingGroup:
-          maximum: 3
-          minimum: 1
           type: "integer"
           description: "The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code."
           format: "int32"
@@ -918,7 +887,6 @@ components:
           example: false
         competentAuthorityApproval:
           maxLength: 70
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "Name and reference number of the competent authority providing the approval."
           example: "{Name and reference...}"
@@ -926,21 +894,39 @@ components:
           type: "array"
           description: |
             List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.
-
-            **Condition:** only applicable to specific hazardous goods.
           items:
+            maxLength: 2
             type: "string"
             description: |
-              List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.
+              Grouping of Dangerous Goods having certain similar chemical properties. Possible values are:
 
-              **Condition:** only applicable to specific hazardous goods.
+              - `1` (Acids)
+              - `2` (Ammonium Compounds)
+              - `3` (Bromates)
+              - `4` (Chlorates)
+              - `5` (Chlorites)
+              - `6` (Cyanides)
+              - `7` (Heavy metals and their salts)
+              - `8` (Hypochlorites)
+              - `9` (Lead and its compounds)
+              - `10` (Liquid halogenated hydrocarbons)
+              - `11` (Mercury and mercury compounds)
+              - `12` (Nitrites and their mixtures)
+              - `13` (Perchlorates)
+              - `14` (Permanganates)
+              - `15` (Powdered metals)
+              - `16` (Peroxides),
+              - `17` (Azides)
+              - `18` (Alkalis)
         innerPackagings:
           type: "array"
           description: "A list of `Inner Packings` contained inside this `outer packaging/overpack`."
           items:
             $ref: "#/components/schemas/InnerPackaging"
         emergencyContactDetails:
-          $ref: "#/components/schemas/EmergencyContactDetails"
+          description: "24 hr emergency contact details"
+          allOf:
+          - $ref: "#/components/schemas/EmergencyContactDetails"
         EMSNumber:
           maxLength: 7
           type: "string"
@@ -951,7 +937,7 @@ components:
           type: "string"
           description: "Date by when the refrigerated liquid needs to be delivered."
           format: "date"
-          example: "2021-09-03T00:00:00.000+00:00"
+          example: "2021-09-03"
         fumigationDateTime:
           type: "string"
           description: "Date & time when the container was fumigated"
@@ -964,7 +950,6 @@ components:
           example: false
         inhalationZone:
           maxLength: 1
-          minLength: 1
           type: "string"
           description: |
             The zone classification of the toxicity of the inhalant. Possible values are:
@@ -975,19 +960,27 @@ components:
             - `D` (Hazard Zone D) can **only** be assigned to specific gases
           example: "A"
         grossWeight:
-          $ref: "#/components/schemas/GrossWeight"
+          description: "Total weight of the goods carried, including packaging."
+          allOf:
+          - $ref: "#/components/schemas/GrossWeight"
         netWeight:
-          $ref: "#/components/schemas/NetWeight"
+          description: "Total weight of the goods carried, excluding packaging."
+          allOf:
+          - $ref: "#/components/schemas/NetWeight"
         netExplosiveContent:
-          $ref: "#/components/schemas/NetExplosiveContent"
+          description: "The total weight of the explosive substances, without the packaging, casings, etc."
+          allOf:
+          - $ref: "#/components/schemas/NetExplosiveContent"
         netVolume:
-          $ref: "#/components/schemas/NetVolume"
+          description: "The volume of the referenced dangerous goods. Only applicable to liquids and gas."
+          allOf:
+          - $ref: "#/components/schemas/NetVolume"
         limits:
-          $ref: "#/components/schemas/Limits"
+          description: "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure."
+          allOf:
+          - $ref: "#/components/schemas/Limits"
       description: "Specification for `Dangerous Goods`. It is mandatory to provide one of `UNNumber` or `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**."
     DocumentParty:
-      required:
-      - "partyName"
       type: "object"
       properties:
         partyFunction:
@@ -996,14 +989,14 @@ components:
           description: |
             Specifies the role of the party in a given context. Possible values are:
 
-            - `SHP` (Shipper)
-            - `CSG` (Consignee)
-            - `CSG` (Endorsee)
-            - `ISS` (Issuing Party)
-            - `CAG` (Carrier's Agent at Destination)
-            - `NP1` (First Notify Party)
-            - `NP2` (Second Notify Party)
-            - `NPX` (Other Notify Party)
+            - `OS` (Shipper)
+            - `CN` (Consignee)
+            - `ZZZ` (Endorsee)
+            - `RW` (Issuing Party)
+            - `CG` (Carrier's Agent at Destination)
+            - `N1` (First Notify Party)
+            - `N2` (Second Notify Party)
+            - `NI` (Other Notify Party)
             - `SCO` (Service Contract Owner)
             - `DDR` (Consignor's freight forwarder)
             - `DDS` (Consignee's freight forwarder)
@@ -1012,7 +1005,7 @@ components:
             - `CS` (Consolidator)
             - `MF` (Manufacturer)
             - `WH` (Warehouse Keeper)
-          example: "DDS"
+          example: "N1"
         partyName:
           maxLength: 70
           type: "string"
@@ -1020,7 +1013,6 @@ components:
           example: "Acme Inc."
         typeOfPerson:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Can be one of the following values as per the Union Customs Code art. 5(4):
@@ -1029,27 +1021,19 @@ components:
             - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
           example: "NATURAL_PERSON"
         location:
-          $ref: "#/components/schemas/Location"
+          description: "Party location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
         displayedAddress:
+          maxItems: 6
           type: "array"
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-
-            **Conditions:** If provided:
-              - the displayed address must be included in the `Transport Document`.
-              - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
-              - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
-              - the order of the items in this array **MUST** be preserved as by the provider of the API.
           items:
+            maxLength: 35
             type: "string"
-            description: |
-              The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-
-              **Conditions:** If provided:
-                - the displayed address must be included in the `Transport Document`.
-                - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
-                - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
-                - the order of the items in this array **MUST** be preserved as by the provider of the API.
+            description: "A single address line"
+            example: "Strawinskylaan 4117"
         identifyingCodes:
           type: "array"
           description: "List of codes identifying the party"
@@ -1067,21 +1051,19 @@ components:
             $ref: "#/components/schemas/PartyContactDetail"
         reference:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
-          description: "A reference linked to the `Consignee`."
-          example: "HHL007"
+          description: "Document party reference"
+          example: "REF1234"
         purchaseOrderReferences:
           type: "array"
-          description: "A list of `Purchase Order Reference`s linked to the `Consignee`."
+          description: "A list of purchase order references"
           items:
+            maxLength: 35
             type: "string"
-            description: "A list of `Purchase Order Reference`s linked to the `Consignee`."
+            description: "Purchase order reference"
+            example: "PO1234"
       description: "Document party"
     EmbeddedDocument:
-      required:
-      - "content"
-      - "name"
       type: "object"
       properties:
         name:
@@ -1113,7 +1095,6 @@ components:
           example: "GlobeTeam"
         phone:
           maxLength: 30
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
@@ -1129,7 +1110,6 @@ components:
       properties:
         equipmentReference:
           maxLength: 11
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -1139,13 +1119,14 @@ components:
           example: "APZU4812090"
         ISOEquipmentCode:
           maxLength: 4
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
           example: "22G1"
         tareWeight:
-          $ref: "#/components/schemas/TareWeight"
+          description: "The tare weight of the container."
+          allOf:
+          - $ref: "#/components/schemas/TareWeight"
       description: "Used for storing cargo during transport. Equipment size/type is defined by the ISO 6346 code. Common sizes include 20'/40'/45' containers."
     ExportLicense:
       type: "object"
@@ -1159,7 +1140,6 @@ components:
           example: true
         reference:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.
@@ -1168,23 +1148,34 @@ components:
           type: "string"
           description: "Issue date of the `Export License`."
           format: "date"
-          example: "2024-09-14T00:00:00.000+00:00"
+          example: "2024-09-14"
         expiryDate:
           type: "string"
           description: "Expiry date of the `Export License`."
           format: "date"
-          example: "2024-09-21T00:00:00.000+00:00"
-      description: |-
-        `Export License` requirements.
-
-        Condition: Included if the property is provided in the `Shipping Instructions.`
+          example: "2024-09-21"
+      description: "`Export License` requirements."
+    Facility:
+      type: "object"
+      properties:
+        facilityCode:
+          maxLength: 6
+          type: "string"
+          description: |
+            The code used for identifying the specific facility. This code does not include the UN Location Code.
+            The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
+            - `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
+            - `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))
+          example: "ADT"
+        facilityCodeListProvider:
+          type: "string"
+          description: |
+            The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+            - `BIC` (Requires a UN Location Code)
+            - `SMDG` (Requires a UN Location Code)
+          example: "SMDG"
+      description: "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC)."
     FreeTime:
-      required:
-      - "calculationBasis"
-      - "duration"
-      - "isoEquipmentCode"
-      - "timeUnit"
-      - "typeCode"
       type: "object"
       properties:
         typeCode:
@@ -1198,7 +1189,6 @@ components:
           example: "DEM"
         isoEquipmentCode:
           maxLength: 4
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Unique code identifying the equipment size and type used to transport commodities.
@@ -1247,12 +1237,11 @@ components:
       type: "object"
       properties:
         value:
-          minimum: 0
           exclusiveMinimum: true
           type: "number"
           description: |
             The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.
-          format: "double"
+          format: "float"
           example: 12000.3
         unit:
           type: "string"
@@ -1318,7 +1307,6 @@ components:
           example: true
         reference:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.
@@ -1327,16 +1315,13 @@ components:
           type: "string"
           description: "Issue date of the `Import License`."
           format: "date"
-          example: "2024-09-14T00:00:00.000+00:00"
+          example: "2024-09-14"
         expiryDate:
           type: "string"
           description: "Expiry date of the `Import License`."
           format: "date"
-          example: "2024-09-21T00:00:00.000+00:00"
-      description: |-
-        `Import License` requirements.
-
-        Condition: Included if the property is provided in the `Shipping Instructions.`
+          example: "2024-09-21"
+      description: "`Import License` requirements."
     InnerPackaging:
       type: "object"
       properties:
@@ -1371,30 +1356,28 @@ components:
           type: "number"
           description: |
             Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.
-
-            **Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code.
-          format: "double"
+          format: "float"
           example: 42.0
         transportControlTemperature:
           type: "number"
           description: |
             Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.
-          format: "double"
+          format: "float"
           example: 24.1
         transportEmergencyTemperature:
           type: "number"
           description: "Temperature at which emergency procedures shall be implemented"
-          format: "double"
+          format: "float"
           example: 74.1
         SADT:
           type: "number"
           description: "Lowest temperature in which self-accelerating decomposition may occur in a substance"
-          format: "double"
+          format: "float"
           example: 54.1
         SAPT:
           type: "number"
           description: "Lowest temperature in which self-accelerating polymerization may occur in a substance"
-          format: "double"
+          format: "float"
           example: 70.0
       description: "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure."
     Location:
@@ -1406,11 +1389,11 @@ components:
           description: "The name of the location."
           example: "Port of Amsterdam"
         address:
-          $ref: "#/components/schemas/Address"
+          description: "Location address"
+          allOf:
+          - $ref: "#/components/schemas/Address"
         UNLocationCode:
           maxLength: 5
-          minLength: 5
-          pattern: "^[A-Z]{2}[A-Z2-9]{3}$"
           type: "string"
           description: |
             The UN Location code specifying where the place is located. The pattern used must be
@@ -1420,28 +1403,20 @@ components:
 
             More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: "NLAMS"
-        facilityCode:
-          maxLength: 6
-          pattern: "^\\S(?:.*\\S)?$"
-          type: "string"
-          description: "Facility code in the list provided by `facilityCodeListProvider`"
-          example: "CTA"
-        facilityCodeListProvider:
-          type: "string"
-          description: |-
-            The provider of the code list in which `facilityCode` is defined.
-            - `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
-            - `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)
-          example: "BIC"
+        facility:
+          description: "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC)."
+          allOf:
+          - $ref: "#/components/schemas/Facility"
         geoCoordinate:
-          $ref: "#/components/schemas/GeoCoordinate"
+          description: "An object used to express a location using `latitude` and `longitude`."
+          allOf:
+          - $ref: "#/components/schemas/GeoCoordinate"
       description: "Location information"
     NationalCommodityCode:
       type: "object"
       properties:
         type:
           maxLength: 10
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The national commodity classification code, which can be one of the following values defined by DCSA:
@@ -1454,8 +1429,6 @@ components:
           example: "NCM"
         countryCode:
           maxLength: 2
-          minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
@@ -1464,19 +1437,20 @@ components:
           type: "array"
           description: "A list of `national commodity codes` values."
           items:
+            maxLength: 10
             type: "string"
-            description: "A list of `national commodity codes` values."
+            description: "The value of the `National Commodity Code`"
+            example: "1515"
       description: "The national commodity classification code linked to a country with a value. Examples: NCM (Brazil), HTS (US), TARIC (EU)."
     NetExplosiveContent:
       type: "object"
       properties:
         value:
-          minimum: 0
           exclusiveMinimum: true
           type: "number"
           description: |
             The total weight of the explosive substances, without the packaging’s, casings, etc.
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -1492,11 +1466,10 @@ components:
       type: "object"
       properties:
         value:
-          minimum: 0
           exclusiveMinimum: true
           type: "number"
           description: "The volume of the referenced dangerous goods."
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -1511,11 +1484,10 @@ components:
       type: "object"
       properties:
         value:
-          minimum: 0
           exclusiveMinimum: true
           type: "number"
           description: "Total weight of the goods carried, excluding packaging."
-          format: "double"
+          format: "float"
           example: 2.4
         unit:
           type: "string"
@@ -1530,27 +1502,17 @@ components:
       properties:
         packageCode:
           maxLength: 2
-          minLength: 2
-          pattern: "^[A-Z0-9]{2}$"
           type: "string"
           description: |
             A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
-
-            **Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.
           example: "5H"
         imoPackagingCode:
           maxLength: 5
-          minLength: 1
-          pattern: "^[A-Z0-9]{1,5}$"
           type: "string"
           description: |
             The code of the packaging as per IMO.
-
-            **Condition:** only applicable to dangerous goods if specified in the [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx). If not available, the `packageCode` as per UN recommendation 21 should be used.
           example: "1A2"
         numberOfPackages:
-          maximum: 99999999
-          minimum: 1
           type: "integer"
           description: "Specifies the number of outer packagings/overpacks associated with this `Cargo Item`."
           format: "int32"
@@ -1581,20 +1543,17 @@ components:
       properties:
         name:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "Name of the contact"
           example: "Henrik"
         phone:
           maxLength: 30
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
           example: "+45 70262970"
         email:
           maxLength: 100
-          pattern: "^.+@\\S+$"
           type: "string"
           description: "`E-mail` address to be used"
           example: "info@dcsa.org"
@@ -1612,7 +1571,6 @@ components:
           example: "CR"
         value:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: "The value of the reference."
           example: "HHL00103004"
@@ -1634,8 +1592,10 @@ components:
           type: "array"
           description: "List of `referenceValues` for a given `referenceType`."
           items:
+            maxLength: 35
             type: "string"
-            description: "List of `referenceValues` for a given `referenceType`."
+            description: "The value of the reference."
+            example: "HHL00103004"
       description: "References for a consignment item, used by shippers or freight forwarders and shared in events or printed on documents."
     Seal:
       type: "object"
@@ -1653,19 +1613,16 @@ components:
             - `SHI` (Shipper)
             - `VET` (Veterinary)
             - `CUS` (Customs)
-
-            **Condition:** Seal source may be required depending on the type of commodity being shipped.
           example: "CUS"
       description: "Seal-related information associated with shipment equipment. A seal is affixed once the equipment is loaded and remains until final destination."
     TareWeight:
       type: "object"
       properties:
         value:
-          minimum: 0
           exclusiveMinimum: true
           type: "number"
           description: "The weight of an empty container (gross container weight)."
-          format: "double"
+          format: "float"
           example: 4800
         unit:
           type: "string"
@@ -1680,75 +1637,66 @@ components:
       properties:
         type:
           maxLength: 50
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The reference type code as defined by the relevant tax and/or legal authority.
           example: "PAN"
         countryCode:
           maxLength: 2
-          minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
           example: "IN"
         value:
           maxLength: 35
-          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The value of the `taxLegalReference`
           example: "AAAAA0000A"
       description: "Reference that uniquely identifies a party for tax and/or legal purposes according to local jurisdiction."
     Transport:
-      required:
-      - "departureDate"
-      - "etaAtPortOfDischargeDate"
-      - "portOfDischarge"
-      - "portOfLoading"
       type: "object"
       properties:
         onBoardDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The date when the container was loaded onto the vessel at the port of origin.
+          format: "date"
           example: "2025-01-23"
         departureDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The date of departure from the location where the cargo is handed over by the shipper, or his agent,
             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
+          format: "date"
           example: "2025-01-23"
         plannedDepartureDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of departure of the first mother vessel arriving at the destination country.
+          format: "date"
           example: "2025-01-23"
         plannedArrivalDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The expected date of arrival of the first mother vessel arriving at the destination country.
+          format: "date"
           example: "2025-01-23"
         etaAtPortOfDischargeDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: "The expected date of arrival of the vessel at the Port of Discharge."
+          format: "date"
           example: "2025-01-23"
         etaAtPlaceOfDeliveryDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: "The expected date of arrival of the shipment at Place of Delivery."
+          format: "date"
           example: "2025-01-23"
         inlandArrivalDate:
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
           type: "string"
           description: |
             The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+          format: "date"
           example: "2025-01-23"
         estimatedGeneralOrderDateTime:
           type: "string"
@@ -1758,17 +1706,37 @@ components:
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         loadLocation:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the equipment is loaded on the first mother vessel arriving at the destination country.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         dischargeLocation:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the equipment is discharged from the last mother vessel arriving at the destination country.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         portOfLoading:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is loaded onto a first sea-going vessel for water transportation.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         portOfDischarge:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is discharged from the last sea-going vessel.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         placeOfReceipt:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
+            This indicates the point at which the shipping line takes on responsibility for carriage of the container.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         placeOfDelivery:
-          $ref: "#/components/schemas/Location"
+          description: |
+            The location where the cargo is handed over by the shipping line to the consignee or its agent
+            and where responsibility of the shipping line ceases.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         modeOfTransport:
           maxLength: 20
           type: "string"
@@ -1783,8 +1751,9 @@ components:
           example: "VESSEL"
         vesselVoyages:
           maxItems: 3
-          minItems: 1
           type: "array"
+          description: |
+            Details of the POD, POL or DC vessel voyages
           items:
             $ref: "#/components/schemas/VesselVoyage"
       description: "Transport info"
@@ -1792,7 +1761,9 @@ components:
       type: "object"
       properties:
         equipment:
-          $ref: "#/components/schemas/Equipment"
+          description: "The container or transport equipment used."
+          allOf:
+          - $ref: "#/components/schemas/Equipment"
         isShipperOwned:
           type: "boolean"
           description: "Indicates whether the container is shipper owned (SOC)."
@@ -1801,23 +1772,22 @@ components:
           type: "boolean"
           description: |
             If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.
-
-            **Condition:** Only applicable if `ISOEquipmentCode` shows a Reefer type.
           example: false
         activeReeferSettings:
-          $ref: "#/components/schemas/ActiveReeferSettings"
+          description: "Active reefer settings applied to this equipment."
+          allOf:
+          - $ref: "#/components/schemas/ActiveReeferSettings"
         shippingMarks:
+          maxItems: 50
           type: "array"
           description: |
             A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
-
-            **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
           items:
+            maxLength: 35
             type: "string"
             description: |
-              A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
-
-              **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
+              The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.
+            example: "Made in China"
         seals:
           type: "array"
           description: "A list of `Seals`"
@@ -1835,10 +1805,6 @@ components:
             $ref: "#/components/schemas/CustomsReference"
       description: "Specifies the container (`equipment`), total `weight`, `volume`, possible `ActiveReeferSettings`, `seals` and `references`."
     VesselVoyage:
-      required:
-      - "carrierVoyageNumber"
-      - "typeCode"
-      - "vesselName"
       type: "object"
       properties:
         typeCode:
@@ -1857,15 +1823,11 @@ components:
           example: "King of the Seas"
         vesselFlag:
           maxLength: 2
-          minLength: 2
-          pattern: "^[A-Z]{2}$"
           type: "string"
           description: "Vessel flag"
           example: "NL"
         vesselIMONumber:
           maxLength: 8
-          minLength: 7
-          pattern: "^\\d{7,8}$"
           type: "string"
           description: |
             The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
@@ -1882,8 +1844,6 @@ components:
           example: "1234N"
         universalVoyageReference:
           maxLength: 5
-          minLength: 5
-          pattern: "^\\d{2}[0-9A-Z]{2}[NEWSR]$"
           type: "string"
           description: |
             Universal identifier of a voyage:

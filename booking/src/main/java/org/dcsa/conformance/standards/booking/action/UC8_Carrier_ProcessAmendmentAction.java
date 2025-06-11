@@ -68,7 +68,6 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
                 getMatchedExchangeUuid(),
                 expectedBookingStatus,
                 expectedAmendedBookingStatus,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

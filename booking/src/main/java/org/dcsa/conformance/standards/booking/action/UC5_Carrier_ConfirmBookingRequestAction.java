@@ -49,7 +49,6 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends StateChangingBookin
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
                 BookingState.CONFIRMED,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

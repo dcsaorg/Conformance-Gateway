@@ -48,7 +48,6 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    // jsonNode.set("csp", getCspSupplier().get().toJson());
     jsonNode.set("bookingPayload", getCspSupplier().get());
     jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
     return jsonNode;
@@ -65,19 +64,18 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.concat(
-          Stream.of(
-            BookingChecks.requestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier()),
-            new JsonSchemaCheck(
-              BookingRole::isShipper,
-              getMatchedExchangeUuid(),
-              HttpMessageType.REQUEST,
-              requestSchemaValidator)),
-          Stream.concat(createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
-          getNotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator,
-            BookingState.RECEIVED,
-            null)));
+            Stream.of(
+                BookingChecks.requestContentChecks(
+                    getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()),
+                new JsonSchemaCheck(
+                    BookingRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    requestSchemaValidator)),
+            Stream.concat(
+                createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
+                getNotificationChecks(
+                    expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)));
       }
     };
   }

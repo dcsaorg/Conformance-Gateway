@@ -174,7 +174,6 @@ public abstract class BookingAction extends ConformanceAction {
                 bookingState,
                 amendedBookingState,
                 bookingCancellationState,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,

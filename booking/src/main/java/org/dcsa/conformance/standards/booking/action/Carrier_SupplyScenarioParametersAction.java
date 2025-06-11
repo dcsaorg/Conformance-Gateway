@@ -12,7 +12,6 @@ import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 
 public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
-  // private CarrierScenarioParameters carrierScenarioParameters = null;
   private JsonNode bookingPayload = null;
 
   private ScenarioType scenarioType;
@@ -27,7 +26,6 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   @Override
   public void reset() {
     super.reset();
-    // carrierScenarioParameters = null;
     bookingPayload = null;
   }
 
@@ -39,9 +37,6 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    /*if (carrierScenarioParameters != null) {
-      jsonState.set("carrierScenarioParameters", carrierScenarioParameters.toJson());
-    }*/
     if (bookingPayload != null) {
       jsonState.set("bookingPayload", bookingPayload);
     }
@@ -51,10 +46,6 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    /*JsonNode cspNode = jsonState.get("carrierScenarioParameters");
-    if (cspNode != null) {
-      carrierScenarioParameters = CarrierScenarioParameters.fromJson(cspNode);
-    }*/
     JsonNode bookingPayloadNode = jsonState.get("bookingPayload");
     if (bookingPayloadNode != null) {
       bookingPayload = bookingPayloadNode;
@@ -70,10 +61,8 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    // carrierScenarioParameters = BookingCarrier.getCarrierScenarioParameters(scenarioType);
     return JsonToolkit.templateFileToJsonNode(
         "/standards/booking/payloads/" + scenarioType.bookingPayload(), Map.of());
-    // return CarrierScenarioJsonAdapter.toJson(carrierScenarioParameters, scenarioType);
   }
 
   @Override

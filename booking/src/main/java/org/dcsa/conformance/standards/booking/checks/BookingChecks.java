@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -49,10 +48,9 @@ public class BookingChecks {
   public static ActionCheck requestContentChecks(
       UUID matched,
       String standardVersion,
-      Supplier<JsonNode> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
-    generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
+    generateScenarioRelatedChecks(checks, dspSupplier);
     return JsonAttribute.contentChecks(
       BookingRole::isShipper,
       matched,
@@ -414,76 +412,63 @@ public class BookingChecks {
             return issues;
           });
 
-  private static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
-    return () -> {
-      var csp = cspSupplier.get();
-      if (csp == null) {
-        return null;
-      }
-      return field.apply(csp);
-    };
-  }
-
   private static void generateScenarioRelatedChecks(
       List<JsonContentCheck> checks,
-      Supplier<JsonNode> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
-    checks.add(
-        JsonAttribute.mustEqual(
-            "[Scenario] Verify that the correct 'carrierServiceName' is used",
-            "carrierServiceName",
-            delayedValue(cspSupplier, payload -> payload.get("carrierServiceName").asText())));
-
-    checks.add(JsonAttribute.customValidator(
-      "[Scenario] Verify that the correct 'contractQuotationReference'/'serviceContractReference' is used",
-      body -> {
-        var contractQuotationReference = body.path("contractQuotationReference").asText("");
-        var serviceContractReference = body.path("serviceContractReference").asText("");
-        if (!contractQuotationReference.isEmpty() && !serviceContractReference.isEmpty()) {
-          return Set.of("The scenario requires either of 'contractQuotationReference'/'serviceContractReference'" +
-            " to be present, but not both");
-        }
-        return Set.of();
-      }
-     ));
 
     checks.add(
-        JsonAttribute.mustEqual(
-            "[Scenario] Verify that the correct 'carrierExportVoyageNumber' is used",
-            "carrierExportVoyageNumber",
-            delayedValue(
-                cspSupplier, payload -> payload.get("carrierExportVoyageNumber").asText())));
-    checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
-      "[Scenario] Validate the containers reefer settings",
-      mav-> mav.submitAllMatching("requestedEquipments.*"),
-      (nodeToValidate, contextPath) -> {
-        var scenario = dspSupplier.get().scenarioType();
-        var activeReeferNode = nodeToValidate.path("activeReeferSettings");
-        var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
-        var issues = new LinkedHashSet<String>();
-        switch (scenario) {
-          case REEFER, REEFER_TEMP_CHANGE -> {
-            if (!activeReeferNode.isObject()) {
-              issues.add("The scenario requires '%s' to have an active reefer".formatted(contextPath));
-            }
-          }
-          case REGULAR_NON_OPERATING_REEFER -> {
-            if (!nonOperatingReeferNode.asBoolean(false)) {
-              issues.add("The scenario requires '%s.isNonOperatingReefer' to be true".formatted(contextPath));
-            }
-          }
-          default -> {
-            if (!activeReeferNode.isMissingNode()) {
-              issues.add("The scenario requires '%s' to NOT have an active reefer".formatted(contextPath));
-            }
-            if (nonOperatingReeferNode.asBoolean(false)) {
-              issues.add("The scenario requires '%s.isNonOperatingReefer' to be omitted or false (depending on the container ISO code)".formatted(contextPath));
-            }
-          }
-        }
-        return issues;
-      }
-    ));
+        JsonAttribute.customValidator(
+            "[Scenario] Verify that the correct 'contractQuotationReference'/'serviceContractReference' is used",
+            body -> {
+              var contractQuotationReference = body.path("contractQuotationReference").asText("");
+              var serviceContractReference = body.path("serviceContractReference").asText("");
+              if (!contractQuotationReference.isEmpty() && !serviceContractReference.isEmpty()) {
+                return Set.of(
+                    "The scenario requires either of 'contractQuotationReference'/'serviceContractReference'"
+                        + " to be present, but not both");
+              }
+              return Set.of();
+            }));
+
+    checks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "[Scenario] Validate the containers reefer settings",
+            mav -> mav.submitAllMatching("requestedEquipments.*"),
+            (nodeToValidate, contextPath) -> {
+              var scenario = dspSupplier.get().scenarioType();
+              var activeReeferNode = nodeToValidate.path("activeReeferSettings");
+              var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
+              var issues = new LinkedHashSet<String>();
+              switch (scenario) {
+                case REEFER, REEFER_TEMP_CHANGE -> {
+                  if (!activeReeferNode.isObject()) {
+                    issues.add(
+                        "The scenario requires '%s' to have an active reefer"
+                            .formatted(contextPath));
+                  }
+                }
+                case REGULAR_NON_OPERATING_REEFER -> {
+                  if (!nonOperatingReeferNode.asBoolean(false)) {
+                    issues.add(
+                        "The scenario requires '%s.isNonOperatingReefer' to be true"
+                            .formatted(contextPath));
+                  }
+                }
+                default -> {
+                  if (!activeReeferNode.isMissingNode()) {
+                    issues.add(
+                        "The scenario requires '%s' to NOT have an active reefer"
+                            .formatted(contextPath));
+                  }
+                  if (nonOperatingReeferNode.asBoolean(false)) {
+                    issues.add(
+                        "The scenario requires '%s.isNonOperatingReefer' to be omitted or false (depending on the container ISO code)"
+                            .formatted(contextPath));
+                  }
+                }
+              }
+              return issues;
+            }));
 
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Whether the cargo should be DG",
@@ -616,7 +601,6 @@ public class BookingChecks {
   public static ActionCheck responseContentChecks(
       UUID matched,
       String standardVersion,
-      Supplier<JsonNode> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
@@ -624,7 +608,6 @@ public class BookingChecks {
       Boolean requestAmendedContent) {
     var checks =
         fullPayloadChecks(
-            cspSupplier,
             dspSupplier,
             bookingStatus,
             expectedAmendedBookingStatus,
@@ -636,7 +619,6 @@ public class BookingChecks {
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(
-      Supplier<JsonNode> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
@@ -712,7 +694,7 @@ public class BookingChecks {
               }));
     }
 
-    generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
+    generateScenarioRelatedChecks(checks, dspSupplier);
 
     return checks;
   }

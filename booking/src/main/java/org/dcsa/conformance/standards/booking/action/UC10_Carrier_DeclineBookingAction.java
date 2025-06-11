@@ -54,7 +54,6 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
                 getMatchedExchangeUuid(),
                 BookingState.DECLINED,
                 expectedAmendedBookingStatus,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

@@ -42,6 +42,7 @@
           },
           "outerPackaging": {
             "numberOfPackages": 1,
+            "packageCode": "2Q",
             "dangerousGoods": [
               {
                 "UNNumber": "1950",

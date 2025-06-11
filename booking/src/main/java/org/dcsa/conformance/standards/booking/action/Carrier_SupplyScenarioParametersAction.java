@@ -15,11 +15,13 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   private JsonNode bookingPayload = null;
 
   private ScenarioType scenarioType;
+  private String standardVersion;
 
   public Carrier_SupplyScenarioParametersAction(
-      String carrierPartyName, @NonNull ScenarioType scenarioType) {
+      String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion) {
     super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1);
     this.scenarioType = scenarioType;
+    this.standardVersion = standardVersion;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
   }
 
@@ -62,7 +64,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/payloads/" + scenarioType.bookingPayload(version), Map.of());
+        "/standards/booking/payloads/" + scenarioType.bookingPayload(standardVersion), Map.of());
   }
 
   @Override

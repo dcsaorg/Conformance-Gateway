@@ -72,7 +72,8 @@ class BookingComponentFactory extends AbstractComponentFactory {
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, BookingRole::isCarrier),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, BookingRole::isShipper));
+            partyConfigurations, counterpartConfigurations, BookingRole::isShipper),
+        standardVersion);
   }
 
   @Override

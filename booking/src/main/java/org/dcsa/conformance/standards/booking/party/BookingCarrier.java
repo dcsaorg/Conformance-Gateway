@@ -119,7 +119,7 @@ public class BookingCarrier extends ConformanceParty {
 
   private JsonNode getBookingPayload(ScenarioType scenarioType) {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/payloads/" + scenarioType.bookingPayload(apiVersion), Map.of());
+        "/standards/booking/messages/" + scenarioType.bookingPayload(apiVersion), Map.of());
   }
 
   private void processBookingAmendment(JsonNode actionPrompt) {

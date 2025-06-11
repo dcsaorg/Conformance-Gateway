@@ -74,7 +74,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
-    // Validate that the input is a valid CarrierScenarioParameters JSON object
+
     doHandlePartyInput(partyInput);
   }
 

@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.booking.checks;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -8,7 +9,6 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
@@ -22,13 +22,13 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   private static final String BOOKING_PREFIX = "[Booking]";
   private static final String AMENDED_BOOKING_PREFIX = "[Amended Booking]";
 
-  private final Supplier<CarrierScenarioParameters> cspSupplier;
+  private final Supplier<JsonNode> cspSupplier;
   private final Supplier<DynamicScenarioParameters> dspSupplier;
 
   public CarrierBookingNotificationDataPayloadRequestConformanceCheck(
       UUID matchedExchangeUuid,
       BookingState bookingStatus,
-      Supplier<CarrierScenarioParameters> cspSupplier,
+      Supplier<JsonNode> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     super(matchedExchangeUuid, HttpMessageType.REQUEST, bookingStatus);
     this.cspSupplier = cspSupplier;
@@ -39,7 +39,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
       UUID matchedExchangeUuid,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
-      Supplier<CarrierScenarioParameters> cspSupplier,
+      Supplier<JsonNode> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     super(
         matchedExchangeUuid, HttpMessageType.REQUEST, bookingStatus, expectedAmendedBookingStatus);
@@ -52,7 +52,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
       BookingCancellationState expectedBookingCancellationStatus,
-      Supplier<CarrierScenarioParameters> cspSupplier,
+      Supplier<JsonNode> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     super(
         matchedExchangeUuid,

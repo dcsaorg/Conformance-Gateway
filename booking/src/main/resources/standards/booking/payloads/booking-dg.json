@@ -1,0 +1,74 @@
+{
+  "receiptTypeAtOrigin": "CY",
+  "deliveryTypeAtDestination": "CY",
+  "cargoMovementTypeAtOrigin": "FCL",
+  "cargoMovementTypeAtDestination": "FCL",
+  "serviceContractReference": "{Service_Contract_Reference}",
+  "vessel": {
+    "name": "{Vessel_Name}"
+  },
+  "carrierExportVoyageNumber": "{Carrier_Export_Voyage_Number}",
+  "isEquipmentSubstitutionAllowed": true,
+  "documentParties": {
+    "bookingAgent": {
+      "partyName": "{DCSA Team}"
+    }
+  },
+  "shipmentLocations": [
+    {
+      "location": {
+        "UNLocationCode": "NLAMS"
+      },
+      "locationTypeCode": "POL"
+    },
+    {
+      "location": {
+        "UNLocationCode": "SGSIN"
+      },
+      "locationTypeCode": "POD"
+    }
+  ],
+  "requestedEquipments": [
+    {
+      "ISOEquipmentCode": "22GP",
+      "units": 1,
+      "isShipperOwned": false,
+      "commodities": [
+        {
+          "commodityType": "{Commodity_Type}",
+          "cargoGrossWeight": {
+            "value": 6.28,
+            "unit": "KGM"
+          },
+          "outerPackaging": {
+            "numberOfPackages": 1,
+            "dangerousGoods": [
+              {
+                "UNNumber": "1950",
+                "properShippingName": "AEROSOLS,NON-FLAMMABLE",
+                "imoClass": "2.2",
+                "isMarinePollutant": false,
+                "isLimitedQuantity": false,
+                "isExceptedQuantity": false,
+                "isSalvagePackings": false,
+                "isEmptyUncleanedResidue": false,
+                "isWaste": false,
+                "isHot": false,
+                "isCompetentAuthorityApprovalRequired": false,
+                "emergencyContactDetails": {
+                  "contact": "{Emergency Contact}",
+                  "phone": "0"
+                },
+                "isReportableQuantity": false,
+                "grossWeight": {
+                  "value": 6.28,
+                  "unit": "KGM"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

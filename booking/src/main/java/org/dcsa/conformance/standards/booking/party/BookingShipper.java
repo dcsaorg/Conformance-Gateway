@@ -98,23 +98,19 @@ public class BookingShipper extends ConformanceParty {
   private void sendBookingRequest(JsonNode actionPrompt) {
     log.info("Shipper.sendBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
-    CarrierScenarioParameters carrierScenarioParameters =
-        CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
+    JsonNode bookingPayload = actionPrompt.get("bookingPayload");
 
-    JsonNode jsonRequestBody = replaceBookingPlaceHolders(actionPrompt);
+    // JsonNode jsonRequestBody = replaceBookingPlaceHolders(actionPrompt);
 
-    ConformanceResponse conformanceResponse = syncCounterpartPost("/v2/bookings", jsonRequestBody);
+    ConformanceResponse conformanceResponse = syncCounterpartPost("/v2/bookings", bookingPayload);
 
     JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
     String cbrr = jsonBody.path("carrierBookingRequestReference").asText();
     ObjectNode updatedBooking =
-      ((ObjectNode) jsonRequestBody)
-        .put("carrierBookingRequestReference", cbrr);
+        ((ObjectNode) bookingPayload).put("carrierBookingRequestReference", cbrr);
     persistentMap.save(cbrr, updatedBooking);
 
-    addOperatorLogEntry(
-        "Sent a booking request with the parameters: %s"
-            .formatted(carrierScenarioParameters.toJson()));
+    addOperatorLogEntry("Sent a booking request with the parameters: %s".formatted(bookingPayload));
   }
 
   private JsonNode replaceBookingPlaceHolders(JsonNode actionPrompt) {

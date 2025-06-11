@@ -69,11 +69,11 @@ public abstract class BookingAction extends ConformanceAction {
     return (BookingAction) previousAction;
   }
 
-  protected Consumer<CarrierScenarioParameters> getCspConsumer() {
+  protected Consumer<JsonNode> getCspConsumer() {
     return getPreviousBookingAction().getCspConsumer();
   }
 
-  protected Supplier<CarrierScenarioParameters> getCspSupplier() {
+  protected Supplier<JsonNode> getCspSupplier() {
     return getPreviousBookingAction().getCspSupplier();
   }
 

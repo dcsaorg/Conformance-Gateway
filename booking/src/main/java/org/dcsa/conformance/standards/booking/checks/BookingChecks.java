@@ -46,7 +46,11 @@ public class BookingChecks {
   private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
 
-  public static ActionCheck requestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck requestContentChecks(
+      UUID matched,
+      String standardVersion,
+      Supplier<JsonNode> cspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
@@ -420,12 +424,15 @@ public class BookingChecks {
     };
   }
 
-  private static void generateScenarioRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'carrierServiceName' is used",
-      "carrierServiceName",
-      delayedValue(cspSupplier, CarrierScenarioParameters::carrierServiceName)
-    ));
+  private static void generateScenarioRelatedChecks(
+      List<JsonContentCheck> checks,
+      Supplier<JsonNode> cspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier) {
+    checks.add(
+        JsonAttribute.mustEqual(
+            "[Scenario] Verify that the correct 'carrierServiceName' is used",
+            "carrierServiceName",
+            delayedValue(cspSupplier, payload -> payload.get("carrierServiceName").asText())));
 
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the correct 'contractQuotationReference'/'serviceContractReference' is used",
@@ -440,11 +447,12 @@ public class BookingChecks {
       }
      ));
 
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'carrierExportVoyageNumber' is used",
-      "carrierExportVoyageNumber",
-      delayedValue(cspSupplier, CarrierScenarioParameters::carrierExportVoyageNumber)
-    ));
+    checks.add(
+        JsonAttribute.mustEqual(
+            "[Scenario] Verify that the correct 'carrierExportVoyageNumber' is used",
+            "carrierExportVoyageNumber",
+            delayedValue(
+                cspSupplier, payload -> payload.get("carrierExportVoyageNumber").asText())));
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Validate the containers reefer settings",
       mav-> mav.submitAllMatching("requestedEquipments.*"),
@@ -605,10 +613,15 @@ public class BookingChecks {
     VALID_FEEDBACK_CODE
   );
 
-  public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier,
-                                                  Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus,
-                                                  BookingState expectedAmendedBookingStatus, BookingCancellationState expectedCancelledBookingStatus,
-                                                  Boolean requestAmendedContent) {
+  public static ActionCheck responseContentChecks(
+      UUID matched,
+      String standardVersion,
+      Supplier<JsonNode> cspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      BookingState bookingStatus,
+      BookingState expectedAmendedBookingStatus,
+      BookingCancellationState expectedCancelledBookingStatus,
+      Boolean requestAmendedContent) {
     var checks =
         fullPayloadChecks(
             cspSupplier,
@@ -623,7 +636,7 @@ public class BookingChecks {
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(
-      Supplier<CarrierScenarioParameters> cspSupplier,
+      Supplier<JsonNode> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,

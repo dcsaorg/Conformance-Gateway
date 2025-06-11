@@ -62,7 +62,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/payloads/" + scenarioType.bookingPayload(), Map.of());
+        "/standards/booking/payloads/" + scenarioType.bookingPayload(version), Map.of());
   }
 
   @Override

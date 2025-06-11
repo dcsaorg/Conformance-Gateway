@@ -3,77 +3,50 @@
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
-  "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
-  "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
-  "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
-  "isEquipmentSubstitutionAllowed": true,
+  "serviceContractReference": "{Service_Contract_Reference}",
   "vessel": {
-    "name": "King of the Seas"
+    "name": "{Vessel_Name}"
   },
-  "requestedEquipments": [
-    {
-      "ISOEquipmentCode": "42R0",
-      "units": 1,
-      "isShipperOwned": false,
-      "commodities": [
-        {
-          "HSCodes": ["COMMODITY_HS_CODE_1"],
-          "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": {
-            "value": 323.32,
-            "unit": "KGM"
-          }
-        }
-      ],
-      "isNonOperatingReefer": false,
-      "activeReeferSettings": {
-        "temperatureSetpoint": -18,
-        "temperatureUnit": "CEL",
-        "o2Setpoint": 75,
-        "co2Setpoint": 15,
-        "humiditySetpoint": 60,
-        "airExchangeSetpoint": 15,
-        "airExchangeUnit": "MQH",
-        "isVentilationOpen": false,
-        "isDrainholesOpen":  false,
-        "isBulbMode": false,
-        "isColdTreatmentRequired": false,
-        "isControlledAtmosphereRequired": false,
-        "isPreCoolingRequired": false,
-        "isGeneratorSetRequired": false
-      }
-    }
-  ],
+  "carrierExportVoyageNumber": "{Carrier_Export_Voyage_Number}",
+  "isEquipmentSubstitutionAllowed": true,
   "documentParties": {
     "bookingAgent": {
-      "partyName": "DCSA Conformance Sandbox",
-      "address": {
-        "street": "Strawinskylaan 4117",
-        "floor": "6",
-        "postCode": "1077 ZX",
-        "city": "Amsterdam",
-        "countryCode": "NL"
-      },
-      "partyContactDetails": [
-        {
-          "name": "Henrik",
-          "phone": "+31611444666"
-        }
-      ]
+      "partyName": "{DCSA Team}"
     }
   },
   "shipmentLocations": [
     {
       "location": {
-        "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
+        "UNLocationCode": "NLAMS"
       },
       "locationTypeCode": "POL"
     },
     {
       "location": {
-        "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
+        "UNLocationCode": "SGSIN"
       },
       "locationTypeCode": "POD"
+    }
+  ],
+  "requestedEquipments": [
+    {
+      "ISOEquipmentCode": "22RT",
+      "units": 1,
+      "isShipperOwned": false,
+      "isNonOperatingReefer": false,
+      "activeReeferSettings": {
+        "temperatureSetpoint": 5.0,
+        "temperatureUnit": "CEL"
+      },
+      "commodities": [
+        {
+          "commodityType": "{Commodity_Type}",
+          "cargoGrossWeight": {
+            "value": 3000.0,
+            "unit": "KGM"
+          }
+        }
+      ]
     }
   ]
 }

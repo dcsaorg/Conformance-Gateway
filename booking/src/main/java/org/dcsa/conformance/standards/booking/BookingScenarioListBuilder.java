@@ -43,31 +43,27 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   }
 
   public static LinkedHashMap<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
-      BookingComponentFactory componentFactory,
-      String carrierPartyName,
-      String shipperPartyName,
-      String standardVersion) {
+      BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
 
     if (SCENARIO_SUITE_CONFORMANCE.equals(componentFactory.getScenarioSuite())) {
-      return createConformanceScenarios(carrierPartyName, standardVersion);
+      return createConformanceScenarios(carrierPartyName);
     }
     if (SCENARIO_SUITE_RI.equals(componentFactory.getScenarioSuite())) {
-      return createReferenceImplementationScenarios(carrierPartyName, standardVersion);
+      return createReferenceImplementationScenarios(carrierPartyName);
     }
     throw new IllegalArgumentException(
         "Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
   }
 
   private static LinkedHashMap<String, BookingScenarioListBuilder> createConformanceScenarios(
-      String carrierPartyName, String standardVersion) {
+      String carrierPartyName) {
     return Stream.of(
             Map.entry(
                 "Dry cargo",
-                carrier_SupplyScenarioParameters(
-                        carrierPartyName, ScenarioType.REGULAR, standardVersion)
+                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
                     .then(
                         uc1_shipper_SubmitBookingRequest()
                             .then(
@@ -230,7 +226,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                             .then(shipperGetBooking(CANCELLED)))))),
             Map.entry(
                 "Dangerous goods",
-                carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.DG, standardVersion)
+                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.DG)
                     .then(
                         uc1_shipper_SubmitBookingRequest()
                             .then(
@@ -257,8 +253,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                                 shipperGetBooking(COMPLETED)))))))),
             Map.entry(
                 "Reefer containers",
-                carrier_SupplyScenarioParameters(
-                        carrierPartyName, ScenarioType.REEFER, standardVersion)
+                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.REEFER)
                     .then(
                         uc1_shipper_SubmitBookingRequest()
                             .then(
@@ -285,8 +280,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                                 shipperGetBooking(COMPLETED)))))))),
             Map.entry(
                 "Carrier error response conformance",
-                carrier_SupplyScenarioParameters(
-                        carrierPartyName, ScenarioType.REGULAR, standardVersion)
+                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
                     .then(
                         uc1_shipper_SubmitBookingRequest().then(shipperGetBookingErrorScenario()))))
         .collect(
@@ -295,40 +289,35 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   }
 
   private static LinkedHashMap<String, BookingScenarioListBuilder>
-      createReferenceImplementationScenarios(String carrierPartyName, String standardVersion) {
+      createReferenceImplementationScenarios(String carrierPartyName) {
     return Stream.of(
             Map.entry(
                 "",
                 noAction()
                     .thenEither(
-                        carrier_SupplyScenarioParameters(
-                                carrierPartyName, ScenarioType.REGULAR, standardVersion)
+                        carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
                             .thenAllPathsFrom(START),
-                        carrier_SupplyScenarioParameters(
-                                carrierPartyName, ScenarioType.REGULAR_2RE1C, standardVersion)
+                        carrierSupplyScenarioParameters(
+                                carrierPartyName, ScenarioType.REGULAR_2RE1C)
                             .thenHappyPathFrom(START),
-                        carrier_SupplyScenarioParameters(
-                                carrierPartyName, ScenarioType.REGULAR_2RE2C, standardVersion)
+                        carrierSupplyScenarioParameters(
+                                carrierPartyName, ScenarioType.REGULAR_2RE2C)
                             .thenHappyPathFrom(START),
-                        carrier_SupplyScenarioParameters(
-                                carrierPartyName, ScenarioType.REGULAR_CHO_DEST, standardVersion)
+                        carrierSupplyScenarioParameters(
+                                carrierPartyName, ScenarioType.REGULAR_CHO_DEST)
                             .thenHappyPathFrom(START),
-                        carrier_SupplyScenarioParameters(
-                                carrierPartyName, ScenarioType.REGULAR_CHO_ORIG, standardVersion)
+                        carrierSupplyScenarioParameters(
+                                carrierPartyName, ScenarioType.REGULAR_CHO_ORIG)
                             .thenHappyPathFrom(START),
-                        carrier_SupplyScenarioParameters(
-                                carrierPartyName,
-                                ScenarioType.REGULAR_NON_OPERATING_REEFER,
-                                standardVersion)
+                        carrierSupplyScenarioParameters(
+                                carrierPartyName, ScenarioType.REGULAR_NON_OPERATING_REEFER)
                             .thenHappyPathFrom(START),
-                        carrier_SupplyScenarioParameters(
-                                carrierPartyName, ScenarioType.REEFER, standardVersion)
+                        carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.REEFER)
                             .thenHappyPathFrom(START, ScenarioType.REEFER),
-                        carrier_SupplyScenarioParameters(
-                                carrierPartyName, ScenarioType.REEFER_TEMP_CHANGE, standardVersion)
+                        carrierSupplyScenarioParameters(
+                                carrierPartyName, ScenarioType.REEFER_TEMP_CHANGE)
                             .thenHappyPathFrom(START),
-                        carrier_SupplyScenarioParameters(
-                                carrierPartyName, ScenarioType.DG, standardVersion)
+                        carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.DG)
                             .thenHappyPathFrom(START, ScenarioType.DG))))
         .collect(
             Collectors.toMap(
@@ -588,12 +577,17 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
     return new BookingScenarioListBuilder(null);
   }
 
-  private static BookingScenarioListBuilder carrier_SupplyScenarioParameters(
-      String carrierPartyName, ScenarioType scenarioType, String standardVersion) {
+  private static BookingScenarioListBuilder carrierSupplyScenarioParameters(
+      String carrierPartyName, ScenarioType scenarioType) {
+    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     return new BookingScenarioListBuilder(
         previousAction ->
             new Carrier_SupplyScenarioParametersAction(
-                carrierPartyName, scenarioType, standardVersion));
+                carrierPartyName,
+                scenarioType,
+                componentFactory.getStandardVersion(),
+                componentFactory.getMessageSchemaValidator(
+                    BOOKING_API, CREATE_BOOKING_SCHEMA_NAME)));
   }
 
   private static BookingScenarioListBuilder shipperGetBooking(BookingState expectedBookingStatus) {

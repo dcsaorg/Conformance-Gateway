@@ -2,12 +2,16 @@ package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.NonNull;
 import org.dcsa.conformance.core.UserFacingException;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 
 public class Carrier_SupplyScenarioParametersAction extends BookingAction {
@@ -15,13 +19,18 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   private JsonNode bookingPayload = null;
 
   private ScenarioType scenarioType;
-  private String standardVersion;
+  private final String standardVersion;
+  private final JsonSchemaValidator requestSchemaValidator;
 
   public Carrier_SupplyScenarioParametersAction(
-      String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion) {
+      String carrierPartyName,
+      @NonNull ScenarioType scenarioType,
+      String standardVersion,
+      JsonSchemaValidator requestSchemaValidator) {
     super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
+    this.requestSchemaValidator = requestSchemaValidator;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
   }
 
@@ -64,7 +73,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/payloads/" + scenarioType.bookingPayload(standardVersion), Map.of());
+        "/standards/booking/messages/" + scenarioType.bookingPayload(standardVersion), Map.of());
   }
 
   @Override
@@ -74,6 +83,27 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
+    List<String> requestContentChecksErrors =
+        BookingChecks.requestContentChecks(
+                getMatchedExchangeUuid(), standardVersion, getDspSupplier())
+            .getResults()
+            .stream()
+            .flatMap(result -> result.getErrors().stream())
+            .toList();
+
+    if (!requestContentChecksErrors.isEmpty()) {
+      throw new UserFacingException(
+          "The booking request has the following errors: %s"
+              .formatted(String.join(", ", requestContentChecksErrors)));
+    }
+
+    Set<String> schemaChecksErrors = requestSchemaValidator.validate(partyInput);
+
+    if (!schemaChecksErrors.isEmpty()) {
+      throw new UserFacingException(
+          "The booking schema has the following errors: %s"
+              .formatted(String.join(", ", schemaChecksErrors)));
+    }
 
     doHandlePartyInput(partyInput);
   }

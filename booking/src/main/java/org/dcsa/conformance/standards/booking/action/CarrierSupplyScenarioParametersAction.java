@@ -85,6 +85,14 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
     return true;
   }
 
+  /**
+   * This method is overridden to handle the party input for the carrier supply scenario. It
+   * validates the input against the schema and content checks, and throws a UserFacingException if
+   * there are any validation errors.
+   *
+   * @param partyInput The input from the party, expected to contain a field named "input".
+   * @throws UserFacingException if there are validation errors in the input.
+   */
   @Override
   public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
     JsonNode inputNode = partyInput.get(INPUT);

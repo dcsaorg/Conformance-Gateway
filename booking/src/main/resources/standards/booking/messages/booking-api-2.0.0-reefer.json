@@ -3,15 +3,15 @@
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
-  "serviceContractReference": "{Service_Contract_Reference}",
+  "serviceContractReference": "HHL51800000",
   "vessel": {
-    "name": "{Vessel_Name}"
+    "name": "OCEAN DESTROYER"
   },
-  "carrierExportVoyageNumber": "{Carrier_Export_Voyage_Number}",
+  "carrierExportVoyageNumber": "403W",
   "isEquipmentSubstitutionAllowed": true,
   "documentParties": {
     "bookingAgent": {
-      "partyName": "{DCSA Team}"
+      "partyName": "DCSA Team"
     }
   },
   "shipmentLocations": [
@@ -40,7 +40,7 @@
       },
       "commodities": [
         {
-          "commodityType": "{Commodity_Type}",
+          "commodityType": "Reefer cargo, Freight all kinds",
           "cargoGrossWeight": {
             "value": 3000.0,
             "unit": "KGM"

@@ -3,15 +3,15 @@
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
-  "serviceContractReference": "{Service_Contract_Reference}",
+  "serviceContractReference": "HHL51800000",
   "vessel": {
-    "name": "{Vessel_Name}"
+    "name": "OCEAN DESTROYER"
   },
-  "carrierExportVoyageNumber": "{Carrier_Export_Voyage_Number}",
+  "carrierExportVoyageNumber": "403W",
   "isEquipmentSubstitutionAllowed": true,
   "documentParties": {
     "bookingAgent": {
-      "partyName": "{DCSA Team}"
+      "partyName": "DCSA Team"
     }
   },
   "shipmentLocations": [
@@ -35,7 +35,7 @@
       "isShipperOwned": false,
       "commodities": [
         {
-          "commodityType": "{Commodity_Type}",
+          "commodityType": "Dangerous goods, Freight all kinds",
           "cargoGrossWeight": {
             "value": 6.28,
             "unit": "KGM"
@@ -57,8 +57,8 @@
                 "isHot": false,
                 "isCompetentAuthorityApprovalRequired": false,
                 "emergencyContactDetails": {
-                  "contact": "{Emergency Contact}",
-                  "phone": "0"
+                  "contact": "Josephine Jackson",
+                  "phone": "+4570262970"
                 },
                 "isReportableQuantity": false,
                 "grossWeight": {

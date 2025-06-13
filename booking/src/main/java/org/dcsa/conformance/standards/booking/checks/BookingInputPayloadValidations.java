@@ -30,25 +30,4 @@ public class BookingInputPayloadValidations {
         .flatMap(check -> check.validate(bookingNode).stream())
         .collect(Collectors.toSet());
   }
-
-  public static Set<String> validateBookingScenarioType(
-      JsonNode bookingNode, ScenarioType scenarioType) {
-    return switch (scenarioType) {
-      case REEFER_TEMP_CHANGE, REEFER -> validateBookingReeferType(bookingNode);
-      case DG -> validateBookingDgType(bookingNode);
-      default -> validateBookingRegularType(bookingNode);
-    };
-  }
-
-  private static Set<String> validateBookingRegularType(JsonNode bookingNode) {
-    return Set.of();
-  }
-
-  private static Set<String> validateBookingReeferType(JsonNode bookingNode) {
-    return Set.of();
-  }
-
-  private static Set<String> validateBookingDgType(JsonNode bookingNode) {
-    return Set.of();
-  }
 }

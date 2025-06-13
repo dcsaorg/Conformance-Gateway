@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.booking.action;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
@@ -17,15 +16,18 @@ import org.dcsa.conformance.standards.booking.checks.BookingInputPayloadValidati
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.util.ErrorFormatter;
 
-public class Carrier_SupplyScenarioParametersAction extends BookingAction {
+public class CarrierSupplyScenarioParametersAction extends BookingAction {
 
-  private JsonNode bookingPayload = null;
+  private static final String SCENARIO_TYPE = "scenarioType";
+  private static final String BOOKING_PAYLOAD = "bookingPayload";
+  private static final String INPUT = "input";
 
+  private JsonNode bookingPayload;
   private ScenarioType scenarioType;
   private final String standardVersion;
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public Carrier_SupplyScenarioParametersAction(
+  public CarrierSupplyScenarioParametersAction(
       String carrierPartyName,
       @NonNull ScenarioType scenarioType,
       String standardVersion,
@@ -45,26 +47,26 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("scenarioType", scenarioType.name());
+    return super.asJsonNode().put(SCENARIO_TYPE, scenarioType.name());
   }
 
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (bookingPayload != null) {
-      jsonState.set("bookingPayload", bookingPayload);
+      jsonState.set(BOOKING_PAYLOAD, bookingPayload);
     }
-    return jsonState.put("scenarioType", scenarioType.name());
+    return jsonState.put(SCENARIO_TYPE, scenarioType.name());
   }
 
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    JsonNode bookingPayloadNode = jsonState.get("bookingPayload");
+    JsonNode bookingPayloadNode = jsonState.get(BOOKING_PAYLOAD);
     if (bookingPayloadNode != null) {
       bookingPayload = bookingPayloadNode;
     }
-    this.scenarioType = ScenarioType.valueOf(jsonState.required("scenarioType").asText());
+    this.scenarioType = ScenarioType.valueOf(jsonState.required(SCENARIO_TYPE).asText());
   }
 
   @Override
@@ -85,7 +87,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
-    JsonNode inputNode = partyInput.get("input");
+    JsonNode inputNode = partyInput.get(INPUT);
 
     Set<String> schemaChecksErrors =
         BookingInputPayloadValidations.validateBookingSchema(inputNode, requestSchemaValidator);
@@ -93,11 +95,8 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
     Set<String> contentChecksErrors =
         BookingInputPayloadValidations.validateBookingContent(inputNode, getDspSupplier());
 
-    Set<String> scenarioTypeChecksErrors =
-        BookingInputPayloadValidations.validateBookingScenarioType(inputNode, scenarioType);
-
     Set<String> allErrors =
-        Stream.of(schemaChecksErrors, contentChecksErrors, scenarioTypeChecksErrors)
+        Stream.of(schemaChecksErrors, contentChecksErrors)
             .flatMap(Set::stream)
             .collect(Collectors.toSet());
 
@@ -110,16 +109,16 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
-    getCspConsumer().accept(partyInput.get("input"));
+    getBookingPayloadConsumer().accept(partyInput.get(INPUT));
   }
 
   @Override
-  protected Consumer<JsonNode> getCspConsumer() {
+  protected Consumer<JsonNode> getBookingPayloadConsumer() {
     return bkgPayload -> this.bookingPayload = bkgPayload;
   }
 
   @Override
-  protected Supplier<JsonNode> getCspSupplier() {
+  protected Supplier<JsonNode> getBookingPayloadSupplier() {
     return () -> bookingPayload;
   }
 }

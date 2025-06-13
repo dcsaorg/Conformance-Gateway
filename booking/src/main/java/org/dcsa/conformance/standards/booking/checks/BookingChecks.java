@@ -66,7 +66,6 @@ public class BookingChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_TYPE_CODES)
   );
 
-
   private static final JsonContentCheck CHECK_EXPECTED_ARRIVAL_POD = JsonAttribute.customValidator(
     "Check expected arrival dates are valid",
     body -> {
@@ -211,7 +210,6 @@ public class BookingChecks {
     ALL_SHIPMENT_CUTOFF_TIMES,
     JsonAttribute.unique("cutOffDateTimeCode")
   );
-
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS = JsonAttribute.customValidator(
     "Validate shipmentLocations",
@@ -700,7 +698,7 @@ public class BookingChecks {
 
     return checks;
   }
-
+  
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';

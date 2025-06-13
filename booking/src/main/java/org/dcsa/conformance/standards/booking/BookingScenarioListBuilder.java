@@ -582,7 +582,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     return new BookingScenarioListBuilder(
         previousAction ->
-            new Carrier_SupplyScenarioParametersAction(
+            new CarrierSupplyScenarioParametersAction(
                 carrierPartyName,
                 scenarioType,
                 componentFactory.getStandardVersion(),

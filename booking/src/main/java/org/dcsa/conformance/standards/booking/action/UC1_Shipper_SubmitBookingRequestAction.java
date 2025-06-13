@@ -43,13 +43,14 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
                   case REEFER, REEFER_TEMP_CHANGE -> "Reefer";
                   default -> "Dry Cargo";
                 });
-    return prompt.replace("CARRIER_SCENARIO_PARAMETERS", getCspSupplier().get().toString());
+    return prompt.replace(
+        "CARRIER_SCENARIO_PARAMETERS", getBookingPayloadSupplier().get().toString());
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.set("bookingPayload", getCspSupplier().get());
+    jsonNode.set("bookingPayload", getBookingPayloadSupplier().get());
     jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
     return jsonNode;
   }

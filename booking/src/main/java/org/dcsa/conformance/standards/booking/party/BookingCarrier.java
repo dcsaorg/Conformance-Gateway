@@ -90,7 +90,7 @@ public class BookingCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(CarrierSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(
             UC2_Carrier_RequestUpdateToBookingRequestAction.class,
             this::requestUpdateToBookingRequest),

@@ -50,7 +50,6 @@ public class UC6_Carrier_RequestToAmendConfirmedBookingAction extends StateChang
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
                 BookingState.PENDING_AMENDMENT,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

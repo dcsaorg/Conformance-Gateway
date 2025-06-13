@@ -15,6 +15,7 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.booking.checks.BookingInputPayloadValidations;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
+import org.dcsa.conformance.standards.booking.util.ErrorFormatter;
 
 public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
@@ -102,11 +103,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
             .collect(Collectors.toSet());
 
     if (!allErrors.isEmpty()) {
-      throw new UserFacingException(
-          "The booking input has the following errors:\n\n"
-              + allErrors.stream()
-                  .map(error -> " \uD83D\uDEAB " + error.replace(": ", ""))
-                  .collect(Collectors.joining("\n")));
+      throw new UserFacingException(ErrorFormatter.formatErrorsForUserFacingException(allErrors));
     }
 
     doHandlePartyInput(partyInput);

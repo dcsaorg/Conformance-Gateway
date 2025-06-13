@@ -15,7 +15,7 @@ public enum ScenarioType {
   public String bookingPayload(String version) {
     String suffix =
         switch (this) {
-          case REEFER_TEMP_CHANGE, REEFER -> "reefer";
+          case REEFER -> "reefer";
           case DG -> "dg";
           default -> "regular";
         };

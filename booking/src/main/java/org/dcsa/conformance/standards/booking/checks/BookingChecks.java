@@ -50,7 +50,7 @@ public class BookingChecks {
       String standardVersion,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
-    generateScenarioRelatedChecks(checks, dspSupplier);
+    checks.addAll(generateScenarioRelatedChecks(dspSupplier));
     return JsonAttribute.contentChecks(
       BookingRole::isShipper,
       matched,
@@ -412,10 +412,9 @@ public class BookingChecks {
             return issues;
           });
 
-  private static void generateScenarioRelatedChecks(
-      List<JsonContentCheck> checks,
+  public static List<JsonContentCheck> generateScenarioRelatedChecks(
       Supplier<DynamicScenarioParameters> dspSupplier) {
-
+    List<JsonContentCheck> checks = new ArrayList<>();
     checks.add(
         JsonAttribute.customValidator(
             "[Scenario] Verify that the correct 'contractQuotationReference'/'serviceContractReference' is used",
@@ -487,6 +486,8 @@ public class BookingChecks {
         return Set.of();
       }
     ));
+
+    return checks;
   }
 
   static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
@@ -501,91 +502,92 @@ public class BookingChecks {
           mav -> mav.submitAllMatching("feedbacks.*.code"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
-  private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
-    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
-    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
-    CHECK_EXPECTED_ARRIVAL_POD,
-    NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
-    ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
-    REFERENCE_TYPE_VALIDATION,
-    IS_EXPORT_DECLARATION_REFERENCE_PRESENCE,
-    DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
-    UNIVERSAL_SERVICE_REFERENCE,
-    VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
-    VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
-    VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
-    NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
-    CHECK_CARGO_GROSS_WEIGHT_CONDITIONS,
-    JsonAttribute.atLeastOneOf(
-      JsonPointer.compile("/expectedDepartureDate"),
-      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
-      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate"),
-      JsonPointer.compile("/carrierExportVoyageNumber")
-    ),
-    JsonAttribute.xOrFields(
-      JsonPointer.compile("/contractQuotationReference"),
-      JsonPointer.compile("/serviceContractReference")
-    ),
-    JsonAttribute.allOrNoneArePresent(
-      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
-      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate")
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "DangerousGoods implies packagingCode or imoPackagingCode",
-      mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
-      (nodeToValidate, contextPath) -> {
-        var dg = nodeToValidate.path("dangerousGoods");
-        if (!dg.isArray() || dg.isEmpty()) {
-          return Set.of();
-        }
-        if (nodeToValidate.path("packageCode").isMissingNode() && nodeToValidate.path("imoPackagingCode").isMissingNode()) {
-          return Set.of("The '%s' object did not have a 'packageCode' nor an 'imoPackagingCode', which is required due to dangerousGoods"
-            .formatted(contextPath));
-        }
-        return Set.of();
-      }
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "DangerousGoods implies numberOfPackages or description",
-      mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
-      (nodeToValidate, contextPath) -> {
-        var dg = nodeToValidate.path("dangerousGoods");
-        if (!dg.isArray() || dg.isEmpty()) {
-          return Set.of();
-        }
-        if (nodeToValidate.path("numberOfPackages").isMissingNode() && nodeToValidate.path("description").isMissingNode()) {
-          return Set.of("The '%s' object did not have a 'numberOfPackages' nor an 'description', which is required due to dangerousGoods"
-            .formatted(contextPath));
-        }
-        return Set.of();
-      }
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'segregationGroups' values must be from dataset",
-      allDg(dg -> dg.path("segregationGroups").all().submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.DG_SEGREGATION_GROUPS)
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'inhalationZone' values must be from dataset",
-      allDg(dg -> dg.path("inhalationZone").all().submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.INHALATION_ZONE_CODE)
-    ),
-    JsonAttribute.allOrNoneArePresent(
-      JsonPointer.compile("/declaredValue"),
-      JsonPointer.compile("/declaredValueCurrency")
-    ),
-
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The charges currency amount must not exceed more than 2 decimal points",
-      mav -> mav.submitAllMatching("charges.*.currencyAmount"),
-      (nodeToValidate, contextPath) -> {
-        var currencyAmount = nodeToValidate.asDouble();
-        if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
-          return Set.of("%s must have at most 2 decimal point of precision".formatted(contextPath));
-        }
-        return Set.of();
-      }
-    ));
+  public static final List<JsonContentCheck> STATIC_BOOKING_CHECKS =
+      Arrays.asList(
+          JsonAttribute.mustBeDatasetKeywordIfPresent(
+              JsonPointer.compile("/cargoMovementTypeAtOrigin"),
+              BookingDataSets.CARGO_MOVEMENT_TYPE),
+          JsonAttribute.mustBeDatasetKeywordIfPresent(
+              JsonPointer.compile("/cargoMovementTypeAtDestination"),
+              BookingDataSets.CARGO_MOVEMENT_TYPE),
+          CHECK_EXPECTED_ARRIVAL_POD,
+          NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
+          ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
+          REFERENCE_TYPE_VALIDATION,
+          IS_EXPORT_DECLARATION_REFERENCE_PRESENCE,
+          DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
+          UNIVERSAL_SERVICE_REFERENCE,
+          VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
+          VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
+          VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
+          NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
+          CHECK_CARGO_GROSS_WEIGHT_CONDITIONS,
+          JsonAttribute.atLeastOneOf(
+              JsonPointer.compile("/expectedDepartureDate"),
+              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
+              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate"),
+              JsonPointer.compile("/carrierExportVoyageNumber")),
+          JsonAttribute.xOrFields(
+              JsonPointer.compile("/contractQuotationReference"),
+              JsonPointer.compile("/serviceContractReference")),
+          JsonAttribute.allOrNoneArePresent(
+              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
+              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate")),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "DangerousGoods implies packagingCode or imoPackagingCode",
+              mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
+              (nodeToValidate, contextPath) -> {
+                var dg = nodeToValidate.path("dangerousGoods");
+                if (!dg.isArray() || dg.isEmpty()) {
+                  return Set.of();
+                }
+                if (nodeToValidate.path("packageCode").isMissingNode()
+                    && nodeToValidate.path("imoPackagingCode").isMissingNode()) {
+                  return Set.of(
+                      "The '%s' object did not have a 'packageCode' nor an 'imoPackagingCode', which is required due to dangerousGoods"
+                          .formatted(contextPath));
+                }
+                return Set.of();
+              }),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "DangerousGoods implies numberOfPackages or description",
+              mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
+              (nodeToValidate, contextPath) -> {
+                var dg = nodeToValidate.path("dangerousGoods");
+                if (!dg.isArray() || dg.isEmpty()) {
+                  return Set.of();
+                }
+                if (nodeToValidate.path("numberOfPackages").isMissingNode()
+                    && nodeToValidate.path("description").isMissingNode()) {
+                  return Set.of(
+                      "The '%s' object did not have a 'numberOfPackages' nor an 'description', which is required due to dangerousGoods"
+                          .formatted(contextPath));
+                }
+                return Set.of();
+              }),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The 'segregationGroups' values must be from dataset",
+              allDg(dg -> dg.path("segregationGroups").all().submitPath()),
+              JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+                  BookingDataSets.DG_SEGREGATION_GROUPS)),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The 'inhalationZone' values must be from dataset",
+              allDg(dg -> dg.path("inhalationZone").all().submitPath()),
+              JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+                  BookingDataSets.INHALATION_ZONE_CODE)),
+          JsonAttribute.allOrNoneArePresent(
+              JsonPointer.compile("/declaredValue"), JsonPointer.compile("/declaredValueCurrency")),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The charges currency amount must not exceed more than 2 decimal points",
+              mav -> mav.submitAllMatching("charges.*.currencyAmount"),
+              (nodeToValidate, contextPath) -> {
+                var currencyAmount = nodeToValidate.asDouble();
+                if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
+                  return Set.of(
+                      "%s must have at most 2 decimal point of precision".formatted(contextPath));
+                }
+                return Set.of();
+              }));
 
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
     CHECK_ABSENCE_OF_CONFIRMED_FIELDS,
@@ -694,9 +696,22 @@ public class BookingChecks {
               }));
     }
 
-    generateScenarioRelatedChecks(checks, dspSupplier);
+    checks.addAll(generateScenarioRelatedChecks(dspSupplier));
 
     return checks;
+  }
+
+  public void aaa() {
+    JsonAttribute.allIndividualMatchesMustBeValid(
+        "DangerousGoods must not be present",
+        mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
+        (nodeToValidate, contextPath) -> {
+          var dg = nodeToValidate.path("dangerousGoods");
+          if (dg == null || dg.isEmpty()) {
+            return Set.of();
+          }
+          return Set.of();
+        });
   }
 
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {

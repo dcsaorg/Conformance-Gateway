@@ -29,6 +29,8 @@ public class EblIssuancePlatform extends ConformanceParty {
   private final Map<String, String> tdr2PendingChecksum = new HashMap<>();
   private final Map<String, Boolean> knownChecksums = new HashMap<>();
 
+  private String scenarioResponseCode = "";
+
   public EblIssuancePlatform(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -60,6 +62,8 @@ public class EblIssuancePlatform extends ConformanceParty {
     targetObjectNode.set("tdr2PendingChecksum", StateManagementUtil.storeMap(tdr2PendingChecksum));
     targetObjectNode.set(
         "knownChecksums", StateManagementUtil.storeMap(knownChecksums, String::valueOf));
+    targetObjectNode.set(
+        "responseCode", OBJECT_MAPPER.createObjectNode().put("code", scenarioResponseCode));
   }
 
   @Override
@@ -75,6 +79,7 @@ public class EblIssuancePlatform extends ConformanceParty {
         tdr2PendingChecksum, sourceObjectNode.path("tdr2PendingChecksum"));
     StateManagementUtil.restoreIntoMap(
         knownChecksums, sourceObjectNode.path("knownChecksums"), Boolean::valueOf);
+    scenarioResponseCode = sourceObjectNode.path("responseCode").path("code").asText("");
   }
 
   @Override
@@ -82,6 +87,7 @@ public class EblIssuancePlatform extends ConformanceParty {
     eblStatesByTdr.clear();
     tdr2PendingChecksum.clear();
     knownChecksums.clear();
+    scenarioResponseCode = "";
   }
 
   @Override
@@ -94,11 +100,11 @@ public class EblIssuancePlatform extends ConformanceParty {
     log.info(
         "EblIssuancePlatform.supplyScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
+    scenarioResponseCode = actionPrompt.required("responseCode").asText();
 
     SuppliedScenarioParameters suppliedScenarioParameters =
         new SuppliedScenarioParameters(
-            IssuanceResponseCode.forStandardCode(actionPrompt.required("responseCode").asText())
-                .sendToPlatform,
+            IssuanceResponseCode.forStandardCode(scenarioResponseCode).sendToPlatform,
             "DCSA issue to party",
             "1234-issue-to",
             "DCSA",
@@ -120,14 +126,6 @@ public class EblIssuancePlatform extends ConformanceParty {
 
     var tdr = jsonRequest.path("document").path("transportDocumentReference").asText(null);
 
-    String value = jsonRequest.path("issueTo").path("sendToPlatform").asText();
-    String irc =
-        switch (value) {
-          case "DCSA" -> "ISSU";
-          case "DCSB" -> "BREQ";
-          case "DCSR" -> "REFU";
-          default -> "";
-        };
     var checksum = Checksums.sha256CanonicalJson(jsonRequest.path("document"));
     var state = eblStatesByTdr.get(tdr);
 
@@ -175,18 +173,30 @@ public class EblIssuancePlatform extends ConformanceParty {
               new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
     }
 
+    if (scenarioResponseCode.isEmpty()) {
+      String value = jsonRequest.path("issueTo").path("sendToPlatform").asText();
+      scenarioResponseCode =
+          switch (value) {
+            case "DCSA" -> "ISSU";
+            case "DCSB" -> "BREQ";
+            case "DCSR" -> "REFU";
+            default -> "ISSU";
+          };
+    }
+
     var platformResponse =
         OBJECT_MAPPER
             .createObjectNode()
             .put("transportDocumentReference", tdr)
-            .put("issuanceResponseCode", irc);
-    if (irc.equals("BREQ")) {
+            .put("issuanceResponseCode", scenarioResponseCode);
+    if (scenarioResponseCode.equals("BREQ") || scenarioResponseCode.equals("REFU")) {
       platformResponse
           .putArray("errors")
           .addObject()
           .put("reason", "Rejected as required by the conformance scenario")
           .put("errorCode", "DCSA-123");
     }
+
     asyncCounterpartNotification(null, "/v3/ebl-issuance-responses", platformResponse);
 
     addOperatorLogEntry(

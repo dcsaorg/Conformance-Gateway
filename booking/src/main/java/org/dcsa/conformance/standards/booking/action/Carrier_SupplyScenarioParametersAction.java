@@ -69,8 +69,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    // TODO: change to use the bookingPayload
-    return getMarkdownHumanReadablePrompt("prompt-carrier-supply-csp.md");
+    return getMarkdownHumanReadablePrompt(scenarioType, "prompt-carrier-supply-csp.md");
   }
 
   @Override

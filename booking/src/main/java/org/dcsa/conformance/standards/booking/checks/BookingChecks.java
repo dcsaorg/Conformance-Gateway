@@ -701,19 +701,6 @@ public class BookingChecks {
     return checks;
   }
 
-  public void aaa() {
-    JsonAttribute.allIndividualMatchesMustBeValid(
-        "DangerousGoods must not be present",
-        mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
-        (nodeToValidate, contextPath) -> {
-          var dg = nodeToValidate.path("dangerousGoods");
-          if (dg == null || dg.isEmpty()) {
-            return Set.of();
-          }
-          return Set.of();
-        });
-  }
-
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';

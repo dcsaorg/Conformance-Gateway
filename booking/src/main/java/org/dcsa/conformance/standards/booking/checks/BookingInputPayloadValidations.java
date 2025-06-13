@@ -40,9 +40,15 @@ public class BookingInputPayloadValidations {
     };
   }
 
-  private static Set<String> validateBookingRegularType(JsonNode bookingNode) {}
+  private static Set<String> validateBookingRegularType(JsonNode bookingNode) {
+    return Set.of();
+  }
 
-  private static Set<String> validateBookingReeferType(JsonNode bookingNode) {}
+  private static Set<String> validateBookingReeferType(JsonNode bookingNode) {
+    return Set.of();
+  }
 
-  private static Set<String> validateBookingDgType(JsonNode bookingNode) {}
+  private static Set<String> validateBookingDgType(JsonNode bookingNode) {
+    return Set.of();
+  }
 }

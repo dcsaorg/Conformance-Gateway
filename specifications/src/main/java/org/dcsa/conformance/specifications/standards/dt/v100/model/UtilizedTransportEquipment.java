@@ -4,16 +4,25 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.ShippingMark;
 
-@Schema(description = "Specifies the container (`equipment`), total `weight`, `volume`, possible `ActiveReeferSettings`, `seals` and `references`.")
+@Schema(description = UtilizedTransportEquipment.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class UtilizedTransportEquipment {
 
-  @Schema(description = "The container or transport equipment used.")
-  private Equipment equipment;
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "Specifies the container (`equipment`), total `weight`, `volume`, possible `ActiveReeferSettings`, `seals` and `references`.";
 
-  @Schema(description = "Indicates whether the container is shipper owned (SOC).", example = "true")
-  private Boolean isShipperOwned;
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "The container or transport equipment used.")
+  protected Equipment equipment;
+
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "Indicates whether the container is shipper owned (SOC).",
+      example = "true")
+  protected Boolean isShipperOwned;
 
   @Schema(
       description =
@@ -23,10 +32,10 @@ If the equipment is a Reefer Container then setting this attribute will indicate
 **Condition:** Only applicable if `ISOEquipmentCode` shows a Reefer type.
 """,
       example = "false")
-  private Boolean isNonOperatingReefer;
+  protected Boolean isNonOperatingReefer;
 
   @Schema(description = "Active reefer settings applied to this equipment.")
-  private ActiveReeferSettings activeReeferSettings;
+  protected ActiveReeferSettings activeReeferSettings;
 
   @Schema(
       description =
@@ -35,22 +44,16 @@ A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
 
 **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 """)
-  @ArraySchema(
-      schema =
-          @Schema(
-              description = "Identifying details or markings on the packages.",
-              example = "Made in China",
-              maxLength = 35),
-      maxItems = 50)
-  private List<String> shippingMarks;
+  @ArraySchema(maxItems = 50)
+  protected List<ShippingMark> shippingMarks;
 
-  @Schema(description = "A list of `Seals`")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "A list of `Seals`")
   @ArraySchema(minItems = 1)
-  private List<Seal> seals;
+  protected List<Seal> seals;
 
   @Schema(description = "A list of `References`")
-  private List<Reference> references;
+  protected List<Reference> references;
 
   @Schema(description = "A list of `Customs references`")
-  private List<CustomsReference> customsReferences;
+  protected List<CustomsReference> customsReferences;
 }

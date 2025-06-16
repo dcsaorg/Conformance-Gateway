@@ -3,140 +3,27 @@
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
-  "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
-  "freightPaymentTermCode": "PRE",
-  "originChargesPaymentTerm": {
-    "haulageChargesPaymentTermCode": "PRE",
-    "portChargesPaymentTermCode": "PRE",
-    "otherChargesPaymentTermCode": "PRE"
-  },
-  "destinationChargesPaymentTerm": {
-    "haulageChargesPaymentTermCode": "COL",
-    "portChargesPaymentTermCode": "PRE",
-    "otherChargesPaymentTermCode": "PRE"
-  },
+  "serviceContractReference": "HHL51800000",
   "vessel": {
-    "name": "King of the Seas",
-    "vesselIMONumber": "9298686"
+    "name": "OCEAN DESTROYER"
   },
-  "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
-  "carrierServiceCode": "TA1",
-  "carrierCode": "MMCU",
-  "carrierCodeListProvider": "NMFTA",
-  "universalServiceReference": "SR12345A",
-  "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
-  "universalExportVoyageReference": "2103N",
-  "declaredValue": 1231.1,
-  "declaredValueCurrency": "EUR",
-  "expectedDepartureDate": "2064-10-17",
-  "expectedArrivalAtPlaceOfDeliveryStartDate": "2064-11-10",
-  "expectedArrivalAtPlaceOfDeliveryEndDate": "2064-11-15",
-  "transportDocumentTypeCode": "BOL",
-  "transportDocumentReference": "reserved-HHL123",
-  "bookingChannelReference": "X12300",
-  "incoTerms": "FCA",
-  "communicationChannelCode": "AO",
+  "carrierExportVoyageNumber": "403W",
   "isEquipmentSubstitutionAllowed": true,
-  "invoicePayableAt": {
-    "UNLocationCode": "NLAMS"
-  },
-  "placeOfBLIssue": {
-    "locationName": "Amsterdam",
-    "UNLocationCode" : "NLAMS"
-  },
-  "references": [
-    {
-      "type": "FF",
-      "value": "KN-00103004"
-    }
-  ],
   "documentParties": {
     "bookingAgent": {
-      "partyName": "DCSA Conformance Sandbox",
-      "address": {
-        "street": "Strawinskylaan 4117",
-        "floor": "6",
-        "postCode": "1077 ZX",
-        "city": "Amsterdam",
-        "countryCode": "NL",
-        "UNLocationCode": "NLAMS",
-        "stateRegion": "North Holland"
-      },
-      "identifyingCodes" : [{
-        "codeListProvider" : "WAVE",
-        "partyCode": "MSK",
-        "codeListName": "DID"
-      },
-      {
-        "codeListProvider" : "WAVE",
-        "partyCode": "CMA",
-        "codeListName": "DID"
-      }],
-      "taxLegalReferences" : [{
-        "type": "RUC",
-        "countryCode": "EC",
-        "value": "Registro Único de Contribuyente"
-      }],
-      "partyContactDetails": [
-        {
-          "name": "Henrik",
-          "phone": "+31611444666",
-          "email": "info@dcsa.org"
-        }
-      ]
-    },
-    "shipper": {
-      "partyName": "DCSA Shipper",
-      "address": {
-        "street": "Strawinskylaan 485",
-        "floor": "6",
-        "postCode": "1077 ZX",
-        "city": "Amsterdam",
-        "countryCode": "NL",
-        "UNLocationCode": "NLAMS",
-        "stateRegion": "North Holland"
-      },
-      "identifyingCodes" : [{
-        "codeListProvider" : "WAVE",
-        "partyCode": "MSK",
-        "codeListName": "DID"
-      },
-        {
-          "codeListProvider" : "WAVE",
-          "partyCode": "CMA",
-          "codeListName": "DID"
-        }],
-      "taxLegalReferences" : [{
-        "type": "RUC",
-        "countryCode": "EC",
-        "value": "Registro Único de Contribuyente"
-      }],
-      "partyContactDetails": [
-        {
-          "name": "Henrik",
-          "phone": "+31611444666",
-          "email": "info@dcsa.org"
-        }
-      ]
+      "partyName": "DCSA Team"
     }
   },
-  "partyContactDetails": [
-    {
-      "name": "Henrik",
-      "phone": "+31611444666",
-      "email": "info@dcsa.org"
-    }
-  ],
   "shipmentLocations": [
     {
       "location": {
-        "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
+        "UNLocationCode": "NLAMS"
       },
       "locationTypeCode": "POL"
     },
     {
       "location": {
-        "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
+        "UNLocationCode": "SGSIN"
       },
       "locationTypeCode": "POD"
     }
@@ -146,29 +33,13 @@
       "ISOEquipmentCode": "22GP",
       "units": 1,
       "isShipperOwned": false,
-      "equipmentReferences": [
-        "APZU4812090"
-      ],
       "commodities": [
         {
-          "HSCodes": ["COMMODITY_HS_CODE_1"],
-          "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
+          "commodityType": "Dry cargo, Freight all kinds",
           "cargoGrossWeight": {
-            "value": 323.32,
+            "value": 3000.0,
             "unit": "KGM"
-          },
-          "cargoGrossVolume": {
-              "value": 14,
-              "unit": "MTQ"
-          },
-          "exportLicenseIssueDate": "2021-10-10",
-          "exportLicenseExpiryDate": "2030-10-10",
-          "references": [
-            {
-              "type": "FF",
-              "value": "KN-00103004"
-            }
-          ]
+          }
         }
       ]
     }

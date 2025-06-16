@@ -69,12 +69,12 @@ public abstract class BookingAction extends ConformanceAction {
     return (BookingAction) previousAction;
   }
 
-  protected Consumer<CarrierScenarioParameters> getCspConsumer() {
-    return getPreviousBookingAction().getCspConsumer();
+  protected Consumer<JsonNode> getBookingPayloadConsumer() {
+    return getPreviousBookingAction().getBookingPayloadConsumer();
   }
 
-  protected Supplier<CarrierScenarioParameters> getCspSupplier() {
-    return getPreviousBookingAction().getCspSupplier();
+  protected Supplier<JsonNode> getBookingPayloadSupplier() {
+    return getPreviousBookingAction().getBookingPayloadSupplier();
   }
 
   protected Supplier<DynamicScenarioParameters> getDspSupplier() {
@@ -133,6 +133,23 @@ public abstract class BookingAction extends ConformanceAction {
         .collect(Collectors.joining());
   }
 
+  protected String getMarkdownHumanReadablePrompt(ScenarioType scenarioType, String... fileNames) {
+    Map<String, String> replacementsMap =
+        Map.ofEntries(
+            Map.entry(
+                "WITH_CBR_OR_CBRR_PLACEHOLDER",
+                withCbrOrCbrr(
+                    getDspSupplier().get().carrierBookingReference(),
+                    getDspSupplier().get().carrierBookingRequestReference())));
+    return Arrays.stream(fileNames)
+        .map(
+            fileName ->
+                IOToolkit.templateFileToText(
+                    "/standards/booking/instructions/" + fileName, replacementsMap))
+        .collect(Collectors.joining())
+        .replace("SCENARIO_TYPE", scenarioType.name());
+  }
+
   protected static String withCbrOrCbrr(String cbr, String cbrr) {
     return (cbr != null ? "with CBR '%s'".formatted(cbr) : "")
       + (cbr != null && cbrr != null ? " and " : "")
@@ -174,7 +191,6 @@ public abstract class BookingAction extends ConformanceAction {
                 bookingState,
                 amendedBookingState,
                 bookingCancellationState,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,

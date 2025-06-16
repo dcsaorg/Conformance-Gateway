@@ -70,38 +70,47 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
         Stream<ActionCheck> primaryExchangeChecks =
-          Stream.of(
-            new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PUT"),
-            new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), "/v3/shipping-instructions/%s".formatted(useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference())),
-            new ResponseStatusCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
-            new ApiHeaderCheck(
-                EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new ApiHeaderCheck(
-                EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-                EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator),
-            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier())
-        );
+            Stream.of(
+                new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PUT"),
+                new UrlPathCheck(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    "/v3/shipping-instructions/%s"
+                        .formatted(
+                            useTDRef
+                                ? dsp.transportDocumentReference()
+                                : dsp.shippingInstructionsReference())),
+                new ResponseStatusCheck(
+                    EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+                new ApiHeaderCheck(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    expectedApiVersion),
+                new ApiHeaderCheck(
+                    EblRole::isCarrier,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    expectedApiVersion),
+                new JsonSchemaCheck(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    requestSchemaValidator),
+                EBLChecks.siRequestContentChecks(
+                    getMatchedExchangeUuid(),
+                    expectedApiVersion,
+                    getCspSupplier(),
+                    getDspSupplier()));
         return Stream.concat(
-          primaryExchangeChecks,
-          getSINotificationChecks(
-            getMatchedNotificationExchangeUuid(),
-            expectedApiVersion,
-            notificationSchemaValidator,
-            expectedSiStatus,
-            ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
-            EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier()))
-          );
+            primaryExchangeChecks,
+            getSINotificationChecks(
+                getMatchedNotificationExchangeUuid(),
+                expectedApiVersion,
+                notificationSchemaValidator,
+                expectedSiStatus,
+                ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
+                EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier())));
       }
     };
   }

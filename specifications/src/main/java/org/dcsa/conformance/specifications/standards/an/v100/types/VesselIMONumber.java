@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(
     type = "string",
-    pattern = "^\\d{7,8}$",
-    minLength = 7,
     maxLength = 8,
     example = "12345678",
     description =

@@ -4,11 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 
-@Schema(description = "A cargoItem is the smallest unit used in stuffing. It cannot be split across containers.")
+@Schema(description = CargoItem.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class CargoItem {
 
+  public static final String CLASS_SCHEMA_DESCRIPTION = "A cargoItem is the smallest unit used in stuffing. It cannot be split across containers.";
+
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -19,32 +22,32 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
       example = "APZU4812090",
       maxLength = 11,
       pattern = "^\\S(?:.*\\S)?$")
-  private String equipmentReference;
+  protected String equipmentReference;
 
-  @Schema(description = "Gross weight of the cargo.")
-  private CargoGrossWeight cargoGrossWeight;
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Gross weight of the cargo.")
+  protected CargoGrossWeight cargoGrossWeight;
 
   @Schema(description = "Gross volume of the cargo.")
-  private CargoGrossVolume cargoGrossVolume;
+  protected CargoGrossVolume cargoGrossVolume;
 
   @Schema(description = "Net weight of the cargo.")
-  private CargoNetWeight cargoNetWeight;
+  protected CargoNetWeight cargoNetWeight;
 
   @Schema(description = "Net volume of the cargo.")
-  private CargoNetVolume cargoNetVolume;
+  protected CargoNetVolume cargoNetVolume;
 
   @Schema(description = "Export license applicable to this cargo item.")
-  private ExportLicense exportLicense;
+  protected ExportLicense exportLicense;
 
   @Schema(description = "Import license applicable to this cargo item.")
-  private ImportLicense importLicense;
+  protected ImportLicense importLicense;
 
-  @Schema(description = "Packaging information for this cargo item.")
-  private OuterPackaging outerPackaging;
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Packaging information for this cargo item.")
+  protected OuterPackaging outerPackaging;
 
   @Schema(description = "A list of `National Commodity Codes` that apply to this `cargoItem`")
-  private List<NationalCommodityCode> nationalCommodityCodes;
+  protected List<NationalCommodityCode> nationalCommodityCodes;
 
   @Schema(description = "A list of `Customs references`")
-  private List<CustomsReference> customsReferences;
+  protected List<CustomsReference> customsReferences;
 }

@@ -10,12 +10,12 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactD
 @Data
 public class CarriersAgentAtDestination {
 
-  @Schema(description = "Name of the party.", example = "IKEA Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Name of the party.", example = "IKEA Denmark", maxLength = 70, pattern = "^\\S(?:.*\\S)?$")
   private String partyName;
 
-  @Schema(description = "Physical address of the agent.")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Physical address of the agent.")
   private Address address;
 
-  @Schema(description = "A list of contact details")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "A list of contact details")
   private List<PartyContactDetail> partyContactDetails;
 }

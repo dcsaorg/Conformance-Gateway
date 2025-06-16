@@ -2,10 +2,8 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.generator.SchemaOverride;
-import org.dcsa.conformance.specifications.generator.StringPatterns;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FacilityCodeListProvider;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GeoCoordinate;
 
 @Data
@@ -30,20 +28,11 @@ The UN Location code specifying where the place is located. The pattern used mus
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
 """,
       example = "NLAMS",
-      minLength = 5,
-      maxLength = 5,
-      pattern = "^[A-Z]{2}[A-Z2-9]{3}$")
+      maxLength = 5)
   private String unLocationCode;
 
-  @Schema(
-      pattern = StringPatterns.TRIMMED_NON_EMPTY_STRING,
-      maxLength = 6,
-      example = "CTA",
-      description = "Facility code in the list provided by `facilityCodeListProvider`")
-  private String facilityCode;
-
-  @SchemaOverride(description = "The provider of the code list in which `facilityCode` is defined.")
-  private FacilityCodeListProvider facilityCodeListProvider;
+  @Schema()
+  private Facility facility;
 
   @Schema() private GeoCoordinate geoCoordinate;
 }

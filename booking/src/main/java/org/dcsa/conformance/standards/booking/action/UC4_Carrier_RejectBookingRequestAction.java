@@ -49,7 +49,6 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
                 BookingState.REJECTED,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

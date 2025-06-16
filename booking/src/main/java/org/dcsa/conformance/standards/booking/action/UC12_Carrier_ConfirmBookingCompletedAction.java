@@ -50,7 +50,6 @@ public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
                 BookingState.COMPLETED,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

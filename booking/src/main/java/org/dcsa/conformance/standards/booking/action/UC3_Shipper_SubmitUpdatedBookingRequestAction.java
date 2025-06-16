@@ -58,20 +58,19 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var cbrr = getDspSupplier().get().carrierBookingRequestReference();
         return Stream.concat(
-          Stream.of(
-          new JsonSchemaCheck(
-            BookingRole::isShipper,
-            getMatchedExchangeUuid(),
-            HttpMessageType.REQUEST,
-            requestSchemaValidator),
-            BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier())),
-          Stream.concat(
-            createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/%s".formatted(cbrr)),
-            getNotificationChecks(
-                expectedApiVersion,
-                notificationSchemaValidator,
-                expectedBookingState,
-                null)));
+            Stream.of(
+                new JsonSchemaCheck(
+                    BookingRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    requestSchemaValidator),
+                BookingChecks.requestContentChecks(
+                    getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())),
+            Stream.concat(
+                createPrimarySubChecks(
+                    "PUT", expectedApiVersion, "/v2/bookings/%s".formatted(cbrr)),
+                getNotificationChecks(
+                    expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)));
       }
     };
   }

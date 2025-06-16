@@ -3,12 +3,20 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided.")
+@Schema(description = PartyContactDetail.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class PartyContactDetail {
 
-  @Schema(description = "Name of the contact", example = "Henrik", maxLength = 35, pattern = "^\\S(?:.*\\S)?$")
-  private String name;
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided.";
+
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "Name of the contact",
+      example = "Henrik",
+      maxLength = 35,
+      pattern = "^\\S(?:.*\\S)?$")
+  protected String name;
 
   @Schema(
       description =
@@ -18,8 +26,12 @@ Phone number for the contact. Phone **MUST** include an international phone numb
       example = "+45 70262970",
       maxLength = 30,
       pattern = "^\\S(?:.*\\S)?$")
-  private String phone;
+  protected String phone;
 
-  @Schema(description = "`E-mail` address to be used", example = "info@dcsa.org", maxLength = 100, pattern = "^.+@\\S+$")
-  private String email;
+  @Schema(
+      description = "`E-mail` address to be used",
+      example = "info@dcsa.org",
+      maxLength = 100,
+      pattern = "^.+@\\S+$")
+  protected String email;
 }

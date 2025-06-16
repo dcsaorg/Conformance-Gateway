@@ -60,6 +60,12 @@
                               ></textarea>
                           </mat-form-field>
                       </div>
+                    <div class="paragraph" *ngIf="submitAttempted && inlineErrorMessage">
+                      <mat-card style="background-color: #fdecea; color: #b00020; padding: 1em;">
+                          <mat-icon>error</mat-icon>
+                          <pre style="margin: 0; white-space: pre-wrap;">{{ inlineErrorMessage }}</pre>
+                      </mat-card>
+                    </div>
                       <div class="paragraph">
                           <button
                           id="submitActionButton"

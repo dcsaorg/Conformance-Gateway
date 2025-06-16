@@ -37,6 +37,11 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
   public static Map<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
+  private BookingScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
+    super(actionBuilder);
+  }
+
+  public static LinkedHashMap<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
       BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
@@ -267,9 +272,15 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
 
   private static BookingScenarioListBuilder carrierSupplyScenarioParameters(
       String carrierPartyName, ScenarioType scenarioType) {
+    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     return new BookingScenarioListBuilder(
         previousAction ->
-            new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType));
+            new CarrierSupplyScenarioParametersAction(
+                carrierPartyName,
+                scenarioType,
+                componentFactory.getStandardVersion(),
+                componentFactory.getMessageSchemaValidator(
+                    BOOKING_API, CREATE_BOOKING_SCHEMA_NAME)));
   }
 
   private static BookingScenarioListBuilder shipperGetBooking(BookingState expectedBookingStatus) {

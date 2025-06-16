@@ -3,11 +3,15 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "Code-based identifier for a party. Includes the provider, code, and list name.")
+@Schema(description = IdentifyingCode.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class IdentifyingCode {
 
+  public static final String CLASS_SCHEMA_DESCRIPTION =
+      "Code-based identifier for a party. Includes the provider, code, and list name.";
+
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 A list of codes identifying a party. Possible values are:
@@ -34,10 +38,14 @@ A list of codes identifying a party. Possible values are:
 """,
       example = "W3C",
       maxLength = 100)
-  private String codeListProvider;
+  protected String codeListProvider;
 
-  @Schema(description = "Code to identify the party as provided by the code list provider", example = "MSK", maxLength = 150)
-  private String partyCode;
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "Code to identify the party as provided by the code list provider",
+      example = "MSK",
+      maxLength = 150)
+  protected String partyCode;
 
   @Schema(
       description =
@@ -49,5 +57,5 @@ The name of the code list, code generation mechanism or code authority for the `
 """,
       example = "DID",
       maxLength = 100)
-  private String codeListName;
+  protected String codeListName;
 }

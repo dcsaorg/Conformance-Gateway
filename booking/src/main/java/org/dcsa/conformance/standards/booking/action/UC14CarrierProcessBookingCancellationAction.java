@@ -67,7 +67,6 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
                 expectedBookingStatus,
                 expectedAmendedBookingStatus,
                 cancelledStatus,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

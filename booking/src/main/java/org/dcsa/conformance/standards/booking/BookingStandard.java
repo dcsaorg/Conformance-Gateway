@@ -1,10 +1,9 @@
 package org.dcsa.conformance.standards.booking;
 
+import java.util.*;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
-
-import java.util.*;
 
 public class BookingStandard extends AbstractStandard {
   public static final BookingStandard INSTANCE = new BookingStandard();
@@ -21,8 +20,7 @@ public class BookingStandard extends AbstractStandard {
                 "2.0.0",
                 new TreeSet<>(
                     Set.of(
-                        BookingScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE,
-                        BookingScenarioListBuilder.SCENARIO_SUITE_RI)))));
+                        BookingScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE)))));
   }
 
   @Override
@@ -46,8 +44,7 @@ public class BookingStandard extends AbstractStandard {
     return Map.ofEntries(
         Map.entry(
             BookingScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE,
-            endpointUrisAndMethodsByRoleName),
-        Map.entry(BookingScenarioListBuilder.SCENARIO_SUITE_RI, endpointUrisAndMethodsByRoleName));
+            endpointUrisAndMethodsByRoleName));
   }
 
   @Override

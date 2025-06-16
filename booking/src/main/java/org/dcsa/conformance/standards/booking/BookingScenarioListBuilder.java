@@ -36,12 +36,11 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   private static final String CANCEL_SCHEMA_NAME = "CancelBookingRequest";
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
-  public static Map<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
-  private BookingScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
+  private BookingScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
     super(actionBuilder);
   }
 
-  public static LinkedHashMap<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
+  public static Map<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
       BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
@@ -264,10 +263,6 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-  }
-
-  private BookingScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
-    super(actionBuilder);
   }
 
   private static BookingScenarioListBuilder carrierSupplyScenarioParameters(

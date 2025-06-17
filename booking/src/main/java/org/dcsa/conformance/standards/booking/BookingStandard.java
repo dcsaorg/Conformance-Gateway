@@ -55,4 +55,9 @@ public class BookingStandard extends AbstractStandard {
       String standardVersion, String scenarioSuite) {
     return new BookingComponentFactory(getName(), standardVersion, scenarioSuite);
   }
+
+  @Override
+  protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
+    return Set.of(BookingRole.SHIPPER.getConfigName());
+  }
 }

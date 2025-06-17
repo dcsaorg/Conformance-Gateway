@@ -45,4 +45,9 @@ public class EblIssuanceStandard extends AbstractStandard {
       String standardVersion, String scenarioSuite) {
     return new EblIssuanceComponentFactory(getName(), standardVersion, scenarioSuite);
   }
+
+  @Override
+  protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
+    return Set.of();
+  }
 }

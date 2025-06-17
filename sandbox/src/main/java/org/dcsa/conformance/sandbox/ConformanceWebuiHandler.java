@@ -316,8 +316,13 @@ public class ConformanceWebuiHandler {
                 .orElseThrow()
                 .getUrl()
             .split("/party/")[0] + "/";
+    boolean allowEmptyUrl =
+        SupportedStandard.forName(sandboxConfiguration.getStandard().getName())
+            .standard
+            .isExternalPartyEmptyUrlAllowed(
+                sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole());
     CounterpartConfiguration.validateUrl(
-        externalPartyUrl, sandboxPartyBaseUrl.startsWith("http://localhost"));
+        externalPartyUrl, sandboxPartyBaseUrl.startsWith("http://localhost"), allowEmptyUrl);
     if (externalPartyUrl.startsWith(sandboxPartyBaseUrl))
       throw new UserFacingException("The sandbox URL cannot be used as external party URL");
 

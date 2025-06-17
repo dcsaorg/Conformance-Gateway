@@ -41,4 +41,9 @@ public class CsStandard extends AbstractStandard {
       String standardVersion, String scenarioSuite) {
     return new CsComponentFactory(getName(), standardVersion, scenarioSuite);
   }
+
+  @Override
+  protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
+    return Set.of(CsRole.SUBSCRIBER.getConfigName());
+  }
 }

@@ -45,4 +45,9 @@ public class AdoptionStandard extends AbstractStandard {
       String standardVersion, String scenarioSuite) {
     return new AdoptionComponentFactory(getName(), standardVersion, scenarioSuite);
   }
+
+  @Override
+  protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
+    return Set.of(AdoptionRole.ADOPTER.getConfigName(), AdoptionRole.DCSA.getConfigName());
+  }
 }

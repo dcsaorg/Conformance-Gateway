@@ -88,4 +88,9 @@ public class JitStandard extends AbstractStandard {
       String standardVersion, String scenarioSuite) {
     return new JitComponentFactory(getName(), standardVersion, scenarioSuite);
   }
+
+  @Override
+  protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
+    return Set.of();
+  }
 }

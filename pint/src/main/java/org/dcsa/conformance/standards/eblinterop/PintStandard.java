@@ -46,4 +46,9 @@ public class PintStandard extends AbstractStandard {
       String standardVersion, String scenarioSuite) {
     return new PintComponentFactory(getName(), standardVersion, scenarioSuite);
   }
+
+  @Override
+  protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
+    return Set.of(PintRole.SENDING_PLATFORM.getConfigName());
+  }
 }

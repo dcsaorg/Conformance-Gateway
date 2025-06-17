@@ -29,4 +29,9 @@ public class AnStandard extends AbstractStandard {
       String standardVersion, String scenarioSuite) {
     throw new UnsupportedOperationException(); // FIXME
   }
+
+  @Override
+  protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
+    return Set.of(); // FIXME
+  }
 }

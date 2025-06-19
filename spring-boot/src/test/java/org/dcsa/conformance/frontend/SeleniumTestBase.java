@@ -110,6 +110,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
               .findElements(By.className(("wrappingText")))
               .get(scenarioIndex)
               .getText());
+      resetParty();
       driver
         .findElement(By.tagName("app-sandbox"))
         .findElements(By.className(("scenarioActionButton")))
@@ -128,6 +129,33 @@ public abstract class SeleniumTestBase extends ManualTestBase {
         break;
       }
     }
+  }
+
+  private void resetParty() {
+    log.debug("Resetting party");
+    switchToTab(1);
+    waitForUIReadiness();
+    By resetBtn = By.id("resetPartyButton");
+    wait.until(ExpectedConditions.elementToBeClickable(resetBtn)).click();
+
+    WebElement confirmResetButton =
+        driver
+            .findElement(By.cssSelector("app-confirmation-dialog"))
+            .findElements(By.tagName("button"))
+            .getFirst(); // Equivalent to YES button in the dialogue box
+
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmResetButton);
+
+    By confirmationDialog = By.cssSelector("app-confirmation-dialog");
+    wait.until(ExpectedConditions.invisibilityOfElementLocated(confirmationDialog));
+    waitForUIReadiness();
+
+    driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
+    waitForUIReadiness();
+
+    switchToTab(0);
+    waitForUIReadiness();
+    log.debug("Party reset complete");
   }
 
   private boolean handleJsonPromptForText() {

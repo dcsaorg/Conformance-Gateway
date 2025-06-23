@@ -110,7 +110,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
               .findElements(By.className(("wrappingText")))
               .get(scenarioIndex)
               .getText());
-      resetParty();
+      resetInternalParty();
       driver
         .findElement(By.tagName("app-sandbox"))
         .findElements(By.className(("scenarioActionButton")))
@@ -131,11 +131,12 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     }
   }
 
-  private void resetParty() {
+  private void resetInternalParty() {
     log.debug("Resetting party");
     switchToTab(1);
     waitForUIReadiness();
-    By resetBtn = By.id("resetPartyButton");
+    waitForAsyncCalls(lambdaDelay);
+    By resetBtn = By.cssSelector("button[testId='resetPartyButton']");
     wait.until(ExpectedConditions.elementToBeClickable(resetBtn)).click();
 
     WebElement confirmResetButton =
@@ -149,12 +150,15 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     By confirmationDialog = By.cssSelector("app-confirmation-dialog");
     wait.until(ExpectedConditions.invisibilityOfElementLocated(confirmationDialog));
     waitForUIReadiness();
+    waitForAsyncCalls(lambdaDelay);
 
     driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
     waitForUIReadiness();
+    waitForAsyncCalls(lambdaDelay);
 
     switchToTab(0);
     waitForUIReadiness();
+    waitForAsyncCalls(lambdaDelay);
     log.debug("Party reset complete");
   }
 

@@ -290,33 +290,35 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                     .then(
                                         uc6CarrierPublishDraftTransportDocument(false)
                                             .then(
-                                                shipperGetTransportDocument(TD_DRAFT)
+                                                shipperGetShippingInstructionsRecordTDRef()
                                                     .then(
-                                                        uc7ShipperApproveDraftTransportDocument()
+                                                        shipperGetTransportDocument(TD_DRAFT)
                                                             .then(
-                                                                shipperGetTransportDocument(
-                                                                        TD_APPROVED)
+                                                                uc7ShipperApproveDraftTransportDocument()
                                                                     .then(
-                                                                        uc8CarrierIssueTransportDocument()
+                                                                        shipperGetTransportDocument(
+                                                                                TD_APPROVED)
                                                                             .then(
-                                                                                shipperGetTransportDocument(
-                                                                                        TD_ISSUED)
+                                                                                uc8CarrierIssueTransportDocument()
                                                                                     .then(
-                                                                                        uc12CarrierAwaitSurrenderRequestForDelivery()
+                                                                                        shipperGetTransportDocument(
+                                                                                                TD_ISSUED)
                                                                                             .then(
-                                                                                                shipperGetTransportDocument(
-                                                                                                        TD_PENDING_SURRENDER_FOR_DELIVERY)
+                                                                                                uc12CarrierAwaitSurrenderRequestForDelivery()
                                                                                                     .then(
-                                                                                                        uc13aCarrierAcceptSurrenderRequestForDelivery()
+                                                                                                        shipperGetTransportDocument(
+                                                                                                                TD_PENDING_SURRENDER_FOR_DELIVERY)
                                                                                                             .then(
-                                                                                                                shipperGetTransportDocument(
-                                                                                                                        TD_SURRENDERED_FOR_DELIVERY)
+                                                                                                                uc13aCarrierAcceptSurrenderRequestForDelivery()
                                                                                                                     .then(
-                                                                                                                        uc14CarrierConfirmShippingInstructionsComplete()
+                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                TD_SURRENDERED_FOR_DELIVERY)
                                                                                                                             .then(
-                                                                                                                                shipperGetShippingInstructions(
-                                                                                                                                    SI_COMPLETED,
-                                                                                                                                    false)))))))))))))))))
+                                                                                                                                uc14CarrierConfirmShippingInstructionsComplete()
+                                                                                                                                    .then(
+                                                                                                                                        shipperGetShippingInstructions(
+                                                                                                                                            SI_COMPLETED,
+                                                                                                                                            false))))))))))))))))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));

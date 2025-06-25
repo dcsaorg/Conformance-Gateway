@@ -1,10 +1,13 @@
 package org.dcsa.conformance.standards.booking.action;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
@@ -80,5 +83,11 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
                     expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)));
       }
     };
+  }
+
+  @Override
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    super.doHandleExchange(exchange);
+    getBookingPayloadConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }
 }

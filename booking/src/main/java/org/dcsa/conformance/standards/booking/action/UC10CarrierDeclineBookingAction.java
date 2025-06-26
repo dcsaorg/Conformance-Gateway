@@ -10,22 +10,25 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
-public class UC6_Carrier_RequestToAmendConfirmedBookingAction extends StateChangingBookingAction {
+public class UC10CarrierDeclineBookingAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
+  private final BookingState expectedAmendedBookingStatus;
 
-  public UC6_Carrier_RequestToAmendConfirmedBookingAction(
+  public UC10CarrierDeclineBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
+      BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC6", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, "UC10", 204);
     this.requestSchemaValidator = requestSchemaValidator;
+    this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        "prompt-carrier-uc6.md", "prompt-carrier-notification.md");
+        "prompt-carrier-uc10.md", "prompt-carrier-notification.md");
   }
 
   @Override
@@ -49,7 +52,8 @@ public class UC6_Carrier_RequestToAmendConfirmedBookingAction extends StateChang
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
-                BookingState.PENDING_AMENDMENT,
+                BookingState.DECLINED,
+                expectedAmendedBookingStatus,
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

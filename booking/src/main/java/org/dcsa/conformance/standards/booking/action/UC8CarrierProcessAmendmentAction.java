@@ -10,30 +10,48 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
-public class UC5_Carrier_ConfirmBookingRequestAction extends StateChangingBookingAction {
+public class UC8CarrierProcessAmendmentAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
+  private final BookingState expectedBookingStatus;
+  private final BookingState expectedAmendedBookingStatus;
 
-  public UC5_Carrier_ConfirmBookingRequestAction(
+  private final boolean acceptAmendment;
+
+  public UC8CarrierProcessAmendmentAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC5", 204);
+      BookingState expectedBookingStatus,
+      BookingState expectedAmendedBookingStatus,
+      JsonSchemaValidator requestSchemaValidator,
+      boolean acceptAmendment) {
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        "UC8%s [%s]".formatted(acceptAmendment ? "a" : "b", acceptAmendment ? "A" : "D"),
+        204);
     this.requestSchemaValidator = requestSchemaValidator;
+    this.acceptAmendment = acceptAmendment;
+    this.expectedBookingStatus = expectedBookingStatus;
+    this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        "prompt-carrier-uc5.md", "prompt-carrier-notification.md");
+        "prompt-carrier-uc8%s.md".formatted(acceptAmendment ? "c" : "d"),
+        "prompt-carrier-notification.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
+    var dsp = getDspSupplier().get();
     return jsonNode
-        .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
-        .put("cbr", getDspSupplier().get().carrierBookingReference());
+        .put("cbrr", dsp.carrierBookingRequestReference())
+        .put("cbr", dsp.carrierBookingReference())
+        .put("acceptAmendment", acceptAmendment);
   }
 
   @Override
@@ -48,7 +66,8 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends StateChangingBookin
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
-                BookingState.CONFIRMED,
+                expectedBookingStatus,
+                expectedAmendedBookingStatus,
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

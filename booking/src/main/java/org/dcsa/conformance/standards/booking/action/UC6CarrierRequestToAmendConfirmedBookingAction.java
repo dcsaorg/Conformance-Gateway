@@ -10,30 +10,31 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
-public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBookingAction {
+public class UC6CarrierRequestToAmendConfirmedBookingAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC4_Carrier_RejectBookingRequestAction(
+  public UC6CarrierRequestToAmendConfirmedBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC4", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, "UC6", 204);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        "prompt-carrier-uc4.md", "prompt-carrier-notification.md");
+        "prompt-carrier-uc6.md", "prompt-carrier-notification.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
-    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
-    return jsonNode;
+    var dsp = getDspSupplier().get();
+    return jsonNode
+        .put("cbr", dsp.carrierBookingReference())
+        .put("cbrr", dsp.carrierBookingRequestReference());
   }
 
   @Override
@@ -48,7 +49,7 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
-                BookingState.REJECTED,
+                BookingState.PENDING_AMENDMENT,
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

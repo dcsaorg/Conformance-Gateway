@@ -92,16 +92,16 @@ public class BookingCarrier extends ConformanceParty {
     return Map.ofEntries(
         Map.entry(CarrierSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(
-            UC2_Carrier_RequestUpdateToBookingRequestAction.class,
+            UC2CarrierRequestUpdateToBookingRequestAction.class,
             this::requestUpdateToBookingRequest),
-        Map.entry(UC4_Carrier_RejectBookingRequestAction.class, this::rejectBookingRequest),
-        Map.entry(UC5_Carrier_ConfirmBookingRequestAction.class, this::confirmBookingRequest),
+        Map.entry(UC4CarrierRejectBookingRequestAction.class, this::rejectBookingRequest),
+        Map.entry(UC5CarrierConfirmBookingRequestAction.class, this::confirmBookingRequest),
         Map.entry(
-            UC6_Carrier_RequestToAmendConfirmedBookingAction.class,
+            UC6CarrierRequestToAmendConfirmedBookingAction.class,
             this::requestToAmendConfirmedBooking),
-        Map.entry(UC8_Carrier_ProcessAmendmentAction.class, this::processBookingAmendment),
-        Map.entry(UC10_Carrier_DeclineBookingAction.class, this::declineBooking),
-        Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted),
+        Map.entry(UC8CarrierProcessAmendmentAction.class, this::processBookingAmendment),
+        Map.entry(UC10CarrierDeclineBookingAction.class, this::declineBooking),
+        Map.entry(UC12CarrierConfirmBookingCompletedAction.class, this::confirmBookingCompleted),
         Map.entry(
             UC14CarrierProcessBookingCancellationAction.class,
             this::processConfirmedBookingCancellation));

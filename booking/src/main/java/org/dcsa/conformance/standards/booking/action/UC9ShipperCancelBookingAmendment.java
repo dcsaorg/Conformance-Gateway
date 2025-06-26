@@ -11,23 +11,23 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
 @Slf4j
-public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingAction {
+public class UC9ShipperCancelBookingAmendment extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
   private final BookingState expectedBookingStatus;
   private final BookingState expectedAmendedBookingStatus;
 
-  public UC7_Shipper_SubmitBookingAmendment(
-      String carrierPartyName,
-      String shipperPartyName,
-      BookingAction previousAction,
-      BookingState expectedBookingStatus,
-      BookingState expectedAmendedBookingStatus,
-      JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC7", 202);
+  public UC9ShipperCancelBookingAmendment(
+    String carrierPartyName,
+    String shipperPartyName,
+    BookingAction previousAction,
+    BookingState expectedBookingStatus,
+    BookingState expectedAmendedBookingStatus,
+    JsonSchemaValidator requestSchemaValidator,
+    JsonSchemaValidator responseSchemaValidator,
+    JsonSchemaValidator notificationSchemaValidator) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC9", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -38,7 +38,12 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        "prompt-shipper-uc7.md", "prompt-shipper-refresh-complete.md");
+        "prompt-shipper-uc9.md", "prompt-shipper-refresh-complete.md");
+  }
+
+  @Override
+  protected boolean expectsNotificationExchange() {
+    return true;
   }
 
   @Override
@@ -50,11 +55,6 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
   }
 
   @Override
-  protected boolean expectsNotificationExchange() {
-    return true;
-  }
-
-  @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {
     return new ConformanceCheck(getActionTitle()) {
       @Override
@@ -62,18 +62,18 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
         var dsp = getDspSupplier().get();
         String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
         return Stream.concat(
-          Stream.concat( createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/%s".formatted(reference)),
+          Stream.concat(createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/%s".formatted(reference)),
             Stream.of(
               new JsonSchemaCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 requestSchemaValidator))),
-            getNotificationChecks(
-                expectedApiVersion,
-                notificationSchemaValidator,
-                expectedBookingStatus,
-                expectedAmendedBookingStatus));
+          getNotificationChecks(
+            expectedApiVersion,
+            notificationSchemaValidator,
+            expectedBookingStatus,
+            expectedAmendedBookingStatus));
       }
     };
   }

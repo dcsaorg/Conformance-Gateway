@@ -6,9 +6,9 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 
-public class Shipper_GetAmendedBooking404Action extends BookingAction {
+public class ShipperGetAmendedBooking404Action extends BookingAction {
 
-  public Shipper_GetAmendedBooking404Action(
+  public ShipperGetAmendedBooking404Action(
       String carrierPartyName, String shipperPartyName, BookingAction previousAction) {
     super(
         shipperPartyName,

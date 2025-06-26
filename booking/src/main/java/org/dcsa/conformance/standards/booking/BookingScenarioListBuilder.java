@@ -327,7 +327,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingScenarioListBuilder(
         previousAction ->
-            new UC1_Shipper_SubmitBookingRequestAction(
+            new UC1ShipperSubmitBookingRequestAction(
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
@@ -339,7 +339,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   }
 
   private static BookingScenarioListBuilder uc2CarrierRequestUpdateToBookingRequest() {
-    return carrierStateChange(UC2_Carrier_RequestUpdateToBookingRequestAction::new);
+    return carrierStateChange(UC2CarrierRequestUpdateToBookingRequestAction::new);
   }
 
   private static BookingScenarioListBuilder uc3ShipperSubmitUpdatedBookingRequest() {
@@ -348,7 +348,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingScenarioListBuilder(
         previousAction ->
-            new UC3_Shipper_SubmitUpdatedBookingRequestAction(
+            new UC3ShipperSubmitUpdatedBookingRequestAction(
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
@@ -361,15 +361,15 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   }
 
   private static BookingScenarioListBuilder uc4CarrierRejectBookingRequest() {
-    return carrierStateChange(UC4_Carrier_RejectBookingRequestAction::new);
+    return carrierStateChange(UC4CarrierRejectBookingRequestAction::new);
   }
 
   private static BookingScenarioListBuilder uc5CarrierConfirmBookingRequest() {
-    return carrierStateChange(UC5_Carrier_ConfirmBookingRequestAction::new);
+    return carrierStateChange(UC5CarrierConfirmBookingRequestAction::new);
   }
 
   private static BookingScenarioListBuilder uc6CarrierRequestToAmendConfirmedBooking() {
-    return carrierStateChange(UC6_Carrier_RequestToAmendConfirmedBookingAction::new);
+    return carrierStateChange(UC6CarrierRequestToAmendConfirmedBookingAction::new);
   }
 
   private static BookingScenarioListBuilder uc7ShipperSubmitBookingAmendment(
@@ -379,7 +379,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingScenarioListBuilder(
         previousAction ->
-            new UC7_Shipper_SubmitBookingAmendment(
+            new UC7ShipperSubmitBookingAmendment(
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
@@ -395,7 +395,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   private static BookingScenarioListBuilder uc8aCarrierApproveBookingAmendment() {
     return carrierStateChange(
         (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
-            new UC8_Carrier_ProcessAmendmentAction(
+            new UC8CarrierProcessAmendmentAction(
                 carrierPartyName,
                 shipperPartyName,
                 previousAction,
@@ -408,7 +408,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   private static BookingScenarioListBuilder uc8bCarrierDeclineBookingAmendment() {
     return carrierStateChange(
         (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
-            new UC8_Carrier_ProcessAmendmentAction(
+            new UC8CarrierProcessAmendmentAction(
                 carrierPartyName,
                 shipperPartyName,
                 previousAction,
@@ -424,7 +424,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingScenarioListBuilder(
         previousAction ->
-            new UC9_Shipper_CancelBookingAmendment(
+            new UC9ShipperCancelBookingAmendment(
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
@@ -440,7 +440,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   private static BookingScenarioListBuilder uc10CarrierDeclineBooking() {
     return carrierStateChange(
         (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
-            new UC10_Carrier_DeclineBookingAction(
+            new UC10CarrierDeclineBookingAction(
                 carrierPartyName, shipperPartyName, previousAction, null, requestSchemaValidator));
   }
 
@@ -450,7 +450,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingScenarioListBuilder(
         previousAction ->
-            new UC11_Shipper_CancelBookingRequestAction(
+            new UC11ShipperCancelBookingRequestAction(
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
@@ -463,7 +463,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   }
 
   private static BookingScenarioListBuilder uc12CarrierConfirmBookingCompleted() {
-    return carrierStateChange(UC12_Carrier_ConfirmBookingCompletedAction::new);
+    return carrierStateChange(UC12CarrierConfirmBookingCompletedAction::new);
   }
 
   private static BookingScenarioListBuilder uc13ShipperCancelConfirmedBooking() {

@@ -1,10 +1,13 @@
 package org.dcsa.conformance.standards.booking.action;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
@@ -12,37 +15,46 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
 @Slf4j
-public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChangingBookingAction {
+public class UC1ShipperSubmitBookingRequestAction extends StateChangingBookingAction {
+
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
-  private final BookingState expectedBookingState;
 
-  public UC3_Shipper_SubmitUpdatedBookingRequestAction(
+  public UC1ShipperSubmitBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      BookingState expectedBookingState,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 202);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
-    this.expectedBookingState = expectedBookingState;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(
-        "prompt-shipper-uc3.md", "prompt-shipper-refresh-complete.md");
+    String prompt =
+        getMarkdownHumanReadablePrompt(
+                "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
+            .replace(
+                "BOOKING_TYPE_PLACEHOLDER",
+                switch (getDspSupplier().get().scenarioType()) {
+                  case DG -> "DG";
+                  case REEFER, REEFER_TEMP_CHANGE -> "Reefer";
+                  default -> "Dry Cargo";
+                });
+    return prompt.replace(
+        "CARRIER_SCENARIO_PARAMETERS", getBookingPayloadSupplier().get().toString());
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
+    jsonNode.set("bookingPayload", getBookingPayloadSupplier().get());
+    jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
     return jsonNode;
   }
 
@@ -56,22 +68,26 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var cbrr = getDspSupplier().get().carrierBookingRequestReference();
         return Stream.concat(
             Stream.of(
+                BookingChecks.requestContentChecks(
+                    getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()),
                 new JsonSchemaCheck(
                     BookingRole::isShipper,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    requestSchemaValidator),
-                BookingChecks.requestContentChecks(
-                    getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())),
+                    requestSchemaValidator)),
             Stream.concat(
-                createPrimarySubChecks(
-                    "PUT", expectedApiVersion, "/v2/bookings/%s".formatted(cbrr)),
+                createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
                 getNotificationChecks(
-                    expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)));
+                    expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)));
       }
     };
+  }
+
+  @Override
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    super.doHandleExchange(exchange);
+    getBookingPayloadConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }
 }

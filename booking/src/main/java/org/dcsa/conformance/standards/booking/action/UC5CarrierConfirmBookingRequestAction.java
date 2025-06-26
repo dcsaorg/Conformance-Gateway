@@ -10,28 +10,30 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
-public class UC2_Carrier_RequestUpdateToBookingRequestAction extends StateChangingBookingAction {
+public class UC5CarrierConfirmBookingRequestAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC2_Carrier_RequestUpdateToBookingRequestAction(
+  public UC5CarrierConfirmBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC2", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, "UC5", 204);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        "prompt-carrier-uc2.md", "prompt-carrier-notification.md");
+        "prompt-carrier-uc5.md", "prompt-carrier-notification.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    return jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
+    return jsonNode
+        .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
+        .put("cbr", getDspSupplier().get().carrierBookingReference());
   }
 
   @Override
@@ -40,14 +42,13 @@ public class UC2_Carrier_RequestUpdateToBookingRequestAction extends StateChangi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new HttpMethodCheck(BookingRole::isCarrier, getMatchedExchangeUuid(), "POST"),
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
-                BookingState.PENDING_UPDATE,
+                BookingState.CONFIRMED,
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,

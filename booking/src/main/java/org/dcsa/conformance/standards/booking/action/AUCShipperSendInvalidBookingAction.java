@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
@@ -8,15 +9,13 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.model.InvalidBookingMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 
-import java.util.stream.Stream;
-
 @Getter
 @Slf4j
-public class AUC_Shipper_SendInvalidBookingAction extends StateChangingBookingAction {
+public class AUCShipperSendInvalidBookingAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final InvalidBookingMessageType invalidBookingMessageType;
 
-  public AUC_Shipper_SendInvalidBookingAction(
+  public AUCShipperSendInvalidBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,

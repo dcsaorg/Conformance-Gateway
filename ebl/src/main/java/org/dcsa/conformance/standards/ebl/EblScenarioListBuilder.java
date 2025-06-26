@@ -341,6 +341,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                                                                                                                 uc4aCarrierAcceptUpdatedShippingInstructions()
                                                                                                                                                     .then(
                                                                                                                                                         shipperGetShippingInstructions(
+                                                                                                                                                                SI_RECEIVED,
                                                                                                                                                                 SI_UPDATE_CONFIRMED,
                                                                                                                                                                 true)
                                                                                                                                                             .then(
@@ -376,7 +377,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                                         SI_RECEIVED, true)
                                                                     .then(
                                                                         shipperGetShippingInstructions(
-                                                                                SI_RECEIVED, true)
+                                                                                SI_RECEIVED,
+                                                                                SI_UPDATE_RECEIVED,
+                                                                                true)
                                                                             .then(
                                                                                 shipperGetTransportDocument(
                                                                                         TD_DRAFT)
@@ -384,6 +387,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                                                         uc4aCarrierAcceptUpdatedShippingInstructions()
                                                                                             .then(
                                                                                                 shipperGetShippingInstructions(
+                                                                                                        SI_RECEIVED,
                                                                                                         SI_UPDATE_CONFIRMED,
                                                                                                         true)
                                                                                                     .then(
@@ -452,10 +456,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                                                     .then(
                                                                                         shipperGetShippingInstructions(
                                                                                                 SI_RECEIVED,
+                                                                                                SI_UPDATE_RECEIVED,
                                                                                                 true)
                                                                                             .then(
                                                                                                 shipperGetTransportDocument(
-                                                                                                        TD_DRAFT)
+                                                                                                        TD_APPROVED)
                                                                                                     .then(
                                                                                                         uc4aCarrierAcceptUpdatedShippingInstructions()
                                                                                                             .then(
@@ -472,7 +477,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                                         SI_RECEIVED, true)
                                                                     .then(
                                                                         shipperGetShippingInstructions(
-                                                                                SI_RECEIVED, true)
+                                                                                SI_RECEIVED,
+                                                                                SI_UPDATE_RECEIVED,
+                                                                                true)
                                                                             .then(
                                                                                 uc4aCarrierAcceptUpdatedShippingInstructions()
                                                                                     .then(

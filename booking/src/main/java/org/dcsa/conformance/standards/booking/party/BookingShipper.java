@@ -144,11 +144,11 @@ public class BookingShipper extends ConformanceParty {
     log.info("Shipper.sendCancelBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
     String reference = getBookingReference(actionPrompt);
     syncCounterpartPatch(
-      "/v2/bookings/%s".formatted(reference),
-      Collections.emptyMap(),
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
+        "/v2/bookings/%s".formatted(reference),
+        Collections.emptyMap(),
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("bookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
 
     addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(reference));
   }

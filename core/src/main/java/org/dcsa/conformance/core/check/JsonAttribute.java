@@ -1,5 +1,6 @@
 package org.dcsa.conformance.core.check;
 
+
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;

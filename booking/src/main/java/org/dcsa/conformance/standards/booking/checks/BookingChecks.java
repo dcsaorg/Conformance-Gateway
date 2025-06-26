@@ -42,6 +42,7 @@ public class BookingChecks {
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final String RE_EMPTY_CONTAINER_PICKUP = "emptyContainerPickup";
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
+  private static final String ATTR_BOOKING_STATUS = "bookingStatus";
   private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
 
@@ -322,7 +323,7 @@ public class BookingChecks {
       JsonAttribute.customValidator(
           "Feedbacks must be present for the selected Booking Status",
           body -> {
-            var bookingStatus = body.path("bookingStatus").asText("");
+            var bookingStatus = body.path(ATTR_BOOKING_STATUS).asText("");
             var issues = new LinkedHashSet<String>();
             if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
                     || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)))
@@ -332,55 +333,60 @@ public class BookingChecks {
             return issues;
           });
 
-  private static final JsonContentCheck CHECK_ABSENCE_OF_CONFIRMED_FIELDS = JsonAttribute.customValidator(
-    "check absence of confirmed fields in non confirmed booking states",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      var bookingStatus = body.path("bookingStatus").asText("");
-      if (NON_CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
-        if (body.hasNonNull("termsAndConditions")) {
-          issues.add("termsAndConditions must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("carrierClauses")) {
-          issues.add("carrierClauses must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("charges")) {
-          issues.add("charges must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("advanceManifestFilings")) {
-          issues.add("advanceManifestFilings must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("confirmedEquipments")) {
-          issues.add("confirmedEquipments must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("transportPlan")) {
-          issues.add("transportPlan must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("shipmentCutOffTimes")) {
-          issues.add("shipmentCutOffTimes must not be present in %s".formatted(bookingStatus));
-        }
-      }
-      return issues;
-    });
+  private static final JsonContentCheck CHECK_ABSENCE_OF_CONFIRMED_FIELDS =
+      JsonAttribute.customValidator(
+          "check absence of confirmed fields in non confirmed booking states",
+          body -> {
+            var issues = new LinkedHashSet<String>();
+            var bookingStatus = body.path(ATTR_BOOKING_STATUS).asText("");
+            if (NON_CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
+              if (body.hasNonNull("termsAndConditions")) {
+                issues.add("termsAndConditions must not be present in %s".formatted(bookingStatus));
+              }
+              if (body.hasNonNull("carrierClauses")) {
+                issues.add("carrierClauses must not be present in %s".formatted(bookingStatus));
+              }
+              if (body.hasNonNull("charges")) {
+                issues.add("charges must not be present in %s".formatted(bookingStatus));
+              }
+              if (body.hasNonNull("advanceManifestFilings")) {
+                issues.add(
+                    "advanceManifestFilings must not be present in %s".formatted(bookingStatus));
+              }
+              if (body.hasNonNull("confirmedEquipments")) {
+                issues.add(
+                    "confirmedEquipments must not be present in %s".formatted(bookingStatus));
+              }
+              if (body.hasNonNull("transportPlan")) {
+                issues.add("transportPlan must not be present in %s".formatted(bookingStatus));
+              }
+              if (body.hasNonNull("shipmentCutOffTimes")) {
+                issues.add(
+                    "shipmentCutOffTimes must not be present in %s".formatted(bookingStatus));
+              }
+            }
+            return issues;
+          });
 
-  private static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS = JsonAttribute.customValidator(
-    "check confirmed booking fields availability",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      var bookingStatus = body.path("bookingStatus").asText("");
-      if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
-        if (body.path("confirmedEquipments").isEmpty()) {
-          issues.add("confirmedEquipments for confirmed booking is not present");
-        }
-        if (body.path("transportPlan").isEmpty()) {
-          issues.add("transportPlan for confirmed booking is not present");
-        }
-        if (body.path("shipmentCutOffTimes").isEmpty()) {
-          issues.add("shipmentCutOffTimes for confirmed booking is not present");
-        }
-      }
-      return issues;
-    });
+  private static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS =
+      JsonAttribute.customValidator(
+          "check confirmed booking fields availability",
+          body -> {
+            var issues = new LinkedHashSet<String>();
+            var bookingStatus = body.path(ATTR_BOOKING_STATUS).asText("");
+            if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
+              if (body.path("confirmedEquipments").isEmpty()) {
+                issues.add("confirmedEquipments for confirmed booking is not present");
+              }
+              if (body.path("transportPlan").isEmpty()) {
+                issues.add("transportPlan for confirmed booking is not present");
+              }
+              if (body.path("shipmentCutOffTimes").isEmpty()) {
+                issues.add("shipmentCutOffTimes for confirmed booking is not present");
+              }
+            }
+            return issues;
+          });
 
   static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_CONDITIONS =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -488,13 +494,13 @@ public class BookingChecks {
     return checks;
   }
 
-  static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
+  private static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate that 'feedbacks severity' is valid",
           mav -> mav.submitAllMatching("feedbacks.*.severity"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
 
-  static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
+  private static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate that 'feedbacks code' is valid",
           mav -> mav.submitAllMatching("feedbacks.*.code"),
@@ -702,6 +708,17 @@ public class BookingChecks {
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';
+  }
+
+  public static JsonContentCheck validateAmendedBookingCancellation() {
+    return JsonAttribute.customValidator(
+        "Validate amended booking cancellation",
+        JsonAttribute.combine(
+            JsonAttribute.path(ATTR_BOOKING_STATUS, JsonAttribute.matchedMustBeAbsent()),
+            JsonAttribute.path(ATTR_AMENDED_BOOKING_STATUS, JsonAttribute.matchedMustBePresent()),
+            JsonAttribute.path(
+                ATTR_AMENDED_BOOKING_STATUS,
+                JsonAttribute.matchedMustEqual(BookingState.AMENDMENT_CANCELLED::name))));
   }
 }
 

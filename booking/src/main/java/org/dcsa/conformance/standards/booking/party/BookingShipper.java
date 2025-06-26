@@ -148,7 +148,7 @@ public class BookingShipper extends ConformanceParty {
         Collections.emptyMap(),
         OBJECT_MAPPER
             .createObjectNode()
-            .put("bookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
+            .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
 
     addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(reference));
   }

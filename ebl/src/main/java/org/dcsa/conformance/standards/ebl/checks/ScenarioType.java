@@ -57,4 +57,20 @@ public enum ScenarioType {
   public boolean isSWB() {
     return this == REGULAR_SWB || this == REGULAR_SWB_AMF || this == REGULAR_SWB_SOC_AND_REFERENCES;
   }
+
+  public String eblPayload(String version) {
+    String suffix =
+        switch (this) {
+          case REGULAR_2C_2U_1E -> "2c2u1e";
+          case REGULAR_2C_2U_2E -> "2c2u2e";
+          case REGULAR_NO_COMMODITY_SUBREFERENCE -> "no-commodity-subreference";
+          case REGULAR_SWB_SOC_AND_REFERENCES -> "soc-references";
+          case REGULAR_SWB_AMF -> "amf";
+          case DG -> "dg";
+          case REGULAR_SWB, REGULAR_STRAIGHT_BL, ACTIVE_REEFER, NON_OPERATING_REEFER -> "request";
+          case REGULAR_NEGOTIABLE_BL -> "negotiable-bl";
+          case REGULAR_CLAD -> "clad";
+        };
+    return "booking-api-" + version.toLowerCase() + "-" + suffix + ".json";
+  }
 }

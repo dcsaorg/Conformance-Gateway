@@ -97,11 +97,11 @@ public abstract class EblAction extends ConformanceAction {
     return (EblAction) previousAction;
   }
 
-  protected Consumer<CarrierScenarioParameters> getCspConsumer() {
+  protected Consumer<JsonNode> getCspConsumer() {
     return getPreviousEblAction().getCspConsumer();
   }
 
-  protected Supplier<CarrierScenarioParameters> getCspSupplier() {
+  protected Supplier<JsonNode> getCspSupplier() {
     return getPreviousEblAction().getCspSupplier();
   }
 
@@ -202,7 +202,6 @@ public abstract class EblAction extends ConformanceAction {
             expectedApiVersion,
             expectedStatus,
             expectedUpdatedStatus,
-            getCspSupplier(),
             getDspSupplier(),
             extraChecks));
   }
@@ -251,7 +250,6 @@ public abstract class EblAction extends ConformanceAction {
             expectedApiVersion,
             transportDocumentStatus,
             tdrIsKnown,
-            getCspSupplier(),
             getDspSupplier()));
   }
 }

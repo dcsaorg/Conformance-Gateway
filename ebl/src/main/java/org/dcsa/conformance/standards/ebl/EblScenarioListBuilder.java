@@ -887,8 +887,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static EblScenarioListBuilder carrierSupplyScenarioParameters(ScenarioType scenarioType) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
+    String standardVersion = STANDARD_VERSION.get();
     return new EblScenarioListBuilder(
-        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType));
+        previousAction ->
+            new Carrier_SupplyScenarioParametersAction(
+                carrierPartyName, scenarioType, standardVersion));
   }
 
   private static EblScenarioListBuilder shipperGetShippingInstructions(

@@ -91,7 +91,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       .put("documentReference", dr)
       .put("scenarioType", dsp.scenarioType().name())
       .put("skipSI", skipSI);
-    node.set("csp", getCspSupplier().get().toJson());
+    node.set("eblPayload", getCspSupplier().get());
     return node;
   }
 

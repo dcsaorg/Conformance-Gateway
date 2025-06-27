@@ -58,11 +58,8 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new UrlPathCheck(
-                EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                "/v3/transport-documents/" + tdr),
-            new ResponseStatusCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+                EblRole::isShipper, getMatchedExchangeUuid(), "/v3/transport-documents/" + tdr),
+            new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -74,13 +71,16 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             new JsonSchemaCheck(
-              EblRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              responseSchemaValidator),
-            // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
-            // checkTDChanged(getMatchedExchangeUuid(), expectedApiVersion, dsp), // see commit history
-            EBLChecks.tdPlusScenarioContentChecks(getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getCspSupplier(), getDspSupplier()));
+                EblRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of
+            // an earlier action
+            // checkTDChanged(getMatchedExchangeUuid(), expectedApiVersion, dsp), // see commit
+            // history
+            EBLChecks.tdPlusScenarioContentChecks(
+                getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getDspSupplier()));
       }
     };
   }

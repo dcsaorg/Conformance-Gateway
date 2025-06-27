@@ -33,7 +33,6 @@ public class EBLChecks {
   private static final JsonPointer TD_REF_TDR_PTR = JsonPointer.compile("/transportDocumentReference");
   private static final JsonPointer TD_REF_TD_STATUS_PTR = JsonPointer.compile("/transportDocumentStatus");
 
-  private static final JsonPointer SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE = JsonPointer.compile("/invoicePayableAt/UNLocationCode");
   private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM = JsonPointer.compile("/documentParties/issueTo/sendToPlatform");
 
   private static final JsonPointer TD_TDR = JsonPointer.compile("/transportDocumentReference");
@@ -52,7 +51,6 @@ public class EBLChecks {
   private static final String ADVANCE_MANIFEST_FILINGS = "advanceManifestFilings";
   private static final String HOUSE_BILL_OF_LADINGS = "houseBillOfLadings";
   private static final String NUMBER_OF_COPIES_WITH_CHARGES = "numberOfCopiesWithCharges";
-  private static final String COMMODITY_SUB_REFERENCE = "commoditySubReference";
   private static final String PARTY_CONTACT_DETAILS = "partyContactDetails";
   private static final String SELLER = "seller";
 
@@ -170,12 +168,6 @@ public class EBLChecks {
             arrayNodeHandler.accept(
                 rootNode, "requestedCarrierClauses", ArrayOrderHandler.toStringSortableArray());
           };
-
-  private static final BiConsumer<JsonNode, JsonNode> SI_NORMALIZER = (leftNode, rhsNode) -> {
-    for (var node : List.of(leftNode, rhsNode)) {
-      SI_ARRAY_ORDER_DEFINITIONS.accept(node, ArrayOrderHelper::restoreArrayOrder);
-    }
-  };
 
   private static final JsonRebaseableContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE = JsonAttribute.ifThen(
     "Validate transportDocumentTypeCode vs. isToOrder",
@@ -918,9 +910,9 @@ public class EBLChecks {
         TD_REF_TDR_PTR, () -> dspSupplier.get().transportDocumentReference());
   }
 
-  private static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
+  private static <T, O> Supplier<T> delayedValue(Supplier<O> supplier, Function<O, T> field) {
     return () -> {
-      var csp = cspSupplier.get();
+      var csp = supplier.get();
       if (csp == null) {
         return null;
       }
@@ -928,16 +920,15 @@ public class EBLChecks {
     };
   }
 
-  private static void generateScenarioRelatedChecks(List<JsonContentCheck> checks, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
+  private static void generateScenarioRelatedChecks(
+      List<JsonContentCheck> checks,
+      String standardVersion,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      boolean isTD) {
     checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'transportDocumentTypeCode' is used",
       "transportDocumentTypeCode",
       delayedValue(dspSupplier, dsp -> dsp.scenarioType().transportDocumentTypeCode())
-    ));
-    checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
-      "[Scenario] Verify that the correct 'carrierBookingReference' is used",
-      mav -> mav.submitAllMatching("consignmentItems.*.carrierBookingReference"),
-      JsonAttribute.matchedMustEqual(delayedValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
     ));
     if (isTD) {
 /* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
@@ -958,10 +949,6 @@ public class EBLChecks {
           ignored -> dspSupplier.get().scenarioType().isCarriersAgentAtDestinationRequired(),
           JsonAttribute.path("isCarriersAgentAtDestinationRequired", JsonAttribute.matchedMustBeTrue())
         ));
-      checks.add(
-        JsonAttribute.customValidator(
-          "[Scenario] Verify that the correct 'commoditySubReference' is used",
-          JsonAttribute.path(CONSIGNMENT_ITEMS, checkCommoditySubreference(cspSupplier))));
 
       checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
@@ -975,29 +962,12 @@ public class EBLChecks {
         )
       );
     }
-    checks.add(JsonAttribute.customValidator(
-      "[Scenario] Verify that the correct 'equipmentReference' values are used",
-      JsonAttribute.path(UTILIZED_TRANSPORT_EQUIPMENTS, checkEquipmentReference(cspSupplier))
-    ));
-    checks.add(JsonAttribute.customValidator(
-      "[Scenario] Verify that the correct 'HSCodes' are used",
-      JsonAttribute.path(CONSIGNMENT_ITEMS, checkHSCodes(cspSupplier))
-    ));
-    checks.add(JsonAttribute.customValidator(
-      "[Scenario] Verify that the correct 'descriptionOfGoods' is used",
-      JsonAttribute.path(CONSIGNMENT_ITEMS, checkDescriptionOfGoods(cspSupplier))
-    ));
-
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'invoicePayableAt' location is used",
-      SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
-      delayedValue(cspSupplier, CarrierScenarioParameters::invoicePayableAtUNLocationCode)
-    ));
 
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the scenario contained references when the scenario requires it",
       scenarioReferencesCheck(dspSupplier)
     ));
+
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that 'customsReferences' is used when the scenario requires it",
       scenarioCustomsReferencesCheck(dspSupplier)
@@ -1064,247 +1034,12 @@ public class EBLChecks {
     return !field.isEmpty() || field.isValueNode();
   }
 
-  private static <T> Set<T> setOf(T v1, T v2) {
-    var s = new LinkedHashSet<T>();
-    if (v1 != null) {
-      s.add(v1);
-    }
-    if (v2 != null) {
-      s.add(v2);
-    }
-    return s;
-  }
-
-  private static JsonContentMatchedValidation checkCSPAllUsedAtLeastOnce(
-    String attributeName,
-    Supplier<Set<String>> expectedValuesSupplier
-  ) {
-    return checkCSPAllUsedAtLeastOnce(
-      attributeName,
-      expectedValuesSupplier,
-      (node, pathBuilder) -> {
-        pathBuilder.append(".").append(attributeName);
-        return node.path(attributeName);
-      }
-    );
-  }
-
-  private static JsonContentMatchedValidation checkCSPValueBasedOnOtherValue(
-    String attributeName,
-    String referenceAttributeName,
-    Supplier<Map<String, String>> expectedValuesSupplier,
-    BiFunction<JsonNode, StringBuilder, JsonNode> resolveValue
-  ) {
-    return (nodes, contextPath) -> {
-      var issues = new LinkedHashSet<String>();
-      var seen = new HashSet<String>();
-      var expectedValues = expectedValuesSupplier.get();
-      int index = 0;
-      var pathBuilder = new StringBuilder(contextPath);
-      for (var node : nodes) {
-        pathBuilder.setLength(contextPath.length());
-        pathBuilder.append('[').append(index).append(']');
-        var refPath = pathBuilder + "." + referenceAttributeName;
-        var valueNode = resolveValue != null ? resolveValue.apply(node, pathBuilder) : node;
-        index++;
-        if (valueNode == null || !valueNode.isTextual()) {
-          continue;
-        }
-        var value = valueNode.asText(null);
-        if (value == null) {
-          continue;
-        }
-        seen.add(value);
-        var expectedReferenceValue = expectedValues.get(value);
-        var refNode = node.path(referenceAttributeName);
-        if (expectedReferenceValue == null) {
-          if (!refNode.isMissingNode()) {
-            issues.add("The '%s' attribute must be absent".formatted(refPath));
-          }
-          continue;
-        }
-        if (refNode.isMissingNode() || !refNode.isTextual()) {
-          continue;
-        }
-        var refValue = refNode.asText(null);
-        if (refValue == null) {
-          continue;
-        }
-        if (!refValue.equals(expectedReferenceValue)) {
-          issues.add("The value %s at %s is not aligned with %s. The %s was '%s' but should have been '%s'".formatted(
-            value, pathBuilder.toString(), refPath, refPath, refValue, expectedReferenceValue
-          ));
-        }
-      }
-      for (var ref : expectedValues.keySet()) {
-        if (!seen.contains(ref)) {
-          issues.add("Expected %s %s to be used by one of the elements in %s, but it was not present".formatted(attributeName, ref, contextPath));
-        }
-      }
-      return issues;
-    };
-  }
-
-  private static JsonContentMatchedValidation checkCSPAllUsedAtLeastOnce(
-    String attributeName,
-    Supplier<Set<String>> expectedValuesSupplier,
-    BiFunction<JsonNode, StringBuilder, JsonNode> resolveValue
-  ) {
-    return (nodes, contextPath) -> {
-      var issues = new LinkedHashSet<String>();
-      var seen = new HashSet<String>();
-      var expectedValues = expectedValuesSupplier.get();
-      int index = 0;
-      var pathBuilder = new StringBuilder(contextPath);
-      for (var node : nodes) {
-        pathBuilder.setLength(contextPath.length());
-        pathBuilder.append('[').append(index).append(']');
-        var valueNode = resolveValue != null ? resolveValue.apply(node, pathBuilder) : node;
-        index++;
-        if (valueNode == null || !valueNode.isTextual()) {
-          continue;
-        }
-        var value = valueNode.asText(null);
-        if (value == null) {
-          continue;
-        }
-        seen.add(value);
-        if (!expectedValues.contains(value)) {
-          issues.add(
-              "Unexpected %s %s at %s".formatted(attributeName, value, pathBuilder.toString()));
-        }
-      }
-      for (var ref : expectedValues) {
-        if (ref != null && !seen.contains(ref)) {
-          issues.add(
-              "Expected %s %s to be used by one of the elements in %s, but it was not present"
-                  .formatted(attributeName, ref, contextPath));
-        }
-      }
-      return issues;
-    };
-  }
-
-  private static JsonContentMatchedValidation checkEquipmentReference(Supplier<CarrierScenarioParameters> cspSupplier) {
-    BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (ute, pathBuilder) -> {
-      var equipmentReferenceNode = ute.get(EQUIPMENT_REFERENCE);
-      if (equipmentReferenceNode != null) {
-        pathBuilder.append(".equipmentReference");
-      } else {
-        pathBuilder.append(".equipment.equipmentReference");
-        equipmentReferenceNode = ute.path("equipment").path(EQUIPMENT_REFERENCE);
-      }
-      return equipmentReferenceNode;
-    };
-    return (nodes, contextPath) -> {
-      var csp = cspSupplier.get();
-      var expectedReferences = setOf(csp.equipmentReference(), csp.equipmentReference2());
-      if (expectedReferences.isEmpty()) {
-        // SOC-case
-        var issues = new LinkedHashSet<String>();
-        int index = 0;
-        var pathBuilder = new StringBuilder(contextPath);
-        for (var node : nodes) {
-          pathBuilder.setLength(contextPath.length());
-          pathBuilder.append('[').append(index).append("].isShipperOwned");
-          var isSoc = node.path("isShipperOwned").asBoolean(false);
-          if (isSoc) {
-            continue;
-          }
-          issues.add(
-            "Expected %s to be true".formatted(pathBuilder.toString())
-          );
-        }
-
-        return issues;
-      }
-      return checkCSPAllUsedAtLeastOnce(EQUIPMENT_REFERENCE, () -> expectedReferences, resolver)
-          .validate(nodes, contextPath);
-    };
-   }
-
-  private static JsonContentMatchedValidation checkCommoditySubreference(Supplier<CarrierScenarioParameters> cspSupplier) {
-    Supplier<Set<String>> expectedValueSupplier =
-        () -> {
-          var csp = cspSupplier.get();
-          return setOf(
-              csp.commoditySubReference() != null && !csp.commoditySubReference().isEmpty()
-                  ? csp.commoditySubReference()
-                  : null,
-              csp.commoditySubReference2() != null && !csp.commoditySubReference2().isEmpty()
-                  ? csp.commoditySubReference2()
-                  : null);
-        };
-    return checkCSPAllUsedAtLeastOnce(
-      COMMODITY_SUB_REFERENCE,
-      expectedValueSupplier
-    );
-  }
-
-  private static JsonContentMatchedValidation checkDescriptionOfGoods(Supplier<CarrierScenarioParameters> cspSupplier) {
-    Supplier<Map<String, String>> expectedValueSupplier = () -> {
-      var csp = cspSupplier.get();
-      var m = new LinkedHashMap<String, String>();
-      if (csp.descriptionOfGoods() != null) {
-        m.put(csp.descriptionOfGoods(), csp.commoditySubReference());
-      }
-      if (csp.descriptionOfGoods2() != null) {
-        m.put(csp.descriptionOfGoods2(), csp.commoditySubReference2());
-      }
-      return m;
-    };
-    BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (consignmentItem, pathBuilder) -> {
-      var hsCodes = consignmentItem.path("descriptionOfGoods");
-      if (!hsCodes.isArray()) {
-        return null;
-      }
-      // TODO: We should support more descriptionOfGoods some other day.
-      pathBuilder.append(".descriptionOfGoods[0]");
-      return hsCodes.path(0);
-    };
-    return checkCSPValueBasedOnOtherValue(
-      "descriptionOfGoods",
-      COMMODITY_SUB_REFERENCE,
-      expectedValueSupplier,
-      resolver
-    );
-  }
-
-  private static JsonContentMatchedValidation checkHSCodes(Supplier<CarrierScenarioParameters> cspSupplier) {
-    Supplier<Map<String, String>> expectedValueSupplier =
-        () -> {
-          var csp = cspSupplier.get();
-          var m = new LinkedHashMap<String, String>();
-          if (csp.consignmentItemHSCode() != null) {
-            m.put(csp.consignmentItemHSCode(), csp.commoditySubReference());
-          }
-          if (csp.consignmentItem2HSCode() != null) {
-            m.put(csp.consignmentItem2HSCode(), csp.commoditySubReference2());
-          }
-          return m;
-        };
-    BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (consignmentItem, pathBuilder) -> {
-      var hsCodes = consignmentItem.path("HSCodes");
-      if (!hsCodes.isArray()) {
-        return null;
-      }
-      // TODO: We should support more HSCodes some other day.
-      pathBuilder.append(".HSCodes[0]");
-      return hsCodes.path(0);
-    };
-    return checkCSPValueBasedOnOtherValue(
-      "HSCodes",
-      COMMODITY_SUB_REFERENCE,
-      expectedValueSupplier,
-      resolver
-    );
-  }
-
-  public static ActionCheck siRequestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck siRequestContentChecks(
+      UUID matched, String standardVersion, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
     checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     checks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
+    generateScenarioRelatedChecks(checks, standardVersion, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
       matched,
@@ -1317,7 +1052,6 @@ public class EBLChecks {
   public static ActionCheck siResponseContentChecks(
       UUID matched,
       String standardVersion,
-      Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
@@ -1327,7 +1061,6 @@ public class EBLChecks {
             standardVersion,
             shippingInstructionsStatus,
             updatedShippingInstructionsStatus,
-            cspSupplier,
             dspSupplier,
             requestAmendedStatus);
     return JsonAttribute.contentChecks(
@@ -1338,7 +1071,6 @@ public class EBLChecks {
       String standardVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
-      Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier,
       boolean requestedAmendment) {
     var checks = new ArrayList<JsonContentCheck>();
@@ -1366,7 +1098,7 @@ public class EBLChecks {
           SI_NORMALIZER
         ));
     */
-    generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
+    generateScenarioRelatedChecks(checks, standardVersion, dspSupplier, false);
     return checks;
   }
 
@@ -1471,9 +1203,13 @@ public class EBLChecks {
     return jsonContentChecks;
   }
 
-  public static ActionCheck tdPlusScenarioContentChecks(UUID matched, String standardVersion, TransportDocumentStatus transportDocumentStatus, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck tdPlusScenarioContentChecks(
+      UUID matched,
+      String standardVersion,
+      TransportDocumentStatus transportDocumentStatus,
+      Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
-        getTdPayloadChecks(standardVersion, transportDocumentStatus, cspSupplier, dspSupplier);
+        getTdPayloadChecks(standardVersion, transportDocumentStatus, dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }
@@ -1481,7 +1217,6 @@ public class EBLChecks {
   public static List<JsonContentCheck> getTdPayloadChecks(
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
-      Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
     genericTdContentChecks(
@@ -1550,8 +1285,7 @@ public class EBLChecks {
               }
               return Set.of();
             }));
-    generateScenarioRelatedChecks(
-        jsonContentChecks, standardVersion, cspSupplier, dspSupplier, true);
+    generateScenarioRelatedChecks(jsonContentChecks, standardVersion, dspSupplier, true);
     return jsonContentChecks;
   }
 

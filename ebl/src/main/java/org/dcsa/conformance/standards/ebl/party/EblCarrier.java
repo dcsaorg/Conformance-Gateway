@@ -22,6 +22,7 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -75,134 +76,54 @@ public class EblCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-      Map.entry(UC2_Carrier_RequestUpdateToShippingInstructionsAction.class, this::requestUpdateToShippingInstructions),
-      Map.entry(UC4_Carrier_ProcessUpdateToShippingInstructionsAction.class, this::processUpdatedShippingInstructions),
-      Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument),
-      Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument),
-      Map.entry(UC9_Carrier_AwaitSurrenderRequestForAmendmentAction.class, this::notifyOfSurrenderForAmendment),
-      Map.entry(UC10_Carrier_ProcessSurrenderRequestForAmendmentAction.class, this::processSurrenderRequestForAmendment),
-      Map.entry(UC11v_Carrier_VoidTransportDocumentAction.class, this::voidTransportDocument),
-      Map.entry(UC11i_Carrier_IssueAmendedTransportDocumentAction.class, this::issueAmendedTransportDocument),
-      Map.entry(UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class, this::notifyOfSurrenderForDelivery),
-      Map.entry(UC13_Carrier_ProcessSurrenderRequestForDeliveryAction.class, this::processSurrenderRequestForDelivery),
-      Map.entry(UC14_Carrier_ConfirmShippingInstructionsCompleteAction.class, this::confirmShippingInstructionsComplete),
-      Map.entry(UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction.class, this::processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction)
-    );
+        Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(
+            UC2_Carrier_RequestUpdateToShippingInstructionsAction.class,
+            this::requestUpdateToShippingInstructions),
+        Map.entry(
+            UC4_Carrier_ProcessUpdateToShippingInstructionsAction.class,
+            this::processUpdatedShippingInstructions),
+        Map.entry(
+            UC6_Carrier_PublishDraftTransportDocumentAction.class,
+            this::publishDraftTransportDocument),
+        Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument),
+        Map.entry(
+            UC9_Carrier_AwaitSurrenderRequestForAmendmentAction.class,
+            this::notifyOfSurrenderForAmendment),
+        Map.entry(
+            UC10_Carrier_ProcessSurrenderRequestForAmendmentAction.class,
+            this::processSurrenderRequestForAmendment),
+        Map.entry(UC11v_Carrier_VoidTransportDocumentAction.class, this::voidTransportDocument),
+        Map.entry(
+            UC11i_Carrier_IssueAmendedTransportDocumentAction.class,
+            this::issueAmendedTransportDocument),
+        Map.entry(
+            UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class,
+            this::notifyOfSurrenderForDelivery),
+        Map.entry(
+            UC13_Carrier_ProcessSurrenderRequestForDeliveryAction.class,
+            this::processSurrenderRequestForDelivery),
+        Map.entry(
+            UC14_Carrier_ConfirmShippingInstructionsCompleteAction.class,
+            this::confirmShippingInstructionsComplete),
+        Map.entry(
+            UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction
+                .class,
+            this::processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    CarrierScenarioParameters carrierScenarioParameters =
-        switch (scenarioType) {
-          case REGULAR_SWB,
-              REGULAR_STRAIGHT_BL,
-              REGULAR_SWB_AMF,
-              REGULAR_CLAD,
-              REGULAR_NEGOTIABLE_BL ->
-              new CarrierScenarioParameters(
-                  "CBR_123_" + scenarioType.name(),
-                  "Some Commodity Subreference 123",
-                  null,
-                  // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "NARU3472484",
-                  null,
-                  DKAAR,
-                  "640510",
-                  null,
-                  "Shoes - black, 400 boxes",
-                  null,
-                  FIBREBOARD_BOXES);
-          case REGULAR_NO_COMMODITY_SUBREFERENCE ->
-              new CarrierScenarioParameters(
-                  "CBR_123_NO_SUBREF",
-                  null,
-                  null,
-                  // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "NARU3472484",
-                  null,
-                  DKAAR,
-                  "640510",
-                  null,
-                  "Shoes - black, 400 boxes",
-                  null,
-                  FIBREBOARD_BOXES);
-          case ACTIVE_REEFER ->
-              new CarrierScenarioParameters(
-                  "CBR_123_REEFER",
-                  "Some reefer Commodity Subreference 123",
-                  null,
-                  // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "KKFU6671914",
-                  null,
-                  DKAAR,
-                  "04052090",
-                  null,
-                  "Dairy products",
-                  null,
-                  "Bottles");
-          case NON_OPERATING_REEFER ->
-              new CarrierScenarioParameters(
-                  "CBR_123_NON_OPERATING_REEFER",
-                  "Some reefer Commodity Subreference 123",
-                  null,
-                  // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "KKFU6671914",
-                  null,
-                  DKAAR,
-                  "220299",
-                  null,
-                  "Non alcoholic beverages",
-                  null,
-                  "Bottles");
-          case DG ->
-              new CarrierScenarioParameters(
-                  "RTM1234567",
-                  "Some DG Commodity Subreference 123",
-                  null,
-                  // A "22GP" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "HLXU1234567",
-                  null,
-                  DKAAR,
-                  "293499",
-                  null,
-                  "Environmentally hazardous substance",
-                  null,
-                  null);
-          case REGULAR_2C_2U_1E, REGULAR_2C_2U_2E ->
-              new CarrierScenarioParameters(
-                  "RG-2C-2U-2E",
-                  "Commodity Subreference 123",
-                  "Commodity Subreference 456",
-                  // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "MSKU3963442",
-                  "MSKU7895860",
-                  DKAAR,
-                  "691110",
-                  "732391",
-                  "Tableware and kitchenware",
-                  "Kitchen pots and pans",
-                  FIBREBOARD_BOXES);
-          case REGULAR_SWB_SOC_AND_REFERENCES ->
-              new CarrierScenarioParameters(
-                  "RG-SOC-REFERENCES",
-                  "Commodity Subreference 123",
-                  null,
-                  "ABCU7341935",
-                  null,
-                  DKAAR,
-                  "691110",
-                  null,
-                  "Tableware and kitchenware",
-                  null,
-                  FIBREBOARD_BOXES);
-        };
-    var json = carrierScenarioParameters.toJson();
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.required(ACTION_ID).asText(), json);
+    ObjectNode eblPayload = (ObjectNode) getEblPayload(scenarioType);
+    asyncOrchestratorPostPartyInput(actionPrompt.required(ACTION_ID).asText(), eblPayload);
     addOperatorLogEntry(
-      "Prompt answer for supplyScenarioParameters: %s".formatted(json.toString()));
+        "Prompt answer for supplyScenarioParameters: %s".formatted(eblPayload.toString()));
+  }
+
+  private JsonNode getEblPayload(ScenarioType scenarioType) {
+    return JsonToolkit.templateFileToJsonNode(
+        "/standards/ebl/messages/" + scenarioType.eblPayload(apiVersion), Map.of());
   }
 
   private void requestUpdateToShippingInstructions(JsonNode actionPrompt) {

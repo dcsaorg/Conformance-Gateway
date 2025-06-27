@@ -1,11 +1,14 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
@@ -38,7 +41,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
             "SCENARIO_TYPE",
             getScenarioType(),
             "CARRIER_SCENARIO_PARAMETERS",
-            getCspSupplier().get().toJson().toString()),
+            getCspSupplier().get().toString()),
         "prompt-shipper-uc1.md",
         "prompt-shipper-refresh-complete.md");
   }
@@ -66,7 +69,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.set("csp", getCspSupplier().get().toJson());
+    jsonNode.set("eblPayload", getCspSupplier().get());
     return jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
   }
 
@@ -110,7 +113,6 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 EBLChecks.siRequestContentChecks(
                     getMatchedExchangeUuid(),
                     expectedApiVersion,
-                    getCspSupplier(),
                     getDspSupplier()));
         return Stream.concat(
             primaryExchangeChecks,
@@ -122,5 +124,11 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 EBLChecks.SIR_REQUIRED_IN_NOTIFICATION));
       }
     };
+  }
+
+  @Override
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    super.doHandleExchange(exchange);
+    getCspConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }
 }

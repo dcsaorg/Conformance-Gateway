@@ -163,18 +163,18 @@ class BookingChecksTest {
   }
 
   @Test
-  void testValidateAmendedBookingCancellation_valid() {
+  void testValidateBookingAmendmentCancellation_valid() {
     booking.put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name());
 
-    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
     Set<String> errors = check.validate(booking);
 
     assertTrue(errors.isEmpty());
   }
 
   @Test
-  void testValidateAmendedBookingCancellation_missingAmendedBookingStatus() {
-    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+  void testValidateAmendedBookingCancellation_missingBookingAmendmentStatus() {
+    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
     Set<String> errors = check.validate(booking);
 
     assertFalse(errors.isEmpty());
@@ -187,10 +187,10 @@ class BookingChecksTest {
   }
 
   @Test
-  void testValidateAmendedBookingCancellation_wrongAmendedBookingStatus() {
+  void testValidateAmendedBookingCancellation_wrongBookingAmendmentStatus() {
     booking.put("amendedBookingStatus", BookingState.CONFIRMED.name());
 
-    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
     Set<String> errors = check.validate(booking);
 
     assertFalse(errors.isEmpty());
@@ -202,11 +202,11 @@ class BookingChecksTest {
   }
 
   @Test
-  void testValidateAmendedBookingCancellation_bookingStatusPresent() {
+  void testValidateBookingCancellation_bookingAmendmentStatusPresent() {
     booking.put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name());
     booking.put("bookingStatus", BookingState.CONFIRMED.name());
 
-    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
     Set<String> errors = check.validate(booking);
 
     assertFalse(errors.isEmpty());
@@ -217,8 +217,8 @@ class BookingChecksTest {
   }
 
   @Test
-  void testValidateAmendedBookingCancellation_nullBookingNode() {
-    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+  void testValidateBookingCancellation_nullBookingAmendmentNode() {
+    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
     Set<String> errors = check.validate(OBJECT_MAPPER.nullNode());
 
     assertFalse(errors.isEmpty());
@@ -231,8 +231,8 @@ class BookingChecksTest {
   }
 
   @Test
-  void testValidateAmendedBookingCancellation_emptyBookingNode() {
-    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+  void testValidateBookingCancellation_emptyBookingAmendmentNode() {
+    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
     Set<String> errors = check.validate(OBJECT_MAPPER.createObjectNode());
 
     assertFalse(errors.isEmpty());

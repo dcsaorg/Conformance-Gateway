@@ -705,9 +705,9 @@ public class BookingChecks {
     return codeChar == 'R' || codeChar == 'H';
   }
 
-  public static JsonContentCheck validateAmendedBookingCancellation() {
+  public static JsonContentCheck validateBookingAmendmentCancellation() {
     return JsonAttribute.customValidator(
-        "Validate amended booking cancellation",
+        "Validate booking amendment cancellation",
         JsonAttribute.combine(
             JsonAttribute.path(ATTR_BOOKING_STATUS, JsonAttribute.matchedMustBeAbsent()),
             JsonAttribute.path(ATTR_AMENDED_BOOKING_STATUS, JsonAttribute.matchedMustBePresent()),

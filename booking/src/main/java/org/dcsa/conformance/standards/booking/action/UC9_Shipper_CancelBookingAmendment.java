@@ -80,7 +80,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
                         expectedApiVersion,
-                        BookingChecks.validateAmendedBookingCancellation()))),
+                        BookingChecks.validateBookingAmendmentCancellation()))),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,

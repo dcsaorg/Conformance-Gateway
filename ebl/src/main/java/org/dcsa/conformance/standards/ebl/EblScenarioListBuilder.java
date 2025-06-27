@@ -122,6 +122,81 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
+  private static LinkedHashMap<String, EblScenarioListBuilder> createSIandTDCombinedScenarios() {
+    return Stream.of(
+            Map.entry(
+                "Straight eBL",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL)
+                    .then(
+                        uc1Get(
+                            SI_RECEIVED,
+                            uc6Get(
+                                false,
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(
+                                        uc7Get(
+                                            uc8Get(
+                                                uc12Get(uc13Get(uc14Get(SI_COMPLETED))),
+                                                uc9Get(
+                                                    uc10Get(
+                                                        uc3Get(
+                                                            SI_RECEIVED,
+                                                            SI_UPDATE_RECEIVED,
+                                                            uc4aGet(
+                                                                SI_RECEIVED,
+                                                                SI_UPDATE_CONFIRMED,
+                                                                uc11Get(
+                                                                    uc12Get(
+                                                                        uc13Get(
+                                                                            uc14Get(
+                                                                                SI_COMPLETED))))))))))),
+                                uc3Get(
+                                    SI_RECEIVED,
+                                    SI_UPDATE_RECEIVED,
+                                    uc4aGet(
+                                        SI_RECEIVED,
+                                        SI_UPDATE_CONFIRMED,
+                                        uc6Get(
+                                            false,
+                                            shipperGetShippingInstructionsRecordTDRef()
+                                                .then(
+                                                    uc7Get(
+                                                        uc8Get(
+                                                            uc12Get(
+                                                                uc13Get(
+                                                                    uc14Get(
+                                                                        SI_COMPLETED))))))))))))),
+            Map.entry(
+                "Sea Waybill",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_SWB)
+                    .then(
+                        uc1Get(
+                            SI_RECEIVED,
+                            uc6Get(
+                                false,
+                                shipperGetShippingInstructionsRecordTDRef().then(uc7Get(uc8Get())),
+                                uc3Get(
+                                    SI_RECEIVED,
+                                    SI_UPDATE_RECEIVED,
+                                    uc4aGet(
+                                        SI_RECEIVED,
+                                        SI_UPDATE_CONFIRMED,
+                                        uc6Get(
+                                            false,
+                                            shipperGetTransportDocument(TD_DRAFT)
+                                                .then(uc7Get(uc8Get()))))),
+                                uc7Get(
+                                    uc8Get(
+                                        uc3Get(
+                                            SI_RECEIVED,
+                                            SI_UPDATE_RECEIVED,
+                                            uc4aGet(
+                                                SI_RECEIVED, SI_UPDATE_CONFIRMED, uc8Get())))))))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
   private static EblScenarioListBuilder buildScenarioForType(ScenarioType type) {
     if (type.isSWB()) {
       return carrierSupplyScenarioParameters(type).then(uc6Get(true, uc7Get(uc8Get())));
@@ -265,234 +340,6 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static EblScenarioListBuilder oobAmendment(EblScenarioListBuilder... thenEither) {
     return oobCarrierProcessOutOfBoundTDUpdateRequest().thenEither(thenEither);
   }
-
-  private static LinkedHashMap<String, EblScenarioListBuilder> createSIandTDCombinedScenarios() {
-    return Stream.of(
-            Map.entry(
-                "Straight eBL",
-                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL)
-                    .then(
-                        uc1ShipperSubmitShippingInstructions()
-                            .then(
-                                shipperGetShippingInstructions(SI_RECEIVED, false)
-                                    .then(
-                                        uc6CarrierPublishDraftTransportDocument(false)
-                                            .then(
-                                                shipperGetShippingInstructionsRecordTDRef()
-                                                    .then(
-                                                        shipperGetTransportDocument(TD_DRAFT)
-                                                            .thenEither(
-                                                                uc7ShipperApproveDraftTransportDocument()
-                                                                    .then(
-                                                                        shipperGetTransportDocument(
-                                                                                TD_APPROVED)
-                                                                            .then(
-                                                                                uc8CarrierIssueTransportDocument()
-                                                                                    .then(
-                                                                                        shipperGetTransportDocument(
-                                                                                                TD_ISSUED)
-                                                                                            .thenEither(
-                                                                                                uc12CarrierAwaitSurrenderRequestForDelivery()
-                                                                                                    .then(
-                                                                                                        shipperGetTransportDocument(
-                                                                                                                TD_PENDING_SURRENDER_FOR_DELIVERY)
-                                                                                                            .then(
-                                                                                                                uc13aCarrierAcceptSurrenderRequestForDelivery()
-                                                                                                                    .then(
-                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                TD_SURRENDERED_FOR_DELIVERY)
-                                                                                                                            .then(
-                                                                                                                                uc14CarrierConfirmShippingInstructionsComplete()
-                                                                                                                                    .then(
-                                                                                                                                        shipperGetShippingInstructions(
-                                                                                                                                            SI_COMPLETED,
-                                                                                                                                            true)))))),
-                                                                                                uc9CarrierAwaitSurrenderRequestForAmendment()
-                                                                                                    .then(
-                                                                                                        shipperGetTransportDocument(
-                                                                                                                TD_PENDING_SURRENDER_FOR_AMENDMENT)
-                                                                                                            .then(
-                                                                                                                uc10aCarrierAcceptSurrenderRequestForAmendment()
-                                                                                                                    .then(
-                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                TD_SURRENDERED_FOR_AMENDMENT)
-                                                                                                                            .then(
-                                                                                                                                uc3ShipperSubmitUpdatedShippingInstructions(
-                                                                                                                                        SI_RECEIVED,
-                                                                                                                                        true)
-                                                                                                                                    .then(
-                                                                                                                                        shipperGetShippingInstructions(
-                                                                                                                                                SI_RECEIVED,
-                                                                                                                                                SI_UPDATE_RECEIVED,
-                                                                                                                                                true)
-                                                                                                                                            .then(
-                                                                                                                                                uc4aCarrierAcceptUpdatedShippingInstructions()
-                                                                                                                                                    .then(
-                                                                                                                                                        shipperGetShippingInstructions(
-                                                                                                                                                                SI_RECEIVED,
-                                                                                                                                                                SI_UPDATE_CONFIRMED,
-                                                                                                                                                                true)
-                                                                                                                                                            .then(
-                                                                                                                                                                uc11CarrierVoidTransportDocument()
-                                                                                                                                                                    .then(
-                                                                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                                                                TD_VOIDED)
-                                                                                                                                                                            .then(
-                                                                                                                                                                                uc11iCarrierIssueAmendedTransportDocument()
-                                                                                                                                                                                    .then(
-                                                                                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                                                                                TD_ISSUED)
-                                                                                                                                                                                            .then(
-                                                                                                                                                                                                uc12CarrierAwaitSurrenderRequestForDelivery()
-                                                                                                                                                                                                    .then(
-                                                                                                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                                                                                                TD_PENDING_SURRENDER_FOR_DELIVERY)
-                                                                                                                                                                                                            .then(
-                                                                                                                                                                                                                shipperGetTransportDocument(
-                                                                                                                                                                                                                        TD_PENDING_SURRENDER_FOR_DELIVERY)
-                                                                                                                                                                                                                    .then(
-                                                                                                                                                                                                                        uc13aCarrierAcceptSurrenderRequestForDelivery()
-                                                                                                                                                                                                                            .then(
-                                                                                                                                                                                                                                shipperGetTransportDocument(
-                                                                                                                                                                                                                                        TD_SURRENDERED_FOR_DELIVERY)
-                                                                                                                                                                                                                                    .then(
-                                                                                                                                                                                                                                        uc14CarrierConfirmShippingInstructionsComplete()
-                                                                                                                                                                                                                                            .then(
-                                                                                                                                                                                                                                                shipperGetShippingInstructions(
-                                                                                                                                                                                                                                                    SI_COMPLETED,
-                                                                                                                                                                                                                                                    true))))))))))))))))))))))),
-                                                                uc3ShipperSubmitUpdatedShippingInstructions(
-                                                                        SI_RECEIVED, true)
-                                                                    .then(
-                                                                        shipperGetShippingInstructions(
-                                                                                SI_RECEIVED,
-                                                                                SI_UPDATE_RECEIVED,
-                                                                                true)
-                                                                            .then(
-                                                                                uc4aCarrierAcceptUpdatedShippingInstructions()
-                                                                                    .then(
-                                                                                        shipperGetShippingInstructions(
-                                                                                                SI_RECEIVED,
-                                                                                                SI_UPDATE_CONFIRMED,
-                                                                                                true)
-                                                                                            .then(
-                                                                                                shipperGetTransportDocument(
-                                                                                                        TD_DRAFT)
-                                                                                                    .then(
-                                                                                                        uc6CarrierPublishDraftTransportDocument(
-                                                                                                                false)
-                                                                                                            .then(
-                                                                                                                shipperGetShippingInstructionsRecordTDRef()
-                                                                                                                    .then(
-                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                TD_DRAFT)
-                                                                                                                            .then(
-                                                                                                                                uc7ShipperApproveDraftTransportDocument()
-                                                                                                                                    .then(
-                                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                                TD_APPROVED)
-                                                                                                                                            .then(
-                                                                                                                                                uc8CarrierIssueTransportDocument()
-                                                                                                                                                    .then(
-                                                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                                                TD_ISSUED)
-                                                                                                                                                            .then(
-                                                                                                                                                                uc12CarrierAwaitSurrenderRequestForDelivery()
-                                                                                                                                                                    .then(
-                                                                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                                                                TD_PENDING_SURRENDER_FOR_DELIVERY)
-                                                                                                                                                                            .then(
-                                                                                                                                                                                uc13aCarrierAcceptSurrenderRequestForDelivery()
-                                                                                                                                                                                    .then(
-                                                                                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                                                                                TD_SURRENDERED_FOR_DELIVERY)
-                                                                                                                                                                                            .then(
-                                                                                                                                                                                                uc14CarrierConfirmShippingInstructionsComplete()
-                                                                                                                                                                                                    .then(
-                                                                                                                                                                                                        shipperGetShippingInstructions(
-                                                                                                                                                                                                            SI_COMPLETED,
-                                                                                                                                                                                                            false))))))))))))))))))))))))),
-            Map.entry(
-                "Sea Waybill",
-                carrierSupplyScenarioParameters(ScenarioType.REGULAR_SWB)
-                    .then(
-                        uc1ShipperSubmitShippingInstructions()
-                            .then(
-                                shipperGetShippingInstructions(SI_RECEIVED, false)
-                                    .then(
-                                        uc6CarrierPublishDraftTransportDocument(false)
-                                            .then(
-                                                shipperGetShippingInstructionsRecordTDRef()
-                                                    .then(
-                                                        shipperGetTransportDocument(TD_DRAFT)
-                                                            .thenEither(
-                                                                uc7ShipperApproveDraftTransportDocument()
-                                                                    .then(
-                                                                        shipperGetTransportDocument(
-                                                                                TD_APPROVED)
-                                                                            .thenEither(
-                                                                                uc8CarrierIssueTransportDocument()
-                                                                                    .then(
-                                                                                        shipperGetTransportDocument(
-                                                                                            TD_ISSUED)),
-                                                                                uc3ShipperSubmitUpdatedShippingInstructions(
-                                                                                        SI_RECEIVED,
-                                                                                        true)
-                                                                                    .then(
-                                                                                        shipperGetShippingInstructions(
-                                                                                                SI_RECEIVED,
-                                                                                                SI_UPDATE_RECEIVED,
-                                                                                                true)
-                                                                                            .then(
-                                                                                                shipperGetTransportDocument(
-                                                                                                        TD_APPROVED)
-                                                                                                    .then(
-                                                                                                        uc4aCarrierAcceptUpdatedShippingInstructions()
-                                                                                                            .then(
-                                                                                                                shipperGetShippingInstructions(
-                                                                                                                        SI_RECEIVED,
-                                                                                                                        SI_UPDATE_CONFIRMED,
-                                                                                                                        true)
-                                                                                                                    .then(
-                                                                                                                        uc8CarrierIssueTransportDocument()
-                                                                                                                            .then(
-                                                                                                                                shipperGetTransportDocument(
-                                                                                                                                    TD_ISSUED))))))))),
-                                                                uc3ShipperSubmitUpdatedShippingInstructions(
-                                                                        SI_RECEIVED, true)
-                                                                    .then(
-                                                                        shipperGetShippingInstructions(
-                                                                                SI_RECEIVED,
-                                                                                SI_UPDATE_RECEIVED,
-                                                                                true)
-                                                                            .then(
-                                                                                uc4aCarrierAcceptUpdatedShippingInstructions()
-                                                                                    .then(
-                                                                                        shipperGetShippingInstructions(
-                                                                                                SI_RECEIVED,
-                                                                                                SI_UPDATE_CONFIRMED,
-                                                                                                true)
-                                                                                            .then(
-                                                                                                uc6CarrierPublishDraftTransportDocument(
-                                                                                                        false)
-                                                                                                    .then(
-                                                                                                        shipperGetTransportDocument(
-                                                                                                                TD_DRAFT)
-                                                                                                            .then(
-                                                                                                                uc7ShipperApproveDraftTransportDocument()
-                                                                                                                    .then(
-                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                TD_APPROVED)
-                                                                                                                            .then(
-                                                                                                                                uc8CarrierIssueTransportDocument()
-                                                                                                                                    .then(
-                                                                                                                                        shipperGetTransportDocument(
-                                                                                                                                            TD_ISSUED))))))))))))))))))
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-  }
-
 
   private EblScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
     super(actionBuilder);

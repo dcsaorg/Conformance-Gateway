@@ -74,6 +74,16 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   }
 
   protected ConformanceCheck wrapWithSubCheck(String label, String path, JsonContentCheck check) {
-    return createSubCheck(label, check.description(), at(path, check::validate));
+    return createSubCheck(
+        label,
+        check.description(),
+        at(
+            path,
+            jsonNode -> {
+              if (jsonNode.isMissingNode() || jsonNode.isEmpty()) {
+                return Set.of();
+              }
+              return check.validate(jsonNode);
+            }));
   }
 }

@@ -86,9 +86,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                     "Validate 'data.feedbacks' severity and code are valid",
                     at(DATA_PATH, this::ensureFeedbackSeverityAndCodeCompliance))),
             createFullNotificationChecksAt(BOOKING_PATH, BOOKING_PREFIX),
-            expectedAmendedBookingStatus != null
-                ? createFullNotificationChecksAt(AMENDED_BOOKING_PATH, AMENDED_BOOKING_PREFIX)
-                : Stream.<ConformanceCheck>empty())
+            createFullNotificationChecksAt(AMENDED_BOOKING_PATH, AMENDED_BOOKING_PREFIX))
         .flatMap(Function.identity());
   }
 
@@ -105,6 +103,13 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                 createSubCheck(
                     prefix,
                     jsonContentCheck.description(),
-                    at(jsonPath, jsonContentCheck::validate)));
+                    at(
+                        jsonPath,
+                        jsonNode -> {
+                          if (jsonNode.isMissingNode() || jsonNode.isEmpty()) {
+                            return Set.of();
+                          }
+                          return jsonContentCheck.validate(jsonNode);
+                        })));
   }
 }

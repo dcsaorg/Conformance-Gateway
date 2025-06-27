@@ -42,6 +42,7 @@ public class BookingChecks {
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final String RE_EMPTY_CONTAINER_PICKUP = "emptyContainerPickup";
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
+  private static final String ATTR_BOOKING_STATUS = "bookingStatus";
   private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
 
@@ -702,6 +703,17 @@ public class BookingChecks {
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';
+  }
+
+  public static JsonContentCheck validateAmendedBookingCancellation() {
+    return JsonAttribute.customValidator(
+        "Validate amended booking cancellation",
+        JsonAttribute.combine(
+            JsonAttribute.path(ATTR_BOOKING_STATUS, JsonAttribute.matchedMustBeAbsent()),
+            JsonAttribute.path(ATTR_AMENDED_BOOKING_STATUS, JsonAttribute.matchedMustBePresent()),
+            JsonAttribute.path(
+                ATTR_AMENDED_BOOKING_STATUS,
+                JsonAttribute.matchedMustEqual(BookingState.AMENDMENT_CANCELLED::name))));
   }
 }
 

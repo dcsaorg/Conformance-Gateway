@@ -15,7 +15,14 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class BookingChecksTest {
+class BookingChecksTest {
+
+  private static final String ERROR_MESSAGE_MISSING_AMENDED_BOOKING_STATUS =
+      "The attribute 'amendedBookingStatus' should have been present but was absent";
+  private static final String ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS =
+      "The value of 'amendedBookingStatus' was '%s' instead of '%s'";
+  private static final String ERROR_MESSAGE_BOOKING_STATUS_PRESENT =
+      "The attribute 'bookingStatus' should have been absent but was present and had value '%s'";
 
   private ObjectNode booking;
   private ObjectNode requestedEquipment;
@@ -153,5 +160,87 @@ public class BookingChecksTest {
 
     booking.remove("feedbacks");
     assertFalse(FEEDBACKS_PRESENCE.validate(booking).isEmpty());
+  }
+
+  @Test
+  void testValidateAmendedBookingCancellation_valid() {
+    booking.put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name());
+
+    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+    Set<String> errors = check.validate(booking);
+
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testValidateAmendedBookingCancellation_missingAmendedBookingStatus() {
+    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+    Set<String> errors = check.validate(booking);
+
+    assertFalse(errors.isEmpty());
+    assertEquals(2, errors.size());
+    assertTrue(errors.contains(ERROR_MESSAGE_MISSING_AMENDED_BOOKING_STATUS));
+    assertTrue(
+        errors.contains(
+            ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS.formatted(
+                "(absent)", BookingState.AMENDMENT_CANCELLED.name())));
+  }
+
+  @Test
+  void testValidateAmendedBookingCancellation_wrongAmendedBookingStatus() {
+    booking.put("amendedBookingStatus", BookingState.CONFIRMED.name());
+
+    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+    Set<String> errors = check.validate(booking);
+
+    assertFalse(errors.isEmpty());
+    assertEquals(1, errors.size());
+    assertTrue(
+        errors.contains(
+            ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS.formatted(
+                BookingState.CONFIRMED.name(), BookingState.AMENDMENT_CANCELLED.name())));
+  }
+
+  @Test
+  void testValidateAmendedBookingCancellation_bookingStatusPresent() {
+    booking.put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name());
+    booking.put("bookingStatus", BookingState.CONFIRMED.name());
+
+    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+    Set<String> errors = check.validate(booking);
+
+    assertFalse(errors.isEmpty());
+    assertEquals(1, errors.size());
+    assertTrue(
+        errors.contains(
+            ERROR_MESSAGE_BOOKING_STATUS_PRESENT.formatted(BookingState.CONFIRMED.name())));
+  }
+
+  @Test
+  void testValidateAmendedBookingCancellation_nullBookingNode() {
+    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+    Set<String> errors = check.validate(OBJECT_MAPPER.nullNode());
+
+    assertFalse(errors.isEmpty());
+    assertEquals(2, errors.size());
+    assertTrue(errors.contains(ERROR_MESSAGE_MISSING_AMENDED_BOOKING_STATUS));
+    assertTrue(
+        errors.contains(
+            ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS.formatted(
+                "(absent)", BookingState.AMENDMENT_CANCELLED.name())));
+  }
+
+  @Test
+  void testValidateAmendedBookingCancellation_emptyBookingNode() {
+    JsonContentCheck check = BookingChecks.validateAmendedBookingCancellation();
+    Set<String> errors = check.validate(OBJECT_MAPPER.createObjectNode());
+
+    assertFalse(errors.isEmpty());
+    assertEquals(2, errors.size());
+    assertTrue(errors.contains(ERROR_MESSAGE_MISSING_AMENDED_BOOKING_STATUS));
+    assertTrue(
+        errors.contains(
+            ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS.formatted(
+                "(absent)", BookingState.AMENDMENT_CANCELLED.name())));
   }
 }

@@ -31,6 +31,9 @@ export class SandboxComponent implements OnInit, OnDestroy {
   startingOrStoppingScenario: boolean = false;
   newReportTitle: string = '';
 
+  displayedReportDigest: ReportDigest | null = null;
+  displayedReportContent: any | null = null;
+
   activatedRouteSubscription: Subscription | undefined;
 
   getConformanceStatusEmoji = getConformanceStatusEmoji;
@@ -171,9 +174,12 @@ export class SandboxComponent implements OnInit, OnDestroy {
   }
 
   async onReportClick(reportDigest: ReportDigest) {
-    console.log("TODO load and show report");
-    // this.router.navigate([
-    //   '/scenario', this.sandbox!.id, scenario.id
-    // ]);
+    this.displayedReportContent = await this.conformanceService.getReportContent(this.sandbox!.id, reportDigest.isoTimestamp);
+    this.displayedReportDigest = reportDigest;
+  }
+
+  onClickBackToAllReports() {
+    this.displayedReportDigest = null;
+    this.displayedReportContent = null;
   }
 }

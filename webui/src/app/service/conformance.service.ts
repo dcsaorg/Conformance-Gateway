@@ -74,6 +74,14 @@ export class ConformanceService {
     });
   }
 
+  async getReportContent(sandboxId: string, reportIsoTimestamp: string): Promise<any> {
+    return await this.apiService.call({
+      operation: "getReportContent",
+      sandboxId,
+      reportIsoTimestamp,
+    });
+  }
+
   async getScenarioDigests(sandboxId: string): Promise<StandardModule[]> {
     return await this.apiService.call({
       operation: "getScenarioDigests",

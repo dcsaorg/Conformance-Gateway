@@ -86,6 +86,7 @@ public class ConformanceWebuiHandler {
           case "resetParty" -> _resetParty(userId, requestNode);
           case "createReport" -> _createReport(userId, requestNode);
           case "getReportDigests" -> _getReportDigests(userId, requestNode);
+          case "getReportContent" -> _getReportContent(userId, requestNode);
           case "getScenarioDigests" -> _getScenarioDigests(userId, requestNode);
           case "getScenario" -> _getScenario(userId, requestNode);
           case "getScenarioStatus" -> _getScenarioStatus(userId, requestNode);
@@ -449,7 +450,7 @@ public class ConformanceWebuiHandler {
     persistenceProvider
         .getNonLockingMap()
         .getPartitionValuesBySortKey(
-            "environment#" + accessChecker.getUserEnvironmentId(userId), "")
+            "environment#" + accessChecker.getUserEnvironmentId(userId), "sandbox#")
         .forEach(
             (key, value) ->
                 sortedSandboxesByLowercaseName.put(
@@ -541,6 +542,14 @@ public class ConformanceWebuiHandler {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.getReportDigests(persistenceProvider, userId, sandboxId);
+  }
+
+  private JsonNode _getReportContent(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    String reportIsoTimestamp = requestNode.get("reportIsoTimestamp").asText();
+    return ConformanceSandbox.getReportContent(
+        persistenceProvider, userId, sandboxId, reportIsoTimestamp);
   }
 
   private JsonNode _getScenarioDigests(String userId, JsonNode requestNode) {

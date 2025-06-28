@@ -1,4 +1,5 @@
 export interface ReportDigest {
+  isoTimestamp: string,
   dateTime: string,
   title: string,
   standardName: string,

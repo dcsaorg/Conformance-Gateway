@@ -430,6 +430,7 @@ public class ConformanceSandbox {
             "report#digest#%s#%s".formatted(sandboxId, reportIsoTimestamp),
             OBJECT_MAPPER
                 .createObjectNode()
+                .put("isoTimestamp", reportIsoTimestamp)
                 .put("dateTime", reportDateTime)
                 .put("title", reportTitle)
                 .put("standardName", sandboxConfiguration.getStandard().getName())
@@ -450,8 +451,20 @@ public class ConformanceSandbox {
             resultReference.get());
   }
 
+  public static JsonNode getReportContent(
+      ConformancePersistenceProvider persistenceProvider,
+      String environmentId,
+      String sandboxId,
+      String reportIsoTimestamp) {
+    return persistenceProvider
+        .getNonLockingMap()
+        .getItemValue(
+            "environment#" + environmentId,
+            "report#content#%s#%s".formatted(sandboxId, reportIsoTimestamp));
+  }
+
   public static JsonNode getReportDigests(
-      ConformancePersistenceProvider persistenceProvider, String environmentId, String sandboxId) {
+    ConformancePersistenceProvider persistenceProvider, String environmentId, String sandboxId) {
     // PK=environment#UUID
     // SK=report#digest#<sandboxUUID>#<reportUTC>
     // value={...title...standard...}

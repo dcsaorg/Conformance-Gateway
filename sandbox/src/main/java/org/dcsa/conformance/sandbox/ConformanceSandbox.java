@@ -12,6 +12,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -45,6 +47,7 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 public class ConformanceSandbox {
   protected static final String SANDBOX = "sandbox#";
   protected static final String SESSION = "session#";
+  public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
     AdoptionStandard.INSTANCE,
@@ -396,6 +399,71 @@ public class ConformanceSandbox {
             "resetting party " + partyName,
             ConformanceParty::reset)
         .run();
+  }
+
+  public static void createReport(
+      ConformancePersistenceProvider persistenceProvider,
+      String environmentId,
+      String sandboxId,
+      String reportTitle) {
+    AtomicReference<JsonNode> resultReference = new AtomicReference<>();
+    new OrchestratorTask(
+            persistenceProvider,
+            null,
+            sandboxId,
+            "creating for sandbox %s a full report".formatted(sandboxId),
+            orchestrator -> resultReference.set(orchestrator.createFullReport()))
+        .run();
+
+    // PK=environment#UUID
+    // SK=report#digest#<sandboxUUID>#<reportUTC>
+    // value={...title...standard...}
+    Instant reportInstant = Instant.now();
+    String reportIsoTimestamp = reportInstant.toString();
+    String reportDateTime = reportInstant.atZone(ZoneOffset.UTC).format(DATE_TIME_FORMATTER);
+    SandboxConfiguration sandboxConfiguration =
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue(
+            "environment#" + environmentId,
+            "report#digest#%s#%s".formatted(sandboxId, reportIsoTimestamp),
+            OBJECT_MAPPER
+                .createObjectNode()
+                .put("dateTime", reportDateTime)
+                .put("title", reportTitle)
+                .put("standardName", sandboxConfiguration.getStandard().getName())
+                .put("standardVersion", sandboxConfiguration.getStandard().getVersion())
+                .put("scenarioSuite", sandboxConfiguration.getScenarioSuite())
+                .put(
+                    "testedPartyRole",
+                    sandboxConfiguration.getSandboxPartyCounterpartConfiguration().getRole()));
+
+    // PK=environment#UUID
+    // SK=report#content#<sandboxUUID>#<reportUTC>
+    // value={...report content...}
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue(
+            "environment#" + environmentId,
+            "report#content#%s#%s".formatted(sandboxId, reportIsoTimestamp),
+            resultReference.get());
+  }
+
+  public static JsonNode getReportDigests(
+      ConformancePersistenceProvider persistenceProvider, String environmentId, String sandboxId) {
+    // PK=environment#UUID
+    // SK=report#digest#<sandboxUUID>#<reportUTC>
+    // value={...title...standard...}
+    return persistenceProvider
+        .getNonLockingMap()
+        .getPartitionValuesBySortKey(
+            "environment#" + environmentId, "report#digest#%s#".formatted(sandboxId))
+        .sequencedEntrySet()
+        .reversed()
+        .stream()
+        .map(sortKeyAndValue -> (ObjectNode) sortKeyAndValue.getValue())
+        .collect(OBJECT_MAPPER::createArrayNode, ArrayNode::add, ArrayNode::addAll);
   }
 
   public static ObjectNode getScenarioDigest(

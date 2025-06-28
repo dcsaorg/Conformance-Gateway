@@ -12,6 +12,9 @@ package org.dcsa.conformance.sandbox.state;
 // PK=session#UUID      SK=state#orchestrator  value={...}                          lock=...
 // PK=session#UUID      SK=state#party#NAME    value={...}                          lock=...
 // PK=session#UUID      SK=exchange#UTC#UUID   value={...}
+//
+// PK=environment#UUID      SK=report#digest#<sandboxUUID>#<reportUTC> value={...title...standard...}
+// PK=environment#UUID      SK=report#content#<sandboxUUID>#<reportUTC> value={...}
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 

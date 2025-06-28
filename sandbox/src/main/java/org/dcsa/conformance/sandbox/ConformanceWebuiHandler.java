@@ -84,6 +84,8 @@ public class ConformanceWebuiHandler {
           case "getSandbox" -> _getSandbox(userId, requestNode);
           case "notifyParty" -> _notifyParty(userId, requestNode);
           case "resetParty" -> _resetParty(userId, requestNode);
+          case "createReport" -> _createReport(userId, requestNode);
+          case "getReportDigests" -> _getReportDigests(userId, requestNode);
           case "getScenarioDigests" -> _getScenarioDigests(userId, requestNode);
           case "getScenario" -> _getScenario(userId, requestNode);
           case "getScenarioStatus" -> _getScenarioStatus(userId, requestNode);
@@ -525,6 +527,20 @@ public class ConformanceWebuiHandler {
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ConformanceSandbox.resetParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     return OBJECT_MAPPER.createObjectNode();
+  }
+
+  private JsonNode _createReport(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    String reportTitle = requestNode.get("reportTitle").asText();
+    ConformanceSandbox.createReport(persistenceProvider, userId, sandboxId, reportTitle);
+    return OBJECT_MAPPER.createObjectNode();
+  }
+
+  private JsonNode _getReportDigests(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    return ConformanceSandbox.getReportDigests(persistenceProvider, userId, sandboxId);
   }
 
   private JsonNode _getScenarioDigests(String userId, JsonNode requestNode) {

@@ -401,6 +401,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
     return conformanceCheck;
   }
 
+  public JsonNode createFullReport() {
+    return new ConformanceReport(
+            _createScenarioConformanceCheck(), _getManualCounterpart().getRole())
+        .toJsonReport();
+  }
+
   public ObjectNode getScenarioDigest(String scenarioId) {
     ConformanceScenario scenario = _getScenario(UUID.fromString(scenarioId));
     return OBJECT_MAPPER

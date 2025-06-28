@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import {Component, OnDestroy, OnInit} from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -13,6 +13,7 @@ import {
 import { ConfirmationDialog } from "src/app/dialogs/confirmation/confirmation-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
 import {StandardModule} from "../../model/standard-module";
+import {ReportDigest} from "../../model/report-digest";
 
 @Component({
     selector: 'app-sandbox',
@@ -20,13 +21,15 @@ import {StandardModule} from "../../model/standard-module";
     styleUrls: ['../../shared-styles.css'],
     standalone: false
 })
-export class SandboxComponent {
+export class SandboxComponent implements OnInit, OnDestroy {
   sandboxId: string = '';
   sandbox: Sandbox | undefined;
   standardModules: StandardModule[] = [];
+  reportDigests: ReportDigest[] = [];
   isAnyScenarioRunning: boolean = false;
   isLoading: boolean = false;
   startingOrStoppingScenario: boolean = false;
+  newReportTitle: string = '';
 
   activatedRouteSubscription: Subscription | undefined;
 
@@ -66,6 +69,7 @@ export class SandboxComponent {
         scenario => scenario.isRunning
       ).length > 0
     ).length > 0;
+    this.reportDigests = await this.conformanceService.getReportDigests(this.sandboxId);
     this.isLoading = false;
   }
 
@@ -73,6 +77,10 @@ export class SandboxComponent {
     if (this.activatedRouteSubscription) {
       this.activatedRouteSubscription.unsubscribe();
     }
+  }
+
+  isInternalSandbox(): boolean {
+    return !!this.sandbox?.canNotifyParty;
   }
 
   getActionIconName(scenario: ScenarioDigest): string {
@@ -154,5 +162,18 @@ export class SandboxComponent {
   onClickRefresh() {
     this.sandbox = undefined;
     this._loadData();
+  }
+
+  async onClickCreateReport() {
+    await this.conformanceService.createReport(this.sandbox!.id, this.newReportTitle);
+    this.reportDigests = await this.conformanceService.getReportDigests(this.sandbox!.id);
+    this.newReportTitle = "";
+  }
+
+  async onReportClick(reportDigest: ReportDigest) {
+    console.log("TODO load and show report");
+    // this.router.navigate([
+    //   '/scenario', this.sandbox!.id, scenario.id
+    // ]);
   }
 }

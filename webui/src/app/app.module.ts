@@ -34,6 +34,7 @@ import {EditHeaderComponent} from "./pages/edit-header/edit-header.component";
 import {MarkdownModule} from "ngx-markdown";
 import {SandboxTypeComponent} from "./components/sandbox-type/sandbox-type.component";
 import {TextDialog} from "./dialogs/text/text-dialog.component";
+import {MatTabsModule} from "@angular/material/tabs";
 
 @NgModule({
   declarations: [
@@ -69,6 +70,7 @@ import {TextDialog} from "./dialogs/text/text-dialog.component";
     MatMenuModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    MatTabsModule,
     MatToolbarModule,
     ReactiveFormsModule,
     // import as last module!

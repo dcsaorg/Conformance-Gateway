@@ -53,6 +53,7 @@ import software.amazon.awscdk.services.cognito.UserPoolClientOptions;
 import software.amazon.awscdk.services.dynamodb.Attribute;
 import software.amazon.awscdk.services.dynamodb.AttributeType;
 import software.amazon.awscdk.services.dynamodb.BillingMode;
+import software.amazon.awscdk.services.dynamodb.PointInTimeRecoverySpecification;
 import software.amazon.awscdk.services.dynamodb.Table;
 import software.amazon.awscdk.services.dynamodb.TableProps;
 import software.amazon.awscdk.services.ec2.SubnetSelection;
@@ -142,7 +143,10 @@ public class ConformanceStack extends Stack {
                 .tableName(tableName)
                 .partitionKey(Attribute.builder().name("PK").type(AttributeType.STRING).build())
                 .sortKey(Attribute.builder().name("SK").type(AttributeType.STRING).build())
-                .pointInTimeRecovery(true)
+                .pointInTimeRecoverySpecification(
+                    PointInTimeRecoverySpecification.builder()
+                        .pointInTimeRecoveryEnabled(true)
+                        .build())
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .build());
 
@@ -179,16 +183,33 @@ public class ConformanceStack extends Stack {
     Function sandboxTaskLambda =
         createLambda(
             prefix + "SandboxTaskLambda",
+            5,
+            16,
             assetCode,
             "org.dcsa.conformance.lambda.SandboxTaskLambda",
             vpc);
 
     Function apiLambda =
-        createLambda(prefix + "ApiLambda", assetCode, "org.dcsa.conformance.lambda.ApiLambda", vpc);
+        createLambda(
+            prefix + "ApiLambda", 5, 16, assetCode, "org.dcsa.conformance.lambda.ApiLambda", vpc);
 
     Function webuiLambda =
         createLambda(
-            prefix + "WebuiLambda", assetCode, "org.dcsa.conformance.lambda.WebuiLambda", vpc);
+            prefix + "WebuiLambda",
+            5,
+            16,
+            assetCode,
+            "org.dcsa.conformance.lambda.WebuiLambda",
+            vpc);
+
+    Function adminLambda =
+        createLambda(
+            prefix + "AdminLambda",
+            15,
+            2,
+            assetCode,
+            "org.dcsa.conformance.lambda.AdminLambda",
+            vpc);
 
     Policy invokeSandboxTaskLambdaPolicy =
         new Policy(
@@ -203,7 +224,7 @@ public class ConformanceStack extends Stack {
                             .build()))
                 .build());
 
-    Stream.of(sandboxTaskLambda, apiLambda, webuiLambda)
+    Stream.of(sandboxTaskLambda, apiLambda, webuiLambda, adminLambda)
         .forEach(
             lambda -> {
               table.grantReadWriteData(lambda);
@@ -398,7 +419,12 @@ public class ConformanceStack extends Stack {
   }
 
   private Function createLambda(
-      String name, AssetCode assetCode, String handler, Vpc vpc) {
+      String name,
+      int timeoutMinutes,
+      int reservedConcurrentExecutions,
+      AssetCode assetCode,
+      String handler,
+      Vpc vpc) {
     FunctionProps.Builder functionPropsBuilder =
         FunctionProps.builder()
             .functionName(name)
@@ -406,8 +432,8 @@ public class ConformanceStack extends Stack {
             .code(assetCode)
             .handler(handler)
             .memorySize(2048)
-            .timeout(Duration.minutes(5))
-            .reservedConcurrentExecutions(16)
+            .timeout(Duration.minutes(timeoutMinutes))
+            .reservedConcurrentExecutions(reservedConcurrentExecutions)
             .logRetention(RetentionDays.SEVEN_YEARS);
     if (vpc != null) {
       functionPropsBuilder

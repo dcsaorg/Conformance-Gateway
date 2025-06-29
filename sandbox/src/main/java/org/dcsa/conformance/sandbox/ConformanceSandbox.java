@@ -1019,20 +1019,21 @@ public class ConformanceSandbox {
     TreeMap<String, TreeSet<String>> sandboxIdsByEnvironmentId =
         getSandboxIdsByEnvironmentId(persistenceProvider);
     int environmentCount = sandboxIdsByEnvironmentId.size();
-    AtomicInteger environmentIndex = new AtomicInteger();
+    AtomicInteger atomicEnvironmentIndex = new AtomicInteger();
     sandboxIdsByEnvironmentId.forEach(
         (environmentId, sandboxIds) -> {
           ArrayNode sandboxResults = OBJECT_MAPPER.createArrayNode();
+          int environmentIndex = atomicEnvironmentIndex.incrementAndGet();
           int sandboxCount = sandboxIds.size();
-          AtomicInteger sandboxIndex = new AtomicInteger();
+          AtomicInteger atomicSandboxIndex = new AtomicInteger();
           sandboxIds.forEach(
               sandboxId -> {
                 log.info(
                     "In environment {} of {} with id {} creating report for sandbox {} of {} with id {}",
-                    environmentIndex.incrementAndGet(),
+                    environmentIndex,
                     environmentCount,
                     environmentId,
-                    sandboxIndex.incrementAndGet(),
+                    atomicSandboxIndex.incrementAndGet(),
                     sandboxCount,
                     sandboxId);
                 String sandboxResultString;

@@ -1039,21 +1039,21 @@ public class ConformanceSandbox {
                 if (sandboxId.contains("#deleted")) {
                   sandboxResultString = "Skipped (deleted sandbox)";
                 } else {
-                  SandboxConfiguration sandboxConfiguration =
-                      loadSandboxConfiguration(persistenceProvider, sandboxId);
-                  if (sandboxConfiguration.getSandboxPartyCounterpartConfiguration() == null) {
-                    sandboxResultString = "Skipped (no counterpart configuration)";
-                  } else if (!sandboxConfiguration.getOrchestrator().isActive()) {
-                    sandboxResultString = "Skipped (internal sandbox)";
-                  } else {
-                    try {
+                  try {
+                    SandboxConfiguration sandboxConfiguration =
+                        loadSandboxConfiguration(persistenceProvider, sandboxId);
+                    if (sandboxConfiguration.getSandboxPartyCounterpartConfiguration() == null) {
+                      sandboxResultString = "Skipped (no counterpart configuration)";
+                    } else if (!sandboxConfiguration.getOrchestrator().isActive()) {
+                      sandboxResultString = "Skipped (internal sandbox)";
+                    } else {
                       createReport(
                           persistenceProvider, environmentId, sandboxConfiguration, reportTitle);
                       sandboxResultString = "DONE";
-                    } catch (Exception e) {
-                      log.warn("Sandbox report creation failed: {}", e, e);
-                      sandboxResultString = "Failed: " + e;
                     }
+                  } catch (Exception e) {
+                    log.warn("Sandbox report creation failed: {}", e, e);
+                    sandboxResultString = "Failed: " + e;
                   }
                 }
                 sandboxResults.add(

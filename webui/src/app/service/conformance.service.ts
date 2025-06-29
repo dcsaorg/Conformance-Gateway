@@ -7,6 +7,7 @@ import {Standard} from "../model/standard";
 import {EndpointUriOverride, HeaderNameAndValue, SandboxConfig} from "../model/sandbox-config";
 import {StandardModule} from "../model/standard-module";
 import {SandboxStatus} from "../model/sandbox-status";
+import {ReportDigest} from "../model/report-digest";
 
 @Injectable({
   providedIn: 'root'
@@ -55,6 +56,29 @@ export class ConformanceService {
     return await this.apiService.call({
       operation: "resetParty",
       sandboxId,
+    });
+  }
+
+  async createReport(sandboxId: string, reportTitle: string) {
+    return await this.apiService.call({
+      operation: "createReport",
+      sandboxId,
+      reportTitle
+    });
+  }
+
+  async getReportDigests(sandboxId: string): Promise<ReportDigest[]> {
+    return await this.apiService.call({
+      operation: "getReportDigests",
+      sandboxId,
+    });
+  }
+
+  async getReportContent(sandboxId: string, reportIsoTimestamp: string): Promise<any> {
+    return await this.apiService.call({
+      operation: "getReportContent",
+      sandboxId,
+      reportIsoTimestamp,
     });
   }
 

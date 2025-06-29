@@ -3,7 +3,12 @@ package org.dcsa.conformance.core.toolkit;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import java.io.BufferedWriter;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.StreamSupport;
@@ -26,6 +31,15 @@ public class JsonToolkit {
   @SneakyThrows
   public static JsonNode inputStreamToJsonNode(InputStream inputStream) {
     return OBJECT_MAPPER.readTree(inputStream);
+  }
+
+  @SneakyThrows
+  public static void writeJsonNodeToOutputStream(JsonNode jsonNode, OutputStream outputStream) {
+    try (BufferedWriter writer =
+        new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+      writer.write(jsonNode.toPrettyString());
+      writer.flush();
+    }
   }
 
   @SneakyThrows

@@ -108,7 +108,7 @@
           <div class="pageSubtitle">Conformance status</div>
           <app-report
           *ngIf="scenario && scenarioStatus?.conformanceSubReport"
-          [folded]="false"
+          [unfoldedLevels]="1"
           [report]="scenarioStatus.conformanceSubReport"
           ></app-report>
       </div>

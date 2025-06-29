@@ -21,6 +21,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -117,6 +118,30 @@ public class ConformancePersistenceProvider {
                         Map.Entry::getValue,
                         (existing, updated) -> existing,
                         LinkedHashMap::new));
+          }
+
+          @Override
+          public TreeMap<String, TreeMap<String, JsonNode>> scan(
+              String partitionKeyPrefix, String sortKeyPrefix) {
+            TreeMap<String, TreeMap<String, JsonNode>> externalResult = new TreeMap<>();
+            internalNonLockingMap
+                .scan(partitionKeyPrefix, sortKeyPrefix)
+                .forEach(
+                    (partitionKey, valuesBySortKey) ->
+                        valuesBySortKey.forEach(
+                            (sortKey, internalValue) ->
+                                externalResult
+                                    .computeIfAbsent(partitionKey, ignoredPK -> new TreeMap<>())
+                                    .put(
+                                        sortKey,
+                                        isNotChunkedValueRedirect(internalValue)
+                                            ? internalValue
+                                            : chunksToValue(
+                                                internalNonLockingMap.getPartitionValuesBySortKey(
+                                                    partitionKey,
+                                                    getChunkSortKeyPrefix(
+                                                        sortKey, getChunksUuid(internalValue)))))));
+            return externalResult;
           }
         };
 

@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -404,9 +405,10 @@ public class ConformanceSandbox {
   public static void createReport(
       ConformancePersistenceProvider persistenceProvider,
       String environmentId,
-      String sandboxId,
+      SandboxConfiguration sandboxConfiguration,
       String reportTitle) {
     AtomicReference<JsonNode> resultReference = new AtomicReference<>();
+    String sandboxId = sandboxConfiguration.getId();
     new OrchestratorTask(
             persistenceProvider,
             null,
@@ -421,8 +423,6 @@ public class ConformanceSandbox {
     Instant reportInstant = Instant.now();
     String reportIsoTimestamp = reportInstant.toString();
     String reportDateTime = reportInstant.atZone(ZoneOffset.UTC).format(DATE_TIME_FORMATTER);
-    SandboxConfiguration sandboxConfiguration =
-        loadSandboxConfiguration(persistenceProvider, sandboxId);
     persistenceProvider
         .getNonLockingMap()
         .setItemValue(
@@ -1000,5 +1000,93 @@ public class ConformanceSandbox {
                 new UnsupportedOperationException(
                     "Unsupported standard: %s".formatted(standardConfiguration)))
         .createComponentFactory(standardConfiguration.getVersion(), scenarioSuite);
+  }
+
+  public static JsonNode executeAdminTask(
+      ConformancePersistenceProvider persistenceProvider,
+      JsonNode jsonInput) {
+    String operation = jsonInput.path("operation").asText();
+    if ("createReportInAllSandboxes".equals(operation)) {
+      String reportTitle = jsonInput.get("reportTitle").asText(); // throw NPE if missing
+      return createReportInAllSandboxes(persistenceProvider, reportTitle);
+    }
+    throw new UnsupportedOperationException("Unsupported operation '%s'".formatted(operation));
+  }
+
+  private static JsonNode createReportInAllSandboxes(
+      ConformancePersistenceProvider persistenceProvider, String reportTitle) {
+    ArrayNode environmentResults = OBJECT_MAPPER.createArrayNode();
+    TreeMap<String, TreeSet<String>> sandboxIdsByEnvironmentId =
+        getSandboxIdsByEnvironmentId(persistenceProvider);
+    int environmentCount = sandboxIdsByEnvironmentId.size();
+    AtomicInteger environmentIndex = new AtomicInteger();
+    sandboxIdsByEnvironmentId.forEach(
+        (environmentId, sandboxIds) -> {
+          ArrayNode sandboxResults = OBJECT_MAPPER.createArrayNode();
+          int sandboxCount = sandboxIds.size();
+          AtomicInteger sandboxIndex = new AtomicInteger();
+          sandboxIds.forEach(
+              sandboxId -> {
+                log.info(
+                    "In environment {} of {} with id {} creating report for sandbox {} of {} with id {}",
+                    environmentIndex.incrementAndGet(),
+                    environmentCount,
+                    environmentId,
+                    sandboxIndex.incrementAndGet(),
+                    sandboxCount,
+                    sandboxId);
+                String sandboxResultString;
+                if (sandboxId.contains("#deleted")) {
+                  sandboxResultString = "Skipped (deleted sandbox)";
+                } else {
+                  SandboxConfiguration sandboxConfiguration =
+                      loadSandboxConfiguration(persistenceProvider, sandboxId);
+                  if (sandboxConfiguration.getSandboxPartyCounterpartConfiguration() == null) {
+                    sandboxResultString = "Skipped (no counterpart configuration)";
+                  } else if (!sandboxConfiguration.getOrchestrator().isActive()) {
+                    sandboxResultString = "Skipped (internal sandbox)";
+                  } else {
+                    try {
+                      createReport(
+                          persistenceProvider, environmentId, sandboxConfiguration, reportTitle);
+                      sandboxResultString = "DONE";
+                    } catch (Exception e) {
+                      log.warn("Sandbox report creation failed: {}", e, e);
+                      sandboxResultString = "Failed: " + e;
+                    }
+                  }
+                }
+                sandboxResults.add(
+                    OBJECT_MAPPER
+                        .createObjectNode()
+                        .put("sandboxId", sandboxId)
+                        .put("result", sandboxResultString));
+              });
+          ObjectNode environmentResult =
+              OBJECT_MAPPER.createObjectNode().put("environmentId", environmentId);
+          environmentResult.set("sandboxResults", sandboxResults);
+          environmentResults.add(environmentResult);
+        });
+    return environmentResults;
+  }
+
+  private static TreeMap<String, TreeSet<String>> getSandboxIdsByEnvironmentId(
+    ConformancePersistenceProvider persistenceProvider) {
+    TreeMap<String, TreeSet<String>> sandboxIdsByEnvironmentId = new TreeMap<>();
+    String partitionKeyPrefix = "environment#";
+    String sortKeyPrefix = "sandbox#";
+    persistenceProvider
+        .getNonLockingMap()
+        .scan(partitionKeyPrefix, sortKeyPrefix)
+        .forEach(
+            (partitionKey, valuesBySortKey) -> {
+              TreeSet<String> sandboxIds = new TreeSet<>();
+              sandboxIdsByEnvironmentId.put(
+                  partitionKey.substring(partitionKeyPrefix.length()), sandboxIds);
+              valuesBySortKey
+                  .keySet()
+                  .forEach(sortKey -> sandboxIds.add(sortKey.substring(sortKeyPrefix.length())));
+            });
+    return sandboxIdsByEnvironmentId;
   }
 }

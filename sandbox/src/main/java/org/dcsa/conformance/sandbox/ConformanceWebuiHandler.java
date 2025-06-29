@@ -534,7 +534,11 @@ public class ConformanceWebuiHandler {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     String reportTitle = requestNode.get("reportTitle").asText();
-    ConformanceSandbox.createReport(persistenceProvider, userId, sandboxId, reportTitle);
+    ConformanceSandbox.createReport(
+        persistenceProvider,
+        userId,
+        ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId),
+        reportTitle);
     return OBJECT_MAPPER.createObjectNode();
   }
 

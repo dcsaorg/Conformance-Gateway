@@ -80,7 +80,9 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
             Map.entry(
                 "REFERENCE",
                 this.useTDRef
-                    ? dsp.transportDocumentReference()
+                    ? String.format(
+                        "either the TD reference (%s) or the SI reference (%s)",
+                        dsp.transportDocumentReference(), dsp.shippingInstructionsReference())
                     : dsp.shippingInstructionsReference()),
             Map.entry(
                 "ORIGINAL_OR_AMENDED_PLACEHOLDER", requestAmendedStatus ? "AMENDED" : "ORIGINAL"));
@@ -106,13 +108,18 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        var documentReference =
-            useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+
+        var siPath = "/v3/shipping-instructions/" + dsp.shippingInstructionsReference();
+        var tdPath = "/v3/shipping-instructions/" + dsp.transportDocumentReference();
+
+        UrlPathCheck urlPathCheck =
+            useTDRef
+                ? new UrlPathCheck(
+                    "", EblRole::isShipper, getMatchedExchangeUuid(), siPath, true, tdPath)
+                : new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), siPath);
+
         return Stream.of(
-            new UrlPathCheck(
-                EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                "/v3/shipping-instructions/" + documentReference),
+            urlPathCheck,
             new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,

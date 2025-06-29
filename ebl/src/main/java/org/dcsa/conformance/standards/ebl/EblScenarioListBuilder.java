@@ -80,7 +80,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                             .map(
                                 scenarioType ->
                                     carrierSupplyScenarioParameters(scenarioType)
-                                        .then(uc1Get(SI_RECEIVED, uc14Get(SI_COMPLETED))))
+                                        .then(
+                                            uc1Get(
+                                                SI_RECEIVED, false, uc14Get(SI_COMPLETED, false))))
                             .toList()
                             .toArray(new EblScenarioListBuilder[] {}))),
             Map.entry(
@@ -89,12 +91,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                     .then(
                         uc1Get(
                             SI_RECEIVED,
+                            false,
                             uc2Get(
                                 SI_PENDING_UPDATE, uc3AndAllSiOnlyPathsFrom(SI_PENDING_UPDATE))))),
             Map.entry(
                 "Shipper initiated update scenarios",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL)
-                    .then(uc1Get(SI_RECEIVED, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))))
+                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -130,32 +133,38 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                     .then(
                         uc1Get(
                             SI_RECEIVED,
+                            false,
                             uc6Get(
                                 false,
                                 shipperGetShippingInstructionsRecordTDRef()
                                     .then(
                                         uc7Get(
                                             uc8Get(
-                                                uc12Get(uc13Get(uc14Get(SI_COMPLETED))),
+                                                uc12Get(uc13Get(uc14Get(SI_COMPLETED, true))),
                                                 uc9Get(
                                                     uc10Get(
                                                         uc3Get(
                                                             SI_RECEIVED,
                                                             SI_UPDATE_RECEIVED,
+                                                            true,
                                                             uc4aGet(
                                                                 SI_RECEIVED,
                                                                 SI_UPDATE_CONFIRMED,
+                                                                true,
                                                                 uc11Get(
                                                                     uc12Get(
                                                                         uc13Get(
                                                                             uc14Get(
-                                                                                SI_COMPLETED))))))))))),
+                                                                                SI_COMPLETED,
+                                                                                true))))))))))),
                                 uc3Get(
                                     SI_RECEIVED,
                                     SI_UPDATE_RECEIVED,
+                                    true,
                                     uc4aGet(
                                         SI_RECEIVED,
                                         SI_UPDATE_CONFIRMED,
+                                        true,
                                         uc6Get(
                                             false,
                                             shipperGetShippingInstructionsRecordTDRef()
@@ -165,22 +174,26 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                             uc12Get(
                                                                 uc13Get(
                                                                     uc14Get(
-                                                                        SI_COMPLETED))))))))))))),
+                                                                        SI_COMPLETED,
+                                                                        true))))))))))))),
             Map.entry(
                 "Sea Waybill",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_SWB)
                     .then(
                         uc1Get(
                             SI_RECEIVED,
+                            false,
                             uc6Get(
                                 false,
                                 shipperGetShippingInstructionsRecordTDRef().then(uc7Get(uc8Get())),
                                 uc3Get(
                                     SI_RECEIVED,
                                     SI_UPDATE_RECEIVED,
+                                    true,
                                     uc4aGet(
                                         SI_RECEIVED,
                                         SI_UPDATE_CONFIRMED,
+                                        true,
                                         uc6Get(
                                             false,
                                             shipperGetTransportDocument(TD_DRAFT)
@@ -190,8 +203,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                         uc3Get(
                                             SI_RECEIVED,
                                             SI_UPDATE_RECEIVED,
-                                            uc4aGet(
-                                                SI_RECEIVED, SI_UPDATE_CONFIRMED, uc8Get())))))))))
+                                            true,
+                                            uc4aGet(SI_RECEIVED, SI_UPDATE_CONFIRMED, true)))))))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -210,28 +223,34 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     return uc3Get(
         originalSiState,
         SI_UPDATE_RECEIVED,
-        uc2Get(SI_PENDING_UPDATE, uc3Get(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, uc4aUc14())),
-        uc3Get(originalSiState, SI_UPDATE_RECEIVED, uc4aUc14()),
+        false,
+        uc2Get(
+            SI_PENDING_UPDATE,
+            uc3Get(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, false, uc4aUc14(false))),
+        uc3Get(originalSiState, SI_UPDATE_RECEIVED, false, uc4aUc14(false)),
         uc4aGet(
             SI_RECEIVED,
             SI_UPDATE_CONFIRMED,
-            uc2Get(SI_PENDING_UPDATE, uc3Get(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, uc4aUc14())),
-            uc3Get(SI_RECEIVED, SI_UPDATE_RECEIVED, uc4aUc14()),
-            uc14Get(SI_COMPLETED)),
+            false,
+            uc2Get(
+                SI_PENDING_UPDATE,
+                uc3Get(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, false, uc4aUc14(false))),
+            uc3Get(SI_RECEIVED, SI_UPDATE_RECEIVED, false, uc4aUc14(false)),
+            uc14Get(SI_COMPLETED, false)),
         uc4dGet(
             originalSiState,
             SI_UPDATE_DECLINED,
-            uc3Get(originalSiState, SI_UPDATE_RECEIVED, uc4aUc14())),
+            uc3Get(originalSiState, SI_UPDATE_RECEIVED, false, uc4aUc14(false))),
         uc5Get(
             originalSiState,
             SI_UPDATE_CANCELLED,
-            uc3Get(originalSiState, SI_UPDATE_RECEIVED, uc4aUc14())));
+            uc3Get(originalSiState, SI_UPDATE_RECEIVED, false, uc4aUc14(false))));
   }
 
   private static EblScenarioListBuilder uc1Get(
-      ShippingInstructionsStatus siState, EblScenarioListBuilder... thenEither) {
+      ShippingInstructionsStatus siState, boolean useTDRef, EblScenarioListBuilder... thenEither) {
     return uc1ShipperSubmitShippingInstructions()
-        .then(shipperGetShippingInstructions(siState, false).thenEither(thenEither));
+        .then(shipperGetShippingInstructions(siState, useTDRef).thenEither(thenEither));
   }
 
   private static EblScenarioListBuilder uc2Get(
@@ -243,23 +262,26 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static EblScenarioListBuilder uc3Get(
       ShippingInstructionsStatus originalSiState,
       ShippingInstructionsStatus modifiedSiState,
+      boolean useTDRef,
       EblScenarioListBuilder... thenEither) {
     // Calling both amemded SI GET and original SI GET after a UC3
-    return uc3ShipperSubmitUpdatedShippingInstructions(originalSiState, false)
+    return uc3ShipperSubmitUpdatedShippingInstructions(originalSiState, useTDRef)
         .then(
-            shipperGetShippingInstructions(originalSiState, modifiedSiState, true, false)
+            shipperGetShippingInstructions(originalSiState, modifiedSiState, true, useTDRef)
                 .then(
-                    shipperGetShippingInstructions(originalSiState, modifiedSiState, false, false)
+                    shipperGetShippingInstructions(
+                            originalSiState, modifiedSiState, false, useTDRef)
                         .thenEither(thenEither)));
   }
 
   private static EblScenarioListBuilder uc4aGet(
       ShippingInstructionsStatus originalSiState,
       ShippingInstructionsStatus modifiedSiState,
+      boolean useTDRef,
       EblScenarioListBuilder... thenEither) {
     return uc4aCarrierAcceptUpdatedShippingInstructions()
         .then(
-            shipperGetShippingInstructions(originalSiState, modifiedSiState, false)
+            shipperGetShippingInstructions(originalSiState, modifiedSiState, useTDRef)
                 .thenEither(thenEither));
   }
 
@@ -273,8 +295,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 .thenEither(thenEither));
   }
 
-  private static EblScenarioListBuilder uc4aUc14() {
-    return uc4aGet(SI_RECEIVED, SI_UPDATE_CONFIRMED, uc14Get(SI_COMPLETED));
+  private static EblScenarioListBuilder uc4aUc14(boolean useTDRef) {
+    return uc4aGet(SI_RECEIVED, SI_UPDATE_CONFIRMED, useTDRef, uc14Get(SI_COMPLETED, useTDRef));
   }
 
   private static EblScenarioListBuilder uc5Get(
@@ -332,9 +354,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         .then(shipperGetTransportDocument(TD_SURRENDERED_FOR_DELIVERY).thenEither(thenEither));
   }
 
-  private static EblScenarioListBuilder uc14Get(ShippingInstructionsStatus siState) {
+  private static EblScenarioListBuilder uc14Get(
+      ShippingInstructionsStatus siState, boolean useTDRef) {
     return uc14CarrierConfirmShippingInstructionsComplete()
-        .then(shipperGetShippingInstructions(siState, false));
+        .then(shipperGetShippingInstructions(siState, useTDRef));
   }
 
   private static EblScenarioListBuilder oobAmendment(EblScenarioListBuilder... thenEither) {

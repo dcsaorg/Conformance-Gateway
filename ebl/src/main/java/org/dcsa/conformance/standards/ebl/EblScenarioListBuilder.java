@@ -197,14 +197,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                         uc6Get(
                                             false,
                                             shipperGetTransportDocument(TD_DRAFT)
-                                                .then(uc7Get(uc8Get()))))),
-                                uc7Get(
-                                    uc8Get(
-                                        uc3Get(
-                                            SI_RECEIVED,
-                                            SI_UPDATE_RECEIVED,
-                                            true,
-                                            uc4aGet(SI_RECEIVED, SI_UPDATE_CONFIRMED, true)))))))))
+                                                .then(uc7Get(uc8Get()))))))))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -248,9 +241,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc1Get(
-      ShippingInstructionsStatus siState, boolean useTDRef, EblScenarioListBuilder... thenEither) {
+      ShippingInstructionsStatus siState,
+      boolean useBothRef,
+      EblScenarioListBuilder... thenEither) {
     return uc1ShipperSubmitShippingInstructions()
-        .then(shipperGetShippingInstructions(siState, useTDRef).thenEither(thenEither));
+        .then(shipperGetShippingInstructions(siState, useBothRef).thenEither(thenEither));
   }
 
   private static EblScenarioListBuilder uc2Get(
@@ -262,26 +257,26 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static EblScenarioListBuilder uc3Get(
       ShippingInstructionsStatus originalSiState,
       ShippingInstructionsStatus modifiedSiState,
-      boolean useTDRef,
+      boolean useBothRef,
       EblScenarioListBuilder... thenEither) {
     // Calling both amemded SI GET and original SI GET after a UC3
-    return uc3ShipperSubmitUpdatedShippingInstructions(originalSiState, useTDRef)
+    return uc3ShipperSubmitUpdatedShippingInstructions(originalSiState, useBothRef)
         .then(
-            shipperGetShippingInstructions(originalSiState, modifiedSiState, true, useTDRef)
+            shipperGetShippingInstructions(originalSiState, modifiedSiState, true, useBothRef)
                 .then(
                     shipperGetShippingInstructions(
-                            originalSiState, modifiedSiState, false, useTDRef)
+                            originalSiState, modifiedSiState, false, useBothRef)
                         .thenEither(thenEither)));
   }
 
   private static EblScenarioListBuilder uc4aGet(
       ShippingInstructionsStatus originalSiState,
       ShippingInstructionsStatus modifiedSiState,
-      boolean useTDRef,
+      boolean useBothRef,
       EblScenarioListBuilder... thenEither) {
     return uc4aCarrierAcceptUpdatedShippingInstructions()
         .then(
-            shipperGetShippingInstructions(originalSiState, modifiedSiState, useTDRef)
+            shipperGetShippingInstructions(originalSiState, modifiedSiState, useBothRef)
                 .thenEither(thenEither));
   }
 
@@ -295,8 +290,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 .thenEither(thenEither));
   }
 
-  private static EblScenarioListBuilder uc4aUc14(boolean useTDRef) {
-    return uc4aGet(SI_RECEIVED, SI_UPDATE_CONFIRMED, useTDRef, uc14Get(SI_COMPLETED, useTDRef));
+  private static EblScenarioListBuilder uc4aUc14(boolean useBothRef) {
+    return uc4aGet(SI_RECEIVED, SI_UPDATE_CONFIRMED, useBothRef, uc14Get(SI_COMPLETED, useBothRef));
   }
 
   private static EblScenarioListBuilder uc5Get(
@@ -355,9 +350,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc14Get(
-      ShippingInstructionsStatus siState, boolean useTDRef) {
+      ShippingInstructionsStatus siState, boolean useBothRef) {
     return uc14CarrierConfirmShippingInstructionsComplete()
-        .then(shipperGetShippingInstructions(siState, useTDRef));
+        .then(shipperGetShippingInstructions(siState, useBothRef));
   }
 
   private static EblScenarioListBuilder oobAmendment(EblScenarioListBuilder... thenEither) {
@@ -379,17 +374,17 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder shipperGetShippingInstructions(
-      ShippingInstructionsStatus expectedSiStatus, boolean useTDRef) {
-    return shipperGetShippingInstructions(expectedSiStatus, null, useTDRef);
+      ShippingInstructionsStatus expectedSiStatus, boolean useBothRef) {
+    return shipperGetShippingInstructions(expectedSiStatus, null, useBothRef);
   }
 
   private static EblScenarioListBuilder shipperGetShippingInstructions(
       ShippingInstructionsStatus expectedSiStatus,
       ShippingInstructionsStatus expectedUpdatedSiStatus,
       boolean requestAmendedSI,
-      boolean useTDRef) {
+      boolean useBothRef) {
     return shipperGetShippingInstructions(
-        expectedSiStatus, expectedUpdatedSiStatus, requestAmendedSI, false, useTDRef);
+        expectedSiStatus, expectedUpdatedSiStatus, requestAmendedSI, false, useBothRef);
   }
 
   private static EblScenarioListBuilder shipperGetShippingInstructionsRecordTDRef() {
@@ -399,9 +394,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static EblScenarioListBuilder shipperGetShippingInstructions(
       ShippingInstructionsStatus expectedSiStatus,
       ShippingInstructionsStatus expectedUpdatedSiStatus,
-      boolean useTDRef) {
+      boolean useBothRef) {
     return shipperGetShippingInstructions(
-        expectedSiStatus, expectedUpdatedSiStatus, false, false, useTDRef);
+        expectedSiStatus, expectedUpdatedSiStatus, false, false, useBothRef);
   }
 
   private static EblScenarioListBuilder shipperGetShippingInstructions(
@@ -409,21 +404,21 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       ShippingInstructionsStatus expectedUpdatedSiStatus,
       boolean requestAmendedSI,
       boolean recordTDR,
-      boolean useTDRef) {
+      boolean useBothRef) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
-      previousAction ->
-        new Shipper_GetShippingInstructionsAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          expectedSiStatus,
-          expectedUpdatedSiStatus,
-          resolveMessageSchemaValidator(EBL_API, GET_EBL_SCHEMA_NAME),
-          requestAmendedSI,
-          recordTDR,
-          useTDRef));
+        previousAction ->
+            new Shipper_GetShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                expectedSiStatus,
+                expectedUpdatedSiStatus,
+                resolveMessageSchemaValidator(EBL_API, GET_EBL_SCHEMA_NAME),
+                requestAmendedSI,
+                recordTDR,
+                useBothRef));
   }
 
   private static EblScenarioListBuilder shipperGetTransportDocument(
@@ -455,9 +450,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc3ShipperSubmitUpdatedShippingInstructions(
-    ShippingInstructionsStatus expectedSiStatus,
-    boolean useTDRef
-  ) {
+      ShippingInstructionsStatus expectedSiStatus, boolean useBothRef) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
@@ -467,7 +460,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 shipperPartyName,
                 (EblAction) previousAction,
                 expectedSiStatus,
-                useTDRef,
+                useBothRef,
                 resolveMessageSchemaValidator(EBL_API, PUT_EBL_SCHEMA_NAME),
                 resolveMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
@@ -518,21 +511,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc5ShipperCancelUpdateToShippingInstructions(
-      ShippingInstructionsStatus expectedSIStatus, boolean useTDRef) {
+      ShippingInstructionsStatus expectedSIStatus, boolean useBothRef) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
-      previousAction ->
-        new UC5_Shipper_CancelUpdateToShippingInstructionsAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          expectedSIStatus,
-          useTDRef,
-          resolveMessageSchemaValidator(
-            EBL_API, PATCH_SI_SCHEMA_NAME),
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+        previousAction ->
+            new UC5_Shipper_CancelUpdateToShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                expectedSIStatus,
+                useBothRef,
+                resolveMessageSchemaValidator(EBL_API, PATCH_SI_SCHEMA_NAME),
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static EblScenarioListBuilder uc6CarrierPublishDraftTransportDocument(boolean skipSI) {

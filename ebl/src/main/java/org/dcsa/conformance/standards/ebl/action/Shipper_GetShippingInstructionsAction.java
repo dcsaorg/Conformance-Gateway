@@ -21,18 +21,13 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
   private final JsonSchemaValidator responseSchemaValidator;
   private final boolean requestAmendedStatus;
   private final boolean recordTDR;
-  private final boolean useTDRef;
+  private final boolean useBothRef;
 
-  private static String name(boolean requestAmendedStatus, boolean useTDRef) {
-    var flag =
-        (requestAmendedStatus ? FLAG_REQUEST_AMENDMENT : FLAG_NONE)
-      | (useTDRef ? FLAG_USE_TD_REF : FLAG_NONE)
-      ;
+  private static String name(boolean requestAmendedStatus) {
+    var flag = (requestAmendedStatus ? FLAG_REQUEST_AMENDMENT : FLAG_NONE);
     return switch (flag) {
       case FLAG_NONE -> "GET SI";
-      case FLAG_NONE|FLAG_USE_TD_REF -> "GET SI (TDR)";
-      case FLAG_REQUEST_AMENDMENT|FLAG_NONE -> "GET aSI";
-      case FLAG_REQUEST_AMENDMENT|FLAG_USE_TD_REF -> "GET aSI (TDR)";
+      case FLAG_REQUEST_AMENDMENT -> "GET aSI";
       default -> throw new AssertionError("Missing case for 0x" + Integer.toHexString(flag));
     };
   }
@@ -46,24 +41,25 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       JsonSchemaValidator responseSchemaValidator,
       boolean requestAmendedStatus,
       boolean recordTDR,
-      boolean useTDRef) {
-    super(shipperPartyName, carrierPartyName, previousAction, name(requestAmendedStatus, useTDRef), 200);
+      boolean useBothRef) {
+    super(shipperPartyName, carrierPartyName, previousAction, name(requestAmendedStatus), 200);
     this.expectedSiStatus = expectedSiStatus;
     this.expectedAmendedSiStatus = expectedAmendedSiStatus;
-    this.useTDRef = useTDRef;
+    this.useBothRef = useBothRef;
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestAmendedStatus = requestAmendedStatus;
     this.recordTDR = recordTDR;
 
-    if (useTDRef && recordTDR) {
-      throw new IllegalArgumentException("Cannot use recordTDR with useTDRef");
+    if (useBothRef && recordTDR) {
+      throw new IllegalArgumentException("Cannot use recordTDR with useBothRef");
     }
   }
 
   @Override
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
-    var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+    var documentReference =
+        this.useBothRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
     if (documentReference == null) {
       throw new IllegalStateException("Missing document reference for use-case 3");
     }
@@ -79,7 +75,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
         Map.ofEntries(
             Map.entry(
                 "REFERENCE",
-                this.useTDRef
+                this.useBothRef
                     ? String.format(
                         "either the TD reference (%s) or the SI reference (%s)",
                         dsp.transportDocumentReference(), dsp.shippingInstructionsReference())
@@ -113,7 +109,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
         var tdPath = "/v3/shipping-instructions/" + dsp.transportDocumentReference();
 
         UrlPathCheck urlPathCheck =
-            useTDRef
+            useBothRef
                 ? new UrlPathCheck(
                     "", EblRole::isShipper, getMatchedExchangeUuid(), siPath, true, tdPath)
                 : new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), siPath);

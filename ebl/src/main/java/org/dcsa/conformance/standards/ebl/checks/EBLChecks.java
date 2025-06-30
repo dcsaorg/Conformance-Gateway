@@ -441,7 +441,7 @@ public class EBLChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_CODES)
   );
 
-  private static final JsonRebaseableContentCheck  DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
+  public static final JsonRebaseableContentCheck  DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
     "Each document party can be used at most once",
     JsonAttribute.path(
       DOCUMENT_PARTIES,
@@ -449,7 +449,7 @@ public class EBLChecks {
     ));
 
 
-  private static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTIES_MATCH_EBL = JsonAttribute.customValidator(
+  public static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTIES_MATCH_EBL = JsonAttribute.customValidator(
     "Validate documentParties match the EBL type",
     (body, contextPath) -> {
       var issues = new LinkedHashSet<String>();
@@ -746,7 +746,7 @@ public class EBLChecks {
           mav -> mav.submitAllMatching("feedbacks.*.code"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
-  private static final List<JsonContentCheck> STATIC_SI_CHECKS =
+  public static final List<JsonContentCheck> STATIC_SI_CHECKS =
       Arrays.asList(
           JsonAttribute.mustBeDatasetKeywordIfPresent(
               SI_REQUEST_SEND_TO_PLATFORM, EblDatasets.EBL_PLATFORMS_DATASET),
@@ -920,11 +920,9 @@ public class EBLChecks {
     };
   }
 
-  private static void generateScenarioRelatedChecks(
-      List<JsonContentCheck> checks,
-      String standardVersion,
-      Supplier<DynamicScenarioParameters> dspSupplier,
-      boolean isTD) {
+  public static List<JsonContentCheck> generateScenarioRelatedChecks(
+      Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
+    List<JsonContentCheck> checks = new ArrayList<>();
     checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'transportDocumentTypeCode' is used",
       "transportDocumentTypeCode",
@@ -972,6 +970,7 @@ public class EBLChecks {
       "[Scenario] Verify that 'customsReferences' is used when the scenario requires it",
       scenarioCustomsReferencesCheck(dspSupplier)
     ));
+    return checks;
   }
 
   private static JsonContentMatchedValidation scenarioCustomsReferencesCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
@@ -1039,7 +1038,7 @@ public class EBLChecks {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
     checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     checks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    generateScenarioRelatedChecks(checks, standardVersion, dspSupplier, false);
+    checks.addAll(generateScenarioRelatedChecks(dspSupplier, false));
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
       matched,
@@ -1098,7 +1097,7 @@ public class EBLChecks {
           SI_NORMALIZER
         ));
     */
-    generateScenarioRelatedChecks(checks, standardVersion, dspSupplier, false);
+    checks.addAll(generateScenarioRelatedChecks(dspSupplier, false));
     return checks;
   }
 
@@ -1285,7 +1284,7 @@ public class EBLChecks {
               }
               return Set.of();
             }));
-    generateScenarioRelatedChecks(jsonContentChecks, standardVersion, dspSupplier, true);
+    jsonContentChecks.addAll(generateScenarioRelatedChecks(dspSupplier, true));
     return jsonContentChecks;
   }
 

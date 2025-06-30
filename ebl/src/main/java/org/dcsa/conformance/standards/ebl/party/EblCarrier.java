@@ -39,6 +39,7 @@ public class EblCarrier extends ConformanceParty {
   private static final String ACTION_ID = "actionId";
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
   private static final String FIBREBOARD_BOXES = "Fibreboard boxes";
+  public static final String SCENARIO_TYPE = "scenarioType";
 
   private final Map<String, String> tdrToSir = new HashMap<>();
 
@@ -76,7 +77,7 @@ public class EblCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(CarrierSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(
             UC2_Carrier_RequestUpdateToShippingInstructionsAction.class,
             this::requestUpdateToShippingInstructions),
@@ -114,7 +115,7 @@ public class EblCarrier extends ConformanceParty {
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required(SCENARIO_TYPE).asText());
     ObjectNode eblPayload = (ObjectNode) getEblPayload(scenarioType);
     asyncOrchestratorPostPartyInput(actionPrompt.required(ACTION_ID).asText(), eblPayload);
     addOperatorLogEntry(
@@ -183,7 +184,7 @@ public class EblCarrier extends ConformanceParty {
   private void publishDraftTransportDocument(JsonNode actionPrompt) {
     log.info("Carrier.publishDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required(SCENARIO_TYPE).asText());
     var skipSI = actionPrompt.required("skipSI").asBoolean(false);
     String documentReference;
     CarrierShippingInstructions si;
@@ -290,7 +291,7 @@ public class EblCarrier extends ConformanceParty {
     log.info("Carrier.issueAmendedTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required(SCENARIO_TYPE).asText());
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);

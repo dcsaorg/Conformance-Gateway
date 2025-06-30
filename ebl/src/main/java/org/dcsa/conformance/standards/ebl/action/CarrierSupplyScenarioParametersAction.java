@@ -3,28 +3,38 @@ package org.dcsa.conformance.standards.ebl.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import org.dcsa.conformance.core.UserFacingException;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.core.util.ErrorFormatter;
+import org.dcsa.conformance.standards.ebl.checks.EblInputPayloadValidations;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 
-public class Carrier_SupplyScenarioParametersAction extends EblAction {
+public class CarrierSupplyScenarioParametersAction extends EblAction {
 
   private static final String SCENARIO_TYPE = "scenarioType";
-  private static final String EBL_PAYLOAD = "bookingPayload";
+  private static final String EBL_PAYLOAD = "eblPayload";
   private static final String INPUT = "input";
 
   private JsonNode carrierScenarioParameters;
   private ScenarioType scenarioType;
   private final String standardVersion;
+  private final JsonSchemaValidator requestSchemaValidator;
+  private final boolean isTd;
 
-  public Carrier_SupplyScenarioParametersAction(
-      String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion) {
+  public CarrierSupplyScenarioParametersAction(
+      String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion, JsonSchemaValidator requestSchemaValidator, boolean isTd) {
     super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
+    this.requestSchemaValidator = requestSchemaValidator;
+    this.isTd = isTd;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
   }
 
@@ -86,8 +96,20 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
     JsonNode inputNode = partyInput.get(INPUT);
 
-    // validations here
+    Set<String> schemaChecksErrors =
+        EblInputPayloadValidations.validateEblSchema(inputNode, requestSchemaValidator);
 
+    Set<String> contentChecksErrors =
+        EblInputPayloadValidations.validateEblContent(inputNode, getDspSupplier(), isTd);
+
+    Set<String> allErrors =
+        Stream.of(schemaChecksErrors, contentChecksErrors)
+            .flatMap(Set::stream)
+            .collect(Collectors.toSet());
+
+    if (!allErrors.isEmpty()) {
+      throw new UserFacingException(ErrorFormatter.formatInputErrors(allErrors));
+    }
     doHandlePartyInput(partyInput);
   }
 

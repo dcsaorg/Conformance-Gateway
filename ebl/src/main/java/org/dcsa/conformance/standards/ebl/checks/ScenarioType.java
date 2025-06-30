@@ -71,6 +71,6 @@ public enum ScenarioType {
           case REGULAR_NEGOTIABLE_BL -> "negotiable-bl";
           case REGULAR_CLAD -> "clad";
         };
-    return "booking-api-" + version.toLowerCase() + "-" + suffix + ".json";
+    return "ebl-api-" + version.toLowerCase() + "-" + suffix + ".json";
   }
 }

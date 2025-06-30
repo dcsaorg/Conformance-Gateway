@@ -17,18 +17,18 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
   private final ShippingInstructionsStatus expectedSiStatus;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
-  private final boolean useTDRef;
+  private final boolean useBothRef;
 
   public UC3ShipperSubmitUpdatedShippingInstructionsAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
       ShippingInstructionsStatus expectedSiStatus,
-      boolean useTDRef,
+      boolean useBothRef,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3" + (useTDRef ? " [TDR]" : ""), 202);
-    this.useTDRef = useTDRef;
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 202);
+    this.useBothRef = useBothRef;
     this.expectedSiStatus = expectedSiStatus;
     this.requestSchemaValidator = requestSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -39,8 +39,10 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
     return getMarkdownHumanReadablePrompt(
         Map.of(
             "REFERENCE",
-            this.useTDRef
-                ? getDSP().transportDocumentReference()
+            this.useBothRef
+                ? String.format(
+                    "either the TD reference (%s) or the SI reference (%s)",
+                    getDSP().transportDocumentReference(), getDSP().shippingInstructionsReference())
                 : getDSP().shippingInstructionsReference()),
         "prompt-shipper-uc3.md",
         "prompt-shipper-refresh-complete.md");
@@ -49,7 +51,8 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
   @Override
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
-    var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+    var documentReference =
+        this.useBothRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
     if (documentReference == null) {
       throw new IllegalStateException("Missing document reference for use-case 3");
     }
@@ -69,17 +72,19 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
+
+        var siPath = "/v3/shipping-instructions/" + dsp.shippingInstructionsReference();
+        var tdPath = "/v3/shipping-instructions/" + dsp.transportDocumentReference();
+
+        UrlPathCheck urlPathCheck =
+            useBothRef
+                ? new UrlPathCheck(
+                    "", EblRole::isShipper, getMatchedExchangeUuid(), siPath, true, tdPath)
+                : new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), siPath);
         Stream<ActionCheck> primaryExchangeChecks =
             Stream.of(
                 new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PUT"),
-                new UrlPathCheck(
-                    EblRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    "/v3/shipping-instructions/%s"
-                        .formatted(
-                            useTDRef
-                                ? dsp.transportDocumentReference()
-                                : dsp.shippingInstructionsReference())),
+                urlPathCheck,
                 new ResponseStatusCheck(
                     EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
                 new ApiHeaderCheck(

@@ -1,14 +1,14 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-
-import java.util.stream.Stream;
 
 @Getter
 @Slf4j
@@ -61,20 +61,31 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
+        String reference =
+            dsp.carrierBookingReference() != null
+                ? dsp.carrierBookingReference()
+                : dsp.carrierBookingRequestReference();
         return Stream.concat(
-          Stream.concat(createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/%s".formatted(reference)),
-            Stream.of(
-              new JsonSchemaCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator))),
-          getNotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator,
-            expectedBookingStatus,
-            expectedAmendedBookingStatus));
+            Stream.concat(
+                createPrimarySubChecks(
+                    "PATCH", expectedApiVersion, "/v2/bookings/%s".formatted(reference)),
+                Stream.of(
+                    new JsonSchemaCheck(
+                        BookingRole::isShipper,
+                        getMatchedExchangeUuid(),
+                        HttpMessageType.REQUEST,
+                        requestSchemaValidator),
+                    JsonAttribute.contentChecks(
+                        BookingRole::isShipper,
+                        getMatchedExchangeUuid(),
+                        HttpMessageType.REQUEST,
+                        expectedApiVersion,
+                        BookingChecks.validateBookingAmendmentCancellation()))),
+            getNotificationChecks(
+                expectedApiVersion,
+                notificationSchemaValidator,
+                expectedBookingStatus,
+                expectedAmendedBookingStatus));
       }
     };
   }

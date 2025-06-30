@@ -43,4 +43,24 @@ public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonL
                 (existing, replacement) -> existing,
                 LinkedHashMap::new));
   }
+
+  @Override
+  public TreeMap<String, TreeMap<String, JsonNode>> scan(
+      String partitionKeyPrefix, String sortKeyPrefix) {
+    TreeMap<String, TreeMap<String, JsonNode>> result = new TreeMap<>();
+    memoryMap.forEach(
+        (partitionKey, valuesBySortKey) -> {
+          if (partitionKey.startsWith(partitionKeyPrefix)) {
+            TreeMap<String, JsonNode> subResult = new TreeMap<>();
+            result.put(partitionKey, subResult);
+            valuesBySortKey.forEach(
+                (sortKey, value) -> {
+                  if (sortKey.startsWith(sortKeyPrefix)) {
+                    subResult.put(sortKey, value.get("value"));
+                  }
+                });
+          }
+        });
+    return result;
+  }
 }

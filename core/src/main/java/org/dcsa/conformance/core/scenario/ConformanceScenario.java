@@ -59,17 +59,21 @@ public class ConformanceScenario implements StatefulEntity {
 
   @Override
   public void importJsonState(JsonNode jsonState) {
-    if (!jsonState.has("id")) return;
-    id = UUID.fromString(jsonState.get("id").asText());
+    try {
+      if (!jsonState.has("id")) return;
+      id = UUID.fromString(jsonState.get("id").asText());
 
-    int nextActionsSize = jsonState.get("nextActionsSize").asInt();
-    while (nextActions.size() > nextActionsSize) {
-      nextActions.removeFirst();
-    }
+      int nextActionsSize = jsonState.get("nextActionsSize").asInt();
+      while (nextActions.size() > nextActionsSize) {
+        nextActions.removeFirst();
+      }
 
-    ArrayNode allActionsNode = (ArrayNode) jsonState.get("allActions");
-    for (int index = 0; index < allActions.size(); ++index) {
-      allActions.get(index).importJsonState(allActionsNode.get(index));
+      ArrayNode allActionsNode = (ArrayNode) jsonState.get("allActions");
+      for (int index = 0; index < allActions.size(); ++index) {
+        allActions.get(index).importJsonState(allActionsNode.get(index));
+      }
+    } catch (Exception e) {
+      log.warn("Failed to load scenario state: {}", e, e);
     }
   }
 

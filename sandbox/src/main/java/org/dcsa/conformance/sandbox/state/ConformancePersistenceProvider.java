@@ -12,12 +12,16 @@ package org.dcsa.conformance.sandbox.state;
 // PK=session#UUID      SK=state#orchestrator  value={...}                          lock=...
 // PK=session#UUID      SK=state#party#NAME    value={...}                          lock=...
 // PK=session#UUID      SK=exchange#UTC#UUID   value={...}
+//
+// PK=environment#UUID      SK=report#digest#<sandboxUUID>#<reportUTC> value={...title...standard...}
+// PK=environment#UUID      SK=report#content#<sandboxUUID>#<reportUTC> value={...}
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -114,6 +118,30 @@ public class ConformancePersistenceProvider {
                         Map.Entry::getValue,
                         (existing, updated) -> existing,
                         LinkedHashMap::new));
+          }
+
+          @Override
+          public TreeMap<String, TreeMap<String, JsonNode>> scan(
+              String partitionKeyPrefix, String sortKeyPrefix) {
+            TreeMap<String, TreeMap<String, JsonNode>> externalResult = new TreeMap<>();
+            internalNonLockingMap
+                .scan(partitionKeyPrefix, sortKeyPrefix)
+                .forEach(
+                    (partitionKey, valuesBySortKey) ->
+                        valuesBySortKey.forEach(
+                            (sortKey, internalValue) ->
+                                externalResult
+                                    .computeIfAbsent(partitionKey, ignoredPK -> new TreeMap<>())
+                                    .put(
+                                        sortKey,
+                                        isNotChunkedValueRedirect(internalValue)
+                                            ? internalValue
+                                            : chunksToValue(
+                                                internalNonLockingMap.getPartitionValuesBySortKey(
+                                                    partitionKey,
+                                                    getChunkSortKeyPrefix(
+                                                        sortKey, getChunksUuid(internalValue)))))));
+            return externalResult;
           }
         };
 

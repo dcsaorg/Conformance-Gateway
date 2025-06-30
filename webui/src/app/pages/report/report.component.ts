@@ -11,7 +11,7 @@ import { ScenarioConformanceReport } from "src/app/model/scenario-status";
     standalone: false
 })
 export class ReportComponent {
-  @Input() folded!: boolean;
+  @Input() unfoldedLevels!: number;
   @Input() report!: ScenarioConformanceReport;
 
   getConformanceStatusEmoji = getConformanceStatusEmoji;

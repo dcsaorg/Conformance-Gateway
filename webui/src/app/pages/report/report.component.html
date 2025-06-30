@@ -7,7 +7,7 @@
         <span>{{report.title}}</span>
     </div>
 
-    <details [attr.open]="!folded ? '' : null" *ngIf="report.errorMessages.length || report.subReports.length">
+    <details [attr.open]="unfoldedLevels > 0 ? '' : null" *ngIf="report.errorMessages.length || report.subReports.length">
         <summary>
             <span
               class="conformanceStatus"
@@ -27,7 +27,7 @@
 
         <div style="margin-left: 2em">
           <app-report *ngFor="let subReport of report.subReports"
-                      [folded]="true"
+                      [unfoldedLevels]="unfoldedLevels - 1"
                       [report]="subReport"
           ></app-report>
         </div>

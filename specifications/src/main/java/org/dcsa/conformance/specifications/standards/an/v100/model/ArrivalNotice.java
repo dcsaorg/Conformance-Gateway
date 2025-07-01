@@ -5,7 +5,6 @@ import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
 
 @Schema(description = "Full content of an Arrival Notice document.")
@@ -173,6 +172,9 @@ Name identifying the entity responsible for freight payment.
 """,
       example = "Acme Inc.")
   private String payerCode;
+
+  @Schema()
+  private PaymentRemittance paymentRemittance;
 
   @Schema(description = "The equipments being used.")
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;

@@ -60,6 +60,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.NetVolume;
 import org.dcsa.conformance.specifications.standards.an.v100.model.NetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.PartyContactDetail;
+import org.dcsa.conformance.specifications.standards.an.v100.model.PaymentRemittance;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReferenceConsignmentItem;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Seal;
@@ -161,6 +162,7 @@ public class ANStandardSpecification extends StandardSpecification {
         NetWeight.class,
         OuterPackaging.class,
         PartyContactDetail.class,
+        PaymentRemittance.class,
         Reference.class,
         ReferenceConsignmentItem.class,
         Seal.class,
@@ -196,7 +198,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/0a5f6e4013c71e491a487a3c1c4112ea0b594eec/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/a8f1d43ad75fc383410f4e52a465a7b12000b003/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 

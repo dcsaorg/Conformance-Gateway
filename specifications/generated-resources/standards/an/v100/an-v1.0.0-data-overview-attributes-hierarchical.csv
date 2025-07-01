@@ -339,6 +339,12 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 "ArrivalNotice / label",label,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNotice / payerCode",payerCode,string,,maxLength=100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
+"ArrivalNotice / paymentRemittance",paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
+"ArrivalNotice / paymentRemittance / accountNumber",accountNumber,string,,maxLength=40,,XYZ1234567890,"Bank account number for receiving payment",
+"ArrivalNotice / paymentRemittance / bankName",bankName,string,,maxLength=100,,"Example Bank","Name of the carrier's bank where payment should be sent",
+"ArrivalNotice / paymentRemittance / beneficiary",beneficiary,string,,maxLength=100,,"Example Carrier","Legal name of the payment recipient (carrier)",
+"ArrivalNotice / paymentRemittance / remittanceEmail",remittanceEmail,string,,maxLength=100,,carrier@example.com,"Email address where proof of payment remittance should be sent",
+"ArrivalNotice / paymentRemittance / swiftCode",swiftCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
 "ArrivalNotice / pickupLocation",pickupLocation,Location,,,,,"Pickup location",
 "ArrivalNotice / pickupLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -369,6 +375,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / pickupLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / references",references,"Reference list",,,,,"A list of `References`",
 "ArrivalNotice / references / type",type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
+- `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)",
 "ArrivalNotice / references / value",value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
@@ -592,6 +599,8 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / portOfLoading / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfLoading / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / vesselVoyages",vesselVoyages,"VesselVoyage list",,maxItems=3,,,"Details of the POD, POL or DC vessel voyages",
+"ArrivalNotice / transport / vesselVoyages / callReferenceNumber",callReferenceNumber,string,,maxLength=100,,CRN1234,"A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
+It can be used for customs clearance purposes in specific countries (e.g. NL, UK).",
 "ArrivalNotice / transport / vesselVoyages / carrierVoyageNumber",carrierVoyageNumber,string,,maxLength=50,,1234N,"Carrier-specific identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",
@@ -650,6 +659,7 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
 "ArrivalNotice / utilizedTransportEquipments / isShipperOwned",isShipperOwned,boolean,,,,true,"Indicates whether the container is shipper owned (SOC).",
 "ArrivalNotice / utilizedTransportEquipments / references",references,"Reference list",,,,,"A list of `References`",
 "ArrivalNotice / utilizedTransportEquipments / references / type",type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
+- `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)",
 "ArrivalNotice / utilizedTransportEquipments / references / value",value,string,,maxLength=35,,HHL00103004,"The value of the reference.",

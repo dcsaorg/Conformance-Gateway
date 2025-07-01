@@ -53,6 +53,7 @@ ArrivalNotice,issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The 
 ArrivalNotice,label,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 ArrivalNotice,payerCode,string,,maxLength=100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
+ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
 ArrivalNotice,pickupLocation,Location,,,,,"Pickup location",
 ArrivalNotice,references,"Reference list",,,,,"A list of `References`",
 ArrivalNotice,returnInstructions,string,,maxLength=500,,"Please place the container...","Return instructions",
@@ -346,7 +347,13 @@ OuterPackaging,woodDeclaration,string,,maxLength=30,,TREATED_AND_CERTIFIED,"Prop
 PartyContactDetail,email,string,,maxLength=100,,info@dcsa.org,"`E-mail` address to be used",
 PartyContactDetail,name,string,,maxLength=35,,Henrik,"Name of the contact",
 PartyContactDetail,phone,string,,maxLength=30,,"+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+PaymentRemittance,accountNumber,string,,maxLength=40,,XYZ1234567890,"Bank account number for receiving payment",
+PaymentRemittance,bankName,string,,maxLength=100,,"Example Bank","Name of the carrier's bank where payment should be sent",
+PaymentRemittance,beneficiary,string,,maxLength=100,,"Example Carrier","Legal name of the payment recipient (carrier)",
+PaymentRemittance,remittanceEmail,string,,maxLength=100,,carrier@example.com,"Email address where proof of payment remittance should be sent",
+PaymentRemittance,swiftCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
 Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
+- `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)",
 Reference,value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
@@ -404,6 +411,8 @@ Transport,vesselVoyages,"VesselVoyage list",,maxItems=3,,,"Details of the POD, P
 "UtilizedTransportEquipment",seals,"Seal list",,,,,"A list of `Seals`",
 "UtilizedTransportEquipment",shippingMarks,"string list",,"maxItems=50
 maxLength=35",,,"A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`",
+VesselVoyage,callReferenceNumber,string,,maxLength=100,,CRN1234,"A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
+It can be used for customs clearance purposes in specific countries (e.g. NL, UK).",
 VesselVoyage,carrierVoyageNumber,string,,maxLength=50,,1234N,"Carrier-specific identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",

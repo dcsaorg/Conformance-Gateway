@@ -426,6 +426,11 @@ components:
           description: |
             Name identifying the entity responsible for freight payment.
           example: "Acme Inc."
+        paymentRemittance:
+          description: |
+            Bank account information provided by the carrier for customers to make payments of the outstanding charges
+          allOf:
+          - $ref: "#/components/schemas/PaymentRemittance"
         utilizedTransportEquipments:
           type: "array"
           description: "The equipments being used."
@@ -1558,6 +1563,36 @@ components:
           description: "`E-mail` address to be used"
           example: "info@dcsa.org"
       description: "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided."
+    PaymentRemittance:
+      type: "object"
+      properties:
+        bankName:
+          maxLength: 100
+          type: "string"
+          description: "Name of the carrier's bank where payment should be sent"
+          example: "Example Bank"
+        accountNumber:
+          maxLength: 40
+          type: "string"
+          description: "Bank account number for receiving payment"
+          example: "XYZ1234567890"
+        swiftCode:
+          maxLength: 11
+          type: "string"
+          description: "SWIFT/BIC code for international wire transfers"
+          example: "XYZ123456"
+        beneficiary:
+          maxLength: 100
+          type: "string"
+          description: "Legal name of the payment recipient (carrier)"
+          example: "Example Carrier"
+        remittanceEmail:
+          maxLength: 100
+          type: "string"
+          description: "Email address where proof of payment remittance should be sent"
+          example: "carrier@example.com"
+      description: |
+        Bank account information provided by the carrier for customers to make payments of the outstanding charges
     Reference:
       type: "object"
       properties:
@@ -1566,6 +1601,7 @@ components:
           type: "string"
           description: |
             The reference type codes defined by DCSA. Possible values are:
+            - `CA` (Carrier’s Reference)
             - `CR` (Customer’s Reference)
             - `AKG` (Vehicle Identification Number)
           example: "CR"
@@ -1574,7 +1610,8 @@ components:
           type: "string"
           description: "The value of the reference."
           example: "HHL00103004"
-      description: "References provided by the shipper or freight forwarder at the time of Booking or Shipping Instructions. Carriers share them back during Track & Trace and they may appear on the Bill of Lading."
+      description: |
+        References used by the customer or carrier to identify the shipment in their internal system.
     ReferenceConsignmentItem:
       type: "object"
       properties:
@@ -1850,6 +1887,13 @@ components:
             * the import voyage (if `typeCode` is `POD` or `DC`)
             * the export voyage (if `typeCode` is `POL`)
           example: "2301W"
+        callReferenceNumber:
+          maxLength: 100
+          type: "string"
+          description: |
+            A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
+            It can be used for customs clearance purposes in specific countries (e.g. NL, UK).
+          example: "CRN1234"
       description: |
         Details of a vessel voyage.
 

@@ -58,4 +58,14 @@ Universal identifier of a voyage:
 * the export voyage (if `typeCode` is `POL`)
 """)
   private UniversalVoyageReference universalVoyageReference;
+
+  @Schema(
+    maxLength = 100,
+    example = "CRN1234",
+    description =
+"""
+A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
+It can be used for customs clearance purposes in specific countries (e.g. NL, UK).
+""")
+  private String callReferenceNumber;
 }

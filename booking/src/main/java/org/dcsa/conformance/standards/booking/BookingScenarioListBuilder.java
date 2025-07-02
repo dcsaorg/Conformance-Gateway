@@ -102,14 +102,14 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                                                         CANCELLATION_RECEIVED,
                                                                                         false)
                                                                                     .thenEither(
-                                                                                        uc14CarrierBookingCancellationConfirmed()
+                                                                                        uc14aCarrierBookingCancellationConfirmed()
                                                                                             .then(
                                                                                                 shipperGetBooking(
                                                                                                     CANCELLED,
                                                                                                     null,
                                                                                                     CANCELLATION_CONFIRMED,
                                                                                                     false)),
-                                                                                        uc14CarrierBookingCancellationDeclined()
+                                                                                        uc14bCarrierBookingCancellationDeclined()
                                                                                             .then(
                                                                                                 shipperGetBooking(
                                                                                                         CONFIRMED,
@@ -486,7 +486,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                     BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
-  private static BookingScenarioListBuilder uc14CarrierBookingCancellationConfirmed() {
+  private static BookingScenarioListBuilder uc14aCarrierBookingCancellationConfirmed() {
     return carrierStateChange(
         (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
             new UC14CarrierProcessBookingCancellationAction(
@@ -499,7 +499,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                 true));
   }
 
-  private static BookingScenarioListBuilder uc14CarrierBookingCancellationDeclined() {
+  private static BookingScenarioListBuilder uc14bCarrierBookingCancellationDeclined() {
     return carrierStateChange(
         (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
             new UC14CarrierProcessBookingCancellationAction(

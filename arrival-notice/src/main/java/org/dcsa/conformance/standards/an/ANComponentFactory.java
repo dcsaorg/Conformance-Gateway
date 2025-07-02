@@ -12,11 +12,11 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.dcsa.conformance.core.AbstractComponentFactory;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
-import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.an.party.ANPublisher;
 import org.dcsa.conformance.standards.an.party.ANRole;
@@ -25,6 +25,10 @@ import org.dcsa.conformance.standards.an.party.ANSubscriber;
 public class ANComponentFactory extends AbstractComponentFactory {
   protected ANComponentFactory(String standardName, String standardVersion, String scenarioSuite, String roleOne, String roleTwo) {
     super(standardName, standardVersion, scenarioSuite, roleOne, roleTwo);
+  }
+
+  public ANComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
+    super(standardName, standardVersion, scenarioSuite, "Publisher", "Subscriber");
   }
 
   @Override
@@ -67,7 +71,9 @@ public class ANComponentFactory extends AbstractComponentFactory {
   }
 
   @Override
-  protected <T extends ScenarioListBuilder<T>> Map<String, T> createModuleScenarioListBuilders(PartyConfiguration[] partyConfigurations, CounterpartConfiguration[] counterpartConfigurations) {
+  protected Map<String, ANScenarioListBuilder> createModuleScenarioListBuilders(
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations) {
 
     return ANScenarioListBuilder.createModuleScenarioListBuilders(
       this,
@@ -87,5 +93,10 @@ public class ANComponentFactory extends AbstractComponentFactory {
   @Override
   public Set<String> getReportRoleNames(PartyConfiguration[] partyConfigurations, CounterpartConfiguration[] counterpartConfigurations) {
     return Set.of();
+  }
+
+  public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {
+    String schemaFilePath = "/standards.an/schemas/AN_v%s.yaml".formatted(standardVersion);
+    return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 }

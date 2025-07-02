@@ -1,0 +1,58 @@
+{
+  "arrivalNoticeNotifications": [
+    {
+      "issueDateTime": "2025-01-23T01:23:45Z",
+      "label": "Warning",
+      "transportDocumentReference": "TDR1234",
+      "equipmentReferences": [
+        "APZU4812090"
+      ],
+      "portOfDischarge": {
+        "locationName": "Port of Amsterdam",
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "UNLocationCode": "NLAMS",
+        "facility": {
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG"
+        },
+        "geoCoordinate": {
+          "latitude": "48.85855",
+          "longitude": "2.294492036"
+        }
+      },
+      "etaAtPortOfDischargeDate": "2025-01-23",
+      "placeOfDelivery": {
+        "locationName": "Port of Amsterdam",
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "UNLocationCode": "NLAMS",
+        "facility": {
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG"
+        },
+        "geoCoordinate": {
+          "latitude": "48.85855",
+          "longitude": "2.294492036"
+        }
+      },
+      "etaAtPlaceOfDeliveryDate": "2025-01-23"
+    }
+  ]
+}

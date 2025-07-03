@@ -16,11 +16,11 @@ public class SubscriberGetANAction extends AnAction {
   private final JsonSchemaValidator responseSchemaValidator;
 
   public SubscriberGetANAction(
-      String sourcePartyName,
-      String targetPartyName,
+      String subscriberPartyName,
+      String publisherPartyName,
       AnAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
-    super(sourcePartyName, targetPartyName, previousAction, "GET AN");
+    super(subscriberPartyName, publisherPartyName, previousAction, "GET AN");
     this.responseSchemaValidator = responseSchemaValidator;
   }
 

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -92,7 +93,16 @@ public class ANComponentFactory extends AbstractComponentFactory {
 
   @Override
   public Set<String> getReportRoleNames(PartyConfiguration[] partyConfigurations, CounterpartConfiguration[] counterpartConfigurations) {
-    return Set.of();
+    return (partyConfigurations.length == ANRole.values().length
+            ? Arrays.stream(ANRole.values()).map(ANRole::getConfigName)
+            : Arrays.stream(counterpartConfigurations)
+                .map(CounterpartConfiguration::getRole)
+                .filter(
+                    counterpartRole ->
+                        Arrays.stream(partyConfigurations)
+                            .map(PartyConfiguration::getRole)
+                            .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
+        .collect(Collectors.toSet());
   }
 
   public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {

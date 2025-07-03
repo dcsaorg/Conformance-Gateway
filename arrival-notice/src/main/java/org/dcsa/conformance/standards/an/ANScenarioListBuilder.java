@@ -9,6 +9,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.an.action.AnAction;
 import org.dcsa.conformance.standards.an.action.PublisherPostANAction;
+import org.dcsa.conformance.standards.an.action.PublisherPostANNotificationAction;
 import org.dcsa.conformance.standards.an.action.SubscriberGetANAction;
 import org.dcsa.conformance.standards.an.checks.ScenarioType;
 
@@ -33,7 +34,14 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
     threadLocalSubscriberPartyName.set(subscriberPartyName);
 
     return Stream.of(
-            Map.entry("", sendArrivalNotices(ScenarioType.REGULAR).then(getArrivalNotices())))
+            Map.entry(
+                "",
+                noAction()
+                    .thenEither(
+                        sendArrivalNotices(ScenarioType.REGULAR).then(getArrivalNotices()),
+                        sendArrivalNotices(ScenarioType.FREIGHTED).then(getArrivalNotices()),
+                        sendArrivalNotices(ScenarioType.FREE_TIME).then(getArrivalNotices()),
+                        sendArrivalNoticesNotification().then(getArrivalNotices()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -46,8 +54,8 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
     return new ANScenarioListBuilder(
         previousAction ->
             new PublisherPostANAction(
-                subscriberPartyName,
                 publisherPartyName,
+                subscriberPartyName,
                 (AnAction) previousAction,
                 scenarioType,
                 componentFactory.getMessageSchemaValidator("ArrivalNoticesMessage")));
@@ -64,5 +72,22 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
                 publisherPartyName,
                 (AnAction) previousAction,
                 componentFactory.getMessageSchemaValidator("ArrivalNoticesMessage")));
+  }
+
+  private static ANScenarioListBuilder sendArrivalNoticesNotification() {
+    ANComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String publisherPartyName = threadLocalPublisherPartyName.get();
+    String subscriberPartyName = threadLocalSubscriberPartyName.get();
+    return new ANScenarioListBuilder(
+        previousAction ->
+            new PublisherPostANNotificationAction(
+                publisherPartyName,
+                subscriberPartyName,
+                (AnAction) previousAction,
+                componentFactory.getMessageSchemaValidator("ArrivalNoticeNotificationsMessage")));
+  }
+
+  private static ANScenarioListBuilder noAction() {
+    return new ANScenarioListBuilder(null);
   }
 }

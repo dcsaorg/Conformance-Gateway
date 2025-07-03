@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.an.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
+import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
@@ -21,21 +22,20 @@ public class PublisherPostANAction extends AnAction {
       ScenarioType scenarioType,
       JsonSchemaValidator requestSchemaValidator) {
 
-    super(publisherPartyName, subscriberPartyName, previousAction, "POST AN");
+    super(publisherPartyName, subscriberPartyName, previousAction, computeTitle(scenarioType));
     this.requestSchemaValidator = requestSchemaValidator;
     this.scenarioType = scenarioType;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Submit a Arrival Notice to the subscriber.\n";
+    return "Submit a Arrival Notice to the subscriber.";
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("isFreighted", scenarioType.equals(ScenarioType.FREIGHTED));
-    jsonNode.put("isFreetime", scenarioType.equals(ScenarioType.FREE_TIME));
+    jsonNode.put("scenarioType", scenarioType.name());
     return jsonNode;
   }
 
@@ -49,8 +49,31 @@ public class PublisherPostANAction extends AnAction {
                 ANRole::isPublisher,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator));
+                requestSchemaValidator),
+            new ApiHeaderCheck(
+                ANRole::isSubscriber,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion));
       }
     };
+  }
+
+  private boolean isFreighted() {
+    return scenarioType.equals(ScenarioType.FREIGHTED);
+  }
+
+  private boolean isFreetime() {
+    return scenarioType.equals(ScenarioType.FREE_TIME);
+  }
+
+  private static String computeTitle(ScenarioType scenarioType) {
+    if (scenarioType == ScenarioType.FREIGHTED) {
+      return "POST AN [%s]".formatted("FREIGHTED");
+    } else if (scenarioType == ScenarioType.FREE_TIME) {
+      return "POST AN [%s]".formatted("FREE_TIME");
+    } else {
+      return "POST AN";
+    }
   }
 }

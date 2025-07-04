@@ -31,4 +31,7 @@ If not provided, the customer should refer to the ROE available on the carrier w
 or the ROE defined by the competent customs authority, as per local practice.
 """)
   protected String carrierRateOfExchange;
+
+  @Schema(description = PAYMENT_TERM_CODE_DESCRIPTION, example = "PRE")
+  protected String paymentTermCode;
 }

@@ -300,9 +300,6 @@ components:
             - `SMDG` (Ship Message Design Group)
             - `NMFTA` (National Motor Freight Traffic Association)
           example: "NMFTA"
-          enum:
-          - "SMDG"
-          - "NMFTA"
         carrierContactInformation:
           type: "array"
           description: "The party to contact for any inquiries related to this Arrival Notice."
@@ -357,9 +354,6 @@ components:
             - `BOL` (Bill of Lading)
             - `SWB` (Sea Waybill)
           example: "SWB"
-          enum:
-          - "BOL"
-          - "SWB"
         isElectronic:
           type: "boolean"
           description: "An indicator whether the transport document is electronically transferred."
@@ -374,10 +368,6 @@ components:
             - `SD` (Store Door)
             - `CFS` (Container Freight Station)
           example: "CY"
-          enum:
-          - "CY"
-          - "SD"
-          - "CFS"
         cargoMovementTypeAtDestination:
           maxLength: 3
           type: "string"
@@ -683,9 +673,6 @@ components:
             - `PRE` (Prepaid)
             - `COL` (Collect)
           example: "PRE"
-          enum:
-          - "PRE"
-          - "COL"
         calculationBasis:
           maxLength: 50
           type: "string"

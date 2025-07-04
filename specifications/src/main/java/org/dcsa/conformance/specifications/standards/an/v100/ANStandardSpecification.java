@@ -38,6 +38,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetVolum
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ConsignmentItem;
+import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsClearance;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsReference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.DangerousGoods;
 import org.dcsa.conformance.specifications.standards.an.v100.model.DocumentParty;
@@ -50,6 +51,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.an.v100.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.IdentifyingCode;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ImmediateTransportationEntry;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ImportLicense;
 import org.dcsa.conformance.specifications.standards.an.v100.model.InnerPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Limits;
@@ -133,6 +135,7 @@ public class ANStandardSpecification extends StandardSpecification {
         Charge.class,
         ConsignmentItem.class,
         CountryCode.class,
+        CustomsClearance.class,
         CustomsReference.class,
         DangerousGoods.class,
         DocumentParty.class,
@@ -150,6 +153,7 @@ public class ANStandardSpecification extends StandardSpecification {
         GeoCoordinate.class,
         GrossWeight.class,
         IdentifyingCode.class,
+        ImmediateTransportationEntry.class,
         ImportLicense.class,
         InnerPackaging.class,
         IsoEquipmentCode.class,

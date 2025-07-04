@@ -67,6 +67,9 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
       example = "Please place the container...")
   private String returnInstructions;
 
+  @Schema()
+  private CustomsClearance customsClearance;
+
   @Schema(
       maxLength = 1000,
       description = "Customs import declaration procedure",

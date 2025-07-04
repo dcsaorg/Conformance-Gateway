@@ -40,6 +40,7 @@ ArrivalNotice,"carrierContactInformation","PartyContactDetail list",,,,,"The par
 ArrivalNotice,"carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
 ArrivalNotice,charges,"Charge list",,,,,"A list of `Charges`",
 ArrivalNotice,consignmentItems,"ConsignmentItem list",,,,,"A list of `ConsignmentItems`",
+ArrivalNotice,customsClearance,CustomsClearance,,,,,"Customs clearance information",
 ArrivalNotice,"customsImportDeclarationProcedure",string,,maxLength=1000,,"The tax must be declared...","Customs import declaration procedure",
 ArrivalNotice,"deliveryTypeAtDestination",string,,maxLength=3,,CY,"Indicates the type of service offered at `Destination`. The options are:
 
@@ -128,6 +129,15 @@ ConsignmentItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list 
 ConsignmentItem,references,"ReferenceConsignmentItem list",,,,,"A list of `References`",
 ConsignmentItem,shippingMarks,"string list",,"maxItems=50
 maxLength=35",,,"A list of the `ShippingMarks` applicable to this `consignmentItem`",
+CustomsClearance,customsClearancePoint,Location,,,,,"Location information",
+CustomsClearance,"customsImportDeclarationProcedure",string,,maxLength=1000,,,"Instructions on the administrative processes for submitting import customs declarations to the local agency.",
+CustomsClearance,"immediateTransportationEntry","ImmediateTransportationEntry",,,,,"An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
+that allows imported cargo to be moved from the first port of arrival in the U.S.
+to another port or bonded facility without being physically cleared by CBP at the first port.",
+CustomsClearance,internalCode,string,,maxLength=5,,FRMRS,"Port code used in the Carrier’s internal system to match the location",
+CustomsClearance,manifestReferenceNumber,string,,maxLength=35,,a1234,"Manifest reference number for manifest declaration and customs clearance in Korea.",
+CustomsClearance,masterSequenceNumber,string,,maxLength=35,,x12345,"A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of
+a particular vessel. Customers use this Master Sequence Number (MSN) as a reference when declaring all related House B/Ls.",
 CustomsReference,countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 CustomsReference,type,string,,maxLength=50,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",
 CustomsReference,values,"string list",,maxLength=35,,,,
@@ -282,6 +292,16 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `DCSA` (Digital Container Shipping Association)
 - `ZZZ` (Mutually defined)",
 IdentifyingCode,partyCode,string,,maxLength=150,,MSK,"Code to identify the party as provided by the code list provider",
+"ImmediateTransportationEntry",internalCode,string,,maxLength=4,,a391,"The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
+assigned by U.S. Customs and Border Protection (CBP) to facilities in the U.S. where imported goods are held or processed,
+such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
+It tells CBP and freight systems where the cargo is physically located.",
+"ImmediateTransportationEntry",itDate,"string(date)",,,,2025-01-23,"The date the in-bond movement began, i.e., when the Immediate Transportation (IT) entry was filed and accepted
+by U.S. Customs and Border Protection (CBP).",
+"ImmediateTransportationEntry",itNumber,string,,maxLength=100,,V4914303071,"The reference number of the bonded movement under a U.S. Customs and Border Protection (CBP) Immediate Transportation (IT) entry,
+often assigned by the carrier or customs broker. It allows goods to be moved under bond from the Port of Discharge
+to another inland port or bonded facility without paying duties at the first port. The IT number is used
+for tracking the movement and verifying arrival at the inland port or bonded facility.",
 ImportLicense,expiryDate,"string(date)",,,,2024-09-21,"Expiry date of the `Import License`.",
 ImportLicense,isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
 

@@ -323,6 +323,10 @@ components:
           type: "string"
           description: "Return instructions"
           example: "Please place the container..."
+        customsClearance:
+          description: "Customs clearance information"
+          allOf:
+          - $ref: "#/components/schemas/CustomsClearance"
         customsImportDeclarationProcedure:
           maxLength: 1000
           type: "string"
@@ -767,6 +771,44 @@ components:
           items:
             $ref: "#/components/schemas/CustomsReference"
       description: "Defines a list of `CargoItems` belonging together and the associated `Booking`. A `ConsignmentItem` can be split across multiple containers by referencing multiple `CargoItems`."
+    CustomsClearance:
+      type: "object"
+      properties:
+        customsClearancePoint:
+          description: "Location information"
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        internalCode:
+          maxLength: 5
+          type: "string"
+          description: "Port code used in the Carrier’s internal system to match the location"
+          example: "FRMRS"
+        immediateTransportationEntry:
+          description: |
+            An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
+            that allows imported cargo to be moved from the first port of arrival in the U.S.
+            to another port or bonded facility without being physically cleared by CBP at the first port.
+          allOf:
+          - $ref: "#/components/schemas/ImmediateTransportationEntry"
+        customsImportDeclarationProcedure:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Instructions on the administrative processes for submitting import customs declarations to the local agency.
+        manifestReferenceNumber:
+          maxLength: 35
+          type: "string"
+          description: |
+            Manifest reference number for manifest declaration and customs clearance in Korea.
+          example: "a1234"
+        masterSequenceNumber:
+          maxLength: 35
+          type: "string"
+          description: |
+            A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of
+            a particular vessel. Customers use this Master Sequence Number (MSN) as a reference when declaring all related House B/Ls.
+          example: "x12345"
+      description: "Customs clearance information"
     CustomsReference:
       type: "object"
       properties:
@@ -1300,6 +1342,38 @@ components:
             - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`
           example: "DID"
       description: "Code-based identifier for a party. Includes the provider, code, and list name."
+    ImmediateTransportationEntry:
+      type: "object"
+      properties:
+        internalCode:
+          maxLength: 4
+          type: "string"
+          description: |
+            The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
+            assigned by U.S. Customs and Border Protection (CBP) to facilities in the U.S. where imported goods are held or processed,
+            such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
+            It tells CBP and freight systems where the cargo is physically located.
+          example: "a391"
+        itNumber:
+          maxLength: 100
+          type: "string"
+          description: |
+            The reference number of the bonded movement under a U.S. Customs and Border Protection (CBP) Immediate Transportation (IT) entry,
+            often assigned by the carrier or customs broker. It allows goods to be moved under bond from the Port of Discharge
+            to another inland port or bonded facility without paying duties at the first port. The IT number is used
+            for tracking the movement and verifying arrival at the inland port or bonded facility.
+          example: "V4914303071"
+        itDate:
+          type: "string"
+          description: |
+            The date the in-bond movement began, i.e., when the Immediate Transportation (IT) entry was filed and accepted
+            by U.S. Customs and Border Protection (CBP).
+          format: "date"
+          example: "2025-01-23"
+      description: |
+        An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
+        that allows imported cargo to be moved from the first port of arrival in the U.S.
+        to another port or bonded facility without being physically cleared by CBP at the first port.
     ImportLicense:
       type: "object"
       properties:

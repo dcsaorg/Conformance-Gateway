@@ -61,7 +61,8 @@ Specifies the role of the party in a given context. Possible values are:
   @Schema(
       description =
 """
-The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
+The address of the party to be displayed on the `Transport Document`.
+The displayed address may be used to match the address provided in the `Letter of Credit`.
 """)
   @ArraySchema(maxItems = 6)
   private List<DisplayedAddressLine> displayedAddress;
@@ -76,11 +77,11 @@ The address of the party to be displayed on the `Transport Document`. The displa
   private List<PartyContactDetail> partyContactDetails;
 
   @Schema(
-      description = "Document party reference",
+      description = "A reference linked to the document party.",
       example = "REF1234",
       maxLength = 35)
   private String reference;
 
-  @Schema(description = "A list of purchase order references")
+  @Schema(description = "A list of `Purchase Order Reference`s linked to the document party.")
   private List<PurchaseOrderReference> purchaseOrderReferences;
 }

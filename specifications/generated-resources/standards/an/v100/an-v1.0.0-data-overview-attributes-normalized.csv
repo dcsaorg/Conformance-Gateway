@@ -32,7 +32,10 @@ ArrivalNotice,"cargoMovementTypeAtDestination",string,,maxLength=3,,FCL,"Refers 
 - `FCL` (Full Container Load)
 - `LCL` (Less than Container Load)",
 ArrivalNotice,carrierClauses,"string list",,maxLength=20000,,,"Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.",
-ArrivalNotice,carrierCode,string,,maxLength=4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
+ArrivalNotice,carrierCode,string,,maxLength=4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
+[SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
+
+`carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
 ArrivalNotice,carrierCodeListProvider,string,,,,NMFTA,"The code list provider for the `carrierCode`. Possible values are:
 - `SMDG` (Ship Message Design Group)
 - `NMFTA` (National Motor Freight Traffic Association)",
@@ -41,7 +44,6 @@ ArrivalNotice,"carrierInformationForCargoRelease","PartyContactDetail list",,,,,
 ArrivalNotice,charges,"Charge list",,,,,"A list of `Charges`",
 ArrivalNotice,consignmentItems,"ConsignmentItem list",,,,,"A list of `ConsignmentItems`",
 ArrivalNotice,customsClearance,CustomsClearance,,,,,"Customs clearance information",
-ArrivalNotice,"customsImportDeclarationProcedure",string,,maxLength=1000,,"The tax must be declared...","Customs import declaration procedure",
 ArrivalNotice,"deliveryTypeAtDestination",string,,maxLength=3,,CY,"Indicates the type of service offered at `Destination`. The options are:
 
 - `CY` (Container yard (incl. rail ramp))
@@ -55,12 +57,12 @@ ArrivalNotice,label,string,,maxLength=1000,,Warning,"Free text used to indicate 
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 ArrivalNotice,payerCode,string,,maxLength=100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
 ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
-ArrivalNotice,pickupLocation,Location,,,,,"Pickup location",
+ArrivalNotice,pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
 ArrivalNotice,references,"Reference list",,,,,"A list of `References`",
 ArrivalNotice,returnInstructions,string,,maxLength=500,,"Please place the container...","Return instructions",
-ArrivalNotice,returnLocation,Location,,,,,"Return location",
+ArrivalNotice,returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
 ArrivalNotice,serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
-ArrivalNotice,termsAndConditions,string,,maxLength=50000,,"Any reference in...","Carrier terms and conditions of transport.",
+ArrivalNotice,termsAndConditions,string,,maxLength=50000,,,"Carrier terms and conditions for the Arrival Notice.",
 ArrivalNotice,transport,Transport,,,,,"Transport info",
 ArrivalNotice,"transportDocumentReference",string,yes,maxLength=20,,HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
 ArrivalNotice,"transportDocumentTypeCode",string,,,,SWB,"Specifies the type of the transport document
@@ -118,7 +120,9 @@ Charge,paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepai
 - `COL` (Collect)",
 Charge,quantity,number,,,,34.4,"The amount of unit for this charge item.",
 Charge,unitPrice,number,,,,3456.6,"The unit price of this charge item in the currency of the charge.",
-ConsignmentItem,HSCodes,"string list",,maxLength=10,,,"A list of `HS Codes` that apply to this `consignmentItem`",
+ConsignmentItem,HSCodes,"string list",,maxLength=10,,,"A list of `HS Codes` that apply to this `consignmentItem`.
+HS codes are used by customs to classify the product being shipped.
+The code must be at least 6 and at most 10 digits.",
 ConsignmentItem,cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",
 ConsignmentItem,carrierBookingReference,string,,maxLength=35,,ABC709951,"The associated booking number provided by the carrier for this `Consignment Item`.",
 ConsignmentItem,customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
@@ -189,7 +193,8 @@ DangerousGoods,subsidiaryRisk1,string,,maxLength=3,,1.2,"Any risk in addition to
 DangerousGoods,subsidiaryRisk2,string,,maxLength=3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,technicalName,string,,maxLength=250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
 DocumentParty,displayedAddress,"string list",,"maxItems=6
-maxLength=35",,,"The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.",
+maxLength=35",,,"The address of the party to be displayed on the `Transport Document`.
+The displayed address may be used to match the address provided in the `Letter of Credit`.",
 DocumentParty,identifyingCodes,"IdentifyingCode list",,,,,"List of codes identifying the party",
 DocumentParty,location,Location,,,,,"Party location",
 DocumentParty,partyContactDetails,"PartyContactDetail list",,,,,"Party contact details",
@@ -212,8 +217,8 @@ DocumentParty,partyFunction,string,,maxLength=3,,N1,"Specifies the role of the p
 - `MF` (Manufacturer)
 - `WH` (Warehouse Keeper)",
 DocumentParty,partyName,string,,maxLength=70,,"Acme Inc.","Party name",
-DocumentParty,purchaseOrderReferences,"string list",,maxLength=35,,,"A list of purchase order references",
-DocumentParty,reference,string,,maxLength=35,,REF1234,"Document party reference",
+DocumentParty,purchaseOrderReferences,"string list",,maxLength=35,,,"A list of `Purchase Order Reference`s linked to the document party.",
+DocumentParty,reference,string,,maxLength=35,,REF1234,"A reference linked to the document party.",
 DocumentParty,taxLegalReferences,"TaxLegalReference list",,,,,"List of tax or legal references relevant to the party",
 DocumentParty,typeOfPerson,string,,maxLength=50,,NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):
 - `NATURAL_PERSON` (A person that is an individual living human being)
@@ -398,13 +403,13 @@ TaxLegalReference,type,string,,maxLength=50,,PAN,"The reference type code as def
 TaxLegalReference,value,string,,maxLength=35,,AAAAA0000A,"The value of the `taxLegalReference`",
 Transport,departureDate,"string(date)",,,,2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
-Transport,dischargeLocation,Location,,,,,"The location where the equipment is discharged from the last mother vessel arriving at the destination country.",
+Transport,dischargeLocation,Location,,,,,"Location where the equipment is discharged from the mother vessel arriving at the destination country.",
 Transport,"estimatedGeneralOrderDateTime","string(date-time)",,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
 Transport,etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
 Transport,etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
 Transport,inlandArrivalDate,"string(date)",,,,2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
-Transport,loadLocation,Location,,,,,"The location where the equipment is loaded on the first mother vessel arriving at the destination country.",
+Transport,loadLocation,Location,,,,,"Location where the equipment is loaded on the mother vessel arriving at the destination country.",
 Transport,modeOfTransport,string,,maxLength=20,,VESSEL,"Code defined by DCSA to identify a mode of transport.
 
 - `VESSEL` - Vessel
@@ -413,12 +418,12 @@ Transport,modeOfTransport,string,,maxLength=20,,VESSEL,"Code defined by DCSA to 
 - `BARGE` - Barge
 - `MULTIMODAL` - Multimodal",
 Transport,onBoardDate,"string(date)",,,,2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
-Transport,placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent
-and where responsibility of the shipping line ceases.",
+Transport,placeOfDelivery,Location,,,,,"The location where the cargo is handed over to the consignee, or his agent,
+by the shipping line and where responsibility of the shipping line ceases.",
 Transport,placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
 This indicates the point at which the shipping line takes on responsibility for carriage of the container.",
-Transport,plannedArrivalDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the first mother vessel arriving at the destination country.",
-Transport,plannedDepartureDate,"string(date)",,,,2025-01-23,"The expected date of departure of the first mother vessel arriving at the destination country.",
+Transport,plannedArrivalDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the mother vessel arriving at the destination country.",
+Transport,plannedDepartureDate,"string(date)",,,,2025-01-23,"The expected date of departure of the  mother vessel arriving at the destination country.",
 Transport,portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 Transport,portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
 Transport,vesselVoyages,"VesselVoyage list",,maxItems=3,,,"Details of the POD, POL or DC vessel voyages",
@@ -444,7 +449,9 @@ VesselVoyage,typeCode,string,,,,POD,"Code representing the type of a vessel voya
 VesselVoyage,universalVoyageReference,string,,maxLength=5,,2301W,"Universal identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",
-VesselVoyage,vesselFlag,string,,maxLength=2,,NL,"Vessel flag",
+VesselVoyage,vesselFlag,string,,maxLength=2,,NL,"The flag of the nation whose laws the vessel is registered under.
+This is indicated by the 2 characters for the country code using
+[ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",
 VesselVoyage,vesselIMONumber,string,,maxLength=8,,12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
 The reference is the International Maritime Organisation (IMO) number,
 also sometimes known as the Lloyd's register code.",

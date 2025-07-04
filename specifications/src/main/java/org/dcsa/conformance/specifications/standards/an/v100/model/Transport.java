@@ -31,14 +31,14 @@ to the shipping line. This can refer either to the Place of Receipt or the Port 
   @Schema(
       description =
 """
-The expected date of departure of the first mother vessel arriving at the destination country.
+The expected date of departure of the  mother vessel arriving at the destination country.
 """)
   private FormattedDate plannedDepartureDate;
 
   @Schema(
       description =
 """
-The expected date of arrival of the first mother vessel arriving at the destination country.
+The expected date of arrival of the mother vessel arriving at the destination country.
 """)
   private FormattedDate plannedArrivalDate;
 
@@ -66,14 +66,14 @@ The estimated date and time when the shipment will be placed under General Order
   @Schema(
       description =
 """
-The location where the equipment is loaded on the first mother vessel arriving at the destination country.
+Location where the equipment is loaded on the mother vessel arriving at the destination country.
 """)
   private Location loadLocation;
 
   @Schema(
       description =
 """
-The location where the equipment is discharged from the last mother vessel arriving at the destination country.
+Location where the equipment is discharged from the mother vessel arriving at the destination country.
 """)
   private Location dischargeLocation;
 
@@ -102,8 +102,8 @@ This indicates the point at which the shipping line takes on responsibility for 
   @Schema(
       description =
 """
-The location where the cargo is handed over by the shipping line to the consignee or its agent
-and where responsibility of the shipping line ceases.
+The location where the cargo is handed over to the consignee, or his agent,
+by the shipping line and where responsibility of the shipping line ceases.
 """)
   private Location placeOfDelivery;
 

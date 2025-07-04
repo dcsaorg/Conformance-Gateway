@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.dcsa.conformance.specifications.generator.ClearSchemaConstraints;
 import org.dcsa.conformance.specifications.standards.dt.v100.types.DescriptionOfGoodsLine;
+import org.dcsa.conformance.specifications.standards.dt.v100.types.HSCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.types.ShippingMark;
 
 @Schema(
@@ -31,6 +32,17 @@ public class ConsignmentItem
 A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.
 """)
   protected List<DescriptionOfGoodsLine> descriptionOfGoods;
+
+  @Schema(
+      name = "HSCodes",
+      description =
+"""
+A list of `HS Codes` that apply to this `consignmentItem`.
+HS codes are used by customs to classify the product being shipped.
+The code must be at least 6 and at most 10 digits.
+""")
+  @ArraySchema(minItems = 1)
+  protected List<HSCode> hsCodes;
 
   @Schema(
       description =

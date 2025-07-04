@@ -29,7 +29,12 @@ for example "Warning", "Updated", "Second", "Third" etc.
 
   @Schema(
       description =
-          "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
+"""
+The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
+[SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
+
+`carrierCodeListProvider` defines which list the `carrierCode` is based upon.
+""",
       example = "MMCU",
       maxLength = 4)
   private String carrierCode;
@@ -55,10 +60,18 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
 """)
   private List<PartyContactDetail> carrierInformationForCargoRelease;
 
-  @Schema(description = "Pickup location")
+  @Schema(
+      description =
+"""
+The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.
+""")
   private Location pickupLocation;
 
-  @Schema(description = "Return location")
+  @Schema(
+      description =
+"""
+The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.
+""")
   private Location returnLocation;
 
   @Schema(
@@ -69,12 +82,6 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
 
   @Schema()
   private CustomsClearance customsClearance;
-
-  @Schema(
-      maxLength = 1000,
-      description = "Customs import declaration procedure",
-      example = "The tax must be declared...")
-  private String customsImportDeclarationProcedure;
 
   @Schema(
       maxLength = 500,
@@ -146,8 +153,7 @@ Reference number for agreement between shipper and carrier, which optionally inc
 
   @Schema(
       maxLength = 50000,
-      description = "Carrier terms and conditions of transport.",
-      example = "Any reference in...")
+      description = "Carrier terms and conditions for the Arrival Notice.")
   private String termsAndConditions;
 
   @Schema(

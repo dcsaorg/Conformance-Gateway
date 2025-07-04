@@ -38,6 +38,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetVolum
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ConsignmentItem;
+import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsClearance;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsReference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.DangerousGoods;
 import org.dcsa.conformance.specifications.standards.an.v100.model.DocumentParty;
@@ -50,6 +51,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.an.v100.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.IdentifyingCode;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ImmediateTransportationEntry;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ImportLicense;
 import org.dcsa.conformance.specifications.standards.an.v100.model.InnerPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Limits;
@@ -60,6 +62,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.NetVolume;
 import org.dcsa.conformance.specifications.standards.an.v100.model.NetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.PartyContactDetail;
+import org.dcsa.conformance.specifications.standards.an.v100.model.PaymentRemittance;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReferenceConsignmentItem;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Seal;
@@ -132,6 +135,7 @@ public class ANStandardSpecification extends StandardSpecification {
         Charge.class,
         ConsignmentItem.class,
         CountryCode.class,
+        CustomsClearance.class,
         CustomsReference.class,
         DangerousGoods.class,
         DocumentParty.class,
@@ -149,6 +153,7 @@ public class ANStandardSpecification extends StandardSpecification {
         GeoCoordinate.class,
         GrossWeight.class,
         IdentifyingCode.class,
+        ImmediateTransportationEntry.class,
         ImportLicense.class,
         InnerPackaging.class,
         IsoEquipmentCode.class,
@@ -161,6 +166,7 @@ public class ANStandardSpecification extends StandardSpecification {
         NetWeight.class,
         OuterPackaging.class,
         PartyContactDetail.class,
+        PaymentRemittance.class,
         Reference.class,
         ReferenceConsignmentItem.class,
         Seal.class,
@@ -196,7 +202,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/0a5f6e4013c71e491a487a3c1c4112ea0b594eec/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/a8f1d43ad75fc383410f4e52a465a7b12000b003/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 

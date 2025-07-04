@@ -5,8 +5,6 @@ import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
 
 @Schema(description = "Full content of an Arrival Notice document.")
 @Data
@@ -30,7 +28,12 @@ for example "Warning", "Updated", "Second", "Third" etc.
 
   @Schema(
       description =
-          "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
+"""
+The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
+[SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
+
+`carrierCodeListProvider` defines which list the `carrierCode` is based upon.
+""",
       example = "MMCU",
       maxLength = 4)
   private String carrierCode;
@@ -42,8 +45,7 @@ for example "Warning", "Updated", "Second", "Third" etc.
       - `SMDG` (Ship Message Design Group)
       - `NMFTA` (National Motor Freight Traffic Association)
       """,
-      example = "NMFTA",
-      allowableValues = {"SMDG", "NMFTA"})
+      example = "NMFTA")
   private String carrierCodeListProvider;
 
   @Schema(description = "The party to contact for any inquiries related to this Arrival Notice.")
@@ -56,10 +58,18 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
 """)
   private List<PartyContactDetail> carrierInformationForCargoRelease;
 
-  @Schema(description = "Pickup location")
+  @Schema(
+      description =
+"""
+The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.
+""")
   private Location pickupLocation;
 
-  @Schema(description = "Return location")
+  @Schema(
+      description =
+"""
+The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.
+""")
   private Location returnLocation;
 
   @Schema(
@@ -68,11 +78,8 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
       example = "Please place the container...")
   private String returnInstructions;
 
-  @Schema(
-      maxLength = 1000,
-      description = "Customs import declaration procedure",
-      example = "The tax must be declared...")
-  private String customsImportDeclarationProcedure;
+  @Schema()
+  private CustomsClearance customsClearance;
 
   @Schema(
       maxLength = 500,
@@ -98,8 +105,7 @@ e.g. additional required documents to prepare and present for shipment release -
   @Schema(
       description =
           "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)",
-      example = "SWB",
-      allowableValues = {"BOL", "SWB"})
+      example = "SWB")
   private String transportDocumentTypeCode;
 
   @Schema(
@@ -117,8 +123,7 @@ e.g. additional required documents to prepare and present for shipment release -
       - `CFS` (Container Freight Station)
       """,
       example = "CY",
-      maxLength = 3,
-      allowableValues = {"CY", "SD", "CFS"})
+      maxLength = 3)
   private String deliveryTypeAtDestination;
 
   @Schema(
@@ -144,8 +149,7 @@ Reference number for agreement between shipper and carrier, which optionally inc
 
   @Schema(
       maxLength = 50000,
-      description = "Carrier terms and conditions of transport.",
-      example = "Any reference in...")
+      description = "Carrier terms and conditions for the Arrival Notice.")
   private String termsAndConditions;
 
   @Schema(
@@ -173,6 +177,9 @@ Name identifying the entity responsible for freight payment.
 """,
       example = "Acme Inc.")
   private String payerCode;
+
+  @Schema()
+  private PaymentRemittance paymentRemittance;
 
   @Schema(description = "The equipments being used.")
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;

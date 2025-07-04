@@ -34,7 +34,13 @@ public class VesselVoyage {
       description = "Vessel name")
   private String vesselName;
 
-  @Schema(description = "Vessel flag")
+  @Schema(
+      description =
+"""
+The flag of the nation whose laws the vessel is registered under.
+This is indicated by the 2 characters for the country code using
+[ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).
+""")
   private CountryCode vesselFlag;
 
   @Schema() private VesselIMONumber vesselIMONumber;
@@ -58,4 +64,14 @@ Universal identifier of a voyage:
 * the export voyage (if `typeCode` is `POL`)
 """)
   private UniversalVoyageReference universalVoyageReference;
+
+  @Schema(
+    maxLength = 100,
+    example = "CRN1234",
+    description =
+"""
+A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
+It can be used for customs clearance purposes in specific countries (e.g. NL, UK).
+""")
+  private String callReferenceNumber;
 }

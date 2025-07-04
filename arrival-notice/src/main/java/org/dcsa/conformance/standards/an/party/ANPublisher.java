@@ -65,7 +65,7 @@ public class ANPublisher extends ConformanceParty {
             "/standards.an/messages/arrivalnotice-api-%s-post-notification-request.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
             Map.ofEntries());
-    syncCounterpartPost("/arrival-notices-notifications", jsonRequestBody);
+    syncCounterpartPost("/arrival-notice-notifications", jsonRequestBody);
   }
 
   @Override

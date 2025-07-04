@@ -48,7 +48,7 @@ public class ANSubscriber extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     ConformanceResponse response =
         request.createResponse(
-            204,
+            200,
             Map.of(API_VERSION, List.of(apiVersion)),
             new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 

@@ -1,13 +1,9 @@
 package org.dcsa.conformance.specifications.standards.an.v100.model;
 
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.PurchaseOrderReference;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
-import org.dcsa.conformance.specifications.standards.dt.v100.types.DisplayedAddressLine;
 
 @Data
 @Schema(description = "Document party")
@@ -43,29 +39,8 @@ Specifies the role of the party in a given context. Possible values are:
   @Schema(maxLength = 70, description = "Party name", example = "Acme Inc.")
   private String partyName;
 
-  @Schema(
-      description =
-          """
-      Can be one of the following values as per the Union Customs Code art. 5(4):
-      - `NATURAL_PERSON` (A person that is an individual living human being)
-      - `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
-      - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
-      """,
-      example = "NATURAL_PERSON",
-      maxLength = 50)
-  private String typeOfPerson;
-
-  @Schema(description = "Party location")
-  private Location location;
-
-  @Schema(
-      description =
-"""
-The address of the party to be displayed on the `Transport Document`.
-The displayed address may be used to match the address provided in the `Letter of Credit`.
-""")
-  @ArraySchema(maxItems = 6)
-  private List<DisplayedAddressLine> displayedAddress;
+  @Schema(description = "Party  address")
+  private Address address;
 
   @Schema(description = "List of codes identifying the party")
   private List<IdentifyingCode> identifyingCodes;

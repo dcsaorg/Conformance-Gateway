@@ -1071,30 +1071,10 @@ components:
           type: "string"
           description: "Party name"
           example: "Acme Inc."
-        typeOfPerson:
-          maxLength: 50
-          type: "string"
-          description: |
-            Can be one of the following values as per the Union Customs Code art. 5(4):
-            - `NATURAL_PERSON` (A person that is an individual living human being)
-            - `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
-            - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
-          example: "NATURAL_PERSON"
-        location:
-          description: "Party location"
+        address:
+          description: "Party  address"
           allOf:
-          - $ref: "#/components/schemas/Location"
-        displayedAddress:
-          maxItems: 6
-          type: "array"
-          description: |
-            The address of the party to be displayed on the `Transport Document`.
-            The displayed address may be used to match the address provided in the `Letter of Credit`.
-          items:
-            maxLength: 35
-            type: "string"
-            description: "A single address line"
-            example: "Strawinskylaan 4117"
+          - $ref: "#/components/schemas/Address"
         identifyingCodes:
           type: "array"
           description: "List of codes identifying the party"

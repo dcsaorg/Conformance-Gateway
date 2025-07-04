@@ -284,9 +284,15 @@ a particular vessel. Customers use this Master Sequence Number (MSN) as a refere
 - `SD` (Store Door)
 - `CFS` (Container Freight Station)",
 "ArrivalNotice / documentParties",documentParties,"DocumentParty list",,,,,"Document parties",
-"ArrivalNotice / documentParties / displayedAddress",displayedAddress,"string list",,"maxItems=6
-maxLength=35",,,"The address of the party to be displayed on the `Transport Document`.
-The displayed address may be used to match the address provided in the `Letter of Credit`.",
+"ArrivalNotice / documentParties / address",address,Address,,,,,"Party  address",
+"ArrivalNotice / documentParties / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"ArrivalNotice / documentParties / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"ArrivalNotice / documentParties / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / documentParties / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"ArrivalNotice / documentParties / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"ArrivalNotice / documentParties / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"ArrivalNotice / documentParties / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"ArrivalNotice / documentParties / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
 "ArrivalNotice / documentParties / identifyingCodes",identifyingCodes,"IdentifyingCode list",,,,,"List of codes identifying the party",
 "ArrivalNotice / documentParties / identifyingCodes / codeListName",codeListName,string,,maxLength=100,,DID,"The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
@@ -314,34 +320,6 @@ The displayed address may be used to match the address provided in the `Letter o
 - `DCSA` (Digital Container Shipping Association)
 - `ZZZ` (Mutually defined)",
 "ArrivalNotice / documentParties / identifyingCodes / partyCode",partyCode,string,,maxLength=150,,MSK,"Code to identify the party as provided by the code list provider",
-"ArrivalNotice / documentParties / location",location,Location,,,,,"Party location",
-"ArrivalNotice / documentParties / location / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
-
-- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
-
-More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-"ArrivalNotice / documentParties / location / address",address,Address,,,,,"Location address",
-"ArrivalNotice / documentParties / location / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
-"ArrivalNotice / documentParties / location / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
-"ArrivalNotice / documentParties / location / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-"ArrivalNotice / documentParties / location / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
-"ArrivalNotice / documentParties / location / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
-"ArrivalNotice / documentParties / location / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
-"ArrivalNotice / documentParties / location / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
-"ArrivalNotice / documentParties / location / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / documentParties / location / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / documentParties / location / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / documentParties / location / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
-"ArrivalNotice / documentParties / location / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
-"ArrivalNotice / documentParties / location / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
-"ArrivalNotice / documentParties / location / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / documentParties / location / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / documentParties / partyContactDetails",partyContactDetails,"PartyContactDetail list",,,,,"Party contact details",
 "ArrivalNotice / documentParties / partyContactDetails / email",email,string,,maxLength=100,,info@dcsa.org,"`E-mail` address to be used",
 "ArrivalNotice / documentParties / partyContactDetails / name",name,string,,maxLength=35,,Henrik,"Name of the contact",
@@ -371,10 +349,6 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / documentParties / taxLegalReferences / countryCode",countryCode,string,,maxLength=2,,IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 "ArrivalNotice / documentParties / taxLegalReferences / type",type,string,,maxLength=50,,PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
 "ArrivalNotice / documentParties / taxLegalReferences / value",value,string,,maxLength=35,,AAAAA0000A,"The value of the `taxLegalReference`",
-"ArrivalNotice / documentParties / typeOfPerson",typeOfPerson,string,,maxLength=50,,NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):
-- `NATURAL_PERSON` (A person that is an individual living human being)
-- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
-- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)",
 "ArrivalNotice / freeTimes",freeTimes,"FreeTime list",,,,,"List of free time conditions applicable to this shipment at destination",
 "ArrivalNotice / freeTimes / calculationBasis",calculationBasis,string,,maxLength=1000,,"Calculated as...","Description of the conditions under which this free time item applies.
 It can include references to the carrier website or individual charges as per service contract/agreement.",

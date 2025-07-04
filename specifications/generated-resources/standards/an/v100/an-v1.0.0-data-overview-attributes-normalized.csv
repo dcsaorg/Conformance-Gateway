@@ -197,11 +197,8 @@ DangerousGoods,segregationGroups,"string list",,maxLength=2,,,"List of the segre
 DangerousGoods,subsidiaryRisk1,string,,maxLength=3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,subsidiaryRisk2,string,,maxLength=3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,technicalName,string,,maxLength=250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
-DocumentParty,displayedAddress,"string list",,"maxItems=6
-maxLength=35",,,"The address of the party to be displayed on the `Transport Document`.
-The displayed address may be used to match the address provided in the `Letter of Credit`.",
+DocumentParty,address,Address,,,,,"Party  address",
 DocumentParty,identifyingCodes,"IdentifyingCode list",,,,,"List of codes identifying the party",
-DocumentParty,location,Location,,,,,"Party location",
 DocumentParty,partyContactDetails,"PartyContactDetail list",,,,,"Party contact details",
 DocumentParty,partyFunction,string,,maxLength=3,,N1,"Specifies the role of the party in a given context. Possible values are:
 
@@ -225,10 +222,6 @@ DocumentParty,partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 DocumentParty,purchaseOrderReferences,"string list",,maxLength=35,,,"A list of `Purchase Order Reference`s linked to the document party.",
 DocumentParty,reference,string,,maxLength=35,,REF1234,"A reference linked to the document party.",
 DocumentParty,taxLegalReferences,"TaxLegalReference list",,,,,"List of tax or legal references relevant to the party",
-DocumentParty,typeOfPerson,string,,maxLength=50,,NATURAL_PERSON,"Can be one of the following values as per the Union Customs Code art. 5(4):
-- `NATURAL_PERSON` (A person that is an individual living human being)
-- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
-- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)",
 EmbeddedDocument,content,string,,,,RXhhbXBsZSBBTiBjb250ZW50,"Base64 representation of the binary document content",
 EmbeddedDocument,contentType,string,,,,application/msword,"Content type of document",
 EmbeddedDocument,name,string,,,,"20250123 AN XYZ01234.docx","Document name",

@@ -5,7 +5,6 @@ import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
 
 @Schema(description = "Full content of an Arrival Notice document.")
 @Data

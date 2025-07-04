@@ -1,31 +1,31 @@
 {
   "NANumber": "9037",
-  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+  "transportDocumentTypeCode": "SWB",
   "isElectronic": true,
   "isToOrder": false,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+    "UNLocationCode": "USNYC"
   },
   "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
-      "name": "DCSA test person",
-      "email": "no-reply@dcsa.example.org"
+      "name": "DCSA Test Person",
+      "email": "no-reply@dcsa.org"
     }
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
+      "carrierBookingReference": "DGBOOKING1234567890123456789012",
+      "descriptionOfGoods": ["Lithium Ion Batteries - UN3480"],
       "HSCodes": [
-        "CONSIGNMENT_ITEM_HS_CODE"
+        "85076000"
       ],
-      "commoditySubReference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "commoditySubReference": "LITHIUM-DG-001",
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "equipmentReference": "MAEU1234567",
           "cargoGrossWeight": {
             "value": 5000,
             "unit": "KGM"
@@ -37,7 +37,7 @@
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": false,
-      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "equipmentReference": "MAEU1234567",
       "seals": [
         {
           "number": "NSL13386"
@@ -50,8 +50,8 @@
       "partyName": "DCSA CTK",
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ],
       "address": {
@@ -62,7 +62,7 @@
     },
     "issueTo": {
       "partyName": "DCSA CTK",
-      "identifyingCodes" : [
+      "identifyingCodes": [
         {
           "codeListProvider": "W3C",
           "codeListName": "LCL",
@@ -71,10 +71,24 @@
       ],
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ]
+    },
+    "consignee": {
+      "partyName": "BatteryTech Inc.",
+      "partyContactDetails": [
+        {
+          "name": "Emily Carter",
+          "email": "e.carter@batterytech.com"
+        }
+      ],
+      "address": {
+        "street": "5000 Harbor Ave",
+        "city": "New York",
+        "countryCode": "US"
+      }
     }
   }
 }

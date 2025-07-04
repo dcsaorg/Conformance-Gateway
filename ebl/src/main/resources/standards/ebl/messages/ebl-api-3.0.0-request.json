@@ -1,5 +1,5 @@
 {
-  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+  "transportDocumentTypeCode": "SWB",
   "isElectronic": true,
   "isToOrder": false,
   "numberOfCopiesWithCharges": 0,
@@ -7,39 +7,43 @@
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+    "UNLocationCode": "BRSSZ"
   },
   "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
-      "name": "DCSA test person",
-      "email": "no-reply@dcsa.example.org"
+      "name": "DCSA Test Person",
+      "email": "no-reply@dcsa.org"
     }
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
+      "carrierBookingReference": "BOOKREQ202507041234567890123456",
+      "descriptionOfGoods": [
+        "Refined Soybean Oil"
+      ],
       "nationalCommodityCodes": [
         {
           "type": "NCM",
           "countryCode": "BR",
-          "values": ["1515"]
+          "values": [
+            "15152100"
+          ]
         }
       ],
       "HSCodes": [
-        "CONSIGNMENT_ITEM_HS_CODE"
+        "15152100"
       ],
-      "commoditySubReference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "commoditySubReference": "SOY2025REF-BR",
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "equipmentReference": "MSCU9988776",
           "cargoGrossWeight": {
             "value": 12000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Steel Drums",
             "numberOfPackages": 400
           }
         }
@@ -49,9 +53,9 @@
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": false,
-      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
-      "shippingMarks":  [
-        "Made in some Country",
+      "equipmentReference": "MSCU9988776",
+      "shippingMarks": [
+        "Made in Brazil",
         "こんにちはこんにちはこんにちはこんにちはこんにちはこんにちはこんにちは"
       ],
       "seals": [
@@ -76,46 +80,50 @@
       "documentParties": {
         "shipper": {
           "partyName": "DCSA CTK",
-         "typeOfPerson": "NATURAL_PERSON"
+          "typeOfPerson": "NATURAL_PERSON"
         },
         "notifyParty": {
           "partyName": "DCSA CTK",
           "typeOfPerson": "NATURAL_PERSON",
           "partyContactDetails": [
             {
-              "name": "DCSA test person",
-              "email": "tets@test.com"
+              "name": "DCSA Test Person",
+              "email": "test@test.com"
             }
           ]
         }
       },
       "placeOfAcceptance": {
-        "locationName": "NLRTM",
+        "locationName": "Rotterdam",
         "countryCode": "NL"
       },
       "placeOfFinalDelivery": {
-        "locationName": "NLRTM",
+        "locationName": "Hamburg",
         "countryCode": "DE"
       },
       "isCargoDeliveredInICS2Zone": false,
-      "routingOfConsignmentCountries": ["NL", "DE"],
+      "routingOfConsignmentCountries": [
+        "NL",
+        "DE"
+      ],
       "consignmentItems": [
         {
-          "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-          "descriptionOfGoods": "blue shoes size 47",
-          "nationalCommodityCode":
-            {
-              "type": "NCM",
-              "countryCode": "BR",
-              "values": ["1515"]
-            },
+          "carrierBookingReference": "BOOKREQ-HBOL-1234567890123456",
+          "descriptionOfGoods": "Blue Shoes Size 47",
+          "nationalCommodityCode": {
+            "type": "NCM",
+            "countryCode": "BR",
+            "values": [
+              "64041900"
+            ]
+          },
           "HSCodes": [
-            "CONSIGNMENT_ITEM_HS_CODE"
+            "64041900"
           ],
-          "commoditySubReference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+          "commoditySubReference": "FOOT-BR-B47",
           "cargoItems": [
             {
-              "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+              "equipmentReference": "MSCU9988776",
               "cargoGrossWeight": {
                 "value": 12000,
                 "unit": "KGM"
@@ -131,9 +139,9 @@
       "utilizedTransportEquipments": [
         {
           "isShipperOwned": false,
-          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "equipmentReference": "MSCU9988776",
           "ISOEquipmentCode": "42G0",
-          "emptyIndicatorCode":  "EMPTY"
+          "emptyIndicatorCode": "EMPTY"
         }
       ]
     }
@@ -150,8 +158,8 @@
       ],
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ]
     },
@@ -166,11 +174,27 @@
       ],
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ]
+    },
+    "consignee": {
+      "partyName": "Global Retail Imports",
+      "partyContactDetails": [
+        {
+          "name": "Anna Müller",
+          "email": "anna.muller@grimports.de"
+        }
+      ],
+      "address": {
+        "street": "Neuer Wall 10",
+        "city": "Hamburg",
+        "countryCode": "DE"
+      }
     }
   },
-"requestedCarrierClauses": ["CARGO_CARGOSPECIFICS"]
+  "requestedCarrierClauses": [
+    "CARGO_CARGOSPECIFICS"
+  ]
 }

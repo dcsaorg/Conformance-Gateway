@@ -1,42 +1,46 @@
 {
-  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+  "transportDocumentTypeCode": "SWB",
   "isElectronic": true,
   "isToOrder": false,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+    "UNLocationCode": "BRSSZ"
   },
   "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
-      "name": "DCSA test person",
-      "email": "no-reply@dcsa.example.org"
+      "name": "DCSA Test Person",
+      "email": "no-reply@dcsa.org"
     }
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
+      "carrierBookingReference": "BOOKING202507041234567890123456",
+      "descriptionOfGoods": [
+        "Refined Soybean Oil"
+      ],
       "nationalCommodityCodes": [
         {
           "type": "NCM",
           "countryCode": "BR",
-          "values": ["1515"]
+          "values": [
+            "15152100"
+          ]
         }
       ],
       "HSCodes": [
-        "CONSIGNMENT_ITEM_HS_CODE"
+        "15152100"
       ],
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "equipmentReference": "MSCU9988776",
           "cargoGrossWeight": {
             "value": 12000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Steel Drums",
             "numberOfPackages": 400
           }
         }
@@ -46,7 +50,7 @@
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": false,
-      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "equipmentReference": "MSCU9988776",
       "seals": [
         {
           "number": "NSL13386"
@@ -59,8 +63,8 @@
       "partyName": "DCSA CTK",
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ],
       "identifyingCodes": [
@@ -73,7 +77,7 @@
     },
     "issueTo": {
       "partyName": "DCSA CTK",
-      "identifyingCodes" : [
+      "identifyingCodes": [
         {
           "codeListProvider": "W3C",
           "codeListName": "LCL",
@@ -82,10 +86,24 @@
       ],
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ]
+    },
+    "consignee": {
+      "partyName": "BioExport Ltd.",
+      "partyContactDetails": [
+        {
+          "name": "Carlos Oliveira",
+          "email": "c.oliveira@bioexport.com"
+        }
+      ],
+      "address": {
+        "street": "Rua das Alfândegas, 500",
+        "city": "Santos",
+        "countryCode": "BR"
+      }
     }
   }
 }

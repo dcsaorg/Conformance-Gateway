@@ -1,79 +1,83 @@
 {
-  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+  "transportDocumentTypeCode": "SWB",
   "isElectronic": true,
   "isToOrder": false,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+    "UNLocationCode": "NLRTM"
   },
   "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
-      "name": "DCSA test person",
-      "email": "no-reply@dcsa.example.org"
+      "name": "DCSA Test Person",
+      "email": "no-reply@dcsa.org"
     }
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
-      "HSCodes": [
-        "CONSIGNMENT_ITEM_HS_CODE"
+      "carrierBookingReference": "BOOKREF1234567890123456789012345",
+      "descriptionOfGoods": [
+        "Automotive Parts"
       ],
-      "commoditySubReference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "HSCodes": [
+        "87089900"
+      ],
+      "commoditySubReference": "AUTO-1234",
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "equipmentReference": "ABCU1234567",
           "cargoGrossWeight": {
             "value": 5000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Cardboard Boxes",
             "numberOfPackages": 100
           }
         },
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+          "equipmentReference": "XYZU9876543",
           "cargoGrossWeight": {
             "value": 5000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Pallets",
             "numberOfPackages": 100
           }
         }
       ]
     },
     {
-      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_2_PLACEHOLDER"],
-      "HSCodes": [
-        "CONSIGNMENT_ITEM_2_HS_CODE"
+      "carrierBookingReference": "BOOKREF2345678901234567890123456",
+      "descriptionOfGoods": [
+        "Electronic Components"
       ],
-      "commoditySubReference": "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
+      "HSCodes": [
+        "85423100"
+      ],
+      "commoditySubReference": "ELEC-5678",
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "equipmentReference": "ABCU1234567",
           "cargoGrossWeight": {
             "value": 5000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Wooden Crates",
             "numberOfPackages": 100
           }
         },
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+          "equipmentReference": "XYZU9876543",
           "cargoGrossWeight": {
             "value": 5000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Steel Drums",
             "numberOfPackages": 200
           }
         }
@@ -83,7 +87,7 @@
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": false,
-      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "equipmentReference": "ABCU1234567",
       "seals": [
         {
           "number": "NSL13386"
@@ -92,7 +96,7 @@
     },
     {
       "isShipperOwned": false,
-      "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+      "equipmentReference": "XYZU9876543",
       "seals": [
         {
           "number": "NSL13387"
@@ -105,8 +109,8 @@
       "partyName": "DCSA CTK",
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ],
       "address": {
@@ -117,7 +121,7 @@
     },
     "issueTo": {
       "partyName": "DCSA CTK",
-      "identifyingCodes" : [
+      "identifyingCodes": [
         {
           "codeListProvider": "W3C",
           "codeListName": "LCL",
@@ -126,10 +130,24 @@
       ],
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ]
+    },
+    "consignee": {
+      "partyName": "Tech Solutions GmbH",
+      "partyContactDetails": [
+        {
+          "name": "Hans Meier",
+          "email": "contact@tech-solutions.de"
+        }
+      ],
+      "address": {
+        "street": "Berliner Strasse 10",
+        "city": "Hamburg",
+        "countryCode": "DE"
+      }
     }
   }
 }

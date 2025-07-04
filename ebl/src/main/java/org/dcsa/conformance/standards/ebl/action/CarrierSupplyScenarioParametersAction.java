@@ -70,7 +70,7 @@ public class CarrierSupplyScenarioParametersAction extends EblAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(null, "prompt-carrier-supply-csp.md");
+    return getMarkdownHumanReadablePrompt(Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
   }
 
   @Override

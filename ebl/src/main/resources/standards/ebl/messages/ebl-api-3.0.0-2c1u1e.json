@@ -1,57 +1,61 @@
 {
-  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+  "transportDocumentTypeCode": "SWB",
   "isElectronic": true,
   "isToOrder": false,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+    "UNLocationCode": "SGSIN"
   },
   "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
-      "name": "DCSA test person",
-      "email": "no-reply@dcsa.example.org"
+      "name": "DCSA Test Person",
+      "email": "info@dcsa.org"
     }
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
-      "HSCodes": [
-        "CONSIGNMENT_ITEM_HS_CODE"
+      "carrierBookingReference": "DCSA12345678901234567890123456789012345",
+      "descriptionOfGoods": [
+        "Electronics - Consumer Devices"
       ],
-      "commoditySubReference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "HSCodes": [
+        "85171200"
+      ],
+      "commoditySubReference": "ELEC-2025A",
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "equipmentReference": "MSCU1234567",
           "cargoGrossWeight": {
             "value": 15000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Cartons",
             "numberOfPackages": 600
           }
         }
       ]
     },
     {
-      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_2_PLACEHOLDER"],
-      "HSCodes": [
-        "CONSIGNMENT_ITEM_2_HS_CODE"
+      "carrierBookingReference": "DCSA98765432101234567890123456789012345",
+      "descriptionOfGoods": [
+        "Apparel - Summer Collection"
       ],
-      "commoditySubReference": "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
+      "HSCodes": [
+        "62034200"
+      ],
+      "commoditySubReference": "APRL-2025B",
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+          "equipmentReference": "MSCU7654321",
           "cargoGrossWeight": {
             "value": 20000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Bales",
             "numberOfPackages": 400
           }
         }
@@ -61,7 +65,7 @@
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": false,
-      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "equipmentReference": "MSCU1234567",
       "seals": [
         {
           "number": "NSL13386"
@@ -70,7 +74,7 @@
     },
     {
       "isShipperOwned": false,
-      "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+      "equipmentReference": "MSCU7654321",
       "seals": [
         {
           "number": "NSL13387"
@@ -80,22 +84,22 @@
   ],
   "documentParties": {
     "shipper": {
-      "partyName": "DCSA CTK",
+      "partyName": "DCSA Test Shipper",
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "info@dcsa.org"
         }
       ],
       "address": {
-        "street": "Ruijggoordweg",
+        "street": "Ruijggoordweg 80",
         "city": "Amsterdam",
         "countryCode": "NL"
       }
     },
     "issueTo": {
-      "partyName": "DCSA CTK",
-      "identifyingCodes" : [
+      "partyName": "DCSA Partner Consignee",
+      "identifyingCodes": [
         {
           "codeListProvider": "W3C",
           "codeListName": "LCL",
@@ -104,10 +108,24 @@
       ],
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Partner",
+          "email": "partner@dcsa.org"
         }
       ]
+    },
+    "consignee": {
+      "partyName": "DCSA Final Consignee",
+      "partyContactDetails": [
+        {
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
+        }
+      ],
+      "address": {
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
+      }
     }
   }
 }

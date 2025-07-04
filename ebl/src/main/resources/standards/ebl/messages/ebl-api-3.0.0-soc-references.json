@@ -1,36 +1,38 @@
 {
-  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+  "transportDocumentTypeCode": "SWB",
   "isElectronic": true,
   "isToOrder": false,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+    "UNLocationCode": "SNDAK"
   },
   "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
-      "name": "DCSA test person",
-      "email": "no-reply@dcsa.example.org"
+      "name": "DCSA Test Person",
+      "email": "no-reply@dcsa.org"
     }
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
-      "HSCodes": [
-        "CONSIGNMENT_ITEM_HS_CODE"
+      "carrierBookingReference": "SOCBOOKING202507041234567890123456",
+      "descriptionOfGoods": [
+        "Agricultural Equipment"
       ],
-      "commoditySubReference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "HSCodes": [
+        "84328000"
+      ],
+      "commoditySubReference": "AG-EQ-2025",
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "equipmentReference": "DCSU1234567",
           "cargoGrossWeight": {
             "value": 12000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Wooden Crates",
             "numberOfPackages": 400
           }
         }
@@ -41,14 +43,16 @@
     {
       "type": "CTN",
       "countryCode": "SN",
-      "values": ["12345"]
+      "values": [
+        "12345"
+      ]
     }
   ],
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": true,
       "equipment": {
-        "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+        "equipmentReference": "DCSU1234567",
         "ISOEquipmentCode": "45G1",
         "tareWeight": {
           "value": 4030,
@@ -68,8 +72,8 @@
       "reference": "SI-REF-1234",
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ],
       "address": {
@@ -80,7 +84,7 @@
     },
     "issueTo": {
       "partyName": "DCSA CTK",
-      "identifyingCodes" : [
+      "identifyingCodes": [
         {
           "codeListProvider": "W3C",
           "codeListName": "LCL",
@@ -89,10 +93,24 @@
       ],
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ]
+    },
+    "consignee": {
+      "partyName": "FarmCo West Africa",
+      "partyContactDetails": [
+        {
+          "name": "Moussa Ndiaye",
+          "email": "m.ndiaye@farmco.sn"
+        }
+      ],
+      "address": {
+        "street": "Route de Rufisque, KM 9",
+        "city": "Dakar",
+        "countryCode": "SN"
+      }
     }
   }
 }

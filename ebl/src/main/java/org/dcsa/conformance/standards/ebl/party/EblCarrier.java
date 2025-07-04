@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.ebl.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SI_ARRAY_ORDER_DEFINITIONS;
-import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenarioType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -189,13 +188,10 @@ public class EblCarrier extends ConformanceParty {
     String documentReference;
     CarrierShippingInstructions si;
     if (skipSI) {
-      var csp = CarrierScenarioParameters.fromJson(actionPrompt.required("csp"));
-      var jsonRequestBody = siFromScenarioType(
-        scenarioType,
-        csp,
-        apiVersion
-      );
-      si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(jsonRequestBody, apiVersion);
+      var jsonRequestBody = actionPrompt.get("eblPayload");
+      si =
+          CarrierShippingInstructions.initializeFromShippingInstructionsRequest(
+              (ObjectNode) jsonRequestBody, apiVersion);
       documentReference = si.getShippingInstructionsReference();
     } else {
       documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();

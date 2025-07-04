@@ -1,5 +1,22 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250704-alpha
+
+The GET endpoints now accept multiple transport document references and equipment references, both with the "explode: false" correctly set in order to allow comma-separated values. (SD-2151, SD-2276)
+
+A new `CustomsClearance` object was introduced in the `ArrivalNotice`. (SD-2187)
+
+The descriptions of several attributes were updated. (SD-2207)
+
+The `ArrivalNotice` now includes a `PaymentRemittance` object. The `VesselVoyage` now includes a `callReferenceNumber` attribute. In the `Reference` object, the `type` now also allows the value `CA (Carrier’s Reference)`. (SD-2208)
+
+The `Charges` object now contains a `carrierRateOfExchange` attribute. (SD-2240)
+
+The `enum` constraint was removed from four attributes where it still mistakenly appeared. (SD-2247)
+
+The `DocumentParty` object no longer contains the `displayedAddresses` and `typeOfPerson`, and instead of the `location` it now only contains an `address`. (SD-2248)
+
+
 ## Snapshot v1.0.0-20250606-alpha
 
 Started the Alpha Stage with a blank slate by removing all constraints except for the maxLength of strings and the maxItems of arrays.

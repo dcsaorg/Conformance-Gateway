@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+
+import io.swagger.v3.oas.models.parameters.Parameter;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -39,11 +41,6 @@ public enum SpecificationToolkit {
 
   public static List<Schema<?>> parameterizeRawSchemaList(List<Schema> rawSchemaList) {
     return (ArrayList) new ArrayList<>(rawSchemaList);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static Schema<List<String>> stringListQueryParameterSchema() {
-    return new Schema<List<String>>().type("array").items(new Schema<String>().type("string"));
   }
 
   public static List<SchemaConstraint> getClassConstraints(String className) {
@@ -116,6 +113,7 @@ public enum SpecificationToolkit {
         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
         .setDefaultPropertyInclusion(JsonInclude.Include.NON_DEFAULT)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .addMixIn(Schema.class, SchemaMixin.class);
+        .addMixIn(Schema.class, SchemaMixin.class)
+        .addMixIn(Parameter.class, ParameterMixin.class);
   }
 }

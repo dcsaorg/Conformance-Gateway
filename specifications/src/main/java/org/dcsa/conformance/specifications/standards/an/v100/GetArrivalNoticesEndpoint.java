@@ -1,32 +1,34 @@
 package org.dcsa.conformance.specifications.standards.an.v100;
 
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
-import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
-
 import java.util.List;
 import java.util.Map;
+import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 
 public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint {
 
-  private final Parameter transportDocumentReference =
+  private final Parameter transportDocumentReferences =
       new Parameter()
           .in("query")
-          .name("transportDocumentReference")
+          .name("transportDocumentReferences")
+          .schema(new ArraySchema().items(new StringSchema()))
+          .explode(Boolean.FALSE)
           .description(
-              "Reference of the transport document for which to return the associated arrival notices")
-          .example("TDR0123456")
-          .schema(new Schema<String>().type("string"));
+              "Reference(s) of the transport document(s) for which to return the associated arrival notices")
+          .example("TDR0123456,TDR1234567");
 
-  private final Parameter equipmentReference =
+  private final Parameter equipmentReferences =
       new Parameter()
           .in("query")
-          .name("equipmentReference")
+          .name("equipmentReferences")
+          .schema(new ArraySchema().items(new StringSchema()))
+          .explode(Boolean.FALSE)
           .description(
               "Reference(s) of the equipment for which to return the associated arrival notices")
-          .example("APZU4812090,APZU4812091")
-          .schema(SpecificationToolkit.stringListQueryParameterSchema());
+          .example("APZU4812090,APZU4812091");
 
   private final Parameter portOfDischarge =
       new Parameter()
@@ -123,8 +125,8 @@ and can be used in combination with any such filter.
   @Override
   public List<Parameter> getQueryParameters() {
     return List.of(
-        transportDocumentReference,
-        equipmentReference,
+        transportDocumentReferences,
+        equipmentReferences,
         portOfDischarge,
         vesselIMONumber,
         vesselName,
@@ -144,15 +146,15 @@ and can be used in combination with any such filter.
             Boolean.TRUE,
             List.of(
                 // TDR only
-                List.of(transportDocumentReference))),
+                List.of(transportDocumentReferences))),
         Map.entry(
             Boolean.FALSE,
             List.of(
                 // EQR
-                List.of(transportDocumentReference, equipmentReference),
-                List.of(equipmentReference),
+                List.of(transportDocumentReferences, equipmentReferences),
+                List.of(equipmentReferences),
                 List.of(
-                    minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, equipmentReference),
+                    minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, equipmentReferences),
                 // POD
                 List.of(minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, portOfDischarge),
                 // vessel IMO + voyage number (+ service)

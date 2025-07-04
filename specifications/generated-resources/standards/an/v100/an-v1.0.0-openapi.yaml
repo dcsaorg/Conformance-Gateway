@@ -29,15 +29,19 @@ paths:
       summary: "Retrieves a list of arrival notices"
       operationId: "get-arrival-notices"
       parameters:
-      - name: "transportDocumentReference"
+      - name: "transportDocumentReferences"
         in: "query"
-        description: "Reference of the transport document for which to return the associated arrival notices"
+        description: "Reference(s) of the transport document(s) for which to return the associated arrival notices"
+        explode: false
         schema:
-          type: "string"
-        example: "TDR0123456"
-      - name: "equipmentReference"
+          type: "array"
+          items:
+            type: "string"
+        example: "TDR0123456,TDR1234567"
+      - name: "equipmentReferences"
         in: "query"
         description: "Reference(s) of the equipment for which to return the associated arrival notices"
+        explode: false
         schema:
           type: "array"
           items:

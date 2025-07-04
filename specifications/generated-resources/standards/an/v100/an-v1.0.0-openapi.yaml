@@ -702,6 +702,16 @@ components:
           description: "The amount of unit for this charge item."
           format: "float"
           example: 34.4
+        carrierRateOfExchange:
+          maxLength: 50
+          type: "string"
+          description: |
+            The quotation of the relative value of a currency unit against the unit of another currency
+            in the foreign exchange market applicable to this charge item.
+            The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+            If not provided, the customer should refer to the ROE available on the carrier website
+            or the ROE defined by the competent customs authority, as per local practice.
+          example: "1.00 Euro = 1.17801 US Dollars"
       description: "Addresses the monetary value of freight and other service charges for a `Booking`."
     ConsignmentItem:
       type: "object"

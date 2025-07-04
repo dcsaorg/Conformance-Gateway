@@ -111,6 +111,11 @@ CargoNetWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in
 - `LBR` (Pounds)",
 CargoNetWeight,value,number,,,,2400,"The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
 Charge,calculationBasis,string,,maxLength=50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
+Charge,carrierRateOfExchange,string,,maxLength=50,,"1.00 Euro = 1.17801 US Dollars","The quotation of the relative value of a currency unit against the unit of another currency
+in the foreign exchange market applicable to this charge item.
+The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+If not provided, the customer should refer to the ROE available on the carrier website
+or the ROE defined by the competent customs authority, as per local practice.",
 Charge,chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
 Charge,currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 Charge,currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",

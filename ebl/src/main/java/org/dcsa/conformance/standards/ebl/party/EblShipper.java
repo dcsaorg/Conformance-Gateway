@@ -71,7 +71,7 @@ public class EblShipper extends ConformanceParty {
   private void sendShippingInstructionsRequest(JsonNode actionPrompt) {
     log.info("Shipper.sendShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
-    JsonNode siPayload = actionPrompt.get("eblPayload");
+    JsonNode siPayload = actionPrompt.get(CarrierSupplyPayloadAction.CARRIER_PAYLOAD);
 
     ConformanceResponse conformanceResponse = syncCounterpartPost("/v3/shipping-instructions", siPayload);
 

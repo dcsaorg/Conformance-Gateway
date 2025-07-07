@@ -57,6 +57,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       }
     }
     getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
+    getCarrierPayloadConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }
 
   @Override

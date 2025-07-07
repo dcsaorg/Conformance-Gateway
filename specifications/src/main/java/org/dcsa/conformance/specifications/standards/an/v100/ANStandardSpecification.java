@@ -202,7 +202,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/a8f1d43ad75fc383410f4e52a465a7b12000b003/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/e56f6fbd1dab7e31a9c9cc8f895028b93203ffdc/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 

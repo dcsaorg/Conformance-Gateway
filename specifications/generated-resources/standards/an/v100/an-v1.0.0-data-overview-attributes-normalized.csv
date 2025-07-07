@@ -295,7 +295,7 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `DCSA` (Digital Container Shipping Association)
 - `ZZZ` (Mutually defined)",
 IdentifyingCode,partyCode,string,,maxLength=150,,MSK,"Code to identify the party as provided by the code list provider",
-"ImmediateTransportationEntry",internalCode,string,,maxLength=4,,a391,"The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
+"ImmediateTransportationEntry",firmsCode,string,,maxLength=4,,a391,"The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
 assigned by U.S. Customs and Border Protection (CBP) to facilities in the U.S. where imported goods are held or processed,
 such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
 It tells CBP and freight systems where the cargo is physically located.",

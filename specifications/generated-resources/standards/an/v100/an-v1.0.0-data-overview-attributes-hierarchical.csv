@@ -264,7 +264,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / customsClearance / immediateTransportationEntry","immediateTransportationEntry","ImmediateTransportationEntry",,,,,"An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
 that allows imported cargo to be moved from the first port of arrival in the U.S.
 to another port or bonded facility without being physically cleared by CBP at the first port.",
-"ArrivalNotice / customsClearance / immediateTransportationEntry / internalCode",internalCode,string,,maxLength=4,,a391,"The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
+"ArrivalNotice / customsClearance / immediateTransportationEntry / firmsCode",firmsCode,string,,maxLength=4,,a391,"The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
 assigned by U.S. Customs and Border Protection (CBP) to facilities in the U.S. where imported goods are held or processed,
 such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
 It tells CBP and freight systems where the cargo is physically located.",

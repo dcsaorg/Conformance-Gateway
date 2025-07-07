@@ -24,7 +24,7 @@ assigned by U.S. Customs and Border Protection (CBP) to facilities in the U.S. w
 such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
 It tells CBP and freight systems where the cargo is physically located.
 """)
-  private String internalCode;
+  private String firmsCode;
 
   @Schema(
       maxLength = 100,

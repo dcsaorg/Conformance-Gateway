@@ -52,7 +52,8 @@ public enum ScenarioType {
           case REGULAR_SWB_SOC_AND_REFERENCES -> "soc-references";
           case REGULAR_SWB_AMF -> "amf";
           case DG -> "dg";
-          case REGULAR_SWB, REGULAR_STRAIGHT_BL, ACTIVE_REEFER, NON_OPERATING_REEFER -> "request";
+          case REGULAR_SWB, ACTIVE_REEFER, NON_OPERATING_REEFER -> "request";
+          case REGULAR_STRAIGHT_BL -> "straight-bl";
           case REGULAR_NEGOTIABLE_BL -> "negotiable-bl";
           case REGULAR_CLAD -> "clad";
         };

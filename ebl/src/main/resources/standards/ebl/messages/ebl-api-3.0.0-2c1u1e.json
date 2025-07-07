@@ -16,7 +16,7 @@
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "DCSA12345678901234567890123456789012345",
+      "carrierBookingReference": "BOOKREQ-HBOL-1234567890123456",
       "descriptionOfGoods": [
         "Electronics - Consumer Devices"
       ],
@@ -39,7 +39,7 @@
       ]
     },
     {
-      "carrierBookingReference": "DCSA98765432101234567890123456789012345",
+      "carrierBookingReference": "BOOKREQ-HBOL-1234567890123457",
       "descriptionOfGoods": [
         "Apparel - Summer Collection"
       ],

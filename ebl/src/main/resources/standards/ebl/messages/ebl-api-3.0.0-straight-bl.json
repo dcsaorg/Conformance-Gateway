@@ -1,7 +1,9 @@
 {
   "transportDocumentTypeCode": "BOL",
   "isElectronic": true,
-  "isToOrder": true,
+  "isToOrder": false,
+  "numberOfCopiesWithCharges": 0,
+  "numberOfOriginalsWithCharges": 0,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
@@ -16,7 +18,7 @@
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "BOOKNEGOTIABLE123456789012345",
+      "carrierBookingReference": "BOOKBOL202507041234567890123456",
       "descriptionOfGoods": [
         "Refined Soybean Oil"
       ],
@@ -32,12 +34,12 @@
       "HSCodes": [
         "15152100"
       ],
-      "commoditySubReference": "SOYOIL-BR-2025",
+      "commoditySubReference": "SOY2025REF-BR",
       "cargoItems": [
         {
-          "equipmentReference": "MAEU6543210",
+          "equipmentReference": "MSCU9988776",
           "cargoGrossWeight": {
-            "value": 5000,
+            "value": 12000,
             "unit": "KGM"
           },
           "outerPackaging": {
@@ -51,7 +53,11 @@
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": false,
-      "equipmentReference": "MAEU6543210",
+      "equipmentReference": "MSCU9988776",
+      "shippingMarks": [
+        "Made in Brazil",
+        "こんにちはこんにちはこんにちはこんにちはこんにちはこんにちはこんにちは"
+      ],
       "seals": [
         {
           "number": "NSL13386"
@@ -59,28 +65,27 @@
       ]
     }
   ],
+  "advanceManifestFilings": [
+    {
+      "manifestTypeCode": "ACE",
+      "advanceManifestFilingsHouseBLPerformedBy": "SELF",
+      "selfFilerCode": "FLXP"
+    }
+  ],
   "documentParties": {
     "shipper": {
       "partyName": "DCSA CTK",
-      "partyContactDetails": [
-        {
-          "name": "DCSA Test Person",
-          "email": "no-reply@dcsa.org"
-        }
-      ],
-      "address": {
-        "street": "Ruijggoordweg",
-        "city": "Amsterdam",
-        "countryCode": "NL"
-      }
-    },
-    "endorsee": {
-      "partyName": "To Order of Shipper",
       "identifyingCodes": [
         {
           "codeListProvider": "W3C",
           "codeListName": "LCL",
           "partyCode": "MSC"
+        }
+      ],
+      "partyContactDetails": [
+        {
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ]
     },
@@ -101,21 +106,22 @@
         }
       ]
     },
-    "notifyParties": [
-      {
-        "partyName": "DCSA CTK",
-        "partyContactDetails": [
-          {
-            "name": "DCSA Test Person",
-            "email": "no-reply@dcsa.org"
-          }
-        ],
-        "address": {
-          "street": "Ruijggoordweg",
-          "city": "Amsterdam",
-          "countryCode": "NL"
+    "consignee": {
+      "partyName": "Global Retail Imports",
+      "partyContactDetails": [
+        {
+          "name": "Anna Müller",
+          "email": "anna.muller@grimports.de"
         }
+      ],
+      "address": {
+        "street": "Neuer Wall 10",
+        "city": "Hamburg",
+        "countryCode": "DE"
       }
-    ]
-  }
+    }
+  },
+  "requestedCarrierClauses": [
+    "CARGO_CARGOSPECIFICS"
+  ]
 }

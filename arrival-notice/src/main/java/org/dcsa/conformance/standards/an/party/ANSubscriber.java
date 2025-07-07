@@ -58,7 +58,7 @@ public class ANSubscriber extends ConformanceParty {
   }
 
   private void getArrivalNotices(JsonNode actionPrompt) {
-
+    JsonNode dsp = actionPrompt.required("dsp");
     syncCounterpartGet("/arrival-notices", Map.of());
   }
 }

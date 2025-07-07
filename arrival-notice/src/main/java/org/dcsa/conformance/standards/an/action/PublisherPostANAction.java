@@ -71,7 +71,10 @@ public class PublisherPostANAction extends AnAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             ANChecks.getANPayloadChecks(
-                getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()));
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                getDspSupplier(),
+                scenarioType.name()));
       }
     };
   }

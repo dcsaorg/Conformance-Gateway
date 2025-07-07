@@ -58,6 +58,8 @@ public class SubscriberGetANAction extends AnAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode();
+    ObjectNode jsonNode = super.asJsonNode();
+    jsonNode.put("dsp", getDspSupplier().get().toJson());
+    return jsonNode;
   }
 }

@@ -17,10 +17,13 @@ public class ANChecks {
   public static ActionCheck getANPayloadChecks(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.add(CHECK_PRESENCE_OF_REQUIRED_FIELDS);
+    getScenarioRelatedChecks(
+        matchedExchangeUuid, expectedApiVersion, dspSupplier, scenarioType, checks);
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,
@@ -28,6 +31,8 @@ public class ANChecks {
         expectedApiVersion,
         checks);
   }
+
+
 
   private static final JsonContentCheck CHECK_PRESENCE_OF_REQUIRED_FIELDS =
       JsonAttribute.customValidator(
@@ -54,4 +59,11 @@ public class ANChecks {
       JsonAttribute.customValidator(
           "Every response received during a conformance test must not be empty",
           body -> body.isEmpty() ? Set.of("The response body must not be empty") : Set.of());
+
+  private static void getScenarioRelatedChecks(
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      String scenarioType,
+      ArrayList<JsonContentCheck> checks) {}
 }

@@ -100,6 +100,13 @@
     },
     "consignee": {
       "partyName": "FarmCo West Africa",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "W3C",
+          "codeListName": "LCL",
+          "partyCode": "MSC"
+        }
+      ],
       "partyContactDetails": [
         {
           "name": "Moussa Ndiaye",

@@ -18,7 +18,9 @@
   "consignmentItems": [
     {
       "carrierBookingReference": "DGBOOKING1234567890123456789012",
-      "descriptionOfGoods": ["Lithium Ion Batteries - UN3480"],
+      "descriptionOfGoods": [
+        "Lithium Ion Batteries - UN3480"
+      ],
       "HSCodes": [
         "85076000"
       ],
@@ -78,6 +80,13 @@
     },
     "consignee": {
       "partyName": "BatteryTech Inc.",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "W3C",
+          "codeListName": "LCL",
+          "partyCode": "MSC"
+        }
+      ],
       "partyContactDetails": [
         {
           "name": "Emily Carter",

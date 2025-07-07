@@ -93,6 +93,13 @@
     },
     "consignee": {
       "partyName": "Agrotrading Brasil Ltda",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "W3C",
+          "codeListName": "LCL",
+          "partyCode": "MSC"
+        }
+      ],
       "partyContactDetails": [
         {
           "name": "João Silva",

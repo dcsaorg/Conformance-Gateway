@@ -137,6 +137,13 @@
     },
     "consignee": {
       "partyName": "Tech Solutions GmbH",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "W3C",
+          "codeListName": "LCL",
+          "partyCode": "MSC"
+        }
+      ],
       "partyContactDetails": [
         {
           "name": "Hans Meier",

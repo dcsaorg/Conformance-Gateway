@@ -181,6 +181,13 @@
     },
     "consignee": {
       "partyName": "Global Retail Imports",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "W3C",
+          "codeListName": "LCL",
+          "partyCode": "MSC"
+        }
+      ],
       "partyContactDetails": [
         {
           "name": "Anna Müller",

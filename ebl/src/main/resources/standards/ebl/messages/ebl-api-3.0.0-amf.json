@@ -101,6 +101,13 @@
     },
     "consignee": {
       "partyName": "Global Pharma Distribution",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "W3C",
+          "codeListName": "LCL",
+          "partyCode": "MSC"
+        }
+      ],
       "partyContactDetails": [
         {
           "name": "Elena Varga",

@@ -41,7 +41,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
             "SCENARIO_TYPE",
             getScenarioType(),
             "CARRIER_SCENARIO_PARAMETERS",
-            getCspSupplier().get().toString()),
+            getCarrierPayloadSupplier().get().toString()),
         "prompt-shipper-uc1.md",
         "prompt-shipper-refresh-complete.md");
   }
@@ -69,7 +69,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.set("eblPayload", getCspSupplier().get());
+    jsonNode.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
     return jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
   }
 
@@ -129,6 +129,6 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   @Override
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
-    getCspConsumer().accept(OBJECT_MAPPER.createObjectNode());
+    getCarrierPayloadConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }
 }

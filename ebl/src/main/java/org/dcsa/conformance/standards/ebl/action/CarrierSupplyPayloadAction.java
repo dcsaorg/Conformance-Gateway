@@ -16,19 +16,19 @@ import org.dcsa.conformance.core.util.ErrorFormatter;
 import org.dcsa.conformance.standards.ebl.checks.EblInputPayloadValidations;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 
-public class CarrierSupplyScenarioParametersAction extends EblAction {
+public class CarrierSupplyPayloadAction extends EblAction {
 
+  public static final String CARRIER_PAYLOAD = "carrierPayload";
   private static final String SCENARIO_TYPE = "scenarioType";
-  private static final String EBL_PAYLOAD = "eblPayload";
   private static final String INPUT = "input";
 
-  private JsonNode carrierScenarioParameters;
+  private JsonNode carrierPayload;
   private ScenarioType scenarioType;
   private final String standardVersion;
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean isTd;
 
-  public CarrierSupplyScenarioParametersAction(
+  public CarrierSupplyPayloadAction(
       String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion, JsonSchemaValidator requestSchemaValidator, boolean isTd) {
     super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1);
     this.scenarioType = scenarioType;
@@ -41,7 +41,7 @@ public class CarrierSupplyScenarioParametersAction extends EblAction {
   @Override
   public void reset() {
     super.reset();
-    carrierScenarioParameters = null;
+    carrierPayload = null;
   }
 
   @Override
@@ -52,8 +52,8 @@ public class CarrierSupplyScenarioParametersAction extends EblAction {
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (carrierScenarioParameters != null) {
-      jsonState.set(EBL_PAYLOAD, carrierScenarioParameters);
+    if (carrierPayload!= null) {
+      jsonState.set(CARRIER_PAYLOAD, carrierPayload);
     }
     return jsonState.put(SCENARIO_TYPE, scenarioType.name());
   }
@@ -61,9 +61,9 @@ public class CarrierSupplyScenarioParametersAction extends EblAction {
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    JsonNode eblPayloadNode = jsonState.get(EBL_PAYLOAD);
+    JsonNode eblPayloadNode = jsonState.get(CARRIER_PAYLOAD);
     if (eblPayloadNode != null) {
-      carrierScenarioParameters = eblPayloadNode;
+      carrierPayload = eblPayloadNode;
     }
     this.scenarioType = ScenarioType.valueOf(jsonState.required(SCENARIO_TYPE).asText());
   }
@@ -115,16 +115,16 @@ public class CarrierSupplyScenarioParametersAction extends EblAction {
 
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
-    getCspConsumer().accept(partyInput.get(INPUT));
+    getCarrierPayloadConsumer().accept(partyInput.get(INPUT));
   }
 
   @Override
-  protected Consumer<JsonNode> getCspConsumer() {
-    return eblPayloadNode -> this.carrierScenarioParameters = eblPayloadNode;
+  protected Consumer<JsonNode> getCarrierPayloadConsumer() {
+    return carrierPayloadNode -> this.carrierPayload = carrierPayloadNode;
   }
 
   @Override
-  protected Supplier<JsonNode> getCspSupplier() {
-    return () -> carrierScenarioParameters;
+  protected Supplier<JsonNode> getCarrierPayloadSupplier() {
+    return () -> carrierPayload;
   }
 }

@@ -894,7 +894,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         resolveMessageSchemaValidator(EBL_API, POST_EBL_SCHEMA_NAME);
     return new EblScenarioListBuilder(
         previousAction ->
-            new CarrierSupplyScenarioParametersAction(
+            new CarrierSupplyPayloadAction(
                 carrierPartyName, scenarioType, standardVersion, requestSchemaValidator, isTd));
   }
 

@@ -97,12 +97,12 @@ public abstract class EblAction extends ConformanceAction {
     return (EblAction) previousAction;
   }
 
-  protected Consumer<JsonNode> getCspConsumer() {
-    return getPreviousEblAction().getCspConsumer();
+  protected Consumer<JsonNode> getCarrierPayloadConsumer() {
+    return getPreviousEblAction().getCarrierPayloadConsumer();
   }
 
-  protected Supplier<JsonNode> getCspSupplier() {
-    return getPreviousEblAction().getCspSupplier();
+  protected Supplier<JsonNode> getCarrierPayloadSupplier() {
+    return getPreviousEblAction().getCarrierPayloadSupplier();
   }
 
   protected Supplier<DynamicScenarioParameters> getDspSupplier() {

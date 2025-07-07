@@ -76,7 +76,7 @@ public class EblCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(CarrierSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(CarrierSupplyPayloadAction.class, this::supplyScenarioParameters),
         Map.entry(
             UC2_Carrier_RequestUpdateToShippingInstructionsAction.class,
             this::requestUpdateToShippingInstructions),

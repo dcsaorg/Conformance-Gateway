@@ -374,9 +374,8 @@ public class PersistableCarrierBooking {
   private String extractUnLocationCode(JsonNode locationNode) {
     if (locationNode != null) {
       var loc = locationNode.path("location");
-      var locType = loc.path("locationType").asText("");
       var unloc = loc.path("UNLocationCode").asText("");
-      if ((locType.equals("UNLO") || locType.equals("FACI")) && !unloc.isBlank()) {
+      if (!unloc.isBlank()) {
         return unloc;
       }
     }
@@ -552,13 +551,12 @@ public class PersistableCarrierBooking {
     // TODO: Add Address here at some point
 
     public T unlocation(String unlocationCode) {
-      location.put("locationType", "UNLO").put("UNLocationCode", unlocationCode);
+      location.put("UNLocationCode", unlocationCode);
       return endLocation();
     }
 
     public T facility(String unlocationCode, String facilityCode, String facilityCodeListProvider) {
       location
-        .put("locationType", "FACI")
         .put("UNLocationCode", unlocationCode)
         .put("facilityCode", facilityCode)
         .put("facilityCodeListProvider", facilityCodeListProvider);
@@ -593,29 +591,9 @@ public class PersistableCarrierBooking {
       return setStringField("transportPlanStage", transportPlanStage);
     }
 
-    public TransportPlanStepBuilder modeOfTransport(String modeOfTransport) {
-      return setStringField("modeOfTransport", modeOfTransport);
-    }
-
-    public TransportPlanStepBuilder vesselName(String vesselName) {
-      return setStringField("vesselName", vesselName);
-    }
-
-    public TransportPlanStepBuilder vesselIMONumber(String vesselIMONumber) {
-      return setStringField("vesselIMONumber", vesselIMONumber);
-    }
-
     private TransportPlanStepBuilder setStringField(String fieldName, String value) {
       this.transportPlanStep.put(fieldName, value);
       return this;
-    }
-
-    public TransportPlanStepBuilder nextTransportLeg() {
-      return parentBuilder.addTransportLeg();
-    }
-
-    public JsonNode buildTransportPlan() {
-      return parentBuilder.build();
     }
   }
 

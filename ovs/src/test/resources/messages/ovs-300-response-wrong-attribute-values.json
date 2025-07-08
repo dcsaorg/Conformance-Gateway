@@ -20,6 +20,7 @@
             "universalExportVoyageReference": "2765S",
             "location": {
               "locationName": "Port of Amsterdam",
+              "locationType": "UNLO",
               "UNLocationCode": "NLERRAMS"
             },
             "statusCode": "OMIT",
@@ -58,6 +59,7 @@
             "universalExportVoyageReference": "2343S",
             "location": {
               "locationName": "Port of Singapore",
+              "locationType": "UNLO",
               "UNLocationCode": "SGSIN"
             },
             "statusCode": "ARRI",
@@ -96,6 +98,7 @@
             "universalExportVoyageReference": "2555S",
             "location": {
               "locationName": "Port of New York",
+              "locationType": "UNLO",
               "UNLocationCode": "USSSYC"
             },
             "statusCode": "ARRI",

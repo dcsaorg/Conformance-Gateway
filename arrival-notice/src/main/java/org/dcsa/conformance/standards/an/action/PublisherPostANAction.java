@@ -49,7 +49,7 @@ public class PublisherPostANAction extends AnAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new UrlPathCheck(ANRole::isPublisher, getMatchedExchangeUuid(), "/arrival-notices"),
-            new ResponseStatusCheck(ANRole::isSubscriber, getMatchedExchangeUuid(), 200),
+            new ResponseStatusCheck(ANRole::isSubscriber, getMatchedExchangeUuid(), 204),
             new ApiHeaderCheck(
                 ANRole::isSubscriber,
                 getMatchedExchangeUuid(),
@@ -70,11 +70,8 @@ public class PublisherPostANAction extends AnAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            ANChecks.getANPayloadChecks(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                getDspSupplier(),
-                scenarioType.name()));
+            ANChecks.getANPostPayloadChecks(
+                getMatchedExchangeUuid(), expectedApiVersion, scenarioType.name()));
       }
     };
   }

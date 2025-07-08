@@ -4,6 +4,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class ANSubscriber extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     ConformanceResponse response =
         request.createResponse(
-            200,
+            204,
             Map.of(API_VERSION, List.of(apiVersion)),
             new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 
@@ -59,6 +60,10 @@ public class ANSubscriber extends ConformanceParty {
 
   private void getArrivalNotices(JsonNode actionPrompt) {
     JsonNode dsp = actionPrompt.required("dsp");
-    syncCounterpartGet("/arrival-notices", Map.of());
+    List<String> references = new ArrayList<>();
+    for (JsonNode node : dsp) {
+      references.add(node.asText());
+    }
+    syncCounterpartGet("/arrival-notices", Map.of("transportDocumentReferences", references));
   }
 }

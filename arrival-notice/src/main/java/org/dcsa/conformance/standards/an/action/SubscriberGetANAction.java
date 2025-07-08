@@ -1,6 +1,9 @@
 package org.dcsa.conformance.standards.an.action;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -9,6 +12,7 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.dcsa.conformance.standards.an.party.ANRole;
 
 public class SubscriberGetANAction extends AnAction {
@@ -51,15 +55,25 @@ public class SubscriberGetANAction extends AnAction {
                 ANRole::isPublisher,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                expectedApiVersion));
+                expectedApiVersion),
+            ANChecks.getANGetResponseChecks(
+                getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()));
       }
     };
   }
 
+
+
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("dsp", getDspSupplier().get().toJson());
+    List<String> references = getDspSupplier().get().transportDocumentReferences();
+    ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
+    assert references != null;
+    for (String ref : references) {
+      arrayNode.add(ref);
+    }
+    jsonNode.set("dsp", arrayNode);
     return jsonNode;
   }
 }

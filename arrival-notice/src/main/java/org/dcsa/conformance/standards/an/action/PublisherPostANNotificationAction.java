@@ -43,7 +43,7 @@ public class PublisherPostANNotificationAction extends AnAction {
         return Stream.of(
             new UrlPathCheck(
                 ANRole::isPublisher, getMatchedExchangeUuid(), "/arrival-notice-notifications"),
-            new ResponseStatusCheck(ANRole::isSubscriber, getMatchedExchangeUuid(), 200),
+            new ResponseStatusCheck(ANRole::isSubscriber, getMatchedExchangeUuid(), 204),
             new ApiHeaderCheck(
                 ANRole::isSubscriber,
                 getMatchedExchangeUuid(),

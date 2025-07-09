@@ -292,26 +292,534 @@
           }
         ]
       },
-      "freeTimes": [
+      "payerCode": "Acme Inc.",
+      "utilizedTransportEquipments": [
         {
-          "typeCode": "DEM",
-          "isoEquipmentCode": "22GP",
-          "duration": 123,
-          "timeUnit": "WD",
-          "calculationBasis": "Calculated as..."
+          "equipment": {
+            "equipmentReference": "APZU4812090",
+            "ISOEquipmentCode": "22G1",
+            "tareWeight": {
+              "value": 4800,
+              "unit": "KGM"
+            }
+          },
+          "isShipperOwned": true,
+          "isNonOperatingReefer": false,
+          "activeReeferSettings": {
+            "temperatureSetpoint": -15,
+            "temperatureUnit": "CEL",
+            "o2Setpoint": 25,
+            "co2Setpoint": 25,
+            "humiditySetpoint": 95.6,
+            "airExchangeSetpoint": 15.4,
+            "airExchangeUnit": "MQH",
+            "isVentilationOpen": true,
+            "isDrainholesOpen": true,
+            "isBulbMode": true,
+            "isColdTreatmentRequired": true,
+            "isControlledAtmosphereRequired": true
+          },
+          "shippingMarks": [
+            "Made in China"
+          ],
+          "seals": [
+            {
+              "number": "VET123",
+              "source": "CUS"
+            }
+          ],
+          "references": [
+            {
+              "type": "CR",
+              "value": "HHL00103004"
+            }
+          ],
+          "customsReferences": [
+            {
+              "type": "CUS",
+              "countryCode": "NL",
+              "values": [
+                "4988470982020120017"
+              ]
+            }
+          ]
         }
       ],
-      "charges": [
+      "consignmentItems": [
         {
-          "chargeName": "Documentation fee - Destination",
-          "currencyAmount": 1012.12,
-          "currencyCode": "DKK",
-          "paymentTermCode": "PRE",
-          "calculationBasis": "Per day",
-          "unitPrice": 3456.6,
-          "quantity": 34.4
+          "carrierBookingReference": "ABC709951",
+          "descriptionOfGoods": [
+            "blue shoes size 47"
+          ],
+          "HSCodes": [
+            "851713"
+          ],
+          "nationalCommodityCodes": [
+            {
+              "type": "NCM",
+              "countryCode": "BR",
+              "values": [
+                "1515"
+              ]
+            }
+          ],
+          "shippingMarks": [
+            "Made in China"
+          ],
+          "cargoItems": [
+            {
+              "equipmentReference": "APZU4812090",
+              "cargoGrossWeight": {
+                "value": 2400,
+                "unit": "KGM"
+              },
+              "cargoGrossVolume": {
+                "value": 2.4,
+                "unit": "MTQ"
+              },
+              "cargoNetWeight": {
+                "value": 2400,
+                "unit": "KGM"
+              },
+              "cargoNetVolume": {
+                "value": 2.4,
+                "unit": "MTQ"
+              },
+              "exportLicense": {
+                "isRequired": true,
+                "reference": "EMC007123",
+                "issueDate": "2024-09-14",
+                "expiryDate": "2024-09-21"
+              },
+              "importLicense": {
+                "isRequired": true,
+                "reference": "EMC007123",
+                "issueDate": "2024-09-14",
+                "expiryDate": "2024-09-21"
+              },
+              "outerPackaging": {
+                "packageCode": "5H",
+                "imoPackagingCode": "1A2",
+                "numberOfPackages": 18,
+                "description": "Drum, steel",
+                "woodDeclaration": "TREATED_AND_CERTIFIED",
+                "dangerousGoods": [
+                  {
+                    "UNNumber": "1463",
+                    "NANumber": "9037",
+                    "codedVariantList": "2200",
+                    "properShippingName": "Chromium Trioxide, anhydrous",
+                    "technicalName": "xylene and benzene",
+                    "imoClass": "1.4S",
+                    "subsidiaryRisk1": "1.2",
+                    "subsidiaryRisk2": "1.2",
+                    "isMarinePollutant": false,
+                    "packingGroup": 3,
+                    "isLimitedQuantity": false,
+                    "isExceptedQuantity": false,
+                    "isSalvagePackings": false,
+                    "isEmptyUncleanedResidue": false,
+                    "isWaste": false,
+                    "isHot": false,
+                    "isCompetentAuthorityApprovalRequired": false,
+                    "competentAuthorityApproval": "{Name and reference...}",
+                    "segregationGroups": [
+                      "st"
+                    ],
+                    "innerPackagings": [
+                      {
+                        "quantity": 20,
+                        "material": "Plastic",
+                        "description": "Woven plastic water resistant Bag"
+                      }
+                    ],
+                    "emergencyContactDetails": {
+                      "contact": "Henrik Larsen",
+                      "provider": "GlobeTeam",
+                      "phone": "+45 70262970",
+                      "referenceNumber": "12234"
+                    },
+                    "EMSNumber": "F-A S-Q",
+                    "endOfHoldingTime": "2021-09-03",
+                    "fumigationDateTime": "2024-09-04T09:41:00Z",
+                    "isReportableQuantity": false,
+                    "inhalationZone": "A",
+                    "grossWeight": {
+                      "value": 12000.3,
+                      "unit": "KGM"
+                    },
+                    "netWeight": {
+                      "value": 2.4,
+                      "unit": "KGM"
+                    },
+                    "netExplosiveContent": {
+                      "value": 2.4,
+                      "unit": "KGM"
+                    },
+                    "netVolume": {
+                      "value": 2.4,
+                      "unit": "MTQ"
+                    },
+                    "limits": {
+                      "temperatureUnit": "CEL",
+                      "flashPoint": 42,
+                      "transportControlTemperature": 24.1,
+                      "transportEmergencyTemperature": 74.1,
+                      "SADT": 54.1,
+                      "SAPT": 70
+                    }
+                  }
+                ]
+              },
+              "nationalCommodityCodes": [
+                {
+                  "type": "NCM",
+                  "countryCode": "BR",
+                  "values": [
+                    "1515"
+                  ]
+                }
+              ],
+              "customsReferences": [
+                {
+                  "type": "CUS",
+                  "countryCode": "NL",
+                  "values": [
+                    "4988470982020120017"
+                  ]
+                }
+              ]
+            }
+          ],
+          "exportLicense": {
+            "isRequired": true,
+            "reference": "EMC007123",
+            "issueDate": "2024-09-14",
+            "expiryDate": "2024-09-21"
+          },
+          "importLicense": {
+            "isRequired": true,
+            "reference": "EMC007123",
+            "issueDate": "2024-09-14",
+            "expiryDate": "2024-09-21"
+          },
+          "references": [
+            {
+              "type": "CR",
+              "values": [
+                "HHL00103004"
+              ]
+            }
+          ],
+          "customsReferences": [
+            {
+              "type": "CUS",
+              "countryCode": "NL",
+              "values": [
+                "4988470982020120017"
+              ]
+            }
+          ]
         }
       ],
+      "arrivalNoticeVisualization": {
+        "name": "20250123 AN XYZ01234.docx",
+        "content": "RXhhbXBsZSBBTiBjb250ZW50",
+        "contentType": "application/msword"
+      }
+    },
+    {
+      "issueDateTime": "2025-01-23T01:23:45Z",
+      "label": "Warning",
+      "carrierCode": "MMCU",
+      "carrierCodeListProvider": "NMFTA",
+      "carrierContactInformation": [
+        {
+          "name": "Henrik",
+          "phone": "+45 70262970",
+          "email": "info@dcsa.org"
+        }
+      ],
+      "carrierInformationForCargoRelease": [
+        {
+          "name": "Henrik",
+          "phone": "+45 70262970",
+          "email": "info@dcsa.org"
+        }
+      ],
+      "pickupLocation": {
+        "locationName": "Port of Amsterdam",
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "UNLocationCode": "NLAMS",
+        "facility": {
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG"
+        },
+        "geoCoordinate": {
+          "latitude": "48.85855",
+          "longitude": "2.294492036"
+        }
+      },
+      "returnLocation": {
+        "locationName": "Port of Amsterdam",
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "UNLocationCode": "NLAMS",
+        "facility": {
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG"
+        },
+        "geoCoordinate": {
+          "latitude": "48.85855",
+          "longitude": "2.294492036"
+        }
+      },
+      "returnInstructions": "Please place the container...",
+      "customsImportDeclarationProcedure": "The tax must be declared...",
+      "additionalInformation": "FIRMS code: B986",
+      "references": [
+        {
+          "type": "CR",
+          "value": "HHL00103004"
+        }
+      ],
+      "transportDocumentReference": "TDR1234",
+      "transportDocumentTypeCode": "SWB",
+      "isElectronic": true,
+      "deliveryTypeAtDestination": "CY",
+      "cargoMovementTypeAtDestination": "FCL",
+      "serviceContractReference": "HHL51800000",
+      "termsAndConditions": "Any reference in...",
+      "carrierClauses": [
+        "It is not allowed to..."
+      ],
+      "documentParties": [
+        {
+          "partyFunction": "N1",
+          "partyName": "Acme Inc.",
+          "typeOfPerson": "NATURAL_PERSON",
+          "location": {
+            "locationName": "Port of Amsterdam",
+            "address": {
+              "street": "Ruijggoordweg",
+              "streetNumber": "100",
+              "floor": "N/A",
+              "postCode": "1047 HM",
+              "POBox": "123",
+              "city": "Amsterdam",
+              "stateRegion": "North Holland",
+              "countryCode": "NL"
+            },
+            "UNLocationCode": "NLAMS",
+            "facility": {
+              "facilityCode": "ADT",
+              "facilityCodeListProvider": "SMDG"
+            },
+            "geoCoordinate": {
+              "latitude": "48.85855",
+              "longitude": "2.294492036"
+            }
+          },
+          "displayedAddress": [
+            "Strawinskylaan 4117"
+          ],
+          "identifyingCodes": [
+            {
+              "codeListProvider": "W3C",
+              "partyCode": "MSK",
+              "codeListName": "DID"
+            }
+          ],
+          "taxLegalReferences": [
+            {
+              "type": "PAN",
+              "countryCode": "IN",
+              "value": "AAAAA0000A"
+            }
+          ],
+          "partyContactDetails": [
+            {
+              "name": "Henrik",
+              "phone": "+45 70262970",
+              "email": "info@dcsa.org"
+            }
+          ],
+          "reference": "REF1234",
+          "purchaseOrderReferences": [
+            "PO1234"
+          ]
+        }
+      ],
+      "transport": {
+        "onBoardDate": "2025-01-23",
+        "departureDate": "2025-01-23",
+        "plannedDepartureDate": "2025-01-23",
+        "plannedArrivalDate": "2025-01-23",
+        "etaAtPortOfDischargeDate": "2025-01-23",
+        "etaAtPlaceOfDeliveryDate": "2025-01-23",
+        "inlandArrivalDate": "2025-01-23",
+        "estimatedGeneralOrderDateTime": "2025-01-23T01:23:45Z",
+        "loadLocation": {
+          "locationName": "Port of Amsterdam",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "dischargeLocation": {
+          "locationName": "Port of Amsterdam",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "portOfLoading": {
+          "locationName": "Port of Amsterdam",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "portOfDischarge": {
+          "locationName": "Port of Amsterdam",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "placeOfReceipt": {
+          "locationName": "Port of Amsterdam",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "placeOfDelivery": {
+          "locationName": "Port of Amsterdam",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "modeOfTransport": "VESSEL",
+        "vesselVoyages": [
+          {
+            "typeCode": "POD",
+            "vesselName": "King of the Seas",
+            "vesselFlag": "NL",
+            "vesselIMONumber": "12345678",
+            "carrierVoyageNumber": "1234N",
+            "universalVoyageReference": "2301W"
+          }
+        ]
+      },
       "payerCode": "Acme Inc.",
       "utilizedTransportEquipments": [
         {

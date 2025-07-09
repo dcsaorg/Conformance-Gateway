@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.an.checks;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,9 +18,18 @@ public class ANChecks {
 
   public static ActionCheck getANPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion, String scenarioType) {
-    var checks = new ArrayList<>(COMMON_PAYLOAD_CHECKS);
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.addAll(validateBasicFields());
+    checks.add(validateCarrierContactInformation());
+    checks.add(validateDocumentParties());
+    checks.add(validateTransport());
+    checks.add(validateUtilizedTransportEquipments());
+    checks.add(validateConsignmentItems());
     checks.addAll(getScenarioRelatedChecks(scenarioType));
+
     return JsonAttribute.contentChecks(
+        "",
+        "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
         ANRole::isPublisher,
         matchedExchangeUuid,
         HttpMessageType.REQUEST,
@@ -29,22 +37,17 @@ public class ANChecks {
         checks);
   }
 
-  private static JsonContentCheck validateBasicFields() {
-    return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the basic ArrivalNotice fields",
-        body -> {
-          var issues = new LinkedHashSet<String>();
-          issues.addAll(checkBasicField("carrierCode").validate(body));
-          issues.addAll(checkBasicField("carrierCodeListProvider").validate(body));
-          issues.addAll(checkBasicField("deliveryTypeAtDestination").validate(body));
-          return issues;
-        });
+  private static List<JsonContentCheck> validateBasicFields() {
+    return List.of(
+        checkBasicFieldWithLabel("carrierCode"),
+        checkBasicFieldWithLabel("carrierCodeListProvider"),
+        checkBasicFieldWithLabel("deliveryTypeAtDestination"));
   }
 
-  private static JsonContentCheck checkBasicField(String field) {
+  private static JsonContentCheck checkBasicFieldWithLabel(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"" + field + "\" attribute",
-        mav -> mav.path("arrivalNotices").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(
@@ -54,9 +57,65 @@ public class ANChecks {
         });
   }
 
+  static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
+      JsonAttribute.customValidator(
+          "Every response received during a conformance test must not be empty",
+          body -> body.isEmpty() ? Set.of("The response body must not be empty") : Set.of());
+
+  private static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
+    var checks = new ArrayList<JsonContentCheck>();
+    switch (scenarioType) {
+      case "FREE_TIME" -> checks.add(validateFreeTimeObjectStructure(scenarioType));
+      case "FREIGHTED" -> checks.add(validateChargesStructure());
+    }
+    return checks;
+  }
+
+  public static ActionCheck getANGetResponseChecks(
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      Supplier<DynamicScenarioParameters> dspSupplier) {
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
+    checks.addAll(checkValidTransportDocumentReferences(dspSupplier));
+    return JsonAttribute.contentChecks(
+        ANRole::isPublisher,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion,
+        checks);
+  }
+
+  private static List<JsonContentCheck> checkValidTransportDocumentReferences(
+      Supplier<DynamicScenarioParameters> dsp) {
+    return List.of(
+        JsonAttribute.customValidator(
+            "[Scenario] Validate that each 'transportDocumentReference' in the response is valid",
+            body -> {
+              var issues = new LinkedHashSet<String>();
+              var arrivalNotices = body.get("arrivalNotices");
+              if (arrivalNotices == null || !arrivalNotices.isArray()) {
+                issues.add("Missing or invalid 'arrivalNotices' array in payload.");
+                return issues;
+              }
+              Set<String> validReferences = new HashSet<>(dsp.get().transportDocumentReferences());
+              for (int i = 0; i < arrivalNotices.size(); i++) {
+                var notice = arrivalNotices.get(i);
+                var tdr = notice.get("transportDocumentReference");
+                if (!validReferences.contains(tdr.asText())) {
+                  issues.add(
+                      String.format(
+                          "ArrivalNotice %d: 'transportDocumentReference' '%s' is not a valid one",
+                          i, tdr.asText()));
+                }
+              }
+              return issues;
+            }));
+  }
+
   private static JsonContentCheck validateCarrierContactInformation() {
     return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the \"carrierInformationForCargoRelease\" object",
+        "The publisher has demonstrated the correct use of the \"carrierContactInformation\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
           issues.addAll(checkCarrierField("name").validate(body));
@@ -69,8 +128,8 @@ public class ANChecks {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \""
             + field
-            + "\" attribute in \"carrierInformationForCargoRelease\"",
-        mav -> mav.path("arrivalNotices").all().path("carrierInformationForCargoRelease").all(),
+            + "\" attribute in \"carrierContactInformation\"",
+        mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");
@@ -81,8 +140,8 @@ public class ANChecks {
 
   private static JsonContentCheck checkCarrierEmailOrPhone() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-        "The publisher has demonstrated the correct use of either the \"email\" or \"phone\" attribute in \"carrierInformationForCargoRelease\"",
-        mav -> mav.path("arrivalNotices").all().path("carrierInformationForCargoRelease").all(),
+        "The publisher has demonstrated the correct use of either the \"email\" or \"phone\" attribute in \"carrierContactInformation\"",
+        mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull("email") && !node.hasNonNull("phone")) {
             return Set.of(contextPath + " must functionally include either 'email' or 'phone'");
@@ -221,17 +280,12 @@ public class ANChecks {
         });
   }
 
-  static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
-      JsonAttribute.customValidator(
-          "Every response received during a conformance test must not be empty",
-          body -> body.isEmpty() ? Set.of("The response body must not be empty") : Set.of());
-
   private static JsonContentCheck checkFreeTimeAttribute(String attributeName) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"freeTime\" \""
             + attributeName
             + "\" attribute",
-        mav -> mav.path("arrivalNotices").all().path("freeTimes").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.freeTimes.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(attributeName)) {
             return Set.of(
@@ -267,23 +321,13 @@ public class ANChecks {
         });
   }
 
-  private static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
-    var checks = new ArrayList<JsonContentCheck>();
-
-    switch (scenarioType) {
-      case "FREE_TIME" -> checks.add(validateFreeTimeObjectStructure(scenarioType));
-      case "FREIGHTED" -> checks.add(validateChargesStructure());
-    }
-
-    return checks;
-  }
 
   private static JsonContentCheck checkChargeAttribute(String attributeName) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"charges\" \""
             + attributeName
             + "\" attribute",
-        mav -> mav.path("arrivalNotices").all().path("charges").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.charges.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(attributeName)) {
             return Set.of(
@@ -309,56 +353,6 @@ public class ANChecks {
         });
   }
 
-  public static ActionCheck getANGetResponseChecks(
-      UUID matchedExchangeUuid,
-      String expectedApiVersion,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
-    var checks = new ArrayList<JsonContentCheck>();
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
-    checks.addAll(checkValidTransportDocumentReferences(dspSupplier));
-    return JsonAttribute.contentChecks(
-        ANRole::isPublisher,
-        matchedExchangeUuid,
-        HttpMessageType.RESPONSE,
-        expectedApiVersion,
-        checks);
-  }
-
-  private static List<JsonContentCheck> checkValidTransportDocumentReferences(
-      Supplier<DynamicScenarioParameters> dsp) {
-    var checks = new ArrayList<JsonContentCheck>();
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "[Scenario] Validate that each 'transportDocumentReference' in the response is valid",
-            body -> {
-              var issues = new LinkedHashSet<String>();
-
-              var arrivalNotices = body.get("arrivalNotices");
-              if (arrivalNotices == null || !arrivalNotices.isArray()) {
-                issues.add("Missing or invalid 'arrivalNotices' array in payload.");
-                return issues;
-              }
-
-              Set<String> validReferences = new HashSet<>(dsp.get().transportDocumentReferences());
-
-              for (int i = 0; i < arrivalNotices.size(); i++) {
-                var notice = arrivalNotices.get(i);
-                var tdr = notice.get("transportDocumentReference");
-
-                if (!validReferences.contains(tdr.asText())) {
-                  issues.add(
-                      String.format(
-                          "ArrivalNotice %d: 'transportDocumentReference' '%s' is not a valid one",
-                          i, tdr.asText()));
-                }
-              }
-
-              return issues;
-            }));
-
-    return checks;
-  }
 
   private static JsonContentCheck validateUtilizedTransportEquipments() {
     return JsonAttribute.customValidator(
@@ -381,13 +375,7 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"utilizedTransportEquipments.equipment."
             + field
             + "\" attribute",
-        mav ->
-            mav.path("arrivalNotices")
-                .all()
-                .path("utilizedTransportEquipments")
-                .all()
-                .path("equipment")
-                .submitPath(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*.equipment"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");
@@ -399,7 +387,7 @@ public class ANChecks {
   private static JsonContentCheck checkUTEEquipmentPresence() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"utilizedTransportEquipments.equipment\" object",
-        mav -> mav.path("arrivalNotices").all().path("utilizedTransportEquipments").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*"),
         (ute, contextPath) -> {
           if (ute.get("equipment") == null || ute.get("equipment").isNull()) {
             return Set.of(contextPath + ".equipment must be functionally present");
@@ -435,13 +423,7 @@ public class ANChecks {
   private static JsonContentCheck checkUTESealNumber() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"utilizedTransportEquipments.seals.number\" attribute",
-        mav ->
-            mav.path("arrivalNotices")
-                .all()
-                .path("utilizedTransportEquipments")
-                .all()
-                .path("seals")
-                .all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*.seals.*"),
         (seal, contextPath) -> {
           if (!seal.hasNonNull("number")) {
             return Set.of(contextPath + ".number must be functionally present");
@@ -470,7 +452,7 @@ public class ANChecks {
   private static JsonContentCheck checkConsignmentDescriptionOfGoods() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"descriptionOfGoods\" field",
-        mav -> mav.path("arrivalNotices").all().path("consignmentItem").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*"),
         (ci, contextPath) -> {
           var node = ci.get("descriptionOfGoods");
           if (node == null || !node.isArray() || node.isEmpty()) {
@@ -485,7 +467,7 @@ public class ANChecks {
   private static JsonContentCheck checkCargoItemPresence() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"cargoItems\" array",
-        mav -> mav.path("arrivalNotices").all().path("consignmentItem").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*"),
         (ci, contextPath) -> {
           var items = ci.get("cargoItems");
           if (items == null || !items.isArray() || items.isEmpty()) {
@@ -500,8 +482,7 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"cargoItems."
             + field
             + "\" attribute",
-        mav ->
-            mav.path("arrivalNotices").all().path("consignmentItem").all().path("cargoItems").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*.cargoItems.*"),
         (item, contextPath) -> {
           if (!item.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");
@@ -513,8 +494,7 @@ public class ANChecks {
   private static JsonContentCheck checkOuterPackagingStructure() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"outerPackaging\" object",
-        mav ->
-            mav.path("arrivalNotices").all().path("consignmentItem").all().path("cargoItems").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*.cargoItems.*"),
         (item, contextPath) -> {
           var op = item.get("outerPackaging");
           if (op == null || !op.isObject() || op.isEmpty()) {
@@ -528,14 +508,8 @@ public class ANChecks {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"outerPackaging\" required fields",
         mav ->
-            mav.path("arrivalNotices")
-                .all()
-                .path("consignmentItem")
-                .all()
-                .path("cargoItems")
-                .all()
-                .path("outerPackaging")
-                .submitPath(),
+            mav.submitAllMatching(
+                "arrivalNotices.*.consignmentItems.*.cargoItems.*.outerPackaging."),
         (op, contextPath) -> {
           var issues = new LinkedHashSet<String>();
 
@@ -554,22 +528,4 @@ public class ANChecks {
           return issues;
         });
   }
-
-  private static final JsonContentCheck CHECK_PRESENCE_OF_REQUIRED_FIELDS =
-      JsonAttribute.customValidator(
-          "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
-          body -> {
-            Set<String> allIssues = new LinkedHashSet<>();
-            allIssues.addAll(validateBasicFields().validate(body));
-            allIssues.addAll(validateCarrierContactInformation().validate(body));
-            allIssues.addAll(validateDocumentParties().validate(body));
-            allIssues.addAll(validateTransport().validate(body));
-            allIssues.addAll(validateUtilizedTransportEquipments().validate(body));
-            allIssues.addAll(validateConsignmentItems().validate(body));
-
-            return allIssues;
-          });
-
-  public static final List<JsonContentCheck> COMMON_PAYLOAD_CHECKS =
-      Arrays.asList(VALIDATE_NON_EMPTY_RESPONSE, CHECK_PRESENCE_OF_REQUIRED_FIELDS);
 }

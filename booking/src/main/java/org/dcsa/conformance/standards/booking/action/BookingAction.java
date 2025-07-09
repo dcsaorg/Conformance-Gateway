@@ -160,6 +160,17 @@ public abstract class BookingAction extends ConformanceAction {
     return message + " " + withCbrOrCbrr(cbr, cbrr);
   }
 
+  protected String[] buildFullUris(String uri, String... uriReference) {
+    if (uriReference == null || uriReference.length == 0) {
+      return new String[] {uri};
+    }
+
+    return Arrays.stream(uriReference)
+        .filter(Objects::nonNull)
+        .map(ref -> uri + ref)
+        .toArray(String[]::new);
+  }
+
   protected Stream<ActionCheck> getNotificationChecks(
     String expectedApiVersion,
     JsonSchemaValidator notificationSchemaValidator,

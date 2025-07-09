@@ -61,14 +61,11 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        String reference =
-            dsp.carrierBookingReference() != null
-                ? dsp.carrierBookingReference()
-                : dsp.carrierBookingRequestReference();
+        String cbrr = dsp.carrierBookingRequestReference();
+        String cbr = dsp.carrierBookingReference();
         return Stream.concat(
             Stream.concat(
-                createPrimarySubChecks(
-                    "PATCH", expectedApiVersion, "/v2/bookings/%s".formatted(reference)),
+                createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
                 Stream.of(
                     new JsonSchemaCheck(
                         BookingRole::isShipper,

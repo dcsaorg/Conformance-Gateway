@@ -292,6 +292,15 @@
           }
         ]
       },
+      "freeTimes": [
+        {
+          "typeCode": "DEM",
+          "isoEquipmentCode": "22GP",
+          "duration": 123,
+          "timeUnit": "WD",
+          "calculationBasis": "Calculated as..."
+        }
+      ],
       "payerCode": "Acme Inc.",
       "utilizedTransportEquipments": [
         {

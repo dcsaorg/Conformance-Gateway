@@ -51,11 +51,15 @@ public class ANPublisher extends ConformanceParty {
 
   private void sendArrivalNotices(JsonNode actionPrompt) {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
+    String filePath = "/standards.an/messages/arrivalnotice-api-%s-post-request.json";
+    if (scenarioType == ScenarioType.FREIGHTED) {
+      filePath = "/standards.an/messages/arrivalnotice-api-%s-post-freighted-request.json";
+    } else if (scenarioType == ScenarioType.FREE_TIME) {
+      filePath = "/standards.an/messages/arrivalnotice-api-%s-post-freetime-request.json";
+    }
     JsonNode jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards.an/messages/arrivalnotice-api-%s-post-request.json"
-                .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
-            Map.ofEntries());
+            filePath.formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")), Map.ofEntries());
     syncCounterpartPost("/arrival-notices", jsonRequestBody);
   }
 

@@ -64,7 +64,39 @@
         }
       },
       "returnInstructions": "Please place the container...",
-      "customsImportDeclarationProcedure": "The tax must be declared...",
+      "customsClearance": {
+        "customsClearancePoint": {
+          "locationName": "Port of Amsterdam",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "internalCode": "FRMRS",
+        "immediateTransportationEntry": {
+          "internalCode": "a391",
+          "itNumber": "V4914303071",
+          "itDate": "2025-01-23"
+        },
+        "customsImportDeclarationProcedure": "string",
+        "manifestReferenceNumber": "a1234",
+        "masterSequenceNumber": "x12345"
+      },
       "additionalInformation": "FIRMS code: B986",
       "references": [
         {
@@ -78,7 +110,7 @@
       "deliveryTypeAtDestination": "CY",
       "cargoMovementTypeAtDestination": "FCL",
       "serviceContractReference": "HHL51800000",
-      "termsAndConditions": "Any reference in...",
+      "termsAndConditions": "string",
       "carrierClauses": [
         "It is not allowed to..."
       ],
@@ -86,32 +118,16 @@
         {
           "partyFunction": "N1",
           "partyName": "Acme Inc.",
-          "typeOfPerson": "NATURAL_PERSON",
-          "location": {
-            "locationName": "Port of Amsterdam",
-            "address": {
-              "street": "Ruijggoordweg",
-              "streetNumber": "100",
-              "floor": "N/A",
-              "postCode": "1047 HM",
-              "POBox": "123",
-              "city": "Amsterdam",
-              "stateRegion": "North Holland",
-              "countryCode": "NL"
-            },
-            "UNLocationCode": "NLAMS",
-            "facility": {
-              "facilityCode": "ADT",
-              "facilityCodeListProvider": "SMDG"
-            },
-            "geoCoordinate": {
-              "latitude": "48.85855",
-              "longitude": "2.294492036"
-            }
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
           },
-          "displayedAddress": [
-            "Strawinskylaan 4117"
-          ],
           "identifyingCodes": [
             {
               "codeListProvider": "W3C",
@@ -288,11 +304,19 @@
             "vesselFlag": "NL",
             "vesselIMONumber": "12345678",
             "carrierVoyageNumber": "1234N",
-            "universalVoyageReference": "2301W"
+            "universalVoyageReference": "2301W",
+            "callReferenceNumber": "CRN1234"
           }
         ]
       },
       "payerCode": "Acme Inc.",
+      "paymentRemittance": {
+        "bankName": "Example Bank",
+        "accountNumber": "XYZ1234567890",
+        "swiftCode": "XYZ123456",
+        "beneficiary": "Example Carrier",
+        "remittanceEmail": "carrier@example.com"
+      },
       "utilizedTransportEquipments": [
         {
           "equipment": {
@@ -592,7 +616,39 @@
         }
       },
       "returnInstructions": "Please place the container...",
-      "customsImportDeclarationProcedure": "The tax must be declared...",
+      "customsClearance": {
+        "customsClearancePoint": {
+          "locationName": "Port of Amsterdam",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "internalCode": "FRMRS",
+        "immediateTransportationEntry": {
+          "internalCode": "a391",
+          "itNumber": "V4914303071",
+          "itDate": "2025-01-23"
+        },
+        "customsImportDeclarationProcedure": "string",
+        "manifestReferenceNumber": "a1234",
+        "masterSequenceNumber": "x12345"
+      },
       "additionalInformation": "FIRMS code: B986",
       "references": [
         {
@@ -606,7 +662,7 @@
       "deliveryTypeAtDestination": "CY",
       "cargoMovementTypeAtDestination": "FCL",
       "serviceContractReference": "HHL51800000",
-      "termsAndConditions": "Any reference in...",
+      "termsAndConditions": "string",
       "carrierClauses": [
         "It is not allowed to..."
       ],
@@ -614,32 +670,16 @@
         {
           "partyFunction": "N1",
           "partyName": "Acme Inc.",
-          "typeOfPerson": "NATURAL_PERSON",
-          "location": {
-            "locationName": "Port of Amsterdam",
-            "address": {
-              "street": "Ruijggoordweg",
-              "streetNumber": "100",
-              "floor": "N/A",
-              "postCode": "1047 HM",
-              "POBox": "123",
-              "city": "Amsterdam",
-              "stateRegion": "North Holland",
-              "countryCode": "NL"
-            },
-            "UNLocationCode": "NLAMS",
-            "facility": {
-              "facilityCode": "ADT",
-              "facilityCodeListProvider": "SMDG"
-            },
-            "geoCoordinate": {
-              "latitude": "48.85855",
-              "longitude": "2.294492036"
-            }
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
           },
-          "displayedAddress": [
-            "Strawinskylaan 4117"
-          ],
           "identifyingCodes": [
             {
               "codeListProvider": "W3C",
@@ -816,11 +856,40 @@
             "vesselFlag": "NL",
             "vesselIMONumber": "12345678",
             "carrierVoyageNumber": "1234N",
-            "universalVoyageReference": "2301W"
+            "universalVoyageReference": "2301W",
+            "callReferenceNumber": "CRN1234"
           }
         ]
       },
+      "freeTimes": [
+        {
+          "typeCode": "DEM",
+          "isoEquipmentCode": "22GP",
+          "duration": 123,
+          "timeUnit": "WD",
+          "calculationBasis": "Calculated as..."
+        }
+      ],
+      "charges": [
+        {
+          "chargeName": "Documentation fee - Destination",
+          "currencyAmount": 1012.12,
+          "currencyCode": "DKK",
+          "paymentTermCode": "PRE",
+          "calculationBasis": "Per day",
+          "unitPrice": 3456.6,
+          "quantity": 34.4,
+          "carrierRateOfExchange": "1.00 Euro = 1.17801 US Dollars"
+        }
+      ],
       "payerCode": "Acme Inc.",
+      "paymentRemittance": {
+        "bankName": "Example Bank",
+        "accountNumber": "XYZ1234567890",
+        "swiftCode": "XYZ123456",
+        "beneficiary": "Example Carrier",
+        "remittanceEmail": "carrier@example.com"
+      },
       "utilizedTransportEquipments": [
         {
           "equipment": {

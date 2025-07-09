@@ -118,13 +118,13 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"carrierContactInformation\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(checkCarrierField("name").validate(body));
-          issues.addAll(checkCarrierEmailOrPhone().validate(body));
+          issues.addAll(checkCarrierContactField("name").validate(body));
+          issues.addAll(checkCarrierContactEmailOrPhone().validate(body));
           return issues;
         });
   }
 
-  private static JsonContentCheck checkCarrierField(String field) {
+  private static JsonContentCheck checkCarrierContactField(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \""
             + field
@@ -138,7 +138,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkCarrierEmailOrPhone() {
+  private static JsonContentCheck checkCarrierContactEmailOrPhone() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of either the \"email\" or \"phone\" attribute in \"carrierContactInformation\"",
         mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
@@ -168,7 +168,7 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \""
             + field
             + "\" attribute in \"documentParties\"",
-        mav -> mav.path("arrivalNotices").all().path("documentParties").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally  present");
@@ -180,7 +180,7 @@ public class ANChecks {
   private static JsonContentCheck checkDocumentPartyAddress() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"address\" object in \"documentParties\"",
-        mav -> mav.path("arrivalNotices").all().path("documentParties").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
         (node, contextPath) -> {
           var address = node.get("address");
           if (address == null || !address.isObject() || address.isEmpty()) {
@@ -211,7 +211,7 @@ public class ANChecks {
   private static JsonContentCheck checkTransportETA() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of transport ETA fields",
-        mav -> mav.path("arrivalNotices").all().path("transport").submitPath(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
         (node, contextPath) -> {
           if (!node.hasNonNull("etaAtPortOfDischargeDate")
               && !node.hasNonNull("etaAtPlaceOfDeliveryDate")) {
@@ -226,7 +226,7 @@ public class ANChecks {
   private static JsonContentCheck checkPortOfDischargePresence() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"portOfDischarge\" object",
-        mav -> mav.path("arrivalNotices").all().path("transport").submitPath(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
         (node, contextPath) -> {
           var pod = node.get("portOfDischarge");
           if (pod == null) {
@@ -239,7 +239,7 @@ public class ANChecks {
   private static JsonContentCheck checkPortOfDischargeLocation() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of location information in \"portOfDischarge\"",
-        mav -> mav.path("arrivalNotices").all().path("transport").submitPath(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
         (node, contextPath) -> {
           var pod = node.get("portOfDischarge");
           if (pod != null && pod.isObject()) {
@@ -258,7 +258,7 @@ public class ANChecks {
   private static JsonContentCheck checkVesselVoyagesArray() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"vesselVoyages\" array",
-        mav -> mav.path("arrivalNotices").all().path("transport").submitPath(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
         (node, contextPath) -> {
           var voyages = node.get("vesselVoyages");
           if (voyages == null || !voyages.isArray() || voyages.isEmpty()) {
@@ -271,7 +271,7 @@ public class ANChecks {
   private static JsonContentCheck checkVesselVoyageField(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of \"" + field + "\" in vesselVoyages",
-        mav -> mav.path("arrivalNotices").all().path("transport").all().path("vesselVoyages").all(),
+        mav -> mav.submitAllMatching("arrivalNotices.*.transport.vesselVoyages.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");

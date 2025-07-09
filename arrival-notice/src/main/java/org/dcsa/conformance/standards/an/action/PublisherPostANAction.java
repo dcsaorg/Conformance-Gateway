@@ -76,13 +76,6 @@ public class PublisherPostANAction extends AnAction {
     };
   }
 
-  private boolean isFreighted() {
-    return scenarioType.equals(ScenarioType.FREIGHTED);
-  }
-
-  private boolean isFreetime() {
-    return scenarioType.equals(ScenarioType.FREE_TIME);
-  }
 
   private static String computeTitle(ScenarioType scenarioType) {
     if (scenarioType == ScenarioType.FREIGHTED) {

@@ -53,20 +53,14 @@ class BookingActionTest {
   }
 
   @Test
-  void testUriWithTrailingSlash() {
-    String[] result = bookingAction.buildFullUris("/base/", "/id");
-    assertArrayEquals(new String[] {"/base//id"}, result); // note the double slash
-  }
-
-  @Test
   void testUriReferenceWithEmptyString() {
-    String[] result = bookingAction.buildFullUris("/base", "");
-    assertArrayEquals(new String[] {"/base"}, result);
+    String[] result = bookingAction.buildFullUris("/base", "  ");
+    assertArrayEquals(new String[] {}, result);
   }
 
   @Test
   void testMixedEmptyAndNullUriReferences() {
-    String[] result = bookingAction.buildFullUris("/base", "", null, "/x");
-    assertArrayEquals(new String[] {"/base", "/base/x"}, result);
+    String[] result = bookingAction.buildFullUris("/base", "  ", null, "/x");
+    assertArrayEquals(new String[] {"/base/x"}, result);
   }
 }

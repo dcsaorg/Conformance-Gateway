@@ -58,7 +58,6 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
         String cbrr = dsp.carrierBookingRequestReference();
-        String cbr = dsp.carrierBookingReference();
         return Stream.concat(
             Stream.of(
                 new JsonSchemaCheck(
@@ -69,7 +68,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
                 BookingChecks.requestContentChecks(
                     getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())),
             Stream.concat(
-                createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
+                createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr),
                 getNotificationChecks(
                     expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)));
       }

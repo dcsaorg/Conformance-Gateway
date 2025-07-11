@@ -1,6 +1,6 @@
 Name,Type,Description,Example
-"transportDocumentReference",string,"Reference of the transport document for which to return the associated arrival notices",TDR0123456
-equipmentReference,array,"Reference(s) of the equipment for which to return the associated arrival notices","APZU4812090,APZU4812091"
+"transportDocumentReferences",array,"Reference(s) of the transport document(s) for which to return the associated arrival notices","TDR0123456,TDR1234567"
+equipmentReferences,array,"Reference(s) of the equipment for which to return the associated arrival notices","APZU4812090,APZU4812091"
 portOfDischarge,string,"UN location of the port of discharge for which to retrieve available arrival notices",NLRTM
 vesselIMONumber,string,"IMO number of the vessel for which to retrieve available arrival notices",12345678
 vesselName,string,"Name of the vessel for which to retrieve available arrival notices","King of the Seas"

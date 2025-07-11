@@ -1,8 +1,8 @@
 FilterParameters,Required
-"transportDocumentReference",yes
-"transportDocumentReference, equipmentReference",
-equipmentReference,
-"minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, equipmentReference",
+"transportDocumentReferences",yes
+"transportDocumentReferences, equipmentReferences",
+equipmentReferences,
+"minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, equipmentReferences",
 "minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, portOfDischarge",
 "minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, vesselIMONumber",
 "minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, vesselIMONumber, carrierImportVoyageNumber",

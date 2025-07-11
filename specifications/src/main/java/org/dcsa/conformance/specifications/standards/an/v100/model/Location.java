@@ -2,9 +2,6 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.Facility;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.GeoCoordinate;
 
 @Data
 @Schema(description = "Location information")

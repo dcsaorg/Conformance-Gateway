@@ -29,15 +29,19 @@ paths:
       summary: "Retrieves a list of arrival notices"
       operationId: "get-arrival-notices"
       parameters:
-      - name: "transportDocumentReference"
+      - name: "transportDocumentReferences"
         in: "query"
-        description: "Reference of the transport document for which to return the associated arrival notices"
+        description: "Reference(s) of the transport document(s) for which to return the associated arrival notices"
+        explode: false
         schema:
-          type: "string"
-        example: "TDR0123456"
-      - name: "equipmentReference"
+          type: "array"
+          items:
+            type: "string"
+        example: "TDR0123456,TDR1234567"
+      - name: "equipmentReferences"
         in: "query"
         description: "Reference(s) of the equipment for which to return the associated arrival notices"
+        explode: false
         schema:
           type: "array"
           items:
@@ -287,7 +291,11 @@ components:
         carrierCode:
           maxLength: 4
           type: "string"
-          description: "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon."
+          description: |
+            The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
+            [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
+
+            `carrierCodeListProvider` defines which list the `carrierCode` is based upon.
           example: "MMCU"
         carrierCodeListProvider:
           type: "string"
@@ -296,9 +304,6 @@ components:
             - `SMDG` (Ship Message Design Group)
             - `NMFTA` (National Motor Freight Traffic Association)
           example: "NMFTA"
-          enum:
-          - "SMDG"
-          - "NMFTA"
         carrierContactInformation:
           type: "array"
           description: "The party to contact for any inquiries related to this Arrival Notice."
@@ -311,11 +316,13 @@ components:
           items:
             $ref: "#/components/schemas/PartyContactDetail"
         pickupLocation:
-          description: "Pickup location"
+          description: |
+            The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.
           allOf:
           - $ref: "#/components/schemas/Location"
         returnLocation:
-          description: "Return location"
+          description: |
+            The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.
           allOf:
           - $ref: "#/components/schemas/Location"
         returnInstructions:
@@ -323,11 +330,10 @@ components:
           type: "string"
           description: "Return instructions"
           example: "Please place the container..."
-        customsImportDeclarationProcedure:
-          maxLength: 1000
-          type: "string"
-          description: "Customs import declaration procedure"
-          example: "The tax must be declared..."
+        customsClearance:
+          description: "Customs clearance information"
+          allOf:
+          - $ref: "#/components/schemas/CustomsClearance"
         additionalInformation:
           maxLength: 500
           type: "string"
@@ -352,9 +358,6 @@ components:
             - `BOL` (Bill of Lading)
             - `SWB` (Sea Waybill)
           example: "SWB"
-          enum:
-          - "BOL"
-          - "SWB"
         isElectronic:
           type: "boolean"
           description: "An indicator whether the transport document is electronically transferred."
@@ -369,10 +372,6 @@ components:
             - `SD` (Store Door)
             - `CFS` (Container Freight Station)
           example: "CY"
-          enum:
-          - "CY"
-          - "SD"
-          - "CFS"
         cargoMovementTypeAtDestination:
           maxLength: 3
           type: "string"
@@ -391,8 +390,7 @@ components:
         termsAndConditions:
           maxLength: 50000
           type: "string"
-          description: "Carrier terms and conditions of transport."
-          example: "Any reference in..."
+          description: "Carrier terms and conditions for the Arrival Notice."
         carrierClauses:
           type: "array"
           description: "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer."
@@ -426,6 +424,11 @@ components:
           description: |
             Name identifying the entity responsible for freight payment.
           example: "Acme Inc."
+        paymentRemittance:
+          description: |
+            Bank account information provided by the carrier for customers to make payments of the outstanding charges
+          allOf:
+          - $ref: "#/components/schemas/PaymentRemittance"
         utilizedTransportEquipments:
           type: "array"
           description: "The equipments being used."
@@ -674,9 +677,6 @@ components:
             - `PRE` (Prepaid)
             - `COL` (Collect)
           example: "PRE"
-          enum:
-          - "PRE"
-          - "COL"
         calculationBasis:
           maxLength: 50
           type: "string"
@@ -693,6 +693,16 @@ components:
           description: "The amount of unit for this charge item."
           format: "float"
           example: 34.4
+        carrierRateOfExchange:
+          maxLength: 50
+          type: "string"
+          description: |
+            The quotation of the relative value of a currency unit against the unit of another currency
+            in the foreign exchange market applicable to this charge item.
+            The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+            If not provided, the customer should refer to the ROE available on the carrier website
+            or the ROE defined by the competent customs authority, as per local practice.
+          example: "1.00 Euro = 1.17801 US Dollars"
       description: "Addresses the monetary value of freight and other service charges for a `Booking`."
     ConsignmentItem:
       type: "object"
@@ -713,7 +723,10 @@ components:
             example: "blue shoes size 47"
         HSCodes:
           type: "array"
-          description: "A list of `HS Codes` that apply to this `consignmentItem`"
+          description: |
+            A list of `HS Codes` that apply to this `consignmentItem`.
+            HS codes are used by customs to classify the product being shipped.
+            The code must be at least 6 and at most 10 digits.
           items:
             maxLength: 10
             type: "string"
@@ -762,6 +775,44 @@ components:
           items:
             $ref: "#/components/schemas/CustomsReference"
       description: "Defines a list of `CargoItems` belonging together and the associated `Booking`. A `ConsignmentItem` can be split across multiple containers by referencing multiple `CargoItems`."
+    CustomsClearance:
+      type: "object"
+      properties:
+        customsClearancePoint:
+          description: "Location information"
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        internalCode:
+          maxLength: 5
+          type: "string"
+          description: "Port code used in the Carrier’s internal system to match the location"
+          example: "FRMRS"
+        immediateTransportationEntry:
+          description: |
+            An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
+            that allows imported cargo to be moved from the first port of arrival in the U.S.
+            to another port or bonded facility without being physically cleared by CBP at the first port.
+          allOf:
+          - $ref: "#/components/schemas/ImmediateTransportationEntry"
+        customsImportDeclarationProcedure:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Instructions on the administrative processes for submitting import customs declarations to the local agency.
+        manifestReferenceNumber:
+          maxLength: 35
+          type: "string"
+          description: |
+            Manifest reference number for manifest declaration and customs clearance in Korea.
+          example: "a1234"
+        masterSequenceNumber:
+          maxLength: 35
+          type: "string"
+          description: |
+            A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of
+            a particular vessel. Customers use this Master Sequence Number (MSN) as a reference when declaring all related House B/Ls.
+          example: "x12345"
+      description: "Customs clearance information"
     CustomsReference:
       type: "object"
       properties:
@@ -1011,29 +1062,10 @@ components:
           type: "string"
           description: "Party name"
           example: "Acme Inc."
-        typeOfPerson:
-          maxLength: 50
-          type: "string"
-          description: |
-            Can be one of the following values as per the Union Customs Code art. 5(4):
-            - `NATURAL_PERSON` (A person that is an individual living human being)
-            - `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
-            - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
-          example: "NATURAL_PERSON"
-        location:
-          description: "Party location"
+        address:
+          description: "Party  address"
           allOf:
-          - $ref: "#/components/schemas/Location"
-        displayedAddress:
-          maxItems: 6
-          type: "array"
-          description: |
-            The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-          items:
-            maxLength: 35
-            type: "string"
-            description: "A single address line"
-            example: "Strawinskylaan 4117"
+          - $ref: "#/components/schemas/Address"
         identifyingCodes:
           type: "array"
           description: "List of codes identifying the party"
@@ -1052,11 +1084,11 @@ components:
         reference:
           maxLength: 35
           type: "string"
-          description: "Document party reference"
+          description: "A reference linked to the document party."
           example: "REF1234"
         purchaseOrderReferences:
           type: "array"
-          description: "A list of purchase order references"
+          description: "A list of `Purchase Order Reference`s linked to the document party."
           items:
             maxLength: 35
             type: "string"
@@ -1295,6 +1327,38 @@ components:
             - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`
           example: "DID"
       description: "Code-based identifier for a party. Includes the provider, code, and list name."
+    ImmediateTransportationEntry:
+      type: "object"
+      properties:
+        firmsCode:
+          maxLength: 4
+          type: "string"
+          description: |
+            The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
+            assigned by U.S. Customs and Border Protection (CBP) to facilities in the U.S. where imported goods are held or processed,
+            such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
+            It tells CBP and freight systems where the cargo is physically located.
+          example: "a391"
+        itNumber:
+          maxLength: 100
+          type: "string"
+          description: |
+            The reference number of the bonded movement under a U.S. Customs and Border Protection (CBP) Immediate Transportation (IT) entry,
+            often assigned by the carrier or customs broker. It allows goods to be moved under bond from the Port of Discharge
+            to another inland port or bonded facility without paying duties at the first port. The IT number is used
+            for tracking the movement and verifying arrival at the inland port or bonded facility.
+          example: "V4914303071"
+        itDate:
+          type: "string"
+          description: |
+            The date the in-bond movement began, i.e., when the Immediate Transportation (IT) entry was filed and accepted
+            by U.S. Customs and Border Protection (CBP).
+          format: "date"
+          example: "2025-01-23"
+      description: |
+        An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
+        that allows imported cargo to be moved from the first port of arrival in the U.S.
+        to another port or bonded facility without being physically cleared by CBP at the first port.
     ImportLicense:
       type: "object"
       properties:
@@ -1558,6 +1622,36 @@ components:
           description: "`E-mail` address to be used"
           example: "info@dcsa.org"
       description: "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided."
+    PaymentRemittance:
+      type: "object"
+      properties:
+        bankName:
+          maxLength: 100
+          type: "string"
+          description: "Name of the carrier's bank where payment should be sent"
+          example: "Example Bank"
+        accountNumber:
+          maxLength: 40
+          type: "string"
+          description: "Bank account number for receiving payment"
+          example: "XYZ1234567890"
+        swiftCode:
+          maxLength: 11
+          type: "string"
+          description: "SWIFT/BIC code for international wire transfers"
+          example: "XYZ123456"
+        beneficiary:
+          maxLength: 100
+          type: "string"
+          description: "Legal name of the payment recipient (carrier)"
+          example: "Example Carrier"
+        remittanceEmail:
+          maxLength: 100
+          type: "string"
+          description: "Email address where proof of payment remittance should be sent"
+          example: "carrier@example.com"
+      description: |
+        Bank account information provided by the carrier for customers to make payments of the outstanding charges
     Reference:
       type: "object"
       properties:
@@ -1566,6 +1660,7 @@ components:
           type: "string"
           description: |
             The reference type codes defined by DCSA. Possible values are:
+            - `CA` (Carrier’s Reference)
             - `CR` (Customer’s Reference)
             - `AKG` (Vehicle Identification Number)
           example: "CR"
@@ -1574,7 +1669,8 @@ components:
           type: "string"
           description: "The value of the reference."
           example: "HHL00103004"
-      description: "References provided by the shipper or freight forwarder at the time of Booking or Shipping Instructions. Carriers share them back during Track & Trace and they may appear on the Bill of Lading."
+      description: |
+        References used by the customer or carrier to identify the shipment in their internal system.
     ReferenceConsignmentItem:
       type: "object"
       properties:
@@ -1673,13 +1769,13 @@ components:
         plannedDepartureDate:
           type: "string"
           description: |
-            The expected date of departure of the first mother vessel arriving at the destination country.
+            The expected date of departure of the  mother vessel arriving at the destination country.
           format: "date"
           example: "2025-01-23"
         plannedArrivalDate:
           type: "string"
           description: |
-            The expected date of arrival of the first mother vessel arriving at the destination country.
+            The expected date of arrival of the mother vessel arriving at the destination country.
           format: "date"
           example: "2025-01-23"
         etaAtPortOfDischargeDate:
@@ -1707,12 +1803,12 @@ components:
           example: "2025-01-23T01:23:45Z"
         loadLocation:
           description: |
-            The location where the equipment is loaded on the first mother vessel arriving at the destination country.
+            Location where the equipment is loaded on the mother vessel arriving at the destination country.
           allOf:
           - $ref: "#/components/schemas/Location"
         dischargeLocation:
           description: |
-            The location where the equipment is discharged from the last mother vessel arriving at the destination country.
+            Location where the equipment is discharged from the mother vessel arriving at the destination country.
           allOf:
           - $ref: "#/components/schemas/Location"
         portOfLoading:
@@ -1733,8 +1829,8 @@ components:
           - $ref: "#/components/schemas/Location"
         placeOfDelivery:
           description: |
-            The location where the cargo is handed over by the shipping line to the consignee or its agent
-            and where responsibility of the shipping line ceases.
+            The location where the cargo is handed over to the consignee, or his agent,
+            by the shipping line and where responsibility of the shipping line ceases.
           allOf:
           - $ref: "#/components/schemas/Location"
         modeOfTransport:
@@ -1824,7 +1920,10 @@ components:
         vesselFlag:
           maxLength: 2
           type: "string"
-          description: "Vessel flag"
+          description: |
+            The flag of the nation whose laws the vessel is registered under.
+            This is indicated by the 2 characters for the country code using
+            [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).
           example: "NL"
         vesselIMONumber:
           maxLength: 8
@@ -1850,6 +1949,13 @@ components:
             * the import voyage (if `typeCode` is `POD` or `DC`)
             * the export voyage (if `typeCode` is `POL`)
           example: "2301W"
+        callReferenceNumber:
+          maxLength: 100
+          type: "string"
+          description: |
+            A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
+            It can be used for customs clearance purposes in specific countries (e.g. NL, UK).
+          example: "CRN1234"
       description: |
         Details of a vessel voyage.
 

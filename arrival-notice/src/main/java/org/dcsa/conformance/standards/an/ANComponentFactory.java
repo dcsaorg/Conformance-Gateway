@@ -111,7 +111,7 @@ public class ANComponentFactory extends AbstractComponentFactory {
   }
 
   public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {
-    String schemaFilePath = "/standards/an/schemas/AN_v%s.yaml".formatted(standardVersion);
+    String schemaFilePath = "/standards/an/v100/an-v%s-openapi.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 }

@@ -79,4 +79,15 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<build>
+		<resources>
+			<resource>
+				<directory>generated-resources</directory>
+				<includes>
+					<include>**/*.yaml</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+
 </project>

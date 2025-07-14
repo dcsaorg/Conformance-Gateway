@@ -88,6 +88,15 @@
 				</includes>
 			</resource>
 		</resources>
+		<testResources>
+			<testResource>
+				<directory>generated-resources</directory>
+				<includes>
+					<include>**/*.yaml</include>
+				</includes>
+			</testResource>
+		</testResources>
 	</build>
+
 
 </project>

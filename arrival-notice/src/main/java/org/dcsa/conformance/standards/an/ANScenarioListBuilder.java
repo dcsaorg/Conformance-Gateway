@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.standards.an.action.AnAction;
+import org.dcsa.conformance.standards.an.action.ANAction;
 import org.dcsa.conformance.standards.an.action.PublisherPostANAction;
 import org.dcsa.conformance.standards.an.action.PublisherPostANNotificationAction;
 import org.dcsa.conformance.standards.an.action.SubscriberGetANAction;
@@ -56,7 +56,7 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
             new PublisherPostANAction(
                 publisherPartyName,
                 subscriberPartyName,
-                (AnAction) previousAction,
+                (ANAction) previousAction,
                 scenarioType,
                 componentFactory.getMessageSchemaValidator("ArrivalNoticesMessage")));
   }
@@ -70,7 +70,7 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
             new SubscriberGetANAction(
                 subscriberPartyName,
                 publisherPartyName,
-                (AnAction) previousAction,
+                (ANAction) previousAction,
                 componentFactory.getMessageSchemaValidator("ArrivalNoticesMessage")));
   }
 
@@ -83,7 +83,7 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
             new PublisherPostANNotificationAction(
                 publisherPartyName,
                 subscriberPartyName,
-                (AnAction) previousAction,
+                (ANAction) previousAction,
                 componentFactory.getMessageSchemaValidator("ArrivalNoticeNotificationsMessage")));
   }
 

@@ -29,17 +29,17 @@ public class ANPublisher extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-
+    // no state to export
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-
+    // no state to import
   }
 
   @Override
   protected void doReset() {
-
+    // no state to reset
   }
 
   @Override
@@ -51,22 +51,21 @@ public class ANPublisher extends ConformanceParty {
 
   private void sendArrivalNotices(JsonNode actionPrompt) {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    String filePath = "/standards.an/messages/arrivalnotice-api-%s-post-request.json";
-    if (scenarioType == ScenarioType.FREIGHTED) {
-      filePath = "/standards.an/messages/arrivalnotice-api-%s-post-freighted-request.json";
-    } else if (scenarioType == ScenarioType.FREE_TIME) {
-      filePath = "/standards.an/messages/arrivalnotice-api-%s-post-freetime-request.json";
-    }
-    JsonNode jsonRequestBody =
-        JsonToolkit.templateFileToJsonNode(
-            filePath.formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")), Map.ofEntries());
+    String filePath = getAnPayloadFilepath(scenarioType);
+    JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath, Map.ofEntries());
     syncCounterpartPost("/arrival-notices", jsonRequestBody);
+  }
+
+  private String getAnPayloadFilepath(ScenarioType scenarioType) {
+
+    return "/standards/an/messages/"
+        + scenarioType.arrivalNoticePayload(apiVersion.toLowerCase().replaceAll("[.-]", ""));
   }
 
   private void sendArrivalNoticeNotification(JsonNode actionPrompt) {
     JsonNode jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards.an/messages/arrivalnotice-api-%s-post-notification-request.json"
+            "/standards/an/messages/arrivalnotice-api-%s-post-notification-request.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
             Map.ofEntries());
     syncCounterpartPost("/arrival-notice-notifications", jsonRequestBody);
@@ -77,7 +76,7 @@ public class ANPublisher extends ConformanceParty {
 
     JsonNode jsonResponseBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards.an/messages/arrivalnotice-api-%s-get-response.json"
+            "/standards/an/messages/arrivalnotice-api-%s-get-response.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
             Map.ofEntries());
     return request.createResponse(

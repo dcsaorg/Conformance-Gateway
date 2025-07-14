@@ -29,7 +29,12 @@ public class ANComponentFactory extends AbstractComponentFactory {
   }
 
   public ANComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
-    super(standardName, standardVersion, scenarioSuite, "Publisher", "Subscriber");
+    super(
+        standardName,
+        standardVersion,
+        scenarioSuite,
+        ANRole.PUBLISHER.getConfigName(),
+        ANRole.SUBSCRIBER.getConfigName());
   }
 
   @Override
@@ -41,7 +46,7 @@ public class ANComponentFactory extends AbstractComponentFactory {
       Arrays.stream(counterpartConfigurations)
         .collect(Collectors.toMap(CounterpartConfiguration::getRole, Function.identity()));
 
-    LinkedList<ConformanceParty> parties = new LinkedList<>();
+    List<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration publisherConfiguration =
       partyConfigurationsByRoleName.get(ANRole.PUBLISHER.getConfigName());
@@ -106,7 +111,7 @@ public class ANComponentFactory extends AbstractComponentFactory {
   }
 
   public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {
-    String schemaFilePath = "/standards.an/schemas/AN_v%s.yaml".formatted(standardVersion);
+    String schemaFilePath = "/standards/an/schemas/AN_v%s.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 }

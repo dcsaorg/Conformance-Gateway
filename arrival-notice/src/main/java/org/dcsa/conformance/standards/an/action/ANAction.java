@@ -11,11 +11,12 @@ import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.an.party.DynamicScenarioParameters;
 
-public class AnAction extends ConformanceAction {
+public class ANAction extends ConformanceAction {
 
   private final OverwritingReference<DynamicScenarioParameters> dsp;
 
-  protected AnAction(String sourcePartyName, String targetPartyName, AnAction previousAction, String actionTitle) {
+  protected ANAction(
+      String sourcePartyName, String targetPartyName, ANAction previousAction, String actionTitle) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.dsp =
       previousAction == null

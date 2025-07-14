@@ -19,6 +19,7 @@ public class ANChecks {
   public static ActionCheck getANPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion, String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.addAll(validateBasicFields());
     checks.add(validateCarrierContactInformation());
     checks.add(validateDocumentParties());
@@ -39,12 +40,12 @@ public class ANChecks {
 
   private static List<JsonContentCheck> validateBasicFields() {
     return List.of(
-        checkBasicFieldWithLabel("carrierCode"),
-        checkBasicFieldWithLabel("carrierCodeListProvider"),
-        checkBasicFieldWithLabel("deliveryTypeAtDestination"));
+        validateBasicFieldWithLabel("carrierCode"),
+        validateBasicFieldWithLabel("carrierCodeListProvider"),
+        validateBasicFieldWithLabel("deliveryTypeAtDestination"));
   }
 
-  private static JsonContentCheck checkBasicFieldWithLabel(String field) {
+  private static JsonContentCheck validateBasicFieldWithLabel(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"" + field + "\" attribute",
         mav -> mav.submitAllMatching("arrivalNotices.*"),
@@ -57,7 +58,7 @@ public class ANChecks {
         });
   }
 
-  static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
+  private static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
       JsonAttribute.customValidator(
           "Every response received during a conformance test must not be empty",
           body -> body.isEmpty() ? Set.of("The response body must not be empty") : Set.of());
@@ -77,7 +78,7 @@ public class ANChecks {
       Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
-    checks.addAll(checkValidTransportDocumentReferences(dspSupplier));
+    checks.addAll(validateTransportDocumentReferences(dspSupplier));
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,
@@ -86,29 +87,65 @@ public class ANChecks {
         checks);
   }
 
-  private static List<JsonContentCheck> checkValidTransportDocumentReferences(
+  public static ActionCheck getANNPostPayloadChecks(
+      UUID matchedExchangeUuid, String expectedApiVersion) {
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
+    return JsonAttribute.contentChecks(
+        ANRole::isPublisher,
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST,
+        expectedApiVersion,
+        checks);
+  }
+
+  private static List<JsonContentCheck> validateTransportDocumentReferences(
       Supplier<DynamicScenarioParameters> dsp) {
     return List.of(
         JsonAttribute.customValidator(
-            "[Scenario] Validate that each 'transportDocumentReference' in the response is valid",
+            "[Scenario] Validate that all 'transportDocumentReference's in the response match the query parameters, and none are missing",
             body -> {
               var issues = new LinkedHashSet<String>();
               var arrivalNotices = body.get("arrivalNotices");
+
               if (arrivalNotices == null || !arrivalNotices.isArray()) {
                 issues.add("Missing or invalid 'arrivalNotices' array in payload.");
                 return issues;
               }
-              Set<String> validReferences = new HashSet<>(dsp.get().transportDocumentReferences());
+
+              Set<String> expectedTDRs = new HashSet<>(dsp.get().transportDocumentReferences());
+              Set<String> foundTDRs = new HashSet<>();
+
               for (int i = 0; i < arrivalNotices.size(); i++) {
                 var notice = arrivalNotices.get(i);
-                var tdr = notice.get("transportDocumentReference");
-                if (!validReferences.contains(tdr.asText())) {
+                var tdrNode = notice.get("transportDocumentReference");
+
+                if (tdrNode == null || !tdrNode.isTextual()) {
+                  issues.add(
+                      String.format("ArrivalNotice %d: missing 'transportDocumentReference'", i));
+                  continue;
+                }
+
+                String tdr = tdrNode.asText();
+                foundTDRs.add(tdr);
+
+                if (!expectedTDRs.contains(tdr)) {
                   issues.add(
                       String.format(
-                          "ArrivalNotice %d: 'transportDocumentReference' '%s' is not a valid one",
-                          i, tdr.asText()));
+                          "ArrivalNotice %d: transportDocumentReference '%s' was not requested in query parameters",
+                          i, tdr));
                 }
               }
+
+              Set<String> missingTDRs = new HashSet<>(expectedTDRs);
+              missingTDRs.removeAll(foundTDRs);
+              for (String missingTdr : missingTDRs) {
+                issues.add(
+                    String.format(
+                        "No ArrivalNotice was returned for transportDocumentReference '%s' specified in query parameters",
+                        missingTdr));
+              }
+
               return issues;
             }));
   }
@@ -118,13 +155,13 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"carrierContactInformation\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(checkCarrierContactField("name").validate(body));
-          issues.addAll(checkCarrierContactEmailOrPhone().validate(body));
+          issues.addAll(validateCarrierContactField("name").validate(body));
+          issues.addAll(validateCarrierContactEmailOrPhone().validate(body));
           return issues;
         });
   }
 
-  private static JsonContentCheck checkCarrierContactField(String field) {
+  private static JsonContentCheck validateCarrierContactField(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \""
             + field
@@ -138,7 +175,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkCarrierContactEmailOrPhone() {
+  private static JsonContentCheck validateCarrierContactEmailOrPhone() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of either the \"email\" or \"phone\" attribute in \"carrierContactInformation\"",
         mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
@@ -155,15 +192,15 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"documentParties\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(checkDocumentPartyField("partyFunction").validate(body));
-          issues.addAll(checkDocumentPartyField("partyName").validate(body));
-          issues.addAll(checkDocumentPartyField("partyContactDetails").validate(body));
-          issues.addAll(checkDocumentPartyAddress().validate(body));
+          issues.addAll(validateDocumentPartyField("partyFunction").validate(body));
+          issues.addAll(validateDocumentPartyField("partyName").validate(body));
+          issues.addAll(validateDocumentPartyField("partyContactDetails").validate(body));
+          issues.addAll(validateDocumentPartyAddress().validate(body));
           return issues;
         });
   }
 
-  private static JsonContentCheck checkDocumentPartyField(String field) {
+  private static JsonContentCheck validateDocumentPartyField(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \""
             + field
@@ -177,7 +214,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkDocumentPartyAddress() {
+  private static JsonContentCheck validateDocumentPartyAddress() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"address\" object in \"documentParties\"",
         mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
@@ -197,18 +234,18 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"transport\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(checkTransportETA().validate(body));
-          issues.addAll(checkPortOfDischargePresence().validate(body));
-          issues.addAll(checkPortOfDischargeLocation().validate(body));
-          issues.addAll(checkVesselVoyagesArray().validate(body));
-          issues.addAll(checkVesselVoyageField("typeCode").validate(body));
-          issues.addAll(checkVesselVoyageField("vesselName").validate(body));
-          issues.addAll(checkVesselVoyageField("carrierVoyageNumber").validate(body));
+          issues.addAll(validateTransportETA().validate(body));
+          issues.addAll(validatePortOfDischargePresence().validate(body));
+          issues.addAll(validatePortOfDischargeLocation().validate(body));
+          issues.addAll(validateVesselVoyagesArray().validate(body));
+          issues.addAll(validateVesselVoyageField("typeCode").validate(body));
+          issues.addAll(validateVesselVoyageField("vesselName").validate(body));
+          issues.addAll(validateVesselVoyageField("carrierVoyageNumber").validate(body));
           return issues;
         });
   }
 
-  private static JsonContentCheck checkTransportETA() {
+  private static JsonContentCheck validateTransportETA() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of transport ETA fields",
         mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
@@ -223,7 +260,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkPortOfDischargePresence() {
+  private static JsonContentCheck validatePortOfDischargePresence() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"portOfDischarge\" object",
         mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
@@ -236,7 +273,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkPortOfDischargeLocation() {
+  private static JsonContentCheck validatePortOfDischargeLocation() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of location information in \"portOfDischarge\"",
         mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
@@ -255,7 +292,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkVesselVoyagesArray() {
+  private static JsonContentCheck validateVesselVoyagesArray() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"vesselVoyages\" array",
         mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
@@ -268,7 +305,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkVesselVoyageField(String field) {
+  private static JsonContentCheck validateVesselVoyageField(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of \"" + field + "\" in vesselVoyages",
         mav -> mav.submitAllMatching("arrivalNotices.*.transport.vesselVoyages.*"),
@@ -280,7 +317,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkFreeTimeAttribute(String attributeName) {
+  private static JsonContentCheck validateFreeTimeAttribute(String attributeName) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"freeTime\" \""
             + attributeName
@@ -312,17 +349,16 @@ public class ANChecks {
               }
             }
           }
-          issues.addAll(checkFreeTimeAttribute("typeCode").validate(body));
-          issues.addAll(checkFreeTimeAttribute("isoEquipmentCode").validate(body));
-          issues.addAll(checkFreeTimeAttribute("duration").validate(body));
-          issues.addAll(checkFreeTimeAttribute("timeUnit").validate(body));
+          issues.addAll(validateFreeTimeAttribute("typeCode").validate(body));
+          issues.addAll(validateFreeTimeAttribute("isoEquipmentCode").validate(body));
+          issues.addAll(validateFreeTimeAttribute("duration").validate(body));
+          issues.addAll(validateFreeTimeAttribute("timeUnit").validate(body));
 
           return issues;
         });
   }
 
-
-  private static JsonContentCheck checkChargeAttribute(String attributeName) {
+  private static JsonContentCheck validateChargeAttribute(String attributeName) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"charges\" \""
             + attributeName
@@ -342,13 +378,13 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"charges\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(checkChargeAttribute("chargeName").validate(body));
-          issues.addAll(checkChargeAttribute("currencyAmount").validate(body));
-          issues.addAll(checkChargeAttribute("currencyCode").validate(body));
-          issues.addAll(checkChargeAttribute("paymentTermCode").validate(body));
-          issues.addAll(checkChargeAttribute("unitPrice").validate(body));
-          issues.addAll(checkChargeAttribute("quantity").validate(body));
-          issues.addAll(checkChargeAttribute("carrierRateOfExchange").validate(body));
+          issues.addAll(validateChargeAttribute("chargeName").validate(body));
+          issues.addAll(validateChargeAttribute("currencyAmount").validate(body));
+          issues.addAll(validateChargeAttribute("currencyCode").validate(body));
+          issues.addAll(validateChargeAttribute("paymentTermCode").validate(body));
+          issues.addAll(validateChargeAttribute("unitPrice").validate(body));
+          issues.addAll(validateChargeAttribute("quantity").validate(body));
+          issues.addAll(validateChargeAttribute("carrierRateOfExchange").validate(body));
           return issues;
         });
   }
@@ -360,17 +396,17 @@ public class ANChecks {
         body -> {
           var issues = new LinkedHashSet<String>();
 
-          issues.addAll(checkUTEEquipmentPresence().validate(body));
-          issues.addAll(checkUTEEquipmentField("equipmentReference").validate(body));
-          issues.addAll(checkUTEEquipmentField("ISOEquipmentCode").validate(body));
-          issues.addAll(checkUTESealsPresence().validate(body));
-          issues.addAll(checkUTESealNumber().validate(body));
+          issues.addAll(validateUTEEquipmentPresence().validate(body));
+          issues.addAll(validateUTEEquipmentField("equipmentReference").validate(body));
+          issues.addAll(validateUTEEquipmentField("ISOEquipmentCode").validate(body));
+          issues.addAll(validateUTESealsPresence().validate(body));
+          issues.addAll(validateUTESealNumber().validate(body));
 
           return issues;
         });
   }
 
-  private static JsonContentCheck checkUTEEquipmentField(String field) {
+  private static JsonContentCheck validateUTEEquipmentField(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"utilizedTransportEquipments.equipment."
             + field
@@ -384,7 +420,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkUTEEquipmentPresence() {
+  private static JsonContentCheck validateUTEEquipmentPresence() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"utilizedTransportEquipments.equipment\" object",
         mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*"),
@@ -396,7 +432,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkUTESealsPresence() {
+  private static JsonContentCheck validateUTESealsPresence() {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the \"utilizedTransportEquipments.seals\" array",
         body -> {
@@ -420,7 +456,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkUTESealNumber() {
+  private static JsonContentCheck validateUTESealNumber() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"utilizedTransportEquipments.seals.number\" attribute",
         mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*.seals.*"),
@@ -438,18 +474,18 @@ public class ANChecks {
         body -> {
           var issues = new LinkedHashSet<String>();
 
-          issues.addAll(checkConsignmentDescriptionOfGoods().validate(body));
-          issues.addAll(checkCargoItemPresence().validate(body));
-          issues.addAll(checkCargoItemField("equipmentReference").validate(body));
-          issues.addAll(checkCargoItemField("cargoGrossWeight").validate(body));
-          issues.addAll(checkOuterPackagingStructure().validate(body));
-          issues.addAll(checkOuterPackagingFields().validate(body));
+          issues.addAll(validateConsignmentItemsDescriptionOfGoods().validate(body));
+          issues.addAll(validateCargoItemPresence().validate(body));
+          issues.addAll(validateCargoItemField("equipmentReference").validate(body));
+          issues.addAll(validateCargoItemField("cargoGrossWeight").validate(body));
+          issues.addAll(validateOuterPackagingStructure().validate(body));
+          issues.addAll(validateOuterPackagingFields().validate(body));
 
           return issues;
         });
   }
 
-  private static JsonContentCheck checkConsignmentDescriptionOfGoods() {
+  private static JsonContentCheck validateConsignmentItemsDescriptionOfGoods() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"descriptionOfGoods\" field",
         mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*"),
@@ -464,7 +500,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkCargoItemPresence() {
+  private static JsonContentCheck validateCargoItemPresence() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"cargoItems\" array",
         mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*"),
@@ -477,7 +513,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkCargoItemField(String field) {
+  private static JsonContentCheck validateCargoItemField(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"cargoItems."
             + field
@@ -491,7 +527,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkOuterPackagingStructure() {
+  private static JsonContentCheck validateOuterPackagingStructure() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"outerPackaging\" object",
         mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*.cargoItems.*"),
@@ -504,7 +540,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck checkOuterPackagingFields() {
+  private static JsonContentCheck validateOuterPackagingFields() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"outerPackaging\" required fields",
         mav ->
@@ -528,4 +564,6 @@ public class ANChecks {
           return issues;
         });
   }
+
+
 }

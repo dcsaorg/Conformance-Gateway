@@ -9,16 +9,17 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.dcsa.conformance.standards.an.party.ANRole;
 
-public class PublisherPostANNotificationAction extends AnAction {
+public class PublisherPostANNotificationAction extends ANAction {
 
   private final JsonSchemaValidator requestSchemaValidator;
 
   public PublisherPostANNotificationAction(
       String sourcePartyName,
       String targetPartyName,
-      AnAction previousAction,
+      ANAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
     super(sourcePartyName, targetPartyName, previousAction, "POST AN Notification");
     this.requestSchemaValidator = requestSchemaValidator;
@@ -63,7 +64,8 @@ public class PublisherPostANNotificationAction extends AnAction {
                 ANRole::isSubscriber,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                expectedApiVersion));
+                expectedApiVersion),
+            ANChecks.getANNPostPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

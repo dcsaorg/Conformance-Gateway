@@ -4,7 +4,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -27,17 +26,17 @@ public class ANSubscriber extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-
+    // no state to export
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-
+    // no state to import
   }
 
   @Override
   protected void doReset() {
-
+    // no state to reset
   }
 
   @Override
@@ -60,10 +59,7 @@ public class ANSubscriber extends ConformanceParty {
 
   private void getArrivalNotices(JsonNode actionPrompt) {
     JsonNode dsp = actionPrompt.required("dsp");
-    List<String> references = new ArrayList<>();
-    for (JsonNode node : dsp) {
-      references.add(node.asText());
-    }
+    List<String> references = dsp.findValuesAsText("transportDocumentReferences");
     syncCounterpartGet("/arrival-notices", Map.of("transportDocumentReferences", references));
   }
 }

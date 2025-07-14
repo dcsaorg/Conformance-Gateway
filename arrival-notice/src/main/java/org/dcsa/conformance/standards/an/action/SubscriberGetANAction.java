@@ -15,14 +15,14 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.dcsa.conformance.standards.an.party.ANRole;
 
-public class SubscriberGetANAction extends AnAction {
+public class SubscriberGetANAction extends ANAction {
 
   private final JsonSchemaValidator responseSchemaValidator;
 
   public SubscriberGetANAction(
       String subscriberPartyName,
       String publisherPartyName,
-      AnAction previousAction,
+      ANAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
     super(subscriberPartyName, publisherPartyName, previousAction, "GET AN");
     this.responseSchemaValidator = responseSchemaValidator;
@@ -30,7 +30,8 @@ public class SubscriberGetANAction extends AnAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "GET the arrival notices";
+    return "GET the arrival notices with the given transport document references from the publisher."
+        + getDspSupplier().get().transportDocumentReferences().toString();
   }
 
   @Override

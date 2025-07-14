@@ -13,7 +13,7 @@ import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.dcsa.conformance.standards.an.checks.ScenarioType;
 import org.dcsa.conformance.standards.an.party.ANRole;
 
-public class PublisherPostANAction extends AnAction {
+public class PublisherPostANAction extends ANAction {
 
   private final JsonSchemaValidator requestSchemaValidator;
   private ScenarioType scenarioType;
@@ -21,7 +21,7 @@ public class PublisherPostANAction extends AnAction {
   public PublisherPostANAction(
       String publisherPartyName,
       String subscriberPartyName,
-      AnAction previousAction,
+      ANAction previousAction,
       ScenarioType scenarioType,
       JsonSchemaValidator requestSchemaValidator) {
 

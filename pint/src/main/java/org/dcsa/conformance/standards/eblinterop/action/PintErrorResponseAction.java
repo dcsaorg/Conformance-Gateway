@@ -17,6 +17,8 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 @Slf4j
 public class PintErrorResponseAction extends PintAction {
 
+  public static final String INVALID_FACILITY_CODE_ATTRIBUTE = "invalidFacilityCode";
+
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator requestSchemaValidator;
   private final PintResponseCode pintResponseCode;
@@ -32,7 +34,7 @@ public class PintErrorResponseAction extends PintAction {
         sendingPlatform,
         receivingPlatform,
         previousAction,
-        "ErrorResponse(%s)".formatted(pintResponseCode.name()),
+        "InvalidFacilityCode(%s)".formatted(pintResponseCode.name()),
         pintResponseCode.getHttpResponseCode());
     this.pintResponseCode = pintResponseCode;
     this.responseSchemaValidator = responseSchemaValidator;
@@ -46,7 +48,7 @@ public class PintErrorResponseAction extends PintAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    var node = super.asJsonNode().put("invalidFacilityCode", true);
+    var node = super.asJsonNode().put(INVALID_FACILITY_CODE_ATTRIBUTE, true);
     node.put("senderTransmissionClass", SenderTransmissionClass.VALID_ISSUANCE.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
@@ -79,12 +81,7 @@ public class PintErrorResponseAction extends PintAction {
                 PintRole::isReceivingPlatform,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                responseSchemaValidator),
-            new JsonSchemaCheck(
-                PintRole::isSendingPlatform,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+                responseSchemaValidator));
       }
     };
   }

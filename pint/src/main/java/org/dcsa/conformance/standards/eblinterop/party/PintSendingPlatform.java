@@ -37,6 +37,7 @@ public class PintSendingPlatform extends ConformanceParty {
 
   private static final PayloadSignerWithKey SENDING_PLATFORM_PAYLOAD_SIGNER = PayloadSignerFactory.senderPayloadSigner();
   private static final PayloadSignerWithKey CARRIER_PLATFORM_PAYLOAD_SIGNER = PayloadSignerFactory.carrierPayloadSigner();
+  public static final String INVALID_FACILITY_CODE = "INVALID_FACILITY_CODE";
 
   public PintSendingPlatform(
       String apiVersion,
@@ -309,13 +310,12 @@ public class PintSendingPlatform extends ConformanceParty {
     sendingState.setSignedEnvelopeTransferChain(envelopeTransferChain);
     sendingState.save(persistentMap);
 
-    boolean invalidFacilityCode = actionPrompt.path("invalidFacilityCode").asBoolean(false);
+    boolean invalidFacilityCode =
+        actionPrompt.path(PintErrorResponseAction.INVALID_FACILITY_CODE_ATTRIBUTE).asBoolean(false);
     if (invalidFacilityCode) {
-      var facility = body.path("transportDocument")
-              .path("transports")
-              .path("placeOfReceipt")
-              .path("facility");
-      ((ObjectNode) facility).put("facilityCode", "INVALID_FACILITY_CODE");
+      var facility =
+          body.path("transportDocument").path("transports").path("placeOfReceipt").path("facility");
+      ((ObjectNode) facility).put("facilityCode", INVALID_FACILITY_CODE);
     }
 
     var response = this.syncCounterpartPost(

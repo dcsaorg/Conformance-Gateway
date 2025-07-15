@@ -149,7 +149,7 @@ public class PintReceivingPlatform extends ConformanceParty {
             .path("facility")
             .path("facilityCode")
             .asText(null);
-    if (facilityCode.equals("INVALID_FACILITY_CODE")) {
+    if (PintSendingPlatform.INVALID_FACILITY_CODE.equals(facilityCode)) {
       return handleErrorResponse(request, apiVersion, this);
     }
 

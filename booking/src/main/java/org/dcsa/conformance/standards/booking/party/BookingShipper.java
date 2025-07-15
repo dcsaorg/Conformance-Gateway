@@ -13,13 +13,10 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
-import org.dcsa.conformance.standards.booking.checks.ScenarioType;
-import org.dcsa.conformance.standards.booking.model.InvalidBookingMessageType;
 
 @Slf4j
 public class BookingShipper extends ConformanceParty {
@@ -62,7 +59,6 @@ public class BookingShipper extends ConformanceParty {
     return Map.ofEntries(
         Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
         Map.entry(ShipperGetBookingAction.class, this::getBookingRequest),
-        Map.entry(Shipper_GetAmendedBooking404Action.class, this::getBookingRequest),
         Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
         Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
         Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
@@ -70,7 +66,6 @@ public class BookingShipper extends ConformanceParty {
         Map.entry(
             UC13ShipperCancelConfirmedBookingAction.class,
             this::sendConfirmedBookingCancellationRequest),
-        Map.entry(AUC_Shipper_SendInvalidBookingAction.class, this::sendInvalidBookingAction),
         Map.entry(ShipperGetBookingErrorScenarioAction.class, this::getBookingRequest));
   }
 
@@ -98,56 +93,17 @@ public class BookingShipper extends ConformanceParty {
   private void sendBookingRequest(JsonNode actionPrompt) {
     log.info("Shipper.sendBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
-    CarrierScenarioParameters carrierScenarioParameters =
-        CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
+    JsonNode bookingPayload = actionPrompt.get("bookingPayload");
 
-    JsonNode jsonRequestBody = replaceBookingPlaceHolders(actionPrompt);
-
-    ConformanceResponse conformanceResponse = syncCounterpartPost("/v2/bookings", jsonRequestBody);
+    ConformanceResponse conformanceResponse = syncCounterpartPost("/v2/bookings", bookingPayload);
 
     JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
     String cbrr = jsonBody.path("carrierBookingRequestReference").asText();
     ObjectNode updatedBooking =
-      ((ObjectNode) jsonRequestBody)
-        .put("carrierBookingRequestReference", cbrr);
+        ((ObjectNode) bookingPayload).put("carrierBookingRequestReference", cbrr);
     persistentMap.save(cbrr, updatedBooking);
 
-    addOperatorLogEntry(
-        "Sent a booking request with the parameters: %s"
-            .formatted(carrierScenarioParameters.toJson()));
-  }
-
-  private JsonNode replaceBookingPlaceHolders(JsonNode actionPrompt) {
-    CarrierScenarioParameters csp =
-      CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/messages/" + scenarioType.bookingTemplate(apiVersion),
-        Map.ofEntries(
-            Map.entry("SERVICE_CONTRACT_REFERENCE_PLACEHOLDER", csp.serviceContractReference()),
-            Map.entry(
-                "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
-                Objects.requireNonNullElse(csp.contractQuotationReference(), "")),
-            Map.entry(
-                "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
-                Objects.requireNonNullElse(csp.carrierExportVoyageNumber(), "")),
-            Map.entry(
-                "CARRIER_SERVICE_NAME_PLACEHOLDER",
-                Objects.requireNonNullElse(csp.carrierServiceName(), "")),
-            Map.entry("COMMODITY_HS_CODE_1", Objects.requireNonNullElse(csp.hsCodes1(), "")),
-            Map.entry("COMMODITY_HS_CODE_2", Objects.requireNonNullElse(csp.hsCodes1(), "")),
-            Map.entry(
-                "COMMODITY_TYPE_1_PLACEHOLDER",
-                Objects.requireNonNullElse(csp.commodityType1(), "")),
-            Map.entry(
-                "COMMODITY_TYPE_2_PLACEHOLDER",
-                Objects.requireNonNullElse(csp.commodityType2(), "")),
-            Map.entry(
-                "POL_UNLOCATION_CODE_PLACEHOLDER",
-                Objects.requireNonNullElse(csp.polUNLocationCode(), "")),
-            Map.entry(
-                "POD_UNLOCATION_CODE_PLACEHOLDER",
-                Objects.requireNonNullElse(csp.podUNLocationCode(), ""))));
+    addOperatorLogEntry("Sent a booking request with the parameters: %s".formatted(bookingPayload));
   }
 
   private void sendCancelBookingRequest(JsonNode actionPrompt) {
@@ -192,22 +148,6 @@ public class BookingShipper extends ConformanceParty {
         .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
 
     addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(reference));
-  }
-
-  private void sendInvalidBookingAction(JsonNode actionPrompt) {
-    log.info("Shipper.sendInvalidBookingAction(%s)".formatted(actionPrompt.toPrettyString()));
-    var invalidBookingMessageType = InvalidBookingMessageType.valueOf(actionPrompt.required("invalidBookingMessageType").asText("<?>"));
-    var cbrr = actionPrompt.required("cbrr").asText();
-    switch (invalidBookingMessageType) {
-      case UPDATE_BOOKING -> sendUpdatedBooking(actionPrompt);
-      case SUBMIT_BOOKING_AMENDMENT  -> sendUpdatedConfirmedBooking(actionPrompt);
-      case CANCEL_BOOKING_AMENDMENT  -> sendCancelBookingAmendment(actionPrompt);
-      case CANCEL_BOOKING  -> sendCancelBookingRequest(actionPrompt);
-      default -> throw new AssertionError("Missing case for " + invalidBookingMessageType.name());
-    }
-    addOperatorLogEntry(
-        BookingAction.createMessageForUIPrompt(
-            "Sent a invalid booking action request for booking", null, cbrr));
   }
 
   private void sendUpdatedBooking(JsonNode actionPrompt) {

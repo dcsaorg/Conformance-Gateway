@@ -2,7 +2,6 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.generator.SchemaOverride;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
@@ -26,23 +25,27 @@ the first mother vessel arriving at the destination country.
 """)
 public class VesselVoyage {
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @Schema()
   private VesselVoyageTypeCode typeCode;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 50,
       example = "King of the Seas",
       description = "Vessel name")
   private String vesselName;
 
-  @SchemaOverride(description = "Vessel flag")
+  @Schema(
+      description =
+"""
+The flag of the nation whose laws the vessel is registered under.
+This is indicated by the 2 characters for the country code using
+[ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).
+""")
   private CountryCode vesselFlag;
 
   @Schema() private VesselIMONumber vesselIMONumber;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 50,
       example = "1234N",
       description =
@@ -53,7 +56,7 @@ Carrier-specific identifier of a voyage:
 """)
   private String carrierVoyageNumber;
 
-  @SchemaOverride(
+  @Schema(
       description =
 """
 Universal identifier of a voyage:
@@ -61,4 +64,14 @@ Universal identifier of a voyage:
 * the export voyage (if `typeCode` is `POL`)
 """)
   private UniversalVoyageReference universalVoyageReference;
+
+  @Schema(
+    maxLength = 100,
+    example = "CRN1234",
+    description =
+"""
+A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
+It can be used for customs clearance purposes in specific countries (e.g. NL, UK).
+""")
+  private String callReferenceNumber;
 }

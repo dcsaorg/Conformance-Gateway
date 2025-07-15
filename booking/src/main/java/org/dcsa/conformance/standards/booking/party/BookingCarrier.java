@@ -29,12 +29,7 @@ import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
 @Slf4j
 public class BookingCarrier extends ConformanceParty {
 
-  private static final Random RANDOM = new Random();
-  private static final String EXAMPLE_CARRIER_SERVICE = "Example Carrier Service";
   private static final String MESSAGE = "message";
-  private static final String DKAAR = "DKAAR";
-  private static final String DEBRV = "DEBRV";
-  private static final String CARRIER_SERVICE = "Carrier Service %d";
   private static final String BOOKING_STATUS = "bookingStatus";
   private static final String AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String CANCEL_AMENDMENT_OPERATION = "cancelAmendment";
@@ -95,7 +90,7 @@ public class BookingCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(CarrierSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(
             UC2_Carrier_RequestUpdateToBookingRequestAction.class,
             this::requestUpdateToBookingRequest),
@@ -116,101 +111,15 @@ public class BookingCarrier extends ConformanceParty {
     if (log.isInfoEnabled())
       log.info("Carrier.supplyScenarioParameters({})", actionPrompt.toPrettyString());
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    CarrierScenarioParameters carrierScenarioParameters = getCarrierScenarioParameters(scenarioType);
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.get("actionId").asText(),
-        CarrierScenarioJsonAdapter.toJson(carrierScenarioParameters, scenarioType));
+    ObjectNode bookingPayload = (ObjectNode) getBookingPayload(scenarioType);
+    asyncOrchestratorPostPartyInput(actionPrompt.get("actionId").asText(), bookingPayload);
     addOperatorLogEntry(
-        "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
+        "Provided CarrierScenarioParameters: %s".formatted(bookingPayload.toString()));
   }
 
-  public static CarrierScenarioParameters getCarrierScenarioParameters(ScenarioType scenarioType) {
-    return switch (scenarioType) {
-      case REGULAR, REGULAR_SHIPPER_OWNED ->
-          new CarrierScenarioParameters(
-              "SCR-1234-REGULAR",
-              EXAMPLE_CARRIER_SERVICE,
-              "402E",
-              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
-              "640510",
-              "Shoes - black, 400 boxes",
-              null,
-              null,
-              DKAAR,
-              DEBRV);
-      case REGULAR_2RE1C, REGULAR_2RE2C ->
-          new CarrierScenarioParameters(
-              "SCR-1234-REGULAR-2REC",
-              EXAMPLE_CARRIER_SERVICE,
-              "402E",
-              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
-              "630260",
-              "Tableware and kitchenware",
-              "691010",
-              "Kitchen pots and pans",
-              DKAAR,
-              DEBRV);
-      case REGULAR_CHO_DEST ->
-          new CarrierScenarioParameters(
-              "SCR-1234-REGULAR-CHO-DEST",
-              EXAMPLE_CARRIER_SERVICE,
-              "402E",
-              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
-              "640510",
-              "Shoes - black, 400 boxes",
-              null,
-              null,
-              DKAAR,
-              "USGBO");
-      case REGULAR_CHO_ORIG ->
-          new CarrierScenarioParameters(
-              "SCR-1234-REGULAR-CHO-ORIG",
-              EXAMPLE_CARRIER_SERVICE,
-              "402E",
-              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
-              "640510",
-              "Shoes - black, 400 boxes",
-              null,
-              null,
-              DKAAR,
-              DKAAR);
-      case REGULAR_NON_OPERATING_REEFER ->
-          new CarrierScenarioParameters(
-              "SCR-1234-NON-OPERATING-REEFER",
-              EXAMPLE_CARRIER_SERVICE,
-              "402E",
-              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
-              "220291",
-              "Non alcoholic beverages",
-              null,
-              null,
-              DKAAR,
-              DEBRV);
-      case REEFER, REEFER_TEMP_CHANGE ->
-          new CarrierScenarioParameters(
-              "SCR-1234-REEFER",
-              EXAMPLE_CARRIER_SERVICE,
-              "402E",
-              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
-              "04052090",
-              "Dairy products",
-              null,
-              null,
-              DKAAR,
-              DEBRV);
-      case DG ->
-          new CarrierScenarioParameters(
-              "SCR-1234-DG",
-              EXAMPLE_CARRIER_SERVICE,
-              "403W",
-              "TA1",
-              "293498",
-              null,
-              null,
-              null,
-              DKAAR,
-              DEBRV);
-    };
+  private JsonNode getBookingPayload(ScenarioType scenarioType) {
+    return JsonToolkit.templateFileToJsonNode(
+        "/standards/booking/messages/" + scenarioType.bookingPayload(apiVersion), Map.of());
   }
 
   private void processBookingAmendment(JsonNode actionPrompt) {

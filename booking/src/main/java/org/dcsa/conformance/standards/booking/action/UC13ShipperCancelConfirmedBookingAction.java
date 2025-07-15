@@ -63,21 +63,25 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
+        String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
         return Stream.concat(
-          Stream.concat(createPrimarySubChecks("PATCH",expectedApiVersion,"/v2/bookings/%s".formatted(cbr)),
-            Stream.of(
-              new JsonSchemaCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator))),
-          expectedBookingStatus != null ?  getNotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator,
-            expectedBookingStatus,
-            expectedAmendedBookingStatus,
-            expectedBookingCancellationStatus): Stream.empty());
+            Stream.concat(
+                createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
+                Stream.of(
+                    new JsonSchemaCheck(
+                        BookingRole::isShipper,
+                        getMatchedExchangeUuid(),
+                        HttpMessageType.REQUEST,
+                        requestSchemaValidator))),
+            expectedBookingStatus != null
+                ? getNotificationChecks(
+                    expectedApiVersion,
+                    notificationSchemaValidator,
+                    expectedBookingStatus,
+                    expectedAmendedBookingStatus,
+                    expectedBookingCancellationStatus)
+                : Stream.empty());
       }
     };
   }

@@ -8,7 +8,6 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
@@ -22,16 +21,13 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   private static final String BOOKING_PREFIX = "[Booking]";
   private static final String AMENDED_BOOKING_PREFIX = "[Amended Booking]";
 
-  private final Supplier<CarrierScenarioParameters> cspSupplier;
   private final Supplier<DynamicScenarioParameters> dspSupplier;
 
   public CarrierBookingNotificationDataPayloadRequestConformanceCheck(
       UUID matchedExchangeUuid,
       BookingState bookingStatus,
-      Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     super(matchedExchangeUuid, HttpMessageType.REQUEST, bookingStatus);
-    this.cspSupplier = cspSupplier;
     this.dspSupplier = dspSupplier;
   }
 
@@ -39,11 +35,9 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
       UUID matchedExchangeUuid,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
-      Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     super(
         matchedExchangeUuid, HttpMessageType.REQUEST, bookingStatus, expectedAmendedBookingStatus);
-    this.cspSupplier = cspSupplier;
     this.dspSupplier = dspSupplier;
   }
 
@@ -52,7 +46,6 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
       BookingCancellationState expectedBookingCancellationStatus,
-      Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     super(
         matchedExchangeUuid,
@@ -61,7 +54,6 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
         expectedAmendedBookingStatus,
         expectedBookingCancellationStatus,
         false);
-    this.cspSupplier = cspSupplier;
     this.dspSupplier = dspSupplier;
   }
 
@@ -94,15 +86,12 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                     "Validate 'data.feedbacks' severity and code are valid",
                     at(DATA_PATH, this::ensureFeedbackSeverityAndCodeCompliance))),
             createFullNotificationChecksAt(BOOKING_PATH, BOOKING_PREFIX),
-            expectedAmendedBookingStatus != null
-                ? createFullNotificationChecksAt(AMENDED_BOOKING_PATH, AMENDED_BOOKING_PREFIX)
-                : Stream.<ConformanceCheck>empty())
+            createFullNotificationChecksAt(AMENDED_BOOKING_PATH, AMENDED_BOOKING_PREFIX))
         .flatMap(Function.identity());
   }
 
   private Stream<ConformanceCheck> createFullNotificationChecksAt(String jsonPath, String prefix) {
     return BookingChecks.fullPayloadChecks(
-            cspSupplier,
             dspSupplier,
             expectedBookingStatus,
             expectedAmendedBookingStatus,
@@ -114,6 +103,13 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                 createSubCheck(
                     prefix,
                     jsonContentCheck.description(),
-                    at(jsonPath, jsonContentCheck::validate)));
+                    at(
+                        jsonPath,
+                        jsonNode -> {
+                          if (jsonNode.isMissingNode() || jsonNode.isEmpty()) {
+                            return Set.of();
+                          }
+                          return jsonContentCheck.validate(jsonNode);
+                        })));
   }
 }

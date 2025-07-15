@@ -88,4 +88,9 @@ public class EblStandard extends AbstractStandard {
       String standardVersion, String scenarioSuite) {
     return new EblComponentFactory(getName(), standardVersion, scenarioSuite);
   }
+
+  @Override
+  protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
+    return Set.of(EblRole.SHIPPER.getConfigName());
+  }
 }

@@ -5,14 +5,24 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 
-@Schema(description = "Transport information for the shipment including ports, places, and planned dates.")
+@Schema(
+    description =
+        "Transport information for the shipment including ports, places, and planned dates.")
 @Data
 public class Transports {
 
-  @Schema(description = "The planned date of arrival.", example = "2024-06-07", format = "date")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "The planned date of arrival.",
+      example = "2024-06-07",
+      format = "date")
   private String plannedArrivalDate;
 
-  @Schema(description = "The planned date of departure.", example = "2024-06-03", format = "date")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "The planned date of departure.",
+      example = "2024-06-03",
+      format = "date")
   private String plannedDepartureDate;
 
   @Schema(
@@ -43,13 +53,18 @@ Mode of transportation for on-carriage when transport from the port of discharge
       maxLength = 50)
   private String onCarriageBy;
 
-  @Schema(description = "The place where the carrier takes receipt of the goods for transportation.")
+  @Schema(
+      description = "The place where the carrier takes receipt of the goods for transportation.")
   private PlaceOfReceipt placeOfReceipt;
 
-  @Schema(description = "The port where the cargo is loaded onto the vessel.")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "The port where the cargo is loaded onto the vessel.")
   private PortOfLoading portOfLoading;
 
-  @Schema(description = "The port where the cargo is discharged from the vessel.")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "The port where the cargo is discharged from the vessel.")
   private PortOfDischarge portOfDischarge;
 
   @Schema(description = "The place where the carrier delivers the goods to the consignee.")
@@ -59,6 +74,7 @@ Mode of transportation for on-carriage when transport from the port of discharge
   private OnwardInlandRouting onwardInlandRouting;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 Allow the possibility to include multiple vessels/voyages in the `Transport Document` (e.g. the first sea going vessel and the mother vessel). At least one is mandatory to provide.

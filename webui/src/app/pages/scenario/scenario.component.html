@@ -60,6 +60,12 @@
                               ></textarea>
                           </mat-form-field>
                       </div>
+                    <div class="paragraph" *ngIf="submitAttempted && inlineErrorMessage">
+                      <mat-card style="background-color: #fdecea; color: #b00020; padding: 1em;">
+                          <mat-icon>error</mat-icon>
+                          <pre style="margin: 0; white-space: pre-wrap;">{{ inlineErrorMessage }}</pre>
+                      </mat-card>
+                    </div>
                       <div class="paragraph">
                           <button
                           id="submitActionButton"
@@ -108,7 +114,7 @@
           <div class="pageSubtitle">Conformance status</div>
           <app-report
           *ngIf="scenario && scenarioStatus?.conformanceSubReport"
-          [folded]="false"
+          [unfoldedLevels]="1"
           [report]="scenarioStatus.conformanceSubReport"
           ></app-report>
       </div>

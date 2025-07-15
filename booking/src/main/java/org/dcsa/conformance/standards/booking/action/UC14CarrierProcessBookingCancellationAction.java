@@ -25,7 +25,12 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
       BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator requestSchemaValidator,
       boolean isCancellationConfirmed) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC14", 204);
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        getFormattedActionTitle(isCancellationConfirmed),
+        204);
     this.requestSchemaValidator = requestSchemaValidator;
     this.isCancellationConfirmed = isCancellationConfirmed;
     this.expectedBookingStatus = expectedBookingStatus;
@@ -67,7 +72,6 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
                 expectedBookingStatus,
                 expectedAmendedBookingStatus,
                 cancelledStatus,
-                getCspSupplier(),
                 getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
@@ -86,5 +90,10 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
                 requestSchemaValidator));
       }
     };
+  }
+
+  private static String getFormattedActionTitle(boolean isCancellationConfirmed) {
+    return "UC14%s [%s]"
+        .formatted(isCancellationConfirmed ? "a" : "b", isCancellationConfirmed ? "A" : "D");
   }
 }

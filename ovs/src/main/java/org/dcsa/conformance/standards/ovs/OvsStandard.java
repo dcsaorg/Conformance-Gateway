@@ -39,4 +39,9 @@ public class OvsStandard extends AbstractStandard {
       String standardVersion, String scenarioSuite) {
     return new OvsComponentFactory(getName(), standardVersion, scenarioSuite);
   }
+
+  @Override
+  protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
+    return Set.of(OvsRole.SUBSCRIBER.getConfigName());
+  }
 }

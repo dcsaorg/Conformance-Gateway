@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -41,14 +40,17 @@ public class BookingChecks {
 
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
-  private static final String RE_EMPTY_CONTAINER_PICKUP = "emptyContainerPickup";
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
+  private static final String ATTR_BOOKING_STATUS = "bookingStatus";
   private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
 
-  public static ActionCheck requestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck requestContentChecks(
+      UUID matched,
+      String standardVersion,
+      Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
-    generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
+    checks.addAll(generateScenarioRelatedChecks(dspSupplier));
     return JsonAttribute.contentChecks(
       BookingRole::isShipper,
       matched,
@@ -63,7 +65,6 @@ public class BookingChecks {
     mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.nationalCommodityCodes.*.type"),
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_TYPE_CODES)
   );
-
 
   private static final JsonContentCheck CHECK_EXPECTED_ARRIVAL_POD = JsonAttribute.customValidator(
     "Check expected arrival dates are valid",
@@ -210,7 +211,6 @@ public class BookingChecks {
     JsonAttribute.unique("cutOffDateTimeCode")
   );
 
-
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS = JsonAttribute.customValidator(
     "Validate shipmentLocations",
     body -> {
@@ -253,21 +253,6 @@ public class BookingChecks {
                 .orElse(null);
               if ((preNode == null || preNode.isEmpty()) || containerPositionsDateTime == null){
                 issues.add("Empty container positioning DateTime at requestedEquipments position %s must be provided.".formatted(currentCount));
-              }
-            });
-        }
-      }
-      if("CY".equals(receiptTypeAtOrigin)) {
-        var requestedEquipments = body.path("requestedEquipments");
-        if (requestedEquipments.isArray()) {
-          AtomicInteger counter = new AtomicInteger(0);
-          StreamSupport.stream(requestedEquipments.spliterator(), false)
-            .forEach(element -> {
-              int currentCount = counter.getAndIncrement();
-              if (element.path(RE_EMPTY_CONTAINER_PICKUP).isContainerNode()
-                && element.path(RE_EMPTY_CONTAINER_PICKUP).path("dateTime").asText("").isEmpty()
-                && element.path(RE_EMPTY_CONTAINER_PICKUP).path("depotReleaseLocation").asText("").isEmpty()) {
-                issues.add("Empty container Pickup DateTime/depotReleaseLocation  at requestedEquipments position %s must be provided.".formatted(currentCount));
               }
             });
         }
@@ -410,72 +395,62 @@ public class BookingChecks {
             return issues;
           });
 
-  private static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
-    return () -> {
-      var csp = cspSupplier.get();
-      if (csp == null) {
-        return null;
-      }
-      return field.apply(csp);
-    };
-  }
+  public static List<JsonContentCheck> generateScenarioRelatedChecks(
+      Supplier<DynamicScenarioParameters> dspSupplier) {
+    List<JsonContentCheck> checks = new ArrayList<>();
+    checks.add(
+        JsonAttribute.customValidator(
+            "[Scenario] Verify that the correct 'contractQuotationReference'/'serviceContractReference' is used",
+            body -> {
+              var contractQuotationReference = body.path("contractQuotationReference").asText("");
+              var serviceContractReference = body.path("serviceContractReference").asText("");
+              if (!contractQuotationReference.isEmpty() && !serviceContractReference.isEmpty()) {
+                return Set.of(
+                    "The scenario requires either of 'contractQuotationReference'/'serviceContractReference'"
+                        + " to be present, but not both");
+              }
+              return Set.of();
+            }));
 
-  private static void generateScenarioRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'carrierServiceName' is used",
-      "carrierServiceName",
-      delayedValue(cspSupplier, CarrierScenarioParameters::carrierServiceName)
-    ));
-
-    checks.add(JsonAttribute.customValidator(
-      "[Scenario] Verify that the correct 'contractQuotationReference'/'serviceContractReference' is used",
-      body -> {
-        var contractQuotationReference = body.path("contractQuotationReference").asText("");
-        var serviceContractReference = body.path("serviceContractReference").asText("");
-        if (!contractQuotationReference.isEmpty() && !serviceContractReference.isEmpty()) {
-          return Set.of("The scenario requires either of 'contractQuotationReference'/'serviceContractReference'" +
-            " to be present, but not both");
-        }
-        return Set.of();
-      }
-     ));
-
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'carrierExportVoyageNumber' is used",
-      "carrierExportVoyageNumber",
-      delayedValue(cspSupplier, CarrierScenarioParameters::carrierExportVoyageNumber)
-    ));
-    checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
-      "[Scenario] Validate the containers reefer settings",
-      mav-> mav.submitAllMatching("requestedEquipments.*"),
-      (nodeToValidate, contextPath) -> {
-        var scenario = dspSupplier.get().scenarioType();
-        var activeReeferNode = nodeToValidate.path("activeReeferSettings");
-        var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
-        var issues = new LinkedHashSet<String>();
-        switch (scenario) {
-          case REEFER, REEFER_TEMP_CHANGE -> {
-            if (!activeReeferNode.isObject()) {
-              issues.add("The scenario requires '%s' to have an active reefer".formatted(contextPath));
-            }
-          }
-          case REGULAR_NON_OPERATING_REEFER -> {
-            if (!nonOperatingReeferNode.asBoolean(false)) {
-              issues.add("The scenario requires '%s.isNonOperatingReefer' to be true".formatted(contextPath));
-            }
-          }
-          default -> {
-            if (!activeReeferNode.isMissingNode()) {
-              issues.add("The scenario requires '%s' to NOT have an active reefer".formatted(contextPath));
-            }
-            if (nonOperatingReeferNode.asBoolean(false)) {
-              issues.add("The scenario requires '%s.isNonOperatingReefer' to be omitted or false (depending on the container ISO code)".formatted(contextPath));
-            }
-          }
-        }
-        return issues;
-      }
-    ));
+    checks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "[Scenario] Validate the containers reefer settings",
+            mav -> mav.submitAllMatching("requestedEquipments.*"),
+            (nodeToValidate, contextPath) -> {
+              var scenario = dspSupplier.get().scenarioType();
+              var activeReeferNode = nodeToValidate.path("activeReeferSettings");
+              var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
+              var issues = new LinkedHashSet<String>();
+              switch (scenario) {
+                case REEFER, REEFER_TEMP_CHANGE -> {
+                  if (!activeReeferNode.isObject()) {
+                    issues.add(
+                        "The scenario requires '%s' to have an active reefer"
+                            .formatted(contextPath));
+                  }
+                }
+                case REGULAR_NON_OPERATING_REEFER -> {
+                  if (!nonOperatingReeferNode.asBoolean(false)) {
+                    issues.add(
+                        "The scenario requires '%s.isNonOperatingReefer' to be true"
+                            .formatted(contextPath));
+                  }
+                }
+                default -> {
+                  if (!activeReeferNode.isMissingNode()) {
+                    issues.add(
+                        "The scenario requires '%s' to NOT have an active reefer"
+                            .formatted(contextPath));
+                  }
+                  if (nonOperatingReeferNode.asBoolean(false)) {
+                    issues.add(
+                        "The scenario requires '%s.isNonOperatingReefer' to be omitted or false (depending on the container ISO code)"
+                            .formatted(contextPath));
+                  }
+                }
+              }
+              return issues;
+            }));
 
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Whether the cargo should be DG",
@@ -494,6 +469,8 @@ public class BookingChecks {
         return Set.of();
       }
     ));
+
+    return checks;
   }
 
   static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
@@ -508,91 +485,92 @@ public class BookingChecks {
           mav -> mav.submitAllMatching("feedbacks.*.code"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
-  private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
-    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
-    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
-    CHECK_EXPECTED_ARRIVAL_POD,
-    NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
-    ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
-    REFERENCE_TYPE_VALIDATION,
-    IS_EXPORT_DECLARATION_REFERENCE_PRESENCE,
-    DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
-    UNIVERSAL_SERVICE_REFERENCE,
-    VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
-    VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
-    VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
-    NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
-    CHECK_CARGO_GROSS_WEIGHT_CONDITIONS,
-    JsonAttribute.atLeastOneOf(
-      JsonPointer.compile("/expectedDepartureDate"),
-      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
-      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate"),
-      JsonPointer.compile("/carrierExportVoyageNumber")
-    ),
-    JsonAttribute.xOrFields(
-      JsonPointer.compile("/contractQuotationReference"),
-      JsonPointer.compile("/serviceContractReference")
-    ),
-    JsonAttribute.allOrNoneArePresent(
-      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
-      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate")
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "DangerousGoods implies packagingCode or imoPackagingCode",
-      mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
-      (nodeToValidate, contextPath) -> {
-        var dg = nodeToValidate.path("dangerousGoods");
-        if (!dg.isArray() || dg.isEmpty()) {
-          return Set.of();
-        }
-        if (nodeToValidate.path("packageCode").isMissingNode() && nodeToValidate.path("imoPackagingCode").isMissingNode()) {
-          return Set.of("The '%s' object did not have a 'packageCode' nor an 'imoPackagingCode', which is required due to dangerousGoods"
-            .formatted(contextPath));
-        }
-        return Set.of();
-      }
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "DangerousGoods implies numberOfPackages or description",
-      mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
-      (nodeToValidate, contextPath) -> {
-        var dg = nodeToValidate.path("dangerousGoods");
-        if (!dg.isArray() || dg.isEmpty()) {
-          return Set.of();
-        }
-        if (nodeToValidate.path("numberOfPackages").isMissingNode() && nodeToValidate.path("description").isMissingNode()) {
-          return Set.of("The '%s' object did not have a 'numberOfPackages' nor an 'description', which is required due to dangerousGoods"
-            .formatted(contextPath));
-        }
-        return Set.of();
-      }
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'segregationGroups' values must be from dataset",
-      allDg(dg -> dg.path("segregationGroups").all().submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.DG_SEGREGATION_GROUPS)
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'inhalationZone' values must be from dataset",
-      allDg(dg -> dg.path("inhalationZone").all().submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.INHALATION_ZONE_CODE)
-    ),
-    JsonAttribute.allOrNoneArePresent(
-      JsonPointer.compile("/declaredValue"),
-      JsonPointer.compile("/declaredValueCurrency")
-    ),
-
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The charges currency amount must not exceed more than 2 decimal points",
-      mav -> mav.submitAllMatching("charges.*.currencyAmount"),
-      (nodeToValidate, contextPath) -> {
-        var currencyAmount = nodeToValidate.asDouble();
-        if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
-          return Set.of("%s must have at most 2 decimal point of precision".formatted(contextPath));
-        }
-        return Set.of();
-      }
-    ));
+  public static final List<JsonContentCheck> STATIC_BOOKING_CHECKS =
+      Arrays.asList(
+          JsonAttribute.mustBeDatasetKeywordIfPresent(
+              JsonPointer.compile("/cargoMovementTypeAtOrigin"),
+              BookingDataSets.CARGO_MOVEMENT_TYPE),
+          JsonAttribute.mustBeDatasetKeywordIfPresent(
+              JsonPointer.compile("/cargoMovementTypeAtDestination"),
+              BookingDataSets.CARGO_MOVEMENT_TYPE),
+          CHECK_EXPECTED_ARRIVAL_POD,
+          NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
+          ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
+          REFERENCE_TYPE_VALIDATION,
+          IS_EXPORT_DECLARATION_REFERENCE_PRESENCE,
+          DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
+          UNIVERSAL_SERVICE_REFERENCE,
+          VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
+          VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
+          VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
+          NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
+          CHECK_CARGO_GROSS_WEIGHT_CONDITIONS,
+          JsonAttribute.atLeastOneOf(
+              JsonPointer.compile("/expectedDepartureDate"),
+              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
+              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate"),
+              JsonPointer.compile("/carrierExportVoyageNumber")),
+          JsonAttribute.xOrFields(
+              JsonPointer.compile("/contractQuotationReference"),
+              JsonPointer.compile("/serviceContractReference")),
+          JsonAttribute.allOrNoneArePresent(
+              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
+              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate")),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "DangerousGoods implies packagingCode or imoPackagingCode",
+              mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
+              (nodeToValidate, contextPath) -> {
+                var dg = nodeToValidate.path("dangerousGoods");
+                if (!dg.isArray() || dg.isEmpty()) {
+                  return Set.of();
+                }
+                if (nodeToValidate.path("packageCode").isMissingNode()
+                    && nodeToValidate.path("imoPackagingCode").isMissingNode()) {
+                  return Set.of(
+                      "The '%s' object did not have a 'packageCode' nor an 'imoPackagingCode', which is required due to dangerousGoods"
+                          .formatted(contextPath));
+                }
+                return Set.of();
+              }),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "DangerousGoods implies numberOfPackages or description",
+              mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
+              (nodeToValidate, contextPath) -> {
+                var dg = nodeToValidate.path("dangerousGoods");
+                if (!dg.isArray() || dg.isEmpty()) {
+                  return Set.of();
+                }
+                if (nodeToValidate.path("numberOfPackages").isMissingNode()
+                    && nodeToValidate.path("description").isMissingNode()) {
+                  return Set.of(
+                      "The '%s' object did not have a 'numberOfPackages' nor an 'description', which is required due to dangerousGoods"
+                          .formatted(contextPath));
+                }
+                return Set.of();
+              }),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The 'segregationGroups' values must be from dataset",
+              allDg(dg -> dg.path("segregationGroups").all().submitPath()),
+              JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+                  BookingDataSets.DG_SEGREGATION_GROUPS)),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The 'inhalationZone' values must be from dataset",
+              allDg(dg -> dg.path("inhalationZone").all().submitPath()),
+              JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+                  BookingDataSets.INHALATION_ZONE_CODE)),
+          JsonAttribute.allOrNoneArePresent(
+              JsonPointer.compile("/declaredValue"), JsonPointer.compile("/declaredValueCurrency")),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The charges currency amount must not exceed more than 2 decimal points",
+              mav -> mav.submitAllMatching("charges.*.currencyAmount"),
+              (nodeToValidate, contextPath) -> {
+                var currencyAmount = nodeToValidate.asDouble();
+                if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
+                  return Set.of(
+                      "%s must have at most 2 decimal point of precision".formatted(contextPath));
+                }
+                return Set.of();
+              }));
 
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
     CHECK_ABSENCE_OF_CONFIRMED_FIELDS,
@@ -605,13 +583,16 @@ public class BookingChecks {
     VALID_FEEDBACK_CODE
   );
 
-  public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier,
-                                                  Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus,
-                                                  BookingState expectedAmendedBookingStatus, BookingCancellationState expectedCancelledBookingStatus,
-                                                  Boolean requestAmendedContent) {
+  public static ActionCheck responseContentChecks(
+      UUID matched,
+      String standardVersion,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      BookingState bookingStatus,
+      BookingState expectedAmendedBookingStatus,
+      BookingCancellationState expectedCancelledBookingStatus,
+      Boolean requestAmendedContent) {
     var checks =
         fullPayloadChecks(
-            cspSupplier,
             dspSupplier,
             bookingStatus,
             expectedAmendedBookingStatus,
@@ -623,7 +604,6 @@ public class BookingChecks {
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(
-      Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
@@ -699,14 +679,25 @@ public class BookingChecks {
               }));
     }
 
-    generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
+    checks.addAll(generateScenarioRelatedChecks(dspSupplier));
 
     return checks;
   }
-
+  
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';
+  }
+
+  public static JsonContentCheck validateBookingAmendmentCancellation() {
+    return JsonAttribute.customValidator(
+        "Validate booking amendment cancellation",
+        JsonAttribute.combine(
+            JsonAttribute.path(ATTR_BOOKING_STATUS, JsonAttribute.matchedMustBeAbsent()),
+            JsonAttribute.path(ATTR_AMENDED_BOOKING_STATUS, JsonAttribute.matchedMustBePresent()),
+            JsonAttribute.path(
+                ATTR_AMENDED_BOOKING_STATUS,
+                JsonAttribute.matchedMustEqual(BookingState.AMENDMENT_CANCELLED::name))));
   }
 }
 

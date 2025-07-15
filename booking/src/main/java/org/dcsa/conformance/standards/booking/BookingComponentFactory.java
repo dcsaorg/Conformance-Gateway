@@ -9,7 +9,6 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
-import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.booking.party.BookingCarrier;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
@@ -64,7 +63,8 @@ class BookingComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
+  @Override
+  public Map<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
     return BookingScenarioListBuilder.createModuleScenarioListBuilders(

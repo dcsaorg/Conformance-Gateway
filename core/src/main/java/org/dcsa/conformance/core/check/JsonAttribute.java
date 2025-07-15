@@ -339,6 +339,15 @@ public class JsonAttribute {
     };
   }
 
+  public static JsonContentMatchedValidation matchedMustBeNull() {
+    return (node, contextPath) -> {
+      if (node.isMissingNode() || node.isNull()) {
+        return Set.of();
+      }
+      return Set.of("The value of '%s' must not be present".formatted(contextPath));
+    };
+  }
+
   public static JsonRebaseableContentCheck mustBeNotNull(
     JsonPointer jsonPointer,
     String reason

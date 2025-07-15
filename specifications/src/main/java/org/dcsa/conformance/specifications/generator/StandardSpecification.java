@@ -15,13 +15,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
 import org.dcsa.conformance.specifications.dataoverview.DataOverview;
 import org.dcsa.conformance.specifications.dataoverview.DataOverviewSheet;
+import org.dcsa.conformance.specifications.dataoverview.LegendMetadata;
 
 @Slf4j
 public abstract class StandardSpecification {
@@ -90,7 +90,17 @@ public abstract class StandardSpecification {
                                             .add(schemaConstraint))));
 
     ModelConverters.getInstance()
-        .addConverter(new ModelValidatorConverter(constraintsByClassAndField));
+        .getConverters()
+        .forEach(
+            existingConverter -> {
+              if (existingConverter instanceof ModelValidatorConverter) {
+                log.info("Removing {}", existingConverter);
+                ModelConverters.getInstance().removeConverter(existingConverter);
+              }
+            });
+    ModelConverters.getInstance()
+        .addConverter(
+            new ModelValidatorConverter(constraintsByClassAndField, modelClassesStream()));
     modelClassesStream()
         .sorted(Comparator.comparing(Class::getSimpleName))
         .forEach(
@@ -99,6 +109,8 @@ public abstract class StandardSpecification {
                     .read(modelClass)
                     .forEach(openAPI.getComponents()::addSchemas));
   }
+
+  protected abstract LegendMetadata getLegendMetadata();
 
   protected abstract Stream<Class<?>> modelClassesStream();
 
@@ -128,6 +140,7 @@ public abstract class StandardSpecification {
 
     DataOverview dataOverview =
         new DataOverview(
+            getLegendMetadata(),
             constraintsByClassAndField,
             SpecificationToolkit.parameterizeStringRawSchemaMap(
                 openAPI.getComponents().getSchemas()),

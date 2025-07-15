@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.ebl.party;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -127,18 +128,20 @@ public class EblShipper extends ConformanceParty {
     if (!scenarioType.isToOrder()) {
       // Cannot substitute this because it is a full element
       var parties = (ObjectNode) jsonRequestBody.path("documentParties");
-      parties
-          .putObject("consignee")
-          .put("partyName", "DCSA CTK Consignee")
-          .putArray("identifyingCodes")
-          .addObject()
-          .put("codeListProvider", "W3C")
-          .put("partyCode", "MSK")
-          .put("codeListName", "DID")
-          .putArray("partyContactDetails")
-          .addObject()
-          .put("name", "DCSA another test person")
-          .put("email", "no-reply@dcsa-consignee.example.org");
+
+      ObjectNode consignee = parties.putObject("consignee");
+      consignee.put("partyName", "DCSA CTK Consignee");
+
+      ArrayNode identifyingCodes = consignee.putArray("identifyingCodes");
+      ObjectNode idCode = identifyingCodes.addObject();
+      idCode.put("codeListProvider", "W3C");
+      idCode.put("partyCode", "MSK");
+      idCode.put("codeListName", "DID");
+
+      ArrayNode contactDetails = consignee.putArray("partyContactDetails");
+      ObjectNode contact = contactDetails.addObject();
+      contact.put("name", "DCSA another test person");
+      contact.put("email", "no-reply@dcsa-consignee.example.org");
     }
     if (scenarioType.transportDocumentTypeCode().equals("BOL")) {
       JsonNode documentParties = jsonRequestBody.path("documentParties");

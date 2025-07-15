@@ -1,8 +1,10 @@
 package org.dcsa.conformance.core;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+
 import lombok.Getter;
 
 @Getter
@@ -34,5 +36,11 @@ public abstract class AbstractStandard {
           "Unsupported scenario suite '%s'".formatted(scenarioSuite));
     }
     return doCreateComponentFactory(standardVersion, scenarioSuite);
+  }
+
+  protected abstract Set<String> getExternalPartyRoleNamesAllowingEmptyUrl();
+
+  public boolean isExternalPartyEmptyUrlAllowed(String externalPartyRoleName) {
+    return getExternalPartyRoleNamesAllowingEmptyUrl().contains(externalPartyRoleName);
   }
 }

@@ -24,35 +24,85 @@
 
 <app-text-waiting *ngIf="startingOrStoppingScenario" text="Updating scenario state..."></app-text-waiting>
 
-<div *ngIf="!startingOrStoppingScenario">
-    <div *ngFor="let standardModule of standardModules">
-        <div class="pageSubtitle">{{standardModule.moduleName}}</div>
+<div *ngIf="!isInternalSandbox()">
+    <br />
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+        <mat-tab label="▶️ Scenarios">
+            <div *ngIf="!startingOrStoppingScenario">
+                <div *ngFor="let standardModule of standardModules">
+                    <div class="pageSubtitle">{{standardModule.moduleName}}</div>
 
-        <mat-card [ngClass]="'entityCard'" *ngFor="let scenario of standardModule.scenarios">
-            <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
-                <button
-                class="scenarioActionButton"
-                mat-icon-button
-                color="primary"
-                [disabled]="cannotPerformAction(scenario)"
-                [title]="getActionTitle(scenario)"
-                (click)="onScenarioAction($event, scenario)"
-                ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
+                    <mat-card [ngClass]="'entityCard'" *ngFor="let scenario of standardModule.scenarios">
+                        <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
+                            <button
+                            class="scenarioActionButton"
+                            mat-icon-button
+                            color="primary"
+                            [disabled]="cannotPerformAction(scenario)"
+                            [title]="getActionTitle(scenario)"
+                            (click)="onScenarioAction($event, scenario)"
+                            ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
 
-                <span
-                id="conformanceStatus"
-                class="conformanceStatus"
-                [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
-                >{{getConformanceStatusEmoji(scenario.conformanceStatus)}}</span>
+                            <span
+                            id="conformanceStatus"
+                            class="conformanceStatus"
+                            [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
+                            >{{getConformanceStatusEmoji(scenario.conformanceStatus)}}</span>
 
-                <span class="wrappingText">{{scenario.name}}</span>
+                            <span class="wrappingText">{{scenario.name}}</span>
+                        </div>
+                    </mat-card>
+                    <br/>
+                </div>
             </div>
-        </mat-card>
-        <br/>
-    </div>
+        </mat-tab>
+        <mat-tab label="📜 Reports">
+            <div *ngIf="!displayedReportDigest">
+                <div class="paragraph">Create a report from the current sandbox state:</div>
+                <br/>
+                <mat-form-field class="fullWidth">
+                    <mat-label>Optional report title</mat-label>
+                    <input
+                      matInput
+                      type="text"
+                      autocomplete="off"
+                      name="newReportTitleTextField"
+                      [(ngModel)]="newReportTitle"
+                    />
+                </mat-form-field>
+                <div>
+                    <button
+                    mat-raised-button
+                    color="primary"
+                    (click)="onClickCreateReport()"
+                    >Create report</button>
+                </div>
+
+                <mat-card [ngClass]="'entityCard'" *ngFor="let reportDigest of reportDigests">
+                    <div class="cardContent withPointerCursor" (click)="onReportClick(reportDigest)">
+                      <span style="margin: 8px" class="wrappingText">📜 {{reportDigest.dateTime}} {{reportDigest.title}}</span>
+                    </div>
+                </mat-card>
+            </div>
+
+            <div *ngIf="displayedReportDigest">
+                <div class="paragraph withPointerCursor">
+                  <a (click)="onClickBackToAllReports()">⬅️ Back to all reports</a>
+                </div>
+
+                <app-report
+                *ngIf="displayedReportContent"
+                [unfoldedLevels]="2"
+                [report]="displayedReportContent"
+                ></app-report>
+            </div>
+
+            <br />
+        </mat-tab>
+    </mat-tab-group>
 </div>
 
-<div *ngIf="sandbox?.canNotifyParty">
+<div *ngIf="isInternalSandbox()">
     <div class="paragraph">
         <button
         id="notifyPartyButton"
@@ -62,6 +112,7 @@
         >Notify party</button>
         &nbsp;
         <button
+          testId="resetPartyButton"
         mat-raised-button
         (click)="onClickResetParty()"
         >Reset party</button>

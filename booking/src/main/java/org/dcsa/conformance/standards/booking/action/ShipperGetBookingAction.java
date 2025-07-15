@@ -61,13 +61,13 @@ public class ShipperGetBookingAction extends BookingAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        String reference =
-            dsp.carrierBookingReference() != null
-                ? dsp.carrierBookingReference()
-                : dsp.carrierBookingRequestReference();
+        String cbrr = dsp.carrierBookingRequestReference();
+        String cbr = dsp.carrierBookingReference();
         return Stream.of(
             new UrlPathCheck(
-                BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/" + reference),
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                buildFullUris("/v2/bookings/", cbrr, cbr)),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

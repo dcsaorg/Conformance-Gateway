@@ -144,6 +144,12 @@
     "portOfDischarge": {
       "UNLocationCode": "DEBRV"
     },
+    "placeOfReceipt": {
+      "facility": {
+        "facilityCode": "ADT",
+        "facilityCodeListProvider": "BIC"
+      }
+    },
     "vesselVoyages": [
       {
         "vesselName": "HMM Algeciras",

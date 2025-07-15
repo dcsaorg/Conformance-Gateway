@@ -30,6 +30,10 @@ public class PintChecks {
 
   private static final JsonPointer TDR_PTR = JsonPointer.compile("/transportDocument/transportDocumentReference");
 
+  private PintChecks(){
+
+  }
+
   private static final JsonRebaseableContentCheck TRANSACTION_PARTY_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate 'codeListProvider' is a known value",
     (mav) -> {
@@ -68,31 +72,6 @@ public class PintChecks {
         size,
         expectedSize
       ));
-    };
-  }
-
-  public static JsonContentMatchedValidation anyArrayElementMatching(Predicate<JsonNode> matcher, JsonContentMatchedValidation delegate, boolean invalidIfNoMatch) {
-    return (nodeToValidate,contextPath) -> {
-      boolean hadMatch = false;
-      Set<String> issues = new LinkedHashSet<>();
-      if (nodeToValidate.isArray()) {
-        int idx = -1;
-        for (var node : nodeToValidate) {
-          idx++;
-          if (matcher.test(node)) {
-            var r = delegate.validate(node, contextPath + "[" + idx + "]");
-            issues.addAll(r);
-            hadMatch = true;
-          }
-        }
-
-        if (invalidIfNoMatch && !hadMatch) {
-          issues.add("None of the elements in '" + contextPath + "' were the right type");
-        }
-      } else if (invalidIfNoMatch){
-        issues.add("'" + contextPath + "' as not an array");
-      }
-      return issues;
     };
   }
 

@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.eblinterop.action;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-
 @Getter
 @RequiredArgsConstructor
 public enum PintResponseCode {
@@ -15,6 +14,7 @@ public enum PintResponseCode {
     INCD(409),
     MDOC(409),
     DISE(409),
+    ERR(400),
     ;
 
     private final int httpResponseCode;

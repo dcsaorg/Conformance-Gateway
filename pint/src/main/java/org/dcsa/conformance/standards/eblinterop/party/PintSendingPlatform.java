@@ -9,10 +9,8 @@ import com.fasterxml.jackson.databind.node.BinaryNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.nimbusds.jose.util.Base64URL;
-
 import java.util.*;
 import java.util.function.Consumer;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -25,10 +23,10 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblinterop.action.*;
-import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
@@ -36,9 +34,6 @@ import org.dcsa.conformance.standards.eblinterop.models.TDSendingState;
 
 @Slf4j
 public class PintSendingPlatform extends ConformanceParty {
-
-  private static final Random RANDOM = new Random();
-
 
   private static final PayloadSignerWithKey SENDING_PLATFORM_PAYLOAD_SIGNER = PayloadSignerFactory.senderPayloadSigner();
   private static final PayloadSignerWithKey CARRIER_PLATFORM_PAYLOAD_SIGNER = PayloadSignerFactory.carrierPayloadSigner();
@@ -72,17 +67,15 @@ public class PintSendingPlatform extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(SenderSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-      Map.entry(PintInitiateAndCloseTransferAction.class, this::initiateTransferRequest),
-      Map.entry(PintInitiateTransferAction.class, this::initiateTransferRequest),
-      Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::initiateTransferRequest),
-      Map.entry(PintTransferAdditionalDocumentAction.class, this::transferActionDocument),
-      Map.entry(PintTransferAdditionalDocumentFailureAction.class, this::transferActionDocument),
-      Map.entry(PintRetryTransferAction.class, this::retryTransfer),
-      Map.entry(PintRetryTransferAndCloseAction.class, this::retryTransfer),
-      Map.entry(PintCloseTransferAction.class, this::finishTransfer),
-      Map.entry(PintReceiverValidationAction.class, this::requestReceiverValidation)
-    );
+        Map.entry(SenderSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(PintInitiateAndCloseTransferAction.class, this::initiateTransferRequest),
+        Map.entry(PintInitiateTransferAction.class, this::initiateTransferRequest),
+        Map.entry(PintTransferAdditionalDocumentAction.class, this::transferActionDocument),
+        Map.entry(PintRetryTransferAction.class, this::retryTransfer),
+        Map.entry(PintRetryTransferAndCloseAction.class, this::retryTransfer),
+        Map.entry(PintCloseTransferAction.class, this::finishTransfer),
+        Map.entry(PintReceiverValidationAction.class, this::requestReceiverValidation),
+        Map.entry(PintErrorResponseAction.class, this::initiateTransferRequest));
   }
 
   private void requestReceiverValidation(JsonNode actionPrompt) {
@@ -109,22 +102,6 @@ public class PintSendingPlatform extends ConformanceParty {
       "Prompt answer for supplyScenarioParameters: %s".formatted(scenarioParameters.toString()));
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), scenarioParameters);
-  }
-
-  private void manipulateTransactions(JsonNode actionPrompt) {
-    log.info(
-        "EblInteropSendingPlatform.manipulateTransactions(%s)"
-            .formatted(actionPrompt.toPrettyString()));
-    var rsp = ReceiverScenarioParameters.fromJson(actionPrompt.required("rsp"));
-    var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
-    var tdr = ssp.transportDocumentReference();
-    var sendingState = TDSendingState.load(persistentMap, tdr);
-    sendingState.manipulateLatestTransaction(SENDING_PLATFORM_PAYLOAD_SIGNER, rsp);
-    sendingState.save(persistentMap);
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
-    addOperatorLogEntry(
-      "Mutated transaction chain for document: %s".formatted(tdr));
   }
 
   @SneakyThrows
@@ -331,6 +308,16 @@ public class PintSendingPlatform extends ConformanceParty {
     var envelopeTransferChain = body.path("envelopeTransferChain");
     sendingState.setSignedEnvelopeTransferChain(envelopeTransferChain);
     sendingState.save(persistentMap);
+
+    boolean invalidFacilityCode = actionPrompt.path("invalidFacilityCode").asBoolean(false);
+    if (invalidFacilityCode) {
+      var facility = body.path("transportDocument")
+              .path("transports")
+              .path("placeOfReceipt")
+              .path("facility");
+      ((ObjectNode) facility).put("facilityCode", "INVALID_FACILITY_CODE");
+    }
+
     var response = this.syncCounterpartPost(
       "/v" + apiVersion.charAt(0) + "/envelopes",
       body

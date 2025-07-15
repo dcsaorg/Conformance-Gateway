@@ -1,20 +1,19 @@
 package org.dcsa.conformance.standards.eblinterop.models;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.*;
 import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNode;
+import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.nimbusds.jose.JWSObject;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import com.nimbusds.jose.JWSObject;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
@@ -275,11 +274,12 @@ public class TDReceiveState {
   }
 
   public void updateTransferState(PintResponseCode code) {
-    var state = switch (code){
-      case RECE, DUPE -> TransferState.ACCEPTED;
-      case BENV, BSIG, DISE -> TransferState.REJECTED;
-      case INCD, MDOC, BETR -> TransferState.INCOMPLETE;
-    };
+    var state =
+        switch (code) {
+          case RECE, DUPE -> TransferState.ACCEPTED;
+          case BENV, BSIG, DISE, ERR -> TransferState.REJECTED;
+          case INCD, MDOC, BETR -> TransferState.INCOMPLETE;
+        };
     this.setTransferState(state);
   }
 

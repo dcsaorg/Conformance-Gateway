@@ -79,7 +79,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                     ? String.format(
                         "either the TD reference (%s) or the SI reference (%s)",
                         dsp.transportDocumentReference(), dsp.shippingInstructionsReference())
-                    : dsp.shippingInstructionsReference()),
+                    : "document reference  " + dsp.shippingInstructionsReference()),
             Map.entry(
                 "ORIGINAL_OR_AMENDED_PLACEHOLDER", requestAmendedStatus ? "AMENDED" : "ORIGINAL"));
     return getMarkdownHumanReadablePrompt(

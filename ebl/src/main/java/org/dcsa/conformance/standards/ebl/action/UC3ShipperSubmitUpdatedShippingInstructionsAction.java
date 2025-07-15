@@ -43,7 +43,7 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
                 ? String.format(
                     "either the TD reference (%s) or the SI reference (%s)",
                     getDSP().transportDocumentReference(), getDSP().shippingInstructionsReference())
-                : getDSP().shippingInstructionsReference()),
+                : "document reference " + getDSP().shippingInstructionsReference()),
         "prompt-shipper-uc3.md",
         "prompt-shipper-refresh-complete.md");
   }
@@ -73,18 +73,16 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
 
-        var siPath = "/v3/shipping-instructions/" + dsp.shippingInstructionsReference();
-        var tdPath = "/v3/shipping-instructions/" + dsp.transportDocumentReference();
-
-        UrlPathCheck urlPathCheck =
-            useBothRef
-                ? new UrlPathCheck(
-                    "", EblRole::isShipper, getMatchedExchangeUuid(), siPath, true, tdPath)
-                : new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), siPath);
         Stream<ActionCheck> primaryExchangeChecks =
             Stream.of(
                 new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PUT"),
-                urlPathCheck,
+                new UrlPathCheck(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    buildFullUris(
+                        "/v3/shipping-instructions/",
+                        dsp.shippingInstructionsReference(),
+                        dsp.transportDocumentReference())),
                 new ResponseStatusCheck(
                     EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
                 new ApiHeaderCheck(

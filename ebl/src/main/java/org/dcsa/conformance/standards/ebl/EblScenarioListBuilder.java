@@ -197,7 +197,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                         uc6Get(
                                             false,
                                             shipperGetTransportDocument(TD_DRAFT)
-                                                .then(uc7Get(uc8Get()))))))))))
+                                                .then(uc7Get(uc8Get()))))),
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(
+                                        uc7Get(
+                                            uc8Get(
+                                                uc3Get(
+                                                    SI_RECEIVED,
+                                                    SI_UPDATE_RECEIVED,
+                                                    true,
+                                                    uc4aGet(
+                                                        SI_RECEIVED,
+                                                        SI_UPDATE_CONFIRMED,
+                                                        true,
+                                                        uc8Get()))))))))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));

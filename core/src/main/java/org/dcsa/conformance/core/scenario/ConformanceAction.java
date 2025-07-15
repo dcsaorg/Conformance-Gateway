@@ -4,7 +4,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -12,10 +12,10 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.UserFacingException;
@@ -282,6 +282,18 @@ public abstract class ConformanceAction implements StatefulEntity {
     if (o == null || getClass() != o.getClass()) return false;
     ConformanceAction that = (ConformanceAction) o;
     return Objects.equals(id, that.id);
+  }
+
+  public String[] buildFullUris(String uri, String... uriReference) {
+    if (uriReference == null || uriReference.length == 0) {
+      return new String[] {uri};
+    }
+
+    return Arrays.stream(uriReference)
+      .filter(Objects::nonNull)
+      .filter(Predicate.not(String::isBlank))
+      .map(ref -> uri + ref)
+      .toArray(String[]::new);
   }
 
   @Override

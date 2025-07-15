@@ -37,9 +37,15 @@ public class UrlPathCheck extends ActionCheck {
   protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) return Set.of();
+
     String requestUrl = exchange.getRequest().url();
-    return requestUrl.endsWith(expectedUrlPathEnd)
+
+    boolean matches = expectedUrlPathEnd.stream().anyMatch(requestUrl::endsWith);
+
+    return matches
         ? Collections.emptySet()
-        : Set.of("Request URL '%s' does not end with '%s'".formatted(requestUrl, expectedUrlPathEnd));
+        : Set.of(
+            "Request URL '%s' does not end with any of %s"
+                .formatted(requestUrl, expectedUrlPathEnd));
   }
 }

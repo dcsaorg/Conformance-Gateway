@@ -105,17 +105,14 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
 
-        var siPath = "/v3/shipping-instructions/" + dsp.shippingInstructionsReference();
-        var tdPath = "/v3/shipping-instructions/" + dsp.transportDocumentReference();
-
-        UrlPathCheck urlPathCheck =
-            useBothRef
-                ? new UrlPathCheck(
-                    "", EblRole::isShipper, getMatchedExchangeUuid(), siPath, true, tdPath)
-                : new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), siPath);
-
         return Stream.of(
-            urlPathCheck,
+            new UrlPathCheck(
+                EblRole::isShipper,
+                getMatchedExchangeUuid(),
+                buildFullUris(
+                    "/v3/shipping-instructions/",
+                    dsp.shippingInstructionsReference(),
+                    dsp.transportDocumentReference())),
             new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,

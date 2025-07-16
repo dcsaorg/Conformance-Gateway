@@ -318,7 +318,8 @@ public class ConformanceOrchestrator implements StatefulEntity {
               .formatted(currentScenario.toString()));
       return;
     }
-    if (nextAction.isMissingMatchedExchange()) {
+    if (nextAction.isMissingMatchedExchange()
+        && !nextAction.skippableForRoles().contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
       throw new UserFacingException(
           "A required API exchange was not yet detected for action '%s'"
               .formatted(nextAction.getActionTitle()));
@@ -455,6 +456,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
             .findFirst()
             .orElseThrow();
     scenarioNode.set("conformanceSubReport", scenarioSubReport.toJsonReport());
+
+    scenarioNode.put("isSkippable", false);
+    if (nextAction != null
+        && nextAction.skippableForRoles().contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
+      scenarioNode.put("isSkippable", true);
+    }
 
     return scenarioNode;
   }

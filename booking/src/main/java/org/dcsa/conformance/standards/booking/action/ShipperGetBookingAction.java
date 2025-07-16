@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.booking.action;
 
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -53,6 +54,11 @@ public class ShipperGetBookingAction extends BookingAction {
     return getMarkdownHumanReadablePrompt(
             "prompt-shipper-get.md", "prompt-shipper-refresh-complete.md")
         .replace("ORIGINAL_OR_AMENDED_PLACEHOLDER", requestAmendedContent ? "AMENDED" : "ORIGINAL");
+  }
+
+  @Override
+  public Set<String> skippableForRoles() {
+    return Set.of(BookingRole.SHIPPER.getConfigName());
   }
 
   @Override

@@ -362,8 +362,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `HR` - Hours",
 "ArrivalNotice / freeTimes / typeCode",typeCode,string,,,,DEM,"Code used to denote the type of free time.
 - `DEM` - Demurrage
-- `DET` - Detention
-- `PDM` - Per Diem
+- `DET` - Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')
 - `STO` - Storage",
 "ArrivalNotice / isElectronic",isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 "ArrivalNotice / issueDateTime",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",

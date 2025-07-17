@@ -260,8 +260,7 @@ FreeTime,timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which fr
 - `HR` - Hours",
 FreeTime,typeCode,string,,,,DEM,"Code used to denote the type of free time.
 - `DEM` - Demurrage
-- `DET` - Detention
-- `PDM` - Per Diem
+- `DET` - Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')
 - `STO` - Storage",
 GeoCoordinate,latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 GeoCoordinate,longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",

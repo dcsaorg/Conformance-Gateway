@@ -277,7 +277,7 @@ public class TDReceiveState {
     var state =
         switch (code) {
           case RECE, DUPE -> TransferState.ACCEPTED;
-          case BENV, BSIG, DISE, ERR -> TransferState.REJECTED;
+          case BENV, BSIG, DISE -> TransferState.REJECTED;
           case INCD, MDOC, BETR -> TransferState.INCOMPLETE;
         };
     this.setTransferState(state);

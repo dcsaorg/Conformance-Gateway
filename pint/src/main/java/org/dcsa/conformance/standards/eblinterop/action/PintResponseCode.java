@@ -14,7 +14,6 @@ public enum PintResponseCode {
     INCD(409),
     MDOC(409),
     DISE(409),
-    ERR(400),
     ;
 
     private final int httpResponseCode;

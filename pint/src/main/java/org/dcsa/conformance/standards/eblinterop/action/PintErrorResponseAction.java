@@ -18,25 +18,18 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 public class PintErrorResponseAction extends PintAction {
 
   public static final String INVALID_FACILITY_CODE_ATTRIBUTE = "invalidFacilityCode";
+  private static final int RESPONSE_CODE = 400;
 
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator requestSchemaValidator;
-  private final PintResponseCode pintResponseCode;
 
   public PintErrorResponseAction(
       String receivingPlatform,
       String sendingPlatform,
       PintAction previousAction,
-      PintResponseCode pintResponseCode,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator) {
-    super(
-        sendingPlatform,
-        receivingPlatform,
-        previousAction,
-        "InvalidFacilityCode(%s)".formatted(pintResponseCode.name()),
-        pintResponseCode.getHttpResponseCode());
-    this.pintResponseCode = pintResponseCode;
+    super(sendingPlatform, receivingPlatform, previousAction, "InvalidFacilityCode", RESPONSE_CODE);
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestSchemaValidator = requestSchemaValidator;
   }
@@ -64,9 +57,7 @@ public class PintErrorResponseAction extends PintAction {
         return Stream.of(
             new HttpMethodCheck(PintRole::isSendingPlatform, getMatchedExchangeUuid(), "POST"),
             new ResponseStatusCheck(
-                PintRole::isReceivingPlatform,
-                getMatchedExchangeUuid(),
-                pintResponseCode.getHttpResponseCode()),
+                PintRole::isReceivingPlatform, getMatchedExchangeUuid(), RESPONSE_CODE),
             new ApiHeaderCheck(
                 PintRole::isSendingPlatform,
                 getMatchedExchangeUuid(),

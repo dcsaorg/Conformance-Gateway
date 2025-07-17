@@ -96,7 +96,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                     "Error response scenarios",
                     noAction().then(
                             supplySenderTransferScenarioParameters(0).then(
-                                            receiverStateSetup(ScenarioClass.NO_ISSUES).then(errorResponseAction(PintResponseCode.ERR))))))
+                                            receiverStateSetup(ScenarioClass.NO_ISSUES).then(errorResponseAction())))))
       .collect(
         Collectors.toMap(
           Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -278,7 +278,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA)));
   }
 
-  private static PintScenarioListBuilder errorResponseAction(PintResponseCode signedResponseCode) {
+  private static PintScenarioListBuilder errorResponseAction() {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -287,7 +287,6 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 receivingPlatform,
                 sendingPlatform,
                 (PintAction) previousAction,
-                signedResponseCode,
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ERROR_RESPONSE_SCHEMA)));
   }

@@ -31,7 +31,9 @@ ArrivalNotice,"cargoMovementTypeAtDestination",string,,maxLength=3,,FCL,"Refers 
 
 - `FCL` (Full Container Load)
 - `LCL` (Less than Container Load)",
-ArrivalNotice,carrierClauses,"string list",,maxLength=20000,,,"Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.",
+ArrivalNotice,carrierClauses,"string list",,maxLength=20000,,,"Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.
+Item description:
+The content of the clause.",
 ArrivalNotice,carrierCode,string,,maxLength=4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
 [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
 
@@ -69,7 +71,17 @@ ArrivalNotice,"transportDocumentTypeCode",string,,,,SWB,"Specifies the type of t
 - `BOL` (Bill of Lading)
 - `SWB` (Sea Waybill)",
 ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",,,,,"The equipments being used.",
-"ArrivalNoticeNotification",equipmentReferences,"string list",,maxLength=11,,,"References of the equipments for which this arrival notice was created",
+"ArrivalNoticeNotification",equipmentReferences,"string list",,maxLength=11,,,"References of the equipments for which this arrival notice was created
+Item description:
+The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+If a container does not comply with ISO 6346, it is suggested to follow
+[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+from SMDG.
+",
 "ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at place of delivery",
 "ArrivalNoticeNotification",etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
 "ArrivalNoticeNotification",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
@@ -127,17 +139,27 @@ Charge,quantity,number,,,,34.4,"The amount of unit for this charge item.",
 Charge,unitPrice,number,,,,3456.6,"The unit price of this charge item in the currency of the charge.",
 ConsignmentItem,HSCodes,"string list",,maxLength=10,,,"A list of `HS Codes` that apply to this `consignmentItem`.
 HS codes are used by customs to classify the product being shipped.
-The code must be at least 6 and at most 10 digits.",
+The code must be at least 6 and at most 10 digits.
+Item description:
+Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.
+
+More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
+",
 ConsignmentItem,cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",
 ConsignmentItem,carrierBookingReference,string,,maxLength=35,,ABC709951,"The associated booking number provided by the carrier for this `Consignment Item`.",
 ConsignmentItem,customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
-ConsignmentItem,descriptionOfGoods,"string list",,maxLength=35,,,"A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.",
+ConsignmentItem,descriptionOfGoods,"string list",,maxLength=35,,,"A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.
+Item description:
+A line describing the cargo",
 ConsignmentItem,exportLicense,ExportLicense,,,,,"Export license for the consignment item.",
 ConsignmentItem,importLicense,ImportLicense,,,,,"Import license for the consignment item.",
 ConsignmentItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list of `National Commodity Codes` that apply to this `commodity`",
 ConsignmentItem,references,"ReferenceConsignmentItem list",,,,,"A list of `References`",
 ConsignmentItem,shippingMarks,"string list",,"maxItems=50
-maxLength=35",,,"A list of the `ShippingMarks` applicable to this `consignmentItem`",
+maxLength=35",,,"A list of the `ShippingMarks` applicable to this `consignmentItem`
+Item description:
+The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.
+",
 CustomsClearance,customsClearancePoint,Location,,,,,"Location information",
 CustomsClearance,"customsImportDeclarationProcedure",string,,maxLength=1000,,,"Instructions on the administrative processes for submitting import customs declarations to the local agency.",
 CustomsClearance,"immediateTransportationEntry","ImmediateTransportationEntry",,,,,"An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
@@ -149,7 +171,9 @@ CustomsClearance,masterSequenceNumber,string,,maxLength=35,,x12345,"A unique seq
 a particular vessel. Customers use this Master Sequence Number (MSN) as a reference when declaring all related House B/Ls.",
 CustomsReference,countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 CustomsReference,type,string,,maxLength=50,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",
-CustomsReference,values,"string list",,maxLength=35,,,,
+CustomsReference,values,"string list",,maxLength=35,,,"
+Item description:
+The value of the `customsReference`",
 DangerousGoods,EMSNumber,string,,maxLength=7,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.",
 DangerousGoods,NANumber,string,,maxLength=4,,9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.",
 DangerousGoods,UNNumber,string,,maxLength=4,,1463,"United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.",
@@ -193,7 +217,29 @@ DangerousGoods,netVolume,NetVolume,,,,,"The volume of the referenced dangerous g
 DangerousGoods,netWeight,NetWeight,,,,,"Total weight of the goods carried, excluding packaging.",
 DangerousGoods,packingGroup,integer,,,,3,"The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code.",
 DangerousGoods,properShippingName,string,,maxLength=250,,"Chromium Trioxide, anhydrous","The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code, or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to the MARPOL Convention.",
-DangerousGoods,segregationGroups,"string list",,maxLength=2,,,"List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.",
+DangerousGoods,segregationGroups,"string list",,maxLength=2,,,"List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.
+Item description:
+Grouping of Dangerous Goods having certain similar chemical properties. Possible values are:
+
+- `1` (Acids)
+- `2` (Ammonium Compounds)
+- `3` (Bromates)
+- `4` (Chlorates)
+- `5` (Chlorites)
+- `6` (Cyanides)
+- `7` (Heavy metals and their salts)
+- `8` (Hypochlorites)
+- `9` (Lead and its compounds)
+- `10` (Liquid halogenated hydrocarbons)
+- `11` (Mercury and mercury compounds)
+- `12` (Nitrites and their mixtures)
+- `13` (Perchlorates)
+- `14` (Permanganates)
+- `15` (Powdered metals)
+- `16` (Peroxides),
+- `17` (Azides)
+- `18` (Alkalis)
+",
 DangerousGoods,subsidiaryRisk1,string,,maxLength=3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,subsidiaryRisk2,string,,maxLength=3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,technicalName,string,,maxLength=250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
@@ -219,7 +265,9 @@ DocumentParty,partyFunction,string,,maxLength=3,,N1,"Specifies the role of the p
 - `MF` (Manufacturer)
 - `WH` (Warehouse Keeper)",
 DocumentParty,partyName,string,,maxLength=70,,"Acme Inc.","Party name",
-DocumentParty,purchaseOrderReferences,"string list",,maxLength=35,,,"A list of `Purchase Order Reference`s linked to the document party.",
+DocumentParty,purchaseOrderReferences,"string list",,maxLength=35,,,"A list of `Purchase Order Reference`s linked to the document party.
+Item description:
+Purchase order reference",
 DocumentParty,reference,string,,maxLength=35,,REF1234,"A reference linked to the document party.",
 DocumentParty,taxLegalReferences,"TaxLegalReference list",,,,,"List of tax or legal references relevant to the party",
 EmbeddedDocument,content,string,,,,RXhhbXBsZSBBTiBjb250ZW50,"Base64 representation of the binary document content",
@@ -258,7 +306,9 @@ FreeTime,timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which fr
 - `CD` - Calendar days
 - `WD` - Working days
 - `HR` - Hours",
-FreeTime,typeCode,string,,,,DEM,"Code used to denote the type of free time.
+FreeTime,typeCodes,"string list",,,,,"One or more types applicable to this free time condition.
+Item description:
+Code used to denote the type of free time.
 - `DEM` - Demurrage
 - `DET` - Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')
 - `STO` - Storage",
@@ -340,7 +390,9 @@ NationalCommodityCode,type,string,,maxLength=10,,NCM,"The national commodity cla
 - `TARIC` (Integrated Tariff of the European Communities)
 - `CN` (Combined Nomenclature)
 - `CUS` (Customs Union and Statistics)",
-NationalCommodityCode,values,"string list",,maxLength=10,,,"A list of `national commodity codes` values.",
+NationalCommodityCode,values,"string list",,maxLength=10,,,"A list of `national commodity codes` values.
+Item description:
+The value of the `National Commodity Code`",
 NetExplosiveContent,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)
@@ -384,7 +436,9 @@ ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes 
 - `AKG` (Vehicle Identification Number)
 - `SPO` (Shipper's Purchase Order)
 - `CPO` (Consignee's Purchase Order)",
-ReferenceConsignmentItem,values,"string list",,maxLength=35,,,"List of `referenceValues` for a given `referenceType`.",
+ReferenceConsignmentItem,values,"string list",,maxLength=35,,,"List of `referenceValues` for a given `referenceType`.
+Item description:
+The value of the reference.",
 Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
 - `CAR` (Carrier)
@@ -432,7 +486,10 @@ Transport,vesselVoyages,"VesselVoyage list",,maxItems=3,,,"Details of the POD, P
 "UtilizedTransportEquipment",references,"Reference list",,,,,"A list of `References`",
 "UtilizedTransportEquipment",seals,"Seal list",,,,,"A list of `Seals`",
 "UtilizedTransportEquipment",shippingMarks,"string list",,"maxItems=50
-maxLength=35",,,"A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`",
+maxLength=35",,,"A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
+Item description:
+The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.
+",
 VesselVoyage,callReferenceNumber,string,,maxLength=100,,CRN1234,"A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
 It can be used for customs clearance purposes in specific countries (e.g. NL, UK).",
 VesselVoyage,carrierVoyageNumber,string,,maxLength=50,,1234N,"Carrier-specific identifier of a voyage:

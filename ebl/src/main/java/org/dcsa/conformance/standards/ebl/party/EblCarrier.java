@@ -34,10 +34,8 @@ import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 public class EblCarrier extends ConformanceParty {
   private static final String DOCUMENT_REFERENCE = "documentReference";
   private static final String MESSAGE = "message";
-  private static final String DKAAR = "DKAAR";
   private static final String ACTION_ID = "actionId";
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
-  private static final String FIBREBOARD_BOXES = "Fibreboard boxes";
   public static final String SCENARIO_TYPE = "scenarioType";
 
   private final Map<String, String> tdrToSir = new HashMap<>();

@@ -67,7 +67,13 @@ public abstract class StandardSpecification {
             new Header()
                 .description(
                     "SemVer used to indicate the version of the contract (API version) returned.")
-                .schema(new Schema<>().type("string").example(standardVersion)));
+                .schema(new Schema<>().type("string").example(standardVersion)))
+        .addHeaders(
+            "Next-Page-Cursor",
+            new Header()
+                .description(
+                    "A cursor value pointing to the next page of results in a paginated GET response.")
+                .schema(new Schema<>().type("string").example("ExampleNextPageCursor")));
 
     constraintsByClassAndField = new HashMap<>();
     modelClassesStream()

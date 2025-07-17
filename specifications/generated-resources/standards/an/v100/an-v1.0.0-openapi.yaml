@@ -112,10 +112,26 @@ paths:
         schema:
           type: "boolean"
         example: true
+      - name: "limit"
+        in: "query"
+        description: "Maximum number of arrival notices to include in each page of the response."
+        schema:
+          minimum: 1
+          type: "number"
+          format: "int32"
+        example: true
+      - name: "cursor"
+        in: "query"
+        description: "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page."
+        schema:
+          type: "string"
+        example: "ExampleNextPageCursor"
       responses:
         "200":
           description: "List of arrival notices matching the query parameters"
           headers:
+            Next-Page-Cursor:
+              $ref: "#/components/headers/Next-Page-Cursor"
             API-Version:
               $ref: "#/components/headers/API-Version"
           content:
@@ -1976,3 +1992,8 @@ components:
       schema:
         type: "string"
         example: "1.0.0"
+    Next-Page-Cursor:
+      description: "A cursor value pointing to the next page of results in a paginated GET response."
+      schema:
+        type: "string"
+        example: "ExampleNextPageCursor"

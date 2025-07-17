@@ -245,7 +245,11 @@ public class ANStandardSpecification extends StandardSpecification {
                                 Map.ofEntries(
                                     Map.entry(
                                         "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        new Header().$ref("#/components/headers/API-Version")),
+                                    Map.entry(
+                                        "Next-Page-Cursor",
+                                        new Header()
+                                            .$ref("#/components/headers/Next-Page-Cursor")))))
                         .content(
                             new Content()
                                 .addMediaType(

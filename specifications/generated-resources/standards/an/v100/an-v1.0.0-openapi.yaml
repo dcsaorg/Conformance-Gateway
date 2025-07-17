@@ -1210,14 +1210,17 @@ components:
     FreeTime:
       type: "object"
       properties:
-        typeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of free time.
-            - `DEM` - Demurrage
-            - `DET` - Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')
-            - `STO` - Storage
-          example: "DEM"
+        typeCodes:
+          type: "array"
+          description: "One or more types applicable to this free time condition."
+          items:
+            type: "string"
+            description: |-
+              Code used to denote the type of free time.
+              - `DEM` - Demurrage
+              - `DET` - Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')
+              - `STO` - Storage
+            example: "DEM"
         isoEquipmentCode:
           maxLength: 4
           type: "string"

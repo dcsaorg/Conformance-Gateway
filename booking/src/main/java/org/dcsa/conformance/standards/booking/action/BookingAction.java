@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -158,6 +159,18 @@ public abstract class BookingAction extends ConformanceAction {
 
   public static String createMessageForUIPrompt(String message, String cbr, String cbrr) {
     return message + " " + withCbrOrCbrr(cbr, cbrr);
+  }
+
+  protected String[] buildFullUris(String uri, String... uriReference) {
+    if (uriReference == null || uriReference.length == 0) {
+      return new String[] {uri};
+    }
+
+    return Arrays.stream(uriReference)
+        .filter(Objects::nonNull)
+        .filter(Predicate.not(String::isBlank))
+        .map(ref -> uri + ref)
+        .toArray(String[]::new);
   }
 
   protected Stream<ActionCheck> getNotificationChecks(

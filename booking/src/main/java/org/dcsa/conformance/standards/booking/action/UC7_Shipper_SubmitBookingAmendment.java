@@ -60,15 +60,17 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
+        String cbrr = dsp.carrierBookingRequestReference();
+        String cbr = dsp.carrierBookingReference();
         return Stream.concat(
-          Stream.concat( createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/%s".formatted(reference)),
-            Stream.of(
-              new JsonSchemaCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator))),
+            Stream.concat(
+                createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
+                Stream.of(
+                    new JsonSchemaCheck(
+                        BookingRole::isShipper,
+                        getMatchedExchangeUuid(),
+                        HttpMessageType.REQUEST,
+                        requestSchemaValidator))),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,

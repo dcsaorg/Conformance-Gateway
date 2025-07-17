@@ -115,9 +115,9 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .name("includeCharges")
           .description(
 """
-Flag indicating whether to include arrival notice charges. If not specified, the default value is `true`.
-This flag is separate from the mandatory and optional lists of query parameters that can be used as filters
-and can be used in combination with any such filter.
+Optional flag indicating whether only arrival notices with charges (`true`) or without charges (`false`) are requested.
+If left unspecified, the arrival notices both with and without charges are requested.
+This flag can only be used in combination with one of the other available query parameter filters.
 """)
           .example(true)
           .schema(new Schema<Boolean>().type("boolean"));

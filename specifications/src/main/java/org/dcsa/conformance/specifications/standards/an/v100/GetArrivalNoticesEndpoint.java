@@ -129,7 +129,7 @@ This flag can only be used in combination with one of the other available query 
           .in("query")
           .name("limit")
           .description("Maximum number of arrival notices to include in each page of the response.")
-          .example(true)
+          .example(10)
           .schema(new Schema<Integer>().type("number").format("int32").minimum(new BigDecimal(1)));
 
   private final Parameter cursor =

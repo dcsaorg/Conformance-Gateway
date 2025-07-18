@@ -16,6 +16,8 @@ The `includeCharges` query parameter no longer has a default value. (SD-2279)
 
 The `firmsCode` attribute name is now correct. (SD-2187)
 
+The data overview now includes the item description for string list attributes.
+
 
 ## Snapshot v1.0.0-20250704-alpha
 

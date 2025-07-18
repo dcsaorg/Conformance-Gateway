@@ -214,7 +214,7 @@ paths:
           minimum: 1
           type: "number"
           format: "int32"
-        example: true
+        example: 10
       - name: "cursor"
         in: "query"
         description: "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page."

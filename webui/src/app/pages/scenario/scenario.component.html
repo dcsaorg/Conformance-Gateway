@@ -94,6 +94,15 @@
                       >Refresh status</button>
                       &nbsp;
                       <button
+                        *ngIf="scenarioStatus.isSkippable"
+                        id="skipCurrentActionButton"
+                        mat-raised-button
+                        class="green-button"
+                        (click)="skipCurrentAction()"
+                      >Skip action
+                      </button>
+                      &nbsp;
+                      <button
                         id="completeCurrentActionButton"
                         mat-raised-button
                         color="primary"

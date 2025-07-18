@@ -104,10 +104,10 @@ public class ANStandardSpecification extends StandardSpecification {
 
     openAPI.path(
         "/arrival-notices",
-        new PathItem().get(operationArrivalNoticesGet()).post(operationArrivalNoticesPut()));
+        new PathItem().get(operationArrivalNoticesGet()).post(operationArrivalNoticesPost()));
     openAPI.path(
         "/arrival-notice-notifications",
-        new PathItem().post(operationArrivalNoticeNotificationsPut()));
+        new PathItem().post(operationArrivalNoticeNotificationsPost()));
 
     getArrivalNoticesEndpoint = new GetArrivalNoticesEndpoint();
   }
@@ -115,7 +115,7 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250606-alpha", "AN", "1.0.0-20250523-design", 4);
+        "Arrival Notice", "1.0.0-20250718-alpha", "AN", "1.0.0-20250704-alpha", 4);
   }
 
   @Override
@@ -227,10 +227,10 @@ public class ANStandardSpecification extends StandardSpecification {
     return false;
   }
 
-  private static Operation operationArrivalNoticesGet() {
+  private Operation operationArrivalNoticesGet() {
     return new Operation()
         .summary("Retrieves a list of arrival notices")
-        .description("")
+        .description(readResourceFile("openapi-get-ans-description.md"))
         .operationId("get-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_PUBLISHERS))
         .parameters(new GetArrivalNoticesEndpoint().getQueryParameters())
@@ -262,10 +262,10 @@ public class ANStandardSpecification extends StandardSpecification {
                                                         ArrivalNoticesMessage.class)))))));
   }
 
-  private static Operation operationArrivalNoticesPut() {
+  private Operation operationArrivalNoticesPost() {
     return new Operation()
         .summary("Sends a list of arrival notices")
-        .description("")
+        .description(readResourceFile("openapi-post-ans-description.md"))
         .operationId("put-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
         .requestBody(
@@ -296,10 +296,10 @@ public class ANStandardSpecification extends StandardSpecification {
                                         new Header().$ref("#/components/headers/API-Version")))))));
   }
 
-  private static Operation operationArrivalNoticeNotificationsPut() {
+  private Operation operationArrivalNoticeNotificationsPost() {
     return new Operation()
         .summary("Sends a list of arrival notice lightweight notifications")
-        .description("")
+        .description(readResourceFile("openapi-post-anns-description.md"))
         .operationId("put-arrival-notice-notifications")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
         .requestBody(

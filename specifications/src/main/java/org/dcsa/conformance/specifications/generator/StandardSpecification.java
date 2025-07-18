@@ -43,12 +43,7 @@ public abstract class StandardSpecification {
                 new Info()
                     .version(standardVersion)
                     .title("DCSA %s API".formatted(standardName))
-                    .description(
-                        SpecificationToolkit.readResourceFile(
-                            "conformance/specifications/%s/v%s/openapi-root.md"
-                                .formatted(
-                                    standardAbbreviation.toLowerCase(),
-                                    standardVersion.replaceAll("\\.", ""))))
+                    .description(readResourceFile("openapi-root.md"))
                     .license(
                         new License()
                             .name("Apache 2.0")
@@ -131,6 +126,15 @@ public abstract class StandardSpecification {
   protected abstract QueryParametersFilterEndpoint getQueryParametersFilterEndpoint();
 
   protected abstract boolean swapOldAndNewInDataOverview();
+
+  protected String readResourceFile(String fileName) {
+    return SpecificationToolkit.readResourceFile(
+        "conformance/specifications/%s/v%s/%s"
+            .formatted(
+                standardAbbreviation.toLowerCase(),
+                standardVersion.replaceAll("\\.", ""),
+                fileName));
+  }
 
   @SneakyThrows
   public void generateArtifacts() {

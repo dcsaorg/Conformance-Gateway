@@ -117,17 +117,31 @@ By default, adopters do not have to preserve between API calls the ordering of e
 Shen the order of elements in an array or collection must be preserved (e.g., the lines of text to be displayed on a package), the API specification explicitly states this.
 
 
-### Errors and feedback
+### Error object
 
-TODO description and schema
+When specifying 4xx error responses in an endpoint, we require the error response body to have a standard structure that can be programmatically processed by API consumers.
+
+The Booking 2.0.0 API contains [an example](https://app.swaggerhub.com/apis/dcsaorg/DCSA_BKG/2.0.0#/ErrorResponse) of how we define and use the "error object".
+
+### Feedback object
+
+In API specifications that allow API consumers to submit updated or amended entities, we include in the regular response (and if available, in notifications, see the dedicated section) a list of "feedback" objects that can be used to programmatically exchange information about what, why and how needs to be updated.
+
+The Booking 2.0.0 API contains [an example](https://app.swaggerhub.com/apis/dcsaorg/DCSA_BKG/2.0.0#/Feedback) of how we define and use the "feedback object".
 
 ### Pagination
 
-TODO copy from AN
+We use a simple and pragmatic pagination mechanism, suitable for a backend-to-backend API and implementable either in a stateful or stateless way, based on a "limit" and a "cursor" query parameters and on a "Next-Page-Cursor" response header.
+
+The Arrival Notice 1.0.0 API contains [an example](https://app.swaggerhub.com/apis/dcsaorg/DCSA_AN/1.0.0#/AN%20Publisher%20Endpoints/get-arrival-notices) of how we define the pagination mechanism.
 
 ### Notifications
 
-TODO copy from BKG Tech IFS
+Instead of callbacks or webhooks, we use standard endpoints to be implemented by the API consumer of the main endpoints and allowing the API provider to send lightweight or full notifications to its counterpart.
+
+The Arrival Notice 1.0.0 API contains [an example lightweight notification endpoint](https://app.swaggerhub.com/apis/dcsaorg/DCSA_AN/1.0.0#/AN%20Subscriber%20Endpoints/put-arrival-notice-notifications).
+
+A "full notification" is similar with a "lightweight notification" but it also includes a property containing the full entity that the notification is about (in the example above, it would be an `arrivalNotice` property containing an entire `ArrivalNotice` object).
 
 ### Extensions
 
@@ -143,11 +157,12 @@ Except for pagination, performance considerations (like rate limiting) are out o
 
 ### Avoided constructs and approaches
 
-We do not use the following constructs and approaches in newly developed DCSA APIs:
+We **do not use** the following constructs and approaches in newly developed DCSA APIs:
 * HATEOAS
 * JSON-LD
 * callbacks or webhooks
   * see the "Notifications" subsection for our alternative approach
+* CloudEvents for notifications
 * strings with custom parsing (except where required for compatibility with existing standards)
 
 
@@ -182,6 +197,4 @@ Starting with a copy of the OpenAPI specification included in the DCSA standard,
 
 ### Extensions
 
-TODO
-
-TODO explain what can be changed in a conformant way
+TODO describe (listing what can be changed in a conformant way)

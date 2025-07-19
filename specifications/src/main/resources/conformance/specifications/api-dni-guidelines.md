@@ -143,10 +143,6 @@ The Arrival Notice 1.0.0 API contains [an example lightweight notification endpo
 
 A "full notification" is similar with a "lightweight notification" but it also includes a property containing the full entity that the notification is about (in the example above, it would be an `arrivalNotice` property containing an entire `ArrivalNotice` object).
 
-### Extensions
-
-TODO
-
 ### Out of scope
 
 The sorting of elements in a result is out of scope in DCSA standards.
@@ -197,4 +193,8 @@ Starting with a copy of the OpenAPI specification included in the DCSA standard,
 
 ### Extensions
 
-TODO describe (listing what can be changed in a conformant way)
+When as an API provider you want to implement a released DCSA standard API in a conformant way but still require changes with respect to the released standard, you can contact DCSA for options.
+
+In most cases, your requirements will be addressed by DCSA by releasing a patch or service pack including the necessary changes.
+
+For the special situations in which the changes are specific to a single adopter, DCSA has a special "extensions" process through it will provide you with guidance on how to extend the standard to fit your needs.

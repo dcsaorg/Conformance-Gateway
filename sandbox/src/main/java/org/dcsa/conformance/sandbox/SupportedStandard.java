@@ -1,7 +1,9 @@
 package org.dcsa.conformance.sandbox;
 
+import java.util.Arrays;
 import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.standards.adoption.AdoptionStandard;
+import org.dcsa.conformance.standards.an.AnStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
 import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
@@ -12,11 +14,10 @@ import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.ovs.OvsStandard;
 import org.dcsa.conformance.standards.tnt.TntStandard;
 
-import java.util.Arrays;
-
 public enum SupportedStandard {
   ADOPTION(AdoptionStandard.INSTANCE),
   BOOKING(BookingStandard.INSTANCE),
+  ARRIVAL_NOTICE(AnStandard.INSTANCE),
   CS(CsStandard.INSTANCE),
   EBL(EblStandard.INSTANCE),
   EBL_ISSUANCE(EblIssuanceStandard.INSTANCE),

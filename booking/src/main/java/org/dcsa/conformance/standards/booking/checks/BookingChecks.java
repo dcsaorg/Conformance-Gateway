@@ -681,7 +681,7 @@ public class BookingChecks {
     return checks;
   }
 
-  private static JsonContentCheck cbrrOrCbr(Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static JsonContentCheck cbrrOrCbr(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
         "Validate Carrier Booking Request Reference and Carrier Booking Reference",
         body -> {

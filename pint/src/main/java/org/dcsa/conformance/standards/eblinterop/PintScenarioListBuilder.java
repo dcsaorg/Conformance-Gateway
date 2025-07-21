@@ -93,7 +93,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
           .then(receiverValidation())
         ),
             Map.entry(
-                    "Error response scenarios",
+                    "Receiver error response scenarios",
                     noAction().then(
                             supplySenderTransferScenarioParameters(0).then(
                                             receiverStateSetup(ScenarioClass.NO_ISSUES).then(errorResponseAction())))))

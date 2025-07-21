@@ -36,7 +36,7 @@ public class PintErrorResponseAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Start an envelope transfer with an unexpected facilityCode. Not to be performed by Receivers.";
+    return "Start an envelope transfer with an unexpected facilityCode. Not to be performed by Senders.";
   }
 
   @Override

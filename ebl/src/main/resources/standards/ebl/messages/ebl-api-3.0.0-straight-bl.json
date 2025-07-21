@@ -6,6 +6,7 @@
   "numberOfOriginalsWithCharges": 0,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
+  "isHouseBillOfLadingsIssued": false,
   "invoicePayableAt": {
     "UNLocationCode": "BRSSZ"
   },
@@ -67,7 +68,8 @@
   ],
   "advanceManifestFilings": [
     {
-      "manifestTypeCode": "ACE",
+      "identificationNumber": "1",
+      "manifestTypeCode": "ENS",
       "advanceManifestFilingsHouseBLPerformedBy": "SELF",
       "selfFilerCode": "FLXP"
     }
@@ -77,9 +79,9 @@
       "partyName": "DCSA CTK",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ],
       "partyContactDetails": [
@@ -94,9 +96,8 @@
       "sendToPlatform": "CARX",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "CARX",
+          "partyCode": "CARX123"
         }
       ],
       "partyContactDetails": [
@@ -110,21 +111,21 @@
       "partyName": "Global Retail Imports",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ],
       "partyContactDetails": [
         {
-          "name": "Anna Müller",
-          "email": "anna.muller@grimports.de"
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
         }
       ],
       "address": {
-        "street": "Neuer Wall 10",
-        "city": "Hamburg",
-        "countryCode": "DE"
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
       }
     }
   },

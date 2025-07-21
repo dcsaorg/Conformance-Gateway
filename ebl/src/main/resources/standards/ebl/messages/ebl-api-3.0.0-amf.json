@@ -32,7 +32,7 @@
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "Thermal Containers",
+            "description": "Boxes",
             "numberOfPackages": 400
           }
         }
@@ -88,8 +88,8 @@
       "identifyingCodes": [
         {
           "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListName": "DID",
+          "partyCode": "123456789abcdefghi"
         }
       ],
       "partyContactDetails": [
@@ -103,21 +103,21 @@
       "partyName": "Global Pharma Distribution",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ],
       "partyContactDetails": [
         {
-          "name": "Elena Varga",
-          "email": "evarga@pharmadistrib.com"
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
         }
       ],
       "address": {
-        "street": "Rue de l'Industrie 10",
-        "city": "Dakar",
-        "countryCode": "SN"
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
       }
     }
   }

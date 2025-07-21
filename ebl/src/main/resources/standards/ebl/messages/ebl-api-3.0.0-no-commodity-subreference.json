@@ -69,9 +69,9 @@
       ],
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "529900T8BM49ADCSAO55"
         }
       ]
     },
@@ -79,9 +79,9 @@
       "partyName": "DCSA CTK",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "529900T8BM49ADCSAO55"
         }
       ],
       "partyContactDetails": [
@@ -95,21 +95,21 @@
       "partyName": "BioExport Ltd.",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ],
       "partyContactDetails": [
         {
-          "name": "Carlos Oliveira",
-          "email": "c.oliveira@bioexport.com"
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
         }
       ],
       "address": {
-        "street": "Rua das Alfândegas, 500",
-        "city": "Santos",
-        "countryCode": "BR"
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
       }
     }
   }

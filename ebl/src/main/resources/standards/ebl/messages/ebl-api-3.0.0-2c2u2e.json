@@ -44,13 +44,13 @@
           },
           "outerPackaging": {
             "description": "Pallets",
-            "numberOfPackages": 100
+            "numberOfPackages": 4
           }
         }
       ]
     },
     {
-      "carrierBookingReference": "BOOKREF2345678901234567890123456",
+      "carrierBookingReference": "BOOKREF1234567890123456789012345",
       "descriptionOfGoods": [
         "Electronic Components"
       ],
@@ -66,7 +66,7 @@
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "Wooden Crates",
+            "description": "Cartoons",
             "numberOfPackages": 100
           }
         },
@@ -77,7 +77,7 @@
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "Steel Drums",
+            "description": "Cartoons",
             "numberOfPackages": 200
           }
         }
@@ -123,9 +123,9 @@
       "partyName": "DCSA CTK",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "ZZZ",
+          "codeListName": "Carrier Code",
+          "partyCode": "Customer1234"
         }
       ],
       "partyContactDetails": [
@@ -139,21 +139,21 @@
       "partyName": "Tech Solutions GmbH",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ],
       "partyContactDetails": [
         {
-          "name": "Hans Meier",
-          "email": "contact@tech-solutions.de"
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
         }
       ],
       "address": {
-        "street": "Berliner Strasse 10",
-        "city": "Hamburg",
-        "countryCode": "DE"
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
       }
     }
   }

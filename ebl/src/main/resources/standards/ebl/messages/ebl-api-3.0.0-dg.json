@@ -66,9 +66,9 @@
       "partyName": "DCSA CTK",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "529900T8BM49ADCSAO55"
         }
       ],
       "partyContactDetails": [
@@ -82,21 +82,21 @@
       "partyName": "BatteryTech Inc.",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ],
       "partyContactDetails": [
         {
-          "name": "Emily Carter",
-          "email": "e.carter@batterytech.com"
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
         }
       ],
       "address": {
-        "street": "5000 Harbor Ave",
-        "city": "New York",
-        "countryCode": "US"
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
       }
     }
   }

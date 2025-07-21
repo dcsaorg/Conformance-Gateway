@@ -39,7 +39,7 @@
       ]
     },
     {
-      "carrierBookingReference": "BOOKREQ-HBOL-1234567890123457",
+      "carrierBookingReference": "BOOKREQ-HBOL-1234567890123456",
       "descriptionOfGoods": [
         "Apparel - Summer Collection"
       ],
@@ -55,7 +55,7 @@
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "Bales",
+            "description": "Boxes",
             "numberOfPackages": 400
           }
         }
@@ -98,18 +98,18 @@
       }
     },
     "issueTo": {
-      "partyName": "DCSA Partner Consignee",
+      "partyName": "DCSA Shipper Agent",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "529900T8BM49ADCSAO55"
         }
       ],
       "partyContactDetails": [
         {
-          "name": "DCSA Partner",
-          "email": "partner@dcsa.org"
+          "name": "DCSA Test Person",
+          "email": "info@dcsa.org"
         }
       ]
     },
@@ -117,9 +117,9 @@
       "partyName": "DCSA Final Consignee",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ],
       "partyContactDetails": [

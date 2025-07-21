@@ -75,12 +75,12 @@
       }
     },
     "endorsee": {
-      "partyName": "To Order of Shipper",
+      "partyName": "Bank of America",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ]
     },
@@ -89,9 +89,8 @@
       "sendToPlatform": "CARX",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "CARX",
+          "partyCode": "CARX123"
         }
       ],
       "partyContactDetails": [

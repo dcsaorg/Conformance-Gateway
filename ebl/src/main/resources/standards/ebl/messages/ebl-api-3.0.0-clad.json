@@ -79,9 +79,9 @@
       "partyName": "DCSA CTK",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "529900T8BM49ADCSAO55"
         }
       ],
       "partyContactDetails": [
@@ -95,21 +95,21 @@
       "partyName": "Agrotrading Brasil Ltda",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ],
       "partyContactDetails": [
         {
-          "name": "João Silva",
-          "email": "contact@agrotrading.br"
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
         }
       ],
       "address": {
-        "street": "Av. Paulista 1000",
-        "city": "São Paulo",
-        "countryCode": "BR"
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
       }
     }
   }

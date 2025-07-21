@@ -3,9 +3,9 @@
   "isElectronic": true,
   "isToOrder": false,
   "numberOfCopiesWithCharges": 0,
-  "numberOfOriginalsWithCharges": 0,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
+  "isHouseBillOfLadingsIssued": false,
   "invoicePayableAt": {
     "UNLocationCode": "BRSSZ"
   },
@@ -67,7 +67,8 @@
   ],
   "advanceManifestFilings": [
     {
-      "manifestTypeCode": "ACE",
+      "identificationNumber": "1",
+      "manifestTypeCode": "ENS",
       "advanceManifestFilingsHouseBLPerformedBy": "SELF",
       "selfFilerCode": "FLXP"
     }
@@ -141,7 +142,7 @@
           "isShipperOwned": false,
           "equipmentReference": "MSCU9988776",
           "ISOEquipmentCode": "42G0",
-          "emptyIndicatorCode": "EMPTY"
+          "emptyIndicatorCode": "LADEN"
         }
       ]
     }
@@ -149,27 +150,26 @@
   "documentParties": {
     "shipper": {
       "partyName": "DCSA CTK",
-      "identifyingCodes": [
-        {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
-        }
-      ],
+      "reference": "SI-REF-1234",
       "partyContactDetails": [
         {
           "name": "DCSA Test Person",
           "email": "no-reply@dcsa.org"
         }
-      ]
+      ],
+      "address": {
+        "street": "Ruijggoordweg",
+        "city": "Amsterdam",
+        "countryCode": "NL"
+      }
     },
     "issueTo": {
       "partyName": "DCSA CTK",
       "identifyingCodes": [
         {
           "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListName": "DID",
+          "partyCode": "123456789abcdefghi"
         }
       ],
       "partyContactDetails": [
@@ -183,21 +183,21 @@
       "partyName": "Global Retail Imports",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
         }
       ],
       "partyContactDetails": [
         {
-          "name": "Anna Müller",
-          "email": "anna.muller@grimports.de"
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
         }
       ],
       "address": {
-        "street": "Neuer Wall 10",
-        "city": "Hamburg",
-        "countryCode": "DE"
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
       }
     }
   },

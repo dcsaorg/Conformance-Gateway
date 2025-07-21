@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -47,6 +48,11 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
     // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
     dsp = dsp.withTransportDocument(null).withPreviousTransportDocument(null);
     getDspConsumer().accept(dsp);
+  }
+
+  @Override
+  public Set<String> skippableForRoles() {
+    return Set.of(EblRole.SHIPPER.getConfigName());
   }
 
   @Override

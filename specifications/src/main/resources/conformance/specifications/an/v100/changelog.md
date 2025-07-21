@@ -1,5 +1,24 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250718-alpha
+
+The initial conformance scenarios and validations are available. (SD-2158)
+
+The `GET` endpoint no longer lacks the pagination mechanism. (SD-2280)
+
+The OpenAPI specification includes detailed general and endpoint descriptions. (SD-2281)
+
+Each `FreeTime` can now have multiple `typeCodes`. (SD-2283)
+
+In the list of `FreeTime` type codes, the redundant `Per diem` type code was merged with `Detention`. (SD-2290)
+
+The `includeCharges` query parameter no longer has a default value. (SD-2279)
+
+The `firmsCode` attribute name is now correct. (SD-2187)
+
+The data overview now includes the item description for string list attributes.
+
+
 ## Snapshot v1.0.0-20250704-alpha
 
 The GET endpoints now accept multiple transport document references and equipment references, both with the "explode: false" correctly set in order to allow comma-separated values. (SD-2151, SD-2276)

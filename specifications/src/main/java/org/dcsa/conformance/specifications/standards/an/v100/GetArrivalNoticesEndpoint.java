@@ -4,6 +4,8 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
@@ -115,12 +117,29 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .name("includeCharges")
           .description(
 """
-Flag indicating whether to include arrival notice charges. If not specified, the default value is `true`.
-This flag is separate from the mandatory and optional lists of query parameters that can be used as filters
-and can be used in combination with any such filter.
+Optional flag indicating whether only arrival notices with charges (`true`) or without charges (`false`) are requested.
+If left unspecified, the arrival notices both with and without charges are requested.
+This flag can only be used in combination with one of the other available query parameter filters.
 """)
           .example(true)
           .schema(new Schema<Boolean>().type("boolean"));
+
+  private final Parameter limit =
+      new Parameter()
+          .in("query")
+          .name("limit")
+          .description("Maximum number of arrival notices to include in each page of the response.")
+          .example(10)
+          .schema(new Schema<Integer>().type("number").format("int32").minimum(new BigDecimal(1)));
+
+  private final Parameter cursor =
+      new Parameter()
+          .in("query")
+          .name("cursor")
+          .description(
+              "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.")
+          .example("ExampleNextPageCursor")
+          .schema(new Schema<String>().type("string"));
 
   @Override
   public List<Parameter> getQueryParameters() {
@@ -136,7 +155,9 @@ and can be used in combination with any such filter.
         universalServiceReference,
         minEtaAtPortOfDischargeDate,
         maxEtaAtPortOfDischargeDate,
-        includeCharges);
+        includeCharges,
+        limit,
+        cursor);
   }
 
   @Override

@@ -8,7 +8,8 @@ export interface ScenarioStatus {
     promptActionId: string,
     confirmationRequired: boolean,
     inputRequired: boolean,
-    conformanceSubReport: ScenarioConformanceReport
+    conformanceSubReport: ScenarioConformanceReport,
+    isSkippable: boolean
 }
 
 export interface ScenarioConformanceReport {

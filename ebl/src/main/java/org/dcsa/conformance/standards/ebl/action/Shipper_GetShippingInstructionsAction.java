@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -98,6 +99,11 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
         getDspConsumer().accept(dsp.withTransportDocumentReference(tdr.asText()));
       }
     }
+  }
+
+  @Override
+  public Set<String> skippableForRoles() {
+    return Set.of(EblRole.SHIPPER.getConfigName());
   }
 
   @Override

@@ -5,6 +5,7 @@ import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -16,6 +17,7 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -147,6 +149,17 @@ public class PintReceivingPlatform extends ConformanceParty {
     if (cannedResponse != null) {
       return cannedResponse;
     }
+
+    var facilityCode =
+            td.path("transports")
+                    .path("placeOfReceipt")
+                    .path("facility")
+                    .path("facilityCode")
+                    .asText(null);
+    if (PintSendingPlatform.INVALID_FACILITY_CODE.equals(facilityCode)) {
+      return handleErrorResponse(request, apiVersion, this);
+    }
+
     var etc = transferRequest.path("envelopeTransferChain");
     var lastEtcEntry = etc.path(etc.size() - 1);
     var lastEnvelopeTransferChainEntrySignedContentChecksum =
@@ -188,6 +201,30 @@ public class PintReceivingPlatform extends ConformanceParty {
     receiveState.save(persistentMap);
     return request.createResponse(
         201, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(unsignedPayload));
+  }
+
+  private static ConformanceResponse handleErrorResponse(
+          ConformanceRequest request, String apiVersion, ConformanceParty jitParty) {
+    String path = request.url();
+    ObjectNode response =
+            (ObjectNode)
+                    JsonToolkit.templateFileToJsonNode(
+                            "/standards/pint/messages/pint-3.0.0-error-message.json",
+                            Map.of(
+                                    "HTTP_METHOD_PLACEHOLDER",
+                                    request.method(),
+                                    "REQUEST_URI_PLACEHOLDER",
+                                    path,
+                                    "REFERENCE_PLACEHOLDER",
+                                    UUID.randomUUID().toString(),
+                                    "ERROR_DATE_TIME_PLACEHOLDER",
+                                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT)));
+
+    jitParty.addOperatorLogEntry(
+            "Handled a request with an invalid facilityCode");
+
+    return request.createResponse(
+            400, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 
   @Override

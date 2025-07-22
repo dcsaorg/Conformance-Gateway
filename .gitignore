@@ -32,6 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
-### DCSA generated resources ###
-/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview.xlsx
-/specifications/generated-resources/standards/ebl/v300/
+### Temporary DCSA generated resources ###
+/specifications/generated-resources/standards/an/v100/*.xlsx
+/specifications/generated-resources/standards/ebl/v300/*.xlsx
+/specifications/generated-resources/standards/ebl/v300/*.csv
+/specifications/generated-resources/standards/ebl/v300/*.yaml

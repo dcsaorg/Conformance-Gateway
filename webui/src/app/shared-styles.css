@@ -85,3 +85,11 @@
   height: 1em;
   margin-right: 8px;
 }
+
+.green-button {
+  background-color: #45A049!important;
+  color: white !important;
+}
+.green-button:hover {
+  background-color: #4CAF50;
+}

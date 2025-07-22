@@ -3,7 +3,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-/specifications/generated-resources/
 
 ### STS ###
 .apt_generated
@@ -32,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Temporary DCSA generated resources ###
+/specifications/generated-resources/standards/an/v100/*.xlsx
+/specifications/generated-resources/standards/ebl/v300/*.xlsx
+/specifications/generated-resources/standards/ebl/v300/*.csv
+/specifications/generated-resources/standards/ebl/v300/*.yaml

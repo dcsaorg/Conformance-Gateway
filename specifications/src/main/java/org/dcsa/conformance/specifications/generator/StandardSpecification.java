@@ -43,12 +43,7 @@ public abstract class StandardSpecification {
                 new Info()
                     .version(standardVersion)
                     .title("DCSA %s API".formatted(standardName))
-                    .description(
-                        SpecificationToolkit.readResourceFile(
-                            "conformance/specifications/%s/v%s/openapi-root.md"
-                                .formatted(
-                                    standardAbbreviation.toLowerCase(),
-                                    standardVersion.replaceAll("\\.", ""))))
+                    .description(readResourceFile("openapi-root.md"))
                     .license(
                         new License()
                             .name("Apache 2.0")
@@ -67,7 +62,13 @@ public abstract class StandardSpecification {
             new Header()
                 .description(
                     "SemVer used to indicate the version of the contract (API version) returned.")
-                .schema(new Schema<>().type("string").example(standardVersion)));
+                .schema(new Schema<>().type("string").example(standardVersion)))
+        .addHeaders(
+            "Next-Page-Cursor",
+            new Header()
+                .description(
+                    "A cursor value pointing to the next page of results in a paginated GET response.")
+                .schema(new Schema<>().type("string").example("ExampleNextPageCursor")));
 
     constraintsByClassAndField = new HashMap<>();
     modelClassesStream()
@@ -125,6 +126,15 @@ public abstract class StandardSpecification {
   protected abstract QueryParametersFilterEndpoint getQueryParametersFilterEndpoint();
 
   protected abstract boolean swapOldAndNewInDataOverview();
+
+  protected String readResourceFile(String fileName) {
+    return SpecificationToolkit.readResourceFile(
+        "conformance/specifications/%s/v%s/%s"
+            .formatted(
+                standardAbbreviation.toLowerCase(),
+                standardVersion.replaceAll("\\.", ""),
+                fileName));
+  }
 
   @SneakyThrows
   public void generateArtifacts() {

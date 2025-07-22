@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.swagger.v3.oas.models.media.StringSchema;
 import org.dcsa.conformance.specifications.constraints.SchemaConstraint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 
@@ -139,6 +140,18 @@ public class AttributesData {
                                           - attributeInfo.getConstraints().length())
                                   .trim());
                         }
+                        Schema<?> itemSchema = attributeSchema.getItems();
+                        if (itemSchema != null) {
+                          if (itemSchema instanceof StringSchema) {
+                            if (itemSchema.getDescription() != null) {
+                              attributeInfo.setDescription(
+                                  "%s\nItem description:\n%s"
+                                      .formatted(
+                                          attributeInfo.getDescription(),
+                                          itemSchema.getDescription()));
+                            }
+                          }
+                        }
                         attributeInfo.setPattern("");
                         Schema<?> attributeStringSchema = getAttributeStringSchema(attributeSchema);
                         if (attributeStringSchema != null) {
@@ -152,7 +165,7 @@ public class AttributesData {
                                 "%s(%s)"
                                     .formatted(
                                         attributeInfo.getAttributeType(),
-                                      attributeStringSchema.getFormat()));
+                                        attributeStringSchema.getFormat()));
                           }
                         }
                         attributeInfoList.add(attributeInfo);

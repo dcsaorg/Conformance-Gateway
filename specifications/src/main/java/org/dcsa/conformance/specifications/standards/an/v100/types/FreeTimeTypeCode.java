@@ -13,8 +13,7 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @AllArgsConstructor
 public enum FreeTimeTypeCode implements EnumBase {
   DEM("Demurrage"),
-  DET("Detention"),
-  PDM("Per Diem"),
+  DET("Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')"),
   STO("Storage");
 
   private final String valueDescription;

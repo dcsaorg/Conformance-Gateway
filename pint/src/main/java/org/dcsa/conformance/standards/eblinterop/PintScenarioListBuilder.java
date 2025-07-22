@@ -28,6 +28,8 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
   private static final String ENVELOPE_MANIFEST_SCHEMA = "EnvelopeManifest";
   private static final String ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA = "EnvelopeTransferChainEntry";
   private static final String ISSUANCE_MANIFEST_SCHEMA = "IssuanceManifest";
+  private static final String ERROR_RESPONSE_SCHEMA = "ErrorResponse";
+
   private static final String RECEIVER_VALIDATION_RESPONSE = "ReceiverValidationResponse";
   private static final String RECEIVER_VALIDATION_REQUEST = "IdentifyingCode";
 
@@ -155,7 +157,15 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                                                                                         .VALID_TRANSFER)))))))))),
             Map.entry(
                 "Receiver validation scenarios",
-                supplyReceiverValidationScenarioParameters().then(receiverValidation())))
+                supplyReceiverValidationScenarioParameters().then(receiverValidation())),
+            Map.entry(
+                "Receiver error response scenarios",
+                noAction()
+                    .then(
+                        supplySenderTransferScenarioParameters(0)
+                            .then(
+                                receiverStateSetup(ScenarioClass.NO_ISSUES)
+                                    .then(errorResponseAction())))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -335,5 +345,18 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
     var standardVersion = STANDARD_VERSION.get();
     String schemaFilePath = "/standards/pint/schemas/EBL_PINT_v%s.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
+  }
+
+  private static PintScenarioListBuilder errorResponseAction() {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+        previousAction ->
+            new PintErrorResponseAction(
+                receivingPlatform,
+                sendingPlatform,
+                (PintAction) previousAction,
+                resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
+                resolveMessageSchemaValidator(ERROR_RESPONSE_SCHEMA)));
   }
 }

@@ -13,7 +13,7 @@
       "value": "SG SIN WHS",
       "jsonPath": "$.location.facilityCode",
       "errorCodeText": "invalidData",
-      "errorCodeMessage": "Spaces not allowed in facility code"
+      "errorCodeMessage": "facilityCode must be at most 6 characters long"
     }
   ]
 }

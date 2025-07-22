@@ -17,7 +17,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 @Slf4j
 public class PintErrorResponseAction extends PintAction {
 
-  public static final String INVALID_FACILITY_CODE_ATTRIBUTE = "invalidFacilityCode";
+  public static final String SEND_INVALID_FACILITY_CODE = "sendInvalidFacilityCode";
   private static final int RESPONSE_CODE = 400;
 
   private final JsonSchemaValidator responseSchemaValidator;
@@ -29,19 +29,19 @@ public class PintErrorResponseAction extends PintAction {
       PintAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator) {
-    super(sendingPlatform, receivingPlatform, previousAction, "InvalidFacilityCode", RESPONSE_CODE);
+    super(sendingPlatform, receivingPlatform, previousAction, "IncorrectSingleRequestTransfer", RESPONSE_CODE);
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Start an envelope transfer with an unexpected facilityCode. Not to be performed by Senders.";
+    return "Not relevant for human operators: used only by synthetic sending parties when starting an envelope transfer with an invalid facilityCode.";
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    var node = super.asJsonNode().put(INVALID_FACILITY_CODE_ATTRIBUTE, true);
+    var node = super.asJsonNode().put(SEND_INVALID_FACILITY_CODE, true);
     node.put("senderTransmissionClass", SenderTransmissionClass.VALID_ISSUANCE.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());

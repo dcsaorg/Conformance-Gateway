@@ -157,7 +157,7 @@ public class PintReceivingPlatform extends ConformanceParty {
                     .path("facilityCode")
                     .asText(null);
     if (PintSendingPlatform.INVALID_FACILITY_CODE.equals(facilityCode)) {
-      return handleErrorResponse(request, apiVersion, this);
+      return sendErrorResponse(request, apiVersion, this);
     }
 
     var etc = transferRequest.path("envelopeTransferChain");
@@ -203,7 +203,7 @@ public class PintReceivingPlatform extends ConformanceParty {
         201, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(unsignedPayload));
   }
 
-  private static ConformanceResponse handleErrorResponse(
+  private static ConformanceResponse sendErrorResponse(
           ConformanceRequest request, String apiVersion, ConformanceParty jitParty) {
     String path = request.url();
     ObjectNode response =

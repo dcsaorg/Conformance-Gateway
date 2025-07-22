@@ -330,7 +330,7 @@ public class PintSendingPlatform extends ConformanceParty {
     sendingState.save(persistentMap);
 
     boolean invalidFacilityCode =
-        actionPrompt.path(PintErrorResponseAction.INVALID_FACILITY_CODE_ATTRIBUTE).asBoolean(false);
+        actionPrompt.path(PintErrorResponseAction.SEND_INVALID_FACILITY_CODE).asBoolean(false);
     if (invalidFacilityCode) {
       var facility =
           body.path("transportDocument").path("transports").path("placeOfReceipt").path("facility");

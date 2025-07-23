@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
@@ -65,8 +64,8 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
                     .thenEither(
                         scenarioWithParameters(Map.of(UN_LOCATION_CODE, "NLAMS")),
                         scenarioWithParameters(Map.of(UN_LOCATION_CODE, "USNYC", LIMIT, "5")),
-                        scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM")),
-                        scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM", LIMIT, "5")))),
+                        scenarioWithParameters(Map.of(UN_LOCATION_CODE, "NLAMS", FACILITY_SMDG_CODE, "APM")),
+                        scenarioWithParameters(Map.of(UN_LOCATION_CODE, "USNYC", FACILITY_SMDG_CODE, "APM", LIMIT, "5")))),
             Map.entry(
                 "Voyage schedules",
                 noAction()

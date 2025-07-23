@@ -1,11 +1,14 @@
 {
-  "transportDocumentTypeCode": "SWB",
+  "transportDocumentTypeCode": "BOL",
   "isElectronic": true,
   "isToOrder": false,
+  "numberOfCopiesWithCharges": 0,
+  "numberOfOriginalsWithCharges": 0,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
+  "isHouseBillOfLadingsIssued": false,
   "invoicePayableAt": {
-    "UNLocationCode": "SGSIN"
+    "UNLocationCode": "BRSSZ"
   },
   "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
@@ -16,50 +19,46 @@
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "BOOK1234567890123456789012345",
+      "carrierBookingReference": "BOOKBOL202507041234567890123456",
       "descriptionOfGoods": [
-        "Pharmaceutical Supplies"
+        "Refined Soybean Oil"
+      ],
+      "nationalCommodityCodes": [
+        {
+          "type": "NCM",
+          "countryCode": "BR",
+          "values": [
+            "15152100"
+          ]
+        }
       ],
       "HSCodes": [
-        "30049099"
+        "15152100"
       ],
-      "commoditySubReference": "PHARMA-001",
+      "commoditySubReference": "SOY2025REF-BR",
       "cargoItems": [
         {
-          "equipmentReference": "MSCU1234567",
+          "equipmentReference": "MSCU9988776",
           "cargoGrossWeight": {
             "value": 12000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "Boxes",
+            "description": "Steel Drums",
             "numberOfPackages": 400
           }
         }
       ]
     }
   ],
-  "advancedManifestFilings": [
-    {
-      "manifestTypeCode": "ACE",
-      "countryCode": "US",
-      "advanceManifestFilingsHouseBLPerformedBy": "SHIPPER",
-      "selfFilerCode": "FLXT"
-    }
-  ],
-  "customsReferences": [
-    {
-      "type": "CTN",
-      "countryCode": "SN",
-      "values": [
-        "12345"
-      ]
-    }
-  ],
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": false,
-      "equipmentReference": "MSCU1234567",
+      "equipmentReference": "MSCU9988776",
+      "shippingMarks": [
+        "Made in Brazil",
+        "こんにちはこんにちはこんにちはこんにちはこんにちはこんにちはこんにちは"
+      ],
       "seals": [
         {
           "number": "NSL13386"
@@ -67,29 +66,38 @@
       ]
     }
   ],
+  "advanceManifestFilings": [
+    {
+      "identificationNumber": "1",
+      "manifestTypeCode": "ENS",
+      "advanceManifestFilingsHouseBLPerformedBy": "SELF",
+      "selfFilerCode": "FLXP"
+    }
+  ],
   "documentParties": {
     "shipper": {
       "partyName": "DCSA CTK",
-      "reference": "SI-REF-1234",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
+        }
+      ],
       "partyContactDetails": [
         {
           "name": "DCSA Test Person",
           "email": "no-reply@dcsa.org"
         }
-      ],
-      "address": {
-        "street": "Ruijggoordweg",
-        "city": "Amsterdam",
-        "countryCode": "NL"
-      }
+      ]
     },
     "issueTo": {
       "partyName": "DCSA CTK",
+      "sendToPlatform": "CARX",
       "identifyingCodes": [
         {
-          "codeListProvider": "W3C",
-          "codeListName": "DID",
-          "partyCode": "123456789abcdefghi"
+          "codeListProvider": "CARX",
+          "partyCode": "CARX123"
         }
       ],
       "partyContactDetails": [
@@ -100,7 +108,7 @@
       ]
     },
     "consignee": {
-      "partyName": "Global Pharma Distribution",
+      "partyName": "Global Retail Imports",
       "identifyingCodes": [
         {
           "codeListProvider": "GLEIF",
@@ -120,5 +128,8 @@
         "countryCode": "SG"
       }
     }
-  }
+  },
+  "requestedCarrierClauses": [
+    "CARGO_CARGOSPECIFICS"
+  ]
 }

@@ -1,0 +1,19 @@
+{
+  "httpMethod": "HTTP_METHOD_PLACEHOLDER",
+  "requestUri": "REQUEST_URI_PLACEHOLDER",
+  "statusCode": 400,
+  "statusCodeText": "Bad Request",
+  "statusCodeMessage": "The supplied data could not be accepted",
+  "providerCorrelationReference": "REFERENCE_PLACEHOLDER",
+  "errorDateTime": "ERROR_DATE_TIME_PLACEHOLDER",
+  "errors": [
+    {
+      "errorCode": 7003,
+      "property": "facilityCode",
+      "value": "SG SIN WHS",
+      "jsonPath": "$.location.facilityCode",
+      "errorCodeText": "invalidData",
+      "errorCodeMessage": "facilityCode must be at most 6 characters long"
+    }
+  ]
+}

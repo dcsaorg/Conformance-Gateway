@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.booking.action;
+package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -13,36 +13,35 @@ import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.util.ErrorFormatter;
-import org.dcsa.conformance.standards.booking.checks.BookingInputPayloadValidations;
-import org.dcsa.conformance.standards.booking.checks.ScenarioType;
+import org.dcsa.conformance.standards.ebl.checks.EblInputPayloadValidations;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 
-public class CarrierSupplyScenarioParametersAction extends BookingAction {
+public class CarrierSupplyPayloadAction extends EblAction {
 
+  public static final String CARRIER_PAYLOAD = "carrierPayload";
   private static final String SCENARIO_TYPE = "scenarioType";
-  private static final String BOOKING_PAYLOAD = "bookingPayload";
   private static final String INPUT = "input";
 
-  private JsonNode bookingPayload;
+  private JsonNode carrierPayload;
   private ScenarioType scenarioType;
   private final String standardVersion;
   private final JsonSchemaValidator requestSchemaValidator;
+  private final boolean isTd;
 
-  public CarrierSupplyScenarioParametersAction(
-      String carrierPartyName,
-      @NonNull ScenarioType scenarioType,
-      String standardVersion,
-      JsonSchemaValidator requestSchemaValidator) {
+  public CarrierSupplyPayloadAction(
+      String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion, JsonSchemaValidator requestSchemaValidator, boolean isTd) {
     super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
+    this.isTd = isTd;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
   }
 
   @Override
   public void reset() {
     super.reset();
-    bookingPayload = null;
+    carrierPayload = null;
   }
 
   @Override
@@ -53,8 +52,8 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (bookingPayload != null) {
-      jsonState.set(BOOKING_PAYLOAD, bookingPayload);
+    if (carrierPayload!= null) {
+      jsonState.set(CARRIER_PAYLOAD, carrierPayload);
     }
     return jsonState.put(SCENARIO_TYPE, scenarioType.name());
   }
@@ -62,22 +61,22 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    JsonNode bookingPayloadNode = jsonState.get(BOOKING_PAYLOAD);
-    if (bookingPayloadNode != null) {
-      bookingPayload = bookingPayloadNode;
+    JsonNode eblPayloadNode = jsonState.get(CARRIER_PAYLOAD);
+    if (eblPayloadNode != null) {
+      carrierPayload = eblPayloadNode;
     }
     this.scenarioType = ScenarioType.valueOf(jsonState.required(SCENARIO_TYPE).asText());
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(scenarioType, "prompt-carrier-supply-csp.md");
+    return getMarkdownHumanReadablePrompt(Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/messages/" + scenarioType.bookingPayload(standardVersion), Map.of());
+        "/standards/ebl/messages/" + scenarioType.eblPayload(standardVersion), Map.of());
   }
 
   @Override
@@ -98,10 +97,10 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
     JsonNode inputNode = partyInput.get(INPUT);
 
     Set<String> schemaChecksErrors =
-        BookingInputPayloadValidations.validateBookingSchema(inputNode, requestSchemaValidator);
+        EblInputPayloadValidations.validateEblSchema(inputNode, requestSchemaValidator);
 
     Set<String> contentChecksErrors =
-        BookingInputPayloadValidations.validateBookingContent(inputNode, getDspSupplier());
+        EblInputPayloadValidations.validateEblContent(inputNode, getDspSupplier(), isTd);
 
     Set<String> allErrors =
         Stream.of(schemaChecksErrors, contentChecksErrors)
@@ -111,22 +110,21 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
     if (!allErrors.isEmpty()) {
       throw new UserFacingException(ErrorFormatter.formatInputErrors(allErrors));
     }
-
     doHandlePartyInput(partyInput);
   }
 
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
-    getBookingPayloadConsumer().accept(partyInput.get(INPUT));
+    getCarrierPayloadConsumer().accept(partyInput.get(INPUT));
   }
 
   @Override
-  protected Consumer<JsonNode> getBookingPayloadConsumer() {
-    return bkgPayload -> this.bookingPayload = bkgPayload;
+  protected Consumer<JsonNode> getCarrierPayloadConsumer() {
+    return carrierPayloadNode -> this.carrierPayload = carrierPayloadNode;
   }
 
   @Override
-  protected Supplier<JsonNode> getBookingPayloadSupplier() {
-    return () -> bookingPayload;
+  protected Supplier<JsonNode> getCarrierPayloadSupplier() {
+    return () -> carrierPayload;
   }
 }

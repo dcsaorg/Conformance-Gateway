@@ -39,6 +39,7 @@ public class PintSendingPlatform extends ConformanceParty {
       PayloadSignerFactory.senderPayloadSigner();
   private static final PayloadSignerWithKey CARRIER_PLATFORM_PAYLOAD_SIGNER =
       PayloadSignerFactory.carrierPayloadSigner();
+  public static final String INVALID_FACILITY_CODE = "INVALID_FACILITY_CODE";
 
   public PintSendingPlatform(
       String apiVersion,
@@ -75,7 +76,8 @@ public class PintSendingPlatform extends ConformanceParty {
         Map.entry(PintRetryTransferAction.class, this::retryTransfer),
         Map.entry(PintRetryTransferAndCloseAction.class, this::retryTransfer),
         Map.entry(PintCloseTransferAction.class, this::finishTransfer),
-        Map.entry(PintReceiverValidationAction.class, this::requestReceiverValidation));
+        Map.entry(PintReceiverValidationAction.class, this::requestReceiverValidation),
+        Map.entry(PintErrorResponseAction.class, this::initiateTransferRequest));
   }
 
   private void requestReceiverValidation(JsonNode actionPrompt) {
@@ -326,6 +328,15 @@ public class PintSendingPlatform extends ConformanceParty {
     var envelopeTransferChain = body.path("envelopeTransferChain");
     sendingState.setSignedEnvelopeTransferChain(envelopeTransferChain);
     sendingState.save(persistentMap);
+
+    boolean invalidFacilityCode =
+        actionPrompt.path(PintErrorResponseAction.SEND_INVALID_FACILITY_CODE).asBoolean(false);
+    if (invalidFacilityCode) {
+      var facility =
+          body.path("transportDocument").path("transports").path("placeOfReceipt").path("facility");
+      ((ObjectNode) facility).put("facilityCode", INVALID_FACILITY_CODE);
+    }
+
     var response = this.syncCounterpartPost("/v" + apiVersion.charAt(0) + "/envelopes", body);
     var responseBody = response.message().body().getJsonBody();
     for (var checksumNode : responseBody.path("missingAdditionalDocumentChecksums")) {

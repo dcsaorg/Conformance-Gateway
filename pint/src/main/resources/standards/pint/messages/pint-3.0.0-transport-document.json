@@ -78,7 +78,9 @@
   "consignmentItems": [
     {
       "carrierBookingReference": "BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["Shoes - black, 400 boxes"],
+      "descriptionOfGoods": [
+        "Shoes - black, 400 boxes"
+      ],
       "HSCodes": [
         "640510"
       ],
@@ -143,6 +145,12 @@
     },
     "portOfDischarge": {
       "UNLocationCode": "DEBRV"
+    },
+    "placeOfReceipt": {
+      "facility": {
+        "facilityCode": "ADT",
+        "facilityCodeListProvider": "BIC"
+      }
     },
     "vesselVoyages": [
       {

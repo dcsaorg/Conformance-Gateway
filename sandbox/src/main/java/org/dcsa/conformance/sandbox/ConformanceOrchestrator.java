@@ -472,9 +472,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
       if (currentScenarioId.equals(scenarioUuid)) {
         // stop
         ConformanceScenario currentScenario = _getCurrentScenario();
-        currentScenario.reset();
         _saveInactiveScenario(currentScenario);
-        latestRunIdsByScenarioId.remove(currentScenarioId);
         currentScenarioId = null;
       } else {
         throw new IllegalStateException("Another scenario is currently running");

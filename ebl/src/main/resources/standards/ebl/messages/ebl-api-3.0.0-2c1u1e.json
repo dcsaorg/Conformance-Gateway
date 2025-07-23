@@ -5,80 +5,58 @@
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "UNLocationCode": "NLRTM"
+    "UNLocationCode": "SGSIN"
   },
   "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
       "name": "DCSA Test Person",
-      "email": "no-reply@dcsa.org"
+      "email": "info@dcsa.org"
     }
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "BOOKREF1234567890123456789012345",
+      "carrierBookingReference": "BOOKREQ-HBOL-1234567890123456",
       "descriptionOfGoods": [
-        "Automotive Parts"
+        "Electronics - Consumer Devices"
       ],
       "HSCodes": [
-        "87089900"
+        "85171200"
       ],
-      "commoditySubReference": "AUTO-1234",
+      "commoditySubReference": "ELEC-2025A",
       "cargoItems": [
         {
-          "equipmentReference": "ABCU1234567",
+          "equipmentReference": "MSCU1234567",
           "cargoGrossWeight": {
-            "value": 5000,
+            "value": 15000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "Cardboard Boxes",
-            "numberOfPackages": 100
-          }
-        },
-        {
-          "equipmentReference": "XYZU9876543",
-          "cargoGrossWeight": {
-            "value": 5000,
-            "unit": "KGM"
-          },
-          "outerPackaging": {
-            "description": "Pallets",
-            "numberOfPackages": 4
+            "description": "Cartons",
+            "numberOfPackages": 600
           }
         }
       ]
     },
     {
-      "carrierBookingReference": "BOOKREF1234567890123456789012345",
+      "carrierBookingReference": "BOOKREQ-HBOL-1234567890123456",
       "descriptionOfGoods": [
-        "Electronic Components"
+        "Apparel - Summer Collection"
       ],
       "HSCodes": [
-        "85423100"
+        "62034200"
       ],
-      "commoditySubReference": "ELEC-5678",
+      "commoditySubReference": "APRL-2025B",
       "cargoItems": [
         {
-          "equipmentReference": "ABCU1234567",
+          "equipmentReference": "MSCU7654321",
           "cargoGrossWeight": {
-            "value": 5000,
+            "value": 20000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "Cartoons",
-            "numberOfPackages": 100
-          }
-        },
-        {
-          "equipmentReference": "XYZU9876543",
-          "cargoGrossWeight": {
-            "value": 5000,
-            "unit": "KGM"
-          },
-          "outerPackaging": {
-            "description": "Cartoons",
-            "numberOfPackages": 200
+            "description": "Boxes",
+            "numberOfPackages": 400
           }
         }
       ]
@@ -87,7 +65,7 @@
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": false,
-      "equipmentReference": "ABCU1234567",
+      "equipmentReference": "MSCU1234567",
       "seals": [
         {
           "number": "NSL13386"
@@ -96,7 +74,7 @@
     },
     {
       "isShipperOwned": false,
-      "equipmentReference": "XYZU9876543",
+      "equipmentReference": "MSCU7654321",
       "seals": [
         {
           "number": "NSL13387"
@@ -106,37 +84,37 @@
   ],
   "documentParties": {
     "shipper": {
-      "partyName": "DCSA CTK",
+      "partyName": "DCSA Test Shipper",
       "partyContactDetails": [
         {
           "name": "DCSA Test Person",
-          "email": "no-reply@dcsa.org"
+          "email": "info@dcsa.org"
         }
       ],
       "address": {
-        "street": "Ruijggoordweg",
+        "street": "Ruijggoordweg 80",
         "city": "Amsterdam",
         "countryCode": "NL"
       }
     },
     "issueTo": {
-      "partyName": "DCSA CTK",
+      "partyName": "DCSA Shipper Agent",
       "identifyingCodes": [
         {
-          "codeListProvider": "ZZZ",
-          "codeListName": "Carrier Code",
-          "partyCode": "Customer1234"
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "529900T8BM49ADCSAO55"
         }
       ],
       "partyContactDetails": [
         {
           "name": "DCSA Test Person",
-          "email": "no-reply@dcsa.org"
+          "email": "info@dcsa.org"
         }
       ]
     },
     "consignee": {
-      "partyName": "Tech Solutions GmbH",
+      "partyName": "DCSA Final Consignee",
       "identifyingCodes": [
         {
           "codeListProvider": "GLEIF",

@@ -157,7 +157,14 @@ Reference number for agreement between shipper and carrier, which optionally inc
           "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
   private List<CarrierClause> carrierClauses;
 
-  @Schema(description = "Document parties")
+  @Schema(description =
+"""
+Document parties.
+
+Note that while parties can generally appear in any order, including `N1` (First Notify Party)
+and `N2` (Second Notify Party), the order of parties of type `NI` (Other Notify Party) is relevant,
+as it determines which of these parties is considered the third, fourth, fifth (and so on) notify party.
+""")
   private List<DocumentParty> documentParties;
 
   @Schema()

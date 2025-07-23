@@ -327,7 +327,11 @@ a particular vessel. Customers use this Master Sequence Number (MSN) as a refere
 - `CY` (Container yard (incl. rail ramp))
 - `SD` (Store Door)
 - `CFS` (Container Freight Station)",
-"ArrivalNotice / documentParties",documentParties,"DocumentParty list",,,,,"Document parties",
+"ArrivalNotice / documentParties",documentParties,"DocumentParty list",,,,,"Document parties.
+
+Note that while parties can generally appear in any order, including `N1` (First Notify Party)
+and `N2` (Second Notify Party), the order of parties of type `NI` (Other Notify Party) is relevant,
+as it determines which of these parties is considered the third, fourth, fifth (and so on) notify party.",
 "ArrivalNotice / documentParties / address",address,Address,,,,,"Party  address",
 "ArrivalNotice / documentParties / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
 "ArrivalNotice / documentParties / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",

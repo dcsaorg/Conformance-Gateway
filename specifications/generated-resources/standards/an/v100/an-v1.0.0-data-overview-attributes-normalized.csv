@@ -51,7 +51,11 @@ ArrivalNotice,"deliveryTypeAtDestination",string,,maxLength=3,,CY,"Indicates the
 - `CY` (Container yard (incl. rail ramp))
 - `SD` (Store Door)
 - `CFS` (Container Freight Station)",
-ArrivalNotice,documentParties,"DocumentParty list",,,,,"Document parties",
+ArrivalNotice,documentParties,"DocumentParty list",,,,,"Document parties.
+
+Note that while parties can generally appear in any order, including `N1` (First Notify Party)
+and `N2` (Second Notify Party), the order of parties of type `NI` (Other Notify Party) is relevant,
+as it determines which of these parties is considered the third, fourth, fifth (and so on) notify party.",
 ArrivalNotice,freeTimes,"FreeTime list",,,,,"List of free time conditions applicable to this shipment at destination",
 ArrivalNotice,isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 ArrivalNotice,issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",

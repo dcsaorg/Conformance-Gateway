@@ -225,10 +225,10 @@ paths:
         "200":
           description: "List of arrival notices matching the query parameters"
           headers:
-            API-Version:
-              $ref: "#/components/headers/API-Version"
             Next-Page-Cursor:
               $ref: "#/components/headers/Next-Page-Cursor"
+            API-Version:
+              $ref: "#/components/headers/API-Version"
           content:
             application/json:
               schema:
@@ -520,7 +520,12 @@ components:
             example: "It is not allowed to..."
         documentParties:
           type: "array"
-          description: "Document parties"
+          description: |
+            Document parties.
+
+            Note that while parties can generally appear in any order, including `N1` (First Notify Party)
+            and `N2` (Second Notify Party), the order of parties of type `NI` (Other Notify Party) is relevant,
+            as it determines which of these parties is considered the third, fourth, fifth (and so on) notify party.
           items:
             $ref: "#/components/schemas/DocumentParty"
         transport:

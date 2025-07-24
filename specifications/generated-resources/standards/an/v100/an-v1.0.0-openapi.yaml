@@ -52,11 +52,11 @@ paths:
 
         ## Filtering
 
-        Every arrival notice publisher must support the retrieval of arrival notices based on the transport document references of one or more bills of lading, specified as the value(s) of the `transportDocumentReferences` query parameter.
+        Every arrival notice publisher **must** support the retrieval of arrival notices based on the transport document references of one or more bills of lading, specified as the value(s) of the `transportDocumentReferences` query parameter.
 
         Each arrival notice publisher can decide whether to support any of the additional filtering query parameters defined in the standard for this endpoint, and should document the decision in their published copy of the API specification.
 
-        When receiving requests containing an unsupported query parameter, arrival notice publishers can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
+        When receiving requests containing an unsupported query parameter, an arrival notice publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400. In particular, the publisher can reject with HTTP 400 a GET request with a number of `transportDocumentReferences` or `equipmentReferences` larger than the maximum supported (which in the case of some publishers is likely to be `1`). Publishers should document these limits in their copy of the API specification.
 
         If multiple versions of an arrival notice exists, only the latest version will be returned in the result. The standard does not provide a way to retrieve older versions of an arrival notice.
 

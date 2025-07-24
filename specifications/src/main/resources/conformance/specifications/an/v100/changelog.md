@@ -10,6 +10,8 @@ Renamed `modeOfTransport` to `onCarriageBy` and removed `VESSEL` as option. (SD-
 
 Added query parameter `includeVisualization` for requesting arrival notices with or without the embedded PDF visualization. (SD-2305)
 
+Clarified that the publisher can reject GET requests for more than a certain number of `transportDocumentReferences` or `equipmentReferences`. (SD-2311)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

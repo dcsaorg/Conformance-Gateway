@@ -1,5 +1,14 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250801-alpha
+
+Clarified that the ordering of `documentParties` is undefined except for parties of type `NI` for which it defines which one is the third, fourth, etc. notify party. (SD-2317)
+
+Removed the `exclusiveMinimum` constraints inadvertently inherited from eBL. (SD-2140)
+
+Renamed `modeOfTransport` to `onCarriageBy` and removed `VESSEL` as option. (SD-2140)
+
+
 ## Snapshot v1.0.0-20250718-alpha
 
 The initial conformance scenarios and validations are available. (SD-2158)

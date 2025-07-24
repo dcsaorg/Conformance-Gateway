@@ -78,7 +78,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
+import org.dcsa.conformance.specifications.standards.an.v100.types.OnCarriageByCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselVoyageTypeCode;
@@ -159,7 +159,7 @@ public class ANStandardSpecification extends StandardSpecification {
         IsoEquipmentCode.class,
         Limits.class,
         Location.class,
-        ModeOfTransportCode.class,
+        OnCarriageByCode.class,
         NationalCommodityCode.class,
         NetExplosiveContent.class,
         NetVolume.class,

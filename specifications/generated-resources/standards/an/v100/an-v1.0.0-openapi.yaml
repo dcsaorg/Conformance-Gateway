@@ -654,7 +654,6 @@ components:
       type: "object"
       properties:
         value:
-          exclusiveMinimum: true
           type: "number"
           description: |
             Calculated by multiplying the width, height, and length of the packed cargo. A maximum of 4 decimals should be provided.
@@ -672,7 +671,6 @@ components:
       type: "object"
       properties:
         value:
-          exclusiveMinimum: true
           type: "number"
           description: |
             The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
@@ -741,7 +739,6 @@ components:
       type: "object"
       properties:
         value:
-          exclusiveMinimum: true
           type: "number"
           description: |
             Calculated by multiplying the width, height, and length of the cargo, excluding packaging.
@@ -759,7 +756,6 @@ components:
       type: "object"
       properties:
         value:
-          exclusiveMinimum: true
           type: "number"
           description: |
             The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
@@ -1395,7 +1391,6 @@ components:
       type: "object"
       properties:
         value:
-          exclusiveMinimum: true
           type: "number"
           description: |
             The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.
@@ -1636,7 +1631,6 @@ components:
       type: "object"
       properties:
         value:
-          exclusiveMinimum: true
           type: "number"
           description: |
             The total weight of the explosive substances, without the packaging’s, casings, etc.
@@ -1656,7 +1650,6 @@ components:
       type: "object"
       properties:
         value:
-          exclusiveMinimum: true
           type: "number"
           description: "The volume of the referenced dangerous goods."
           format: "float"
@@ -1674,7 +1667,6 @@ components:
       type: "object"
       properties:
         value:
-          exclusiveMinimum: true
           type: "number"
           description: "Total weight of the goods carried, excluding packaging."
           format: "float"
@@ -1841,7 +1833,6 @@ components:
       type: "object"
       properties:
         value:
-          exclusiveMinimum: true
           type: "number"
           description: "The weight of an empty container (gross container weight)."
           format: "float"
@@ -1959,18 +1950,18 @@ components:
             by the shipping line and where responsibility of the shipping line ceases.
           allOf:
           - $ref: "#/components/schemas/Location"
-        modeOfTransport:
-          maxLength: 20
+        onCarriageBy:
+          maxLength: 50
           type: "string"
           description: |-
-            Code defined by DCSA to identify a mode of transport.
+            Code indicating the mode of transport used for the movement of containers
+            between the Port of Discharge (POD) and the Place of Delivery (PDE).
 
-            - `VESSEL` - Vessel
             - `RAIL` - Rail
             - `TRUCK` - Truck
             - `BARGE` - Barge
             - `MULTIMODAL` - Multimodal
-          example: "VESSEL"
+          example: "RAIL"
         vesselVoyages:
           maxItems: 3
           type: "array"

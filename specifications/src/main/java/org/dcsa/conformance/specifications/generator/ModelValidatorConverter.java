@@ -161,6 +161,8 @@ public class ModelValidatorConverter implements ModelConverter {
                     propertySchema.minLength(null);
                     propertySchema.minimum(null);
                     propertySchema.maximum(null);
+                    propertySchema.exclusiveMinimum(null);
+                    propertySchema.exclusiveMaximum(null);
                     propertySchema.exclusiveMinimumValue(null);
                     propertySchema.exclusiveMaximumValue(null);
                   }

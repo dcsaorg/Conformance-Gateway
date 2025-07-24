@@ -241,15 +241,19 @@ public class ANStandardSpecification extends StandardSpecification {
                     new ApiResponse()
                         .description("List of arrival notices matching the query parameters")
                         .headers(
-                            new LinkedHashMap<>(
-                                Map.ofEntries(
+                            Stream.of(
                                     Map.entry(
                                         "API-Version",
                                         new Header().$ref("#/components/headers/API-Version")),
                                     Map.entry(
                                         "Next-Page-Cursor",
-                                        new Header()
-                                            .$ref("#/components/headers/Next-Page-Cursor")))))
+                                        new Header().$ref("#/components/headers/Next-Page-Cursor")))
+                                .collect(
+                                    Collectors.toMap(
+                                        Map.Entry::getKey,
+                                        Map.Entry::getValue,
+                                        (a, b) -> b,
+                                        LinkedHashMap::new)))
                         .content(
                             new Content()
                                 .addMediaType(

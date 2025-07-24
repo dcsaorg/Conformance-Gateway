@@ -8,6 +8,8 @@ Removed the `exclusiveMinimum` constraints inadvertently inherited from eBL. (SD
 
 Renamed `modeOfTransport` to `onCarriageBy` and removed `VESSEL` as option. (SD-2140)
 
+Added query parameter `includeVisualization` for requesting arrival notices with or without the embedded PDF visualization. (SD-2305)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

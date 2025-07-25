@@ -6,11 +6,13 @@ Clarified that the ordering of `documentParties` is undefined except for parties
 
 Removed the `exclusiveMinimum` constraints inadvertently inherited from eBL. (SD-2140)
 
-Renamed `modeOfTransport` to `onCarriageBy` and removed `VESSEL` as option. (SD-2140)
+Renamed `modeOfTransport` to `onCarriageBy`, clarified its meaning and removed `VESSEL` as option. (SD-2140)
 
 Added query parameter `includeVisualization` for requesting arrival notices with or without the embedded PDF visualization. (SD-2305)
 
 Clarified that the publisher can reject GET requests for more than a certain number of `transportDocumentReferences` or `equipmentReferences`. (SD-2311)
+
+Renamed `isoEquipmentCode` to `ISOEquipmentCode` in the `FreeTime` object. (SD-2323)
 
 
 ## Snapshot v1.0.0-20250718-alpha

@@ -15,7 +15,7 @@ public class FreeTime {
   @Schema(description = "One or more types applicable to this free time condition.")
   private List<FreeTimeTypeCode> typeCodes;
 
-  @Schema()
+  @Schema(name = "ISOEquipmentCode")
   private IsoEquipmentCode isoEquipmentCode;
 
   @Schema(

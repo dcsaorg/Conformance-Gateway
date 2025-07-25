@@ -400,12 +400,12 @@ Purchase order reference",
 "ArrivalNotice / documentParties / taxLegalReferences / type",type,string,,maxLength=50,,PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
 "ArrivalNotice / documentParties / taxLegalReferences / value",value,string,,maxLength=35,,AAAAA0000A,"The value of the `taxLegalReference`",
 "ArrivalNotice / freeTimes",freeTimes,"FreeTime list",,,,,"List of free time conditions applicable to this shipment at destination",
+"ArrivalNotice / freeTimes / ISOEquipmentCode",ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
+The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 "ArrivalNotice / freeTimes / calculationBasis",calculationBasis,string,,maxLength=1000,,"Calculated as...","Description of the conditions under which this free time item applies.
 It can include references to the carrier website or individual charges as per service contract/agreement.",
 "ArrivalNotice / freeTimes / duration",duration,integer,,,,123,"The duration expressed in `timeUnit`s for which this free time item applies.",
-"ArrivalNotice / freeTimes / isoEquipmentCode",isoEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
-The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
-following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 "ArrivalNotice / freeTimes / timeUnit",timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which free time is expressed
 - `CD` - Calendar days
 - `WD` - Working days

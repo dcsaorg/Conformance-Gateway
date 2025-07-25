@@ -1356,7 +1356,7 @@ components:
               - `DET` - Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')
               - `STO` - Storage
             example: "DEM"
-        isoEquipmentCode:
+        ISOEquipmentCode:
           maxLength: 4
           type: "string"
           description: |

@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -18,7 +17,7 @@ public class UC11v_Carrier_VoidTransportDocumentAction extends StateChangingSIAc
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC11r", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, "UC11v", 204);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 

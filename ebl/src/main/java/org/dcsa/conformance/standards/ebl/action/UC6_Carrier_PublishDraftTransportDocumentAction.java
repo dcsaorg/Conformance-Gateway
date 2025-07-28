@@ -50,12 +50,10 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     super.doHandleExchange(exchange);
 
     var dsp = getDspSupplier().get();
-    if (skipSI) {
       var tdr = exchange.getRequest().message().body().getJsonBody().path("data").path("transportDocumentReference");
       if (!tdr.isMissingNode()) {
         dsp = dsp.withTransportDocumentReference(tdr.asText());
       }
-    }
     getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
     getCarrierPayloadConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }

@@ -450,7 +450,10 @@ public class CarrierShippingInstructions {
   }
 
   public void issueTransportDocument(String documentReference) {
-    checkState(documentReference, getTransportDocumentState(), s -> s == TD_DRAFT || s == TD_APPROVED);
+    checkState(
+        documentReference,
+        getTransportDocumentState(),
+        s -> s == TD_DRAFT || s == TD_APPROVED || s == TD_ISSUED);
     updateTDForIssuance();
   }
 

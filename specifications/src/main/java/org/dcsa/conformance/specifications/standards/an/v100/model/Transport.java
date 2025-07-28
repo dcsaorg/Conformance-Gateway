@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
+import org.dcsa.conformance.specifications.standards.an.v100.types.OnCarriageByCode;
 
 import java.util.List;
 
@@ -107,7 +107,7 @@ by the shipping line and where responsibility of the shipping line ceases.
 """)
   private Location placeOfDelivery;
 
-  @Schema() private ModeOfTransportCode modeOfTransport;
+  @Schema() private OnCarriageByCode onCarriageBy;
 
   @ArraySchema(maxItems = 3)
   @Schema(

@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -50,6 +51,11 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
   }
 
   @Override
+  public Set<String> skippableForRoles() {
+    return Set.of(EblRole.SHIPPER.getConfigName());
+  }
+
+  @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {
     var dsp = getDspSupplier().get();
     var tdr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : "<UNKNOWN-TDR>";
@@ -58,11 +64,8 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new UrlPathCheck(
-                EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                "/v3/transport-documents/" + tdr),
-            new ResponseStatusCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+                EblRole::isShipper, getMatchedExchangeUuid(), "/v3/transport-documents/" + tdr),
+            new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -74,13 +77,16 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             new JsonSchemaCheck(
-              EblRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              responseSchemaValidator),
-            // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
-            // checkTDChanged(getMatchedExchangeUuid(), expectedApiVersion, dsp), // see commit history
-            EBLChecks.tdPlusScenarioContentChecks(getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getCspSupplier(), getDspSupplier()));
+                EblRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of
+            // an earlier action
+            // checkTDChanged(getMatchedExchangeUuid(), expectedApiVersion, dsp), // see commit
+            // history
+            EBLChecks.tdPlusScenarioContentChecks(
+                getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getDspSupplier()));
       }
     };
   }

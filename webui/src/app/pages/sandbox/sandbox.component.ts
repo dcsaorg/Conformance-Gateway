@@ -118,8 +118,11 @@ export class SandboxComponent implements OnInit, OnDestroy {
       ) || await ConfirmationDialog.open(
           this.dialog,
           action + " scenario",
-          "Are you sure you want to " + action.toLowerCase() + " the scenario? "
-          + "All current scenario status and traffic will be lost.")
+          "Are you sure you want to " + action.toLowerCase() + " the scenario? " + (
+              action === "Stop"
+                ? "You cannot resume the scenario execution later; you can only restart the scenario,"
+                + " at which point all current scenario status and traffic will be lost."
+                : "All current scenario status and traffic will be lost."))
     ) {
       this.startingOrStoppingScenario = true;
       await this.conformanceService.startOrStopScenario(this.sandbox!.id, scenario.id);

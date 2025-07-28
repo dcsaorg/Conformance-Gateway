@@ -104,6 +104,19 @@ export class ScenarioComponent implements OnInit, OnDestroy {
     }
   }
 
+  async skipCurrentAction() {
+        this.performingAction = "Marking current action as skipped...";
+        const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id);
+        if (response?.error) {
+          await MessageDialog.open(
+            this.dialog,
+            "Error skipping action",
+            response.error)
+        }
+        this.performingAction = "";
+        await this.loadScenarioStatus();
+    }
+
   async viewHttpExchanges() {
     const exchanges = await this.conformanceService.getCurrentActionExchanges(
       this.sandbox!.id,

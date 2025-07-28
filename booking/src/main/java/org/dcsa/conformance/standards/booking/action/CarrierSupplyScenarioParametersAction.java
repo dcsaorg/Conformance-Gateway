@@ -12,9 +12,9 @@ import lombok.NonNull;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.core.util.ErrorFormatter;
 import org.dcsa.conformance.standards.booking.checks.BookingInputPayloadValidations;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
-import org.dcsa.conformance.standards.booking.util.ErrorFormatter;
 
 public class CarrierSupplyScenarioParametersAction extends BookingAction {
 
@@ -109,7 +109,7 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
             .collect(Collectors.toSet());
 
     if (!allErrors.isEmpty()) {
-      throw new UserFacingException(ErrorFormatter.formatErrorsForUserFacingException(allErrors));
+      throw new UserFacingException(ErrorFormatter.formatInputErrors(allErrors));
     }
 
     doHandlePartyInput(partyInput);

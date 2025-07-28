@@ -91,7 +91,7 @@ public class EBLStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250606-alpha", "eBL TD", "3.0.0 release", 1);
+        "Arrival Notice", "1.0.0-20250801-alpha", "eBL TD", "3.0.0 release", 1);
   }
 
   @Override

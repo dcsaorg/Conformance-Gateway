@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
@@ -24,7 +23,6 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   private final String standardVersion;
   private final TransportDocumentStatus transportDocumentStatus;
   private final Boolean tdrIsKnown;
-  private final Supplier<CarrierScenarioParameters> cspSupplier;
   private final Supplier<DynamicScenarioParameters> dspSupplier;
 
   public CarrierTdNotificationPayloadRequestConformanceCheck(
@@ -32,14 +30,12 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Boolean tdrIsKnown,
-      Supplier<CarrierScenarioParameters> cspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
 
     super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
     this.standardVersion = standardVersion;
     this.transportDocumentStatus = transportDocumentStatus;
     this.tdrIsKnown = Boolean.TRUE.equals(tdrIsKnown);
-    this.cspSupplier = cspSupplier;
     this.dspSupplier = dspSupplier;
   }
 
@@ -55,7 +51,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
                 TRANSPORT_DOCUMENT_PATH,
                 () ->
                     EBLChecks.getTdPayloadChecks(
-                        standardVersion, transportDocumentStatus, cspSupplier, dspSupplier)))
+                        standardVersion, transportDocumentStatus, dspSupplier)))
         .flatMap(Function.identity());
   }
 

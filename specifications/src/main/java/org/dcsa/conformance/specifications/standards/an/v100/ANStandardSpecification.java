@@ -78,7 +78,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
+import org.dcsa.conformance.specifications.standards.an.v100.types.OnCarriageByCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselVoyageTypeCode;
@@ -104,10 +104,10 @@ public class ANStandardSpecification extends StandardSpecification {
 
     openAPI.path(
         "/arrival-notices",
-        new PathItem().get(operationArrivalNoticesGet()).post(operationArrivalNoticesPut()));
+        new PathItem().get(operationArrivalNoticesGet()).post(operationArrivalNoticesPost()));
     openAPI.path(
         "/arrival-notice-notifications",
-        new PathItem().post(operationArrivalNoticeNotificationsPut()));
+        new PathItem().post(operationArrivalNoticeNotificationsPost()));
 
     getArrivalNoticesEndpoint = new GetArrivalNoticesEndpoint();
   }
@@ -115,7 +115,7 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250606-alpha", "AN", "1.0.0-20250523-design", 4);
+        "Arrival Notice", "1.0.0-20250801-alpha", "AN", "1.0.0-20250718-alpha", 4);
   }
 
   @Override
@@ -159,7 +159,7 @@ public class ANStandardSpecification extends StandardSpecification {
         IsoEquipmentCode.class,
         Limits.class,
         Location.class,
-        ModeOfTransportCode.class,
+        OnCarriageByCode.class,
         NationalCommodityCode.class,
         NetExplosiveContent.class,
         NetVolume.class,
@@ -202,7 +202,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/e56f6fbd1dab7e31a9c9cc8f895028b93203ffdc/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/bbe0280b11372c7757e02221af72e06b2d5587fa/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 
@@ -227,10 +227,10 @@ public class ANStandardSpecification extends StandardSpecification {
     return false;
   }
 
-  private static Operation operationArrivalNoticesGet() {
+  private Operation operationArrivalNoticesGet() {
     return new Operation()
         .summary("Retrieves a list of arrival notices")
-        .description("")
+        .description(readResourceFile("openapi-get-ans-description.md"))
         .operationId("get-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_PUBLISHERS))
         .parameters(new GetArrivalNoticesEndpoint().getQueryParameters())
@@ -241,11 +241,19 @@ public class ANStandardSpecification extends StandardSpecification {
                     new ApiResponse()
                         .description("List of arrival notices matching the query parameters")
                         .headers(
-                            new LinkedHashMap<>(
-                                Map.ofEntries(
+                            Stream.of(
                                     Map.entry(
                                         "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        new Header().$ref("#/components/headers/API-Version")),
+                                    Map.entry(
+                                        "Next-Page-Cursor",
+                                        new Header().$ref("#/components/headers/Next-Page-Cursor")))
+                                .collect(
+                                    Collectors.toMap(
+                                        Map.Entry::getKey,
+                                        Map.Entry::getValue,
+                                        (a, b) -> b,
+                                        LinkedHashMap::new)))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -258,10 +266,10 @@ public class ANStandardSpecification extends StandardSpecification {
                                                         ArrivalNoticesMessage.class)))))));
   }
 
-  private static Operation operationArrivalNoticesPut() {
+  private Operation operationArrivalNoticesPost() {
     return new Operation()
         .summary("Sends a list of arrival notices")
-        .description("")
+        .description(readResourceFile("openapi-post-ans-description.md"))
         .operationId("put-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
         .requestBody(
@@ -292,10 +300,10 @@ public class ANStandardSpecification extends StandardSpecification {
                                         new Header().$ref("#/components/headers/API-Version")))))));
   }
 
-  private static Operation operationArrivalNoticeNotificationsPut() {
+  private Operation operationArrivalNoticeNotificationsPost() {
     return new Operation()
         .summary("Sends a list of arrival notice lightweight notifications")
-        .description("")
+        .description(readResourceFile("openapi-post-anns-description.md"))
         .operationId("put-arrival-notice-notifications")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
         .requestBody(

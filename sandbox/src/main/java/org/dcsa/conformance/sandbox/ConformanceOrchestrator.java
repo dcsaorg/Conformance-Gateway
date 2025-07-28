@@ -318,7 +318,8 @@ public class ConformanceOrchestrator implements StatefulEntity {
               .formatted(currentScenario.toString()));
       return;
     }
-    if (nextAction.isMissingMatchedExchange()) {
+    if (nextAction.isMissingMatchedExchange()
+        && !nextAction.skippableForRoles().contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
       throw new UserFacingException(
           "A required API exchange was not yet detected for action '%s'"
               .formatted(nextAction.getActionTitle()));
@@ -456,6 +457,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
             .orElseThrow();
     scenarioNode.set("conformanceSubReport", scenarioSubReport.toJsonReport());
 
+    scenarioNode.put("isSkippable", false);
+    if (nextAction != null
+        && nextAction.skippableForRoles().contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
+      scenarioNode.put("isSkippable", true);
+    }
+
     return scenarioNode;
   }
 
@@ -465,9 +472,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
       if (currentScenarioId.equals(scenarioUuid)) {
         // stop
         ConformanceScenario currentScenario = _getCurrentScenario();
-        currentScenario.reset();
         _saveInactiveScenario(currentScenario);
-        latestRunIdsByScenarioId.remove(currentScenarioId);
         currentScenarioId = null;
       } else {
         throw new IllegalStateException("Another scenario is currently running");

@@ -103,7 +103,6 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
                 EBLChecks.siRequestContentChecks(
                     getMatchedExchangeUuid(),
                     expectedApiVersion,
-                    getCspSupplier(),
                     getDspSupplier()));
         return Stream.concat(
             primaryExchangeChecks,

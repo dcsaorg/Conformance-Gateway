@@ -1,11 +1,14 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
@@ -38,15 +41,15 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
             "SCENARIO_TYPE",
             getScenarioType(),
             "CARRIER_SCENARIO_PARAMETERS",
-            getCspSupplier().get().toJson().toString()),
+            getCarrierPayloadSupplier().get().toString()),
         "prompt-shipper-uc1.md",
         "prompt-shipper-refresh-complete.md");
   }
 
   private String getScenarioType() {
     return switch (getDSP().scenarioType()) {
-      case REGULAR_2C_2U_1E ->
-          "with 2 Commodities, 2 Utilized transport equipments and 1 Equipment";
+      case REGULAR_2C_1U_1E ->
+          "with 2 Commodities, 1 Utilized transport equipment and 1 Equipment";
       case REGULAR_2C_2U_2E ->
           "with  2 Commodities, 2 Utilized transport equipments and 2 Equipments";
       case REGULAR_NO_COMMODITY_SUBREFERENCE -> "with No Commodity Subreference";
@@ -66,7 +69,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.set("csp", getCspSupplier().get().toJson());
+    jsonNode.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
     return jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
   }
 
@@ -110,7 +113,6 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 EBLChecks.siRequestContentChecks(
                     getMatchedExchangeUuid(),
                     expectedApiVersion,
-                    getCspSupplier(),
                     getDspSupplier()));
         return Stream.concat(
             primaryExchangeChecks,
@@ -122,5 +124,11 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 EBLChecks.SIR_REQUIRED_IN_NOTIFICATION));
       }
     };
+  }
+
+  @Override
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    super.doHandleExchange(exchange);
+    getCarrierPayloadConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }
 }

@@ -6,14 +6,16 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeU
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
 
+import java.util.List;
+
 @Data
 @Schema(description = "Free time condition applicable to this shipment at destination.")
 public class FreeTime {
 
-  @Schema()
-  private FreeTimeTypeCode typeCode;
+  @Schema(description = "One or more types applicable to this free time condition.")
+  private List<FreeTimeTypeCode> typeCodes;
 
-  @Schema()
+  @Schema(name = "ISOEquipmentCode")
   private IsoEquipmentCode isoEquipmentCode;
 
   @Schema(

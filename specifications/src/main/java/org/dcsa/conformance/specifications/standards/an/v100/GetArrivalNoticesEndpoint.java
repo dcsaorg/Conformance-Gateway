@@ -4,6 +4,8 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
@@ -115,12 +117,48 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .name("includeCharges")
           .description(
 """
-Flag indicating whether to include arrival notice charges. If not specified, the default value is `true`.
-This flag is separate from the mandatory and optional lists of query parameters that can be used as filters
-and can be used in combination with any such filter.
+Optional flag indicating whether only arrival notices with charges (`true`) or without charges (`false`) are requested.
+If left unspecified, the arrival notices both with and without charges are requested.
 """)
           .example(true)
           .schema(new Schema<Boolean>().type("boolean"));
+
+  private final Parameter includeVisualization =
+      new Parameter()
+          .in("query")
+          .name("includeVisualization")
+          .description(
+"""
+Optional flag indicating whether the PDF `arrivalNoticeVisualization` should be included in each returned arrival notice.
+
+The publisher makes the final decision on whether to include PDF visualizations in the response (for some or for all
+the arrival notices), based on a variety of factors including:
+- whether it has implemented support for including PDF visualizations
+- the API consumer (role, registration profile, business relationship)
+- the type and availability status of the returned arrival notices.
+
+However, to support a future transition to fully automated processing of arrival notices by receivers,
+the publisher should **not** include the PDF visualization if this parameter is set to `false`.
+""")
+          .example(true)
+          .schema(new Schema<Boolean>().type("boolean"));
+
+  private final Parameter limit =
+      new Parameter()
+          .in("query")
+          .name("limit")
+          .description("Maximum number of arrival notices to include in each page of the response.")
+          .example(10)
+          .schema(new Schema<Integer>().type("number").format("int32").minimum(new BigDecimal(1)));
+
+  private final Parameter cursor =
+      new Parameter()
+          .in("query")
+          .name("cursor")
+          .description(
+              "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.")
+          .example("ExampleNextPageCursor")
+          .schema(new Schema<String>().type("string"));
 
   @Override
   public List<Parameter> getQueryParameters() {
@@ -136,7 +174,10 @@ and can be used in combination with any such filter.
         universalServiceReference,
         minEtaAtPortOfDischargeDate,
         maxEtaAtPortOfDischargeDate,
-        includeCharges);
+        includeCharges,
+        includeVisualization,
+        limit,
+        cursor);
   }
 
   @Override

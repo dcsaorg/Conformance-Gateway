@@ -93,7 +93,7 @@ public class EblCarrier extends ConformanceParty {
             this::processSurrenderRequestForAmendment),
         Map.entry(
             UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction.class,
-            this::voidTransportDocumentAndissueAmendedTransportDocument),
+            this::voidTransportDocumentAndIssueAmendedTransportDocument),
         Map.entry(
             UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class,
             this::notifyOfSurrenderForDelivery),
@@ -269,9 +269,9 @@ public class EblCarrier extends ConformanceParty {
             .formatted(documentReference));
   }
 
-  private void voidTransportDocumentAndissueAmendedTransportDocument(JsonNode actionPrompt) {
+  private void voidTransportDocumentAndIssueAmendedTransportDocument(JsonNode actionPrompt) {
     log.info(
-        "Carrier.voidTDandissueAmendedTransportDocument(%s)"
+        "Carrier.voidTransportDocumentAndIssueAmendedTransportDocument(%s)"
             .formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();

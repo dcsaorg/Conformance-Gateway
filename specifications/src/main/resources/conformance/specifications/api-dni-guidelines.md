@@ -114,7 +114,7 @@ When property values are defined in code lists managed by external organizations
 
 By default, adopters do not have to preserve between API calls the ordering of elements in arrays and collections.
 
-Shen the order of elements in an array or collection must be preserved (e.g., the lines of text to be displayed on a package), the API specification explicitly states this.
+When the order of elements in an array or collection must be preserved (e.g., the lines of text to be displayed on a package), the API specification explicitly states this.
 
 
 ### Error object

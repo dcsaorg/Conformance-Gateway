@@ -348,10 +348,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc11Get(EblScenarioListBuilder... thenEither) {
-    return uc11CarrierVoidTransportDocument()
-        .then(
-            uc11iCarrierIssueAmendedTransportDocument()
-                .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither)));
+    return uc11CarrierVoidTDandIssueAmendedTransportDocument()
+        .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither));
   }
 
   private static EblScenarioListBuilder uc12Get(EblScenarioListBuilder... thenEither) {
@@ -618,25 +616,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           true));
   }
 
-  private static EblScenarioListBuilder uc11CarrierVoidTransportDocument() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-            previousAction ->
-                new UC11v_Carrier_VoidTransportDocumentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (EblAction) previousAction,
-                    resolveMessageSchemaValidator(
-                        EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-    }
-
-  private static EblScenarioListBuilder uc11iCarrierIssueAmendedTransportDocument() {
+  private static EblScenarioListBuilder uc11CarrierVoidTDandIssueAmendedTransportDocument() {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
         previousAction ->
-            new UC11i_Carrier_IssueAmendedTransportDocumentAction(
+            new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
                 carrierPartyName,
                 shipperPartyName,
                 (EblAction) previousAction,

@@ -238,7 +238,6 @@ public class ANChecks {
           issues.addAll(validatePortOfDischargePresence().validate(body));
           issues.addAll(validatePortOfDischargeLocation().validate(body));
           issues.addAll(validateVesselVoyagesArray().validate(body));
-          issues.addAll(validateVesselVoyageField("typeCode").validate(body));
           issues.addAll(validateVesselVoyageField("vesselName").validate(body));
           issues.addAll(validateVesselVoyageField("carrierVoyageNumber").validate(body));
           return issues;

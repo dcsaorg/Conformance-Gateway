@@ -26,6 +26,10 @@ Added `freightPaymentStatus` to root object `ArrivalNotice`. (SD-2337)
 
 Removed `internalCode` from object `CustomsClearance`. (SD-2347)
 
+Grouped existing and new properties into `PickupInformation` and `ReturnInformation`, reused both at root level and within each `UtilizedTransportEquipment`. (SD-2328)
+
+Added property `vesselCallSign` to object `VesselVoyage` and property `position` to object `CargoItem`. (SD-2328)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

@@ -225,6 +225,8 @@ Grouping of Dangerous Goods having certain similar chemical properties. Possible
 - `NOT_TREATED_AND_NOT_CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)
 - `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)
 - `TREATED_AND_CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)",
+"ArrivalNotice / consignmentItems / cargoItems / position",position,integer,,,,12,"The order in which the carrier submitted the pre-announcement to the customs authority (which may vary by country) is,
+in some cases, the same order the consignee must follow for the final customs release.",
 "ArrivalNotice / consignmentItems / carrierBookingReference",carrierBookingReference,string,,maxLength=35,,ABC709951,"The associated booking number provided by the carrier for this `Consignment Item`.",
 "ArrivalNotice / consignmentItems / customsReferences",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
 "ArrivalNotice / consignmentItems / customsReferences / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
@@ -445,69 +447,75 @@ for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNotice / paymentRemittance / beneficiary",beneficiary,string,,maxLength=100,,"Example Carrier","Legal name of the payment recipient (carrier)",
 "ArrivalNotice / paymentRemittance / remittanceEmail",remittanceEmail,string,,maxLength=100,,carrier@example.com,"Email address where proof of payment remittance should be sent",
 "ArrivalNotice / paymentRemittance / swiftCode",swiftCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
-"ArrivalNotice / pickupLocation",pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
-"ArrivalNotice / pickupLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / pickupInformation",pickupInformation,PickupInformation,,,,,"Pickup information",
+"ArrivalNotice / pickupInformation / pickupLocation",pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
+"ArrivalNotice / pickupInformation / pickupLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-"ArrivalNotice / pickupLocation / address",address,Address,,,,,"Location address",
-"ArrivalNotice / pickupLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
-"ArrivalNotice / pickupLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
-"ArrivalNotice / pickupLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-"ArrivalNotice / pickupLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
-"ArrivalNotice / pickupLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
-"ArrivalNotice / pickupLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
-"ArrivalNotice / pickupLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
-"ArrivalNotice / pickupLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / pickupLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / pickupLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
+"ArrivalNotice / pickupInformation / pickupLocation / address",address,Address,,,,,"Location address",
+"ArrivalNotice / pickupInformation / pickupLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"ArrivalNotice / pickupInformation / pickupLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"ArrivalNotice / pickupInformation / pickupLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / pickupInformation / pickupLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"ArrivalNotice / pickupInformation / pickupLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"ArrivalNotice / pickupInformation / pickupLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"ArrivalNotice / pickupInformation / pickupLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"ArrivalNotice / pickupInformation / pickupLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"ArrivalNotice / pickupInformation / pickupLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
+"ArrivalNotice / pickupInformation / pickupLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
 The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
 - `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
 - `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / pickupLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+"ArrivalNotice / pickupInformation / pickupLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
 - `BIC` (Requires a UN Location Code)
 - `SMDG` (Requires a UN Location Code)",
-"ArrivalNotice / pickupLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
-"ArrivalNotice / pickupLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
-"ArrivalNotice / pickupLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / pickupLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / pickupInformation / pickupLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"ArrivalNotice / pickupInformation / pickupLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"ArrivalNotice / pickupInformation / pickupLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"ArrivalNotice / pickupInformation / pickupLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / pickupInformation / pickupNumber",pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
+A trucker picking up a container must present the correct pickup number.
+If the pickup number is incorrect, the trucker will have his pickup request denied.",
 "ArrivalNotice / references",references,"Reference list",,,,,"A list of `References`",
 "ArrivalNotice / references / type",type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)",
 "ArrivalNotice / references / value",value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
-"ArrivalNotice / returnInstructions",returnInstructions,string,,maxLength=500,,"Please place the container...","Return instructions",
-"ArrivalNotice / returnLocation",returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
-"ArrivalNotice / returnLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / returnInformation",returnInformation,ReturnInformation,,,,,"Return information",
+"ArrivalNotice / returnInformation / returnInstructions",returnInstructions,string,,maxLength=5000,,"Please place the container...","Return instructions",
+"ArrivalNotice / returnInformation / returnLocation",returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
+"ArrivalNotice / returnInformation / returnLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-"ArrivalNotice / returnLocation / address",address,Address,,,,,"Location address",
-"ArrivalNotice / returnLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
-"ArrivalNotice / returnLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
-"ArrivalNotice / returnLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-"ArrivalNotice / returnLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
-"ArrivalNotice / returnLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
-"ArrivalNotice / returnLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
-"ArrivalNotice / returnLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
-"ArrivalNotice / returnLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / returnLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / returnLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
+"ArrivalNotice / returnInformation / returnLocation / address",address,Address,,,,,"Location address",
+"ArrivalNotice / returnInformation / returnLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"ArrivalNotice / returnInformation / returnLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"ArrivalNotice / returnInformation / returnLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / returnInformation / returnLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"ArrivalNotice / returnInformation / returnLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"ArrivalNotice / returnInformation / returnLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"ArrivalNotice / returnInformation / returnLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"ArrivalNotice / returnInformation / returnLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"ArrivalNotice / returnInformation / returnLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
+"ArrivalNotice / returnInformation / returnLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
 The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
 - `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
 - `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / returnLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+"ArrivalNotice / returnInformation / returnLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
 - `BIC` (Requires a UN Location Code)
 - `SMDG` (Requires a UN Location Code)",
-"ArrivalNotice / returnLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
-"ArrivalNotice / returnLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
-"ArrivalNotice / returnLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / returnLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / returnInformation / returnLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"ArrivalNotice / returnInformation / returnLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"ArrivalNotice / returnInformation / returnLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"ArrivalNotice / returnInformation / returnLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / returnInformation / turnInReference",turnInReference,string,,,,HLCSTD45,"Code or reference required when returning equipment to the depot.",
 "ArrivalNotice / serviceContractReference",serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 "ArrivalNotice / termsAndConditions",termsAndConditions,string,,maxLength=50000,,,"Carrier terms and conditions for the Arrival Notice.",
 "ArrivalNotice / transport",transport,Transport,,,,,"Transport info",
@@ -712,6 +720,10 @@ It can be used for customs clearance purposes in specific countries (e.g. NL, UK
 "ArrivalNotice / transport / vesselVoyages / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Universal identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",
+"ArrivalNotice / transport / vesselVoyages / vesselCallSign",vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel
+and is assigned by the International Telecommunication Union (ITU).
+It consists of a three-letter alphanumeric prefix that indicates nationality,
+followed by one to four characters to identify the individual vessel.",
 "ArrivalNotice / transport / vesselVoyages / vesselFlag",vesselFlag,string,,maxLength=2,,NL,"The flag of the nation whose laws the vessel is registered under.
 This is indicated by the 2 characters for the country code using
 [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",
@@ -761,12 +773,75 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
 "ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / value",value,number,,,,4800,"The weight of an empty container (gross container weight).",
 "ArrivalNotice / utilizedTransportEquipments / isNonOperatingReefer",isNonOperatingReefer,boolean,,,,false,"If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.",
 "ArrivalNotice / utilizedTransportEquipments / isShipperOwned",isShipperOwned,boolean,,,,true,"Indicates whether the container is shipper owned (SOC).",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation",pickupInformation,PickupInformation,,,,,"Pickup information",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation",pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address",address,Address,,,,,"Location address",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
+The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
+- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
+- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+- `BIC` (Requires a UN Location Code)
+- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupNumber",pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
+A trucker picking up a container must present the correct pickup number.
+If the pickup number is incorrect, the trucker will have his pickup request denied.",
 "ArrivalNotice / utilizedTransportEquipments / references",references,"Reference list",,,,,"A list of `References`",
 "ArrivalNotice / utilizedTransportEquipments / references / type",type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)",
 "ArrivalNotice / utilizedTransportEquipments / references / value",value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation",returnInformation,ReturnInformation,,,,,"Return information",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnInstructions",returnInstructions,string,,maxLength=5000,,"Please place the container...","Return instructions",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation",returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address",address,Address,,,,,"Location address",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
+The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
+- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
+- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+- `BIC` (Requires a UN Location Code)
+- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / turnInReference",turnInReference,string,,,,HLCSTD45,"Code or reference required when returning equipment to the depot.",
 "ArrivalNotice / utilizedTransportEquipments / seals",seals,"Seal list",,,,,"A list of `Seals`",
 "ArrivalNotice / utilizedTransportEquipments / seals / number",number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 "ArrivalNotice / utilizedTransportEquipments / seals / source",source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.

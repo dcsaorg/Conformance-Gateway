@@ -59,25 +59,11 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
 """)
   private List<PartyContactDetail> carrierInformationForCargoRelease;
 
-  @Schema(
-      description =
-"""
-The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.
-""")
-  private Location pickupLocation;
+  @Schema()
+  private PickupInformation pickupInformation;
 
-  @Schema(
-      description =
-"""
-The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.
-""")
-  private Location returnLocation;
-
-  @Schema(
-      maxLength = 500,
-      description = "Return instructions",
-      example = "Please place the container...")
-  private String returnInstructions;
+  @Schema()
+  private ReturnInformation returnInformation;
 
   @Schema()
   private CustomsClearance customsClearance;

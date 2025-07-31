@@ -68,10 +68,9 @@ ArrivalNotice,issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The 
 ArrivalNotice,label,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
-ArrivalNotice,pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
+ArrivalNotice,pickupInformation,PickupInformation,,,,,"Pickup information",
 ArrivalNotice,references,"Reference list",,,,,"A list of `References`",
-ArrivalNotice,returnInstructions,string,,maxLength=500,,"Please place the container...","Return instructions",
-ArrivalNotice,returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
+ArrivalNotice,returnInformation,ReturnInformation,,,,,"Return information",
 ArrivalNotice,serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 ArrivalNotice,termsAndConditions,string,,maxLength=50000,,,"Carrier terms and conditions for the Arrival Notice.",
 ArrivalNotice,transport,Transport,,,,,"Transport info",
@@ -123,6 +122,8 @@ CargoItem,exportLicense,ExportLicense,,,,,"Export license applicable to this car
 CargoItem,importLicense,ImportLicense,,,,,"Import license applicable to this cargo item.",
 CargoItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list of `National Commodity Codes` that apply to this `cargoItem`",
 CargoItem,outerPackaging,OuterPackaging,,,,,"Packaging information for this cargo item.",
+CargoItem,position,integer,,,,12,"The order in which the carrier submitted the pre-announcement to the customs authority (which may vary by country) is,
+in some cases, the same order the consignee must follow for the final customs release.",
 CargoNetVolume,unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
 - `FTQ` (Cubic foot)
 - `MTQ` (Cubic meter)",
@@ -448,6 +449,10 @@ PaymentRemittance,bankName,string,,maxLength=100,,"Example Bank","Name of the ca
 PaymentRemittance,beneficiary,string,,maxLength=100,,"Example Carrier","Legal name of the payment recipient (carrier)",
 PaymentRemittance,remittanceEmail,string,,maxLength=100,,carrier@example.com,"Email address where proof of payment remittance should be sent",
 PaymentRemittance,swiftCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
+PickupInformation,pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
+PickupInformation,pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
+A trucker picking up a container must present the correct pickup number.
+If the pickup number is incorrect, the trucker will have his pickup request denied.",
 Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
@@ -461,6 +466,9 @@ ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes 
 ReferenceConsignmentItem,values,"string list",,maxLength=35,,,"List of `referenceValues` for a given `referenceType`.
 Item description:
 The value of the reference.",
+ReturnInformation,returnInstructions,string,,maxLength=5000,,"Please place the container...","Return instructions",
+ReturnInformation,returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
+ReturnInformation,turnInReference,string,,,,HLCSTD45,"Code or reference required when returning equipment to the depot.",
 Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
 - `CAR` (Carrier)
@@ -505,7 +513,9 @@ Transport,vesselVoyages,"VesselVoyage list",,maxItems=3,,,"Details of the POD, P
 "UtilizedTransportEquipment",equipment,Equipment,,,,,"The container or transport equipment used.",
 "UtilizedTransportEquipment",isNonOperatingReefer,boolean,,,,false,"If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.",
 "UtilizedTransportEquipment",isShipperOwned,boolean,,,,true,"Indicates whether the container is shipper owned (SOC).",
+"UtilizedTransportEquipment",pickupInformation,PickupInformation,,,,,"Pickup information",
 "UtilizedTransportEquipment",references,"Reference list",,,,,"A list of `References`",
+"UtilizedTransportEquipment",returnInformation,ReturnInformation,,,,,"Return information",
 "UtilizedTransportEquipment",seals,"Seal list",,,,,"A list of `Seals`",
 "UtilizedTransportEquipment",shippingMarks,"string list",,"maxItems=50
 maxLength=35",,,"A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
@@ -525,6 +535,10 @@ VesselVoyage,typeCode,string,,,,POD,"Code representing the type of a vessel voya
 VesselVoyage,universalVoyageReference,string,,maxLength=5,,2301W,"Universal identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",
+VesselVoyage,vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel
+and is assigned by the International Telecommunication Union (ITU).
+It consists of a three-letter alphanumeric prefix that indicates nationality,
+followed by one to four characters to identify the individual vessel.",
 VesselVoyage,vesselFlag,string,,maxLength=2,,NL,"The flag of the nation whose laws the vessel is registered under.
 This is indicated by the 2 characters for the country code using
 [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",

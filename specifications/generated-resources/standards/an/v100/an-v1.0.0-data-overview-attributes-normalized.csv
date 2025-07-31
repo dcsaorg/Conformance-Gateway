@@ -254,7 +254,7 @@ DocumentParty,partyFunction,string,,maxLength=3,,N1,"Specifies the role of the p
 
 - `OS` (Shipper)
 - `CN` (Consignee)
-- `ZZZ` (Endorsee)
+- `END` (Endorsee)
 - `RW` (Issuing Party)
 - `CG` (Carrier's Agent at Destination)
 - `N1` (First Notify Party)

@@ -17,7 +17,7 @@ Specifies the role of the party in a given context. Possible values are:
 
 - `OS` (Shipper)
 - `CN` (Consignee)
-- `ZZZ` (Endorsee)
+- `END` (Endorsee)
 - `RW` (Issuing Party)
 - `CG` (Carrier's Agent at Destination)
 - `N1` (First Notify Party)

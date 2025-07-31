@@ -376,7 +376,7 @@ as it determines which of these parties is considered the third, fourth, fifth (
 
 - `OS` (Shipper)
 - `CN` (Consignee)
-- `ZZZ` (Endorsee)
+- `END` (Endorsee)
 - `RW` (Issuing Party)
 - `CG` (Carrier's Agent at Destination)
 - `N1` (First Notify Party)

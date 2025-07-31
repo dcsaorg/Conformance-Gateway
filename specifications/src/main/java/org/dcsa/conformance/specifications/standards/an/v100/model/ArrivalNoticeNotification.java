@@ -22,13 +22,17 @@ public class ArrivalNoticeNotification {
 
   @Schema(
       type = "string",
+      maxLength = 1000,
+      example = "English, consignee, USD",
+      description = ArrivalNotice.TYPE_LABEL_DESCRIPTION)
+  private String typeLabel;
+
+  @Schema(
+      type = "string",
+      maxLength = 1000,
       example = "Warning",
-      description =
-"""
-Free text used to indicate a certain version or type of arrival notice,
-for example "Warning", "Updated", "Second", "Third" etc.
-""")
-  private String label;
+      description = ArrivalNotice.VERSION_LABEL_DESCRIPTION)
+  private String versionLabel;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,

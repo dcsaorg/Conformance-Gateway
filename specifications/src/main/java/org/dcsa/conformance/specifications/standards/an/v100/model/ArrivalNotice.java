@@ -11,6 +11,38 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.FreightPaymen
 @Data
 public class ArrivalNotice {
 
+  public static final String TYPE_LABEL_DESCRIPTION =
+"""
+Free-format identifier used to specify a certain type of arrival notice,
+for example "English, consignee, USD" or "No charges, French".
+
+Each publisher can choose their own criteria by which they categorize arrival notices,
+as well as the format of this property. However, for each arrival notice publisher
+the format must be consistent and predictable, in order to allow receivers
+to programmatically determine whether each received arrival notice overrides
+an earlier version of the arrival notice "of the same type" for the same transport document.
+
+An arrival notice (including all its versions) is uniquely identified by the combination
+of the `transportDocumentReference` and this `typeLabel`. Each version of an arrival notice
+is uniquely identified by the combination of the `transportDocumentReference`, this `typeLabel`
+and the `issueDateTime`.
+
+Among the versions of arrival notices of the same type issued for the same transport document,
+a version with a newer `issueDateTime` overrides a version with an older `issueDateTime`,
+regardless of the `versionLabel` (which is a high-level label with business semantics
+and may or may not change between timestamped versions).
+""";
+
+  public static final String VERSION_LABEL_DESCRIPTION =
+"""
+Free text used to indicate a certain version of an arrival notice of a certain type,
+for example "Warning", "Updated", "Second", "Third" etc.
+
+This is a high-level label with business semantics that does not influence the technical versioning
+of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
+which relies on the `issueDateTime` instead.
+""";
+
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
       description = "The date and time when the Arrival Notice was issued.")
@@ -19,13 +51,16 @@ public class ArrivalNotice {
   @Schema(
       type = "string",
       maxLength = 1000,
+      example = "English, consignee, USD",
+      description = TYPE_LABEL_DESCRIPTION)
+  private String typeLabel;
+
+  @Schema(
+      type = "string",
+      maxLength = 1000,
       example = "Warning",
-      description =
-"""
-Free text used to indicate a certain version or type of arrival notice,
-for example "Warning", "Updated", "Second", "Third" etc.
-""")
-  private String label;
+      description = VERSION_LABEL_DESCRIPTION)
+  private String versionLabel;
 
   @Schema(
       description =

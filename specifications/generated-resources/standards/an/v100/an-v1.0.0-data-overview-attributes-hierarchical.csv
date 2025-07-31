@@ -439,8 +439,6 @@ Code used to denote the type of free time.
 - `OVERPAID` - Overpaid",
 "ArrivalNotice / isElectronic",isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 "ArrivalNotice / issueDateTime",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
-"ArrivalNotice / label",label,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
-for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNotice / paymentRemittance",paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
 "ArrivalNotice / paymentRemittance / accountNumber",accountNumber,string,,maxLength=40,,XYZ1234567890,"Bank account number for receiving payment",
 "ArrivalNotice / paymentRemittance / bankName",bankName,string,,maxLength=100,,"Example Bank","Name of the carrier's bank where payment should be sent",
@@ -735,6 +733,24 @@ also sometimes known as the Lloyd's register code.",
 "ArrivalNotice / transportDocumentTypeCode","transportDocumentTypeCode",string,,,,SWB,"Specifies the type of the transport document
 - `BOL` (Bill of Lading)
 - `SWB` (Sea Waybill)",
+"ArrivalNotice / typeLabel",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
+for example ""English, consignee, USD"" or ""No charges, French"".
+
+Each publisher can choose their own criteria by which they categorize arrival notices,
+as well as the format of this property. However, for each arrival notice publisher
+the format must be consistent and predictable, in order to allow receivers
+to programmatically determine whether each received arrival notice overrides
+an earlier version of the arrival notice ""of the same type"" for the same transport document.
+
+An arrival notice (including all its versions) is uniquely identified by the combination
+of the `transportDocumentReference` and this `typeLabel`. Each version of an arrival notice
+is uniquely identified by the combination of the `transportDocumentReference`, this `typeLabel`
+and the `issueDateTime`.
+
+Among the versions of arrival notices of the same type issued for the same transport document,
+a version with a newer `issueDateTime` overrides a version with an older `issueDateTime`,
+regardless of the `versionLabel` (which is a high-level label with business semantics
+and may or may not change between timestamped versions).",
 "ArrivalNotice / utilizedTransportEquipments","utilizedTransportEquipments","UtilizedTransportEquipment list",,,,,"The equipments being used.",
 "ArrivalNotice / utilizedTransportEquipments / activeReeferSettings",activeReeferSettings,ActiveReeferSettings,,,,,"Active reefer settings applied to this equipment.",
 "ArrivalNotice / utilizedTransportEquipments / activeReeferSettings / airExchangeSetpoint",airExchangeSetpoint,number,,,,15.4,"Target value for the air exchange rate which is the rate at which outdoor air replaces indoor air within a Reefer container",
@@ -854,6 +870,12 @@ maxLength=35",,,"A list of the `ShippingMarks` applicable to this `UtilizedTrans
 Item description:
 The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.
 ",
+"ArrivalNotice / versionLabel",versionLabel,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version of an arrival notice of a certain type,
+for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.
+
+This is a high-level label with business semantics that does not influence the technical versioning
+of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
+which relies on the `issueDateTime` instead.",
 "ArrivalNoticeNotification",,,,,,,,
 "ArrivalNoticeNotification / equipmentReferences",equipmentReferences,"string list",,maxLength=11,,,"References of the equipments for which this arrival notice was created
 Item description:
@@ -869,8 +891,6 @@ from SMDG.
 "ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at place of delivery",
 "ArrivalNoticeNotification / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
 "ArrivalNoticeNotification / issueDateTime",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
-"ArrivalNoticeNotification / label",label,string,,,,Warning,"Free text used to indicate a certain version or type of arrival notice,
-for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNoticeNotification / placeOfDelivery",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases",
 "ArrivalNoticeNotification / placeOfDelivery / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -929,3 +949,27 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNoticeNotification / portOfDischarge / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNoticeNotification / portOfDischarge / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,,,TDR1234,"The reference of the transport document for which this arrival notice was created",
+"ArrivalNoticeNotification / typeLabel",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
+for example ""English, consignee, USD"" or ""No charges, French"".
+
+Each publisher can choose their own criteria by which they categorize arrival notices,
+as well as the format of this property. However, for each arrival notice publisher
+the format must be consistent and predictable, in order to allow receivers
+to programmatically determine whether each received arrival notice overrides
+an earlier version of the arrival notice ""of the same type"" for the same transport document.
+
+An arrival notice (including all its versions) is uniquely identified by the combination
+of the `transportDocumentReference` and this `typeLabel`. Each version of an arrival notice
+is uniquely identified by the combination of the `transportDocumentReference`, this `typeLabel`
+and the `issueDateTime`.
+
+Among the versions of arrival notices of the same type issued for the same transport document,
+a version with a newer `issueDateTime` overrides a version with an older `issueDateTime`,
+regardless of the `versionLabel` (which is a high-level label with business semantics
+and may or may not change between timestamped versions).",
+"ArrivalNoticeNotification / versionLabel",versionLabel,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version of an arrival notice of a certain type,
+for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.
+
+This is a high-level label with business semantics that does not influence the technical versioning
+of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
+which relies on the `issueDateTime` instead.",

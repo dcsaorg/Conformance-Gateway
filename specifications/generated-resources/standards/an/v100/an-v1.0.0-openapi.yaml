@@ -421,12 +421,39 @@ components:
           description: "The date and time when the Arrival Notice was issued."
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
-        label:
+        typeLabel:
           maxLength: 1000
           type: "string"
           description: |
-            Free text used to indicate a certain version or type of arrival notice,
+            Free-format identifier used to specify a certain type of arrival notice,
+            for example "English, consignee, USD" or "No charges, French".
+
+            Each publisher can choose their own criteria by which they categorize arrival notices,
+            as well as the format of this property. However, for each arrival notice publisher
+            the format must be consistent and predictable, in order to allow receivers
+            to programmatically determine whether each received arrival notice overrides
+            an earlier version of the arrival notice "of the same type" for the same transport document.
+
+            An arrival notice (including all its versions) is uniquely identified by the combination
+            of the `transportDocumentReference` and this `typeLabel`. Each version of an arrival notice
+            is uniquely identified by the combination of the `transportDocumentReference`, this `typeLabel`
+            and the `issueDateTime`.
+
+            Among the versions of arrival notices of the same type issued for the same transport document,
+            a version with a newer `issueDateTime` overrides a version with an older `issueDateTime`,
+            regardless of the `versionLabel` (which is a high-level label with business semantics
+            and may or may not change between timestamped versions).
+          example: "English, consignee, USD"
+        versionLabel:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Free text used to indicate a certain version of an arrival notice of a certain type,
             for example "Warning", "Updated", "Second", "Third" etc.
+
+            This is a high-level label with business semantics that does not influence the technical versioning
+            of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
+            which relies on the `issueDateTime` instead.
           example: "Warning"
         carrierCode:
           maxLength: 4
@@ -598,11 +625,39 @@ components:
           description: "The date and time when the Arrival Notice was issued."
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
-        label:
+        typeLabel:
+          maxLength: 1000
           type: "string"
           description: |
-            Free text used to indicate a certain version or type of arrival notice,
+            Free-format identifier used to specify a certain type of arrival notice,
+            for example "English, consignee, USD" or "No charges, French".
+
+            Each publisher can choose their own criteria by which they categorize arrival notices,
+            as well as the format of this property. However, for each arrival notice publisher
+            the format must be consistent and predictable, in order to allow receivers
+            to programmatically determine whether each received arrival notice overrides
+            an earlier version of the arrival notice "of the same type" for the same transport document.
+
+            An arrival notice (including all its versions) is uniquely identified by the combination
+            of the `transportDocumentReference` and this `typeLabel`. Each version of an arrival notice
+            is uniquely identified by the combination of the `transportDocumentReference`, this `typeLabel`
+            and the `issueDateTime`.
+
+            Among the versions of arrival notices of the same type issued for the same transport document,
+            a version with a newer `issueDateTime` overrides a version with an older `issueDateTime`,
+            regardless of the `versionLabel` (which is a high-level label with business semantics
+            and may or may not change between timestamped versions).
+          example: "English, consignee, USD"
+        versionLabel:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Free text used to indicate a certain version of an arrival notice of a certain type,
             for example "Warning", "Updated", "Second", "Third" etc.
+
+            This is a high-level label with business semantics that does not influence the technical versioning
+            of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
+            which relies on the `issueDateTime` instead.
           example: "Warning"
         transportDocumentReference:
           type: "string"

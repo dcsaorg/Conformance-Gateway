@@ -32,6 +32,8 @@ Added property `vesselCallSign` to object `VesselVoyage` and property `position`
 
 Replaced query parameter `includeCharges` with `removeCharges`, also adjusting its semantics for a more useful functionality. (SD-2332)
 
+Split `label` into `typeLabel` and `versionLabel` and clarified versioning. (SD-2319)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

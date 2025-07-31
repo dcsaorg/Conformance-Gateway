@@ -14,6 +14,10 @@ Clarified that the publisher can reject GET requests for more than a certain num
 
 Renamed `isoEquipmentCode` to `ISOEquipmentCode` in the `FreeTime` object. (SD-2323)
 
+Replaced `ZZZ` with `END` (pending registration) as Endorsee `partyFunction`. (SD-2303)
+
+Removed property `payerCode` from object `ArrivalNotice`. (SD-2326)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

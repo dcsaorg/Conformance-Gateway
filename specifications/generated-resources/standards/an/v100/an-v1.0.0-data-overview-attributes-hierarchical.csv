@@ -420,7 +420,6 @@ Code used to denote the type of free time.
 "ArrivalNotice / issueDateTime",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNotice / label",label,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
 for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
-"ArrivalNotice / payerCode",payerCode,string,,maxLength=100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
 "ArrivalNotice / paymentRemittance",paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
 "ArrivalNotice / paymentRemittance / accountNumber",accountNumber,string,,maxLength=40,,XYZ1234567890,"Bank account number for receiving payment",
 "ArrivalNotice / paymentRemittance / bankName",bankName,string,,maxLength=100,,"Example Bank","Name of the carrier's bank where payment should be sent",

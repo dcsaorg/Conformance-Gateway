@@ -557,12 +557,6 @@ components:
           description: "A list of `Charges`"
           items:
             $ref: "#/components/schemas/Charge"
-        payerCode:
-          maxLength: 100
-          type: "string"
-          description: |
-            Name identifying the entity responsible for freight payment.
-          example: "Acme Inc."
         paymentRemittance:
           description: |
             Bank account information provided by the carrier for customers to make payments of the outstanding charges

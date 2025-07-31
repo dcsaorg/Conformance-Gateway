@@ -176,15 +176,6 @@ as it determines which of these parties is considered the third, fourth, fifth (
   @Schema(description = "A list of `Charges`")
   private List<Charge> charges;
 
-  @Schema(
-      maxLength = 100,
-      description =
-"""
-Name identifying the entity responsible for freight payment.
-""",
-      example = "Acme Inc.")
-  private String payerCode;
-
   @Schema()
   private PaymentRemittance paymentRemittance;
 

@@ -1932,10 +1932,10 @@ components:
           description: "The expected date of arrival of the shipment at Place of Delivery."
           format: "date"
           example: "2025-01-23"
-        inlandArrivalDate:
+        estimatedInlandArrivalDate:
           type: "string"
           description: |
-            The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+            The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
           format: "date"
           example: "2025-01-23"
         estimatedGeneralOrderDateTime:

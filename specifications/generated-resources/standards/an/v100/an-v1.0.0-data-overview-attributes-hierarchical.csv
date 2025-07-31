@@ -538,9 +538,9 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / dischargeLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / estimatedGeneralOrderDateTime","estimatedGeneralOrderDateTime","string(date-time)",,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
+"ArrivalNotice / transport / estimatedInlandArrivalDate","estimatedInlandArrivalDate","string(date)",,,,2025-01-23,"The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 "ArrivalNotice / transport / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
 "ArrivalNotice / transport / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
-"ArrivalNotice / transport / inlandArrivalDate",inlandArrivalDate,"string(date)",,,,2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 "ArrivalNotice / transport / loadLocation",loadLocation,Location,,,,,"Location where the equipment is loaded on the mother vessel arriving at the destination country.",
 "ArrivalNotice / transport / loadLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 

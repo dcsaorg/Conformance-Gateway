@@ -474,9 +474,9 @@ to the shipping line. This can refer either to the Place of Receipt or the Port 
 Transport,dischargeLocation,Location,,,,,"Location where the equipment is discharged from the mother vessel arriving at the destination country.",
 Transport,"estimatedGeneralOrderDateTime","string(date-time)",,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
+Transport,"estimatedInlandArrivalDate","string(date)",,,,2025-01-23,"The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 Transport,etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
 Transport,etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
-Transport,inlandArrivalDate,"string(date)",,,,2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 Transport,loadLocation,Location,,,,,"Location where the equipment is loaded on the mother vessel arriving at the destination country.",
 Transport,onBoardDate,"string(date)",,,,2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
 Transport,onCarriageBy,string,,maxLength=50,,RAIL,"Code indicating the mode of transport used for the movement of containers

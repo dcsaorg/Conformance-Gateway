@@ -22,6 +22,8 @@ Allowing each `FreeTime` to be associated with multiple `isoEquipmentCodes`, as 
 
 Renamed `inlandArrivalDate` to `estimatedInlandArrivalDate` in object `Transport`. (SD-2327)
 
+Added `freightPaymentStatus` to root object `ArrivalNotice`. (SD-2337)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

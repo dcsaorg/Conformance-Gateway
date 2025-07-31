@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
+import org.dcsa.conformance.specifications.standards.an.v100.types.FreightPaymentStatus;
 
 @Schema(description = "Full content of an Arrival Notice document.")
 @Data
@@ -178,6 +179,9 @@ as it determines which of these parties is considered the third, fourth, fifth (
 
   @Schema()
   private PaymentRemittance paymentRemittance;
+
+  @Schema()
+  private FreightPaymentStatus freightPaymentStatus;
 
   @Schema(description = "The equipments being used.")
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;

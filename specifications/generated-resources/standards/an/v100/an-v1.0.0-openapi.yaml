@@ -562,6 +562,17 @@ components:
             Bank account information provided by the carrier for customers to make payments of the outstanding charges
           allOf:
           - $ref: "#/components/schemas/PaymentRemittance"
+        freightPaymentStatus:
+          maxLength: 50
+          type: "string"
+          description: |-
+            Payment status of the freight charges.
+
+            - `ZERO_PAID` - Zero Paid
+            - `PARTIALLY_PAID` - Partially Paid
+            - `FULLY_PAID` - Fully Paid
+            - `OVERPAID` - Overpaid
+          example: "FULLY_PAID"
         utilizedTransportEquipments:
           type: "array"
           description: "The equipments being used."

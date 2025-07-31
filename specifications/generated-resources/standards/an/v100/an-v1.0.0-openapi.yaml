@@ -922,11 +922,6 @@ components:
           description: "Location information"
           allOf:
           - $ref: "#/components/schemas/Location"
-        internalCode:
-          maxLength: 5
-          type: "string"
-          description: "Port code used in the Carrier’s internal system to match the location"
-          example: "FRMRS"
         immediateTransportationEntry:
           description: |
             An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism

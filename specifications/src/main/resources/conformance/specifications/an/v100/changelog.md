@@ -24,6 +24,8 @@ Renamed `inlandArrivalDate` to `estimatedInlandArrivalDate` in object `Transport
 
 Added `freightPaymentStatus` to root object `ArrivalNotice`. (SD-2337)
 
+Removed `internalCode` from object `CustomsClearance`. (SD-2347)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

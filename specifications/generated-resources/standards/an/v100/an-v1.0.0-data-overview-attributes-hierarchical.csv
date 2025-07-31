@@ -318,7 +318,6 @@ by U.S. Customs and Border Protection (CBP).",
 often assigned by the carrier or customs broker. It allows goods to be moved under bond from the Port of Discharge
 to another inland port or bonded facility without paying duties at the first port. The IT number is used
 for tracking the movement and verifying arrival at the inland port or bonded facility.",
-"ArrivalNotice / customsClearance / internalCode",internalCode,string,,maxLength=5,,FRMRS,"Port code used in the Carrier’s internal system to match the location",
 "ArrivalNotice / customsClearance / manifestReferenceNumber",manifestReferenceNumber,string,,maxLength=35,,a1234,"Manifest reference number for manifest declaration and customs clearance in Korea.",
 "ArrivalNotice / customsClearance / masterSequenceNumber",masterSequenceNumber,string,,maxLength=35,,x12345,"A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of
 a particular vessel. Customers use this Master Sequence Number (MSN) as a reference when declaring all related House B/Ls.",

@@ -83,10 +83,6 @@ paths:
 
         The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `etaAtPortOfDischargeDate` within those ranges.
 
-        ### Filtering by the inclusion of charges
-
-        In combination with the filtering options above, the request can also use the `includeCharges` query parameter to specify whether only the arrival notices with charges or without charges should be returned. By default, if this query parameter is absent, no filtering is requested based on the inclusion of charges.
-
         ### Filtering by region or language
 
         There are no query parameters with which to request the filtering of arrival notices based on language or any other content or format localization for a specific region.
@@ -198,14 +194,6 @@ paths:
           type: "string"
           format: "date"
         example: "2025-01-23"
-      - name: "includeCharges"
-        in: "query"
-        description: |
-          Optional flag indicating whether only arrival notices with charges (`true`) or without charges (`false`) are requested.
-          If left unspecified, the arrival notices both with and without charges are requested.
-        schema:
-          type: "boolean"
-        example: true
       - name: "includeVisualization"
         in: "query"
         description: |
@@ -219,6 +207,24 @@ paths:
 
           However, to support a future transition to fully automated processing of arrival notices by receivers,
           the publisher should **not** include the PDF visualization if this parameter is set to `false`.
+        schema:
+          type: "boolean"
+        example: true
+      - name: "removeCharges"
+        in: "query"
+        description: |
+          Optional flag indicating whether the publisher should remove the charges from the PDF visualization
+          of every returned arrival notice, and for consistency, also from the structured response data.
+
+          This flag allows arrival notice receivers to retrieve, for the purpose of forwarding to third parties,
+          versions of the arrival notice PDF visualizations in which the charges are removed,
+          if they would be normally received with charges included based on the role of the arrival notice recipient.
+
+          This flag is **not** expected to perform any filtering on the list of arrival notices included in the response.
+          However, if the removal of charges (from the arrival notices that have them) results in a list of arrival notices
+          in which some become exact duplicates, publishers may choose to remove duplicates from the response.
+
+          The default value is `false`, which leaves unchanged the presence or absence of charges in each returned arrival notice.
         schema:
           type: "boolean"
         example: true

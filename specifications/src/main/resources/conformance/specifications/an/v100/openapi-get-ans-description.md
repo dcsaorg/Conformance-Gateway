@@ -39,10 +39,6 @@ Whenever the query parameters filter could retrieve large number of historical a
 
 The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `etaAtPortOfDischargeDate` within those ranges.
 
-### Filtering by the inclusion of charges
-
-In combination with the filtering options above, the request can also use the `includeCharges` query parameter to specify whether only the arrival notices with charges or without charges should be returned. By default, if this query parameter is absent, no filtering is requested based on the inclusion of charges.
-
 ### Filtering by region or language
 
 There are no query parameters with which to request the filtering of arrival notices based on language or any other content or format localization for a specific region.

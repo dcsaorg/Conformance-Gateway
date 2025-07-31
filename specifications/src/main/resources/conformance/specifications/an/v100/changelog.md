@@ -30,6 +30,8 @@ Grouped existing and new properties into `PickupInformation` and `ReturnInformat
 
 Added property `vesselCallSign` to object `VesselVoyage` and property `position` to object `CargoItem`. (SD-2328)
 
+Replaced query parameter `includeCharges` with `removeCharges`, also adjusting its semantics for a more useful functionality. (SD-2332)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

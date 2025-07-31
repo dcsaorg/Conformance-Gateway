@@ -1350,14 +1350,32 @@ components:
               - `DET` - Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')
               - `STO` - Storage
             example: "DEM"
-        ISOEquipmentCode:
-          maxLength: 4
-          type: "string"
-          description: |
-            Unique code identifying the equipment size and type used to transport commodities.
-            The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
-            following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
-          example: "22GP"
+        ISOEquipmentCodes:
+          type: "array"
+          items:
+            maxLength: 4
+            type: "string"
+            description: |
+              Unique code identifying the equipment size and type used to transport commodities.
+              The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+              following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
+            example: "22GP"
+        equipmentReferences:
+          type: "array"
+          description: "References of the equipments for which this free time applies"
+          items:
+            maxLength: 11
+            type: "string"
+            description: |
+              The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+              According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+              (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+              If a container does not comply with ISO 6346, it is suggested to follow
+              [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+              from SMDG.
+            example: "APZU4812090"
         duration:
           type: "integer"
           description: "The duration expressed in `timeUnit`s for which this free time item applies."

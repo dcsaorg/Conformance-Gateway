@@ -18,6 +18,8 @@ Replaced `ZZZ` with `END` (pending registration) as Endorsee `partyFunction`. (S
 
 Removed property `payerCode` from object `ArrivalNotice`. (SD-2326)
 
+Allowing each `FreeTime` to be associated with multiple `isoEquipmentCodes`, as well as with multiple `equipmentReferences`. (SD-2330)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

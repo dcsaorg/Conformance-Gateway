@@ -38,9 +38,10 @@ public class BookingChecks {
     BookingState.UPDATE_RECEIVED
   );
 
-  private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
-  private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
+
+  private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
+  private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String ATTR_BOOKING_STATUS = "bookingStatus";
   private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
@@ -612,10 +613,7 @@ public class BookingChecks {
 
     var checks = new ArrayList<JsonContentCheck>();
 
-    checks.add(
-        JsonAttribute.mustEqual(
-            CARRIER_BOOKING_REQUEST_REFERENCE,
-            () -> dspSupplier.get().carrierBookingRequestReference()));
+    checks.add(cbrrOrCbr(dspSupplier));
 
     checks.add(JsonAttribute.mustEqual(BOOKING_STATUS, bookingStatus.name()));
 
@@ -663,7 +661,6 @@ public class BookingChecks {
         */
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);
-      checks.add(JsonAttribute.mustBePresent(CARRIER_BOOKING_REFERENCE));
       checks.add(
           JsonAttribute.allIndividualMatchesMustBeValid(
               "The commoditySubReference is not present for confirmed booking",
@@ -683,8 +680,25 @@ public class BookingChecks {
 
     return checks;
   }
-  
-  private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {
+
+  public static JsonContentCheck cbrrOrCbr(Supplier<DynamicScenarioParameters> dspSupplier) {
+    return JsonAttribute.customValidator(
+        "Validate Carrier Booking Request Reference and Carrier Booking Reference",
+        body -> {
+          String cbrr = body.path(CARRIER_BOOKING_REQUEST_REFERENCE).asText("");
+          String cbr = body.path(CARRIER_BOOKING_REFERENCE).asText("");
+          String expectedCbrr = dspSupplier.get().carrierBookingRequestReference();
+          String expectedCbr = dspSupplier.get().carrierBookingReference();
+          if (!cbrr.equals(expectedCbrr) && !cbr.equals(expectedCbr)) {
+            return Set.of(
+                "Either 'carrierBookingRequestReference' must equal %s or 'carrierBookingReference' must equal %s."
+                    .formatted(expectedCbrr, expectedCbr));
+          }
+          return Set.of();
+        });
+  }
+
+    private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';
   }

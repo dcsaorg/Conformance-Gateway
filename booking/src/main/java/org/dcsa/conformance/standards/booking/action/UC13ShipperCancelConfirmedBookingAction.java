@@ -53,6 +53,7 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
+    jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
     jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }

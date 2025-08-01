@@ -40,8 +40,8 @@ public class BookingChecks {
 
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
 
-    private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
-    private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
+  private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
+  private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String ATTR_BOOKING_STATUS = "bookingStatus";
   private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";

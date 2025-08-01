@@ -401,7 +401,7 @@ Purchase order reference",
 "ArrivalNotice / documentParties / taxLegalReferences / type",type,string,,maxLength=50,,PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
 "ArrivalNotice / documentParties / taxLegalReferences / value",value,string,,maxLength=35,,AAAAA0000A,"The value of the `taxLegalReference`",
 "ArrivalNotice / freeTimes",freeTimes,"FreeTime list",,,,,"List of free time conditions applicable to this shipment at destination",
-"ArrivalNotice / freeTimes / ISOEquipmentCodes",ISOEquipmentCodes,"string list",,maxLength=4,,,"
+"ArrivalNotice / freeTimes / ISOEquipmentCodes",ISOEquipmentCodes,"string list",,maxLength=4,,,"Equipment type codes for which this free time applies
 Item description:
 Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)

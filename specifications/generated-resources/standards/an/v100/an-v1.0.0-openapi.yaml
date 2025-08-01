@@ -1465,6 +1465,7 @@ components:
             example: "DEM"
         ISOEquipmentCodes:
           type: "array"
+          description: "Equipment type codes for which this free time applies"
           items:
             maxLength: 4
             type: "string"

@@ -25,12 +25,17 @@ import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
+import org.dcsa.conformance.specifications.standards.an.v100.messages.FeedbackElement;
+import org.dcsa.conformance.specifications.standards.an.v100.messages.GetArrivalNoticesError;
+import org.dcsa.conformance.specifications.standards.an.v100.messages.GetArrivalNoticesResponse;
+import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticesError;
+import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticesResponse;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ActiveReeferSettings;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNotice;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotification;
-import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotificationsMessage;
-import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticesMessage;
+import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticeNotificationsRequest;
+import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticesRequest;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoGrossVolume;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoGrossWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoItem;
@@ -127,8 +132,6 @@ public class ANStandardSpecification extends StandardSpecification {
         Address.class,
         ArrivalNotice.class,
         ArrivalNoticeNotification.class,
-        ArrivalNoticeNotificationsMessage.class,
-        ArrivalNoticesMessage.class,
         CargoGrossVolume.class,
         CargoGrossWeight.class,
         CargoItem.class,
@@ -145,14 +148,17 @@ public class ANStandardSpecification extends StandardSpecification {
         EmergencyContactDetails.class,
         Equipment.class,
         EquipmentReference.class,
+        GetArrivalNoticesError.class,
         ExportLicense.class,
         Facility.class,
+        FeedbackElement.class,
         FormattedDate.class,
         FormattedDateTime.class,
         FreeTime.class,
         FreeTimeTimeUnitCode.class,
         FreeTimeTypeCode.class,
         GeoCoordinate.class,
+        GetArrivalNoticesResponse.class,
         GrossWeight.class,
         IdentifyingCode.class,
         ImmediateTransportationEntry.class,
@@ -170,6 +176,10 @@ public class ANStandardSpecification extends StandardSpecification {
         PartyContactDetail.class,
         PaymentRemittance.class,
         PickupInformation.class,
+        PostArrivalNoticesError.class,
+        PostArrivalNoticeNotificationsRequest.class,
+        PostArrivalNoticesRequest.class,
+        PostArrivalNoticesResponse.class,
         Reference.class,
         ReferenceConsignmentItem.class,
         ReturnInformation.class,
@@ -267,14 +277,15 @@ public class ANStandardSpecification extends StandardSpecification {
                                             new Schema<>()
                                                 .$ref(
                                                     SpecificationToolkit.getComponentSchema$ref(
-                                                        ArrivalNoticesMessage.class)))))));
+                                                        GetArrivalNoticesResponse.class))))))
+                .addApiResponse("default", createErrorResponse(GetArrivalNoticesError.class)));
   }
 
   private Operation operationArrivalNoticesPost() {
     return new Operation()
         .summary("Sends a list of arrival notices")
         .description(readResourceFile("openapi-post-ans-description.md"))
-        .operationId("put-arrival-notices")
+        .operationId("post-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
         .requestBody(
             new RequestBody()
@@ -289,26 +300,37 @@ public class ANStandardSpecification extends StandardSpecification {
                                     new Schema<>()
                                         .$ref(
                                             SpecificationToolkit.getComponentSchema$ref(
-                                                ArrivalNoticesMessage.class))))))
+                                                PostArrivalNoticesRequest.class))))))
         .responses(
             new ApiResponses()
                 .addApiResponse(
-                    "204",
+                    "200",
                     new ApiResponse()
-                        .description("Empty response")
+                        .description("Arrival notices response")
                         .headers(
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
                                         "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))));
+                                        new Header().$ref("#/components/headers/API-Version")))))
+                        .content(
+                            new Content()
+                                .addMediaType(
+                                    "application/json",
+                                    new MediaType()
+                                        .schema(
+                                            new Schema<>()
+                                                .$ref(
+                                                    SpecificationToolkit.getComponentSchema$ref(
+                                                        PostArrivalNoticesResponse.class))))))
+                .addApiResponse("default", createErrorResponse(PostArrivalNoticesError.class)));
   }
 
   private Operation operationArrivalNoticeNotificationsPost() {
     return new Operation()
         .summary("Sends a list of arrival notice lightweight notifications")
         .description(readResourceFile("openapi-post-anns-description.md"))
-        .operationId("put-arrival-notice-notifications")
+        .operationId("post-arrival-notice-notifications")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
         .requestBody(
             new RequestBody()
@@ -323,18 +345,49 @@ public class ANStandardSpecification extends StandardSpecification {
                                     new Schema<>()
                                         .$ref(
                                             SpecificationToolkit.getComponentSchema$ref(
-                                                ArrivalNoticeNotificationsMessage.class))))))
+                                                PostArrivalNoticeNotificationsRequest.class))))))
         .responses(
             new ApiResponses()
                 .addApiResponse(
-                    "204",
+                    "200",
                     new ApiResponse()
-                        .description("Empty response")
+                        .description("Arrival notice notifications response")
                         .headers(
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
                                         "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))));
+                                        new Header().$ref("#/components/headers/API-Version")))))
+                        .content(
+                            new Content()
+                                .addMediaType(
+                                    "application/json",
+                                    new MediaType()
+                                        .schema(
+                                            new Schema<>()
+                                                .$ref(
+                                                    SpecificationToolkit.getComponentSchema$ref(
+                                                        PostArrivalNoticesResponse.class))))))
+                .addApiResponse("default", createErrorResponse(PostArrivalNoticesError.class)));
+  }
+
+  private ApiResponse createErrorResponse(Class<?> errorMessageClass) {
+    return new ApiResponse()
+        .description("Error response")
+        .headers(
+            new LinkedHashMap<>(
+                Map.ofEntries(
+                    Map.entry(
+                        "API-Version", new Header().$ref("#/components/headers/API-Version")))))
+        .content(
+            new Content()
+                .addMediaType(
+                    "application/json",
+                    new MediaType()
+                        .schema(
+                            new Schema<>()
+                                .$ref(
+                                    SpecificationToolkit.getComponentSchema$ref(
+                                        errorMessageClass)))));
   }
 }

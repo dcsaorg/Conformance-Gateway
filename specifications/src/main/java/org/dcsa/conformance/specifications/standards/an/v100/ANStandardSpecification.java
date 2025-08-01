@@ -226,7 +226,29 @@ public class ANStandardSpecification extends StandardSpecification {
     return Map.ofEntries(
         Map.entry(
             AttributesHierarchicalSheet.class,
-            Map.ofEntries(Map.entry("ArrivalNotice / freeTime", "ArrivalNotice / freeTimes"))),
+            Map.ofEntries(
+                Map.entry(
+                    "ArrivalNotice / freeTimes / isoEquipmentCode",
+                    "ArrivalNotice / freeTimes / ISOEquipmentCodes"),
+                Map.entry(
+                    "ArrivalNotice / pickupLocation",
+                    "ArrivalNotice / pickupInformation / pickupLocation"),
+                Map.entry(
+                    "ArrivalNotice / returnInstructions",
+                    "ArrivalNotice / returnInformation / returnInstructions"),
+                Map.entry(
+                    "ArrivalNotice / returnLocation",
+                    "ArrivalNotice / returnInformation / returnLocation"),
+                Map.entry("ArrivalNotice / label", "ArrivalNotice / versionLabel"),
+                Map.entry(
+                    "ArrivalNotice / transport / modeOfTransport",
+                    "ArrivalNotice / transport / onCarriageBy"),
+                Map.entry(
+                    "ArrivalNotice / transport / inlandArrivalDate",
+                    "ArrivalNotice / transport / estimatedInlandArrivalDate"),
+                Map.entry(
+                    "ArrivalNoticeNotification / label",
+                    "ArrivalNoticeNotification / versionLabel"))),
         Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));

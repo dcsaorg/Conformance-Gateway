@@ -34,6 +34,8 @@ Replaced query parameter `includeCharges` with `removeCharges`, also adjusting i
 
 Split `label` into `typeLabel` and `versionLabel` and clarified versioning. (SD-2319)
 
+Added response feedback and error messages. (SD-2310)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

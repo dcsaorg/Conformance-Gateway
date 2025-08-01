@@ -143,8 +143,6 @@ for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.
 This is a high-level label with business semantics that does not influence the technical versioning
 of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
 which relies on the `issueDateTime` instead.",
-"ArrivalNoticeNotificationsMessage","arrivalNoticeNotifications","ArrivalNoticeNotification list",,,,,"List of Arrival Notice lightweight notifications.",
-ArrivalNoticesMessage,arrivalNotices,"ArrivalNotice list",,,,,"List of arrival notices.",
 CargoGrossVolume,unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
 - `FTQ` (Cubic foot)
 - `MTQ` (Cubic meter)",
@@ -349,6 +347,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 Facility,facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
 - `BIC` (Requires a UN Location Code)
 - `SMDG` (Requires a UN Location Code)",
+FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed
+to a user of the arrival notice publishing organization",
+FeedbackElement,propertyPath,string,,maxLength=1000,,"$.arrivalNotices[2].pickupInformation.location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
+about which the feedback is provided (if applicable)",
+FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity of a `FeedbackElement`
+
+- `ERROR` - Error that fully or partially prevents the correct processing of the request
+- `WARN` - Warning about the request being processed in a potentially unexpected way
+- `INFO` - Informational message about how the request is processed",
 FreeTime,ISOEquipmentCodes,"string list",,maxLength=4,,,"
 Item description:
 Unique code identifying the equipment size and type used to transport commodities.
@@ -381,6 +388,12 @@ Code used to denote the type of free time.
 - `STO` - Storage",
 GeoCoordinate,latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 GeoCoordinate,longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+GetArrivalNoticesError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why the request could not be processed.
+
+At least one feedback element of severity `ERROR` is expected.
+Lower severity feedback elements may also be included.",
+"GetArrivalNoticesResponse",arrivalNotices,"ArrivalNotice list",,,,,"The list of arrival notices matching the filter specified by the request query parameters",
+"GetArrivalNoticesResponse",feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
 GrossWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)",
@@ -497,6 +510,21 @@ PickupInformation,pickupLocation,Location,,,,,"The equipment handling facility w
 PickupInformation,pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
 A trucker picking up a container must present the correct pickup number.
 If the pickup number is incorrect, the trucker will have his pickup request denied.",
+"PostArrivalNoticeNotificationsRequest","arrivalNoticeNotifications","ArrivalNoticeNotification list",,,,,"List of Arrival Notice lightweight notifications.",
+PostArrivalNoticesError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
+
+At least one feedback element of severity `ERROR` is expected.
+Lower severity feedback elements may also be included.
+
+When sent in response to a request that contains an array of arrival notice (notification) objects,
+the order of the `feedbackElements` is not related to the list of request objects.
+Instead, the relevant request object is indicated by the `jsonPath` of each `FeedbackElement`.",
+"PostArrivalNoticesRequest",arrivalNotices,"ArrivalNotice list",,,,,"List of arrival notices.",
+"PostArrivalNoticesResponse",feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
+
+There can be zero, one or more feedback elements per arrival notice (notification) in the request.
+The order of `feedbackElements` is not related to the order of arrival notice (notification) objects in the request.
+Instead, the relevant request object is indicated by the `jsonPath` of each `FeedbackElement`.",
 Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)

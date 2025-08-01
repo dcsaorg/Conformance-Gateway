@@ -253,7 +253,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ArrivalNoticesMessage"
+                $ref: "#/components/schemas/GetArrivalNoticesResponse"
+        default:
+          description: "Error response"
+          headers:
+            API-Version:
+              $ref: "#/components/headers/API-Version"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetArrivalNoticesError"
     post:
       tags:
       - "AN Subscriber Endpoints"
@@ -262,20 +271,33 @@ paths:
         Used by an arrival notice publisher to send arrival notices to a registered subscriber.
 
         The subscription mechanism and the management of subscriber profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
-      operationId: "put-arrival-notices"
+      operationId: "post-arrival-notices"
       requestBody:
         description: "List of arrival notices"
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ArrivalNoticesMessage"
+              $ref: "#/components/schemas/PostArrivalNoticesRequest"
         required: true
       responses:
-        "204":
-          description: "Empty response"
+        "200":
+          description: "Arrival notices response"
           headers:
             API-Version:
               $ref: "#/components/headers/API-Version"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostArrivalNoticesResponse"
+        default:
+          description: "Error response"
+          headers:
+            API-Version:
+              $ref: "#/components/headers/API-Version"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostArrivalNoticesError"
   /arrival-notice-notifications:
     post:
       tags:
@@ -285,20 +307,33 @@ paths:
         Used by an arrival notice publisher to send lightweight arrival notice notifications to a registered subscriber.
 
         The subscription mechanism and the management of subscriber profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
-      operationId: "put-arrival-notice-notifications"
+      operationId: "post-arrival-notice-notifications"
       requestBody:
         description: "List of arrival notice lightweight notifications"
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ArrivalNoticeNotificationsMessage"
+              $ref: "#/components/schemas/PostArrivalNoticeNotificationsRequest"
         required: true
       responses:
-        "204":
-          description: "Empty response"
+        "200":
+          description: "Arrival notice notifications response"
           headers:
             API-Version:
               $ref: "#/components/headers/API-Version"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostArrivalNoticesResponse"
+        default:
+          description: "Error response"
+          headers:
+            API-Version:
+              $ref: "#/components/headers/API-Version"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostArrivalNoticesError"
 components:
   schemas:
     ActiveReeferSettings:
@@ -706,24 +741,6 @@ components:
           example: "2025-01-23"
       description: |
         Lightweight notification that can be sent when a new or updated Arrival Notice is available
-    ArrivalNoticeNotificationsMessage:
-      type: "object"
-      properties:
-        arrivalNoticeNotifications:
-          type: "array"
-          description: "List of Arrival Notice lightweight notifications."
-          items:
-            $ref: "#/components/schemas/ArrivalNoticeNotification"
-      description: "API message containing a list of Arrival Notice lightweight notifications."
-    ArrivalNoticesMessage:
-      type: "object"
-      properties:
-        arrivalNotices:
-          type: "array"
-          description: "List of arrival notices."
-          items:
-            $ref: "#/components/schemas/ArrivalNotice"
-      description: "API message containing a list of Arrival Notices."
     CargoGrossVolume:
       type: "object"
       properties:
@@ -1403,6 +1420,35 @@ components:
             - `SMDG` (Requires a UN Location Code)
           example: "SMDG"
       description: "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC)."
+    FeedbackElement:
+      type: "object"
+      properties:
+        severity:
+          maxLength: 50
+          type: "string"
+          description: |-
+            Code denoting the severity of a `FeedbackElement`
+
+            - `ERROR` - Error that fully or partially prevents the correct processing of the request
+            - `WARN` - Warning about the request being processed in a potentially unexpected way
+            - `INFO` - Informational message about how the request is processed
+          example: "ERROR"
+        message:
+          maxLength: 5000
+          type: "string"
+          description: |
+            Human readable feedback message that can be programmatically relayed
+            to a user of the arrival notice publishing organization
+          example: "The facility SMDG code does not match the location UN/LOCODE"
+        propertyPath:
+          maxLength: 1000
+          type: "string"
+          description: |
+            [JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
+            about which the feedback is provided (if applicable)
+          example: "$.arrivalNotices[2].pickupInformation.location"
+      description: |
+        An individual piece of feedback (potentially out of several) providing information on how an API request is processed
     FreeTime:
       type: "object"
       properties:
@@ -1481,6 +1527,37 @@ components:
             Geographic coordinate that specifies the east–west position of a point on the Earth's surface.
           example: "2.294492036"
       description: "An object used to express a location using `latitude` and `longitude`."
+    GetArrivalNoticesError:
+      type: "object"
+      properties:
+        feedbackElements:
+          type: "array"
+          description: |
+            Feedback elements indicating why the request could not be processed.
+
+            At least one feedback element of severity `ERROR` is expected.
+            Lower severity feedback elements may also be included.
+          items:
+            $ref: "#/components/schemas/FeedbackElement"
+      description: |
+        Error API response to a `GET ArrivalNotices` request
+    GetArrivalNoticesResponse:
+      type: "object"
+      properties:
+        arrivalNotices:
+          type: "array"
+          description: |
+            The list of arrival notices matching the filter specified by the request query parameters
+          items:
+            $ref: "#/components/schemas/ArrivalNotice"
+        feedbackElements:
+          type: "array"
+          description: |
+            Optional list of feedback elements indicating how the request was processed
+          items:
+            $ref: "#/components/schemas/FeedbackElement"
+      description: |
+        API response to a `GET ArrivalNotices` request
     GrossWeight:
       type: "object"
       properties:
@@ -1880,6 +1957,61 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
       description: "Pickup information"
+    PostArrivalNoticeNotificationsRequest:
+      type: "object"
+      properties:
+        arrivalNoticeNotifications:
+          type: "array"
+          description: "List of Arrival Notice lightweight notifications."
+          items:
+            $ref: "#/components/schemas/ArrivalNoticeNotification"
+      description: "API message containing a list of Arrival Notice lightweight notifications."
+    PostArrivalNoticesError:
+      type: "object"
+      properties:
+        feedbackElements:
+          type: "array"
+          description: |
+            Feedback elements indicating why request could not be processed.
+
+            At least one feedback element of severity `ERROR` is expected.
+            Lower severity feedback elements may also be included.
+
+            When sent in response to a request that contains an array of arrival notice (notification) objects,
+            the order of the `feedbackElements` is not related to the list of request objects.
+            Instead, the relevant request object is indicated by the `jsonPath` of each `FeedbackElement`.
+          items:
+            $ref: "#/components/schemas/FeedbackElement"
+      description: |
+        Error API response to a `POST ArrivalNotices` or `POST ArrivalNoticeNotifications` request.
+
+        If some of the arrival notice (notification) objects in the request were successfully processed,
+        a regular `PostArrivalNoticesResponse` is expected to be used instead,
+        with `feedbackElements` indicating which objects were not processed and why.
+    PostArrivalNoticesRequest:
+      type: "object"
+      properties:
+        arrivalNotices:
+          type: "array"
+          description: "List of arrival notices."
+          items:
+            $ref: "#/components/schemas/ArrivalNotice"
+      description: "API message containing a list of Arrival Notices."
+    PostArrivalNoticesResponse:
+      type: "object"
+      properties:
+        feedbackElements:
+          type: "array"
+          description: |
+            Optional list of feedback elements indicating how the request was processed.
+
+            There can be zero, one or more feedback elements per arrival notice (notification) in the request.
+            The order of `feedbackElements` is not related to the order of arrival notice (notification) objects in the request.
+            Instead, the relevant request object is indicated by the `jsonPath` of each `FeedbackElement`.
+          items:
+            $ref: "#/components/schemas/FeedbackElement"
+      description: |
+        API response to a `POST ArrivalNotices` or `POST ArrivalNoticeNotifications` request
     Reference:
       type: "object"
       properties:

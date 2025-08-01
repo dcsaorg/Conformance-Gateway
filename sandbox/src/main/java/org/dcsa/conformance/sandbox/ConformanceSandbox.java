@@ -53,8 +53,8 @@ public class ConformanceSandbox {
 
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
     AdoptionStandard.INSTANCE,
-    BookingStandard.INSTANCE,
     AnStandard.INSTANCE,
+    BookingStandard.INSTANCE,
     CsStandard.INSTANCE,
     EblStandard.INSTANCE,
     EblIssuanceStandard.INSTANCE,

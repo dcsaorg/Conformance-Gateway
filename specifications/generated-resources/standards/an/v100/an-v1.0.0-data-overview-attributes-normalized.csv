@@ -57,16 +57,18 @@ Note that while parties can generally appear in any order, including `N1` (First
 and `N2` (Second Notify Party), the order of parties of type `NI` (Other Notify Party) is relevant,
 as it determines which of these parties is considered the third, fourth, fifth (and so on) notify party.",
 ArrivalNotice,freeTimes,"FreeTime list",,,,,"List of free time conditions applicable to this shipment at destination",
+ArrivalNotice,freightPaymentStatus,string,,maxLength=50,,FULLY_PAID,"Payment status of the freight charges.
+
+- `ZERO_PAID` - Zero Paid
+- `PARTIALLY_PAID` - Partially Paid
+- `FULLY_PAID` - Fully Paid
+- `OVERPAID` - Overpaid",
 ArrivalNotice,isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 ArrivalNotice,issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
-ArrivalNotice,label,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version or type of arrival notice,
-for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
-ArrivalNotice,payerCode,string,,maxLength=100,,"Acme Inc.","Name identifying the entity responsible for freight payment.",
 ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
-ArrivalNotice,pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
+ArrivalNotice,pickupInformation,PickupInformation,,,,,"Pickup information",
 ArrivalNotice,references,"Reference list",,,,,"A list of `References`",
-ArrivalNotice,returnInstructions,string,,maxLength=500,,"Please place the container...","Return instructions",
-ArrivalNotice,returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
+ArrivalNotice,returnInformation,ReturnInformation,,,,,"Return information",
 ArrivalNotice,serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 ArrivalNotice,termsAndConditions,string,,maxLength=50000,,,"Carrier terms and conditions for the Arrival Notice.",
 ArrivalNotice,transport,Transport,,,,,"Transport info",
@@ -74,7 +76,31 @@ ArrivalNotice,"transportDocumentReference",string,yes,maxLength=20,,HHL71800000,
 ArrivalNotice,"transportDocumentTypeCode",string,,,,SWB,"Specifies the type of the transport document
 - `BOL` (Bill of Lading)
 - `SWB` (Sea Waybill)",
+ArrivalNotice,typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
+for example ""English, consignee, USD"" or ""No charges, French"".
+
+Each publisher can choose their own criteria by which they categorize arrival notices,
+as well as the format of this property. However, for each arrival notice publisher
+the format must be consistent and predictable, in order to allow receivers
+to programmatically determine whether each received arrival notice overrides
+an earlier version of the arrival notice ""of the same type"" for the same transport document.
+
+An arrival notice (including all its versions) is uniquely identified by the combination
+of the `transportDocumentReference` and this `typeLabel`. Each version of an arrival notice
+is uniquely identified by the combination of the `transportDocumentReference`, this `typeLabel`
+and the `issueDateTime`.
+
+Among the versions of arrival notices of the same type issued for the same transport document,
+a version with a newer `issueDateTime` overrides a version with an older `issueDateTime`,
+regardless of the `versionLabel` (which is a high-level label with business semantics
+and may or may not change between timestamped versions).",
 ArrivalNotice,"utilizedTransportEquipments","UtilizedTransportEquipment list",,,,,"The equipments being used.",
+ArrivalNotice,versionLabel,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version of an arrival notice of a certain type,
+for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.
+
+This is a high-level label with business semantics that does not influence the technical versioning
+of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
+which relies on the `issueDateTime` instead.",
 "ArrivalNoticeNotification",equipmentReferences,"string list",,maxLength=11,,,"References of the equipments for which this arrival notice was created
 Item description:
 The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -89,12 +115,34 @@ from SMDG.
 "ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at place of delivery",
 "ArrivalNoticeNotification",etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
 "ArrivalNoticeNotification",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
-"ArrivalNoticeNotification",label,string,,,,Warning,"Free text used to indicate a certain version or type of arrival notice,
-for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.",
 "ArrivalNoticeNotification",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases",
 "ArrivalNoticeNotification",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel",
 "ArrivalNoticeNotification","transportDocumentReference",string,yes,,,TDR1234,"The reference of the transport document for which this arrival notice was created",
+"ArrivalNoticeNotification",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
+for example ""English, consignee, USD"" or ""No charges, French"".
+
+Each publisher can choose their own criteria by which they categorize arrival notices,
+as well as the format of this property. However, for each arrival notice publisher
+the format must be consistent and predictable, in order to allow receivers
+to programmatically determine whether each received arrival notice overrides
+an earlier version of the arrival notice ""of the same type"" for the same transport document.
+
+An arrival notice (including all its versions) is uniquely identified by the combination
+of the `transportDocumentReference` and this `typeLabel`. Each version of an arrival notice
+is uniquely identified by the combination of the `transportDocumentReference`, this `typeLabel`
+and the `issueDateTime`.
+
+Among the versions of arrival notices of the same type issued for the same transport document,
+a version with a newer `issueDateTime` overrides a version with an older `issueDateTime`,
+regardless of the `versionLabel` (which is a high-level label with business semantics
+and may or may not change between timestamped versions).",
+"ArrivalNoticeNotification",versionLabel,string,,maxLength=1000,,Warning,"Free text used to indicate a certain version of an arrival notice of a certain type,
+for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.
+
+This is a high-level label with business semantics that does not influence the technical versioning
+of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
+which relies on the `issueDateTime` instead.",
 "ArrivalNoticeNotificationsMessage","arrivalNoticeNotifications","ArrivalNoticeNotification list",,,,,"List of Arrival Notice lightweight notifications.",
 ArrivalNoticesMessage,arrivalNotices,"ArrivalNotice list",,,,,"List of arrival notices.",
 CargoGrossVolume,unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
@@ -118,6 +166,8 @@ CargoItem,exportLicense,ExportLicense,,,,,"Export license applicable to this car
 CargoItem,importLicense,ImportLicense,,,,,"Import license applicable to this cargo item.",
 CargoItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list of `National Commodity Codes` that apply to this `cargoItem`",
 CargoItem,outerPackaging,OuterPackaging,,,,,"Packaging information for this cargo item.",
+CargoItem,position,integer,,,,12,"The order in which the carrier submitted the pre-announcement to the customs authority (which may vary by country) is,
+in some cases, the same order the consignee must follow for the final customs release.",
 CargoNetVolume,unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
 - `FTQ` (Cubic foot)
 - `MTQ` (Cubic meter)",
@@ -169,7 +219,6 @@ CustomsClearance,"customsImportDeclarationProcedure",string,,maxLength=1000,,,"I
 CustomsClearance,"immediateTransportationEntry","ImmediateTransportationEntry",,,,,"An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
 that allows imported cargo to be moved from the first port of arrival in the U.S.
 to another port or bonded facility without being physically cleared by CBP at the first port.",
-CustomsClearance,internalCode,string,,maxLength=5,,FRMRS,"Port code used in the Carrier’s internal system to match the location",
 CustomsClearance,manifestReferenceNumber,string,,maxLength=35,,a1234,"Manifest reference number for manifest declaration and customs clearance in Korea.",
 CustomsClearance,masterSequenceNumber,string,,maxLength=35,,x12345,"A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of
 a particular vessel. Customers use this Master Sequence Number (MSN) as a reference when declaring all related House B/Ls.",
@@ -254,7 +303,7 @@ DocumentParty,partyFunction,string,,maxLength=3,,N1,"Specifies the role of the p
 
 - `OS` (Shipper)
 - `CN` (Consignee)
-- `ZZZ` (Endorsee)
+- `END` (Endorsee)
 - `RW` (Issuing Party)
 - `CG` (Carrier's Agent at Destination)
 - `N1` (First Notify Party)
@@ -300,12 +349,26 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 Facility,facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
 - `BIC` (Requires a UN Location Code)
 - `SMDG` (Requires a UN Location Code)",
-FreeTime,ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
+FreeTime,ISOEquipmentCodes,"string list",,maxLength=4,,,"
+Item description:
+Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
-following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
+following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
+",
 FreeTime,calculationBasis,string,,maxLength=1000,,"Calculated as...","Description of the conditions under which this free time item applies.
 It can include references to the carrier website or individual charges as per service contract/agreement.",
 FreeTime,duration,integer,,,,123,"The duration expressed in `timeUnit`s for which this free time item applies.",
+FreeTime,equipmentReferences,"string list",,maxLength=11,,,"References of the equipments for which this free time applies
+Item description:
+The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+If a container does not comply with ISO 6346, it is suggested to follow
+[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+from SMDG.
+",
 FreeTime,timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which free time is expressed
 - `CD` - Calendar days
 - `WD` - Working days
@@ -430,6 +493,10 @@ PaymentRemittance,bankName,string,,maxLength=100,,"Example Bank","Name of the ca
 PaymentRemittance,beneficiary,string,,maxLength=100,,"Example Carrier","Legal name of the payment recipient (carrier)",
 PaymentRemittance,remittanceEmail,string,,maxLength=100,,carrier@example.com,"Email address where proof of payment remittance should be sent",
 PaymentRemittance,swiftCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
+PickupInformation,pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
+PickupInformation,pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
+A trucker picking up a container must present the correct pickup number.
+If the pickup number is incorrect, the trucker will have his pickup request denied.",
 Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
@@ -443,6 +510,9 @@ ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes 
 ReferenceConsignmentItem,values,"string list",,maxLength=35,,,"List of `referenceValues` for a given `referenceType`.
 Item description:
 The value of the reference.",
+ReturnInformation,returnInstructions,string,,maxLength=5000,,"Please place the container...","Return instructions",
+ReturnInformation,returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
+ReturnInformation,turnInReference,string,,,,HLCSTD45,"Code or reference required when returning equipment to the depot.",
 Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
 - `CAR` (Carrier)
@@ -461,9 +531,9 @@ to the shipping line. This can refer either to the Place of Receipt or the Port 
 Transport,dischargeLocation,Location,,,,,"Location where the equipment is discharged from the mother vessel arriving at the destination country.",
 Transport,"estimatedGeneralOrderDateTime","string(date-time)",,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
+Transport,"estimatedInlandArrivalDate","string(date)",,,,2025-01-23,"The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 Transport,etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
 Transport,etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
-Transport,inlandArrivalDate,"string(date)",,,,2025-01-23,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 Transport,loadLocation,Location,,,,,"Location where the equipment is loaded on the mother vessel arriving at the destination country.",
 Transport,onBoardDate,"string(date)",,,,2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
 Transport,onCarriageBy,string,,maxLength=50,,RAIL,"Code indicating the mode of transport used for the movement of containers
@@ -487,7 +557,9 @@ Transport,vesselVoyages,"VesselVoyage list",,maxItems=3,,,"Details of the POD, P
 "UtilizedTransportEquipment",equipment,Equipment,,,,,"The container or transport equipment used.",
 "UtilizedTransportEquipment",isNonOperatingReefer,boolean,,,,false,"If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.",
 "UtilizedTransportEquipment",isShipperOwned,boolean,,,,true,"Indicates whether the container is shipper owned (SOC).",
+"UtilizedTransportEquipment",pickupInformation,PickupInformation,,,,,"Pickup information",
 "UtilizedTransportEquipment",references,"Reference list",,,,,"A list of `References`",
+"UtilizedTransportEquipment",returnInformation,ReturnInformation,,,,,"Return information",
 "UtilizedTransportEquipment",seals,"Seal list",,,,,"A list of `Seals`",
 "UtilizedTransportEquipment",shippingMarks,"string list",,"maxItems=50
 maxLength=35",,,"A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
@@ -507,6 +579,10 @@ VesselVoyage,typeCode,string,,,,POD,"Code representing the type of a vessel voya
 VesselVoyage,universalVoyageReference,string,,maxLength=5,,2301W,"Universal identifier of a voyage:
 * the import voyage (if `typeCode` is `POD` or `DC`)
 * the export voyage (if `typeCode` is `POL`)",
+VesselVoyage,vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel
+and is assigned by the International Telecommunication Union (ITU).
+It consists of a three-letter alphanumeric prefix that indicates nationality,
+followed by one to four characters to identify the individual vessel.",
 VesselVoyage,vesselFlag,string,,maxLength=2,,NL,"The flag of the nation whose laws the vessel is registered under.
 This is indicated by the 2 characters for the country code using
 [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",

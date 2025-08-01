@@ -72,7 +72,7 @@ Common suffixes
 Other conventions:
 * array / collection names are plural
 * date properties use the `YYYY-MM-DD` format
-* datetime and time properties use the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format
+* date-time properties use [the RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
 * regular expressions match the ECMA262
 * a common (container) shipping industry or legal term is typically preferred even when not meeting these criteria
 

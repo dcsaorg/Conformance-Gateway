@@ -51,9 +51,9 @@ The expected date of arrival of the mother vessel arriving at the destination co
   @Schema(
       description =
 """
-The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
 """)
-  private FormattedDate inlandArrivalDate;
+  private FormattedDate estimatedInlandArrivalDate;
 
   @Schema(
       description =

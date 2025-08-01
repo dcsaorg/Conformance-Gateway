@@ -63,8 +63,10 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.NetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.an.v100.model.PaymentRemittance;
+import org.dcsa.conformance.specifications.standards.an.v100.model.PickupInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReferenceConsignmentItem;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ReturnInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Seal;
 import org.dcsa.conformance.specifications.standards.an.v100.model.TareWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.TaxLegalReference;
@@ -167,8 +169,10 @@ public class ANStandardSpecification extends StandardSpecification {
         OuterPackaging.class,
         PartyContactDetail.class,
         PaymentRemittance.class,
+        PickupInformation.class,
         Reference.class,
         ReferenceConsignmentItem.class,
+        ReturnInformation.class,
         Seal.class,
         TareWeight.class,
         TaxLegalReference.class,

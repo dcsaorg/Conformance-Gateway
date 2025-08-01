@@ -9,12 +9,6 @@ public class CustomsClearance {
 
   @Schema() private Location customsClearancePoint;
 
-  @Schema(
-      maxLength = 5,
-      example = "FRMRS",
-      description = "Port code used in the Carrier’s internal system to match the location")
-  private String internalCode;
-
   @Schema() private ImmediateTransportationEntry immediateTransportationEntry;
 
   @Schema(

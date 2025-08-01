@@ -83,10 +83,6 @@ paths:
 
         The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `etaAtPortOfDischargeDate` within those ranges.
 
-        ### Filtering by the inclusion of charges
-
-        In combination with the filtering options above, the request can also use the `includeCharges` query parameter to specify whether only the arrival notices with charges or without charges should be returned. By default, if this query parameter is absent, no filtering is requested based on the inclusion of charges.
-
         ### Filtering by region or language
 
         There are no query parameters with which to request the filtering of arrival notices based on language or any other content or format localization for a specific region.
@@ -198,14 +194,6 @@ paths:
           type: "string"
           format: "date"
         example: "2025-01-23"
-      - name: "includeCharges"
-        in: "query"
-        description: |
-          Optional flag indicating whether only arrival notices with charges (`true`) or without charges (`false`) are requested.
-          If left unspecified, the arrival notices both with and without charges are requested.
-        schema:
-          type: "boolean"
-        example: true
       - name: "includeVisualization"
         in: "query"
         description: |
@@ -219,6 +207,24 @@ paths:
 
           However, to support a future transition to fully automated processing of arrival notices by receivers,
           the publisher should **not** include the PDF visualization if this parameter is set to `false`.
+        schema:
+          type: "boolean"
+        example: true
+      - name: "removeCharges"
+        in: "query"
+        description: |
+          Optional flag indicating whether the publisher should remove the charges from the PDF visualization
+          of every returned arrival notice, and for consistency, also from the structured response data.
+
+          This flag allows arrival notice receivers to retrieve, for the purpose of forwarding to third parties,
+          versions of the arrival notice PDF visualizations in which the charges are removed,
+          if they would be normally received with charges included based on the role of the arrival notice recipient.
+
+          This flag is **not** expected to perform any filtering on the list of arrival notices included in the response.
+          However, if the removal of charges (from the arrival notices that have them) results in a list of arrival notices
+          in which some become exact duplicates, publishers may choose to remove duplicates from the response.
+
+          The default value is `false`, which leaves unchanged the presence or absence of charges in each returned arrival notice.
         schema:
           type: "boolean"
         example: true
@@ -415,12 +421,39 @@ components:
           description: "The date and time when the Arrival Notice was issued."
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
-        label:
+        typeLabel:
           maxLength: 1000
           type: "string"
           description: |
-            Free text used to indicate a certain version or type of arrival notice,
+            Free-format identifier used to specify a certain type of arrival notice,
+            for example "English, consignee, USD" or "No charges, French".
+
+            Each publisher can choose their own criteria by which they categorize arrival notices,
+            as well as the format of this property. However, for each arrival notice publisher
+            the format must be consistent and predictable, in order to allow receivers
+            to programmatically determine whether each received arrival notice overrides
+            an earlier version of the arrival notice "of the same type" for the same transport document.
+
+            An arrival notice (including all its versions) is uniquely identified by the combination
+            of the `transportDocumentReference` and this `typeLabel`. Each version of an arrival notice
+            is uniquely identified by the combination of the `transportDocumentReference`, this `typeLabel`
+            and the `issueDateTime`.
+
+            Among the versions of arrival notices of the same type issued for the same transport document,
+            a version with a newer `issueDateTime` overrides a version with an older `issueDateTime`,
+            regardless of the `versionLabel` (which is a high-level label with business semantics
+            and may or may not change between timestamped versions).
+          example: "English, consignee, USD"
+        versionLabel:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Free text used to indicate a certain version of an arrival notice of a certain type,
             for example "Warning", "Updated", "Second", "Third" etc.
+
+            This is a high-level label with business semantics that does not influence the technical versioning
+            of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
+            which relies on the `issueDateTime` instead.
           example: "Warning"
         carrierCode:
           maxLength: 4
@@ -449,21 +482,14 @@ components:
             The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
           items:
             $ref: "#/components/schemas/PartyContactDetail"
-        pickupLocation:
-          description: |
-            The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.
+        pickupInformation:
+          description: "Pickup information"
           allOf:
-          - $ref: "#/components/schemas/Location"
-        returnLocation:
-          description: |
-            The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.
+          - $ref: "#/components/schemas/PickupInformation"
+        returnInformation:
+          description: "Return information"
           allOf:
-          - $ref: "#/components/schemas/Location"
-        returnInstructions:
-          maxLength: 500
-          type: "string"
-          description: "Return instructions"
-          example: "Please place the container..."
+          - $ref: "#/components/schemas/ReturnInformation"
         customsClearance:
           description: "Customs clearance information"
           allOf:
@@ -557,17 +583,22 @@ components:
           description: "A list of `Charges`"
           items:
             $ref: "#/components/schemas/Charge"
-        payerCode:
-          maxLength: 100
-          type: "string"
-          description: |
-            Name identifying the entity responsible for freight payment.
-          example: "Acme Inc."
         paymentRemittance:
           description: |
             Bank account information provided by the carrier for customers to make payments of the outstanding charges
           allOf:
           - $ref: "#/components/schemas/PaymentRemittance"
+        freightPaymentStatus:
+          maxLength: 50
+          type: "string"
+          description: |-
+            Payment status of the freight charges.
+
+            - `ZERO_PAID` - Zero Paid
+            - `PARTIALLY_PAID` - Partially Paid
+            - `FULLY_PAID` - Fully Paid
+            - `OVERPAID` - Overpaid
+          example: "FULLY_PAID"
         utilizedTransportEquipments:
           type: "array"
           description: "The equipments being used."
@@ -594,11 +625,39 @@ components:
           description: "The date and time when the Arrival Notice was issued."
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
-        label:
+        typeLabel:
+          maxLength: 1000
           type: "string"
           description: |
-            Free text used to indicate a certain version or type of arrival notice,
+            Free-format identifier used to specify a certain type of arrival notice,
+            for example "English, consignee, USD" or "No charges, French".
+
+            Each publisher can choose their own criteria by which they categorize arrival notices,
+            as well as the format of this property. However, for each arrival notice publisher
+            the format must be consistent and predictable, in order to allow receivers
+            to programmatically determine whether each received arrival notice overrides
+            an earlier version of the arrival notice "of the same type" for the same transport document.
+
+            An arrival notice (including all its versions) is uniquely identified by the combination
+            of the `transportDocumentReference` and this `typeLabel`. Each version of an arrival notice
+            is uniquely identified by the combination of the `transportDocumentReference`, this `typeLabel`
+            and the `issueDateTime`.
+
+            Among the versions of arrival notices of the same type issued for the same transport document,
+            a version with a newer `issueDateTime` overrides a version with an older `issueDateTime`,
+            regardless of the `versionLabel` (which is a high-level label with business semantics
+            and may or may not change between timestamped versions).
+          example: "English, consignee, USD"
+        versionLabel:
+          maxLength: 1000
+          type: "string"
+          description: |
+            Free text used to indicate a certain version of an arrival notice of a certain type,
             for example "Warning", "Updated", "Second", "Third" etc.
+
+            This is a high-level label with business semantics that does not influence the technical versioning
+            of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
+            which relies on the `issueDateTime` instead.
           example: "Warning"
         transportDocumentReference:
           type: "string"
@@ -749,6 +808,13 @@ components:
           description: "A list of `Customs references`"
           items:
             $ref: "#/components/schemas/CustomsReference"
+        position:
+          type: "integer"
+          description: |
+            The order in which the carrier submitted the pre-announcement to the customs authority (which may vary by country) is,
+            in some cases, the same order the consignee must follow for the final customs release.
+          format: "int32"
+          example: 12
       description: "A cargoItem is the smallest unit used in stuffing. It cannot be split across containers."
     CargoNetVolume:
       type: "object"
@@ -917,11 +983,6 @@ components:
           description: "Location information"
           allOf:
           - $ref: "#/components/schemas/Location"
-        internalCode:
-          maxLength: 5
-          type: "string"
-          description: "Port code used in the Carrier’s internal system to match the location"
-          example: "FRMRS"
         immediateTransportationEntry:
           description: |
             An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
@@ -1177,7 +1238,7 @@ components:
 
             - `OS` (Shipper)
             - `CN` (Consignee)
-            - `ZZZ` (Endorsee)
+            - `END` (Endorsee)
             - `RW` (Issuing Party)
             - `CG` (Carrier's Agent at Destination)
             - `N1` (First Notify Party)
@@ -1356,14 +1417,32 @@ components:
               - `DET` - Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')
               - `STO` - Storage
             example: "DEM"
-        ISOEquipmentCode:
-          maxLength: 4
-          type: "string"
-          description: |
-            Unique code identifying the equipment size and type used to transport commodities.
-            The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
-            following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
-          example: "22GP"
+        ISOEquipmentCodes:
+          type: "array"
+          items:
+            maxLength: 4
+            type: "string"
+            description: |
+              Unique code identifying the equipment size and type used to transport commodities.
+              The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+              following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
+            example: "22GP"
+        equipmentReferences:
+          type: "array"
+          description: "References of the equipments for which this free time applies"
+          items:
+            maxLength: 11
+            type: "string"
+            description: |
+              The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+              According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+              (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+              If a container does not comply with ISO 6346, it is suggested to follow
+              [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+              from SMDG.
+            example: "APZU4812090"
         duration:
           type: "integer"
           description: "The duration expressed in `timeUnit`s for which this free time item applies."
@@ -1785,6 +1864,22 @@ components:
           example: "carrier@example.com"
       description: |
         Bank account information provided by the carrier for customers to make payments of the outstanding charges
+    PickupInformation:
+      type: "object"
+      properties:
+        pickupNumber:
+          type: "string"
+          description: |
+            A pickup number is a generated number assigned to each import container individually.
+            A trucker picking up a container must present the correct pickup number.
+            If the pickup number is incorrect, the trucker will have his pickup request denied.
+          example: "123456"
+        pickupLocation:
+          description: |
+            The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.
+          allOf:
+          - $ref: "#/components/schemas/Location"
+      description: "Pickup information"
     Reference:
       type: "object"
       properties:
@@ -1826,6 +1921,24 @@ components:
             description: "The value of the reference."
             example: "HHL00103004"
       description: "References for a consignment item, used by shippers or freight forwarders and shared in events or printed on documents."
+    ReturnInformation:
+      type: "object"
+      properties:
+        turnInReference:
+          type: "string"
+          description: "Code or reference required when returning equipment to the depot."
+          example: "HLCSTD45"
+        returnLocation:
+          description: |
+            The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        returnInstructions:
+          maxLength: 5000
+          type: "string"
+          description: "Return instructions"
+          example: "Please place the container..."
+      description: "Return information"
     Seal:
       type: "object"
       properties:
@@ -1920,10 +2033,10 @@ components:
           description: "The expected date of arrival of the shipment at Place of Delivery."
           format: "date"
           example: "2025-01-23"
-        inlandArrivalDate:
+        estimatedInlandArrivalDate:
           type: "string"
           description: |
-            The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+            The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
           format: "date"
           example: "2025-01-23"
         estimatedGeneralOrderDateTime:
@@ -2031,6 +2144,14 @@ components:
           description: "A list of `Customs references`"
           items:
             $ref: "#/components/schemas/CustomsReference"
+        pickupInformation:
+          description: "Pickup information"
+          allOf:
+          - $ref: "#/components/schemas/PickupInformation"
+        returnInformation:
+          description: "Return information"
+          allOf:
+          - $ref: "#/components/schemas/ReturnInformation"
       description: "Specifies the container (`equipment`), total `weight`, `volume`, possible `ActiveReeferSettings`, `seals` and `references`."
     VesselVoyage:
       type: "object"
@@ -2065,6 +2186,15 @@ components:
             The reference is the International Maritime Organisation (IMO) number,
             also sometimes known as the Lloyd's register code.
           example: "12345678"
+        vesselCallSign:
+          maxLength: 10
+          type: "string"
+          description: |
+            A unique alphanumeric identity that belongs to the vessel
+            and is assigned by the International Telecommunication Union (ITU).
+            It consists of a three-letter alphanumeric prefix that indicates nationality,
+            followed by one to four characters to identify the individual vessel.
+          example: "NCVV"
         carrierVoyageNumber:
           maxLength: 50
           type: "string"

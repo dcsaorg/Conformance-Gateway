@@ -111,14 +111,24 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .example("2025-01-23")
           .schema(new Schema<String>().type("string").format("date"));
 
-  private final Parameter includeCharges =
+  private final Parameter removeCharges =
       new Parameter()
           .in("query")
-          .name("includeCharges")
+          .name("removeCharges")
           .description(
 """
-Optional flag indicating whether only arrival notices with charges (`true`) or without charges (`false`) are requested.
-If left unspecified, the arrival notices both with and without charges are requested.
+Optional flag indicating whether the publisher should remove the charges from the PDF visualization
+of every returned arrival notice, and for consistency, also from the structured response data.
+
+This flag allows arrival notice receivers to retrieve, for the purpose of forwarding to third parties,
+versions of the arrival notice PDF visualizations in which the charges are removed,
+if they would be normally received with charges included based on the role of the arrival notice recipient.
+
+This flag is **not** expected to perform any filtering on the list of arrival notices included in the response.
+However, if the removal of charges (from the arrival notices that have them) results in a list of arrival notices
+in which some become exact duplicates, publishers may choose to remove duplicates from the response.
+
+The default value is `false`, which leaves unchanged the presence or absence of charges in each returned arrival notice.
 """)
           .example(true)
           .schema(new Schema<Boolean>().type("boolean"));
@@ -174,8 +184,8 @@ the publisher should **not** include the PDF visualization if this parameter is 
         universalServiceReference,
         minEtaAtPortOfDischargeDate,
         maxEtaAtPortOfDischargeDate,
-        includeCharges,
         includeVisualization,
+        removeCharges,
         limit,
         cursor);
   }

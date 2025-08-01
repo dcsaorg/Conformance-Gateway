@@ -25,13 +25,9 @@ the first mother vessel arriving at the destination country.
 """)
 public class VesselVoyage {
 
-  @Schema()
-  private VesselVoyageTypeCode typeCode;
+  @Schema() private VesselVoyageTypeCode typeCode;
 
-  @Schema(
-      maxLength = 50,
-      example = "King of the Seas",
-      description = "Vessel name")
+  @Schema(maxLength = 50, example = "King of the Seas", description = "Vessel name")
   private String vesselName;
 
   @Schema(
@@ -44,6 +40,18 @@ This is indicated by the 2 characters for the country code using
   private CountryCode vesselFlag;
 
   @Schema() private VesselIMONumber vesselIMONumber;
+
+  @Schema(
+      maxLength = 10,
+      example = "NCVV",
+      description =
+"""
+A unique alphanumeric identity that belongs to the vessel
+and is assigned by the International Telecommunication Union (ITU).
+It consists of a three-letter alphanumeric prefix that indicates nationality,
+followed by one to four characters to identify the individual vessel.
+""")
+  private String vesselCallSign;
 
   @Schema(
       maxLength = 50,
@@ -66,9 +74,9 @@ Universal identifier of a voyage:
   private UniversalVoyageReference universalVoyageReference;
 
   @Schema(
-    maxLength = 100,
-    example = "CRN1234",
-    description =
+      maxLength = 100,
+      example = "CRN1234",
+      description =
 """
 A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
 It can be used for customs clearance purposes in specific countries (e.g. NL, UK).

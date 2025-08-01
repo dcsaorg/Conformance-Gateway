@@ -2,6 +2,7 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
@@ -15,8 +16,11 @@ public class FreeTime {
   @Schema(description = "One or more types applicable to this free time condition.")
   private List<FreeTimeTypeCode> typeCodes;
 
-  @Schema(name = "ISOEquipmentCode")
-  private IsoEquipmentCode isoEquipmentCode;
+  @Schema(name = "ISOEquipmentCodes")
+  private List<IsoEquipmentCode> isoEquipmentCodes;
+
+  @Schema(description = "References of the equipments for which this free time applies")
+  private List<EquipmentReference> equipmentReferences;
 
   @Schema(
       type = "integer",

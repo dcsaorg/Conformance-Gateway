@@ -122,7 +122,7 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250801-alpha", "AN", "1.0.0-20250718-alpha", 4);
+        "Arrival Notice", "1.0.0-20250815-alpha", "AN", "1.0.0-20250801-alpha", 4);
   }
 
   @Override
@@ -216,7 +216,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/bbe0280b11372c7757e02221af72e06b2d5587fa/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/28a61d04bad06c0a9aa2894f48f0958116cb4f84/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 
@@ -224,31 +224,7 @@ public class ANStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(
-            AttributesHierarchicalSheet.class,
-            Map.ofEntries(
-                Map.entry(
-                    "ArrivalNotice / freeTimes / isoEquipmentCode",
-                    "ArrivalNotice / freeTimes / ISOEquipmentCodes"),
-                Map.entry(
-                    "ArrivalNotice / pickupLocation",
-                    "ArrivalNotice / pickupInformation / pickupLocation"),
-                Map.entry(
-                    "ArrivalNotice / returnInstructions",
-                    "ArrivalNotice / returnInformation / returnInstructions"),
-                Map.entry(
-                    "ArrivalNotice / returnLocation",
-                    "ArrivalNotice / returnInformation / returnLocation"),
-                Map.entry("ArrivalNotice / label", "ArrivalNotice / versionLabel"),
-                Map.entry(
-                    "ArrivalNotice / transport / modeOfTransport",
-                    "ArrivalNotice / transport / onCarriageBy"),
-                Map.entry(
-                    "ArrivalNotice / transport / inlandArrivalDate",
-                    "ArrivalNotice / transport / estimatedInlandArrivalDate"),
-                Map.entry(
-                    "ArrivalNoticeNotification / label",
-                    "ArrivalNoticeNotification / versionLabel"))),
+        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
         Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));

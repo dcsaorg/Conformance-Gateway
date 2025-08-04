@@ -16,8 +16,8 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 
 public enum SupportedStandard {
   ADOPTION(AdoptionStandard.INSTANCE),
-  BOOKING(BookingStandard.INSTANCE),
   ARRIVAL_NOTICE(AnStandard.INSTANCE),
+  BOOKING(BookingStandard.INSTANCE),
   CS(CsStandard.INSTANCE),
   EBL(EblStandard.INSTANCE),
   EBL_ISSUANCE(EblIssuanceStandard.INSTANCE),

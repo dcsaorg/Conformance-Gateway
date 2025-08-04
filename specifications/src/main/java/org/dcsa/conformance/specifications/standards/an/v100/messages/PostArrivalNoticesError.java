@@ -26,7 +26,7 @@ Lower severity feedback elements may also be included.
 
 When sent in response to a request that contains an array of arrival notice (notification) objects,
 the order of the `feedbackElements` is not related to the list of request objects.
-Instead, the relevant request object is indicated by the `jsonPath` of each `FeedbackElement`.
+Instead, the relevant request object is indicated by the `propertyPath` of each `FeedbackElement`.
 """)
   private List<FeedbackElement> feedbackElements;
 }

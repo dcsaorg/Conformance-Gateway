@@ -1980,7 +1980,7 @@ components:
 
             When sent in response to a request that contains an array of arrival notice (notification) objects,
             the order of the `feedbackElements` is not related to the list of request objects.
-            Instead, the relevant request object is indicated by the `jsonPath` of each `FeedbackElement`.
+            Instead, the relevant request object is indicated by the `propertyPath` of each `FeedbackElement`.
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
@@ -2008,7 +2008,7 @@ components:
 
             There can be zero, one or more feedback elements per arrival notice (notification) in the request.
             The order of `feedbackElements` is not related to the order of arrival notice (notification) objects in the request.
-            Instead, the relevant request object is indicated by the `jsonPath` of each `FeedbackElement`.
+            Instead, the relevant request object is indicated by the `propertyPath` of each `FeedbackElement`.
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |

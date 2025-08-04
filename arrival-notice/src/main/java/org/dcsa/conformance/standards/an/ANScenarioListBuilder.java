@@ -58,7 +58,7 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
                 subscriberPartyName,
                 (ANAction) previousAction,
                 scenarioType,
-                componentFactory.getMessageSchemaValidator("ArrivalNoticesMessage")));
+                componentFactory.getMessageSchemaValidator("PostArrivalNoticesRequest")));
   }
 
   private static ANScenarioListBuilder getArrivalNotices() {
@@ -71,7 +71,7 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
                 subscriberPartyName,
                 publisherPartyName,
                 (ANAction) previousAction,
-                componentFactory.getMessageSchemaValidator("ArrivalNoticesMessage")));
+                componentFactory.getMessageSchemaValidator("GetArrivalNoticesResponse")));
   }
 
   private static ANScenarioListBuilder sendArrivalNoticesNotification() {
@@ -84,7 +84,7 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
                 publisherPartyName,
                 subscriberPartyName,
                 (ANAction) previousAction,
-                componentFactory.getMessageSchemaValidator("ArrivalNoticeNotificationsMessage")));
+                componentFactory.getMessageSchemaValidator("PostArrivalNoticeNotificationsRequest")));
   }
 
   private static ANScenarioListBuilder noAction() {

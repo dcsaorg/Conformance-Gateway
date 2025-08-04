@@ -1698,6 +1698,57 @@ components:
           description: "Description of the packaging."
           example: "Woven plastic water resistant Bag"
       description: "Object for inner packaging specification."
+    Leg:
+      type: "object"
+      properties:
+        transportPlanStage:
+          maxLength: 10
+          type: "string"
+          description: |-
+            Code qualifying a specific stage of transport
+            - `PRC` - Pre-Carriage Transport
+            - `MNC` - Main Carriage Transport
+            - `ONC` - On-Carriage Transport
+          example: "MNC"
+        transportPlanStageSequenceNumber:
+          type: "integer"
+          description: "Sequence number of the transport plan stage"
+          format: "int32"
+          example: 5
+        loadLocation:
+          description: "Load location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        dischargeLocation:
+          description: "Discharge location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        plannedDepartureDate:
+          type: "string"
+          description: "Planned departure date"
+          format: "date"
+          example: "2025-01-23"
+        plannedArrivalDate:
+          type: "string"
+          description: "Planned arrival date"
+          format: "date"
+          example: "2025-01-23"
+        modeOfTransport:
+          maxLength: 50
+          type: "string"
+          description: |-
+            The mode of transport as defined by DCSA
+            - `VESSEL` - Vessel
+            - `RAIL` - Rail
+            - `TRUCK` - Truck
+            - `BARGE` - Barge
+            - `MULTIMODAL` - Multimodal
+          example: "VESSEL"
+        vesselVoyage:
+          description: "Vessel and voyage details of a transport leg"
+          allOf:
+          - $ref: "#/components/schemas/VesselVoyage"
+      description: "Details of one transport leg"
     Limits:
       type: "object"
       properties:
@@ -2131,12 +2182,28 @@ components:
     Transport:
       type: "object"
       properties:
-        onBoardDate:
-          type: "string"
+        placeOfReceipt:
           description: |
-            The date when the container was loaded onto the vessel at the port of origin.
-          format: "date"
-          example: "2025-01-23"
+            The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
+            This indicates the point at which the shipping line takes on responsibility for carriage of the container.
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        portOfLoading:
+          description: |
+            The location where the cargo is loaded onto a first sea-going vessel for water transportation.
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        portOfDischarge:
+          description: |
+            The location where the cargo is discharged from the last sea-going vessel.
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        placeOfDelivery:
+          description: |
+            The location where the cargo is handed over to the consignee, or his agent,
+            by the shipping line and where responsibility of the shipping line ceases.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         departureDate:
           type: "string"
           description: |
@@ -2144,16 +2211,10 @@ components:
             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
           format: "date"
           example: "2025-01-23"
-        plannedDepartureDate:
+        onBoardDate:
           type: "string"
           description: |
-            The expected date of departure of the  mother vessel arriving at the destination country.
-          format: "date"
-          example: "2025-01-23"
-        plannedArrivalDate:
-          type: "string"
-          description: |
-            The expected date of arrival of the mother vessel arriving at the destination country.
+            The date when the container was loaded onto the vessel at the port of origin.
           format: "date"
           example: "2025-01-23"
         etaAtPortOfDischargeDate:
@@ -2179,57 +2240,11 @@ components:
             (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
-        loadLocation:
-          description: |
-            Location where the equipment is loaded on the mother vessel arriving at the destination country.
-          allOf:
-          - $ref: "#/components/schemas/Location"
-        dischargeLocation:
-          description: |
-            Location where the equipment is discharged from the mother vessel arriving at the destination country.
-          allOf:
-          - $ref: "#/components/schemas/Location"
-        portOfLoading:
-          description: |
-            The location where the cargo is loaded onto a first sea-going vessel for water transportation.
-          allOf:
-          - $ref: "#/components/schemas/Location"
-        portOfDischarge:
-          description: |
-            The location where the cargo is discharged from the last sea-going vessel.
-          allOf:
-          - $ref: "#/components/schemas/Location"
-        placeOfReceipt:
-          description: |
-            The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
-            This indicates the point at which the shipping line takes on responsibility for carriage of the container.
-          allOf:
-          - $ref: "#/components/schemas/Location"
-        placeOfDelivery:
-          description: |
-            The location where the cargo is handed over to the consignee, or his agent,
-            by the shipping line and where responsibility of the shipping line ceases.
-          allOf:
-          - $ref: "#/components/schemas/Location"
-        onCarriageBy:
-          maxLength: 50
-          type: "string"
-          description: |-
-            Code indicating the mode of transport used for the movement of containers
-            between the Port of Discharge (POD) and the Place of Delivery (PDE).
-
-            - `RAIL` - Rail
-            - `TRUCK` - Truck
-            - `BARGE` - Barge
-            - `MULTIMODAL` - Multimodal
-          example: "RAIL"
-        vesselVoyages:
-          maxItems: 3
+        legs:
           type: "array"
-          description: |
-            Details of the POD, POL or DC vessel voyages
+          description: "The legs of the transport that are relevant in this context"
           items:
-            $ref: "#/components/schemas/VesselVoyage"
+            $ref: "#/components/schemas/Leg"
       description: "Transport info"
     UtilizedTransportEquipment:
       type: "object"
@@ -2289,15 +2304,6 @@ components:
     VesselVoyage:
       type: "object"
       properties:
-        typeCode:
-          type: "string"
-          description: |-
-            Code representing the type of a vessel voyage.
-
-            - `DC` - Destination country
-            - `POD` - Port of destination
-            - `POL` - Port of loading
-          example: "POD"
         vesselName:
           maxLength: 50
           type: "string"
@@ -2328,21 +2334,35 @@ components:
             It consists of a three-letter alphanumeric prefix that indicates nationality,
             followed by one to four characters to identify the individual vessel.
           example: "NCVV"
-        carrierVoyageNumber:
+        carrierServiceCode:
+          maxLength: 11
+          type: "string"
+          description: "The carrier-specific code of the service for which the schedule details are published"
+          example: "FE1"
+        universalServiceReference:
+          maxLength: 8
+          type: "string"
+          description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service"
+          example: "SR12345A"
+        carrierImportVoyageNumber:
           maxLength: 50
           type: "string"
-          description: |
-            Carrier-specific identifier of a voyage:
-            * the import voyage (if `typeCode` is `POD` or `DC`)
-            * the export voyage (if `typeCode` is `POL`)
+          description: "Carrier-specific identifier of the import voyage"
           example: "1234N"
-        universalVoyageReference:
+        universalImportVoyageReference:
           maxLength: 5
           type: "string"
-          description: |
-            Universal identifier of a voyage:
-            * the import voyage (if `typeCode` is `POD` or `DC`)
-            * the export voyage (if `typeCode` is `POL`)
+          description: "Universal identifier of the import voyage"
+          example: "2301W"
+        carrierExportVoyageNumber:
+          maxLength: 50
+          type: "string"
+          description: "Carrier-specific identifier of the export voyage"
+          example: "1234N"
+        universalExportVoyageReference:
+          maxLength: 5
+          type: "string"
+          description: "Universal identifier of the export voyage"
           example: "2301W"
         callReferenceNumber:
           maxLength: 100
@@ -2351,18 +2371,7 @@ components:
             A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
             It can be used for customs clearance purposes in specific countries (e.g. NL, UK).
           example: "CRN1234"
-      description: |
-        Details of a vessel voyage.
-
-        When `typeCode` is `POL` (port of loading), these are the details of
-        the first sea going vessel where the container was initially loaded.
-
-        When `typeCode` is `POD` (port of destination), these are the details of
-        the last sea-going vessel arriving at the Port of Discharge,
-        which can be either a feeder or the mother vessel.
-
-        When `typeCode` is `DC` (destination country), these are the details of
-        the first mother vessel arriving at the destination country.
+      description: "Vessel and voyage details of a transport leg"
   headers:
     API-Version:
       description: "SemVer used to indicate the version of the contract (API version) returned."

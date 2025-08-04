@@ -9,14 +9,11 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Schema(
     type = "string",
     maxLength = 50,
-    example = "RAIL",
-    description =
-"""
-Code indicating the mode of transport used for the movement of containers
-between the Port of Discharge (POD) and the Place of Delivery (PDE).
-""")
+    example = "VESSEL",
+    description = "The mode of transport as defined by DCSA")
 @AllArgsConstructor
-public enum OnCarriageByCode implements EnumBase {
+public enum ModeOfTransportCode implements EnumBase {
+  VESSEL("Vessel"),
   RAIL("Rail"),
   TRUCK("Truck"),
   BARGE("Barge"),

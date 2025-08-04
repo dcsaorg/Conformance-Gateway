@@ -519,75 +519,102 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport",transport,Transport,,,,,"Transport info",
 "ArrivalNotice / transport / departureDate",departureDate,"string(date)",,,,2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
-"ArrivalNotice / transport / dischargeLocation",dischargeLocation,Location,,,,,"Location where the equipment is discharged from the mother vessel arriving at the destination country.",
-"ArrivalNotice / transport / dischargeLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
-
-- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
-
-More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-"ArrivalNotice / transport / dischargeLocation / address",address,Address,,,,,"Location address",
-"ArrivalNotice / transport / dischargeLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
-"ArrivalNotice / transport / dischargeLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
-"ArrivalNotice / transport / dischargeLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-"ArrivalNotice / transport / dischargeLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
-"ArrivalNotice / transport / dischargeLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
-"ArrivalNotice / transport / dischargeLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
-"ArrivalNotice / transport / dischargeLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
-"ArrivalNotice / transport / dischargeLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / transport / dischargeLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / transport / dischargeLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / transport / dischargeLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
-"ArrivalNotice / transport / dischargeLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
-"ArrivalNotice / transport / dischargeLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
-"ArrivalNotice / transport / dischargeLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / transport / dischargeLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
 "ArrivalNotice / transport / estimatedGeneralOrderDateTime","estimatedGeneralOrderDateTime","string(date-time)",,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
 "ArrivalNotice / transport / estimatedInlandArrivalDate","estimatedInlandArrivalDate","string(date)",,,,2025-01-23,"The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
 "ArrivalNotice / transport / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
 "ArrivalNotice / transport / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
-"ArrivalNotice / transport / loadLocation",loadLocation,Location,,,,,"Location where the equipment is loaded on the mother vessel arriving at the destination country.",
-"ArrivalNotice / transport / loadLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"ArrivalNotice / transport / legs",legs,"Leg list",,,,,"The legs of the transport that are relevant in this context",
+"ArrivalNotice / transport / legs / dischargeLocation",dischargeLocation,Location,,,,,"Discharge location",
+"ArrivalNotice / transport / legs / dischargeLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-"ArrivalNotice / transport / loadLocation / address",address,Address,,,,,"Location address",
-"ArrivalNotice / transport / loadLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
-"ArrivalNotice / transport / loadLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
-"ArrivalNotice / transport / loadLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-"ArrivalNotice / transport / loadLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
-"ArrivalNotice / transport / loadLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
-"ArrivalNotice / transport / loadLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
-"ArrivalNotice / transport / loadLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
-"ArrivalNotice / transport / loadLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / transport / loadLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / transport / loadLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
+"ArrivalNotice / transport / legs / dischargeLocation / address",address,Address,,,,,"Location address",
+"ArrivalNotice / transport / legs / dischargeLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"ArrivalNotice / transport / legs / dischargeLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"ArrivalNotice / transport / legs / dischargeLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / transport / legs / dischargeLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"ArrivalNotice / transport / legs / dischargeLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"ArrivalNotice / transport / legs / dischargeLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"ArrivalNotice / transport / legs / dischargeLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"ArrivalNotice / transport / legs / dischargeLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"ArrivalNotice / transport / legs / dischargeLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
+"ArrivalNotice / transport / legs / dischargeLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
 The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
 - `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
 - `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / transport / loadLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+"ArrivalNotice / transport / legs / dischargeLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
 - `BIC` (Requires a UN Location Code)
 - `SMDG` (Requires a UN Location Code)",
-"ArrivalNotice / transport / loadLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
-"ArrivalNotice / transport / loadLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
-"ArrivalNotice / transport / loadLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"ArrivalNotice / transport / loadLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
-"ArrivalNotice / transport / onBoardDate",onBoardDate,"string(date)",,,,2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
-"ArrivalNotice / transport / onCarriageBy",onCarriageBy,string,,maxLength=50,,RAIL,"Code indicating the mode of transport used for the movement of containers
-between the Port of Discharge (POD) and the Place of Delivery (PDE).
+"ArrivalNotice / transport / legs / dischargeLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"ArrivalNotice / transport / legs / dischargeLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"ArrivalNotice / transport / legs / dischargeLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"ArrivalNotice / transport / legs / dischargeLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / transport / legs / loadLocation",loadLocation,Location,,,,,"Load location",
+"ArrivalNotice / transport / legs / loadLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+"ArrivalNotice / transport / legs / loadLocation / address",address,Address,,,,,"Location address",
+"ArrivalNotice / transport / legs / loadLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"ArrivalNotice / transport / legs / loadLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"ArrivalNotice / transport / legs / loadLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ArrivalNotice / transport / legs / loadLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"ArrivalNotice / transport / legs / loadLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"ArrivalNotice / transport / legs / loadLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"ArrivalNotice / transport / legs / loadLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"ArrivalNotice / transport / legs / loadLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"ArrivalNotice / transport / legs / loadLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
+"ArrivalNotice / transport / legs / loadLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
+The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
+- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
+- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
+"ArrivalNotice / transport / legs / loadLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+- `BIC` (Requires a UN Location Code)
+- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / transport / legs / loadLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"ArrivalNotice / transport / legs / loadLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"ArrivalNotice / transport / legs / loadLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"ArrivalNotice / transport / legs / loadLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / transport / legs / modeOfTransport",modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA
+- `VESSEL` - Vessel
 - `RAIL` - Rail
 - `TRUCK` - Truck
 - `BARGE` - Barge
 - `MULTIMODAL` - Multimodal",
+"ArrivalNotice / transport / legs / plannedArrivalDate",plannedArrivalDate,"string(date)",,,,2025-01-23,"Planned arrival date",
+"ArrivalNotice / transport / legs / plannedDepartureDate",plannedDepartureDate,"string(date)",,,,2025-01-23,"Planned departure date",
+"ArrivalNotice / transport / legs / transportPlanStage",transportPlanStage,string,,maxLength=10,,MNC,"Code qualifying a specific stage of transport
+- `PRC` - Pre-Carriage Transport
+- `MNC` - Main Carriage Transport
+- `ONC` - On-Carriage Transport",
+"ArrivalNotice / transport / legs / transportPlanStageSequenceNumber","transportPlanStageSequenceNumber",integer,,,,5,"Sequence number of the transport plan stage",
+"ArrivalNotice / transport / legs / vesselVoyage",vesselVoyage,VesselVoyage,,,,,"Vessel and voyage details of a transport leg",
+"ArrivalNotice / transport / legs / vesselVoyage / callReferenceNumber",callReferenceNumber,string,,maxLength=100,,CRN1234,"A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
+It can be used for customs clearance purposes in specific countries (e.g. NL, UK).",
+"ArrivalNotice / transport / legs / vesselVoyage / carrierExportVoyageNumber","carrierExportVoyageNumber",string,,maxLength=50,,1234N,"Carrier-specific identifier of the export voyage",
+"ArrivalNotice / transport / legs / vesselVoyage / carrierImportVoyageNumber","carrierImportVoyageNumber",string,,maxLength=50,,1234N,"Carrier-specific identifier of the import voyage",
+"ArrivalNotice / transport / legs / vesselVoyage / carrierServiceCode",carrierServiceCode,string,,maxLength=11,,FE1,"The carrier-specific code of the service for which the schedule details are published",
+"ArrivalNotice / transport / legs / vesselVoyage / universalExportVoyageReference","universalExportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the export voyage",
+"ArrivalNotice / transport / legs / vesselVoyage / universalImportVoyageReference","universalImportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the import voyage",
+"ArrivalNotice / transport / legs / vesselVoyage / universalServiceReference","universalServiceReference",string,,maxLength=8,,SR12345A,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service",
+"ArrivalNotice / transport / legs / vesselVoyage / vesselCallSign",vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel
+and is assigned by the International Telecommunication Union (ITU).
+It consists of a three-letter alphanumeric prefix that indicates nationality,
+followed by one to four characters to identify the individual vessel.",
+"ArrivalNotice / transport / legs / vesselVoyage / vesselFlag",vesselFlag,string,,maxLength=2,,NL,"The flag of the nation whose laws the vessel is registered under.
+This is indicated by the 2 characters for the country code using
+[ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",
+"ArrivalNotice / transport / legs / vesselVoyage / vesselIMONumber",vesselIMONumber,string,,maxLength=8,,12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+The reference is the International Maritime Organisation (IMO) number,
+also sometimes known as the Lloyd's register code.",
+"ArrivalNotice / transport / legs / vesselVoyage / vesselName",vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
+"ArrivalNotice / transport / onBoardDate",onBoardDate,"string(date)",,,,2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
 "ArrivalNotice / transport / placeOfDelivery",placeOfDelivery,Location,,,,,"The location where the cargo is handed over to the consignee, or his agent,
 by the shipping line and where responsibility of the shipping line ceases.",
 "ArrivalNotice / transport / placeOfDelivery / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -646,8 +673,6 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfReceipt / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
-"ArrivalNotice / transport / plannedArrivalDate",plannedArrivalDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the mother vessel arriving at the destination country.",
-"ArrivalNotice / transport / plannedDepartureDate",plannedDepartureDate,"string(date)",,,,2025-01-23,"The expected date of departure of the  mother vessel arriving at the destination country.",
 "ArrivalNotice / transport / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 "ArrivalNotice / transport / portOfDischarge / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -704,31 +729,6 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / portOfLoading / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfLoading / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfLoading / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
-"ArrivalNotice / transport / vesselVoyages",vesselVoyages,"VesselVoyage list",,maxItems=3,,,"Details of the POD, POL or DC vessel voyages",
-"ArrivalNotice / transport / vesselVoyages / callReferenceNumber",callReferenceNumber,string,,maxLength=100,,CRN1234,"A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
-It can be used for customs clearance purposes in specific countries (e.g. NL, UK).",
-"ArrivalNotice / transport / vesselVoyages / carrierVoyageNumber",carrierVoyageNumber,string,,maxLength=50,,1234N,"Carrier-specific identifier of a voyage:
-* the import voyage (if `typeCode` is `POD` or `DC`)
-* the export voyage (if `typeCode` is `POL`)",
-"ArrivalNotice / transport / vesselVoyages / typeCode",typeCode,string,,,,POD,"Code representing the type of a vessel voyage.
-
-- `DC` - Destination country
-- `POD` - Port of destination
-- `POL` - Port of loading",
-"ArrivalNotice / transport / vesselVoyages / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Universal identifier of a voyage:
-* the import voyage (if `typeCode` is `POD` or `DC`)
-* the export voyage (if `typeCode` is `POL`)",
-"ArrivalNotice / transport / vesselVoyages / vesselCallSign",vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel
-and is assigned by the International Telecommunication Union (ITU).
-It consists of a three-letter alphanumeric prefix that indicates nationality,
-followed by one to four characters to identify the individual vessel.",
-"ArrivalNotice / transport / vesselVoyages / vesselFlag",vesselFlag,string,,maxLength=2,,NL,"The flag of the nation whose laws the vessel is registered under.
-This is indicated by the 2 characters for the country code using
-[ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",
-"ArrivalNotice / transport / vesselVoyages / vesselIMONumber",vesselIMONumber,string,,maxLength=8,,12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
-The reference is the International Maritime Organisation (IMO) number,
-also sometimes known as the Lloyd's register code.",
-"ArrivalNotice / transport / vesselVoyages / vesselName",vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
 "ArrivalNotice / transportDocumentReference","transportDocumentReference",string,yes,maxLength=20,,HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
 "ArrivalNotice / transportDocumentTypeCode","transportDocumentTypeCode",string,,,,SWB,"Specifies the type of the transport document
 - `BOL` (Bill of Lading)

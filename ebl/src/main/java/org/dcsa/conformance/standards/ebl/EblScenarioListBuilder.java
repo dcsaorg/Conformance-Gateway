@@ -134,7 +134,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             Map.entry(
                 "Straight eBL",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(
+                    .thenEither(
                         uc1Get(
                             SI_RECEIVED,
                             false,
@@ -179,7 +179,63 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                                 uc13Get(
                                                                     uc14Get(
                                                                         SI_COMPLETED,
-                                                                        true))))))))))))),
+                                                                        true))))))))))),
+                        uc1Get(
+                            SI_RECEIVED,
+                            false,
+                            uc6Get(
+                                false,
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(
+                                        uc7Get(
+                                            uc8Get(
+                                                uc3Get(
+                                                    SI_RECEIVED,
+                                                    SI_UPDATE_RECEIVED,
+                                                    true,
+                                                    uc4aGet(
+                                                        SI_RECEIVED,
+                                                        SI_UPDATE_CONFIRMED,
+                                                        true,
+                                                        uc9Get(
+                                                            uc10Get(
+                                                                uc11Get(
+                                                                    uc12Get(
+                                                                        uc13Get(
+                                                                            uc14Get(
+                                                                                SI_COMPLETED,
+                                                                                true)))))))),
+                                                uc9Get(
+                                                    uc3Get(
+                                                        SI_RECEIVED,
+                                                        SI_UPDATE_RECEIVED,
+                                                        true,
+                                                        uc4aGet(
+                                                            SI_RECEIVED,
+                                                            SI_UPDATE_CONFIRMED,
+                                                            true,
+                                                            uc10Get(
+                                                                uc11Get(
+                                                                    uc12Get(
+                                                                        uc13Get(
+                                                                            uc14Get(
+                                                                                SI_COMPLETED,
+                                                                                true))))))),
+                                                    uc10Get(
+                                                        uc3Get(
+                                                            SI_RECEIVED,
+                                                            SI_UPDATE_RECEIVED,
+                                                            true,
+                                                            uc4aGet(
+                                                                SI_RECEIVED,
+                                                                SI_UPDATE_CONFIRMED,
+                                                                true,
+                                                                uc11Get(
+                                                                    uc12Get(
+                                                                        uc13Get(
+                                                                            uc14Get(
+                                                                                SI_COMPLETED,
+                                                                                true))))))))))))))),
             Map.entry(
                 "Sea Waybill",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_SWB, isTd)

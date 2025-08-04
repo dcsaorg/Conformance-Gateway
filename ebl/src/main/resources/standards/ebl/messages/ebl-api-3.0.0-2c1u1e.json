@@ -49,7 +49,7 @@
       "commoditySubReference": "APRL-2025B",
       "cargoItems": [
         {
-          "equipmentReference": "MSCU7654321",
+          "equipmentReference": "MSCU1234567",
           "cargoGrossWeight": {
             "value": 20000,
             "unit": "KGM"
@@ -69,15 +69,6 @@
       "seals": [
         {
           "number": "NSL13386"
-        }
-      ]
-    },
-    {
-      "isShipperOwned": false,
-      "equipmentReference": "MSCU7654321",
-      "seals": [
-        {
-          "number": "NSL13387"
         }
       ]
     }

@@ -976,6 +976,12 @@ public class EBLChecks {
       "[Scenario] Verify that 'customsReferences' is used when the scenario requires it",
       scenarioCustomsReferencesCheck(dspSupplier)
     ));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "[Scenario] Verify that the scenario contains the required amount of 'utilizedTransportEquipments'",
+            utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)));
+
     return checks;
   }
 
@@ -1292,6 +1298,31 @@ public class EBLChecks {
             }));
     jsonContentChecks.addAll(generateScenarioRelatedChecks(dspSupplier, true));
     return jsonContentChecks;
+  }
+
+  public static JsonContentMatchedValidation utilizedTransportEquipmentsScenarioSizeCheck(
+      Supplier<DynamicScenarioParameters> dspSupplier) {
+    return (body, contextPath) -> {
+      var scenario = dspSupplier.get().scenarioType();
+      var utilizedTransportEquipments = body.path(UTILIZED_TRANSPORT_EQUIPMENTS);
+      int actualSize = utilizedTransportEquipments.size();
+
+      Integer expectedSize =
+          switch (scenario) {
+            case ScenarioType.REGULAR_2C_1U_1E -> 1;
+            case ScenarioType.REGULAR_2C_2U_2E -> 2;
+            default -> null; // No size constraint for other scenarios
+          };
+
+      if (expectedSize != null && actualSize != expectedSize) {
+        String path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
+        return Set.of(
+            "Scenario '%s' requires exactly %d utilizedTransportEquipments but found %d at %s"
+                .formatted(scenario, expectedSize, actualSize, path));
+      }
+
+      return Set.of();
+    };
   }
 
   private static Set<String> allEquipmentReferences(JsonNode body) {

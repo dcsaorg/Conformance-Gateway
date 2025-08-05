@@ -1309,8 +1309,8 @@ public class EBLChecks {
 
       Integer expectedSize =
           switch (scenario) {
-            case ScenarioType.REGULAR_2C_1U_1E -> 1;
-            case ScenarioType.REGULAR_2C_2U_2E -> 2;
+            case ScenarioType.REGULAR_2C_1U -> 1;
+            case ScenarioType.REGULAR_2C_2U -> 2;
             default -> null;
           };
 

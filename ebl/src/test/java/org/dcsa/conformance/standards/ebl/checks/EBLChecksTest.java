@@ -577,7 +577,7 @@ class EBLChecksTest {
     Supplier<DynamicScenarioParameters> dspSupplier =
         () -> {
           DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
-          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_1U_1E);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_1U);
           return dsp;
         };
 
@@ -595,7 +595,7 @@ class EBLChecksTest {
     Supplier<DynamicScenarioParameters> dspSupplier =
         () -> {
           DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
-          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_1U_1E);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_1U);
           return dsp;
         };
 
@@ -610,7 +610,7 @@ class EBLChecksTest {
     Supplier<DynamicScenarioParameters> dspSupplier =
         () -> {
           DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
-          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_1U_1E);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_1U);
           return dsp;
         };
 
@@ -629,7 +629,7 @@ class EBLChecksTest {
     Supplier<DynamicScenarioParameters> dspSupplier =
         () -> {
           DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
-          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_2U_2E);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_2U);
           return dsp;
         };
 
@@ -648,7 +648,7 @@ class EBLChecksTest {
     Supplier<DynamicScenarioParameters> dspSupplier =
         () -> {
           DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
-          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_2U_2E);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_2U);
           return dsp;
         };
 
@@ -666,7 +666,7 @@ class EBLChecksTest {
     Supplier<DynamicScenarioParameters> dspSupplier =
         () -> {
           DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
-          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_2U_2E);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_2U);
           return dsp;
         };
 

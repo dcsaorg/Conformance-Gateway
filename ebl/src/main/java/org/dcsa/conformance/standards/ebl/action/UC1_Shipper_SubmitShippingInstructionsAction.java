@@ -48,9 +48,9 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
 
   private String getScenarioType() {
     return switch (getDSP().scenarioType()) {
-      case REGULAR_2C_1U_1E ->
+      case REGULAR_2C_1U ->
           "with 2 Commodities, 1 Utilized transport equipment and 1 Equipment";
-      case REGULAR_2C_2U_2E ->
+      case REGULAR_2C_2U ->
           "with  2 Commodities, 2 Utilized transport equipments and 2 Equipments";
       case REGULAR_NO_COMMODITY_SUBREFERENCE -> "with No Commodity Subreference";
       case REGULAR_SWB_SOC_AND_REFERENCES -> "for Regular SWB and with SOC References";

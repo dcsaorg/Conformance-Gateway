@@ -24,7 +24,7 @@ import org.dcsa.conformance.standards.ebl.models.TriConsumer;
 import org.dcsa.conformance.standards.ebl.party.*;
 
 @UtilityClass
-public class EBLChecks {
+public class EblChecks {
 
   private static final JsonPointer SI_REF_SIR_PTR = JsonPointer.compile("/shippingInstructionsReference");
   private static final JsonPointer SI_REF_SI_STATUS_PTR = JsonPointer.compile("/shippingInstructionsStatus");

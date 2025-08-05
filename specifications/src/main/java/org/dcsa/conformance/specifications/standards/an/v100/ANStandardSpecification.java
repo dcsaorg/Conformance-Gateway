@@ -224,7 +224,27 @@ public class ANStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
+        Map.entry(
+            AttributesHierarchicalSheet.class,
+            Map.ofEntries(
+                Map.entry(
+                    "ArrivalNotice / transport / dischargeLocation",
+                    "ArrivalNotice / transport / legs / dischargeLocation"),
+                Map.entry(
+                    "ArrivalNotice / transport / loadLocation",
+                    "ArrivalNotice / transport / legs / loadLocation"),
+                Map.entry(
+                    "ArrivalNotice / transport / onCarriageBy",
+                    "ArrivalNotice / transport / legs / modeOfTransport"),
+                Map.entry(
+                    "ArrivalNotice / transport / vesselVoyages",
+                    "ArrivalNotice / transport / legs / vesselVoyage"),
+                Map.entry(
+                    "ArrivalNotice / transport / plannedArrivalDate",
+                    "ArrivalNotice / transport / legs / plannedArrivalDate"),
+                Map.entry(
+                    "ArrivalNotice / transport / plannedDepartureDate",
+                    "ArrivalNotice / transport / legs / plannedDepartureDate"))),
         Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));

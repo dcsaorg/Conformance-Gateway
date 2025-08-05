@@ -59,6 +59,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.IdentifyingCo
 import org.dcsa.conformance.specifications.standards.an.v100.model.ImmediateTransportationEntry;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ImportLicense;
 import org.dcsa.conformance.specifications.standards.an.v100.model.InnerPackaging;
+import org.dcsa.conformance.specifications.standards.an.v100.model.Leg;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Limits;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.an.v100.model.NationalCommodityCode;
@@ -85,10 +86,9 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.OnCarriageByCode;
+import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
-import org.dcsa.conformance.specifications.standards.an.v100.types.VesselVoyageTypeCode;
 
 public class ANStandardSpecification extends StandardSpecification {
 
@@ -165,9 +165,10 @@ public class ANStandardSpecification extends StandardSpecification {
         ImportLicense.class,
         InnerPackaging.class,
         IsoEquipmentCode.class,
+        Leg.class,
         Limits.class,
         Location.class,
-        OnCarriageByCode.class,
+        ModeOfTransportCode.class,
         NationalCommodityCode.class,
         NetExplosiveContent.class,
         NetVolume.class,
@@ -190,8 +191,7 @@ public class ANStandardSpecification extends StandardSpecification {
         UniversalVoyageReference.class,
         UtilizedTransportEquipment.class,
         VesselIMONumber.class,
-        VesselVoyage.class,
-        VesselVoyageTypeCode.class);
+        VesselVoyage.class);
   }
 
   @Override
@@ -224,7 +224,27 @@ public class ANStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
+        Map.entry(
+            AttributesHierarchicalSheet.class,
+            Map.ofEntries(
+                Map.entry(
+                    "ArrivalNotice / transport / dischargeLocation",
+                    "ArrivalNotice / transport / legs / dischargeLocation"),
+                Map.entry(
+                    "ArrivalNotice / transport / loadLocation",
+                    "ArrivalNotice / transport / legs / loadLocation"),
+                Map.entry(
+                    "ArrivalNotice / transport / onCarriageBy",
+                    "ArrivalNotice / transport / legs / modeOfTransport"),
+                Map.entry(
+                    "ArrivalNotice / transport / vesselVoyages",
+                    "ArrivalNotice / transport / legs / vesselVoyage"),
+                Map.entry(
+                    "ArrivalNotice / transport / plannedArrivalDate",
+                    "ArrivalNotice / transport / legs / plannedArrivalDate"),
+                Map.entry(
+                    "ArrivalNotice / transport / plannedDepartureDate",
+                    "ArrivalNotice / transport / legs / plannedDepartureDate"))),
         Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));

@@ -5,27 +5,10 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
-import org.dcsa.conformance.specifications.standards.an.v100.types.VesselVoyageTypeCode;
 
 @Data
-@Schema(
-    description =
-"""
-Details of a vessel voyage.
-
-When `typeCode` is `POL` (port of loading), these are the details of
-the first sea going vessel where the container was initially loaded.
-
-When `typeCode` is `POD` (port of destination), these are the details of
-the last sea-going vessel arriving at the Port of Discharge,
-which can be either a feeder or the mother vessel.
-
-When `typeCode` is `DC` (destination country), these are the details of
-the first mother vessel arriving at the destination country.
-""")
+@Schema(description = "Vessel and voyage details of a transport leg")
 public class VesselVoyage {
-
-  @Schema() private VesselVoyageTypeCode typeCode;
 
   @Schema(maxLength = 50, example = "King of the Seas", description = "Vessel name")
   private String vesselName;
@@ -54,24 +37,36 @@ followed by one to four characters to identify the individual vessel.
   private String vesselCallSign;
 
   @Schema(
-      maxLength = 50,
-      example = "1234N",
+      maxLength = 11,
+      example = "FE1",
       description =
-"""
-Carrier-specific identifier of a voyage:
-* the import voyage (if `typeCode` is `POD` or `DC`)
-* the export voyage (if `typeCode` is `POL`)
-""")
-  private String carrierVoyageNumber;
+          "The carrier-specific code of the service for which the schedule details are published")
+  private String carrierServiceCode;
 
   @Schema(
+      maxLength = 8,
+      example = "SR12345A",
       description =
-"""
-Universal identifier of a voyage:
-* the import voyage (if `typeCode` is `POD` or `DC`)
-* the export voyage (if `typeCode` is `POL`)
-""")
-  private UniversalVoyageReference universalVoyageReference;
+          "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service")
+  private String universalServiceReference;
+
+  @Schema(
+      maxLength = 50,
+      example = "1234N",
+      description = "Carrier-specific identifier of the import voyage")
+  private String carrierImportVoyageNumber;
+
+  @Schema(description = "Universal identifier of the import voyage")
+  private UniversalVoyageReference universalImportVoyageReference;
+
+  @Schema(
+      maxLength = 50,
+      example = "1234N",
+      description = "Carrier-specific identifier of the export voyage")
+  private String carrierExportVoyageNumber;
+
+  @Schema(description = "Universal identifier of the export voyage")
+  private UniversalVoyageReference universalExportVoyageReference;
 
   @Schema(
       maxLength = 100,

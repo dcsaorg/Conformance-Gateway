@@ -26,10 +26,14 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FU
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_REQUESTED_CARRIER_CLAUSES;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.function.Supplier;
+import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.junit.jupiter.api.Test;
 
@@ -566,5 +570,129 @@ class EBLChecksTest {
         ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
     rootNode.remove("feedbacks");
     assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckOneEquipmentValid() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        () -> {
+          DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_1U_1E);
+          return dsp;
+        };
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+
+    assertTrue(
+        EBLChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckOneEquipmentsTooFew() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        () -> {
+          DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_1U_1E);
+          return dsp;
+        };
+
+    assertFalse(
+        EBLChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckOneEquipmentTooMany() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        () -> {
+          DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_1U_1E);
+          return dsp;
+        };
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+    utilizedTransportEquipments.addObject();
+
+    assertFalse(
+        EBLChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckTwoEquipmentsValid() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        () -> {
+          DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_2U_2E);
+          return dsp;
+        };
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+    utilizedTransportEquipments.addObject();
+
+    assertTrue(
+        EBLChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckTwoEquipmentsTooFew() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        () -> {
+          DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_2U_2E);
+          return dsp;
+        };
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+
+    assertFalse(
+        EBLChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckTwoEquipmentsTooMany() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        () -> {
+          DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.REGULAR_2C_2U_2E);
+          return dsp;
+        };
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+    utilizedTransportEquipments.addObject();
+    utilizedTransportEquipments.addObject();
+
+    assertFalse(
+        EBLChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckNoConstraint() {
+    Supplier<DynamicScenarioParameters> dspSupplierOther =
+        () -> {
+          DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
+          when(dsp.scenarioType()).thenReturn(ScenarioType.ACTIVE_REEFER);
+          return dsp;
+        };
+
+    assertTrue(
+        EBLChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplierOther)
+            .validate(rootNode, "")
+            .isEmpty());
   }
 }

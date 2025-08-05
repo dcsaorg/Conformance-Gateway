@@ -1311,14 +1311,14 @@ public class EBLChecks {
           switch (scenario) {
             case ScenarioType.REGULAR_2C_1U_1E -> 1;
             case ScenarioType.REGULAR_2C_2U_2E -> 2;
-            default -> null; // No size constraint for other scenarios
+            default -> null;
           };
 
       if (expectedSize != null && actualSize != expectedSize) {
         String path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
         return Set.of(
-            "Scenario '%s' requires exactly %d utilizedTransportEquipments but found %d at %s"
-                .formatted(scenario, expectedSize, actualSize, path));
+            "The scenario requires exactly %d 'utilizedTransportEquipments' but found %d at %s"
+                .formatted(expectedSize, actualSize, path));
       }
 
       return Set.of();

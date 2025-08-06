@@ -196,7 +196,7 @@ public class EblShipper extends ConformanceParty {
   private void getTransportDocument(JsonNode actionPrompt) {
     log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("tdr").asText();
-    boolean errorScenario = actionPrompt.path(ShipperGetTransportDocumentErrorAction.SEND_INVALID_FACILITY_CODE).asBoolean(false);
+    boolean errorScenario = actionPrompt.path(ShipperGetTransportDocumentErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
 
     if (errorScenario) {
       tdr = "NON-EXISTING-TD";

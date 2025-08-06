@@ -36,7 +36,7 @@ public class ShipperGetTransportDocumentErrorAction extends EblAction {
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-        .put("documentReference", getDspSupplier().get().shippingInstructionsReference())
+        .put("tdr", getDspSupplier().get().transportDocumentReference())
         .put(SEND_INVALID_DOCUMENT_REFERENCE, true);
   }
 

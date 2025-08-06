@@ -91,10 +91,9 @@ public class EblCarrier extends ConformanceParty {
         Map.entry(
             UC10_Carrier_ProcessSurrenderRequestForAmendmentAction.class,
             this::processSurrenderRequestForAmendment),
-        Map.entry(UC11v_Carrier_VoidTransportDocumentAction.class, this::voidTransportDocument),
         Map.entry(
-            UC11i_Carrier_IssueAmendedTransportDocumentAction.class,
-            this::issueAmendedTransportDocument),
+            UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction.class,
+            this::voidTransportDocumentAndIssueAmendedTransportDocument),
         Map.entry(
             UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class,
             this::notifyOfSurrenderForDelivery),
@@ -265,36 +264,30 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Processed surrender request for delivery of transport document with reference '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Processed surrender request for amendment of transport document with reference '%s'"
+            .formatted(documentReference));
   }
 
-  private void voidTransportDocument(JsonNode actionPrompt) {
-    log.info("Carrier.voidTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
-
-    var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
-    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
-    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
-    si.voidTransportDocument(documentReference);
-    si.save(persistentMap);
-    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
-
-    addOperatorLogEntry("Voided transport document '%s'".formatted(documentReference));
-  }
-
-  private void issueAmendedTransportDocument(JsonNode actionPrompt) {
-    log.info("Carrier.issueAmendedTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+  private void voidTransportDocumentAndIssueAmendedTransportDocument(JsonNode actionPrompt) {
+    log.info(
+        "Carrier.voidTransportDocumentAndIssueAmendedTransportDocument(%s)"
+            .formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
     var scenarioType = ScenarioType.valueOf(actionPrompt.required(SCENARIO_TYPE).asText());
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.voidTransportDocument(documentReference);
     si.issueAmendedTransportDocument(documentReference, scenarioType);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Issued amended transport document '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Voided original transport document and Issued amended transport document '%s'"
+            .formatted(documentReference));
   }
 
   private void processSurrenderRequestForDelivery(JsonNode actionPrompt) {

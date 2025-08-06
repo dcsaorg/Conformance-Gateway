@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.Builder;
@@ -389,14 +390,26 @@ public class EblCarrier extends ConformanceParty {
   private ConformanceResponse return404(ConformanceRequest request) {
     return return404(request, "Returning 404 since the request did not match any known URL");
   }
+
   private ConformanceResponse return404(ConformanceRequest request, String message) {
+    ObjectNode response =
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/ebl/messages/ebl-api-3.0.0-error-message.json",
+                Map.of(
+                    "HTTP_METHOD_PLACEHOLDER",
+                    request.method(),
+                    "REQUEST_URI_PLACEHOLDER",
+                    request.url(),
+                    "REFERENCE_PLACEHOLDER",
+                    UUID.randomUUID().toString(),
+                    "ERROR_DATE_TIME_PLACEHOLDER",
+                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
+                    "ERROR_MESSAGE_PLACEHOLDER",
+                    message));
+
     return request.createResponse(
-      404,
-      Map.of(API_VERSION, List.of(apiVersion)),
-      new ConformanceMessageBody(
-        OBJECT_MAPPER
-          .createObjectNode()
-          .put(MESSAGE, message)));
+        404, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
@@ -456,7 +469,7 @@ public class EblCarrier extends ConformanceParty {
           .formatted(documentReference, si.getShippingInstructionsState().wireName()));
       return response;
     }
-    return return404(request);
+    return return404(request,"The Shipping Instructions does not exist");
   }
 
   private ConformanceResponse handleGetTransportDocument(ConformanceRequest request, String documentReference) {

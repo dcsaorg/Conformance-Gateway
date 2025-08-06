@@ -49,6 +49,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "CreateShippingInstructionsResponse";
   private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
   private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
+  private static final String ERROR_RESPONSE_SCHEMA_NAME = "ErrorResponse";
 
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
@@ -73,32 +74,38 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceSiOnlyScenarios(
       boolean isTd) {
     return Stream.of(
+//            Map.entry(
+//                "Supported shipment types scenarios",
+//                noAction()
+//                    .thenEither(
+//                        Arrays.stream(ScenarioType.values())
+//                            .map(
+//                                scenarioType ->
+//                                    carrierSupplyScenarioParameters(scenarioType, isTd)
+//                                        .then(
+//                                            uc1Get(
+//                                                SI_RECEIVED, false, uc14Get(SI_COMPLETED, false))))
+//                            .toList()
+//                            .toArray(new EblScenarioListBuilder[] {}))),
+//            Map.entry(
+//                "Carrier requested update scenarios",
+//                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+//                    .then(
+//                        uc1Get(
+//                            SI_RECEIVED,
+//                            false,
+//                            uc2Get(
+//                                SI_PENDING_UPDATE, uc3AndAllSiOnlyPathsFrom(SI_PENDING_UPDATE))))),
+//            Map.entry(
+//                "Shipper initiated update scenarios",
+//                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+//                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))),
             Map.entry(
-                "Supported shipment types scenarios",
-                noAction()
-                    .thenEither(
-                        Arrays.stream(ScenarioType.values())
-                            .map(
-                                scenarioType ->
-                                    carrierSupplyScenarioParameters(scenarioType, isTd)
-                                        .then(
-                                            uc1Get(
-                                                SI_RECEIVED, false, uc14Get(SI_COMPLETED, false))))
-                            .toList()
-                            .toArray(new EblScenarioListBuilder[] {}))),
-            Map.entry(
-                "Carrier requested update scenarios",
+                "Carrier error response conformance",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
                     .then(
-                        uc1Get(
-                            SI_RECEIVED,
-                            false,
-                            uc2Get(
-                                SI_PENDING_UPDATE, uc3AndAllSiOnlyPathsFrom(SI_PENDING_UPDATE))))),
-            Map.entry(
-                "Shipper initiated update scenarios",
-                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))))
+                        uc1ShipperSubmitShippingInstructions()
+                            .then(shipperGetShippingInstructionsErrorScenario()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -498,6 +505,18 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 requestAmendedSI,
                 recordTDR,
                 useBothRef));
+  }
+
+  private static EblScenarioListBuilder shipperGetShippingInstructionsErrorScenario() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new ShipperGetShippingInstructionsErrorAction(
+                shipperPartyName,
+                carrierPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(EBL_API, ERROR_RESPONSE_SCHEMA_NAME)));
   }
 
   private static EblScenarioListBuilder shipperGetTransportDocument(

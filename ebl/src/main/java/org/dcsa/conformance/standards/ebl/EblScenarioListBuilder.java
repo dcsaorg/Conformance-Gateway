@@ -117,7 +117,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                             .toArray(EblScenarioListBuilder[]::new))),
             Map.entry(
                 "Shipper interactions with transport document",
-                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                noAction()
                     .then(
                         uc6Get(
                             true,
@@ -222,10 +222,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static EblScenarioListBuilder buildScenarioForType(ScenarioType type, boolean isTd) {
     if (type.isSWB()) {
-      return carrierSupplyScenarioParameters(type, isTd).then(uc6Get(true, uc7Get(uc8Get())));
+      return uc6Get(true, uc7Get(uc8Get()));
     }
-    return carrierSupplyScenarioParameters(type, isTd)
-        .then(uc6Get(true, uc7Get(uc8Get(uc12Get(uc13Get())))));
+    return uc6Get(true, uc7Get(uc8Get(uc12Get(uc13Get()))));
   }
 
   private static EblScenarioListBuilder uc3AndAllSiOnlyPathsFrom(

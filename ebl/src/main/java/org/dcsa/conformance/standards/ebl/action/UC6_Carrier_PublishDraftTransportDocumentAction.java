@@ -55,7 +55,6 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
         dsp = dsp.withTransportDocumentReference(tdr.asText());
       }
     getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
-    getCarrierPayloadConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }
 
   @Override
@@ -86,12 +85,10 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
     var dr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
-    var node = super.asJsonNode()
-      .put("documentReference", dr)
-      .put("scenarioType", dsp.scenarioType().name())
-      .put("skipSI", skipSI);
-    node.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
-    return node;
+    return super.asJsonNode()
+        .put("documentReference", dr)
+        .put("scenarioType", dsp.scenarioType().name())
+        .put("skipSI", skipSI);
   }
 
   @Override

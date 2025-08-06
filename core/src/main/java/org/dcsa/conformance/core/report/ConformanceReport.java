@@ -1,5 +1,7 @@
 package org.dcsa.conformance.core.report;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -12,8 +14,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.text.StringEscapeUtils;
 import org.dcsa.conformance.core.check.ConformanceCheck;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 public class ConformanceReport {
@@ -44,30 +44,11 @@ public class ConformanceReport {
             .subChecksStream()
             .filter(check -> check.isRelevantForRole(roleName))
             .map(subCheck -> new ConformanceReport(subCheck, roleName))
-            .collect(Collectors.toList());
+            .toList();
     this.conformanceStatus =
         this.subReports.stream()
             .map(subReport -> subReport.conformanceStatus)
-            .reduce(
-                (conformanceStatus1, conformanceStatus2) -> {
-                  if (ConformanceStatus.NON_CONFORMANT.equals(conformanceStatus1)
-                      || ConformanceStatus.NON_CONFORMANT.equals(conformanceStatus2)) {
-                    return ConformanceStatus.NON_CONFORMANT;
-                  }
-                  if (ConformanceStatus.PARTIALLY_CONFORMANT.equals(conformanceStatus1)
-                      || ConformanceStatus.PARTIALLY_CONFORMANT.equals(conformanceStatus2)) {
-                    return ConformanceStatus.PARTIALLY_CONFORMANT;
-                  }
-                  if (ConformanceStatus.CONFORMANT.equals(conformanceStatus1)
-                      && ConformanceStatus.CONFORMANT.equals(conformanceStatus2)) {
-                    return ConformanceStatus.CONFORMANT;
-                  }
-                  if (ConformanceStatus.NO_TRAFFIC.equals(conformanceStatus1)
-                      && ConformanceStatus.NO_TRAFFIC.equals(conformanceStatus2)) {
-                    return ConformanceStatus.NO_TRAFFIC;
-                  }
-                  return ConformanceStatus.PARTIALLY_CONFORMANT;
-                })
+            .reduce(ConformanceStatusReducer::reduce)
             .orElse(
                 ConformanceStatus.forExchangeCounts(
                     conformantExchangeCount, nonConformantExchangeCount));
@@ -204,7 +185,7 @@ public class ConformanceReport {
   private static String getConformanceIcon(ConformanceStatus conformanceStatus) {
     return switch (conformanceStatus) {
       case CONFORMANT -> "✅";
-      case PARTIALLY_CONFORMANT -> "⚠️";
+      case PARTIALLY_CONFORMANT -> "✔️";
       case NON_CONFORMANT -> "🚫";
       default -> "❔";
     };

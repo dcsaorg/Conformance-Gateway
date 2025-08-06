@@ -184,7 +184,7 @@ public class EblShipper extends ConformanceParty {
     log.info("Shipper.getShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String documentReference = actionPrompt.get("documentReference").asText();
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
-    boolean errorScenario = actionPrompt.path(ShipperGetShippingInstructionsErrorAction.SEND_INVALID_FACILITY_CODE).asBoolean(false);
+    boolean errorScenario = actionPrompt.path(ShipperGetShippingInstructionsErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
 
     Map<String, List<String>> queryParams = requestAmendment
       ? Map.of("updatedContent", List.of("true"))

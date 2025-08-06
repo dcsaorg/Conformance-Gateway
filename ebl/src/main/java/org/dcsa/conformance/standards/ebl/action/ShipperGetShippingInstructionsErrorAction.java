@@ -15,7 +15,7 @@ import org.dcsa.conformance.standards.ebl.party.EblRole;
 public class ShipperGetShippingInstructionsErrorAction extends EblAction {
 
   private static final int RESPONSE_CODE = 404;
-  public static final String SEND_INVALID_FACILITY_CODE = "sendInvalidDocumentReference";
+  public static final String SEND_INVALID_DOCUMENT_REFERENCE = "sendInvalidDocumentReference";
 
   private final JsonSchemaValidator responseSchemaValidator;
 
@@ -37,7 +37,7 @@ public class ShipperGetShippingInstructionsErrorAction extends EblAction {
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
         .put("documentReference", getDspSupplier().get().shippingInstructionsReference())
-        .put(SEND_INVALID_FACILITY_CODE, true);
+        .put(SEND_INVALID_DOCUMENT_REFERENCE, true);
   }
 
   @Override

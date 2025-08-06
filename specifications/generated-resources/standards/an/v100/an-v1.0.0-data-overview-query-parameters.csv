@@ -10,8 +10,6 @@ carrierServiceCode,string,"The carrier specific code of the service for which th
 "universalServiceReference",string,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",SR12345A
 "minEtaAtPortOfDischargeDate",string,"Retrieve arrival notices with an ETA at port of discharge on or after this date",2025-01-23
 "maxEtaAtPortOfDischargeDate",string,"Retrieve arrival notices with an ETA at port of discharge on or before this date",2025-01-23
-includeCharges,boolean,"Optional flag indicating whether only arrival notices with charges (`true`) or without charges (`false`) are requested.
-If left unspecified, the arrival notices both with and without charges are requested.",true
 includeVisualization,boolean,"Optional flag indicating whether the PDF `arrivalNoticeVisualization` should be included in each returned arrival notice.
 
 The publisher makes the final decision on whether to include PDF visualizations in the response (for some or for all
@@ -22,5 +20,17 @@ the arrival notices), based on a variety of factors including:
 
 However, to support a future transition to fully automated processing of arrival notices by receivers,
 the publisher should **not** include the PDF visualization if this parameter is set to `false`.",true
+removeCharges,boolean,"Optional flag indicating whether the publisher should remove the charges from the PDF visualization
+of every returned arrival notice, and for consistency, also from the structured response data.
+
+This flag allows arrival notice receivers to retrieve, for the purpose of forwarding to third parties,
+versions of the arrival notice PDF visualizations in which the charges are removed,
+if they would be normally received with charges included based on the role of the arrival notice recipient.
+
+This flag is **not** expected to perform any filtering on the list of arrival notices included in the response.
+However, if the removal of charges (from the arrival notices that have them) results in a list of arrival notices
+in which some become exact duplicates, publishers may choose to remove duplicates from the response.
+
+The default value is `false`, which leaves unchanged the presence or absence of charges in each returned arrival notice.",true
 limit,number,"Maximum number of arrival notices to include in each page of the response.",10
 cursor,string,"Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.",ExampleNextPageCursor

@@ -14,6 +14,28 @@ Clarified that the publisher can reject GET requests for more than a certain num
 
 Renamed `isoEquipmentCode` to `ISOEquipmentCode` in the `FreeTime` object. (SD-2323)
 
+Replaced `ZZZ` with `END` (pending registration) as Endorsee `partyFunction`. (SD-2303)
+
+Removed property `payerCode` from object `ArrivalNotice`. (SD-2326)
+
+Allowing each `FreeTime` to be associated with multiple `isoEquipmentCodes`, as well as with multiple `equipmentReferences`. (SD-2330)
+
+Renamed `inlandArrivalDate` to `estimatedInlandArrivalDate` in object `Transport`. (SD-2327)
+
+Added `freightPaymentStatus` to root object `ArrivalNotice`. (SD-2337)
+
+Removed `internalCode` from object `CustomsClearance`. (SD-2347)
+
+Grouped existing and new properties into `PickupInformation` and `ReturnInformation`, reused both at root level and within each `UtilizedTransportEquipment`. (SD-2328)
+
+Added property `vesselCallSign` to object `VesselVoyage` and property `position` to object `CargoItem`. (SD-2328)
+
+Replaced query parameter `includeCharges` with `removeCharges`, also adjusting its semantics for a more useful functionality. (SD-2332)
+
+Split `label` into `typeLabel` and `versionLabel` and clarified versioning. (SD-2319)
+
+Added response feedback and error messages. (SD-2310)
+
 
 ## Snapshot v1.0.0-20250718-alpha
 

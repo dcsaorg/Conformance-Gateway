@@ -9,18 +9,17 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Schema(
     type = "string",
     maxLength = 50,
-    example = "RAIL",
+    example = "FULLY_PAID",
     description =
 """
-Code indicating the mode of transport used for the movement of containers
-between the Port of Discharge (POD) and the Place of Delivery (PDE).
+Payment status of the freight charges.
 """)
 @AllArgsConstructor
-public enum OnCarriageByCode implements EnumBase {
-  RAIL("Rail"),
-  TRUCK("Truck"),
-  BARGE("Barge"),
-  MULTIMODAL("Multimodal");
+public enum FreightPaymentStatus implements EnumBase {
+  ZERO_PAID("Zero Paid"),
+  PARTIALLY_PAID("Partially Paid"),
+  FULLY_PAID("Fully Paid"),
+  OVERPAID("Overpaid");
 
   private final String valueDescription;
 }

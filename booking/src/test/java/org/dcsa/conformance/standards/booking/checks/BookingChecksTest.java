@@ -7,11 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +33,8 @@ class BookingChecksTest {
   private ArrayNode requestedEquipments;
   private ObjectNode commodity;
   private ArrayNode commodities;
+  private Supplier<DynamicScenarioParameters> dspSupplier;
+  private static final ObjectMapper mapper = new ObjectMapper();
 
   @BeforeEach
   void setUp() {
@@ -37,6 +43,8 @@ class BookingChecksTest {
     requestedEquipments = OBJECT_MAPPER.createArrayNode();
     commodity = OBJECT_MAPPER.createObjectNode();
     commodities = OBJECT_MAPPER.createArrayNode();
+    dspSupplier =
+        () -> new DynamicScenarioParameters(ScenarioType.REGULAR, "CBRR123", "CBR456", null, null);
   }
 
   @Test
@@ -242,5 +250,74 @@ class BookingChecksTest {
         errors.contains(
             ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS.formatted(
                 "(absent)", BookingState.AMENDMENT_CANCELLED.name())));
+  }
+
+  @Test
+  void bothReferencesCorrect() throws Exception {
+    String json =
+        """
+            {
+              "carrierBookingRequestReference": "CBRR123",
+              "carrierBookingReference": "CBR456"
+            }
+            """;
+
+    JsonNode body = mapper.readTree(json);
+    Set<String> errors = BookingChecks.cbrrOrCbr(dspSupplier).validate(body);
+
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void onlyCbrrCorrect() throws Exception {
+    String json =
+        """
+            {
+              "carrierBookingRequestReference": "CBRR123",
+              "carrierBookingReference": "WRONG"
+            }
+            """;
+
+    JsonNode body = mapper.readTree(json);
+    Set<String> errors = BookingChecks.cbrrOrCbr(dspSupplier).validate(body);
+
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void onlyCbrCorrect() throws Exception {
+    String json =
+        """
+            {
+              "carrierBookingRequestReference": "WRONG",
+              "carrierBookingReference": "CBR456"
+            }
+            """;
+    JsonNode body = mapper.readTree(json);
+    Set<String> errors = BookingChecks.cbrrOrCbr(dspSupplier).validate(body);
+
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void bothReferencesWrong() throws Exception {
+    String json =
+        """
+            {
+              "carrierBookingRequestReference": "WRONG1",
+              "carrierBookingReference": "WRONG2"
+            }
+            """;
+
+    JsonNode body = mapper.readTree(json);
+    Set<String> errors = BookingChecks.cbrrOrCbr(dspSupplier).validate(body);
+
+    assertFalse(errors.isEmpty());
+    assertTrue(
+        errors
+            .iterator()
+            .next()
+            .contains(
+                "Either 'carrierBookingRequestReference' must equal CBRR123 or 'carrierBookingReference' must equal CBR456"));
   }
 }

@@ -10,6 +10,6 @@ import lombok.Data;
     example = "2025-01-23T01:23:45Z",
     description =
 """
-String representation of a timestamp in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format
+Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
 """)
 public class FormattedDateTime {}

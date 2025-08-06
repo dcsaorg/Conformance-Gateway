@@ -8,16 +8,16 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Getter
 @Schema(
     type = "string",
-    example = "POD",
-    description =
-"""
-Code representing the type of a vessel voyage.
-""")
+    maxLength = 50,
+    example = "VESSEL",
+    description = "The mode of transport as defined by DCSA")
 @AllArgsConstructor
-public enum VesselVoyageTypeCode implements EnumBase {
-  DC("Destination country"),
-  POD("Port of destination"),
-  POL("Port of loading");
+public enum ModeOfTransportCode implements EnumBase {
+  VESSEL("Vessel"),
+  RAIL("Rail"),
+  TRUCK("Truck"),
+  BARGE("Barge"),
+  MULTIMODAL("Multimodal");
 
   private final String valueDescription;
 }

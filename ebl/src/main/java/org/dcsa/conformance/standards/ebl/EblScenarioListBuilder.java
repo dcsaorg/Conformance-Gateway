@@ -49,6 +49,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "CreateShippingInstructionsResponse";
   private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
   private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
+  private static final String ERROR_RESPONSE_SCHEMA_NAME = "ErrorResponse";
 
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
@@ -122,7 +123,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                         uc6Get(
                             true,
                             oobAmendment(uc6Get(false, uc8Get(uc12Get(uc13Get())))),
-                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get()))))))))))
+                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get()))))))))),
+            Map.entry(
+                "Carrier error response conformance",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(
+                        uc1ShipperSubmitShippingInstructions()
+                            .then(shipperGetTransportDocumentErrorScenario()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -513,6 +520,18 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 expectedTdStatus,
                 resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME)));
   }
+
+  private static EblScenarioListBuilder shipperGetTransportDocumentErrorScenario() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new ShipperGetTransportDocumentErrorAction(
+                shipperPartyName,
+                carrierPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(EBL_API, ERROR_RESPONSE_SCHEMA_NAME)));
+    }
 
   private static EblScenarioListBuilder uc1ShipperSubmitShippingInstructions() {
     String carrierPartyName = threadLocalCarrierPartyName.get();

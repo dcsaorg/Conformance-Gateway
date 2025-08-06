@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.ebl.party;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -65,7 +64,8 @@ public class EblShipper extends ConformanceParty {
       Map.entry(AUC_Shipper_SendOutOfOrderSIMessageAction.class, this::sendOutOfOrderMessage),
       Map.entry(UC3ShipperSubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
       Map.entry(UC5_Shipper_CancelUpdateToShippingInstructionsAction.class, this::cancelUpdateToShippingInstructions),
-      Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument)
+      Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument),
+      Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument)
     );
   }
 
@@ -196,6 +196,11 @@ public class EblShipper extends ConformanceParty {
   private void getTransportDocument(JsonNode actionPrompt) {
     log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("tdr").asText();
+    boolean errorScenario = actionPrompt.path(ShipperGetTransportDocumentErrorAction.SEND_INVALID_FACILITY_CODE).asBoolean(false);
+
+    if (errorScenario) {
+      tdr = "NON-EXISTING-TD";
+    }
 
     syncCounterpartGet("/v3/transport-documents/" + URLEncoder.encode(tdr, StandardCharsets.UTF_8), Collections.emptyMap());
 

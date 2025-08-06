@@ -74,32 +74,32 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceSiOnlyScenarios(
       boolean isTd) {
     return Stream.of(
-//            Map.entry(
-//                "Supported shipment types scenarios",
-//                noAction()
-//                    .thenEither(
-//                        Arrays.stream(ScenarioType.values())
-//                            .map(
-//                                scenarioType ->
-//                                    carrierSupplyScenarioParameters(scenarioType, isTd)
-//                                        .then(
-//                                            uc1Get(
-//                                                SI_RECEIVED, false, uc14Get(SI_COMPLETED, false))))
-//                            .toList()
-//                            .toArray(new EblScenarioListBuilder[] {}))),
-//            Map.entry(
-//                "Carrier requested update scenarios",
-//                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-//                    .then(
-//                        uc1Get(
-//                            SI_RECEIVED,
-//                            false,
-//                            uc2Get(
-//                                SI_PENDING_UPDATE, uc3AndAllSiOnlyPathsFrom(SI_PENDING_UPDATE))))),
-//            Map.entry(
-//                "Shipper initiated update scenarios",
-//                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-//                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))),
+            Map.entry(
+                "Supported shipment types scenarios",
+                noAction()
+                    .thenEither(
+                        Arrays.stream(ScenarioType.values())
+                            .map(
+                                scenarioType ->
+                                    carrierSupplyScenarioParameters(scenarioType, isTd)
+                                        .then(
+                                            uc1Get(
+                                                SI_RECEIVED, false, uc14Get(SI_COMPLETED, false))))
+                            .toList()
+                            .toArray(new EblScenarioListBuilder[] {}))),
+            Map.entry(
+                "Carrier requested update scenarios",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(
+                        uc1Get(
+                            SI_RECEIVED,
+                            false,
+                            uc2Get(
+                                SI_PENDING_UPDATE, uc3AndAllSiOnlyPathsFrom(SI_PENDING_UPDATE))))),
+            Map.entry(
+                "Shipper initiated update scenarios",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))),
             Map.entry(
                 "Carrier error response conformance",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)

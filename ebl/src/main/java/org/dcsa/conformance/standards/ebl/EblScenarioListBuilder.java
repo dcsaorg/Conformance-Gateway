@@ -25,9 +25,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   public static final String SCENARIO_SUITE_CONFORMANCE_SI_ONLY = "Conformance SI-only";
   public static final String SCENARIO_SUITE_CONFORMANCE_TD_ONLY = "Conformance TD-only";
-  static final String SCENARIO_SUITE_SI_TD_COMBINED = "SI and TD Combined";
+  static final String SCENARIO_SUITE_SI_TD_COMBINED = "Conformance TD Amendments";
 
-  static final Set<String> SCENARIOS =
+  static final Set<String> SCENARIO_SUITES =
       Set.of(
           SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
           SCENARIO_SUITE_CONFORMANCE_TD_ONLY,

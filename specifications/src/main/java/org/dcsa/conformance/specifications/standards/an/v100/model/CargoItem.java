@@ -8,6 +8,8 @@ import lombok.Setter;
 import lombok.ToString;
 import org.dcsa.conformance.specifications.generator.ClearSchemaConstraints;
 
+import java.util.List;
+
 @Schema(
     description =
         org.dcsa.conformance.specifications.standards.dt.v100.model.CargoItem
@@ -31,4 +33,7 @@ in some cases, the same order the consignee must follow for the final customs re
 """,
       example = "12")
   protected int position;
+
+  @Schema(description = "A list of `Charges`")
+  private List<Charge> charges;
 }

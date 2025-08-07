@@ -155,6 +155,7 @@ CargoItem,cargoGrossVolume,CargoGrossVolume,,,,,"Gross volume of the cargo.",
 CargoItem,cargoGrossWeight,CargoGrossWeight,,,,,"Gross weight of the cargo.",
 CargoItem,cargoNetVolume,CargoNetVolume,,,,,"Net volume of the cargo.",
 CargoItem,cargoNetWeight,CargoNetWeight,,,,,"Net weight of the cargo.",
+CargoItem,charges,"Charge list",,,,,"A list of `Charges`",
 CargoItem,customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
 CargoItem,equipmentReference,string,,maxLength=11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
@@ -587,6 +588,7 @@ This indicates the point at which the shipping line takes on responsibility for 
 Transport,portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 Transport,portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
 "UtilizedTransportEquipment",activeReeferSettings,ActiveReeferSettings,,,,,"Active reefer settings applied to this equipment.",
+"UtilizedTransportEquipment",charges,"Charge list",,,,,"A list of `Charges`",
 "UtilizedTransportEquipment",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
 "UtilizedTransportEquipment",equipment,Equipment,,,,,"The container or transport equipment used.",
 "UtilizedTransportEquipment",isNonOperatingReefer,boolean,,,,false,"If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.",

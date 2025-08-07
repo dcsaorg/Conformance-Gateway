@@ -6,6 +6,8 @@ Restructured the `Transport` object to contain an array of `Leg`s, each with its
 
 Added property `lastFreeDate` to object `FreeTime`. (SD-2353)
 
+Added `Charges` also within the `UtilizedTransportEquipment` and `CargoItem`. (SD-2354)
+
 
 ## Snapshot v1.0.0-20250801-alpha
 

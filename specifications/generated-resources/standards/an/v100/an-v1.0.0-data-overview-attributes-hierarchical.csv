@@ -74,6 +74,22 @@ More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/
 - `KGM` (Kilograms)
 - `LBR` (Pounds)",
 "ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / value",value,number,,,,2400,"The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
+"ArrivalNotice / consignmentItems / cargoItems / charges",charges,"Charge list",,,,,"A list of `Charges`",
+"ArrivalNotice / consignmentItems / cargoItems / charges / calculationBasis",calculationBasis,string,,maxLength=50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
+"ArrivalNotice / consignmentItems / cargoItems / charges / carrierRateOfExchange",carrierRateOfExchange,string,,maxLength=50,,"1.00 Euro = 1.17801 US Dollars","The quotation of the relative value of a currency unit against the unit of another currency
+in the foreign exchange market applicable to this charge item.
+The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+If not provided, the customer should refer to the ROE available on the carrier website
+or the ROE defined by the competent customs authority, as per local practice.",
+"ArrivalNotice / consignmentItems / cargoItems / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
+"ArrivalNotice / consignmentItems / cargoItems / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
+"ArrivalNotice / consignmentItems / cargoItems / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+"ArrivalNotice / consignmentItems / cargoItems / charges / paymentTermCode",paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
+
+- `PRE` (Prepaid)
+- `COL` (Collect)",
+"ArrivalNotice / consignmentItems / cargoItems / charges / quantity",quantity,number,,,,34.4,"The amount of unit for this charge item.",
+"ArrivalNotice / consignmentItems / cargoItems / charges / unitPrice",unitPrice,number,,,,3456.6,"The unit price of this charge item in the currency of the charge.",
 "ArrivalNotice / consignmentItems / cargoItems / customsReferences",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
 "ArrivalNotice / consignmentItems / cargoItems / customsReferences / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 "ArrivalNotice / consignmentItems / cargoItems / customsReferences / type",type,string,,maxLength=50,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",
@@ -771,6 +787,22 @@ and may or may not change between timestamped versions).",
 
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)",
+"ArrivalNotice / utilizedTransportEquipments / charges",charges,"Charge list",,,,,"A list of `Charges`",
+"ArrivalNotice / utilizedTransportEquipments / charges / calculationBasis",calculationBasis,string,,maxLength=50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
+"ArrivalNotice / utilizedTransportEquipments / charges / carrierRateOfExchange",carrierRateOfExchange,string,,maxLength=50,,"1.00 Euro = 1.17801 US Dollars","The quotation of the relative value of a currency unit against the unit of another currency
+in the foreign exchange market applicable to this charge item.
+The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+If not provided, the customer should refer to the ROE available on the carrier website
+or the ROE defined by the competent customs authority, as per local practice.",
+"ArrivalNotice / utilizedTransportEquipments / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
+"ArrivalNotice / utilizedTransportEquipments / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
+"ArrivalNotice / utilizedTransportEquipments / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+"ArrivalNotice / utilizedTransportEquipments / charges / paymentTermCode",paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
+
+- `PRE` (Prepaid)
+- `COL` (Collect)",
+"ArrivalNotice / utilizedTransportEquipments / charges / quantity",quantity,number,,,,34.4,"The amount of unit for this charge item.",
+"ArrivalNotice / utilizedTransportEquipments / charges / unitPrice",unitPrice,number,,,,3456.6,"The unit price of this charge item in the currency of the charge.",
 "ArrivalNotice / utilizedTransportEquipments / customsReferences",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
 "ArrivalNotice / utilizedTransportEquipments / customsReferences / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 "ArrivalNotice / utilizedTransportEquipments / customsReferences / type",type,string,,maxLength=50,,CUS,"The reference type code as defined in the relevant customs jurisdiction.",

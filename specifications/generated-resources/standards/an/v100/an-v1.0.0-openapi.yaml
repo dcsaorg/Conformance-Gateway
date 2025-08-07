@@ -832,6 +832,11 @@ components:
             in some cases, the same order the consignee must follow for the final customs release.
           format: "int32"
           example: 12
+        charges:
+          type: "array"
+          description: "A list of `Charges`"
+          items:
+            $ref: "#/components/schemas/Charge"
       description: "A cargoItem is the smallest unit used in stuffing. It cannot be split across containers."
     CargoNetVolume:
       type: "object"
@@ -2305,6 +2310,11 @@ components:
           description: "Return information"
           allOf:
           - $ref: "#/components/schemas/ReturnInformation"
+        charges:
+          type: "array"
+          description: "A list of `Charges`"
+          items:
+            $ref: "#/components/schemas/Charge"
       description: "Specifies the container (`equipment`), total `weight`, `volume`, possible `ActiveReeferSettings`, `seals` and `references`."
     VesselVoyage:
       type: "object"

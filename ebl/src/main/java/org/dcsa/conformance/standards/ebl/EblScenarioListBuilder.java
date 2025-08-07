@@ -220,21 +220,6 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                                         uc13Get(
                                                                             uc14Get(
                                                                                 SI_COMPLETED,
-                                                                                true))))))),
-                                                    uc10Get(
-                                                        uc3Get(
-                                                            SI_RECEIVED,
-                                                            SI_UPDATE_RECEIVED,
-                                                            true,
-                                                            uc4aGet(
-                                                                SI_RECEIVED,
-                                                                SI_UPDATE_CONFIRMED,
-                                                                true,
-                                                                uc11Get(
-                                                                    uc12Get(
-                                                                        uc13Get(
-                                                                            uc14Get(
-                                                                                SI_COMPLETED,
                                                                                 true))))))))))))))),
             Map.entry(
                 "Sea Waybill",

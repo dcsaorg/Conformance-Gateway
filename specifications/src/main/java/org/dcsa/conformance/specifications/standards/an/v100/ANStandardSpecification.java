@@ -42,6 +42,8 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.CargoItem;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetVolume;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Charge;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ClassifiedDate;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ClassifiedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ConsignmentItem;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsClearance;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsReference;
@@ -138,6 +140,8 @@ public class ANStandardSpecification extends StandardSpecification {
         CargoNetVolume.class,
         CargoNetWeight.class,
         Charge.class,
+        ClassifiedDate.class,
+        ClassifiedDateTime.class,
         ConsignmentItem.class,
         CountryCode.class,
         CustomsClearance.class,

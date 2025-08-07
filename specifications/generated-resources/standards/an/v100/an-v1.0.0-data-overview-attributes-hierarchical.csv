@@ -641,14 +641,39 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / serviceContractReference",serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 "ArrivalNotice / termsAndConditions",termsAndConditions,string,,maxLength=50000,,,"Carrier terms and conditions for the Arrival Notice.",
 "ArrivalNotice / transport",transport,Transport,,,,,"Transport info",
-"ArrivalNotice / transport / departureDate",departureDate,"string(date)",,,,2025-01-23,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
+"ArrivalNotice / transport / departureDate",departureDate,ClassifiedDate,,,,,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
-"ArrivalNotice / transport / estimatedGeneralOrderDateTime","estimatedGeneralOrderDateTime","string(date-time)",,,,2025-01-23T01:23:45Z,"The estimated date and time when the shipment will be placed under General Order status
+"ArrivalNotice / transport / departureDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / transport / departureDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / generalOrderDateTime",generalOrderDateTime,ClassifiedDateTime,,,,,"The date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
-"ArrivalNotice / transport / estimatedInlandArrivalDate","estimatedInlandArrivalDate","string(date)",,,,2025-01-23,"The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
-"ArrivalNotice / transport / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at Place of Delivery.",
-"ArrivalNotice / transport / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the Port of Discharge.",
-"ArrivalNotice / transport / legs",legs,"Leg list",,,,,"The legs of the transport that are relevant in this context",
+"ArrivalNotice / transport / generalOrderDateTime / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / transport / generalOrderDateTime / value",value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+"ArrivalNotice / transport / inlandArrivalDate",inlandArrivalDate,ClassifiedDate,,,,,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
+"ArrivalNotice / transport / inlandArrivalDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / transport / inlandArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / legs",legs,"Leg list",,,,,"Full or partial information, considered relevant in this context, on some or all `Legs` of the `Transport`",
+"ArrivalNotice / transport / legs / arrivalDate",arrivalDate,ClassifiedDate,,,,,"Arrival date",
+"ArrivalNotice / transport / legs / arrivalDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / transport / legs / arrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / legs / departureDate",departureDate,ClassifiedDate,,,,,"Departure date",
+"ArrivalNotice / transport / legs / departureDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / transport / legs / departureDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
 "ArrivalNotice / transport / legs / dischargeLocation",dischargeLocation,Location,,,,,"Discharge location",
 "ArrivalNotice / transport / legs / dischargeLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -729,8 +754,6 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `TRUCK` - Truck
 - `BARGE` - Barge
 - `MULTIMODAL` - Multimodal",
-"ArrivalNotice / transport / legs / plannedArrivalDate",plannedArrivalDate,"string(date)",,,,2025-01-23,"Planned arrival date",
-"ArrivalNotice / transport / legs / plannedDepartureDate",plannedDepartureDate,"string(date)",,,,2025-01-23,"Planned departure date",
 "ArrivalNotice / transport / legs / transportPlanStage",transportPlanStage,string,,maxLength=10,,MNC,"A specific stage of transport
 - `PRC` - Pre-Carriage Transport
 - `MNC` - Main Carriage Transport
@@ -749,14 +772,19 @@ It can be used for customs clearance purposes in specific countries (e.g. NL, UK
 and is assigned by the International Telecommunication Union (ITU).
 It consists of a three-letter alphanumeric prefix that indicates nationality,
 followed by one to four characters to identify the individual vessel.",
-"ArrivalNotice / transport / legs / vesselVoyage / vesselFlag",vesselFlag,string,,maxLength=2,,NL,"The flag of the nation whose laws the vessel is registered under.
-This is indicated by the 2 characters for the country code using
+"ArrivalNotice / transport / legs / vesselVoyage / vesselFlag",vesselFlag,string,,maxLength=2,,NL,"The national flag of the country under which a vessel is registered,
+indicated by the 2-character code defined in
 [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",
 "ArrivalNotice / transport / legs / vesselVoyage / vesselIMONumber",vesselIMONumber,string,,maxLength=8,,12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
 The reference is the International Maritime Organisation (IMO) number,
 also sometimes known as the Lloyd's register code.",
 "ArrivalNotice / transport / legs / vesselVoyage / vesselName",vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
-"ArrivalNotice / transport / onBoardDate",onBoardDate,"string(date)",,,,2025-01-23,"The date when the container was loaded onto the vessel at the port of origin.",
+"ArrivalNotice / transport / onBoardDate",onBoardDate,ClassifiedDate,,,,,"The date when the container was loaded onto the vessel at the port of origin.",
+"ArrivalNotice / transport / onBoardDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / transport / onBoardDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
 "ArrivalNotice / transport / placeOfDelivery",placeOfDelivery,Location,,,,,"The location where the cargo is handed over to the consignee, or his agent,
 by the shipping line and where responsibility of the shipping line ceases.",
 "ArrivalNotice / transport / placeOfDelivery / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -795,6 +823,12 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `INTE` - Inland terminal
 - `POTE` - Port terminal
 - `RAMP` - Ramp",
+"ArrivalNotice / transport / placeOfDeliveryArrivalDate","placeOfDeliveryArrivalDate",ClassifiedDate,,,,,"The date of arrival of the shipment at Place of Delivery.",
+"ArrivalNotice / transport / placeOfDeliveryArrivalDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / transport / placeOfDeliveryArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
 "ArrivalNotice / transport / placeOfReceipt",placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
 This indicates the point at which the shipping line takes on responsibility for carriage of the container.",
 "ArrivalNotice / transport / placeOfReceipt / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -870,6 +904,12 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `INTE` - Inland terminal
 - `POTE` - Port terminal
 - `RAMP` - Ramp",
+"ArrivalNotice / transport / portOfDischargeArrivalDate","portOfDischargeArrivalDate",ClassifiedDate,,,,,"The date of arrival of the vessel at the Port of Discharge.",
+"ArrivalNotice / transport / portOfDischargeArrivalDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / transport / portOfDischargeArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
 "ArrivalNotice / transport / portOfLoading",portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
 "ArrivalNotice / transport / portOfLoading / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 

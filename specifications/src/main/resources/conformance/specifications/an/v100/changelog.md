@@ -4,6 +4,8 @@
 
 Restructured the `Transport` object to contain an array of `Leg`s, each with its own `VesselVoyage`. (SD-2352)
 
+Added qualifiers (planned / estimated / actual) to `Transport` and `Leg` dates. (SD-2361, SD-2381)
+
 Added property `lastFreeDate` to object `FreeTime`. (SD-2353)
 
 Added `Charges` also within the `UtilizedTransportEquipment` and `CargoItem`. (SD-2354)

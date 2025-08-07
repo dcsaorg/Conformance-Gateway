@@ -946,6 +946,41 @@ components:
           description: "Code of the partner responsible for the payment"
           example: "000123456"
       description: "Addresses the monetary value of freight and other service charges for a `Booking`."
+    ClassifiedDate:
+      type: "object"
+      properties:
+        value:
+          type: "string"
+          description: "String representation of a date in yyyy-MM-dd format."
+          format: "date"
+          example: "2025-01-23"
+        classifier:
+          type: "string"
+          description: |-
+            Classifier denoting whether a date/time is planned, estimated or actual
+            - `PLN` - Planned
+            - `EST` - Estimated
+            - `ACT` - Actual
+          example: "EST"
+      description: "Date classified as planned, estimated or actual"
+    ClassifiedDateTime:
+      type: "object"
+      properties:
+        value:
+          type: "string"
+          description: |
+            Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        classifier:
+          type: "string"
+          description: |-
+            Classifier denoting whether a date/time is planned, estimated or actual
+            - `PLN` - Planned
+            - `EST` - Estimated
+            - `ACT` - Actual
+          example: "EST"
+      description: "Date and time classified as planned, estimated or actual"
     ConsignmentItem:
       type: "object"
       properties:
@@ -1752,16 +1787,14 @@ components:
           description: "Discharge location"
           allOf:
           - $ref: "#/components/schemas/Location"
-        plannedDepartureDate:
-          type: "string"
-          description: "Planned departure date"
-          format: "date"
-          example: "2025-01-23"
-        plannedArrivalDate:
-          type: "string"
-          description: "Planned arrival date"
-          format: "date"
-          example: "2025-01-23"
+        departureDate:
+          description: "Departure date"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        arrivalDate:
+          description: "Arrival date"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
         modeOfTransport:
           maxLength: 50
           type: "string"
@@ -1777,7 +1810,7 @@ components:
           description: "Vessel and voyage details of a transport leg"
           allOf:
           - $ref: "#/components/schemas/VesselVoyage"
-      description: "Details of one transport leg"
+      description: "Details of each leg of the `Transport`"
     Limits:
       type: "object"
       properties:
@@ -2248,44 +2281,39 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
         departureDate:
-          type: "string"
           description: |
             The date of departure from the location where the cargo is handed over by the shipper, or his agent,
             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
-          format: "date"
-          example: "2025-01-23"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
         onBoardDate:
-          type: "string"
           description: |
             The date when the container was loaded onto the vessel at the port of origin.
-          format: "date"
-          example: "2025-01-23"
-        etaAtPortOfDischargeDate:
-          type: "string"
-          description: "The expected date of arrival of the vessel at the Port of Discharge."
-          format: "date"
-          example: "2025-01-23"
-        etaAtPlaceOfDeliveryDate:
-          type: "string"
-          description: "The expected date of arrival of the shipment at Place of Delivery."
-          format: "date"
-          example: "2025-01-23"
-        estimatedInlandArrivalDate:
-          type: "string"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        portOfDischargeArrivalDate:
+          description: "The date of arrival of the vessel at the Port of Discharge."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        placeOfDeliveryArrivalDate:
+          description: "The date of arrival of the shipment at Place of Delivery."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        inlandArrivalDate:
           description: |
-            The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
-          format: "date"
-          example: "2025-01-23"
-        estimatedGeneralOrderDateTime:
-          type: "string"
+            The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        generalOrderDateTime:
           description: |
-            The estimated date and time when the shipment will be placed under General Order status
+            The date and time when the shipment will be placed under General Order status
             (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
-          format: "date-time"
-          example: "2025-01-23T01:23:45Z"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
         legs:
           type: "array"
-          description: "The legs of the transport that are relevant in this context"
+          description: |
+            Full or partial information, considered relevant in this context, on some or all `Legs` of the `Transport`
           items:
             $ref: "#/components/schemas/Leg"
       description: "Transport info"
@@ -2361,8 +2389,8 @@ components:
           maxLength: 2
           type: "string"
           description: |
-            The flag of the nation whose laws the vessel is registered under.
-            This is indicated by the 2 characters for the country code using
+            The national flag of the country under which a vessel is registered,
+            indicated by the 2-character code defined in
             [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).
           example: "NL"
         vesselIMONumber:

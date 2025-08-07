@@ -1511,6 +1511,11 @@ components:
             Description of the conditions under which this free time item applies.
             It can include references to the carrier website or individual charges as per service contract/agreement.
           example: "Calculated as..."
+        lastFreeDate:
+          type: "string"
+          description: "The final day containers can be collected without incurring charges"
+          format: "date"
+          example: "2025-01-23"
       description: "Free time condition applicable to this shipment at destination."
     GeoCoordinate:
       type: "object"
@@ -1705,7 +1710,7 @@ components:
           maxLength: 10
           type: "string"
           description: |-
-            Code qualifying a specific stage of transport
+            A specific stage of transport
             - `PRC` - Pre-Carriage Transport
             - `MNC` - Main Carriage Transport
             - `ONC` - On-Carriage Transport

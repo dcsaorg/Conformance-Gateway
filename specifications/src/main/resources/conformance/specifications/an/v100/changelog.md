@@ -1,5 +1,12 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250815-alpha
+
+Restructured the `Transport` object to contain an array of `Leg`s, each with its own `VesselVoyage`. (SD-2352)
+
+Added property `lastFreeDate` to object `FreeTime`. (SD-2353)
+
+
 ## Snapshot v1.0.0-20250801-alpha
 
 Clarified that the ordering of `documentParties` is undefined except for parties of type `NI` for which it defines which one is the third, fourth, etc. notify party. (SD-2317)

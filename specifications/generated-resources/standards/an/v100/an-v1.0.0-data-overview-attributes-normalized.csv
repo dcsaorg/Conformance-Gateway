@@ -376,6 +376,7 @@ If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.
 ",
+FreeTime,lastFreeDate,"string(date)",,,,2025-01-23,"The final day containers can be collected without incurring charges",
 FreeTime,timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which free time is expressed
 - `CD` - Calendar days
 - `WD` - Working days
@@ -453,7 +454,7 @@ Leg,modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defin
 - `MULTIMODAL` - Multimodal",
 Leg,plannedArrivalDate,"string(date)",,,,2025-01-23,"Planned arrival date",
 Leg,plannedDepartureDate,"string(date)",,,,2025-01-23,"Planned departure date",
-Leg,transportPlanStage,string,,maxLength=10,,MNC,"Code qualifying a specific stage of transport
+Leg,transportPlanStage,string,,maxLength=10,,MNC,"A specific stage of transport
 - `PRC` - Pre-Carriage Transport
 - `MNC` - Main Carriage Transport
 - `ONC` - On-Carriage Transport",

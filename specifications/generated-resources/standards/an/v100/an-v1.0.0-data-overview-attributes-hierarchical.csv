@@ -421,6 +421,7 @@ If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.
 ",
+"ArrivalNotice / freeTimes / lastFreeDate",lastFreeDate,"string(date)",,,,2025-01-23,"The final day containers can be collected without incurring charges",
 "ArrivalNotice / freeTimes / timeUnit",timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which free time is expressed
 - `CD` - Calendar days
 - `WD` - Working days
@@ -589,7 +590,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `MULTIMODAL` - Multimodal",
 "ArrivalNotice / transport / legs / plannedArrivalDate",plannedArrivalDate,"string(date)",,,,2025-01-23,"Planned arrival date",
 "ArrivalNotice / transport / legs / plannedDepartureDate",plannedDepartureDate,"string(date)",,,,2025-01-23,"Planned departure date",
-"ArrivalNotice / transport / legs / transportPlanStage",transportPlanStage,string,,maxLength=10,,MNC,"Code qualifying a specific stage of transport
+"ArrivalNotice / transport / legs / transportPlanStage",transportPlanStage,string,,maxLength=10,,MNC,"A specific stage of transport
 - `PRC` - Pre-Carriage Transport
 - `MNC` - Main Carriage Transport
 - `ONC` - On-Carriage Transport",

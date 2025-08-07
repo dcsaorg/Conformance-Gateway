@@ -525,6 +525,10 @@ components:
           description: "Return information"
           allOf:
           - $ref: "#/components/schemas/ReturnInformation"
+        releaseInformation:
+          description: "Release information"
+          allOf:
+          - $ref: "#/components/schemas/ReleaseInformation"
         customsClearance:
           description: "Customs clearance information"
           allOf:
@@ -2181,6 +2185,33 @@ components:
             description: "The value of the reference."
             example: "HHL00103004"
       description: "References for a consignment item, used by shippers or freight forwarders and shared in events or printed on documents."
+    ReleaseInformation:
+      type: "object"
+      properties:
+        isReleasedByEmail:
+          type: "boolean"
+          description: "Indicates whether the shipment has been released via email."
+          example: false
+        isOBLReceived:
+          type: "boolean"
+          description: "Indicates that the Original Bill of Lading (OBL) has been surrendered to the carrier."
+          example: false
+        isFreightReleased:
+          type: "boolean"
+          description: |
+            Indicates whether the shipment has been "freight released", meaning the B/L has been surrendered
+            and all required freight payments have been received by the carrier.
+          example: false
+        freightReleaseDate:
+          type: "string"
+          description: "Date when the customer has provided the payment and the relevant documents."
+          format: "date"
+          example: "2025-01-23"
+        isCustomsReleased:
+          type: "boolean"
+          description: "Indicates whether the shipment has been cleared by customs."
+          example: false
+      description: "Release information"
     ReturnInformation:
       type: "object"
       properties:

@@ -598,6 +598,13 @@ If the pickup number is incorrect, the trucker will have his pickup request deni
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)",
 "ArrivalNotice / references / value",value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
+"ArrivalNotice / releaseInformation",releaseInformation,ReleaseInformation,,,,,"Release information",
+"ArrivalNotice / releaseInformation / freightReleaseDate",freightReleaseDate,"string(date)",,,,2025-01-23,"Date when the customer has provided the payment and the relevant documents.",
+"ArrivalNotice / releaseInformation / isCustomsReleased",isCustomsReleased,boolean,,,,false,"Indicates whether the shipment has been cleared by customs.",
+"ArrivalNotice / releaseInformation / isFreightReleased",isFreightReleased,boolean,,,,false,"Indicates whether the shipment has been ""freight released"", meaning the B/L has been surrendered
+and all required freight payments have been received by the carrier.",
+"ArrivalNotice / releaseInformation / isOBLReceived",isOBLReceived,boolean,,,,false,"Indicates that the Original Bill of Lading (OBL) has been surrendered to the carrier.",
+"ArrivalNotice / releaseInformation / isReleasedByEmail",isReleasedByEmail,boolean,,,,false,"Indicates whether the shipment has been released via email.",
 "ArrivalNotice / returnInformation",returnInformation,ReturnInformation,,,,,"Return information",
 "ArrivalNotice / returnInformation / returnInstructions",returnInstructions,string,,maxLength=5000,,"Please place the container...","Return instructions",
 "ArrivalNotice / returnInformation / returnLocation",returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",

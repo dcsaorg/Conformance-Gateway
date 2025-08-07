@@ -74,6 +74,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.PaymentRemitt
 import org.dcsa.conformance.specifications.standards.an.v100.model.PickupInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReferenceConsignmentItem;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ReleaseInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReturnInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Seal;
 import org.dcsa.conformance.specifications.standards.an.v100.model.TareWeight;
@@ -187,6 +188,7 @@ public class ANStandardSpecification extends StandardSpecification {
         PostArrivalNoticesResponse.class,
         Reference.class,
         ReferenceConsignmentItem.class,
+        ReleaseInformation.class,
         ReturnInformation.class,
         Seal.class,
         TareWeight.class,

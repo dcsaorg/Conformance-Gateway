@@ -68,6 +68,7 @@ ArrivalNotice,issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The 
 ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
 ArrivalNotice,pickupInformation,PickupInformation,,,,,"Pickup information",
 ArrivalNotice,references,"Reference list",,,,,"A list of `References`",
+ArrivalNotice,releaseInformation,ReleaseInformation,,,,,"Release information",
 ArrivalNotice,returnInformation,ReturnInformation,,,,,"Return information",
 ArrivalNotice,serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 ArrivalNotice,termsAndConditions,string,,maxLength=50000,,,"Carrier terms and conditions for the Arrival Notice.",
@@ -579,6 +580,12 @@ ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes 
 ReferenceConsignmentItem,values,"string list",,maxLength=35,,,"List of `referenceValues` for a given `referenceType`.
 Item description:
 The value of the reference.",
+ReleaseInformation,freightReleaseDate,"string(date)",,,,2025-01-23,"Date when the customer has provided the payment and the relevant documents.",
+ReleaseInformation,isCustomsReleased,boolean,,,,false,"Indicates whether the shipment has been cleared by customs.",
+ReleaseInformation,isFreightReleased,boolean,,,,false,"Indicates whether the shipment has been ""freight released"", meaning the B/L has been surrendered
+and all required freight payments have been received by the carrier.",
+ReleaseInformation,isOBLReceived,boolean,,,,false,"Indicates that the Original Bill of Lading (OBL) has been surrendered to the carrier.",
+ReleaseInformation,isReleasedByEmail,boolean,,,,false,"Indicates whether the shipment has been released via email.",
 ReturnInformation,returnInstructions,string,,maxLength=5000,,"Please place the container...","Return instructions",
 ReturnInformation,returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
 ReturnInformation,turnInReference,string,,,,HLCSTD45,"Code or reference required when returning equipment to the depot.",

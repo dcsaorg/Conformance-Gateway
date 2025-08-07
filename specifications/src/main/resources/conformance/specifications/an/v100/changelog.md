@@ -4,7 +4,7 @@
 
 Restructured the `Transport` object to contain an array of `Leg`s, each with its own `VesselVoyage`. (SD-2352)
 
-Added qualifiers (planned / estimated / actual) to `Transport` and `Leg` dates. (SD-2361, SD-2381)
+Added classifiers (planned / estimated / actual) to `Transport` and `Leg` dates. (SD-2361, SD-2381)
 
 Added property `lastFreeDate` to object `FreeTime`. (SD-2353)
 
@@ -15,6 +15,8 @@ Added to `Charges` the properties `chargeCode`, `paymentLocation`, `chargePartne
 Added to `Location` the property `locationTypeCode`. (SD-2363)
 
 Clarified that `freightPaymentStatus` refers only to collect freight charges. (SD-2375)
+
+Added a new `ReleaseInformation` object to the root `ArrivalNotice` object. (SD-2364)
 
 
 ## Snapshot v1.0.0-20250801-alpha

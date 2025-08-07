@@ -11,7 +11,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.CurrencyCode;
 
 @Schema(
     description =
-        org.dcsa.conformance.specifications.standards.dt.v100.model.Charge.CLASS_SCHEMA_DESCRIPTION)
+        "Addresses the monetary value of freight and other service charges for a shipment.")
 @Getter
 @Setter
 @RequiredArgsConstructor

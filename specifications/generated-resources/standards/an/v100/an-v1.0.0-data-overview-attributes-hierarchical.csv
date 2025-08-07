@@ -510,7 +510,7 @@ Code used to denote the type of free time.
 - `DEM` - Demurrage
 - `DET` - Detention (in certain regions, particularly in the US, this is commonly referred to as 'Per Diem')
 - `STO` - Storage",
-"ArrivalNotice / freightPaymentStatus",freightPaymentStatus,string,,maxLength=50,,FULLY_PAID,"Payment status of the freight charges.
+"ArrivalNotice / freightPaymentStatus",freightPaymentStatus,string,,maxLength=50,,FULLY_PAID,"Payment status of the collect freight charges.
 
 - `ZERO_PAID` - Zero Paid
 - `PARTIALLY_PAID` - Partially Paid

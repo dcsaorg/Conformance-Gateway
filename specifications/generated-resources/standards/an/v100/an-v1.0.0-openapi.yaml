@@ -627,7 +627,7 @@ components:
           maxLength: 50
           type: "string"
           description: |-
-            Payment status of the freight charges.
+            Payment status of the collect freight charges.
 
             - `ZERO_PAID` - Zero Paid
             - `PARTIALLY_PAID` - Partially Paid

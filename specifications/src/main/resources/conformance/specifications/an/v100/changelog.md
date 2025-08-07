@@ -10,6 +10,8 @@ Added `Charges` also within the `UtilizedTransportEquipment` and `CargoItem`. (S
 
 Added to `Charges` the properties `chargeCode`, `paymentLocation`, `chargePartnerCode` and `paymentCurrency`. (SD-2355, SD-2376)
 
+Clarified that `freightPaymentStatus` refers only to collect freight charges. (SD-2375)
+
 
 ## Snapshot v1.0.0-20250801-alpha
 

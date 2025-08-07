@@ -57,7 +57,7 @@ Note that while parties can generally appear in any order, including `N1` (First
 and `N2` (Second Notify Party), the order of parties of type `NI` (Other Notify Party) is relevant,
 as it determines which of these parties is considered the third, fourth, fifth (and so on) notify party.",
 ArrivalNotice,freeTimes,"FreeTime list",,,,,"List of free time conditions applicable to this shipment at destination",
-ArrivalNotice,freightPaymentStatus,string,,maxLength=50,,FULLY_PAID,"Payment status of the freight charges.
+ArrivalNotice,freightPaymentStatus,string,,maxLength=50,,FULLY_PAID,"Payment status of the collect freight charges.
 
 - `ZERO_PAID` - Zero Paid
 - `PARTIALLY_PAID` - Partially Paid

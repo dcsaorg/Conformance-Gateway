@@ -1825,6 +1825,20 @@ components:
           type: "string"
           description: "The name of the location."
           example: "Port of Amsterdam"
+        typeCode:
+          maxLength: 10
+          type: "string"
+          description: |-
+            Code identifying a specific type of location
+
+            - `CLOC` - Customer location
+            - `COFS` - Container freight station
+            - `OFFD` - Off-dock storage
+            - `DEPO` - Depot
+            - `INTE` - Inland terminal
+            - `POTE` - Port terminal
+            - `RAMP` - Ramp
+          example: "RAMP"
         address:
           description: "Location address"
           allOf:

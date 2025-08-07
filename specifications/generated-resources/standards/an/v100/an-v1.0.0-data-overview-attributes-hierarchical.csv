@@ -69,6 +69,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / charges / paymentLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / charges / paymentLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / charges / paymentLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / charges / paymentLocation / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / charges / paymentTermCode",paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
 
 - `PRE` (Prepaid)
@@ -146,6 +155,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentTermCode",paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
 
 - `PRE` (Prepaid)
@@ -384,6 +402,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / customsClearance / customsClearancePoint / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / customsClearance / customsClearancePoint / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / customsClearance / customsClearancePoint / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / customsClearance / customsClearancePoint / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / customsClearance / customsImportDeclarationProcedure","customsImportDeclarationProcedure",string,,maxLength=1000,,,"Instructions on the administrative processes for submitting import customs declarations to the local agency.",
 "ArrivalNotice / customsClearance / immediateTransportationEntry","immediateTransportationEntry","ImmediateTransportationEntry",,,,,"An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
 that allows imported cargo to be moved from the first port of arrival in the U.S.
@@ -553,6 +580,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / pickupInformation / pickupLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / pickupInformation / pickupLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / pickupInformation / pickupLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / pickupInformation / pickupLocation / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / pickupInformation / pickupNumber",pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
 A trucker picking up a container must present the correct pickup number.
 If the pickup number is incorrect, the trucker will have his pickup request denied.",
@@ -592,6 +628,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / returnInformation / returnLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / returnInformation / returnLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / returnInformation / returnLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / returnInformation / returnLocation / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / returnInformation / turnInReference",turnInReference,string,,,,HLCSTD45,"Code or reference required when returning equipment to the depot.",
 "ArrivalNotice / serviceContractReference",serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 "ArrivalNotice / termsAndConditions",termsAndConditions,string,,maxLength=50000,,,"Carrier terms and conditions for the Arrival Notice.",
@@ -632,6 +677,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / legs / dischargeLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / legs / dischargeLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / legs / dischargeLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / transport / legs / dischargeLocation / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / transport / legs / loadLocation",loadLocation,Location,,,,,"Load location",
 "ArrivalNotice / transport / legs / loadLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -660,6 +714,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / legs / loadLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / legs / loadLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / legs / loadLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / transport / legs / loadLocation / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / transport / legs / modeOfTransport",modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA
 - `VESSEL` - Vessel
 - `RAIL` - Rail
@@ -723,6 +786,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / placeOfDelivery / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfDelivery / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfDelivery / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / transport / placeOfDelivery / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / transport / placeOfReceipt",placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
 This indicates the point at which the shipping line takes on responsibility for carriage of the container.",
 "ArrivalNotice / transport / placeOfReceipt / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -752,6 +824,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfReceipt / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / placeOfReceipt / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / transport / placeOfReceipt / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / transport / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 "ArrivalNotice / transport / portOfDischarge / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -780,6 +861,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / portOfDischarge / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfDischarge / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfDischarge / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / transport / portOfDischarge / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / transport / portOfLoading",portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
 "ArrivalNotice / transport / portOfLoading / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -808,6 +898,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / portOfLoading / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfLoading / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfLoading / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / transport / portOfLoading / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / transportDocumentReference","transportDocumentReference",string,yes,maxLength=20,,HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
 "ArrivalNotice / transportDocumentTypeCode","transportDocumentTypeCode",string,,,,SWB,"Specifies the type of the transport document
 - `BOL` (Bill of Lading)
@@ -890,6 +989,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentTermCode",paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
 
 - `PRE` (Prepaid)
@@ -944,6 +1052,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupNumber",pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
 A trucker picking up a container must present the correct pickup number.
 If the pickup number is incorrect, the trucker will have his pickup request denied.",
@@ -983,6 +1100,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNotice / utilizedTransportEquipments / returnInformation / turnInReference",turnInReference,string,,,,HLCSTD45,"Code or reference required when returning equipment to the depot.",
 "ArrivalNotice / utilizedTransportEquipments / seals",seals,"Seal list",,,,,"A list of `Seals`",
 "ArrivalNotice / utilizedTransportEquipments / seals / number",number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
@@ -1046,6 +1172,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNoticeNotification / placeOfDelivery / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNoticeNotification / placeOfDelivery / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNoticeNotification / placeOfDelivery / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNoticeNotification / placeOfDelivery / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNoticeNotification / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel",
 "ArrivalNoticeNotification / portOfDischarge / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -1074,6 +1209,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNoticeNotification / portOfDischarge / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNoticeNotification / portOfDischarge / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNoticeNotification / portOfDischarge / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNoticeNotification / portOfDischarge / typeCode",typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 "ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,,,TDR1234,"The reference of the transport document for which this arrival notice was created",
 "ArrivalNoticeNotification / typeLabel",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
 for example ""English, consignee, USD"" or ""No charges, French"".

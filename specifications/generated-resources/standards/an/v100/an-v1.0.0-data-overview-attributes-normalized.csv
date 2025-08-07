@@ -484,6 +484,15 @@ Location,address,Address,,,,,"Location address",
 Location,facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
 Location,geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
 Location,locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+Location,typeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
 NationalCommodityCode,countryCode,string,,maxLength=2,,BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 NationalCommodityCode,type,string,,maxLength=10,,NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
 - `NCM` (Nomenclatura Comum do Mercosul)

@@ -32,9 +32,15 @@ The content of the clause.",
 "ArrivalNotice / charges / calculationBasis",calculationBasis,string,,maxLength=50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
 "ArrivalNotice / charges / carrierRateOfExchange",carrierRateOfExchange,string,,maxLength=50,,"1.00 Euro = 1.17801 US Dollars","The quotation of the relative value of a currency unit against the unit of another currency
 in the foreign exchange market applicable to this charge item.
-The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+The currency exchange specified here refers to the exchange rate between the payment currency
+and the charge currency, in an unspecified order.
+
+The Carrier Rate of Exchange applicability is defined based on the local jurisdiction.
 If not provided, the customer should refer to the ROE available on the carrier website
-or the ROE defined by the competent customs authority, as per local practice.",
+or the ROE defined by the competent customs authority, as per local practice.
+
+The publisher must clearly indicate in its API documentation whether the specified rate corresponds
+to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / charges / chargeCode",chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 "ArrivalNotice / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
 "ArrivalNotice / charges / chargePartnerCode",chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
@@ -118,9 +124,15 @@ More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/
 "ArrivalNotice / consignmentItems / cargoItems / charges / calculationBasis",calculationBasis,string,,maxLength=50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / carrierRateOfExchange",carrierRateOfExchange,string,,maxLength=50,,"1.00 Euro = 1.17801 US Dollars","The quotation of the relative value of a currency unit against the unit of another currency
 in the foreign exchange market applicable to this charge item.
-The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+The currency exchange specified here refers to the exchange rate between the payment currency
+and the charge currency, in an unspecified order.
+
+The Carrier Rate of Exchange applicability is defined based on the local jurisdiction.
 If not provided, the customer should refer to the ROE available on the carrier website
-or the ROE defined by the competent customs authority, as per local practice.",
+or the ROE defined by the competent customs authority, as per local practice.
+
+The publisher must clearly indicate in its API documentation whether the specified rate corresponds
+to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / chargeCode",chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 "ArrivalNotice / consignmentItems / cargoItems / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
 "ArrivalNotice / consignmentItems / cargoItems / charges / chargePartnerCode",chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
@@ -999,9 +1011,15 @@ and may or may not change between timestamped versions).",
 "ArrivalNotice / utilizedTransportEquipments / charges / calculationBasis",calculationBasis,string,,maxLength=50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
 "ArrivalNotice / utilizedTransportEquipments / charges / carrierRateOfExchange",carrierRateOfExchange,string,,maxLength=50,,"1.00 Euro = 1.17801 US Dollars","The quotation of the relative value of a currency unit against the unit of another currency
 in the foreign exchange market applicable to this charge item.
-The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+The currency exchange specified here refers to the exchange rate between the payment currency
+and the charge currency, in an unspecified order.
+
+The Carrier Rate of Exchange applicability is defined based on the local jurisdiction.
 If not provided, the customer should refer to the ROE available on the carrier website
-or the ROE defined by the competent customs authority, as per local practice.",
+or the ROE defined by the competent customs authority, as per local practice.
+
+The publisher must clearly indicate in its API documentation whether the specified rate corresponds
+to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / utilizedTransportEquipments / charges / chargeCode",chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 "ArrivalNotice / utilizedTransportEquipments / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
 "ArrivalNotice / utilizedTransportEquipments / charges / chargePartnerCode",chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",

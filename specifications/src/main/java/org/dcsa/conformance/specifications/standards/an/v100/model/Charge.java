@@ -29,9 +29,15 @@ public class Charge extends org.dcsa.conformance.specifications.standards.dt.v10
 """
 The quotation of the relative value of a currency unit against the unit of another currency
 in the foreign exchange market applicable to this charge item.
-The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+The currency exchange specified here refers to the exchange rate between the payment currency
+and the charge currency, in an unspecified order.
+
+The Carrier Rate of Exchange applicability is defined based on the local jurisdiction.
 If not provided, the customer should refer to the ROE available on the carrier website
 or the ROE defined by the competent customs authority, as per local practice.
+
+The publisher must clearly indicate in its API documentation whether the specified rate corresponds
+to a vessel rate of exchange or a daily rate of exchange.
 """)
   protected String carrierRateOfExchange;
 

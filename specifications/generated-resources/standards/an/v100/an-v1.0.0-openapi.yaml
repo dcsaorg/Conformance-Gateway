@@ -916,6 +916,12 @@ components:
           description: "The amount of unit for this charge item."
           format: "float"
           example: 34.4
+        paymentCurrency:
+          maxLength: 3
+          type: "string"
+          description: |
+            Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).
+          example: "EUR"
         carrierRateOfExchange:
           maxLength: 50
           type: "string"
@@ -926,6 +932,19 @@ components:
             If not provided, the customer should refer to the ROE available on the carrier website
             or the ROE defined by the competent customs authority, as per local practice.
           example: "1.00 Euro = 1.17801 US Dollars"
+        chargeCode:
+          maxLength: 50
+          type: "string"
+          description: "Code associated with the charge"
+          example: "FRT00"
+        paymentLocation:
+          description: "Payment location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        chargePartnerCode:
+          type: "string"
+          description: "Code of the partner responsible for the payment"
+          example: "000123456"
       description: "Addresses the monetary value of freight and other service charges for a `Booking`."
     ConsignmentItem:
       type: "object"

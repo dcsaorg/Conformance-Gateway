@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.dcsa.conformance.specifications.generator.ClearSchemaConstraints;
+import org.dcsa.conformance.specifications.standards.an.v100.types.CurrencyCode;
 
 @Schema(
     description =
@@ -18,6 +19,8 @@ import org.dcsa.conformance.specifications.generator.ClearSchemaConstraints;
 @EqualsAndHashCode(callSuper = true)
 @ClearSchemaConstraints
 public class Charge extends org.dcsa.conformance.specifications.standards.dt.v100.model.Charge {
+
+  @Schema() protected CurrencyCode paymentCurrency;
 
   @Schema(
       maxLength = 50,
@@ -34,4 +37,13 @@ or the ROE defined by the competent customs authority, as per local practice.
 
   @Schema(description = PAYMENT_TERM_CODE_DESCRIPTION, example = "PRE")
   protected String paymentTermCode;
+
+  @Schema(maxLength = 50, example = "FRT00", description = "Code associated with the charge")
+  protected String chargeCode;
+
+  @Schema(description = "Payment location")
+  protected Location paymentLocation;
+
+  @Schema(example = "000123456", description = "Code of the partner responsible for the payment")
+  protected String chargePartnerCode;
 }

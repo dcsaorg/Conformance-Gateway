@@ -8,6 +8,8 @@ Added property `lastFreeDate` to object `FreeTime`. (SD-2353)
 
 Added `Charges` also within the `UtilizedTransportEquipment` and `CargoItem`. (SD-2354)
 
+Added to `Charges` the properties `chargeCode`, `paymentLocation`, `chargePartnerCode` and `paymentCurrency`. (SD-2355, SD-2376)
+
 
 ## Snapshot v1.0.0-20250801-alpha
 

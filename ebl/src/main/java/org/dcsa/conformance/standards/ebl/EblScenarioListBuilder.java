@@ -128,7 +128,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 "Carrier error response conformance",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
                     .then(
-                        uc1ShipperSubmitShippingInstructions()
+                        uc6CarrierPublishDraftTransportDocument(true)
                             .then(shipperGetTransportDocumentErrorScenario()))))
         .collect(
             Collectors.toMap(

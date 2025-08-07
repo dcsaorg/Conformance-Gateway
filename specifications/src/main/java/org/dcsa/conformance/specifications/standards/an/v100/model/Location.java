@@ -12,7 +12,7 @@ public class Location {
   private String locationName;
 
   @Schema()
-  private LocationTypeCode typeCode;
+  private LocationTypeCode locationTypeCode;
 
   @Schema(description = "Location address")
   private Address address;

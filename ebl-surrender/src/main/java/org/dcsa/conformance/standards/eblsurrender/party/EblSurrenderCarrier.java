@@ -141,6 +141,11 @@ public class EblSurrenderCarrier extends ConformanceParty {
             .put("action", action);
     asyncCounterpartNotification(null, "/v3/ebl-surrender-responses", carrierResponse);
 
+    if (EblSurrenderPlatform.INVALID_TDR.equals(tdr)) {
+      eblStatesById.put(
+          EblSurrenderPlatform.INVALID_TDR, EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED);
+    }
+
     if (Objects.equals(
         EblSurrenderState.AVAILABLE_FOR_SURRENDER,
         eblStatesById.getOrDefault(

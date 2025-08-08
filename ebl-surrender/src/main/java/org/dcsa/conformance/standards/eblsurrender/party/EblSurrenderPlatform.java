@@ -24,6 +24,8 @@ import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestRespon
 
 @Slf4j
 public class EblSurrenderPlatform extends ConformanceParty {
+
+  public static final String INVALID_TDR = UUID.randomUUID().toString();
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
   private final Map<String, String> tdrsBySrr = new HashMap<>();
 
@@ -118,7 +120,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
             .path(SurrenderRequestResponseErrorAction.SEND_NO_TRANSPORT_DOCUMENT_REFERENCE)
             .asBoolean(false);
     if (errorScenario) {
-      ((ObjectNode) jsonRequestBody).put("transportDocumentReference", UUID.randomUUID().toString());
+      ((ObjectNode) jsonRequestBody).put("transportDocumentReference", INVALID_TDR);
     }
 
     syncCounterpartPost(

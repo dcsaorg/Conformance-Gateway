@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.checks.EblChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -100,7 +100,7 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
                     requestSchemaValidator),
-                EBLChecks.siRequestContentChecks(
+                EblChecks.siRequestContentChecks(
                     getMatchedExchangeUuid(),
                     expectedApiVersion,
                     getDspSupplier()));
@@ -112,7 +112,7 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
                 notificationSchemaValidator,
                 expectedSiStatus,
                 ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
-                EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier())));
+                EblChecks.sirInNotificationMustMatchDSP(getDspSupplier())));
       }
     };
   }

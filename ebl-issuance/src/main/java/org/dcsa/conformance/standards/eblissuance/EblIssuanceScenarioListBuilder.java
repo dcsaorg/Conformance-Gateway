@@ -23,7 +23,7 @@ class EblIssuanceScenarioListBuilder extends ScenarioListBuilder<EblIssuanceScen
     super(actionBuilder);
   }
 
-  public static LinkedHashMap<String, EblIssuanceScenarioListBuilder>
+  public static Map<String, EblIssuanceScenarioListBuilder>
       createModuleScenarioListBuilders(
           EblIssuanceComponentFactory componentFactory,
           String carrierPartyName,
@@ -53,7 +53,14 @@ class EblIssuanceScenarioListBuilder extends ScenarioListBuilder<EblIssuanceScen
                             .then(issuanceRequestResponse()),
                         platformScenarioParameters(
                                 EblType.STRAIGHT_EBL, IssuanceResponseCode.REFUSED)
-                            .then(issuanceRequestResponse()))))
+                            .then(issuanceRequestResponse()))),
+            Map.entry(
+                "Solution Provider error response conformance",
+                carrierScenarioParameters()
+                    .then(
+                        platformScenarioParameters(
+                                EblType.STRAIGHT_EBL, IssuanceResponseCode.ACCEPTED)
+                            .then(issuanceRequestResponseError()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -98,5 +105,18 @@ class EblIssuanceScenarioListBuilder extends ScenarioListBuilder<EblIssuanceScen
                     EblIssuanceRole.CARRIER.getConfigName(), true, false),
                 componentFactory.getMessageSchemaValidator(
                     EblIssuanceRole.CARRIER.getConfigName(), true, true)));
+  }
+
+  private static EblIssuanceScenarioListBuilder issuanceRequestResponseError() {
+    EblIssuanceComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String platformPartyName = threadLocalPlatformPartyName.get();
+    return new EblIssuanceScenarioListBuilder(
+        previousAction ->
+            new IssuanceRequestErrorResponseAction(
+                platformPartyName,
+                carrierPartyName,
+                (IssuanceAction) previousAction,
+                componentFactory.getMessageSchemaValidator("ErrorResponse")));
   }
 }

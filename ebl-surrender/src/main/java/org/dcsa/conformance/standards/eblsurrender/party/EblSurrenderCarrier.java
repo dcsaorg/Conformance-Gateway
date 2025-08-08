@@ -5,6 +5,8 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
@@ -15,6 +17,7 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -166,16 +169,31 @@ public class EblSurrenderCarrier extends ConformanceParty {
                   .put("surrenderRequestReference", srr)
                   .put("transportDocumentReference", tdr)));
     } else {
-      return request.createResponse(
-          409,
-          Map.of(API_VERSION, List.of(apiVersion)),
-          new ConformanceMessageBody(
-              OBJECT_MAPPER
-                  .createObjectNode()
-                  .put(
-                      "comments",
-                      "Rejecting '%s' for document '%s' because it is in state '%s'"
-                          .formatted(src, tdr, eblStatesById.get(tdr)))));
+      return return409(
+          request,
+          "Rejecting '%s' for document '%s' because it is in state '%s'"
+              .formatted(src, tdr, eblStatesById.get(tdr)));
     }
+  }
+
+  private ConformanceResponse return409(ConformanceRequest request, String message) {
+    ObjectNode response =
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/eblsurrender/messages/eblsurrender-api-v3.0.0-error-message.json",
+                Map.of(
+                    "HTTP_METHOD_PLACEHOLDER",
+                    request.method(),
+                    "REQUEST_URI_PLACEHOLDER",
+                    request.url(),
+                    "REFERENCE_PLACEHOLDER",
+                    UUID.randomUUID().toString(),
+                    "ERROR_DATE_TIME_PLACEHOLDER",
+                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
+                    "ERROR_MESSAGE_PLACEHOLDER",
+                    message));
+
+    return request.createResponse(
+        409, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 }

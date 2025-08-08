@@ -1,0 +1,16 @@
+{
+  "httpMethod": "HTTP_METHOD_PLACEHOLDER",
+  "requestUri": "REQUEST_URI_PLACEHOLDER",
+  "statusCode": 409,
+  "statusCodeText": "Conflict",
+  "statusCodeMessage": "Invalid state",
+  "providerCorrelationReference": "REFERENCE_PLACEHOLDER",
+  "errorDateTime": "ERROR_DATE_TIME_PLACEHOLDER",
+  "errors": [
+    {
+      "errorCode": 7003,
+      "errorCodeText": "Invalid state",
+      "errorCodeMessage": "ERROR_MESSAGE_PLACEHOLDER"
+    }
+  ]
+}

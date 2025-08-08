@@ -8,14 +8,14 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Getter
 @Schema(
     type = "string",
-    maxLength = 10,
-    example = "MNC",
-    description = "A specific stage of transport")
+    example = "EST",
+    description = "Classifier denoting whether a date/time is planned, estimated or actual")
 @AllArgsConstructor
-public enum TransportPlanStageCode implements EnumBase {
-  PRC("Pre-Carriage Transport"),
-  MNC("Main Carriage Transport"),
-  ONC("On-Carriage Transport");
+public enum DateTimeClassifierCode implements EnumBase {
+  PLN("Planned"),
+  EST("Estimated"),
+  ACT("Actual")
+  ;
 
   private final String valueDescription;
 }

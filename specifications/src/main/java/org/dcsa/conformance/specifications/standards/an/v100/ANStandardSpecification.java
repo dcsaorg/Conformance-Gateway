@@ -42,6 +42,8 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.CargoItem;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetVolume;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Charge;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ClassifiedDate;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ClassifiedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ConsignmentItem;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsClearance;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsReference;
@@ -72,6 +74,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.PaymentRemitt
 import org.dcsa.conformance.specifications.standards.an.v100.model.PickupInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReferenceConsignmentItem;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ReleaseInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReturnInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Seal;
 import org.dcsa.conformance.specifications.standards.an.v100.model.TareWeight;
@@ -138,6 +141,8 @@ public class ANStandardSpecification extends StandardSpecification {
         CargoNetVolume.class,
         CargoNetWeight.class,
         Charge.class,
+        ClassifiedDate.class,
+        ClassifiedDateTime.class,
         ConsignmentItem.class,
         CountryCode.class,
         CustomsClearance.class,
@@ -183,6 +188,7 @@ public class ANStandardSpecification extends StandardSpecification {
         PostArrivalNoticesResponse.class,
         Reference.class,
         ReferenceConsignmentItem.class,
+        ReleaseInformation.class,
         ReturnInformation.class,
         Seal.class,
         TareWeight.class,

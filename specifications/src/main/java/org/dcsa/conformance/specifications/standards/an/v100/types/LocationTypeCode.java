@@ -9,13 +9,20 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Schema(
     type = "string",
     maxLength = 10,
-    example = "MNC",
-    description = "A specific stage of transport")
+    example = "RAMP",
+    description =
+"""
+Code identifying a specific type of location
+""")
 @AllArgsConstructor
-public enum TransportPlanStageCode implements EnumBase {
-  PRC("Pre-Carriage Transport"),
-  MNC("Main Carriage Transport"),
-  ONC("On-Carriage Transport");
+public enum LocationTypeCode implements EnumBase {
+  CLOC("Customer location"),
+  COFS("Container freight station"),
+  OFFD("Off-dock storage"),
+  DEPO("Depot"),
+  INTE("Inland terminal"),
+  POTE("Port terminal"),
+  RAMP("Ramp");
 
   private final String valueDescription;
 }

@@ -525,6 +525,10 @@ components:
           description: "Return information"
           allOf:
           - $ref: "#/components/schemas/ReturnInformation"
+        releaseInformation:
+          description: "Release information"
+          allOf:
+          - $ref: "#/components/schemas/ReleaseInformation"
         customsClearance:
           description: "Customs clearance information"
           allOf:
@@ -627,7 +631,7 @@ components:
           maxLength: 50
           type: "string"
           description: |-
-            Payment status of the freight charges.
+            Payment status of the collect freight charges.
 
             - `ZERO_PAID` - Zero Paid
             - `PARTIALLY_PAID` - Partially Paid
@@ -832,6 +836,11 @@ components:
             in some cases, the same order the consignee must follow for the final customs release.
           format: "int32"
           example: 12
+        charges:
+          type: "array"
+          description: "A list of `Charges`"
+          items:
+            $ref: "#/components/schemas/Charge"
       description: "A cargoItem is the smallest unit used in stuffing. It cannot be split across containers."
     CargoNetVolume:
       type: "object"
@@ -911,17 +920,77 @@ components:
           description: "The amount of unit for this charge item."
           format: "float"
           example: 34.4
+        paymentCurrency:
+          maxLength: 3
+          type: "string"
+          description: |
+            Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).
+          example: "EUR"
         carrierRateOfExchange:
           maxLength: 50
           type: "string"
           description: |
             The quotation of the relative value of a currency unit against the unit of another currency
             in the foreign exchange market applicable to this charge item.
-            The Carrier rate of exchange applicability is defined based on the local jurisdiction.
+            The currency exchange specified here refers to the exchange rate between the payment currency
+            and the charge currency, in an unspecified order.
+
+            The Carrier Rate of Exchange applicability is defined based on the local jurisdiction.
             If not provided, the customer should refer to the ROE available on the carrier website
             or the ROE defined by the competent customs authority, as per local practice.
+
+            The publisher must clearly indicate in its API documentation whether the specified rate corresponds
+            to a vessel rate of exchange or a daily rate of exchange.
           example: "1.00 Euro = 1.17801 US Dollars"
-      description: "Addresses the monetary value of freight and other service charges for a `Booking`."
+        chargeCode:
+          maxLength: 50
+          type: "string"
+          description: "Code associated with the charge"
+          example: "FRT00"
+        paymentLocation:
+          description: "Payment location"
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        chargePartnerCode:
+          type: "string"
+          description: "Code of the partner responsible for the payment"
+          example: "000123456"
+      description: "Addresses the monetary value of freight and other service charges for a shipment."
+    ClassifiedDate:
+      type: "object"
+      properties:
+        value:
+          type: "string"
+          description: "String representation of a date in yyyy-MM-dd format."
+          format: "date"
+          example: "2025-01-23"
+        classifier:
+          type: "string"
+          description: |-
+            Classifier denoting whether a date/time is planned, estimated or actual
+            - `PLN` - Planned
+            - `EST` - Estimated
+            - `ACT` - Actual
+          example: "EST"
+      description: "Date classified as planned, estimated or actual"
+    ClassifiedDateTime:
+      type: "object"
+      properties:
+        value:
+          type: "string"
+          description: |
+            Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        classifier:
+          type: "string"
+          description: |-
+            Classifier denoting whether a date/time is planned, estimated or actual
+            - `PLN` - Planned
+            - `EST` - Estimated
+            - `ACT` - Actual
+          example: "EST"
+      description: "Date and time classified as planned, estimated or actual"
     ConsignmentItem:
       type: "object"
       properties:
@@ -1511,6 +1580,11 @@ components:
             Description of the conditions under which this free time item applies.
             It can include references to the carrier website or individual charges as per service contract/agreement.
           example: "Calculated as..."
+        lastFreeDate:
+          type: "string"
+          description: "The final day containers can be collected without incurring charges"
+          format: "date"
+          example: "2025-01-23"
       description: "Free time condition applicable to this shipment at destination."
     GeoCoordinate:
       type: "object"
@@ -1705,7 +1779,7 @@ components:
           maxLength: 10
           type: "string"
           description: |-
-            Code qualifying a specific stage of transport
+            A specific stage of transport
             - `PRC` - Pre-Carriage Transport
             - `MNC` - Main Carriage Transport
             - `ONC` - On-Carriage Transport
@@ -1723,16 +1797,14 @@ components:
           description: "Discharge location"
           allOf:
           - $ref: "#/components/schemas/Location"
-        plannedDepartureDate:
-          type: "string"
-          description: "Planned departure date"
-          format: "date"
-          example: "2025-01-23"
-        plannedArrivalDate:
-          type: "string"
-          description: "Planned arrival date"
-          format: "date"
-          example: "2025-01-23"
+        departureDate:
+          description: "Departure date"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        arrivalDate:
+          description: "Arrival date"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
         modeOfTransport:
           maxLength: 50
           type: "string"
@@ -1748,7 +1820,7 @@ components:
           description: "Vessel and voyage details of a transport leg"
           allOf:
           - $ref: "#/components/schemas/VesselVoyage"
-      description: "Details of one transport leg"
+      description: "Details of each leg of the `Transport`"
     Limits:
       type: "object"
       properties:
@@ -1796,6 +1868,20 @@ components:
           type: "string"
           description: "The name of the location."
           example: "Port of Amsterdam"
+        locationTypeCode:
+          maxLength: 10
+          type: "string"
+          description: |-
+            Code identifying a specific type of location
+
+            - `CLOC` - Customer location
+            - `COFS` - Container freight station
+            - `OFFD` - Off-dock storage
+            - `DEPO` - Depot
+            - `INTE` - Inland terminal
+            - `POTE` - Port terminal
+            - `RAMP` - Ramp
+          example: "RAMP"
         address:
           description: "Location address"
           allOf:
@@ -2105,6 +2191,33 @@ components:
             description: "The value of the reference."
             example: "HHL00103004"
       description: "References for a consignment item, used by shippers or freight forwarders and shared in events or printed on documents."
+    ReleaseInformation:
+      type: "object"
+      properties:
+        isReleasedByEmail:
+          type: "boolean"
+          description: "Indicates whether the shipment has been released via email."
+          example: false
+        isOBLReceived:
+          type: "boolean"
+          description: "Indicates that the Original Bill of Lading (OBL) has been surrendered to the carrier."
+          example: false
+        isFreightReleased:
+          type: "boolean"
+          description: |
+            Indicates whether the shipment has been "freight released", meaning the B/L has been surrendered
+            and all required freight payments have been received by the carrier.
+          example: false
+        freightReleaseDate:
+          type: "string"
+          description: "Date when the customer has provided the payment and the relevant documents."
+          format: "date"
+          example: "2025-01-23"
+        isCustomsReleased:
+          type: "boolean"
+          description: "Indicates whether the shipment has been cleared by customs."
+          example: false
+      description: "Release information"
     ReturnInformation:
       type: "object"
       properties:
@@ -2205,44 +2318,39 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
         departureDate:
-          type: "string"
           description: |
             The date of departure from the location where the cargo is handed over by the shipper, or his agent,
             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
-          format: "date"
-          example: "2025-01-23"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
         onBoardDate:
-          type: "string"
           description: |
             The date when the container was loaded onto the vessel at the port of origin.
-          format: "date"
-          example: "2025-01-23"
-        etaAtPortOfDischargeDate:
-          type: "string"
-          description: "The expected date of arrival of the vessel at the Port of Discharge."
-          format: "date"
-          example: "2025-01-23"
-        etaAtPlaceOfDeliveryDate:
-          type: "string"
-          description: "The expected date of arrival of the shipment at Place of Delivery."
-          format: "date"
-          example: "2025-01-23"
-        estimatedInlandArrivalDate:
-          type: "string"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        portOfDischargeArrivalDate:
+          description: "The date of arrival of the vessel at the Port of Discharge."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        placeOfDeliveryArrivalDate:
+          description: "The date of arrival of the shipment at Place of Delivery."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        inlandArrivalDate:
           description: |
-            The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
-          format: "date"
-          example: "2025-01-23"
-        estimatedGeneralOrderDateTime:
-          type: "string"
+            The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        generalOrderDateTime:
           description: |
-            The estimated date and time when the shipment will be placed under General Order status
+            The date and time when the shipment will be placed under General Order status
             (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
-          format: "date-time"
-          example: "2025-01-23T01:23:45Z"
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
         legs:
           type: "array"
-          description: "The legs of the transport that are relevant in this context"
+          description: |
+            Full or partial information, considered relevant in this context, on some or all `Legs` of the `Transport`
           items:
             $ref: "#/components/schemas/Leg"
       description: "Transport info"
@@ -2300,6 +2408,11 @@ components:
           description: "Return information"
           allOf:
           - $ref: "#/components/schemas/ReturnInformation"
+        charges:
+          type: "array"
+          description: "A list of `Charges`"
+          items:
+            $ref: "#/components/schemas/Charge"
       description: "Specifies the container (`equipment`), total `weight`, `volume`, possible `ActiveReeferSettings`, `seals` and `references`."
     VesselVoyage:
       type: "object"
@@ -2313,8 +2426,8 @@ components:
           maxLength: 2
           type: "string"
           description: |
-            The flag of the nation whose laws the vessel is registered under.
-            This is indicated by the 2 characters for the country code using
+            The national flag of the country under which a vessel is registered,
+            indicated by the 2-character code defined in
             [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).
           example: "NL"
         vesselIMONumber:

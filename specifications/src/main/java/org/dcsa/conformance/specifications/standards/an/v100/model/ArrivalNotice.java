@@ -101,6 +101,9 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
   private ReturnInformation returnInformation;
 
   @Schema()
+  private ReleaseInformation releaseInformation;
+
+  @Schema()
   private CustomsClearance customsClearance;
 
   @Schema(

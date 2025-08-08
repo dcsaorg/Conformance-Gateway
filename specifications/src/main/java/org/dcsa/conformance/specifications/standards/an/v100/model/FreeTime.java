@@ -3,6 +3,7 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
+import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
@@ -43,4 +44,7 @@ It can include references to the carrier website or individual charges as per se
 """,
       example = "Calculated as...")
   private String calculationBasis;
+
+  @Schema(description = "The final day containers can be collected without incurring charges")
+  private FormattedDate lastFreeDate;
 }

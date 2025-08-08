@@ -65,6 +65,7 @@ public class EblShipper extends ConformanceParty {
       Map.entry(UC3ShipperSubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
       Map.entry(UC5_Shipper_CancelUpdateToShippingInstructionsAction.class, this::cancelUpdateToShippingInstructions),
       Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument),
+      Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument),
       Map.entry(ShipperGetShippingInstructionsErrorAction.class, this::getShippingInstructionsRequest)
     );
   }
@@ -202,6 +203,11 @@ public class EblShipper extends ConformanceParty {
   private void getTransportDocument(JsonNode actionPrompt) {
     log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("tdr").asText();
+    boolean errorScenario = actionPrompt.path(ShipperGetTransportDocumentErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
+
+    if (errorScenario) {
+      tdr = "NON-EXISTING-TD";
+    }
 
     syncCounterpartGet("/v3/transport-documents/" + URLEncoder.encode(tdr, StandardCharsets.UTF_8), Collections.emptyMap());
 

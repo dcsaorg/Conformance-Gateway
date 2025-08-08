@@ -99,7 +99,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             Map.entry(
                 "Shipper initiated update scenarios",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))))
+                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))),
+            Map.entry(
+                "Carrier error response conformance",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(
+                        uc1ShipperSubmitShippingInstructions()
+                            .then(shipperGetShippingInstructionsErrorScenario()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -503,6 +509,18 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 requestAmendedSI,
                 recordTDR,
                 useBothRef));
+  }
+
+  private static EblScenarioListBuilder shipperGetShippingInstructionsErrorScenario() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new ShipperGetShippingInstructionsErrorAction(
+                shipperPartyName,
+                carrierPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(EBL_API, ERROR_RESPONSE_SCHEMA_NAME)));
   }
 
   private static EblScenarioListBuilder shipperGetTransportDocument(

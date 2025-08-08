@@ -65,7 +65,8 @@ public class EblShipper extends ConformanceParty {
       Map.entry(UC3ShipperSubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
       Map.entry(UC5_Shipper_CancelUpdateToShippingInstructionsAction.class, this::cancelUpdateToShippingInstructions),
       Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument),
-      Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument)
+      Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument),
+      Map.entry(ShipperGetShippingInstructionsErrorAction.class, this::getShippingInstructionsRequest)
     );
   }
 
@@ -184,9 +185,15 @@ public class EblShipper extends ConformanceParty {
     log.info("Shipper.getShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String documentReference = actionPrompt.get("documentReference").asText();
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
+    boolean errorScenario = actionPrompt.path(ShipperGetShippingInstructionsErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
+
     Map<String, List<String>> queryParams = requestAmendment
       ? Map.of("updatedContent", List.of("true"))
       : Collections.emptyMap();
+
+    if (errorScenario) {
+      documentReference = "NON-EXISTING-SI";
+    }
 
     syncCounterpartGet("/v3/shipping-instructions/" + URLEncoder.encode(documentReference, StandardCharsets.UTF_8), queryParams);
 

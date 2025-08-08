@@ -462,7 +462,7 @@ public class EblCarrier extends ConformanceParty {
           .formatted(documentReference, si.getShippingInstructionsState().wireName()));
       return response;
     }
-    return return404(request);
+    return return404(request, "The Shipping Instructions does not exist");
   }
 
   private ConformanceResponse handleGetTransportDocument(ConformanceRequest request, String documentReference) {

@@ -745,40 +745,6 @@ components:
           example: "2025-01-23"
       description: |
         Lightweight notification that can be sent when a new or updated Arrival Notice is available
-    CargoGrossVolume:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            Calculated by multiplying the width, height, and length of the packed cargo. A maximum of 4 decimals should be provided.
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `FTQ` (Cubic foot)
-            - `MTQ` (Cubic meter)
-          example: "MTQ"
-      description: "Calculated by multiplying the width, height, and length of the packed cargo."
-    CargoGrossWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
-          format: "float"
-          example: 2400
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "The weight of the cargo item including packaging, excluding the tare weight of the container."
     CargoItem:
       type: "object"
       properties:
@@ -792,21 +758,26 @@ components:
             If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.
           example: "APZU4812090"
         cargoGrossWeight:
-          description: "Gross weight of the cargo."
+          description: |
+            Gross weight of the cargo item including packaging being carried in the container.
+            Excludes the tare weight of the container.
           allOf:
-          - $ref: "#/components/schemas/CargoGrossWeight"
+          - $ref: "#/components/schemas/Weight"
         cargoGrossVolume:
-          description: "Gross volume of the cargo."
+          description: |
+            Gross volume of the cargo item, calculated by multiplying the width, height, and length of the packaged cargo.
           allOf:
-          - $ref: "#/components/schemas/CargoGrossVolume"
+          - $ref: "#/components/schemas/Volume"
         cargoNetWeight:
-          description: "Net weight of the cargo."
+          description: |
+            Net weight of the cargo item, excluding packaging and excluding the tare weight of the container.
           allOf:
-          - $ref: "#/components/schemas/CargoNetWeight"
+          - $ref: "#/components/schemas/Weight"
         cargoNetVolume:
-          description: "Net volume of the cargo."
+          description: |
+            Net volume of the cargo item, calculated by multiplying the width, height, and length of the cargo, excluding packaging.
           allOf:
-          - $ref: "#/components/schemas/CargoNetVolume"
+          - $ref: "#/components/schemas/Volume"
         exportLicense:
           description: "Export license applicable to this cargo item."
           allOf:
@@ -842,40 +813,6 @@ components:
           items:
             $ref: "#/components/schemas/Charge"
       description: "A cargoItem is the smallest unit used in stuffing. It cannot be split across containers."
-    CargoNetVolume:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            Calculated by multiplying the width, height, and length of the cargo, excluding packaging.
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `FTQ` (Cubic foot)
-            - `MTQ` (Cubic meter)
-          example: "MTQ"
-      description: "Volume of the cargo excluding packaging. Calculated by multiplying width, height, and length."
-    CargoNetWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
-          format: "float"
-          example: 2400
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "The weight of the cargo item excluding packaging and container tare weight."
     Charge:
       type: "object"
       properties:
@@ -1295,19 +1232,19 @@ components:
         grossWeight:
           description: "Total weight of the goods carried, including packaging."
           allOf:
-          - $ref: "#/components/schemas/GrossWeight"
+          - $ref: "#/components/schemas/Weight"
         netWeight:
           description: "Total weight of the goods carried, excluding packaging."
           allOf:
-          - $ref: "#/components/schemas/NetWeight"
+          - $ref: "#/components/schemas/Weight"
         netExplosiveContent:
           description: "The total weight of the explosive substances, without the packaging, casings, etc."
           allOf:
-          - $ref: "#/components/schemas/NetExplosiveContent"
+          - $ref: "#/components/schemas/Weight"
         netVolume:
           description: "The volume of the referenced dangerous goods. Only applicable to liquids and gas."
           allOf:
-          - $ref: "#/components/schemas/NetVolume"
+          - $ref: "#/components/schemas/Volume"
         limits:
           description: "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure."
           allOf:
@@ -1440,7 +1377,7 @@ components:
         tareWeight:
           description: "The tare weight of the container."
           allOf:
-          - $ref: "#/components/schemas/TareWeight"
+          - $ref: "#/components/schemas/Weight"
       description: "Used for storing cargo during transport. Equipment size/type is defined by the ISO 6346 code. Common sizes include 20'/40'/45' containers."
     ExportLicense:
       type: "object"
@@ -1633,23 +1570,6 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `GET ArrivalNotices` request
-    GrossWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.
-          format: "float"
-          example: 12000.3
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "Total weight of the goods carried, including packaging."
     IdentifyingCode:
       type: "object"
       properties:
@@ -1936,58 +1856,6 @@ components:
             description: "The value of the `National Commodity Code`"
             example: "1515"
       description: "The national commodity classification code linked to a country with a value. Examples: NCM (Brazil), HTS (US), TARIC (EU)."
-    NetExplosiveContent:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            The total weight of the explosive substances, without the packaging’s, casings, etc.
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-            - `GRM` (Grams)
-            - `ONZ` (Ounce)
-          example: "KGM"
-      description: "The total weight of the explosive substances, without the packaging, casings, etc."
-    NetVolume:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: "The volume of the referenced dangerous goods."
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `FTQ` (Cubic foot)
-            - `MTQ` (Cubic meter)
-            - `LTR` (Litre)
-          example: "MTQ"
-      description: "The volume of the referenced dangerous goods. Only applicable to liquids and gas."
-    NetWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: "Total weight of the goods carried, excluding packaging."
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "Total weight of the goods carried, excluding packaging."
     OuterPackaging:
       type: "object"
       properties:
@@ -2254,22 +2122,6 @@ components:
             - `CUS` (Customs)
           example: "CUS"
       description: "Seal-related information associated with shipment equipment. A seal is affixed once the equipment is loaded and remains until final destination."
-    TareWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: "The weight of an empty container (gross container weight)."
-          format: "float"
-          example: 4800
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "The weight of an empty container (gross container weight)."
     TaxLegalReference:
       type: "object"
       properties:
@@ -2485,6 +2337,43 @@ components:
             It can be used for customs clearance purposes in specific countries (e.g. NL, UK).
           example: "CRN1234"
       description: "Vessel and voyage details of a transport leg"
+    Volume:
+      type: "object"
+      properties:
+        value:
+          type: "number"
+          description: "Volume value expressed in the measurement `unit`"
+          format: "float"
+          example: 2.4
+        unit:
+          type: "string"
+          description: |
+            Measurement unit in which the volume `value` is expressed:
+            - `FTQ` (Cubic foot)
+            - `MTQ` (Cubic meter)
+            - `LTR` (Litre)
+          example: "MTQ"
+      description: "Volume value and measurement unit"
+    Weight:
+      required:
+      - "unit"
+      type: "object"
+      properties:
+        value:
+          type: "number"
+          description: "Weight value expressed in the measurement `unit`"
+          format: "float"
+          example: 2.4
+        unit:
+          type: "string"
+          description: |
+            Measurement unit in which the weight `value` is expressed:
+            - `KGM` (Kilograms)
+            - `LBR` (Pounds)
+            - `GRM` (Grams)
+            - `ONZ` (Ounce)
+          example: "KGM"
+      description: "Weight value and measurement unit"
   headers:
     API-Version:
       description: "SemVer used to indicate the version of the contract (API version) returned."

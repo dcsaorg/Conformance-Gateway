@@ -100,26 +100,33 @@ Used by customs to classify the product being shipped. The type of HS code depen
 More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
 ",
 "ArrivalNotice / consignmentItems / cargoItems",cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume",cargoGrossVolume,CargoGrossVolume,,,,,"Gross volume of the cargo.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume / unit",unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume",cargoGrossVolume,Volume,,,,,"Gross volume of the cargo item, calculated by multiplying the width, height, and length of the packaged cargo.",
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume / unit",unit,string,,,,MTQ,"Measurement unit in which the volume `value` is expressed:
 - `FTQ` (Cubic foot)
-- `MTQ` (Cubic meter)",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume / value",value,number,,,,2.4,"Calculated by multiplying the width, height, and length of the packed cargo. A maximum of 4 decimals should be provided.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight",cargoGrossWeight,CargoGrossWeight,,,,,"Gross weight of the cargo.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+- `MTQ` (Cubic meter)
+- `LTR` (Litre)",
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume / value",value,number,,,,2.4,"Volume value expressed in the measurement `unit`",
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight",cargoGrossWeight,Weight,,,,,"Gross weight of the cargo item including packaging being carried in the container.
+Excludes the tare weight of the container.",
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / value",value,number,,,,2400,"The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume",cargoNetVolume,CargoNetVolume,,,,,"Net volume of the cargo.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume / unit",unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
+- `LBR` (Pounds)
+- `GRM` (Grams)
+- `ONZ` (Ounce)",
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / value",value,number,,,,2.4,"Weight value expressed in the measurement `unit`",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume",cargoNetVolume,Volume,,,,,"Net volume of the cargo item, calculated by multiplying the width, height, and length of the cargo, excluding packaging.",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume / unit",unit,string,,,,MTQ,"Measurement unit in which the volume `value` is expressed:
 - `FTQ` (Cubic foot)
-- `MTQ` (Cubic meter)",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume / value",value,number,,,,2.4,"Calculated by multiplying the width, height, and length of the cargo, excluding packaging.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight",cargoNetWeight,CargoNetWeight,,,,,"Net weight of the cargo.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+- `MTQ` (Cubic meter)
+- `LTR` (Litre)",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume / value",value,number,,,,2.4,"Volume value expressed in the measurement `unit`",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight",cargoNetWeight,Weight,,,,,"Net weight of the cargo item, excluding packaging and excluding the tare weight of the container.",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / value",value,number,,,,2400,"The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
+- `LBR` (Pounds)
+- `GRM` (Grams)
+- `ONZ` (Ounce)",
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / value",value,number,,,,2.4,"Weight value expressed in the measurement `unit`",
 "ArrivalNotice / consignmentItems / cargoItems / charges",charges,"Charge list",,,,,"A list of `Charges`",
 "ArrivalNotice / consignmentItems / cargoItems / charges / calculationBasis",calculationBasis,string,,maxLength=50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / carrierRateOfExchange",carrierRateOfExchange,string,,maxLength=50,,"1.00 Euro = 1.17801 US Dollars","The quotation of the relative value of a currency unit against the unit of another currency
@@ -238,11 +245,13 @@ Character | Valid Characters | Description
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / referenceNumber",referenceNumber,string,,maxLength=255,,12234,"Contract reference for the emergency support provided by an external third party vendor.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / endOfHoldingTime",endOfHoldingTime,"string(date)",,,,2021-09-03,"Date by when the refrigerated liquid needs to be delivered.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / fumigationDateTime",fumigationDateTime,"string(date-time)",,,,2024-09-04T09:41Z,"Date & time when the container was fumigated",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight",grossWeight,GrossWeight,,,,,"Total weight of the goods carried, including packaging.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight",grossWeight,Weight,,,,,"Total weight of the goods carried, including packaging.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / value",value,number,,,,12000.3,"The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.",
+- `LBR` (Pounds)
+- `GRM` (Grams)
+- `ONZ` (Ounce)",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / value",value,number,,,,2.4,"Weight value expressed in the measurement `unit`",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / imoClass",imoClass,string,,maxLength=4,,1.4S,"The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:
 
 - `1.1A` (Substances and articles which have a mass explosion hazard)
@@ -278,24 +287,26 @@ Character | Valid Characters | Description
 - `FAH` (Fahrenheit)",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / transportControlTemperature","transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / transportEmergencyTemperature","transportEmergencyTemperature",number,,,,74.1,"Temperature at which emergency procedures shall be implemented",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent",netExplosiveContent,NetExplosiveContent,,,,,"The total weight of the explosive substances, without the packaging, casings, etc.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent",netExplosiveContent,Weight,,,,,"The total weight of the explosive substances, without the packaging, casings, etc.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)
 - `GRM` (Grams)
 - `ONZ` (Ounce)",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / value",value,number,,,,2.4,"The total weight of the explosive substances, without the packaging’s, casings, etc.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume",netVolume,NetVolume,,,,,"The volume of the referenced dangerous goods. Only applicable to liquids and gas.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume / unit",unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / value",value,number,,,,2.4,"Weight value expressed in the measurement `unit`",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume",netVolume,Volume,,,,,"The volume of the referenced dangerous goods. Only applicable to liquids and gas.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume / unit",unit,string,,,,MTQ,"Measurement unit in which the volume `value` is expressed:
 - `FTQ` (Cubic foot)
 - `MTQ` (Cubic meter)
 - `LTR` (Litre)",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume / value",value,number,,,,2.4,"The volume of the referenced dangerous goods.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight",netWeight,NetWeight,,,,,"Total weight of the goods carried, excluding packaging.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume / value",value,number,,,,2.4,"Volume value expressed in the measurement `unit`",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight",netWeight,Weight,,,,,"Total weight of the goods carried, excluding packaging.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / value",value,number,,,,2.4,"Total weight of the goods carried, excluding packaging.",
+- `LBR` (Pounds)
+- `GRM` (Grams)
+- `ONZ` (Ounce)",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / value",value,number,,,,2.4,"Weight value expressed in the measurement `unit`",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / packingGroup",packingGroup,integer,,,,3,"The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / properShippingName",properShippingName,string,,maxLength=250,,"Chromium Trioxide, anhydrous","The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code, or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to the MARPOL Convention.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / segregationGroups",segregationGroups,"string list",,maxLength=2,,,"List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.
@@ -1081,11 +1092,13 @@ The value of the `customsReference`",
 According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
 
 If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
-"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight",tareWeight,TareWeight,,,,,"The tare weight of the container.",
-"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / unit",unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms
+"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight",tareWeight,Weight,,,,,"The tare weight of the container.",
+"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)",
-"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / value",value,number,,,,4800,"The weight of an empty container (gross container weight).",
+- `LBR` (Pounds)
+- `GRM` (Grams)
+- `ONZ` (Ounce)",
+"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / value",value,number,,,,2.4,"Weight value expressed in the measurement `unit`",
 "ArrivalNotice / utilizedTransportEquipments / isNonOperatingReefer",isNonOperatingReefer,boolean,,,,false,"If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.",
 "ArrivalNotice / utilizedTransportEquipments / isShipperOwned",isShipperOwned,boolean,,,,true,"Indicates whether the container is shipper owned (SOC).",
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation",pickupInformation,PickupInformation,,,,,"Pickup information",

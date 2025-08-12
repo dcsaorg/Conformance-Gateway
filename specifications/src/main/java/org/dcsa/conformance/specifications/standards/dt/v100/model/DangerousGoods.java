@@ -169,17 +169,17 @@ The zone classification of the toxicity of the inhalant. Possible values are:
       maxLength = 1)
   protected String inhalationZone;
 
-  @Schema
-  protected GrossWeight grossWeight;
+  @Schema(description = "Total weight of the goods carried, including packaging.")
+  protected Weight grossWeight;
 
-  @Schema
-  protected NetWeight netWeight;
+  @Schema(description = "Total weight of the goods carried, excluding packaging.")
+  protected Weight netWeight;
 
-  @Schema
-  protected NetExplosiveContent netExplosiveContent;
+  @Schema(description = "The total weight of the explosive substances, without the packaging, casings, etc.")
+  protected Weight netExplosiveContent;
 
-  @Schema
-  protected NetVolume netVolume;
+  @Schema(description = "The volume of the referenced dangerous goods. Only applicable to liquids and gas.")
+  protected Volume netVolume;
 
   @Schema
   protected Limits limits;

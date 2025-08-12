@@ -97,7 +97,7 @@
         "manifestReferenceNumber": "a1234",
         "masterSequenceNumber": "x12345"
       },
-      "additionalInformation": "FIRMS code: B986",
+      "additionalInformation": "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.",
       "references": [
         {
           "type": "CR",
@@ -649,7 +649,7 @@
         "manifestReferenceNumber": "a1234",
         "masterSequenceNumber": "x12345"
       },
-      "additionalInformation": "FIRMS code: B986",
+      "additionalInformation": "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.",
       "references": [
         {
           "type": "CR",

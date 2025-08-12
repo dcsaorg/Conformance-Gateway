@@ -539,7 +539,7 @@ components:
           description: |
             Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
             e.g. additional required documents to prepare and present for shipment release - country specific.
-          example: "FIRMS code: B986"
+          example: "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security."
         references:
           type: "array"
           description: "A list of `References`"

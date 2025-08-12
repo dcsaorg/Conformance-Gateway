@@ -1,6 +1,6 @@
 Path,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
 ArrivalNotice,,,,,,,,
-"ArrivalNotice / additionalInformation",additionalInformation,string,,maxLength=500,,"FIRMS code: B986","Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
+"ArrivalNotice / additionalInformation",additionalInformation,string,,maxLength=500,,"Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.","Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
 e.g. additional required documents to prepare and present for shipment release - country specific.",
 "ArrivalNotice / arrivalNoticeVisualization","arrivalNoticeVisualization",EmbeddedDocument,,,,,"Visualization of an arrival notice, as an embedded document",
 "ArrivalNotice / arrivalNoticeVisualization / content",content,string,,,,RXhhbXBsZSBBTiBjb250ZW50,"Base64 representation of the binary document content",

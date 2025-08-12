@@ -36,11 +36,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNotice
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotification;
 import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticeNotificationsRequest;
 import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticesRequest;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CargoGrossVolume;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CargoGrossWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoItem;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetVolume;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ClassifiedDate;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ClassifiedDateTime;
@@ -56,7 +52,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.ExportLicense
 import org.dcsa.conformance.specifications.standards.an.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.GeoCoordinate;
-import org.dcsa.conformance.specifications.standards.an.v100.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ImmediateTransportationEntry;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ImportLicense;
@@ -65,9 +60,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.Leg;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Limits;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.an.v100.model.NationalCommodityCode;
-import org.dcsa.conformance.specifications.standards.an.v100.model.NetExplosiveContent;
-import org.dcsa.conformance.specifications.standards.an.v100.model.NetVolume;
-import org.dcsa.conformance.specifications.standards.an.v100.model.NetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.an.v100.model.PaymentRemittance;
@@ -77,7 +69,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.ReferenceCons
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReleaseInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReturnInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Seal;
-import org.dcsa.conformance.specifications.standards.an.v100.model.TareWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.TaxLegalReference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
 import org.dcsa.conformance.specifications.standards.an.v100.model.UtilizedTransportEquipment;
@@ -92,6 +83,8 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentC
 import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Volume;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Weight;
 
 public class ANStandardSpecification extends StandardSpecification {
 
@@ -135,11 +128,7 @@ public class ANStandardSpecification extends StandardSpecification {
         Address.class,
         ArrivalNotice.class,
         ArrivalNoticeNotification.class,
-        CargoGrossVolume.class,
-        CargoGrossWeight.class,
         CargoItem.class,
-        CargoNetVolume.class,
-        CargoNetWeight.class,
         Charge.class,
         ClassifiedDate.class,
         ClassifiedDateTime.class,
@@ -164,7 +153,6 @@ public class ANStandardSpecification extends StandardSpecification {
         FreeTimeTypeCode.class,
         GeoCoordinate.class,
         GetArrivalNoticesResponse.class,
-        GrossWeight.class,
         IdentifyingCode.class,
         ImmediateTransportationEntry.class,
         ImportLicense.class,
@@ -175,9 +163,6 @@ public class ANStandardSpecification extends StandardSpecification {
         Location.class,
         ModeOfTransportCode.class,
         NationalCommodityCode.class,
-        NetExplosiveContent.class,
-        NetVolume.class,
-        NetWeight.class,
         OuterPackaging.class,
         PartyContactDetail.class,
         PaymentRemittance.class,
@@ -191,13 +176,14 @@ public class ANStandardSpecification extends StandardSpecification {
         ReleaseInformation.class,
         ReturnInformation.class,
         Seal.class,
-        TareWeight.class,
         TaxLegalReference.class,
         Transport.class,
         UniversalVoyageReference.class,
         UtilizedTransportEquipment.class,
         VesselIMONumber.class,
-        VesselVoyage.class);
+        VesselVoyage.class,
+        Volume.class,
+        Weight.class);
   }
 
   @Override

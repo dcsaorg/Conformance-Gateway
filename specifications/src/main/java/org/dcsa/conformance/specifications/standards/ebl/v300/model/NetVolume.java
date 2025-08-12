@@ -1,14 +1,24 @@
-package org.dcsa.conformance.specifications.standards.dt.v100.model;
+package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Volume;
 
-@Schema(description = NetVolume.CLASS_SCHEMA_DESCRIPTION)
-@Data
-public class NetVolume {
-
-  public static final String CLASS_SCHEMA_DESCRIPTION =
-      "The volume of the referenced dangerous goods. Only applicable to liquids and gas.";
+@Schema(
+    description =
+"""
+The volume of the referenced dangerous goods. Only applicable to liquids and gas.
+""")
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode(callSuper = true)
+public class NetVolume extends Volume {
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,

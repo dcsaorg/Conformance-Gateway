@@ -20,6 +20,8 @@ Clarified that `freightPaymentStatus` refers only to collect freight charges. (S
 
 Clarified the semantics of the `carrierRateOfExchange` within the `Charge` object. (SD-2382)
 
+Simplified the information model to use a single `Volume` and a single `Weight` type. (SD-2388)
+
 
 ## Snapshot v1.0.0-20250801-alpha
 

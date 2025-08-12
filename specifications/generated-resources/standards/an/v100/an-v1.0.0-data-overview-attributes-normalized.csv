@@ -624,7 +624,7 @@ Volume,unit,string,,,,MTQ,"Measurement unit in which the volume `value` is expre
 - `MTQ` (Cubic meter)
 - `LTR` (Litre)",
 Volume,value,number,,,,2.4,"Volume value expressed in the measurement `unit`",
-Weight,unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
+Weight,unit,string,,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)
 - `GRM` (Grams)

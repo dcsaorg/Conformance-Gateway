@@ -2355,8 +2355,6 @@ components:
           example: "MTQ"
       description: "Volume value and measurement unit"
     Weight:
-      required:
-      - "unit"
       type: "object"
       properties:
         value:

@@ -108,7 +108,7 @@ More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/
 "ArrivalNotice / consignmentItems / cargoItems / cargoGrossVolume / value",value,number,,,,2.4,"Volume value expressed in the measurement `unit`",
 "ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight",cargoGrossWeight,Weight,,,,,"Gross weight of the cargo item including packaging being carried in the container.
 Excludes the tare weight of the container.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
+"ArrivalNotice / consignmentItems / cargoItems / cargoGrossWeight / unit",unit,string,,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)
 - `GRM` (Grams)
@@ -121,7 +121,7 @@ Excludes the tare weight of the container.",
 - `LTR` (Litre)",
 "ArrivalNotice / consignmentItems / cargoItems / cargoNetVolume / value",value,number,,,,2.4,"Volume value expressed in the measurement `unit`",
 "ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight",cargoNetWeight,Weight,,,,,"Net weight of the cargo item, excluding packaging and excluding the tare weight of the container.",
-"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
+"ArrivalNotice / consignmentItems / cargoItems / cargoNetWeight / unit",unit,string,,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)
 - `GRM` (Grams)
@@ -246,7 +246,7 @@ Character | Valid Characters | Description
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / endOfHoldingTime",endOfHoldingTime,"string(date)",,,,2021-09-03,"Date by when the refrigerated liquid needs to be delivered.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / fumigationDateTime",fumigationDateTime,"string(date-time)",,,,2024-09-04T09:41Z,"Date & time when the container was fumigated",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight",grossWeight,Weight,,,,,"Total weight of the goods carried, including packaging.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / grossWeight / unit",unit,string,,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)
 - `GRM` (Grams)
@@ -288,7 +288,7 @@ Character | Valid Characters | Description
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / transportControlTemperature","transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / limits / transportEmergencyTemperature","transportEmergencyTemperature",number,,,,74.1,"Temperature at which emergency procedures shall be implemented",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent",netExplosiveContent,Weight,,,,,"The total weight of the explosive substances, without the packaging, casings, etc.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netExplosiveContent / unit",unit,string,,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)
 - `GRM` (Grams)
@@ -301,7 +301,7 @@ Character | Valid Characters | Description
 - `LTR` (Litre)",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netVolume / value",value,number,,,,2.4,"Volume value expressed in the measurement `unit`",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight",netWeight,Weight,,,,,"Total weight of the goods carried, excluding packaging.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / netWeight / unit",unit,string,,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)
 - `GRM` (Grams)
@@ -1093,7 +1093,7 @@ According to [ISO 6346](https://www.iso.org/standard/83558.html), a container id
 
 If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
 "ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight",tareWeight,Weight,,,,,"The tare weight of the container.",
-"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / unit",unit,string,yes,,,KGM,"Measurement unit in which the weight `value` is expressed:
+"ArrivalNotice / utilizedTransportEquipments / equipment / tareWeight / unit",unit,string,,,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)
 - `GRM` (Grams)

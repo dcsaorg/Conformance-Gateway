@@ -14,7 +14,6 @@ public class Weight {
   protected Double value;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 Measurement unit in which the weight `value` is expressed:

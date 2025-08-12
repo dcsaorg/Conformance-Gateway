@@ -160,8 +160,8 @@
         "departureDate": "2025-01-23",
         "plannedDepartureDate": "2025-01-23",
         "plannedArrivalDate": "2025-01-23",
-        "etaAtPortOfDischargeDate": "2025-01-23",
-        "etaAtPlaceOfDeliveryDate": "2025-01-23",
+        "portOfDischargeArrivalDate": "2025-01-23",
+        "placeOfDeliveryArrivalDate": "2025-01-23",
         "inlandArrivalDate": "2025-01-23",
         "estimatedGeneralOrderDateTime": "2025-01-23T01:23:45Z",
         "loadLocation": {
@@ -721,8 +721,8 @@
         "departureDate": "2025-01-23",
         "plannedDepartureDate": "2025-01-23",
         "plannedArrivalDate": "2025-01-23",
-        "etaAtPortOfDischargeDate": "2025-01-23",
-        "etaAtPlaceOfDeliveryDate": "2025-01-23",
+        "portOfDischargeArrivalDate": "2025-01-23",
+        "placeOfDeliveryArrivalDate": "2025-01-23",
         "inlandArrivalDate": "2025-01-23",
         "estimatedGeneralOrderDateTime": "2025-01-23T01:23:45Z",
         "loadLocation": {

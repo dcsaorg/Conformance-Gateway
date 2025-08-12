@@ -1218,8 +1218,6 @@ If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.
 ",
-"ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at place of delivery",
-"ArrivalNoticeNotification / etaAtPortOfDischargeDate",etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
 "ArrivalNoticeNotification / issueDateTime",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNoticeNotification / placeOfDelivery",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases",
@@ -1259,6 +1257,12 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `INTE` - Inland terminal
 - `POTE` - Port terminal
 - `RAMP` - Ramp",
+"ArrivalNoticeNotification / placeOfDeliveryArrivalDate","placeOfDeliveryArrivalDate",ClassifiedDate,,,,,"The date of arrival of the shipment at Place of Delivery.",
+"ArrivalNoticeNotification / placeOfDeliveryArrivalDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNoticeNotification / placeOfDeliveryArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
 "ArrivalNoticeNotification / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel",
 "ArrivalNoticeNotification / portOfDischarge / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -1296,6 +1300,12 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `INTE` - Inland terminal
 - `POTE` - Port terminal
 - `RAMP` - Ramp",
+"ArrivalNoticeNotification / portOfDischargeArrivalDate","portOfDischargeArrivalDate",ClassifiedDate,,,,,"The date of arrival of the vessel at the Port of Discharge.",
+"ArrivalNoticeNotification / portOfDischargeArrivalDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNoticeNotification / portOfDischargeArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
 "ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,,,TDR1234,"The reference of the transport document for which this arrival notice was created",
 "ArrivalNoticeNotification / typeLabel",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
 for example ""English, consignee, USD"" or ""No charges, French"".

@@ -77,11 +77,11 @@ paths:
 
         The arrival notice publisher can decide to also allow retrieving arrival notices without specifying any of these filtering query parameters, instead filtering the results only based on the authorization and registration profile of the authenticated party calling this endpoint.
 
-        ### Filtering by ETA at POD
+        ### Filtering by POD arrival date
 
-        Whenever the query parameters filter could retrieve large number of historical arrival notices (for example when filtering only by vessel name or IMO number), the request should also include at least the `minEtaAtPortOfDischargeDate` query parameter and could also include the `maxEtaAtPortOfDischargeDate` query parameter.
+        Whenever the query parameters filter could retrieve large number of historical arrival notices (for example when filtering only by vessel name or IMO number), the request should also include at least the `portOfDischargeArrivalDateMin` query parameter and could also include the `portOfDischargeArrivalDateMax` query parameter.
 
-        The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `etaAtPortOfDischargeDate` within those ranges.
+        The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `portOfDischargeArrivalDate` within those ranges.
 
         ### Filtering by region or language
 
@@ -180,16 +180,16 @@ paths:
         schema:
           type: "string"
         example: "SR12345A"
-      - name: "minEtaAtPortOfDischargeDate"
+      - name: "portOfDischargeArrivalDateMin"
         in: "query"
-        description: "Retrieve arrival notices with an ETA at port of discharge on or after this date"
+        description: "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date"
         schema:
           type: "string"
           format: "date"
         example: "2025-01-23"
-      - name: "maxEtaAtPortOfDischargeDate"
+      - name: "portOfDischargeArrivalDateMax"
         in: "query"
-        description: "Retrieve arrival notices with an ETA at port of discharge on or before this date"
+        description: "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date"
         schema:
           type: "string"
           format: "date"
@@ -725,24 +725,20 @@ components:
             The location where the cargo is discharged from the last sea-going vessel
           allOf:
           - $ref: "#/components/schemas/Location"
-        etaAtPortOfDischargeDate:
-          type: "string"
-          description: |
-            The expected date of arrival of the vessel at the port of discharge
-          format: "date"
-          example: "2025-01-23"
         placeOfDelivery:
           description: |
             The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
             responsibility of the shipping line ceases
           allOf:
           - $ref: "#/components/schemas/Location"
-        etaAtPlaceOfDeliveryDate:
-          type: "string"
-          description: |
-            The expected date of arrival of the shipment at place of delivery
-          format: "date"
-          example: "2025-01-23"
+        portOfDischargeArrivalDate:
+          description: "The date of arrival of the vessel at the Port of Discharge."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        placeOfDeliveryArrivalDate:
+          description: "The date of arrival of the shipment at Place of Delivery."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
       description: |
         Lightweight notification that can be sent when a new or updated Arrival Notice is available
     CargoItem:

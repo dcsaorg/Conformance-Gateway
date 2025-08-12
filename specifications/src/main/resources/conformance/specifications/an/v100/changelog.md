@@ -24,6 +24,8 @@ Simplified the information model to use a single `Volume` and a single `Weight` 
 
 Updated the description and maxLength of the `additionalInformation` attribute. (SD-2391)
 
+Renamed `portOfDischargeArrivalDate` and `placeOfDeliveryArrivalDate` in notification and query parameters. (SD-2390)
+
 
 ## Snapshot v1.0.0-20250801-alpha
 

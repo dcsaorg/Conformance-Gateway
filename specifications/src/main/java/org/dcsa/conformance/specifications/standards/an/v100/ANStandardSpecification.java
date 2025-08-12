@@ -220,6 +220,12 @@ public class ANStandardSpecification extends StandardSpecification {
             AttributesHierarchicalSheet.class,
             Map.ofEntries(
                 Map.entry(
+                    "ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",
+                    "ArrivalNoticeNotification / placeOfDeliveryArrivalDate"),
+                Map.entry(
+                    "ArrivalNoticeNotification / etaAtPortOfDischargeDate",
+                    "ArrivalNoticeNotification / portOfDischargeArrivalDate"),
+                Map.entry(
                     "ArrivalNotice / transport / dischargeLocation",
                     "ArrivalNotice / transport / legs / dischargeLocation"),
                 Map.entry(

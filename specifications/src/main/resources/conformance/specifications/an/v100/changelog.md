@@ -22,7 +22,7 @@ Clarified the semantics of the `carrierRateOfExchange` within the `Charge` objec
 
 Simplified the information model to use a single `Volume` and a single `Weight` type. (SD-2388)
 
-Updated the description of the `additionalInformation` attribute. (SD-2391)
+Updated the description and maxLength of the `additionalInformation` attribute. (SD-2391)
 
 
 ## Snapshot v1.0.0-20250801-alpha

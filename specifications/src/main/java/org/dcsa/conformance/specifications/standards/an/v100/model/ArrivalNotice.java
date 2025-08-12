@@ -107,7 +107,7 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
   private CustomsClearance customsClearance;
 
   @Schema(
-      maxLength = 500,
+      maxLength = 5000,
       example = "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.",
       description =
 """

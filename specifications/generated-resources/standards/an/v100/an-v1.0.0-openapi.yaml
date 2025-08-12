@@ -534,7 +534,7 @@ components:
           allOf:
           - $ref: "#/components/schemas/CustomsClearance"
         additionalInformation:
-          maxLength: 500
+          maxLength: 5000
           type: "string"
           description: |
             Free text field to provide additional required information for the consignee to prepare for the shipment arrival,

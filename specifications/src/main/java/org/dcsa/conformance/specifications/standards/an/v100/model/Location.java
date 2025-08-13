@@ -2,6 +2,7 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.an.v100.types.FacilityTypeCode;
 
 @Data
 @Schema(description = "Location information")
@@ -9,6 +10,9 @@ public class Location {
 
   @Schema(maxLength = 100, example = "Port of Amsterdam", description = "The name of the location.")
   private String locationName;
+
+  @Schema()
+  private FacilityTypeCode facilityTypeCode;
 
   @Schema(description = "Location address")
   private Address address;

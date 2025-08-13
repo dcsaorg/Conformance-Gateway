@@ -2,12 +2,11 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportPlanStageCode;
 
 @Data
-@Schema(description = "Details of one transport leg")
+@Schema(description = "Details of each leg of the `Transport`")
 public class Leg {
 
   @Schema() private TransportPlanStageCode transportPlanStage;
@@ -25,11 +24,11 @@ public class Leg {
   @Schema(description = "Discharge location")
   private Location dischargeLocation;
 
-  @Schema(description = "Planned departure date")
-  private FormattedDate plannedDepartureDate;
+  @Schema(description = "Departure date")
+  private ClassifiedDate departureDate;
 
-  @Schema(description = "Planned arrival date")
-  private FormattedDate plannedArrivalDate;
+  @Schema(description = "Arrival date")
+  private ClassifiedDate arrivalDate;
 
   @Schema() ModeOfTransportCode modeOfTransport;
 

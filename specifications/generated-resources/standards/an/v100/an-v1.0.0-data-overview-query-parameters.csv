@@ -8,8 +8,8 @@ vesselName,string,"Name of the vessel for which to retrieve available arrival no
 "universalImportVoyageReference",string,"A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",2301W
 carrierServiceCode,string,"The carrier specific code of the service for which the schedule details are published.",FE1
 "universalServiceReference",string,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",SR12345A
-"minEtaAtPortOfDischargeDate",string,"Retrieve arrival notices with an ETA at port of discharge on or after this date",2025-01-23
-"maxEtaAtPortOfDischargeDate",string,"Retrieve arrival notices with an ETA at port of discharge on or before this date",2025-01-23
+"portOfDischargeArrivalDateMin",string,"Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date",2025-01-23
+"portOfDischargeArrivalDateMax",string,"Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date",2025-01-23
 includeVisualization,boolean,"Optional flag indicating whether the PDF `arrivalNoticeVisualization` should be included in each returned arrival notice.
 
 The publisher makes the final decision on whether to include PDF visualizations in the response (for some or for all

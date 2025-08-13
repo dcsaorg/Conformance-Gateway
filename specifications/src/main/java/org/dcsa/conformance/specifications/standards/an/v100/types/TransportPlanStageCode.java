@@ -10,7 +10,7 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
     type = "string",
     maxLength = 10,
     example = "MNC",
-    description = "Code qualifying a specific stage of transport")
+    description = "A specific stage of transport")
 @AllArgsConstructor
 public enum TransportPlanStageCode implements EnumBase {
   PRC("Pre-Carriage Transport"),

@@ -49,6 +49,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "CreateShippingInstructionsResponse";
   private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
   private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
+  private static final String ERROR_RESPONSE_SCHEMA_NAME = "ErrorResponse";
 
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
@@ -98,7 +99,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             Map.entry(
                 "Shipper initiated update scenarios",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))))
+                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))),
+            Map.entry(
+                "Carrier error response conformance",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(
+                        uc1ShipperSubmitShippingInstructions()
+                            .then(shipperGetShippingInstructionsErrorScenario()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -122,7 +129,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                         uc6Get(
                             true,
                             oobAmendment(uc6Get(false, uc8Get(uc12Get(uc13Get())))),
-                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get()))))))))))
+                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get()))))))))),
+            Map.entry(
+                "Carrier error response conformance",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(
+                        uc6CarrierPublishDraftTransportDocument(true)
+                            .then(shipperGetTransportDocumentErrorScenario()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -390,10 +403,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc11Get(EblScenarioListBuilder... thenEither) {
-    return uc11CarrierVoidTransportDocument()
-        .then(
-            uc11iCarrierIssueAmendedTransportDocument()
-                .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither)));
+    return uc11CarrierVoidTDandIssueAmendedTransportDocument()
+        .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither));
   }
 
   private static EblScenarioListBuilder uc12Get(EblScenarioListBuilder... thenEither) {
@@ -485,6 +496,18 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 useBothRef));
   }
 
+  private static EblScenarioListBuilder shipperGetShippingInstructionsErrorScenario() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new ShipperGetShippingInstructionsErrorAction(
+                shipperPartyName,
+                carrierPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(EBL_API, ERROR_RESPONSE_SCHEMA_NAME)));
+  }
+
   private static EblScenarioListBuilder shipperGetTransportDocument(
       TransportDocumentStatus expectedTdStatus) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
@@ -498,6 +521,18 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 expectedTdStatus,
                 resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME)));
   }
+
+  private static EblScenarioListBuilder shipperGetTransportDocumentErrorScenario() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new ShipperGetTransportDocumentErrorAction(
+                shipperPartyName,
+                carrierPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(EBL_API, ERROR_RESPONSE_SCHEMA_NAME)));
+    }
 
   private static EblScenarioListBuilder uc1ShipperSubmitShippingInstructions() {
     String carrierPartyName = threadLocalCarrierPartyName.get();
@@ -660,25 +695,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           true));
   }
 
-  private static EblScenarioListBuilder uc11CarrierVoidTransportDocument() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-            previousAction ->
-                new UC11v_Carrier_VoidTransportDocumentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (EblAction) previousAction,
-                    resolveMessageSchemaValidator(
-                        EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-    }
-
-  private static EblScenarioListBuilder uc11iCarrierIssueAmendedTransportDocument() {
+  private static EblScenarioListBuilder uc11CarrierVoidTDandIssueAmendedTransportDocument() {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
         previousAction ->
-            new UC11i_Carrier_IssueAmendedTransportDocumentAction(
+            new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
                 carrierPartyName,
                 shipperPartyName,
                 (EblAction) previousAction,

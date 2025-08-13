@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.eblissuance.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.*;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.genericTDContentChecks;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 
 import com.fasterxml.jackson.core.JsonPointer;

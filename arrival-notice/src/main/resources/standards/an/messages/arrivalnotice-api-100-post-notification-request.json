@@ -29,7 +29,7 @@
           "longitude": "2.294492036"
         }
       },
-      "etaAtPortOfDischargeDate": "2025-01-23",
+      "portOfDischargeArrivalDate": "2025-01-23",
       "placeOfDelivery": {
         "locationName": "Port of Amsterdam",
         "address": {
@@ -52,7 +52,7 @@
           "longitude": "2.294492036"
         }
       },
-      "etaAtPlaceOfDeliveryDate": "2025-01-23"
+      "placeOfDeliveryArrivalDate": "2025-01-23"
     },
     {
       "issueDateTime": "2025-01-23T01:23:45Z",
@@ -83,7 +83,7 @@
           "longitude": "2.294492036"
         }
       },
-      "etaAtPortOfDischargeDate": "2025-01-23",
+      "portOfDischargeArrivalDate": "2025-01-23",
       "placeOfDelivery": {
         "locationName": "Port of Amsterdam",
         "address": {
@@ -106,7 +106,7 @@
           "longitude": "2.294492036"
         }
       },
-      "etaAtPlaceOfDeliveryDate": "2025-01-23"
+      "placeOfDeliveryArrivalDate": "2025-01-23"
     }
   ]
 }

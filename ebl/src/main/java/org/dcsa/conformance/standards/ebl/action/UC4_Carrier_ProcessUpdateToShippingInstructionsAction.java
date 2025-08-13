@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.checks.EblChecks;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
@@ -60,7 +60,7 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
           requestSchemaValidator,
           expectedSIStatus,
           acceptChanges ? ShippingInstructionsStatus.SI_UPDATE_CONFIRMED : ShippingInstructionsStatus.SI_UPDATE_DECLINED,
-          EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier())
+          EblChecks.sirInNotificationMustMatchDSP(getDspSupplier())
         );
       }
     };

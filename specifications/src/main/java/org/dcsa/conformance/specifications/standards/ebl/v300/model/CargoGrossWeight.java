@@ -1,14 +1,20 @@
-package org.dcsa.conformance.specifications.standards.dt.v100.model;
+package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Weight;
 
-@Schema(description = CargoGrossWeight.CLASS_SCHEMA_DESCRIPTION)
-@Data
-public class CargoGrossWeight {
-
-  public static final String CLASS_SCHEMA_DESCRIPTION =
-      "The weight of the cargo item including packaging, excluding the tare weight of the container.";
+@Schema(description = "The weight of the cargo item including packaging, excluding the tare weight of the container.")
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode(callSuper = true)
+public class CargoGrossWeight extends Weight {
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,

@@ -677,7 +677,8 @@ to the shipping line. This can refer either to the Place of Receipt or the Port 
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"ArrivalNotice / transport / departureDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / departureDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / generalOrderDateTime",generalOrderDateTime,ClassifiedDateTime,,,,,"The date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
 "ArrivalNotice / transport / generalOrderDateTime / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
@@ -690,20 +691,23 @@ to the shipping line. This can refer either to the Place of Receipt or the Port 
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"ArrivalNotice / transport / inlandArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / inlandArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / legs",legs,"Leg list",,,,,"Full or partial information, considered relevant in this context, on some or all `Legs` of the `Transport`",
 "ArrivalNotice / transport / legs / arrivalDate",arrivalDate,ClassifiedDate,,,,,"Arrival date",
 "ArrivalNotice / transport / legs / arrivalDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"ArrivalNotice / transport / legs / arrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / legs / arrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / legs / departureDate",departureDate,ClassifiedDate,,,,,"Departure date",
 "ArrivalNotice / transport / legs / departureDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"ArrivalNotice / transport / legs / departureDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / legs / departureDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / legs / dischargeLocation",dischargeLocation,Location,,,,,"Discharge location",
 "ArrivalNotice / transport / legs / dischargeLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -814,7 +818,8 @@ also sometimes known as the Lloyd's register code.",
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"ArrivalNotice / transport / onBoardDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / onBoardDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / placeOfDelivery",placeOfDelivery,Location,,,,,"The location where the cargo is handed over to the consignee, or his agent,
 by the shipping line and where responsibility of the shipping line ceases.",
 "ArrivalNotice / transport / placeOfDelivery / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -858,7 +863,8 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"ArrivalNotice / transport / placeOfDeliveryArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / placeOfDeliveryArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / placeOfReceipt",placeOfReceipt,Location,,,,,"The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
 This indicates the point at which the shipping line takes on responsibility for carriage of the container.",
 "ArrivalNotice / transport / placeOfReceipt / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -939,7 +945,8 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"ArrivalNotice / transport / portOfDischargeArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNotice / transport / portOfDischargeArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / portOfLoading",portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
 "ArrivalNotice / transport / portOfLoading / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -1262,7 +1269,8 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"ArrivalNoticeNotification / placeOfDeliveryArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNoticeNotification / placeOfDeliveryArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNoticeNotification / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel",
 "ArrivalNoticeNotification / portOfDischarge / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
@@ -1305,7 +1313,8 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"ArrivalNoticeNotification / portOfDischargeArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+"ArrivalNoticeNotification / portOfDischargeArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,,,TDR1234,"The reference of the transport document for which this arrival notice was created",
 "ArrivalNoticeNotification / typeLabel",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
 for example ""English, consignee, USD"" or ""No charges, French"".

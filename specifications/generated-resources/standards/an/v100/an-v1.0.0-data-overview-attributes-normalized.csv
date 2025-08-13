@@ -190,7 +190,8 @@ ClassifiedDate,classifier,string,,,,EST,"Classifier denoting whether a date/time
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-ClassifiedDate,value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+ClassifiedDate,value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 ClassifiedDateTime,classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated

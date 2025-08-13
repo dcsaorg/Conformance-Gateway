@@ -226,6 +226,7 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
 Item description:
 The value of the `National Commodity Code`",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging",outerPackaging,OuterPackaging,,,,,"Packaging information for this cargo item.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / IMOPackagingCode",IMOPackagingCode,string,,maxLength=5,,1A2,"The code of the packaging as per IMO.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods",dangerousGoods,"DangerousGoods list",,,,,"A list of `Dangerous Goods`",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / EMSNumber",EMSNumber,string,,maxLength=7,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / NANumber",NANumber,string,,maxLength=4,,9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.",
@@ -336,7 +337,6 @@ Grouping of Dangerous Goods having certain similar chemical properties. Possible
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / subsidiaryRisk2",subsidiaryRisk2,string,,maxLength=3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / technicalName",technicalName,string,,maxLength=250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / description",description,string,,maxLength=100,,"Drum, steel","Description of the outer packaging/overpack.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / imoPackagingCode",imoPackagingCode,string,,maxLength=5,,1A2,"The code of the packaging as per IMO.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / numberOfPackages",numberOfPackages,integer,,,,18,"Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / packageCode",packageCode,string,,maxLength=2,,5H,"A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / woodDeclaration",woodDeclaration,string,,maxLength=30,,TREATED_AND_CERTIFIED,"Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:

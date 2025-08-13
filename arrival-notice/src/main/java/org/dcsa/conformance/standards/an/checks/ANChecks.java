@@ -549,11 +549,11 @@ public class ANChecks {
           var issues = new LinkedHashSet<String>();
 
           if (!op.hasNonNull("packageCode")
-              && !op.hasNonNull("imoPackagingCode")
+              && !op.hasNonNull("IMOPackagingCode")
               && !op.hasNonNull("description")) {
             issues.add(
                 contextPath
-                    + " must contain at least one of 'packageCode', 'imoPackagingCode', or 'description'");
+                    + " must contain at least one of 'packageCode', 'IMOPackagingCode', or 'description'");
           }
 
           if (!op.hasNonNull("numberOfPackages")) {

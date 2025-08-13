@@ -28,6 +28,8 @@ Updated the description and maxLength of the `additionalInformation` attribute. 
 
 Renamed `portOfDischargeArrivalDate` and `placeOfDeliveryArrivalDate` in notification and query parameters. (SD-2390)
 
+Renamed `imoPackagingCode` to `IMOPackagingCode`. (SD-2933)
+
 
 ## Snapshot v1.0.0-20250801-alpha
 

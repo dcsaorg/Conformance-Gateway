@@ -1861,7 +1861,7 @@ components:
           description: |
             A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
           example: "5H"
-        imoPackagingCode:
+        IMOPackagingCode:
           maxLength: 5
           type: "string"
           description: |

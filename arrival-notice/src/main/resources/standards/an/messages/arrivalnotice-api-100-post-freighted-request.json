@@ -435,7 +435,7 @@
               },
               "outerPackaging": {
                 "packageCode": "5H",
-                "imoPackagingCode": "1A2",
+                "IMOPackagingCode": "1A2",
                 "numberOfPackages": 18,
                 "description": "Drum, steel",
                 "woodDeclaration": "TREATED_AND_CERTIFIED",
@@ -999,7 +999,7 @@
               },
               "outerPackaging": {
                 "packageCode": "5H",
-                "imoPackagingCode": "1A2",
+                "IMOPackagingCode": "1A2",
                 "numberOfPackages": 18,
                 "description": "Drum, steel",
                 "woodDeclaration": "TREATED_AND_CERTIFIED",

@@ -12,10 +12,10 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
     example = "RAMP",
     description =
 """
-Code identifying a specific type of location
+Code identifying a specific type of facility
 """)
 @AllArgsConstructor
-public enum LocationTypeCode implements EnumBase {
+public enum FacilityTypeCode implements EnumBase {
   CLOC("Customer location"),
   COFS("Container freight station"),
   OFFD("Off-dock storage"),

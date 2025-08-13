@@ -16,6 +16,8 @@ Added property `lastFreeDate` to object `FreeTime`. (SD-2353)
 
 Added to `Location` the property `locationTypeCode`. (SD-2363)
 
+Renamed `locationTypeCode` to `facilityTypeCode`. (SD-2932)
+
 Clarified that `freightPaymentStatus` refers only to collect freight charges. (SD-2375)
 
 Clarified the semantics of the `carrierRateOfExchange` within the `Charge` object. (SD-2382)

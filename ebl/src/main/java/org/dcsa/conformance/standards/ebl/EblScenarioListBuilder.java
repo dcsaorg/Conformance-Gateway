@@ -25,13 +25,15 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   public static final String SCENARIO_SUITE_CONFORMANCE_SI_ONLY = "Conformance SI-only";
   public static final String SCENARIO_SUITE_CONFORMANCE_TD_ONLY = "Conformance TD-only";
-  static final String SCENARIO_SUITE_SI_TD_COMBINED = "Conformance TD Amendments";
+  static final String SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS = "Conformance TD Amendments";
+  static final String SCENARIO_SUITE_SI_TD_COMBINED = "Conformance SI + TD ";
 
   static final Set<String> SCENARIO_SUITES =
       Set.of(
           SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
           SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
-          SCENARIO_SUITE_SI_TD_COMBINED);
+          SCENARIO_SUITE_SI_TD_COMBINED,
+          SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS);
 
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -67,6 +69,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     }
     if (SCENARIO_SUITE_SI_TD_COMBINED.equals(componentFactory.getScenarioSuite())) {
       return createSIandTDCombinedScenarios(false);
+    }
+    if (SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS.equals(componentFactory.getScenarioSuite())) {
+      return createTDAmendmentScenarios(false);
     }
     throw new IllegalArgumentException("Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
   }
@@ -141,7 +146,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  private static LinkedHashMap<String, EblScenarioListBuilder> createSIandTDCombinedScenarios(
+  private static LinkedHashMap<String, EblScenarioListBuilder> createTDAmendmentScenarios(
       boolean isTd) {
     return Stream.of(
             Map.entry(
@@ -157,7 +162,6 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                     .then(
                                         uc7Get(
                                             uc8Get(
-                                                uc12Get(uc13Get(uc14Get(SI_COMPLETED, true))),
                                                 uc9Get(
                                                     uc10Get(
                                                         uc3Get(
@@ -243,19 +247,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                             false,
                             uc6Get(
                                 false,
-                                shipperGetShippingInstructionsRecordTDRef().then(uc7Get(uc8Get())),
-                                uc3Get(
-                                    SI_RECEIVED,
-                                    SI_UPDATE_RECEIVED,
-                                    true,
-                                    uc4aGet(
-                                        SI_RECEIVED,
-                                        SI_UPDATE_CONFIRMED,
-                                        true,
-                                        uc6Get(
-                                            false,
-                                            shipperGetTransportDocument(TD_DRAFT)
-                                                .then(uc7Get(uc8Get()))))),
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(
+                                        uc3Get(
+                                            SI_RECEIVED,
+                                            SI_UPDATE_RECEIVED,
+                                            true,
+                                            uc4aGet(
+                                                SI_RECEIVED,
+                                                SI_UPDATE_CONFIRMED,
+                                                true,
+                                                uc6Get(
+                                                    false,
+                                                    shipperGetTransportDocument(TD_DRAFT)
+                                                        .then(uc7Get(uc8Get())))))),
                                 shipperGetShippingInstructionsRecordTDRef()
                                     .then(
                                         uc7Get(
@@ -269,6 +274,40 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                         SI_UPDATE_CONFIRMED,
                                                         true,
                                                         uc8Get()))))))))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  private static LinkedHashMap<String, EblScenarioListBuilder> createSIandTDCombinedScenarios(
+      boolean isTd) {
+    return Stream.of(
+            Map.entry(
+                "Straight eBL",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(
+                        uc1Get(
+                            SI_RECEIVED,
+                            false,
+                            uc6Get(
+                                false,
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(
+                                        uc7Get(
+                                            uc8Get(
+                                                uc12Get(
+                                                    uc13Get(uc14Get(SI_COMPLETED, true)))))))))),
+            Map.entry(
+                "Sea Waybill",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_SWB, isTd)
+                    .then(
+                        uc1Get(
+                            SI_RECEIVED,
+                            false,
+                            uc6Get(
+                                false,
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(uc7Get(uc8Get())))))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));

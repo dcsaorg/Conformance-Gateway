@@ -45,19 +45,19 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
             buildChecks(
                 ROOT_LABEL,
                 DATA_PATH,
-                () -> EBLChecks.getTdNotificationChecks(transportDocumentStatus, getTdrCheck())),
+                () -> EblChecks.getTdNotificationChecks(transportDocumentStatus, getTdrCheck())),
             buildChecks(
                 TRANSPORT_DOCUMENT_LABEL,
                 TRANSPORT_DOCUMENT_PATH,
                 () ->
-                    EBLChecks.getTdPayloadChecks(
+                    EblChecks.getTdPayloadChecks(
                         standardVersion, transportDocumentStatus, dspSupplier)))
         .flatMap(Function.identity());
   }
 
   private JsonContentCheck getTdrCheck() {
     return Boolean.TRUE.equals(tdrIsKnown)
-        ? EBLChecks.tdrInNotificationMustMatchDSP(dspSupplier)
-        : EBLChecks.TDR_REQUIRED_IN_NOTIFICATION;
+        ? EblChecks.tdrInNotificationMustMatchDSP(dspSupplier)
+        : EblChecks.TDR_REQUIRED_IN_NOTIFICATION;
   }
 }

@@ -97,7 +97,7 @@
         "manifestReferenceNumber": "a1234",
         "masterSequenceNumber": "x12345"
       },
-      "additionalInformation": "FIRMS code: B986",
+      "additionalInformation": "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.",
       "references": [
         {
           "type": "CR",
@@ -160,8 +160,8 @@
         "departureDate": "2025-01-23",
         "plannedDepartureDate": "2025-01-23",
         "plannedArrivalDate": "2025-01-23",
-        "etaAtPortOfDischargeDate": "2025-01-23",
-        "etaAtPlaceOfDeliveryDate": "2025-01-23",
+        "portOfDischargeArrivalDate": "2025-01-23",
+        "placeOfDeliveryArrivalDate": "2025-01-23",
         "inlandArrivalDate": "2025-01-23",
         "estimatedGeneralOrderDateTime": "2025-01-23T01:23:45Z",
         "loadLocation": {
@@ -432,7 +432,7 @@
               },
               "outerPackaging": {
                 "packageCode": "5H",
-                "imoPackagingCode": "1A2",
+                "IMOPackagingCode": "1A2",
                 "numberOfPackages": 18,
                 "description": "Drum, steel",
                 "woodDeclaration": "TREATED_AND_CERTIFIED",
@@ -658,7 +658,7 @@
         "manifestReferenceNumber": "a1234",
         "masterSequenceNumber": "x12345"
       },
-      "additionalInformation": "FIRMS code: B986",
+      "additionalInformation": "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.",
       "references": [
         {
           "type": "CR",
@@ -721,8 +721,8 @@
         "departureDate": "2025-01-23",
         "plannedDepartureDate": "2025-01-23",
         "plannedArrivalDate": "2025-01-23",
-        "etaAtPortOfDischargeDate": "2025-01-23",
-        "etaAtPlaceOfDeliveryDate": "2025-01-23",
+        "portOfDischargeArrivalDate": "2025-01-23",
+        "placeOfDeliveryArrivalDate": "2025-01-23",
         "inlandArrivalDate": "2025-01-23",
         "estimatedGeneralOrderDateTime": "2025-01-23T01:23:45Z",
         "loadLocation": {
@@ -993,7 +993,7 @@
               },
               "outerPackaging": {
                 "packageCode": "5H",
-                "imoPackagingCode": "1A2",
+                "IMOPackagingCode": "1A2",
                 "numberOfPackages": 18,
                 "description": "Drum, steel",
                 "woodDeclaration": "TREATED_AND_CERTIFIED",

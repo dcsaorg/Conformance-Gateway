@@ -9,15 +9,15 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
-public class UC11i_Carrier_IssueAmendedTransportDocumentAction extends StateChangingSIAction {
+public class UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction extends StateChangingSIAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC11i_Carrier_IssueAmendedTransportDocumentAction(
+  public UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC11i", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, "UC11(void and reissue)", 204);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
@@ -25,7 +25,7 @@ public class UC11i_Carrier_IssueAmendedTransportDocumentAction extends StateChan
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
         Map.of("REFERENCE", getDSP().transportDocumentReference()),
-        "prompt-carrier-uc11i.md",
+        "prompt-carrier-uc11.md",
         "prompt-carrier-notification.md");
   }
 

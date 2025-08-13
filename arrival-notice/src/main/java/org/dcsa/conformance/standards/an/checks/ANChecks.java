@@ -249,11 +249,11 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of transport ETA fields",
         mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
         (node, contextPath) -> {
-          if (!node.hasNonNull("etaAtPortOfDischargeDate")
-              && !node.hasNonNull("etaAtPlaceOfDeliveryDate")) {
+          if (!node.hasNonNull("portOfDischargeArrivalDate")
+              && !node.hasNonNull("placeOfDeliveryArrivalDate")) {
             return Set.of(
                 contextPath
-                    + ": must functionally include either 'etaAtPortOfDischargeDate' or 'etaAtPlaceOfDeliveryDate'");
+                    + ": must functionally include either 'portOfDischargeArrivalDate' or 'placeOfDeliveryArrivalDate'");
           }
           return Set.of();
         });
@@ -549,11 +549,11 @@ public class ANChecks {
           var issues = new LinkedHashSet<String>();
 
           if (!op.hasNonNull("packageCode")
-              && !op.hasNonNull("imoPackagingCode")
+              && !op.hasNonNull("IMOPackagingCode")
               && !op.hasNonNull("description")) {
             issues.add(
                 contextPath
-                    + " must contain at least one of 'packageCode', 'imoPackagingCode', or 'description'");
+                    + " must contain at least one of 'packageCode', 'IMOPackagingCode', or 'description'");
           }
 
           if (!op.hasNonNull("numberOfPackages")) {

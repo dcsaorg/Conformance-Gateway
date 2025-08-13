@@ -16,8 +16,8 @@ public class VesselVoyage {
   @Schema(
       description =
 """
-The flag of the nation whose laws the vessel is registered under.
-This is indicated by the 2 characters for the country code using
+The national flag of the country under which a vessel is registered,
+indicated by the 2-character code defined in
 [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).
 """)
   private CountryCode vesselFlag;

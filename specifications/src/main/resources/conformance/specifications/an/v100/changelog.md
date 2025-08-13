@@ -1,5 +1,36 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250815-alpha
+
+Restructured the `Transport` object to contain an array of `Leg`s, each with its own `VesselVoyage`. (SD-2352)
+
+Added classifiers (planned / estimated / actual) to `Transport` and `Leg` dates. (SD-2361, SD-2381)
+
+Added a new `ReleaseInformation` object to the root `ArrivalNotice` object. (SD-2364)
+
+Added `Charges` also within the `UtilizedTransportEquipment` and `CargoItem`. (SD-2354)
+
+Added to `Charges` the properties `chargeCode`, `paymentLocation`, `chargePartnerCode` and `paymentCurrency`. (SD-2355, SD-2376)
+
+Added property `lastFreeDate` to object `FreeTime`. (SD-2353)
+
+Added to `Location` the property `locationTypeCode`. (SD-2363)
+
+Renamed `locationTypeCode` to `facilityTypeCode`. (SD-2932)
+
+Clarified that `freightPaymentStatus` refers only to collect freight charges. (SD-2375)
+
+Clarified the semantics of the `carrierRateOfExchange` within the `Charge` object. (SD-2382)
+
+Simplified the information model to use a single `Volume` and a single `Weight` type. (SD-2388)
+
+Updated the description and maxLength of the `additionalInformation` attribute. (SD-2391)
+
+Renamed `portOfDischargeArrivalDate` and `placeOfDeliveryArrivalDate` in notification and query parameters. (SD-2390)
+
+Renamed `imoPackagingCode` to `IMOPackagingCode`. (SD-2933)
+
+
 ## Snapshot v1.0.0-20250801-alpha
 
 Clarified that the ordering of `documentParties` is undefined except for parties of type `NI` for which it defines which one is the third, fourth, etc. notify party. (SD-2317)

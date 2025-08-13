@@ -24,7 +24,7 @@ import org.dcsa.conformance.standards.ebl.models.TriConsumer;
 import org.dcsa.conformance.standards.ebl.party.*;
 
 @UtilityClass
-public class EBLChecks {
+public class EblChecks {
 
   private static final JsonPointer SI_REF_SIR_PTR = JsonPointer.compile("/shippingInstructionsReference");
   private static final JsonPointer SI_REF_SI_STATUS_PTR = JsonPointer.compile("/shippingInstructionsStatus");
@@ -976,6 +976,12 @@ public class EBLChecks {
       "[Scenario] Verify that 'customsReferences' is used when the scenario requires it",
       scenarioCustomsReferencesCheck(dspSupplier)
     ));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "[Scenario] Verify that the scenario contains the required amount of 'utilizedTransportEquipments'",
+            utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)));
+
     return checks;
   }
 
@@ -1292,6 +1298,31 @@ public class EBLChecks {
             }));
     jsonContentChecks.addAll(generateScenarioRelatedChecks(dspSupplier, true));
     return jsonContentChecks;
+  }
+
+  public static JsonContentMatchedValidation utilizedTransportEquipmentsScenarioSizeCheck(
+      Supplier<DynamicScenarioParameters> dspSupplier) {
+    return (body, contextPath) -> {
+      var scenario = dspSupplier.get().scenarioType();
+      var utilizedTransportEquipments = body.path(UTILIZED_TRANSPORT_EQUIPMENTS);
+      int actualSize = utilizedTransportEquipments.size();
+
+      Integer expectedSize =
+          switch (scenario) {
+            case ScenarioType.REGULAR_2C_1U -> 1;
+            case ScenarioType.REGULAR_2C_2U -> 2;
+            default -> null;
+          };
+
+      if (expectedSize != null && actualSize != expectedSize) {
+        String path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
+        return Set.of(
+            "The scenario requires exactly %d 'utilizedTransportEquipments' but found %d at %s"
+                .formatted(expectedSize, actualSize, path));
+      }
+
+      return Set.of();
+    };
   }
 
   private static Set<String> allEquipmentReferences(JsonNode body) {

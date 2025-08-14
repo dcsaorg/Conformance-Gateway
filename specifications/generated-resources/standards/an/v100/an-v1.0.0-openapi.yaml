@@ -511,12 +511,6 @@ components:
           description: "The party to contact for any inquiries related to this Arrival Notice."
           items:
             $ref: "#/components/schemas/PartyContactDetail"
-        carrierInformationForCargoRelease:
-          type: "array"
-          description: |
-            The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
-          items:
-            $ref: "#/components/schemas/PartyContactDetail"
         pickupInformation:
           description: "Pickup information"
           allOf:
@@ -2083,6 +2077,12 @@ components:
           type: "boolean"
           description: "Indicates whether the shipment has been cleared by customs."
           example: false
+        carrierInformationForCargoRelease:
+          type: "array"
+          description: |
+            The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
+          items:
+            $ref: "#/components/schemas/PartyContactDetail"
       description: "Release information"
     ReturnInformation:
       type: "object"

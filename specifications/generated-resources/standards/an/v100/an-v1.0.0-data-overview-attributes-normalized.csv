@@ -42,7 +42,6 @@ ArrivalNotice,carrierCodeListProvider,string,,,,NMFTA,"The code list provider fo
 - `SMDG` (Ship Message Design Group)
 - `NMFTA` (National Motor Freight Traffic Association)",
 ArrivalNotice,"carrierContactInformation","PartyContactDetail list",,,,,"The party to contact for any inquiries related to this Arrival Notice.",
-ArrivalNotice,"carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
 ArrivalNotice,charges,"Charge list",,,,,"A list of `Charges`",
 ArrivalNotice,consignmentItems,"ConsignmentItem list",,,,,"A list of `ConsignmentItems`",
 ArrivalNotice,customsClearance,CustomsClearance,,,,,"Customs clearance information",
@@ -553,6 +552,7 @@ ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes 
 ReferenceConsignmentItem,values,"string list",,maxLength=35,,,"List of `referenceValues` for a given `referenceType`.
 Item description:
 The value of the reference.",
+ReleaseInformation,"carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
 ReleaseInformation,freightReleaseDate,"string(date)",,,,2025-01-23,"Date when the customer has provided the payment and the relevant documents.",
 ReleaseInformation,isCustomsReleased,boolean,,,,false,"Indicates whether the shipment has been cleared by customs.",
 ReleaseInformation,isFreightReleased,boolean,,,,false,"Indicates whether the shipment has been ""freight released"", meaning the B/L has been surrendered

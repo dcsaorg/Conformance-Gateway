@@ -447,10 +447,10 @@ ImportLicense,reference,string,,maxLength=35,,EMC007123,"Reference number assign
 InnerPackaging,description,string,,maxLength=100,,"Woven plastic water resistant Bag","Description of the packaging.",
 InnerPackaging,material,string,,maxLength=100,,Plastic,"The `material` used for the `Inner Packaging` of the referenced `Dangerous Goods`.",
 InnerPackaging,quantity,integer,,,,20,"Count of `Inner Packagings` of the referenced `Dangerous Goods`.",
-Leg,arrivalDate,ClassifiedDate,,,,,"Arrival date",
-Leg,departureDate,ClassifiedDate,,,,,"Departure date",
-Leg,dischargeLocation,Location,,,,,"Discharge location",
-Leg,loadLocation,Location,,,,,"Load location",
+Leg,arrivalDate,ClassifiedDate,,,,,"The arrival date at the discharge location for this specific leg of the transport plan.",
+Leg,departureDate,ClassifiedDate,,,,,"The departure date from the load location for this specific leg of the transport plan.",
+Leg,dischargeLocation,Location,,,,,"The location where the cargo is discharged for this specific leg of the transport plan.",
+Leg,loadLocation,Location,,,,,"The location where the cargo is loaded for this specific leg of the transport plan.",
 Leg,modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA
 - `VESSEL` - Vessel
 - `RAIL` - Rail

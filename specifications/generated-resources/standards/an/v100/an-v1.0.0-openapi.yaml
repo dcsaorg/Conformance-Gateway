@@ -1702,19 +1702,19 @@ components:
           format: "int32"
           example: 5
         loadLocation:
-          description: "Load location"
+          description: "The location where the cargo is loaded for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/Location"
         dischargeLocation:
-          description: "Discharge location"
+          description: "The location where the cargo is discharged for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/Location"
         departureDate:
-          description: "Departure date"
+          description: "The departure date from the load location for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/ClassifiedDate"
         arrivalDate:
-          description: "Arrival date"
+          description: "The arrival date at the discharge location for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/ClassifiedDate"
         modeOfTransport:
@@ -1732,7 +1732,7 @@ components:
           description: "Vessel and voyage details of a transport leg"
           allOf:
           - $ref: "#/components/schemas/VesselVoyage"
-      description: "Details of each leg of the `Transport`"
+      description: "Details of one specific leg of the transport plan"
     Limits:
       type: "object"
       properties:

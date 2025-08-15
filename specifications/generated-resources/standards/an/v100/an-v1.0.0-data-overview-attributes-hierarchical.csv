@@ -694,21 +694,21 @@ Unless otherwise specified, it is a local date in the time zone of the implicitl
 "ArrivalNotice / transport / inlandArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / legs",legs,"Leg list",,,,,"Full or partial information, considered relevant in this context, on some or all `Legs` of the `Transport`",
-"ArrivalNotice / transport / legs / arrivalDate",arrivalDate,ClassifiedDate,,,,,"Arrival date",
+"ArrivalNotice / transport / legs / arrivalDate",arrivalDate,ClassifiedDate,,,,,"The arrival date at the discharge location for this specific leg of the transport plan.",
 "ArrivalNotice / transport / legs / arrivalDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
 "ArrivalNotice / transport / legs / arrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
-"ArrivalNotice / transport / legs / departureDate",departureDate,ClassifiedDate,,,,,"Departure date",
+"ArrivalNotice / transport / legs / departureDate",departureDate,ClassifiedDate,,,,,"The departure date from the load location for this specific leg of the transport plan.",
 "ArrivalNotice / transport / legs / departureDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
 "ArrivalNotice / transport / legs / departureDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
-"ArrivalNotice / transport / legs / dischargeLocation",dischargeLocation,Location,,,,,"Discharge location",
+"ArrivalNotice / transport / legs / dischargeLocation",dischargeLocation,Location,,,,,"The location where the cargo is discharged for this specific leg of the transport plan.",
 "ArrivalNotice / transport / legs / dischargeLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
@@ -745,7 +745,7 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / legs / dischargeLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / legs / dischargeLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / legs / dischargeLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
-"ArrivalNotice / transport / legs / loadLocation",loadLocation,Location,,,,,"Load location",
+"ArrivalNotice / transport / legs / loadLocation",loadLocation,Location,,,,,"The location where the cargo is loaded for this specific leg of the transport plan.",
 "ArrivalNotice / transport / legs / loadLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)

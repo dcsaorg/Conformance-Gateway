@@ -24,6 +24,13 @@ public class DangerousGoods
     extends org.dcsa.conformance.specifications.standards.dt.v100.model.DangerousGoods {
 
   @Schema(
+    name = "IMOClass",
+    description = IMO_CLASS_DESCRIPTION,
+    example = "1.4S",
+    maxLength = 4)
+  protected String imoClass;
+
+  @Schema(
       description =
 """
 List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.

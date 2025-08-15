@@ -28,7 +28,7 @@ Updated the description and maxLength of the `additionalInformation` attribute. 
 
 Renamed `portOfDischargeArrivalDate` and `placeOfDeliveryArrivalDate` in notification and query parameters. (SD-2390)
 
-Renamed `imoPackagingCode` to `IMOPackagingCode`. (SD-2393)
+Renamed to use uppercase acronyms `IMOPackagingCode`, `IMOClass`, `FIRMSCode`, `ITDate` and `ITNumber`. (SD-2393)
 
 Clarified that all dates are local dates. (SD-2394)
 

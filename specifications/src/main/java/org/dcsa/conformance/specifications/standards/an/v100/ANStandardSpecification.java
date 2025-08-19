@@ -118,7 +118,7 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250815-alpha", "AN", "1.0.0-20250801-alpha", 4);
+        "Arrival Notice", "1.0.0-20250829-beta", "AN", "1.0.0-20250815-alpha", 4);
   }
 
   @Override
@@ -208,7 +208,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/28a61d04bad06c0a9aa2894f48f0958116cb4f84/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/a7e6e34f42f9cc5b26d3dbd7e5c84c52fc7816b2/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 
@@ -216,45 +216,7 @@ public class ANStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(
-            AttributesHierarchicalSheet.class,
-            Map.ofEntries(
-                Map.entry(
-                    "ArrivalNoticeNotification / etaAtPlaceOfDeliveryDate",
-                    "ArrivalNoticeNotification / placeOfDeliveryArrivalDate"),
-                Map.entry(
-                    "ArrivalNoticeNotification / etaAtPortOfDischargeDate",
-                    "ArrivalNoticeNotification / portOfDischargeArrivalDate"),
-                Map.entry(
-                    "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / imoClass",
-                    "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / IMOClass"),
-                Map.entry(
-                    "ArrivalNotice / customsClearance / immediateTransportationEntry / firmsCode",
-                    "ArrivalNotice / customsClearance / immediateTransportationEntry / FIRMSCode"),
-                Map.entry(
-                    "ArrivalNotice / customsClearance / immediateTransportationEntry / itDate",
-                    "ArrivalNotice / customsClearance / immediateTransportationEntry / ITDate"),
-                Map.entry(
-                    "ArrivalNotice / customsClearance / immediateTransportationEntry / itNumber",
-                    "ArrivalNotice / customsClearance / immediateTransportationEntry / ITNumber"),
-                Map.entry(
-                    "ArrivalNotice / transport / dischargeLocation",
-                    "ArrivalNotice / transport / legs / dischargeLocation"),
-                Map.entry(
-                    "ArrivalNotice / transport / loadLocation",
-                    "ArrivalNotice / transport / legs / loadLocation"),
-                Map.entry(
-                    "ArrivalNotice / transport / onCarriageBy",
-                    "ArrivalNotice / transport / legs / modeOfTransport"),
-                Map.entry(
-                    "ArrivalNotice / transport / vesselVoyages",
-                    "ArrivalNotice / transport / legs / vesselVoyage"),
-                Map.entry(
-                    "ArrivalNotice / transport / plannedArrivalDate",
-                    "ArrivalNotice / transport / legs / plannedArrivalDate"),
-                Map.entry(
-                    "ArrivalNotice / transport / plannedDepartureDate",
-                    "ArrivalNotice / transport / legs / plannedDepartureDate"))),
+        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
         Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));

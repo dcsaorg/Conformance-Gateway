@@ -87,13 +87,6 @@ The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (p
   @Schema(description = "The party to contact for any inquiries related to this Arrival Notice.")
   private List<PartyContactDetail> carrierContactInformation;
 
-  @Schema(
-      description =
-"""
-The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
-""")
-  private List<PartyContactDetail> carrierInformationForCargoRelease;
-
   @Schema()
   private PickupInformation pickupInformation;
 

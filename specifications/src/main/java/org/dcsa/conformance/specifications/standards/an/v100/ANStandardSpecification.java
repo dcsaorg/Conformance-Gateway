@@ -226,6 +226,18 @@ public class ANStandardSpecification extends StandardSpecification {
                     "ArrivalNoticeNotification / etaAtPortOfDischargeDate",
                     "ArrivalNoticeNotification / portOfDischargeArrivalDate"),
                 Map.entry(
+                    "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / imoClass",
+                    "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / IMOClass"),
+                Map.entry(
+                    "ArrivalNotice / customsClearance / immediateTransportationEntry / firmsCode",
+                    "ArrivalNotice / customsClearance / immediateTransportationEntry / FIRMSCode"),
+                Map.entry(
+                    "ArrivalNotice / customsClearance / immediateTransportationEntry / itDate",
+                    "ArrivalNotice / customsClearance / immediateTransportationEntry / ITDate"),
+                Map.entry(
+                    "ArrivalNotice / customsClearance / immediateTransportationEntry / itNumber",
+                    "ArrivalNotice / customsClearance / immediateTransportationEntry / ITNumber"),
+                Map.entry(
                     "ArrivalNotice / transport / dischargeLocation",
                     "ArrivalNotice / transport / legs / dischargeLocation"),
                 Map.entry(

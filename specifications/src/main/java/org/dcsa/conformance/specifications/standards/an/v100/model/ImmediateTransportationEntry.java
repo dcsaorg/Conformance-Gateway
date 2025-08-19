@@ -15,6 +15,7 @@ to another port or bonded facility without being physically cleared by CBP at th
 public class ImmediateTransportationEntry {
 
   @Schema(
+      name = "FIRMSCode",
       maxLength = 4,
       example = "a391",
       description =
@@ -27,6 +28,7 @@ It tells CBP and freight systems where the cargo is physically located.
   private String firmsCode;
 
   @Schema(
+      name = "ITNumber",
       maxLength = 100,
       example = "V4914303071",
       description =
@@ -39,6 +41,7 @@ for tracking the movement and verifying arrival at the inland port or bonded fac
   private String itNumber;
 
   @Schema(
+      name = "ITDate",
       description =
 """
 The date the in-bond movement began, i.e., when the Immediate Transportation (IT) entry was filed and accepted

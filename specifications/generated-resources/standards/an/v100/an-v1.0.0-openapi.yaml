@@ -511,12 +511,6 @@ components:
           description: "The party to contact for any inquiries related to this Arrival Notice."
           items:
             $ref: "#/components/schemas/PartyContactDetail"
-        carrierInformationForCargoRelease:
-          type: "array"
-          description: |
-            The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
-          items:
-            $ref: "#/components/schemas/PartyContactDetail"
         pickupInformation:
           description: "Pickup information"
           allOf:
@@ -894,7 +888,9 @@ components:
       properties:
         value:
           type: "string"
-          description: "String representation of a date in yyyy-MM-dd format."
+          description: |
+            String representation of a date in yyyy-MM-dd format.
+            Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.
           format: "date"
           example: "2025-01-23"
         classifier:
@@ -1093,7 +1089,7 @@ components:
           type: "string"
           description: "The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code."
           example: "xylene and benzene"
-        imoClass:
+        IMOClass:
           maxLength: 4
           type: "string"
           description: |
@@ -1613,7 +1609,7 @@ components:
     ImmediateTransportationEntry:
       type: "object"
       properties:
-        firmsCode:
+        FIRMSCode:
           maxLength: 4
           type: "string"
           description: |
@@ -1622,7 +1618,7 @@ components:
             such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
             It tells CBP and freight systems where the cargo is physically located.
           example: "a391"
-        itNumber:
+        ITNumber:
           maxLength: 100
           type: "string"
           description: |
@@ -1631,7 +1627,7 @@ components:
             to another inland port or bonded facility without paying duties at the first port. The IT number is used
             for tracking the movement and verifying arrival at the inland port or bonded facility.
           example: "V4914303071"
-        itDate:
+        ITDate:
           type: "string"
           description: |
             The date the in-bond movement began, i.e., when the Immediate Transportation (IT) entry was filed and accepted
@@ -1706,19 +1702,19 @@ components:
           format: "int32"
           example: 5
         loadLocation:
-          description: "Load location"
+          description: "The location where the cargo is loaded for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/Location"
         dischargeLocation:
-          description: "Discharge location"
+          description: "The location where the cargo is discharged for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/Location"
         departureDate:
-          description: "Departure date"
+          description: "The departure date from the load location for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/ClassifiedDate"
         arrivalDate:
-          description: "Arrival date"
+          description: "The arrival date at the discharge location for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/ClassifiedDate"
         modeOfTransport:
@@ -1736,7 +1732,7 @@ components:
           description: "Vessel and voyage details of a transport leg"
           allOf:
           - $ref: "#/components/schemas/VesselVoyage"
-      description: "Details of each leg of the `Transport`"
+      description: "Details of one specific leg of the transport plan"
     Limits:
       type: "object"
       properties:
@@ -2081,6 +2077,12 @@ components:
           type: "boolean"
           description: "Indicates whether the shipment has been cleared by customs."
           example: false
+        carrierInformationForCargoRelease:
+          type: "array"
+          description: |
+            The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
+          items:
+            $ref: "#/components/schemas/PartyContactDetail"
       description: "Release information"
     ReturnInformation:
       type: "object"

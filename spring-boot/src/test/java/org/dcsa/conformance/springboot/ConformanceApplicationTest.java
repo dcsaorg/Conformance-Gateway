@@ -28,19 +28,22 @@ class ConformanceApplicationTest {
   private TestRestTemplate restTemplate;
 
   @ParameterizedTest
-  @ValueSource(strings = {
-    "adoption-100-conformance-auto-all-in-one",
-    "booking-200-conformance-auto-all-in-one",
-    "cs-100-conformance-auto-all-in-one",
-    "ebl-300-conformance-si-only-auto-all-in-one",
-    "ebl-300-conformance-td-only-auto-all-in-one",
-    "eblissuance-300-conformance-auto-all-in-one",
-    "eblsurrender-300-conformance-auto-all-in-one",
-    "jit-200-conformance-auto-all-in-one",
-    "ovs-300-conformance-auto-all-in-one",
-    "pint-300-conformance-auto-all-in-one",
-    "tnt-220-conformance-auto-all-in-one"
-  })
+  @ValueSource(
+      strings = {
+        "adoption-100-conformance-auto-all-in-one",
+        "an-100-conformance-auto-all-in-one",
+        "booking-200-conformance-auto-all-in-one",
+        "cs-100-conformance-auto-all-in-one",
+        "ebl-300-conformance-si-only-auto-all-in-one",
+        "ebl-300-conformance-td-only-auto-all-in-one",
+        "ebl-300-si-and-td-combined-auto-all-in-one",
+        "eblissuance-300-conformance-auto-all-in-one",
+        "eblsurrender-300-conformance-auto-all-in-one",
+        "jit-200-conformance-auto-all-in-one",
+        "ovs-300-conformance-auto-all-in-one",
+        "pint-300-conformance-auto-all-in-one",
+        "tnt-220-conformance-auto-all-in-one"
+      })
   void testEachSuite(final String sandboxId) throws InterruptedException {
     log.info("Starting scenario suite: {}", sandboxId);
     // validate if scenario is listed

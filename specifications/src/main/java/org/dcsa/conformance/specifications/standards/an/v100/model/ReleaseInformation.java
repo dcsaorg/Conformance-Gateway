@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
 
+import java.util.List;
+
 @Data
 @Schema(description = "Release information")
 public class ReleaseInformation {
@@ -36,4 +38,11 @@ and all required freight payments have been received by the carrier.
       example = "false",
       description = "Indicates whether the shipment has been cleared by customs.")
   private Boolean isCustomsReleased;
+
+  @Schema(
+      description =
+"""
+The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
+""")
+  private List<PartyContactDetail> carrierInformationForCargoRelease;
 }

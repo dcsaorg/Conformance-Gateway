@@ -350,6 +350,7 @@ public class ANChecks {
           }
           issues.addAll(validateFreeTimeArrayAttribute("typeCodes").validate(body));
           issues.addAll(validateFreeTimeArrayAttribute("ISOEquipmentCodes").validate(body));
+          issues.addAll(validateFreeTimeArrayAttribute("equipmentReferences").validate(body));
           issues.addAll(validateFreeTimeAttribute("duration").validate(body));
           issues.addAll(validateFreeTimeAttribute("timeUnit").validate(body));
 

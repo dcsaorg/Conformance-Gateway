@@ -26,6 +26,8 @@ class ManualScenarioTest extends ManualTestBase {
     return Stream.of(
         Arguments.of("Adoption", false),
         Arguments.of("Adoption", true),
+        Arguments.of("AN", false),
+        Arguments.of("AN", true),
         Arguments.of("Booking", false),
         Arguments.of("Booking", true),
         Arguments.of("CS", false),

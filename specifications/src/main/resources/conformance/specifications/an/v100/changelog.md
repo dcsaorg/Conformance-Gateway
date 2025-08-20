@@ -1,5 +1,8 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250829-beta
+
+
 ## Snapshot v1.0.0-20250815-alpha
 
 Restructured the `Transport` object to contain an array of `Leg`s, each with its own `VesselVoyage`. (SD-2352)

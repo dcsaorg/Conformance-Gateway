@@ -104,7 +104,7 @@ class SeleniumTest extends SeleniumTestBase {
     StopWatch stopWatch = StopWatch.createStarted();
     String standardName = "Ebl";
     createSandboxesAndRunGroups(
-      new Standard(standardName, null), "3.0.0", "Conformance TD-only", "Carrier");
+      new Standard(standardName, null), "3.0.1", "Conformance TD-only", "Carrier");
     log.info("Finished AWS testing on standard: {}, time taken: {}", standardName, stopWatch);
   }
 }

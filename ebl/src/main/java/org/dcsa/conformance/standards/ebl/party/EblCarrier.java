@@ -388,7 +388,7 @@ public class EblCarrier extends ConformanceParty {
     ObjectNode response =
         (ObjectNode)
             JsonToolkit.templateFileToJsonNode(
-                "/standards/ebl/messages/ebl-api-3.0.0-error-message.json",
+                "/standards/ebl/messages/ebl-api-3.0.1-error-message.json",
                 Map.of(
                     "HTTP_METHOD_PLACEHOLDER",
                     request.method(),

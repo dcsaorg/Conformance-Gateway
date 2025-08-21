@@ -1,45 +1,43 @@
 openapi: 3.0.3
-servers:
-  - description: SwaggerHub API Auto Mocking
-    url: 'https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/3.0.0'
 info:
-  version: 3.0.0
+  version: 3.0.1
   title: DCSA eBL Surrender API
   description: |
-    <h1>DCSA OpenAPI specification for the surrender of an electronic Bill of Lading (eBL) via an eBL Solution Provider for amendment (incl. switch to paper), and delivery</h1>
+    <h1>DCSA OpenAPI specification for the surrender of an electronic Bill of Lading (referred to as eBL) via an eBL Solution Provider for amendment (incl. switch to paper), and delivery</h1>
 
-    This API is intended as an API between a carrier and an EBL Solution Platform.
+    This API is intended as an API between a carrier and an eBL Solution Platform.
 
-    The EBL Solution Platform will submit surrender requests to the carrier, via
-    
+    The eBL Solution Platform will submit surrender requests to the carrier, via
+
         POST /v3/ebl-surrender-requests
-    
-    which will be processed asynchronously. The EBL Solution Platform submitting the surrender request to the carrier must be the same EBL Solution Platform from which the eBL was issued. Responses to the surrender requests will be submitted by the carrier via 
-    
+
+    which will be processed asynchronously. The eBL Solution Platform submitting the surrender request to the carrier must be the same eBL Solution Platform from which the eBL was issued. Responses to the surrender requests will be submitted by the carrier via
+
         POST /v3/ebl-surrender-responses
 
     When the platform submits a surrender request, the platform guarantees *all* of the following:
 
-    1) The surrender request was submitted by the sole possessor of the EBL.
+    1) The surrender request was submitted by the sole possessor of the eBL.
     2) Depending on the eBL type:
        * For non-negotiable ("straight") eBLs, the surrender request was submitted by either the original shipper OR the consignee.
        * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.
        * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.
-    3) The carrier holds possession of the EBL with this surrender request  until it responds to this surrender request.
+    3) The carrier holds possession of the eBL with this surrender request  until it responds to this surrender request.
 
     Please see the [Surrender Request](#/surrenderRequestDetails) for details on what data the platform will provide.
 
     The processes for amendments to eBL (including switch to paper) and for surrender of the eBL for delivery of the goods shall be exclusively governed by and executed in accordance with the Bylaws of the eBL Platform where the Surrender for amendment or Surrender for delivery was received, including establishing whether the User in Control performing the Surrender for amendment or Surrender for delivery is entitled to carry out this action.
-    
-    ### API Design & Implementation Principles
-    This API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)
 
-    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.
+    ### API Design & Implementation Principles
+    This API follows the guidelines defined in version 2.0 of the API Design & Implementation Principles which can be found on the [DCSA Developer Portal](https://developer.dcsa.org/api_design)
+
+    ### Changelog and GitHub
+    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v301). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
 
     API specification issued by [DCSA.org](https://dcsa.org/).
   license:
     name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
   contact:
     name: Digital Container Shipping Association (DCSA)
     url: 'https://dcsa.org'
@@ -50,7 +48,7 @@ tags:
       The Surrender Requests **implemented** by carrier
   - name: Surrender Request responses
     description: |
-      The Surrender Request responses **implemented** by the EBL Solution Platform
+      The Surrender Request responses **implemented** by the eBL Solution Platform
 paths:
   /v3/ebl-surrender-requests:
     post:
@@ -60,7 +58,7 @@ paths:
       summary: |
         Creates a Surrender Request
       description: |
-        The EBL Solution Platform uses this endpoint to submit a surrender request.
+        The eBL Solution Platform uses this endpoint to submit a surrender request.
 
         The carrier's answer to the surrender request will be returned via a callback response (see the `Callbacks` tab)
       parameters:
@@ -94,7 +92,7 @@ paths:
         - Surrender Request responses
       operationId: post-ebl-surrender-responses
       description: |
-        The carrier uses this endpoint to inform the EBL Solution Platform about the verdict for a given surrender request.
+        The carrier uses this endpoint to inform the eBL Solution Platform about the verdict for a given surrender request.
       parameters:
         - $ref: '#/components/parameters/Api-Version-Major'
       requestBody:
@@ -133,7 +131,7 @@ components:
     API-Version:
       schema:
         type: string
-        example: 3.0.0
+        example: 3.0.1
       description: |
         SemVer used to indicate the version of the contract (API version) returned.
   parameters:
@@ -157,7 +155,7 @@ components:
           pattern: ^\S+$
           maxLength: 4
           description: |
-            The EBL platform of the transaction party. The value **MUST** be one of:
+            The eBL platform of the transaction party. The value **MUST** be one of:
             - `WAVE` (Wave)
             - `CARX` (CargoX)
             - `ESSD` (EssDOCS)
@@ -170,6 +168,10 @@ components:
             - `ETEU` (eTEU)
             - `TRAC` (Enigio trace:original)
             - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
           example: BOLE
         partyName:
           type: string
@@ -233,12 +235,12 @@ components:
 
         The platform guarantees *all* of the following:
 
-          1) The surrender request was submitted by the sole possessor of the EBL.
+          1) The surrender request was submitted by the sole possessor of the eBL.
           2) Depending on the eBL type:
            * For non-negotiable ("straight") eBLs, the surrender request was submitted by either the original shipper OR the consignee.
            * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.
            * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.
-          3) The carrier holds possession of the EBL with this surrender request  until it responds to this surrender request.
+          3) The carrier holds possession of the eBL with this surrender request  until it responds to this surrender request.
       properties:
         surrenderRequestReference:
           type: string
@@ -252,7 +254,7 @@ components:
           pattern: ^\S(?:.*\S)?$
           maxLength: 20
           description: |
-            A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.
+            A unique number allocated by the shipping line to the `Transport Document` and the main number used for the tracking of the status of the shipment.
           example: HHL71800000
         transportDocumentSubReference:
           type: string
@@ -265,10 +267,10 @@ components:
           type: string
           description: |
             Surrender Request codes:
-            - `SREQ` (Requested to surrender for Delivery)
-            - `AREQ` (Requested to surrender for Amendment)
+            - `SREQ` (Requested to Surrender for Delivery)
+            - `AREQ` (Requested to Surrender for Amendment)
 
-            The surrender request code determines the type of surrender request. Any parallel negotiation between the consignee and the carrier related to any of these type surrender are handled outside this API. Examples could be the shipment release related to a surrender for delivery or the actual contents of the amendment in a surrender related to an amendment.
+            The surrender request code determines the type of surrender request. Any parallel negotiation between the consignee and the carrier related to any of these type surrender are handled outside this API. Examples could be the shipment release related to a Surrender for Delivery or the actual contents of the amendment in a surrender related to an amendment.
 
             Note that "Switch to paper" is considered an amendment in how it is modelled via the DCSA eBL data standard.
           enum:
@@ -278,7 +280,9 @@ components:
         reasonCode:
           type: string
           maxLength: 4
-          description: "A code defined by DCSA indicating the reason for requesting a surrender for amendment. Possible values are:\n-\t`SWTP` (Switch to paper)\n"
+          description: |
+            A code defined by DCSA indicating the reason for requesting a Surrender for Amendment. Possible values are:
+            - `SWTP` (Switch to paper)
           example: SWTP
         comments:
           type: string
@@ -289,15 +293,15 @@ components:
         endorsementChain:
           type: array
           description: |
-           A list of one or more endorsement related actions that were performed on or after the issuance of the eBL. It is equivalent to the "back side" of the physical bill of lading. The type of actions recorded in the endorsement chain as defined by the DCSA standard are listed below:
+            A list of one or more endorsement related actions that were performed on or after the issuance of the eBL. It is equivalent to the "back side" of the physical bill of lading. The type of actions recorded in the endorsement chain as defined by the DCSA standard are listed below:
 
-            - **Issue:** The act of issuing an eBL i.e. making the eBL available to the receiver.
-            - **Endorse:** The act of transferring the rights and obligations associated with the eBL to a specific named party, allowing them to claim or deal with the goods. The user in control of the eBL may endorse the eBL in their turn to another named party. Only applicable to To-Order eBL (`isToOrder=true`).
-            - **Sign:** A general-purpose signature that can be used by any party to mark their possession of the eBL. Similar to how any possessor in the physical world can put a physical signature on the paper bill of lading. The endorsement chain as defined by DCSA does not record any transfer of possession of the eBL, unless a signature is added to it.
-            - **Request surrender for amendment:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the puprpose of amending the eBL.
-            - **Request surrender for delivery:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the purpose of claiming delivery of the goods.
+             - **Issue:** The act of issuing an eBL i.e. making the eBL available to the receiver.
+             - **Endorse:** The act of transferring the rights and obligations associated with the eBL to a specific named party, allowing them to claim or deal with the goods. The user in control of the eBL may endorse the eBL in their turn to another named party. Only applicable to To-Order eBL (`isToOrder=true`).
+             - **Sign:** A general-purpose signature that can be used by any party to mark their possession of the eBL. Similar to how any possessor in the physical world can put a physical signature on the paper bill of lading. The endorsement chain as defined by DCSA does not record any transfer of possession of the eBL, unless a signature is added to it.
+             - **Request Surrender for Amendment:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the purpose of amending the eBL.
+             - **Request Surrender for Delivery:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the purpose of claiming delivery of the goods.
 
-            **Note:** DCSA member carriers have agreed that the name `endorsementChain` is still the correct name for this list of actions.
+             **Note:** DCSA member carriers have agreed that the name `endorsementChain` is still the correct name for this list of actions.
           items:
             $ref: '#/components/schemas/EndorsementChainLink'
       required:
@@ -325,6 +329,10 @@ components:
             - `ETEU` (eTEU)
             - `TRAC` (Enigio trace:original)
             - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
             - `GSBN` (Global Shipping Business Network)
             - `WISE` (WiseTech)
             - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -449,7 +457,7 @@ components:
           example: 4426d965-0dd8-4005-8c63-dc68b01c4962
         errorDateTime:
           description: |
-            The DateTime corresponding to the error occurring. Must be formatted using [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format.
+            The DateTime corresponding to the error occurring.
           type: string
           format: date-time
           example: '2024-09-04T09:41:00Z'
@@ -481,7 +489,7 @@ components:
 
               - `7000-7999` Technical error codes
               - `8000-8999` Functional error codes
-              - `9000-9999` API provider-specific error codes            
+              - `9000-9999` API provider-specific error codes
 
             [Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).
           minimum: 7000
@@ -531,7 +539,7 @@ components:
           example: Z12345
           pattern: ^\S(?:.*\S)?$
           description: |
-            The surrender request provided by the EBL solution in the surrender request.
+            The surrender request provided by the eBL solution in the surrender request.
         action:
           type: string
           description: |
@@ -541,7 +549,7 @@ components:
 
             When the carrier accepts the surrender (`SURR`), the platform will inform the party that submitted the surrender request that the surrender has been accepted.  If the surrender is due to an amendment, the carrier will follow up with issuing the amended document to the party that submitted the surrender. The carrier will immediately become the possessor of the bill and can now void it.
 
-            When the carrier rejects the surrender (`SREJ`), the EBL is returned to the party that submitted the surrender request.
+            When the carrier rejects the surrender (`SREJ`), the eBL is returned to the party that submitted the surrender request.
           enum:
             - SURR
             - SREJ
@@ -555,3 +563,7 @@ components:
       required:
         - surrenderRequestReference
         - action
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/3.0.1

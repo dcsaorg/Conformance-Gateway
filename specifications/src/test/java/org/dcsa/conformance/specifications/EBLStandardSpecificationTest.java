@@ -12,7 +12,7 @@ class EBLStandardSpecificationTest {
 
     StandardSpecificationTestToolkit.verifyTypeExport(
         "TransportDocument",
-        "../ebl/src/main/resources/standards/ebl/schemas/EBL_v3.0.0.yaml",
+        "../ebl/src/main/resources/standards/ebl/schemas/EBL_v3.0.1.yaml",
         eblStandardSpecification);
 
     eblStandardSpecification.generateArtifacts();

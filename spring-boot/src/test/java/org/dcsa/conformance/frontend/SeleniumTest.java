@@ -36,18 +36,20 @@ class SeleniumTest extends SeleniumTestBase {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {
-    "Adoption", // Takes 0:29 minutes
-    "Booking", // Takes 11:52 minutes
-    "CS", // 11:05 minutes
-    "Ebl", // 37:09 minutes
-    "eBL Issuance", // 6:03 minutes
-    "eBL Surrender", // 7:59 minutes
-    "JIT", // 1:14 minutes
-    "OVS", // 3:34 minutes
-    "PINT", // 6:10 minutes
-    "TnT" // 6:20 minutes
-  })
+  @ValueSource(
+      strings = {
+        "Adoption", // Takes 0:29 minutes
+        "AN",
+        "Booking", // Takes 11:52 minutes
+        "CS", // 11:05 minutes
+        "Ebl", // 37:09 minutes
+        "eBL Issuance", // 6:03 minutes
+        "eBL Surrender", // 7:59 minutes
+        "JIT", // 1:14 minutes
+        "OVS", // 3:34 minutes
+        "PINT", // 6:10 minutes
+        "TnT" // 6:20 minutes
+      })
   void testStandardWithAllVersions(String standardName) {
     app.setSimulatedLambdaDelay(lambdaDelay);
     StopWatch stopWatch = StopWatch.createStarted();

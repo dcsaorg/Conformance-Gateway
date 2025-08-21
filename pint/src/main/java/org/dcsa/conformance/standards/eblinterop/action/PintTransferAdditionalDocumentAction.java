@@ -68,10 +68,9 @@ public class PintTransferAdditionalDocumentAction extends PintAction {
                       PintRole::isSendingPlatform,
                       getMatchedExchangeUuid(),
                       delayedValue(dspSupplier, DynamicScenarioParameters::envelopeReference))
-                  : new UrlPathCheck(
-                      PintRole::isSendingPlatform,
+                  : new NothingToCheck(
                       getMatchedExchangeUuid(),
-                      ""), // SD-2358 requires non-empty list of checks
+                      HttpMessageType.REQUEST), // SD-2358 requires non-empty list of checks
                 new ResponseStatusCheck(
                     PintRole::isReceivingPlatform, getMatchedExchangeUuid(), expectedStatus),
                 new ApiHeaderCheck(

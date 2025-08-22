@@ -222,7 +222,7 @@ public class CarrierShippingInstructions {
   private static final Map<String, BiConsumer<ObjectNode, ScenarioType>> CONSIGNMENT_ITEMS_HANDLER =
       Map.ofEntries(
           Map.entry(
-              "3.0.1",
+              "3.0.0",
               (transportDocument, scenarioType) -> {
                 for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
                   if (consignmentItemNode instanceof ObjectNode consignmentItem) {

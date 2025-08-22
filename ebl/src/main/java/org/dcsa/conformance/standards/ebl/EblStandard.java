@@ -15,7 +15,7 @@ public class EblStandard extends AbstractStandard {
   @Override
   public SortedMap<String, SortedSet<String>> getScenarioSuitesByStandardVersion() {
     return new TreeMap<>(
-        Map.ofEntries(Map.entry("3.0.1", new TreeSet<>(EblScenarioListBuilder.SCENARIO_SUITES))));
+        Map.ofEntries(Map.entry("3.0.0", new TreeSet<>(EblScenarioListBuilder.SCENARIO_SUITES))));
   }
 
   @Override

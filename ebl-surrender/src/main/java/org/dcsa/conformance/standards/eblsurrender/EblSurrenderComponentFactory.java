@@ -114,7 +114,7 @@ class EblSurrenderComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(String schemaName) {
     String schemaFilePath =
-            "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml".formatted(standardVersion);
+            "/standards/eblsurrender/schemas/EBL_SUR_v%s.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 }

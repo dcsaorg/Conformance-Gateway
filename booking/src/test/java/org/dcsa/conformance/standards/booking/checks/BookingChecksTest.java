@@ -21,13 +21,6 @@ import org.junit.jupiter.api.Test;
 
 class BookingChecksTest {
 
-  private static final String ERROR_MESSAGE_MISSING_AMENDED_BOOKING_STATUS =
-      "The attribute 'amendedBookingStatus' should have been present but was absent";
-  private static final String ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS =
-      "The value of 'amendedBookingStatus' was '%s' instead of '%s'";
-  private static final String ERROR_MESSAGE_BOOKING_STATUS_PRESENT =
-      "The attribute 'bookingStatus' should have been absent but was present and had value '%s'";
-
   private ObjectNode booking;
   private ObjectNode requestedEquipment;
   private ArrayNode requestedEquipments;
@@ -171,88 +164,6 @@ class BookingChecksTest {
   }
 
   @Test
-  void testValidateBookingAmendmentCancellation_valid() {
-    booking.put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name());
-
-    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
-    Set<String> errors = check.validate(booking);
-
-    assertTrue(errors.isEmpty());
-  }
-
-  @Test
-  void testValidateAmendedBookingCancellation_missingBookingAmendmentStatus() {
-    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
-    Set<String> errors = check.validate(booking);
-
-    assertFalse(errors.isEmpty());
-    assertEquals(2, errors.size());
-    assertTrue(errors.contains(ERROR_MESSAGE_MISSING_AMENDED_BOOKING_STATUS));
-    assertTrue(
-        errors.contains(
-            ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS.formatted(
-                "(absent)", BookingState.AMENDMENT_CANCELLED.name())));
-  }
-
-  @Test
-  void testValidateAmendedBookingCancellation_wrongBookingAmendmentStatus() {
-    booking.put("amendedBookingStatus", BookingState.CONFIRMED.name());
-
-    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
-    Set<String> errors = check.validate(booking);
-
-    assertFalse(errors.isEmpty());
-    assertEquals(1, errors.size());
-    assertTrue(
-        errors.contains(
-            ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS.formatted(
-                BookingState.CONFIRMED.name(), BookingState.AMENDMENT_CANCELLED.name())));
-  }
-
-  @Test
-  void testValidateBookingCancellation_bookingAmendmentStatusPresent() {
-    booking.put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name());
-    booking.put("bookingStatus", BookingState.CONFIRMED.name());
-
-    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
-    Set<String> errors = check.validate(booking);
-
-    assertFalse(errors.isEmpty());
-    assertEquals(1, errors.size());
-    assertTrue(
-        errors.contains(
-            ERROR_MESSAGE_BOOKING_STATUS_PRESENT.formatted(BookingState.CONFIRMED.name())));
-  }
-
-  @Test
-  void testValidateBookingCancellation_nullBookingAmendmentNode() {
-    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
-    Set<String> errors = check.validate(OBJECT_MAPPER.nullNode());
-
-    assertFalse(errors.isEmpty());
-    assertEquals(2, errors.size());
-    assertTrue(errors.contains(ERROR_MESSAGE_MISSING_AMENDED_BOOKING_STATUS));
-    assertTrue(
-        errors.contains(
-            ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS.formatted(
-                "(absent)", BookingState.AMENDMENT_CANCELLED.name())));
-  }
-
-  @Test
-  void testValidateBookingCancellation_emptyBookingAmendmentNode() {
-    JsonContentCheck check = BookingChecks.validateBookingAmendmentCancellation();
-    Set<String> errors = check.validate(OBJECT_MAPPER.createObjectNode());
-
-    assertFalse(errors.isEmpty());
-    assertEquals(2, errors.size());
-    assertTrue(errors.contains(ERROR_MESSAGE_MISSING_AMENDED_BOOKING_STATUS));
-    assertTrue(
-        errors.contains(
-            ERROR_MESSAGE_WRONG_AMENDED_BOOKING_STATUS.formatted(
-                "(absent)", BookingState.AMENDMENT_CANCELLED.name())));
-  }
-
-  @Test
   void bothReferencesCorrect() throws Exception {
     String json =
         """
@@ -319,5 +230,213 @@ class BookingChecksTest {
             .next()
             .contains(
                 "Either 'carrierBookingRequestReference' must equal CBRR123 or 'carrierBookingReference' must equal CBR456"));
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_noDocumentParties_valid() {
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_noOtherParties_valid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_emptyOtherParties_valid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_singlePartyFunction_valid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+    ObjectNode party = OBJECT_MAPPER.createObjectNode();
+    party.put("partyFunction", "DDR");
+    otherParties.add(party);
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_uniquePartyFunctions_valid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+
+    String[] partyFunctions = {"DDR", "DDS", "COW", "COX", "N1", "N2"};
+    for (String function : partyFunctions) {
+      ObjectNode party = OBJECT_MAPPER.createObjectNode();
+      party.put("partyFunction", function);
+      otherParties.add(party);
+    }
+
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_multipleNI_valid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+
+    for (int i = 0; i < 3; i++) {
+      ObjectNode party = OBJECT_MAPPER.createObjectNode();
+      party.put("partyFunction", "NI");
+      otherParties.add(party);
+    }
+
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_validExampleWithMultipleNI_valid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+
+    String[] partyFunctions = {"DDR", "DDS", "COW", "COX", "N1", "N2", "NI", "NI", "NI"};
+    for (String function : partyFunctions) {
+      ObjectNode party = OBJECT_MAPPER.createObjectNode();
+      party.put("partyFunction", function);
+      otherParties.add(party);
+    }
+
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_duplicateDDR_invalid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+
+    ObjectNode party1 = OBJECT_MAPPER.createObjectNode();
+    party1.put("partyFunction", "DDR");
+    ObjectNode party2 = OBJECT_MAPPER.createObjectNode();
+    party2.put("partyFunction", "DDR");
+
+    otherParties.add(party1);
+    otherParties.add(party2);
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("Party function 'DDR' cannot be repeated. Found 2 occurrences."));
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_multipleDuplicates_invalid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+
+    String[] partyFunctions = {"DDR", "DDR", "DDS", "COW", "COW", "COW", "N1"};
+    for (String function : partyFunctions) {
+      ObjectNode party = OBJECT_MAPPER.createObjectNode();
+      party.put("partyFunction", function);
+      otherParties.add(party);
+    }
+
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertEquals(2, errors.size());
+    assertTrue(errors.contains("Party function 'DDR' cannot be repeated. Found 2 occurrences."));
+    assertTrue(errors.contains("Party function 'COW' cannot be repeated. Found 3 occurrences."));
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_duplicatesWithValidNI_invalid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+
+    String[] partyFunctions = {"DDR", "DDS", "DDS", "NI", "NI", "NI", "COX", "COX"};
+    for (String function : partyFunctions) {
+      ObjectNode party = OBJECT_MAPPER.createObjectNode();
+      party.put("partyFunction", function);
+      otherParties.add(party);
+    }
+
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertEquals(2, errors.size());
+    assertTrue(errors.contains("Party function 'DDS' cannot be repeated. Found 2 occurrences."));
+    assertTrue(errors.contains("Party function 'COX' cannot be repeated. Found 2 occurrences."));
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_emptyPartyFunction_valid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+
+    ObjectNode party1 = OBJECT_MAPPER.createObjectNode();
+    party1.put("partyFunction", "");
+    ObjectNode party2 = OBJECT_MAPPER.createObjectNode();
+    party2.put("partyFunction", "DDR");
+    ObjectNode party3 = OBJECT_MAPPER.createObjectNode();
+    party3.put("partyFunction", "");
+
+    otherParties.add(party1);
+    otherParties.add(party2);
+    otherParties.add(party3);
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_missingPartyFunction_valid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
+
+    ObjectNode party1 = OBJECT_MAPPER.createObjectNode();
+    ObjectNode party2 = OBJECT_MAPPER.createObjectNode();
+    party2.put("partyFunction", "DDR");
+
+    otherParties.add(party1);
+    otherParties.add(party2);
+    documentParties.set("other", otherParties);
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testDocumentPartyFunctionsUnique_otherNotArray_valid() {
+    ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
+    documentParties.put("other", "not-an-array");
+    booking.set("documentParties", documentParties);
+
+    Set<String> errors = BookingChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE.validate(booking);
+    assertTrue(errors.isEmpty());
   }
 }

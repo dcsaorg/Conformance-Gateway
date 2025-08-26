@@ -32,17 +32,10 @@ public class BookingChecks {
     BookingState.DECLINED
   );
 
-  private static final Set<BookingState> NON_CONFIRMED_BOOKING_STATES = Set.of(
-    BookingState.RECEIVED,
-    BookingState.PENDING_UPDATE,
-    BookingState.UPDATE_RECEIVED
-  );
-
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
 
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
-  private static final String ATTR_BOOKING_STATUS = "bookingStatus";
   private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
 
@@ -160,12 +153,41 @@ public class BookingChecks {
     JsonAttribute.mustBeAbsent(JsonPointer.compile("/exportDeclarationReference"))
   );
 
-  private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
-    "Each document party can be used at most once",
-    JsonAttribute.path(
-      "documentParties",
-      JsonAttribute.path("other", JsonAttribute.unique("partyFunction"))
-    ));
+  static final JsonContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE =
+      JsonAttribute.customValidator(
+          "Each document party can be used at most once, except 'NI' which can be repeated",
+          body -> {
+            var issues = new LinkedHashSet<String>();
+            var documentPartiesNode = body.path("documentParties");
+
+            if (!documentPartiesNode.isMissingNode() && documentPartiesNode.has("other")) {
+              var otherPartiesNode = documentPartiesNode.path("other");
+              if (otherPartiesNode.isArray()) {
+                var partyFunctionCounts = new HashMap<String, Integer>();
+
+                // Count occurrences of each party function
+                StreamSupport.stream(otherPartiesNode.spliterator(), false)
+                    .forEach(
+                        party -> {
+                          var partyFunction = party.path("partyFunction").asText("");
+                          if (!partyFunction.isEmpty()) {
+                            partyFunctionCounts.merge(partyFunction, 1, Integer::sum);
+                          }
+                        });
+
+                // Check for duplicates (excluding "NI")
+                partyFunctionCounts.entrySet().stream()
+                    .filter(entry -> entry.getValue() > 1 && !"NI".equals(entry.getKey()))
+                    .forEach(
+                        entry ->
+                            issues.add(
+                                "Party function '%s' cannot be repeated. Found %d occurrences."
+                                    .formatted(entry.getKey(), entry.getValue())));
+              }
+            }
+
+            return issues;
+          });
 
   private static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each Subreference in commodities must be unique",
@@ -222,23 +244,18 @@ public class BookingChecks {
       var preNode = getShipmentLocationTypeCode(body,"PRE");
       var pdeNode = getShipmentLocationTypeCode(body,"PDE");
       var podNode = getShipmentLocationTypeCode(body,"POD");
-      var ielNode = getShipmentLocationTypeCode(body,"IEL");
 
-
-      if ((pdeNode == null || pdeNode.isEmpty()) && "SD".equals(deliveryTypeAtDestination) && (podNode == null || podNode.isEmpty())) {
-        issues.add("Place of Delivery value must be provided");
-      }
       if ((pdeNode == null || pdeNode.isEmpty()) && (podNode == null || podNode.isEmpty()) ) {
         issues.add("Port of Discharge value must be provided");
       }
       if ((preNode == null || preNode.isEmpty()) && (polNode == null || polNode.isEmpty())) {
         issues.add("Port of Load values must be provided");
       }
-      if ((preNode == null || preNode.isEmpty()) && "SD".equals(receiptTypeAtOrigin) && (polNode == null || polNode.isEmpty())) {
-        issues.add("Place of Receipt values must be provided");
+      if ((pdeNode == null || pdeNode.isEmpty()) && "SD".equals(deliveryTypeAtDestination)) {
+        issues.add("Place of Delivery value must be provided");
       }
-      if(!"SD".equals(receiptTypeAtOrigin) && ielNode != null) {
-        issues.add("Container intermediate export stop-off location should not be provided");
+      if ((preNode == null || preNode.isEmpty()) && "SD".equals(receiptTypeAtOrigin)) {
+        issues.add("Place of Receipt values must be provided");
       }
       if("SD".equals(receiptTypeAtOrigin)) {
         var requestedEquipments = body.path("requestedEquipments");
@@ -252,7 +269,7 @@ public class BookingChecks {
                 .filter(o ->  !o.path("dateTime").asText("").isEmpty())
                 .findFirst()
                 .orElse(null);
-              if ((preNode == null || preNode.isEmpty()) || containerPositionsDateTime == null){
+              if (containerPositionsDateTime == null){
                 issues.add("Empty container positioning DateTime at requestedEquipments position %s must be provided.".formatted(currentCount));
               }
             });
@@ -265,11 +282,21 @@ public class BookingChecks {
     "Validate shipper's minimum request fields",
     body -> {
       var issues = new LinkedHashSet<String>();
+
+      // Check if routingReference is provided
+      var routingReference = body.path("routingReference").asText("");
+      if (!routingReference.isEmpty()) {
+        // If routingReference is provided, validation passes
+        return issues;
+      }
+
+      // If no routingReference, check location-based requirements
       var vesselName = body.path("vessel").path("name").asText("");
       var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber").asText("");
       var carrierServiceCode = body.path("carrierServiceCode").asText("");
       var carrierServiceName = body.path("carrierServiceName").asText("");
       var expectedDepartureDate = body.path("expectedDepartureDate").asText("");
+      var expectedDepartureFromPlaceOfReceiptDate = body.path("expectedDepartureFromPlaceOfReceiptDate").asText("");
 
       var polNode = getShipmentLocationTypeCode(body,"POL");
       var preNode = getShipmentLocationTypeCode(body,"PRE");
@@ -279,21 +306,34 @@ public class BookingChecks {
       String providedArrivalStartDate = body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
       String providedArrivalEndDate = body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
 
-      var isPodAbsent = (pdeNode == null || pdeNode.isEmpty()) && (podNode == null || podNode.isEmpty());
-      var isPolAbsent = (preNode == null || preNode.isEmpty()) && (polNode == null || polNode.isEmpty());
+      // Check (PRE or POL) AND (POD or PDE) requirement
+      var hasOriginLocation = (preNode != null && !preNode.isEmpty()) || (polNode != null && !polNode.isEmpty());
+      var hasDestinationLocation = (pdeNode != null && !pdeNode.isEmpty()) || (podNode != null && !podNode.isEmpty());
 
-      var poldServiceCodeAbsent = isPolAbsent && isPodAbsent && vesselName.isEmpty() && carrierExportVoyageNumber.isEmpty()
-        || isPolAbsent && isPodAbsent && carrierServiceCode.isEmpty() && carrierExportVoyageNumber.isEmpty()
-        || isPolAbsent && isPodAbsent && carrierServiceName.isEmpty() && carrierExportVoyageNumber.isEmpty();
-
-      var poldExpectedDepartureDateAbsent = isPolAbsent && isPodAbsent && expectedDepartureDate.isEmpty() ;
-
-      var poldArrivalStartEndDateAbsent = isPolAbsent && isPodAbsent && providedArrivalStartDate.isEmpty() && providedArrivalEndDate.isEmpty();
-
-      if ( poldServiceCodeAbsent || poldExpectedDepartureDateAbsent || poldArrivalStartEndDateAbsent ) {
-        issues.add("The minimum options to provide shipper's requested fields are missing.");
+      if (!hasOriginLocation || !hasDestinationLocation) {
+        issues.add("Either (PRE or POL) AND (POD or PDE) locations must be provided when routingReference is not available.");
+        return issues;
       }
-       return issues;
+
+      // Check minimum mandatory property combinations
+      var hasExpectedDepartureDate = !expectedDepartureDate.isEmpty();
+      var hasExpectedDepartureFromPlaceOfReceiptDate = !expectedDepartureFromPlaceOfReceiptDate.isEmpty();
+      var hasArrivalDates = !providedArrivalStartDate.isEmpty() && !providedArrivalEndDate.isEmpty();
+      var hasVoyageAndVessel = !carrierExportVoyageNumber.isEmpty() && !vesselName.isEmpty();
+      var hasVoyageAndServiceName = !carrierExportVoyageNumber.isEmpty() && !carrierServiceName.isEmpty();
+      var hasVoyageAndServiceCode = !carrierExportVoyageNumber.isEmpty() && !carrierServiceCode.isEmpty();
+
+      if (!hasExpectedDepartureDate && !hasExpectedDepartureFromPlaceOfReceiptDate && !hasArrivalDates &&
+          !hasVoyageAndVessel && !hasVoyageAndServiceName && !hasVoyageAndServiceCode) {
+        issues.add("At least one of the minimum mandatory property combinations must be provided: " +
+                  "expectedDepartureDate, expectedDepartureFromPlaceOfReceiptDate, " +
+                  "expectedArrival dates (both start and end), " +
+                  "carrierExportVoyageNumber + vesselName, " +
+                  "carrierExportVoyageNumber + carrierServiceName, or " +
+                  "carrierExportVoyageNumber + carrierServiceCode.");
+      }
+
+      return issues;
     });
 
   private static JsonNode getShipmentLocationTypeCode(JsonNode body, @NonNull String locationTypeCode) {
@@ -318,37 +358,6 @@ public class BookingChecks {
             return issues;
           });
 
-  private static final JsonContentCheck CHECK_ABSENCE_OF_CONFIRMED_FIELDS = JsonAttribute.customValidator(
-    "check absence of confirmed fields in non confirmed booking states",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      var bookingStatus = body.path("bookingStatus").asText("");
-      if (NON_CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
-        if (body.hasNonNull("termsAndConditions")) {
-          issues.add("termsAndConditions must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("carrierClauses")) {
-          issues.add("carrierClauses must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("charges")) {
-          issues.add("charges must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("advanceManifestFilings")) {
-          issues.add("advanceManifestFilings must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("confirmedEquipments")) {
-          issues.add("confirmedEquipments must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("transportPlan")) {
-          issues.add("transportPlan must not be present in %s".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("shipmentCutOffTimes")) {
-          issues.add("shipmentCutOffTimes must not be present in %s".formatted(bookingStatus));
-        }
-      }
-      return issues;
-    });
-
   private static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS = JsonAttribute.customValidator(
     "check confirmed booking fields availability",
     body -> {
@@ -360,9 +369,6 @@ public class BookingChecks {
         }
         if (body.path("transportPlan").isEmpty()) {
           issues.add("transportPlan for confirmed booking is not present");
-        }
-        if (body.path("shipmentCutOffTimes").isEmpty()) {
-          issues.add("shipmentCutOffTimes for confirmed booking is not present");
         }
       }
       return issues;
@@ -443,9 +449,9 @@ public class BookingChecks {
                         "The scenario requires '%s' to NOT have an active reefer"
                             .formatted(contextPath));
                   }
-                  if (nonOperatingReeferNode.asBoolean(false)) {
+                  if (!nonOperatingReeferNode.isMissingNode()) {
                     issues.add(
-                        "The scenario requires '%s.isNonOperatingReefer' to be omitted or false (depending on the container ISO code)"
+                        "The scenario requires '%s.isNonOperatingReefer' to be omitted"
                             .formatted(contextPath));
                   }
                 }
@@ -506,11 +512,6 @@ public class BookingChecks {
           VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
           NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
           CHECK_CARGO_GROSS_WEIGHT_CONDITIONS,
-          JsonAttribute.atLeastOneOf(
-              JsonPointer.compile("/expectedDepartureDate"),
-              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
-              JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate"),
-              JsonPointer.compile("/carrierExportVoyageNumber")),
           JsonAttribute.xOrFields(
               JsonPointer.compile("/contractQuotationReference"),
               JsonPointer.compile("/serviceContractReference")),
@@ -534,17 +535,16 @@ public class BookingChecks {
                 return Set.of();
               }),
           JsonAttribute.allIndividualMatchesMustBeValid(
-              "DangerousGoods implies numberOfPackages or description",
+              "DangerousGoods implies numberOfPackages",
               mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
               (nodeToValidate, contextPath) -> {
                 var dg = nodeToValidate.path("dangerousGoods");
                 if (!dg.isArray() || dg.isEmpty()) {
                   return Set.of();
                 }
-                if (nodeToValidate.path("numberOfPackages").isMissingNode()
-                    && nodeToValidate.path("description").isMissingNode()) {
+                if (nodeToValidate.path("numberOfPackages").isMissingNode()) {
                   return Set.of(
-                      "The '%s' object did not have a 'numberOfPackages' nor an 'description', which is required due to dangerousGoods"
+                      "The '%s' object did not have a 'numberOfPackages', which is required due to dangerousGoods"
                           .formatted(contextPath));
                 }
                 return Set.of();
@@ -574,7 +574,6 @@ public class BookingChecks {
               }));
 
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
-    CHECK_ABSENCE_OF_CONFIRMED_FIELDS,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
     CHECK_CONFIRMED_BOOKING_FIELDS,
@@ -702,17 +701,5 @@ public class BookingChecks {
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';
   }
-
-  public static JsonContentCheck validateBookingAmendmentCancellation() {
-    return JsonAttribute.customValidator(
-        "Validate booking amendment cancellation",
-        JsonAttribute.combine(
-            JsonAttribute.path(ATTR_BOOKING_STATUS, JsonAttribute.matchedMustBeAbsent()),
-            JsonAttribute.path(ATTR_AMENDED_BOOKING_STATUS, JsonAttribute.matchedMustBePresent()),
-            JsonAttribute.path(
-                ATTR_AMENDED_BOOKING_STATUS,
-                JsonAttribute.matchedMustEqual(BookingState.AMENDMENT_CANCELLED::name))));
-  }
 }
-
 

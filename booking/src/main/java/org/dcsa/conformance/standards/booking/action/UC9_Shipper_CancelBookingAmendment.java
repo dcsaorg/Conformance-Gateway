@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -20,14 +19,14 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
   private final BookingState expectedAmendedBookingStatus;
 
   public UC9_Shipper_CancelBookingAmendment(
-    String carrierPartyName,
-    String shipperPartyName,
-    BookingAction previousAction,
-    BookingState expectedBookingStatus,
-    BookingState expectedAmendedBookingStatus,
-    JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator,
-    JsonSchemaValidator notificationSchemaValidator) {
+      String carrierPartyName,
+      String shipperPartyName,
+      BookingAction previousAction,
+      BookingState expectedBookingStatus,
+      BookingState expectedAmendedBookingStatus,
+      JsonSchemaValidator requestSchemaValidator,
+      JsonSchemaValidator responseSchemaValidator,
+      JsonSchemaValidator notificationSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC9", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
@@ -71,13 +70,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
                         BookingRole::isShipper,
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
-                        requestSchemaValidator),
-                    JsonAttribute.contentChecks(
-                        BookingRole::isShipper,
-                        getMatchedExchangeUuid(),
-                        HttpMessageType.REQUEST,
-                        expectedApiVersion,
-                        BookingChecks.validateBookingAmendmentCancellation()))),
+                        requestSchemaValidator))),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,

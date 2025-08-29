@@ -277,8 +277,7 @@ class BookingChecksTest {
     ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
     ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
 
-    String[] partyFunctions = {"DDR", "DDS", "COW", "COX", "N1", "N2"};
-    for (String function : partyFunctions) {
+    for (String function : PARTY_FUNCTIONS) {
       ObjectNode party = OBJECT_MAPPER.createObjectNode();
       party.put("partyFunction", function);
       otherParties.add(party);

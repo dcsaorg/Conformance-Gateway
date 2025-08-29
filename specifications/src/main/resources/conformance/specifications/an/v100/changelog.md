@@ -10,6 +10,8 @@ Added to object `Transport` property `receivedForShipmentDate`. (SD-2414)
 
 Added to object `Transport` property `borderCrossingLocation`. (SD-2419)
 
+Updated `Reference` description and type codes. (SD-2420)
+
 
 ## Snapshot v1.0.0-20250815-alpha
 

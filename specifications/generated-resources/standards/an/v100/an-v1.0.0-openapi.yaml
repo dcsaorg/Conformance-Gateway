@@ -536,7 +536,7 @@ components:
           example: "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security."
         references:
           type: "array"
-          description: "A list of `References`"
+          description: "References used by the customer or carrier to identify or track the shipment."
           items:
             $ref: "#/components/schemas/Reference"
         transportDocumentReference:
@@ -2024,6 +2024,8 @@ components:
             - `CA` (Carrier’s Reference)
             - `CR` (Customer’s Reference)
             - `AKG` (Vehicle Identification Number)
+            - `CPR` (Canadian Pacific Railway System)
+            - `CNR` (Canadian National Railway Unit)
           example: "CR"
         value:
           maxLength: 35
@@ -2031,7 +2033,7 @@ components:
           description: "The value of the reference."
           example: "HHL00103004"
       description: |
-        References used by the customer or carrier to identify the shipment in their internal system.
+        Reference used by the customer or carrier to identify or track the shipment.
     ReferenceConsignmentItem:
       type: "object"
       properties:

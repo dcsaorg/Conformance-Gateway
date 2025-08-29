@@ -66,7 +66,7 @@ ArrivalNotice,isElectronic,boolean,,,,true,"An indicator whether the transport d
 ArrivalNotice,issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
 ArrivalNotice,pickupInformation,PickupInformation,,,,,"Pickup information",
-ArrivalNotice,references,"Reference list",,,,,"A list of `References`",
+ArrivalNotice,references,"Reference list",,,,,"References used by the customer or carrier to identify or track the shipment.",
 ArrivalNotice,releaseInformation,ReleaseInformation,,,,,"Release information",
 ArrivalNotice,returnInformation,ReturnInformation,,,,,"Return information",
 ArrivalNotice,serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
@@ -543,7 +543,9 @@ Instead, the relevant request object is indicated by the `propertyPath` of each 
 Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
-- `AKG` (Vehicle Identification Number)",
+- `AKG` (Vehicle Identification Number)
+- `CPR` (Canadian Pacific Railway System)
+- `CNR` (Canadian National Railway Unit)",
 Reference,value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
 ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)

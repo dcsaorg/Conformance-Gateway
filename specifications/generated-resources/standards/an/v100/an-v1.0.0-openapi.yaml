@@ -2207,6 +2207,11 @@ components:
             (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
           allOf:
           - $ref: "#/components/schemas/ClassifiedDateTime"
+        borderCrossingLocation:
+          description: |
+            The inland location where the cargo is intended to cross an international border.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         legs:
           type: "array"
           description: |

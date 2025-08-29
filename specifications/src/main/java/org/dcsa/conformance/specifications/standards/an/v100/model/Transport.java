@@ -86,6 +86,13 @@ The date and time when the shipment will be placed under General Order status
   @Schema(
       description =
 """
+The inland location where the cargo is intended to cross an international border.
+""")
+  private Location borderCrossingLocation;
+
+  @Schema(
+      description =
+"""
 Full or partial information, considered relevant in this context, on some or all `Legs` of the `Transport`
 """)
   private List<Leg> legs;

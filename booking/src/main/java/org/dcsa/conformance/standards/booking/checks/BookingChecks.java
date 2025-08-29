@@ -157,43 +157,43 @@ public class BookingChecks {
       JsonAttribute.customValidator(
           "Each document party can be used at most once, except 'NI' which can be repeated",
           body -> {
-            var issues = new LinkedHashSet<String>();
-            var documentPartiesNode = body.path("documentParties");
+            var partyFunctionCounts = new HashMap<String, Integer>();
 
-            if (!documentPartiesNode.isMissingNode() && documentPartiesNode.has("other")) {
-              var otherPartiesNode = documentPartiesNode.path("other");
-              if (otherPartiesNode.isArray()) {
-                var partyFunctionCounts = new HashMap<String, Integer>();
+            StreamSupport.stream(body.path("documentParties").path("other").spliterator(), false)
+                .map(party -> party.path("partyFunction").asText(""))
+                .filter(partyFunction -> !partyFunction.isBlank())
+                .forEach(partyFunction -> partyFunctionCounts.merge(partyFunction, 1, Integer::sum));
 
-                // Count occurrences of each party function
-                StreamSupport.stream(otherPartiesNode.spliterator(), false)
-                    .forEach(
-                        party -> {
-                          var partyFunction = party.path("partyFunction").asText("");
-                          if (!partyFunction.isEmpty()) {
-                            partyFunctionCounts.merge(partyFunction, 1, Integer::sum);
-                          }
-                        });
-
-                // Check for duplicates (excluding "NI")
-                partyFunctionCounts.entrySet().stream()
-                    .filter(entry -> entry.getValue() > 1 && !"NI".equals(entry.getKey()))
-                    .forEach(
-                        entry ->
-                            issues.add(
-                                "Party function '%s' cannot be repeated. Found %d occurrences."
-                                    .formatted(entry.getKey(), entry.getValue())));
-              }
-            }
-
-            return issues;
+            return partyFunctionCounts.entrySet().stream()
+                .filter(entry -> entry.getValue() > 1 && !"NI".equals(entry.getKey()))
+                .map(entry ->
+                    "Party function '%s' cannot be repeated. Found %d occurrences."
+                        .formatted(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
           });
 
-  private static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Each Subreference in commodities must be unique",
-    mav -> mav.submitAllMatching("requestedEquipments.*.commodities"),
-    JsonAttribute.unique("commoditySubReference")
-  );
+  static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE =
+      JsonAttribute.customValidator(
+          "Each commoditySubReference must be unique across the entire booking",
+          body -> {
+            var subReferenceCount = new HashMap<String, Integer>();
+
+            StreamSupport.stream(body.path("requestedEquipments").spliterator(), false)
+                .flatMap(
+                    equipment ->
+                        StreamSupport.stream(equipment.path("commodities").spliterator(), false))
+                .map(commodity -> commodity.path("commoditySubReference").asText(""))
+                .filter(subRef -> !subRef.isBlank())
+                .forEach(subRef -> subReferenceCount.merge(subRef, 1, Integer::sum));
+
+            return subReferenceCount.entrySet().stream()
+                .filter(entry -> entry.getValue() > 1)
+                .map(
+                    entry ->
+                        "commoditySubReference '%s' is not unique across the booking. Found %d occurrences."
+                            .formatted(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+          });
 
   private static final JsonContentCheck VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate allowed shipment cutoff codes",

@@ -4,6 +4,8 @@
 
 Aligned the description of the `API-Version` header with the latest API DNI Guidelines. (SD-2410)
 
+Updated in object `FreeTime` property `lastFreeDate` to include classifier and added property `lastFreeDateTime`. (SD-2413)
+
 
 ## Snapshot v1.0.0-20250815-alpha
 

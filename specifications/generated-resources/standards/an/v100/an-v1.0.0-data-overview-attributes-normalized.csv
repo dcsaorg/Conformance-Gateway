@@ -383,7 +383,8 @@ If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.
 ",
-FreeTime,lastFreeDate,"string(date)",,,,2025-01-23,"The final day containers can be collected without incurring charges",
+FreeTime,lastFreeDate,ClassifiedDate,,,,,"The final date when the container(s) can be collected without incurring charges.",
+FreeTime,lastFreeDateTime,ClassifiedDateTime,,,,,"The final date and time when the container(s) can be collected without incurring charges.",
 FreeTime,timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which free time is expressed
 - `CD` - Calendar days
 - `WD` - Working days

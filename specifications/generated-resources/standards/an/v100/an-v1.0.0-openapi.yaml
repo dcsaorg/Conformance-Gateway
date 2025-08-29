@@ -1510,10 +1510,13 @@ components:
             It can include references to the carrier website or individual charges as per service contract/agreement.
           example: "Calculated as..."
         lastFreeDate:
-          type: "string"
-          description: "The final day containers can be collected without incurring charges"
-          format: "date"
-          example: "2025-01-23"
+          description: "The final date when the container(s) can be collected without incurring charges."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        lastFreeDateTime:
+          description: "The final date and time when the container(s) can be collected without incurring charges."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
       description: "Free time condition applicable to this shipment at destination."
     GeoCoordinate:
       type: "object"

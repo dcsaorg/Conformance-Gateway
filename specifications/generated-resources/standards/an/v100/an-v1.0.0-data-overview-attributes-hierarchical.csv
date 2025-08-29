@@ -545,7 +545,19 @@ If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.
 ",
-"ArrivalNotice / freeTimes / lastFreeDate",lastFreeDate,"string(date)",,,,2025-01-23,"The final day containers can be collected without incurring charges",
+"ArrivalNotice / freeTimes / lastFreeDate",lastFreeDate,ClassifiedDate,,,,,"The final date when the container(s) can be collected without incurring charges.",
+"ArrivalNotice / freeTimes / lastFreeDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / freeTimes / lastFreeDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
+"ArrivalNotice / freeTimes / lastFreeDateTime",lastFreeDateTime,ClassifiedDateTime,,,,,"The final date and time when the container(s) can be collected without incurring charges.",
+"ArrivalNotice / freeTimes / lastFreeDateTime / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / freeTimes / lastFreeDateTime / value",value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
 "ArrivalNotice / freeTimes / timeUnit",timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which free time is expressed
 - `CD` - Calendar days
 - `WD` - Working days

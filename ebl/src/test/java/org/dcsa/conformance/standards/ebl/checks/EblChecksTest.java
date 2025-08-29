@@ -5,8 +5,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EblChecks.COUNTRY_CODE_C
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBL_AT_MOST_ONE_ORIGINAL_TOTAL;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.FEEDBACKS_PRESENCE;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER;
@@ -401,95 +400,32 @@ class EblChecksTest {
   }
 
   @Test
-  void testEBLSCannotHaveMoreThanOneOriginalsWithoutCharges() {
+  void testEBLSCannotHaveMoreThanOneOriginalsWithandWithoutCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 1);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 2);
-    assertFalse(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 1);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 2);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "SWB");
-    rootNode.put("numberOfOriginalsWithoutCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-  }
-
-  @Test
-  void testEBLSCannotHaveMoreThanOneOriginalsWithCharges() {
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    rootNode.put("numberOfOriginalsWithoutCharges", 0);
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 1);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    rootNode.put("numberOfOriginalsWithoutCharges", 0);
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithCharges", 2);
-    assertFalse(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 1);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    rootNode.put("numberOfOriginalsWithoutCharges", 1);
+    assertFalse(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithCharges", 2);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "SWB");
-    rootNode.put("numberOfOriginalsWithCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
   }
 
   @Test

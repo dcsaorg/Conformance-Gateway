@@ -996,6 +996,15 @@ The definition of the code depends on the `facilityCodeListProvider`. As code li
 "ArrivalNotice / transport / portOfLoading / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfLoading / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / transport / portOfLoading / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ArrivalNotice / transport / receivedForShipmentDate",receivedForShipmentDate,ClassifiedDate,,,,,"The date on which the carrier takes possession of all containers under the bill of lading.
+For carrier haulage, this is when the carrier collects the last container at the place of receipt.
+For merchant haulage, this is when the last container is physically handed over to the terminal.",
+"ArrivalNotice / transport / receivedForShipmentDate / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ArrivalNotice / transport / receivedForShipmentDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transportDocumentReference","transportDocumentReference",string,yes,maxLength=20,,HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
 "ArrivalNotice / transportDocumentTypeCode","transportDocumentTypeCode",string,,,,SWB,"Specifies the type of the transport document
 - `BOL` (Bill of Lading)

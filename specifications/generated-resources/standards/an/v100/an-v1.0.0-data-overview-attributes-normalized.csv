@@ -587,6 +587,9 @@ This indicates the point at which the shipping line takes on responsibility for 
 Transport,portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 Transport,"portOfDischargeArrivalDate",ClassifiedDate,,,,,"The date of arrival of the vessel at the Port of Discharge.",
 Transport,portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
+Transport,receivedForShipmentDate,ClassifiedDate,,,,,"The date on which the carrier takes possession of all containers under the bill of lading.
+For carrier haulage, this is when the carrier collects the last container at the place of receipt.
+For merchant haulage, this is when the last container is physically handed over to the terminal.",
 "UtilizedTransportEquipment",activeReeferSettings,ActiveReeferSettings,,,,,"Active reefer settings applied to this equipment.",
 "UtilizedTransportEquipment",charges,"Charge list",,,,,"A list of `Charges`",
 "UtilizedTransportEquipment",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",

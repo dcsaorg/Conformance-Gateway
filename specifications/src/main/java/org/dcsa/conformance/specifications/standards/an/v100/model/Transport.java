@@ -49,6 +49,15 @@ to the shipping line. This can refer either to the Place of Receipt or the Port 
   @Schema(
       description =
 """
+The date on which the carrier takes possession of all containers under the bill of lading.
+For carrier haulage, this is when the carrier collects the last container at the place of receipt.
+For merchant haulage, this is when the last container is physically handed over to the terminal.
+""")
+  private ClassifiedDate receivedForShipmentDate;
+
+  @Schema(
+      description =
+"""
 The date when the container was loaded onto the vessel at the port of origin.
 """)
   private ClassifiedDate onBoardDate;

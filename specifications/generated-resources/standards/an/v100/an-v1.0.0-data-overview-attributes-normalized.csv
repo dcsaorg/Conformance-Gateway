@@ -66,7 +66,7 @@ ArrivalNotice,isElectronic,boolean,,,,true,"An indicator whether the transport d
 ArrivalNotice,issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
 ArrivalNotice,pickupInformation,PickupInformation,,,,,"Pickup information",
-ArrivalNotice,references,"Reference list",,,,,"A list of `References`",
+ArrivalNotice,references,"Reference list",,,,,"References used by the customer or carrier to identify or track the shipment.",
 ArrivalNotice,releaseInformation,ReleaseInformation,,,,,"Release information",
 ArrivalNotice,returnInformation,ReturnInformation,,,,,"Return information",
 ArrivalNotice,serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
@@ -383,7 +383,8 @@ If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.
 ",
-FreeTime,lastFreeDate,"string(date)",,,,2025-01-23,"The final day containers can be collected without incurring charges",
+FreeTime,lastFreeDate,ClassifiedDate,,,,,"The final date when the container(s) can be collected without incurring charges.",
+FreeTime,lastFreeDateTime,ClassifiedDateTime,,,,,"The final date and time when the container(s) can be collected without incurring charges.",
 FreeTime,timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which free time is expressed
 - `CD` - Calendar days
 - `WD` - Working days
@@ -542,7 +543,9 @@ Instead, the relevant request object is indicated by the `propertyPath` of each 
 Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
-- `AKG` (Vehicle Identification Number)",
+- `AKG` (Vehicle Identification Number)
+- `CPR` (Canadian Pacific Railway System)
+- `CNR` (Canadian National Railway Unit)",
 Reference,value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
 ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)
@@ -571,6 +574,7 @@ Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the se
 TaxLegalReference,countryCode,string,,maxLength=2,,IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 TaxLegalReference,type,string,,maxLength=50,,PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
 TaxLegalReference,value,string,,maxLength=35,,AAAAA0000A,"The value of the `taxLegalReference`",
+Transport,borderCrossingLocation,Location,,,,,"The inland location where the cargo is intended to cross an international border.",
 Transport,departureDate,ClassifiedDate,,,,,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
 Transport,generalOrderDateTime,ClassifiedDateTime,,,,,"The date and time when the shipment will be placed under General Order status
@@ -586,6 +590,9 @@ This indicates the point at which the shipping line takes on responsibility for 
 Transport,portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 Transport,"portOfDischargeArrivalDate",ClassifiedDate,,,,,"The date of arrival of the vessel at the Port of Discharge.",
 Transport,portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
+Transport,receivedForShipmentDate,ClassifiedDate,,,,,"The date on which the carrier takes possession of all containers under the bill of lading.
+For carrier haulage, this is when the carrier collects the last container at the place of receipt.
+For merchant haulage, this is when the last container is physically handed over to the terminal.",
 "UtilizedTransportEquipment",activeReeferSettings,ActiveReeferSettings,,,,,"Active reefer settings applied to this equipment.",
 "UtilizedTransportEquipment",charges,"Charge list",,,,,"A list of `Charges`",
 "UtilizedTransportEquipment",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",

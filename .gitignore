@@ -34,6 +34,7 @@ build/
 
 ### Temporary DCSA generated resources ###
 /specifications/generated-resources/standards/an/v100/*.xlsx
+/specifications/generated-resources/standards/ct/v300/*.xlsx
 /specifications/generated-resources/standards/ebl/v300/*.xlsx
 /specifications/generated-resources/standards/ebl/v300/*.csv
 /specifications/generated-resources/standards/ebl/v300/*.yaml

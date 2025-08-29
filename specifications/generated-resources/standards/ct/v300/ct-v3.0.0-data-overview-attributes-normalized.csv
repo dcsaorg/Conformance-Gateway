@@ -1,0 +1,114 @@
+Object,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
+Address,POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+Address,city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+Address,countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+Address,floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+Address,postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+Address,stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+Address,street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+Address,streetNumber,string,,maxLength=50,,100,"The number of the street.",
+ClassifiedDateTime,classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+ClassifiedDateTime,value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+ContainerTrackingEvent,equipmentEventInfo,EquipmentEventInfo,,,,,"Equipment event information",
+ContainerTrackingEvent,eventDateTime,ClassifiedDateTime,yes,,,,"The date and time when the event has occurred.",
+ContainerTrackingEvent,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the event.",
+ContainerTrackingEvent,eventLocation,Location,,,,,"The date and time when the event has occurred.",
+ContainerTrackingEvent,iotEventInfo,IotEventInfo,,,,,"IoT event information",
+ContainerTrackingEvent,reeferEventInfo,ReeferEventInfo,,,,,"Reefer event information",
+ContainerTrackingEvent,shipmentEventInfo,ShipmentEventInfo,,,,,"Shipment event information",
+ContainerTrackingEvent,transportEventInfo,TransportEventInfo,,,,,"Transport event information",
+EquipmentEventInfo,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
+- `LOAD` - Loaded
+- `DISC` - Discharged
+- `GTIN` - Gated in
+- `GTOT` - Gated out
+- `STUF` - Stuffed
+- `STRP` - Stripped
+- `PICK` - Pick-up
+- `DROP` - Drop-off
+- `INSP` - Inspected
+- `RSEA` - Resealed
+- `RMVD` - Removed",
+Facility,facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
+The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
+- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
+- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
+Facility,facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+- `BIC` (Requires a UN Location Code)
+- `SMDG` (Requires a UN Location Code)",
+FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed to a user of the event publishing organization",
+FeedbackElement,propertyPath,string,,maxLength=1000,,"$.events[2].location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
+about which the feedback is provided (if applicable)",
+FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity of a `FeedbackElement`
+
+- `ERROR` - Error that fully or partially prevents the correct processing of the request
+- `WARN` - Warning about the request being processed in a potentially unexpected way
+- `INFO` - Informational message about how the request is processed",
+GeoCoordinate,latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+GeoCoordinate,longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+GetEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why the request could not be processed.
+
+At least one feedback element of severity `ERROR` is expected.
+Lower severity feedback elements may also be included.",
+GetEventsResponse,events,"ContainerTrackingEvent list",,,,,"The list of events matching the filter specified by the request query parameters",
+GetEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
+IotEventInfo,iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
+- `DETC` - Detected",
+Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+Location,address,Address,,,,,"Location address",
+Location,facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
+Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
+Location,geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+Location,locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+PostEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
+
+At least one feedback element of severity `ERROR` is expected.
+Lower severity feedback elements may also be included.
+
+When sent in response to a request that contains an array of events,
+the order of the `feedbackElements` is not related to the list of request events.
+Instead, the relevant request event is indicated by the `propertyPath` of each `FeedbackElement`.",
+PostEventsRequest,events,"ContainerTrackingEvent list",,,,,"List of container tracking events.",
+PostEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
+
+There can be zero, one or more feedback elements per event in the request.
+The order of `feedbackElements` is not related to the order of events in the request.
+Instead, the relevant request event is indicated by the `propertyPath` of each `FeedbackElement`.",
+ReeferEventInfo,reeferEventTypeCode,string,,,,MEAS,"Code used to denote the type of a reefer event
+- `MEAS` - Measured
+- `ADJU` - Adjusted",
+ShipmentEventInfo,shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
+- `RECE` - Received
+- `DRFT` - Drafted
+- `PENA` - Pending Approval
+- `PENU` - Pending Update
+- `REJE` - Rejected
+- `APPR` - Approved
+- `ISSU` - Arrived
+- `SURR` - Surrendered
+- `SUBM` - Submitted
+- `VOID` - Void
+- `CONF` - Confirmed
+- `REQS` - Requested
+- `CMPL` - Completed
+- `HOLD` - On Hold
+- `RELS` - Released",
+TransportEventInfo,transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
+- `ARRI` - Arrived
+- `DEPA` - Departed",

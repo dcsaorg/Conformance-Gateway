@@ -1,0 +1,4 @@
+FilterParameters,Required
+"transportDocumentReferences",yes
+equipmentReferences,yes
+"transportDocumentReferences, equipmentReferences",

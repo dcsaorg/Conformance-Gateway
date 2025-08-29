@@ -1,0 +1,87 @@
+Path,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
+ContainerTrackingEvent,,,,,,,,
+"ContainerTrackingEvent / equipmentEventInfo",equipmentEventInfo,EquipmentEventInfo,,,,,"Equipment event information",
+"ContainerTrackingEvent / equipmentEventInfo / equipmentEventTypeCode",equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
+- `LOAD` - Loaded
+- `DISC` - Discharged
+- `GTIN` - Gated in
+- `GTOT` - Gated out
+- `STUF` - Stuffed
+- `STRP` - Stripped
+- `PICK` - Pick-up
+- `DROP` - Drop-off
+- `INSP` - Inspected
+- `RSEA` - Resealed
+- `RMVD` - Removed",
+"ContainerTrackingEvent / eventDateTime",eventDateTime,ClassifiedDateTime,yes,,,,"The date and time when the event has occurred.",
+"ContainerTrackingEvent / eventDateTime / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"ContainerTrackingEvent / eventDateTime / value",value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+"ContainerTrackingEvent / eventID",eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the event.",
+"ContainerTrackingEvent / eventLocation",eventLocation,Location,,,,,"The date and time when the event has occurred.",
+"ContainerTrackingEvent / eventLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+"ContainerTrackingEvent / eventLocation / address",address,Address,,,,,"Location address",
+"ContainerTrackingEvent / eventLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"ContainerTrackingEvent / eventLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"ContainerTrackingEvent / eventLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"ContainerTrackingEvent / eventLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"ContainerTrackingEvent / eventLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"ContainerTrackingEvent / eventLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"ContainerTrackingEvent / eventLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"ContainerTrackingEvent / eventLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"ContainerTrackingEvent / eventLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
+"ContainerTrackingEvent / eventLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
+The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
+- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
+- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
+"ContainerTrackingEvent / eventLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
+- `BIC` (Requires a UN Location Code)
+- `SMDG` (Requires a UN Location Code)",
+"ContainerTrackingEvent / eventLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
+
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp",
+"ContainerTrackingEvent / eventLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"ContainerTrackingEvent / eventLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"ContainerTrackingEvent / eventLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"ContainerTrackingEvent / eventLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"ContainerTrackingEvent / iotEventInfo",iotEventInfo,IotEventInfo,,,,,"IoT event information",
+"ContainerTrackingEvent / iotEventInfo / iotEventTypeCode",iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
+- `DETC` - Detected",
+"ContainerTrackingEvent / reeferEventInfo",reeferEventInfo,ReeferEventInfo,,,,,"Reefer event information",
+"ContainerTrackingEvent / reeferEventInfo / reeferEventTypeCode",reeferEventTypeCode,string,,,,MEAS,"Code used to denote the type of a reefer event
+- `MEAS` - Measured
+- `ADJU` - Adjusted",
+"ContainerTrackingEvent / shipmentEventInfo",shipmentEventInfo,ShipmentEventInfo,,,,,"Shipment event information",
+"ContainerTrackingEvent / shipmentEventInfo / shipmentEventTypeCode",shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
+- `RECE` - Received
+- `DRFT` - Drafted
+- `PENA` - Pending Approval
+- `PENU` - Pending Update
+- `REJE` - Rejected
+- `APPR` - Approved
+- `ISSU` - Arrived
+- `SURR` - Surrendered
+- `SUBM` - Submitted
+- `VOID` - Void
+- `CONF` - Confirmed
+- `REQS` - Requested
+- `CMPL` - Completed
+- `HOLD` - On Hold
+- `RELS` - Released",
+"ContainerTrackingEvent / transportEventInfo",transportEventInfo,TransportEventInfo,,,,,"Transport event information",
+"ContainerTrackingEvent / transportEventInfo / transportEventTypeCode",transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
+- `ARRI` - Arrived
+- `DEPA` - Departed",

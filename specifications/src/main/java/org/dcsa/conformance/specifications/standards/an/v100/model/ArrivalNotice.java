@@ -109,7 +109,7 @@ e.g. additional required documents to prepare and present for shipment release -
 """)
   private String additionalInformation;
 
-  @Schema(description = "A list of `References`")
+  @Schema(description = "References used by the customer or carrier to identify or track the shipment.")
   private List<Reference> references;
 
   @Schema(

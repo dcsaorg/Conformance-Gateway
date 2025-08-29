@@ -6,7 +6,7 @@ import org.dcsa.conformance.specifications.generator.ClearSchemaConstraints;
 @Schema(
     description =
 """
-References used by the customer or carrier to identify the shipment in their internal system.
+Reference used by the customer or carrier to identify or track the shipment.
 """)
 @ClearSchemaConstraints
 public class Reference
@@ -19,6 +19,8 @@ The reference type codes defined by DCSA. Possible values are:
 - `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)
+- `CPR` (Canadian Pacific Railway System)
+- `CNR` (Canadian National Railway Unit)
 """,
       example = "CR",
       maxLength = 3)

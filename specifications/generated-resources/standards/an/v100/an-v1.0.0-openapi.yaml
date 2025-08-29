@@ -1510,10 +1510,13 @@ components:
             It can include references to the carrier website or individual charges as per service contract/agreement.
           example: "Calculated as..."
         lastFreeDate:
-          type: "string"
-          description: "The final day containers can be collected without incurring charges"
-          format: "date"
-          example: "2025-01-23"
+          description: "The final date when the container(s) can be collected without incurring charges."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        lastFreeDateTime:
+          description: "The final date and time when the container(s) can be collected without incurring charges."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
       description: "Free time condition applicable to this shipment at destination."
     GeoCoordinate:
       type: "object"
@@ -2173,6 +2176,13 @@ components:
             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
           allOf:
           - $ref: "#/components/schemas/ClassifiedDate"
+        receivedForShipmentDate:
+          description: |
+            The date on which the carrier takes possession of all containers under the bill of lading.
+            For carrier haulage, this is when the carrier collects the last container at the place of receipt.
+            For merchant haulage, this is when the last container is physically handed over to the terminal.
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
         onBoardDate:
           description: |
             The date when the container was loaded onto the vessel at the port of origin.
@@ -2197,6 +2207,11 @@ components:
             (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
           allOf:
           - $ref: "#/components/schemas/ClassifiedDateTime"
+        borderCrossingLocation:
+          description: |
+            The inland location where the cargo is intended to cross an international border.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         legs:
           type: "array"
           description: |
@@ -2372,7 +2387,7 @@ components:
       description: "Weight value and measurement unit"
   headers:
     API-Version:
-      description: "SemVer used to indicate the version of the contract (API version) returned."
+      description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
       schema:
         type: "string"
         example: "1.0.0"

@@ -377,7 +377,10 @@
           "duration": 123,
           "timeUnit": "WD",
           "calculationBasis": "Calculated as...",
-          "lastFreeDate": "2025-01-23"
+          "lastFreeDate": {
+            "value": "2025-01-23",
+            "classifier": "EST"
+          }
         }
       ],
       "paymentRemittance": {

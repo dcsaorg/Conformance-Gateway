@@ -61,7 +61,8 @@ public abstract class StandardSpecification {
             "API-Version",
             new Header()
                 .description(
-                    "SemVer used to indicate the version of the contract (API version) returned.")
+                    "Every API request and response must contain the `API-Version` header,"
+                        + " set to the full version of the implemented DCSA standard.")
                 .schema(new Schema<>().type("string").example(standardVersion)))
         .addHeaders(
             "Next-Page-Cursor",

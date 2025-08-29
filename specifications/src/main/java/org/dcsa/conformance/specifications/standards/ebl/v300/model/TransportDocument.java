@@ -19,7 +19,13 @@ import org.dcsa.conformance.specifications.standards.ebl.v300.types.DisplayedNam
 @Data
 public class TransportDocument {
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.", example = "HHL71800000", maxLength = 20, pattern = "^\\S(?:.*\\S)?$")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description =
+          "A unique number allocated by the shipping line to the `Transport Document` and the main number used for the tracking of the status of the shipment.",
+      example = "HHL71800000",
+      maxLength = 20,
+      pattern = "^\\S(?:.*\\S)?$")
   private String transportDocumentReference;
 
   @Schema(description = "Additional reference that can be optionally used alongside the `transportDocumentReference` in order to distinguish between versions of the same `Transport Document`.", example = "Version_1", maxLength = 100, pattern = "^\\S(?:.*\\S)?$")
@@ -28,7 +34,12 @@ public class TransportDocument {
   @Schema(description = "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.", example = "e0559d83-00e2-438e-afd9-fdd610c1a008", maxLength = 100, pattern = "^\\S(?:.*\\S)?$")
   private String shippingInstructionsReference;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED", example = "DRAFT", maxLength = 50)
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description =
+          "The status of the `Transport Document`. Possible values are:\n- `DRAFT` (the Transport Document is currently a Draft)\n- `APPROVED` (the Transport Document has been Approved by consumer)\n- `ISSUED` (the Transport Document has been Issued by provider)\n- `PENDING_SURRENDER_FOR_AMENDMENT` (the Transport Document has a pending Surrender for Amendment)\n- `SURRENDERED_FOR_AMENDMENT` (the Transport Document is Surrendered for Amendment)\n- `PENDING_SURRENDER_FOR_DELIVERY` (the Transport Document has a pending Surrender for Delivery)\n- `SURRENDERED_FOR_DELIVERY` (the Transport Document is Surrendered for Delivery)\n- `VOIDED` (the Transport Document has been Voided)",
+      example = "DRAFT",
+      maxLength = 50)
   private String transportDocumentStatus;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)", example = "SWB", allowableValues = {"BOL", "SWB"})
@@ -290,7 +301,7 @@ The value of the cargo that the shipper declares in order to avoid the carrier's
 """
 The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).
 
-**Condition:** Mandatory if `declaredValue` is provided
+**Condition:** Mandatory if `declaredValue` is provided. If `declaredValue` is not provided, this field must be empty.
 """,
       example = "DKK",
       maxLength = 3,

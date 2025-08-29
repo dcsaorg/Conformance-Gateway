@@ -33,7 +33,7 @@ The address of the party to be displayed on the `Transport Document`. The displa
 
 **Conditions:** If provided:
   - the displayed address must be included in the `Transport Document`.
-  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
+  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. **Note:** Some carriers may choose to allow more lines, please consult the carrier's API documentation to check if this is the case.
   - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters
   - the order of the items in this array **MUST** be preserved as by the provider of the API.
 """)

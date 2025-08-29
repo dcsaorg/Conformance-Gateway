@@ -277,7 +277,8 @@ class BookingChecksTest {
     ObjectNode documentParties = OBJECT_MAPPER.createObjectNode();
     ArrayNode otherParties = OBJECT_MAPPER.createArrayNode();
 
-    for (String function : PARTY_FUNCTIONS) {
+    String[] partyFunctions = {"DDR", "DDS", "COW", "COX", "N1", "N2"};
+    for (String function : partyFunctions) {
       ObjectNode party = OBJECT_MAPPER.createObjectNode();
       party.put("partyFunction", function);
       otherParties.add(party);
@@ -556,7 +557,7 @@ class BookingChecksTest {
     ObjectNode commodity1 = OBJECT_MAPPER.createObjectNode();
     commodity1.put("commoditySubReference", "REF001");
     ObjectNode commodity2 = OBJECT_MAPPER.createObjectNode();
-    commodity2.put("commoditySubReference", "REF001");  // Duplicate
+    commodity2.put("commoditySubReference", "REF001"); // Duplicate
 
     ArrayNode commodities = OBJECT_MAPPER.createArrayNode();
     commodities.add(commodity1);
@@ -570,7 +571,9 @@ class BookingChecksTest {
 
     Set<String> errors = BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking);
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
+    assertTrue(
+        errors.contains(
+            "commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
   }
 
   @Test
@@ -586,7 +589,7 @@ class BookingChecksTest {
 
     // Equipment 2
     ObjectNode commodity2 = OBJECT_MAPPER.createObjectNode();
-    commodity2.put("commoditySubReference", "REF001");  // Duplicate across equipments
+    commodity2.put("commoditySubReference", "REF001"); // Duplicate across equipments
     ArrayNode commodities2 = OBJECT_MAPPER.createArrayNode();
     commodities2.add(commodity2);
     ObjectNode equipment2 = OBJECT_MAPPER.createObjectNode();
@@ -599,7 +602,9 @@ class BookingChecksTest {
 
     Set<String> errors = BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking);
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
+    assertTrue(
+        errors.contains(
+            "commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
   }
 
   @Test
@@ -608,13 +613,13 @@ class BookingChecksTest {
     ObjectNode commodity1 = OBJECT_MAPPER.createObjectNode();
     commodity1.put("commoditySubReference", "REF001");
     ObjectNode commodity2 = OBJECT_MAPPER.createObjectNode();
-    commodity2.put("commoditySubReference", "REF001");  // Duplicate
+    commodity2.put("commoditySubReference", "REF001"); // Duplicate
     ObjectNode commodity3 = OBJECT_MAPPER.createObjectNode();
     commodity3.put("commoditySubReference", "REF002");
     ObjectNode commodity4 = OBJECT_MAPPER.createObjectNode();
-    commodity4.put("commoditySubReference", "REF002");  // Another duplicate
+    commodity4.put("commoditySubReference", "REF002"); // Another duplicate
     ObjectNode commodity5 = OBJECT_MAPPER.createObjectNode();
-    commodity5.put("commoditySubReference", "REF002");  // Third occurrence
+    commodity5.put("commoditySubReference", "REF002"); // Third occurrence
 
     ArrayNode commodities = OBJECT_MAPPER.createArrayNode();
     commodities.add(commodity1);
@@ -631,19 +636,23 @@ class BookingChecksTest {
 
     Set<String> errors = BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking);
     assertEquals(2, errors.size());
-    assertTrue(errors.contains("commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
-    assertTrue(errors.contains("commoditySubReference 'REF002' is not unique across the booking. Found 3 occurrences."));
+    assertTrue(
+        errors.contains(
+            "commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
+    assertTrue(
+        errors.contains(
+            "commoditySubReference 'REF002' is not unique across the booking. Found 3 occurrences."));
   }
 
   @Test
   void testCommoditiesSubreferenceUnique_emptySubreference_valid() {
     // Test with empty subreference values (should be ignored)
     ObjectNode commodity1 = OBJECT_MAPPER.createObjectNode();
-    commodity1.put("commoditySubReference", "");  // Empty
+    commodity1.put("commoditySubReference", ""); // Empty
     ObjectNode commodity2 = OBJECT_MAPPER.createObjectNode();
     commodity2.put("commoditySubReference", "REF001");
     ObjectNode commodity3 = OBJECT_MAPPER.createObjectNode();
-    commodity3.put("commoditySubReference", "");  // Another empty
+    commodity3.put("commoditySubReference", ""); // Another empty
 
     ArrayNode commodities = OBJECT_MAPPER.createArrayNode();
     commodities.add(commodity1);
@@ -689,11 +698,11 @@ class BookingChecksTest {
   void testCommoditiesSubreferenceUnique_whitespaceOnlySubreference_valid() {
     // Test with whitespace-only subreference values (should be ignored due to isBlank() filter)
     ObjectNode commodity1 = OBJECT_MAPPER.createObjectNode();
-    commodity1.put("commoditySubReference", "   ");  // Whitespace only
+    commodity1.put("commoditySubReference", "   "); // Whitespace only
     ObjectNode commodity2 = OBJECT_MAPPER.createObjectNode();
     commodity2.put("commoditySubReference", "REF001");
     ObjectNode commodity3 = OBJECT_MAPPER.createObjectNode();
-    commodity3.put("commoditySubReference", "\t\n");  // More whitespace
+    commodity3.put("commoditySubReference", "\t\n"); // More whitespace
 
     ArrayNode commodities = OBJECT_MAPPER.createArrayNode();
     commodities.add(commodity1);

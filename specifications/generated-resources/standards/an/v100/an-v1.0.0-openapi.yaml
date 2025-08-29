@@ -2372,7 +2372,7 @@ components:
       description: "Weight value and measurement unit"
   headers:
     API-Version:
-      description: "SemVer used to indicate the version of the contract (API version) returned."
+      description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
       schema:
         type: "string"
         example: "1.0.0"

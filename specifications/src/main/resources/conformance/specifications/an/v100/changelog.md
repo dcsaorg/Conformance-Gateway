@@ -2,6 +2,8 @@
 
 ## Snapshot v1.0.0-20250829-beta
 
+Aligned the description of the `API-Version` header with the latest API DNI Guidelines. (SD-2410)
+
 
 ## Snapshot v1.0.0-20250815-alpha
 

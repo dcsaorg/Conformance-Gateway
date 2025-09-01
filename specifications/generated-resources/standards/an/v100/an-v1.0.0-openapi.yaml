@@ -1585,6 +1585,10 @@ components:
             - `ETEU` (eTEU)
             - `TRAC` (Enigio trace:original)
             - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
             - `GSBN` (Global Shipping Business Network)
             - `WISE` (WiseTech)
             - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -2026,6 +2030,7 @@ components:
             - `AKG` (Vehicle Identification Number)
             - `CPR` (Canadian Pacific Railway System)
             - `CNR` (Canadian National Railway Unit)
+            - `VBN` (V-Bond Number)
           example: "CR"
         value:
           maxLength: 35

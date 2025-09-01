@@ -420,6 +420,10 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `ETEU` (eTEU)
 - `TRAC` (Enigio trace:original)
 - `BRIT` (BRITC eBL)
+- `COVA` (Covantis)
+- `ETIT` (e-title)
+- `KTNE` (KTNET)
+- `CRED` (Credore)
 - `GSBN` (Global Shipping Business Network)
 - `WISE` (WiseTech)
 - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -545,7 +549,8 @@ Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)
 - `CPR` (Canadian Pacific Railway System)
-- `CNR` (Canadian National Railway Unit)",
+- `CNR` (Canadian National Railway Unit)
+- `VBN` (V-Bond Number)",
 Reference,value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
 ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)

@@ -484,6 +484,10 @@ as it determines which of these parties is considered the third, fourth, fifth (
 - `ETEU` (eTEU)
 - `TRAC` (Enigio trace:original)
 - `BRIT` (BRITC eBL)
+- `COVA` (Covantis)
+- `ETIT` (e-title)
+- `KTNE` (KTNET)
+- `CRED` (Credore)
 - `GSBN` (Global Shipping Business Network)
 - `WISE` (WiseTech)
 - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -629,7 +633,8 @@ If the pickup number is incorrect, the trucker will have his pickup request deni
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)
 - `CPR` (Canadian Pacific Railway System)
-- `CNR` (Canadian National Railway Unit)",
+- `CNR` (Canadian National Railway Unit)
+- `VBN` (V-Bond Number)",
 "ArrivalNotice / references / value",value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
 "ArrivalNotice / releaseInformation",releaseInformation,ReleaseInformation,,,,,"Release information",
 "ArrivalNotice / releaseInformation / carrierInformationForCargoRelease","carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
@@ -1215,7 +1220,8 @@ If the pickup number is incorrect, the trucker will have his pickup request deni
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)
 - `CPR` (Canadian Pacific Railway System)
-- `CNR` (Canadian National Railway Unit)",
+- `CNR` (Canadian National Railway Unit)
+- `VBN` (V-Bond Number)",
 "ArrivalNotice / utilizedTransportEquipments / references / value",value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
 "ArrivalNotice / utilizedTransportEquipments / returnInformation",returnInformation,ReturnInformation,,,,,"Return information",
 "ArrivalNotice / utilizedTransportEquipments / returnInformation / returnInstructions",returnInstructions,string,,maxLength=5000,,"Please place the container...","Return instructions",

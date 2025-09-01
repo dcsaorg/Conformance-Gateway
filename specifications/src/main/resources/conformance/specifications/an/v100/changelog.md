@@ -1,5 +1,12 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250912-beta
+
+Added `Reference` type code `VBN` for V-Bond Number. (SD-2435)
+
+Updated the document party code list providers to match the list from version 3.0.1 of the Bill of Lading standard. (SD-2335)
+
+
 ## Snapshot v1.0.0-20250829-beta
 
 Aligned the description of the `API-Version` header with the latest API DNI Guidelines. (SD-2410)

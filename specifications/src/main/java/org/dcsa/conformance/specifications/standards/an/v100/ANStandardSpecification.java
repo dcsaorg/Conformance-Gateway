@@ -118,7 +118,7 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250829-beta", "AN", "1.0.0-20250815-alpha", 4);
+        "Arrival Notice", "1.0.0-20250912-beta", "AN", "1.0.0-20250829-beta", 4);
   }
 
   @Override

@@ -259,7 +259,7 @@ public class EblChecks {
 
   static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTY =
       JsonAttribute.customValidator(
-          "Validate document party for address and identifyingCodes for OtherParty, ",
+          "Validate if address or identifyingCodes present in document parties - shipper, consignee,endorsee, notify parties and 'other' ",
           (body, contextPath) -> {
             var documentParties = body.path(DOCUMENT_PARTIES);
             var issues = new LinkedHashSet<String>();
@@ -728,7 +728,7 @@ public class EblChecks {
 
   static final JsonRebaseableContentCheck BUYER_AND_SELLER_CONDITIONAL_CHECK =
       JsonAttribute.customValidator(
-          "If isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' then Buyer and Seller is required",
+          "If isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER', manifestTypeCode is 'ENS' and isHouseBillOfLadingsIssued is false, then Buyer and Seller is required",
           (node, contextPath) -> {
             JsonNode houseBillOfLadings = node.path(HOUSE_BILL_OF_LADINGS);
             if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
@@ -738,20 +738,21 @@ public class EblChecks {
             if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
               return Set.of();
             }
+            boolean isHouseBlsIssued = node.path("isHouseBillOfLadingsIssued").asBoolean(true);
             int index = 0;
             for (JsonNode hbl : houseBillOfLadings) {
               if (hbl.path("isCargoDeliveredInICS2Zone").asBoolean(false)) {
                 for (JsonNode filing : advanceManifestFilings) {
-                  if ("CARRIER"
-                          .equals(filing.path(AMF_HBL_PERFORMED_BY).asText())
+                  if ("CARRIER".equals(filing.path(AMF_HBL_PERFORMED_BY).asText())
                       && "ENS".equals(filing.path(MANIFEST_TYPE_CODE).asText())
+                      && !isHouseBlsIssued
                       && (hbl.path(DOCUMENT_PARTIES).path("buyer").isMissingNode()
                           || hbl.path(DOCUMENT_PARTIES).path(SELLER).isMissingNode())) {
                     String specificContextPath =
                         concatContextPath(
                             contextPath, "houseBillOfLadings[" + index + "].documentParties");
                     return Set.of(
-                        "Buyer and Seller is required in documentParties in houseBillOfLadings when isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' at %s"
+                        "Buyer and Seller is required in documentParties in houseBillOfLadings when isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER', manifestTypeCode is 'ENS' and and isHouseBillOfLadingsIssued is false at %s"
                             .formatted(specificContextPath));
                   }
                 }
@@ -912,13 +913,21 @@ public class EblChecks {
                   EblDatasets.DG_SEGREGATION_GROUPS)),
           UTE_EQUIPMENT_REFERENCE_UNIQUE,
           JsonAttribute.allIndividualMatchesMustBeValid(
-              "The 'temperatureSetpoint' implies 'temperatureUnit'",
+              "If 'temperatureSetpoint' is present, 'temperatureUnit' must be present (and vice versa)",
               mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
               JsonAttribute.presenceImpliesOtherField("temperatureSetpoint", "temperatureUnit")),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "If 'temperatureUnit' is present, 'temperatureSetpoint' must be present",
+              mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
+              JsonAttribute.presenceImpliesOtherField("temperatureUnit", "temperatureSetpoint")),
           JsonAttribute.allIndividualMatchesMustBeValid(
               "The 'airExchangeSetpoint' implies 'airExchangeUnit'",
               mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
               JsonAttribute.presenceImpliesOtherField("airExchangeSetpoint", "airExchangeUnit")),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "If 'airExchangeUnit' is present, 'airExchangeSetpoint' must be present",
+              mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
+              JsonAttribute.presenceImpliesOtherField("airExchangeUnit", "airExchangeSetpoint")),
           EBL_DISPLAYED_ADDRESS_LIMIT,
           CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
           ADVANCED_MANIFEST_FILING_CODES_UNIQUE,

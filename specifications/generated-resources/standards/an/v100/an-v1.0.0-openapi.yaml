@@ -878,9 +878,9 @@ components:
           description: "Payment location"
           allOf:
           - $ref: "#/components/schemas/Location"
-        chargePartnerCode:
+        invoicePayerCode:
           type: "string"
-          description: "Code of the partner responsible for the payment"
+          description: "Code used to identify the party responsible for the payment"
           example: "000123456"
       description: "Addresses the monetary value of freight and other service charges for a shipment."
     ClassifiedDate:

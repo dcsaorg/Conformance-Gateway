@@ -6,6 +6,8 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentRefe
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.standards.an.v100.types;
+package org.dcsa.conformance.specifications.standards.core.v100.types;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

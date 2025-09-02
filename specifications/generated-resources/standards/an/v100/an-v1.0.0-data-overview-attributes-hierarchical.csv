@@ -39,9 +39,9 @@ The publisher must clearly indicate in its API documentation whether the specifi
 to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / charges / chargeCode",chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 "ArrivalNotice / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
-"ArrivalNotice / charges / chargePartnerCode",chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
 "ArrivalNotice / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 "ArrivalNotice / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+"ArrivalNotice / charges / invoicePayerCode",invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
 "ArrivalNotice / charges / paymentCurrency",paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 "ArrivalNotice / charges / paymentLocation",paymentLocation,Location,,,,,"Payment location",
 "ArrivalNotice / charges / paymentLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -138,9 +138,9 @@ The publisher must clearly indicate in its API documentation whether the specifi
 to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / chargeCode",chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 "ArrivalNotice / consignmentItems / cargoItems / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
-"ArrivalNotice / consignmentItems / cargoItems / charges / chargePartnerCode",chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
 "ArrivalNotice / consignmentItems / cargoItems / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+"ArrivalNotice / consignmentItems / cargoItems / charges / invoicePayerCode",invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentCurrency",paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation",paymentLocation,Location,,,,,"Payment location",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -1105,9 +1105,9 @@ The publisher must clearly indicate in its API documentation whether the specifi
 to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / utilizedTransportEquipments / charges / chargeCode",chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 "ArrivalNotice / utilizedTransportEquipments / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
-"ArrivalNotice / utilizedTransportEquipments / charges / chargePartnerCode",chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
 "ArrivalNotice / utilizedTransportEquipments / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 "ArrivalNotice / utilizedTransportEquipments / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+"ArrivalNotice / utilizedTransportEquipments / charges / invoicePayerCode",invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentCurrency",paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation",paymentLocation,Location,,,,,"Payment location",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be

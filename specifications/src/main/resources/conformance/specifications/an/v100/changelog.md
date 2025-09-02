@@ -6,6 +6,8 @@ Added `Reference` type code `VBN` for V-Bond Number. (SD-2435)
 
 Updated the document party code list providers to match the list from version 3.0.1 of the Bill of Lading standard. (SD-2335)
 
+Renamed in object `Charge` property `chargePartnerCode` to `invoicePayerCode`. (SD-2437)
+
 
 ## Snapshot v1.0.0-20250829-beta
 

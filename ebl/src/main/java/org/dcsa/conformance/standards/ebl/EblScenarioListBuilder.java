@@ -84,6 +84,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 noAction()
                     .thenEither(
                         Arrays.stream(ScenarioType.values())
+                            .filter(
+                                scenarioType ->
+                                    scenarioType != ScenarioType.DG
+                                        && scenarioType != ScenarioType.ACTIVE_REEFER
+                                        && scenarioType != ScenarioType.NON_OPERATING_REEFER
+                                        && scenarioType
+                                            != ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE)
                             .map(
                                 scenarioType ->
                                     carrierSupplyScenarioParameters(scenarioType, isTd)

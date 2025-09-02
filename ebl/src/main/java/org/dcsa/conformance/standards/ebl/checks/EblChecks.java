@@ -955,16 +955,12 @@ public class EblChecks {
         ));
 
       checks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-          "[Scenario] CargoItem and DG vs. outerPackaging in the SI",
-          mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
-          JsonAttribute.ifMatchedThenElse(
-            ignored -> dspSupplier.get().scenarioType().hasDG(),
-            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBeAbsent()),
-            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent())
-          )
-        )
-      );
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "[Scenario] Non-DG: outerPackaging must be present in the SI",
+              mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
+              JsonAttribute.ifMatchedThen(
+                  ignored -> !dspSupplier.get().scenarioType().hasDG(),
+                  JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent()))));
     }
 
     checks.add(JsonAttribute.customValidator(
@@ -1100,7 +1096,7 @@ public class EblChecks {
     }
 
     checks.addAll(STATIC_SI_CHECKS);
-    
+
     checks.add(FEEDBACKS_PRESENCE);
     /* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
         checks.add(JsonAttribute.lostAttributeCheck(

@@ -21,6 +21,7 @@ The reference type codes defined by DCSA. Possible values are:
 - `AKG` (Vehicle Identification Number)
 - `CPR` (Canadian Pacific Railway System)
 - `CNR` (Canadian National Railway Unit)
+- `VBN` (V-Bond Number)
 """,
       example = "CR",
       maxLength = 3)

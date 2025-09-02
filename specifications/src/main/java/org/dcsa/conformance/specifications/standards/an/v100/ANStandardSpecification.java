@@ -118,7 +118,7 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250829-beta", "AN", "1.0.0-20250815-alpha", 4);
+        "Arrival Notice", "1.0.0-20250912-beta", "AN", "1.0.0-20250829-beta", 4);
   }
 
   @Override
@@ -208,7 +208,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/a7e6e34f42f9cc5b26d3dbd7e5c84c52fc7816b2/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/8f172898ecdff2d5df2bb1af3f06e42928286671/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 
@@ -216,8 +216,21 @@ public class ANStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
-        Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
+        Map.entry(
+            AttributesHierarchicalSheet.class,
+            Map.ofEntries(
+                Map.entry(
+                    "ArrivalNotice / charges / chargePartnerCode",
+                    "ArrivalNotice / charges / invoicePayerCode"),
+                Map.entry(
+                    "ArrivalNotice / consignmentItems / cargoItems / charges / chargePartnerCode",
+                    "ArrivalNotice / consignmentItems / cargoItems / charges / invoicePayerCode"),
+                Map.entry(
+                    "ArrivalNotice / utilizedTransportEquipments / charges / chargePartnerCode",
+                    "ArrivalNotice / utilizedTransportEquipments / charges / invoicePayerCode"))),
+        Map.entry(
+            AttributesNormalizedSheet.class,
+            Map.ofEntries(Map.entry("Charge,chargePartnerCode", "Charge,invoicePayerCode"))),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
   }

@@ -21,10 +21,6 @@ import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ActiveReeferSettings;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Address;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoGrossVolume;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoGrossWeight;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoNetVolume;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoNetWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Charge;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ConsignmentItem;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.CustomsReference;
@@ -32,33 +28,36 @@ import org.dcsa.conformance.specifications.standards.dt.v100.model.EmergencyCont
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ExportLicense;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.GeoCoordinate;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoItem;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.Equipment;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ImportLicense;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.InnerPackaging;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Limits;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.NationalCommodityCode;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.NetExplosiveContent;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.NetVolume;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.NetWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.ReferenceConsignmentItem;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Seal;
-import org.dcsa.conformance.specifications.standards.ebl.v300.model.TareWeight;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.TaxLegalReference;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoGrossVolume;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoGrossWeight;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoItem;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoNetVolume;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.CargoNetWeight;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.CarriersAgentAtDestination;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.City;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Consignee;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.DangerousGoods;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.DocumentParties;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Endorsee;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.Equipment;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.InvoicePayableAt;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.IssuingParty;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.NetExplosiveContent;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.NetVolume;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.NetWeight;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.NotifyParty;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.OnwardInlandRouting;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.OtherDocumentParty;
@@ -70,6 +69,7 @@ import org.dcsa.conformance.specifications.standards.ebl.v300.model.PlaceOfRecei
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.PortOfDischarge;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.PortOfLoading;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Shipper;
+import org.dcsa.conformance.specifications.standards.ebl.v300.model.TareWeight;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.TransportDocument;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.Transports;
 import org.dcsa.conformance.specifications.standards.ebl.v300.model.VesselVoyage;
@@ -91,7 +91,7 @@ public class EBLStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250829-beta", "eBL TD", "3.0.0 release", 1);
+        "Arrival Notice", "1.0.0-20250912-beta", "eBL TD", "3.0.1 release", 1);
   }
 
   @Override

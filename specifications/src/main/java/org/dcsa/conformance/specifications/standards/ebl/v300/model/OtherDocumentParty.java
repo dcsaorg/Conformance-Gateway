@@ -25,9 +25,6 @@ Specifies the role of the party in a given context. Possible values are:
 - `DDS` (Consignee's freight forwarder)
 - `COW` (Invoice payer on behalf of the consignor (shipper))
 - `COX` (Invoice payer on behalf of the consignee)
-- `CS` (Consolidator)
-- `MF` (Manufacturer)
-- `WH` (Warehouse Keeper)
 """,
       example = "DDS",
       maxLength = 3)

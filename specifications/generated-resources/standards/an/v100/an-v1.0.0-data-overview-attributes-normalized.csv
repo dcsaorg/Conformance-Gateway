@@ -174,9 +174,9 @@ The publisher must clearly indicate in its API documentation whether the specifi
 to a vessel rate of exchange or a daily rate of exchange.",
 Charge,chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 Charge,chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
-Charge,chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
 Charge,currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 Charge,currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+Charge,invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
 Charge,paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 Charge,paymentLocation,Location,,,,,"Payment location",
 Charge,paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
@@ -420,6 +420,10 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `ETEU` (eTEU)
 - `TRAC` (Enigio trace:original)
 - `BRIT` (BRITC eBL)
+- `COVA` (Covantis)
+- `ETIT` (e-title)
+- `KTNE` (KTNET)
+- `CRED` (Credore)
 - `GSBN` (Global Shipping Business Network)
 - `WISE` (WiseTech)
 - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -545,7 +549,8 @@ Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)
 - `CPR` (Canadian Pacific Railway System)
-- `CNR` (Canadian National Railway Unit)",
+- `CNR` (Canadian National Railway Unit)
+- `VBN` (V-Bond Number)",
 Reference,value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
 ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)

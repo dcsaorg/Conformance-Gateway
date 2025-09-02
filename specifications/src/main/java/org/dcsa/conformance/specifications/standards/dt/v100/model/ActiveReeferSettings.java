@@ -25,7 +25,7 @@ The unit for temperature in Celsius or Fahrenheit
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)
 
-**Condition:** Mandatory to provide if `temperatureSetpoint` is provided
+**Condition:** Mandatory if `temperatureSetpoint` is provided. If `temperatureSetpoint` is not provided, this field must be empty.
 """,
       example = "CEL")
   protected String temperatureUnit;
@@ -71,7 +71,7 @@ The unit for `airExchange` in metrics- or imperial- units per hour
 - `MQH` (Cubic metre per hour)
 - `FQH` (Cubic foot per hour)
 
-**Condition:** Mandatory to provide if `airExchange` is provided
+**Condition:** Mandatory if `airExchange` is provided. If `airExchange` is not provided, this field must be empty.
 """,
       example = "MQH")
   protected String airExchangeUnit;

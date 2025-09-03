@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.eblsurrender.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -20,7 +19,7 @@ import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
 @Getter
 @Slf4j
-public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
+public class SurrenderRequestResponsePlatformErrorAction extends EblSurrenderAction {
 
   private static final int RESPONSE_CODE = 409;
   public static final String SEND_NO_TRANSPORT_DOCUMENT_REFERENCE =
@@ -30,7 +29,7 @@ public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
   private final Supplier<String> srrSupplier = surrenderRequestReference::get;
   private final JsonSchemaValidator responseSchemaValidator;
 
-  public SurrenderRequestResponseErrorAction(
+  public SurrenderRequestResponsePlatformErrorAction(
       String platformPartyName,
       String carrierPartyName,
       ConformanceAction previousAction,
@@ -45,7 +44,7 @@ public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
   }
 
   @Override
-  public Supplier<String> getSrrSupplier() {
+  public synchronized Supplier<String> getSrrSupplier() {
     return srrSupplier;
   }
 

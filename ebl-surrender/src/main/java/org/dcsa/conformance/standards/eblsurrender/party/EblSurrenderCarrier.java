@@ -5,7 +5,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
@@ -85,6 +84,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
     String tdr = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     persistentMap.save("response", actionPrompt.get("response"));
+    persistentMap.save("error", actionPrompt.get("error"));
 
     var identifyingCodes =
         OBJECT_MAPPER
@@ -132,6 +132,9 @@ public class EblSurrenderCarrier extends ConformanceParty {
     }
     if (persistentMap.load("response") != null) {
       action = persistentMap.load("response").asText();
+    }
+    if (persistentMap.load("error").asBoolean()) {
+      srr = UUID.randomUUID().toString();
     }
 
     var carrierResponse =

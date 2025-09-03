@@ -15,11 +15,13 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private String response;
   private String eblType;
+  private final boolean errorFlow;
 
-  public SupplyScenarioParametersAction(String carrierPartyName, ConformanceAction previousAction, String response, String eblType) {
+  public SupplyScenarioParametersAction(String carrierPartyName, ConformanceAction previousAction, String response, String eblType, boolean errorFlow) {
     super(carrierPartyName, null, previousAction, "SupplyTDR[%s]".formatted(eblType));
     this.response = response;
     this.eblType = eblType;
+    this.errorFlow = errorFlow;
   }
 
   @Override
@@ -95,7 +97,8 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("eblType", eblType)
-      .put("response", response);
+        .put("eblType", eblType)
+        .put("response", response)
+        .put("error", errorFlow);
   }
 }

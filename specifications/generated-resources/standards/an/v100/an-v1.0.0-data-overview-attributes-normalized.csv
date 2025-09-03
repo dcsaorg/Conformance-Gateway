@@ -24,7 +24,7 @@ Address,postCode,string,,maxLength=10,,"1047 HM","The post code of the address."
 Address,stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 Address,street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 Address,streetNumber,string,,maxLength=50,,100,"The number of the street.",
-ArrivalNotice,additionalInformation,string,,maxLength=500,,"FIRMS code: B986","Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
+ArrivalNotice,additionalInformation,string,,maxLength=5000,,"Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.","Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
 e.g. additional required documents to prepare and present for shipment release - country specific.",
 ArrivalNotice,"arrivalNoticeVisualization",EmbeddedDocument,,,,,"Visualization of an arrival notice, as an embedded document",
 ArrivalNotice,"cargoMovementTypeAtDestination",string,,maxLength=3,,FCL,"Refers to the shipment term at the **unloading** of the cargo out of the container. Possible values are:
@@ -42,7 +42,6 @@ ArrivalNotice,carrierCodeListProvider,string,,,,NMFTA,"The code list provider fo
 - `SMDG` (Ship Message Design Group)
 - `NMFTA` (National Motor Freight Traffic Association)",
 ArrivalNotice,"carrierContactInformation","PartyContactDetail list",,,,,"The party to contact for any inquiries related to this Arrival Notice.",
-ArrivalNotice,"carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
 ArrivalNotice,charges,"Charge list",,,,,"A list of `Charges`",
 ArrivalNotice,consignmentItems,"ConsignmentItem list",,,,,"A list of `ConsignmentItems`",
 ArrivalNotice,customsClearance,CustomsClearance,,,,,"Customs clearance information",
@@ -67,7 +66,7 @@ ArrivalNotice,isElectronic,boolean,,,,true,"An indicator whether the transport d
 ArrivalNotice,issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
 ArrivalNotice,pickupInformation,PickupInformation,,,,,"Pickup information",
-ArrivalNotice,references,"Reference list",,,,,"A list of `References`",
+ArrivalNotice,references,"Reference list",,,,,"References used by the customer or carrier to identify or track the shipment.",
 ArrivalNotice,releaseInformation,ReleaseInformation,,,,,"Release information",
 ArrivalNotice,returnInformation,ReturnInformation,,,,,"Return information",
 ArrivalNotice,serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
@@ -113,12 +112,12 @@ If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.
 ",
-"ArrivalNoticeNotification",etaAtPlaceOfDeliveryDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the shipment at place of delivery",
-"ArrivalNoticeNotification",etaAtPortOfDischargeDate,"string(date)",,,,2025-01-23,"The expected date of arrival of the vessel at the port of discharge",
 "ArrivalNoticeNotification",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNoticeNotification",placeOfDelivery,Location,,,,,"The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases",
+"ArrivalNoticeNotification","placeOfDeliveryArrivalDate",ClassifiedDate,,,,,"The date of arrival of the shipment at Place of Delivery.",
 "ArrivalNoticeNotification",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel",
+"ArrivalNoticeNotification","portOfDischargeArrivalDate",ClassifiedDate,,,,,"The date of arrival of the vessel at the Port of Discharge.",
 "ArrivalNoticeNotification","transportDocumentReference",string,yes,,,TDR1234,"The reference of the transport document for which this arrival notice was created",
 "ArrivalNoticeNotification",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
 for example ""English, consignee, USD"" or ""No charges, French"".
@@ -144,18 +143,11 @@ for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.
 This is a high-level label with business semantics that does not influence the technical versioning
 of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
 which relies on the `issueDateTime` instead.",
-CargoGrossVolume,unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
-- `FTQ` (Cubic foot)
-- `MTQ` (Cubic meter)",
-CargoGrossVolume,value,number,,,,2.4,"Calculated by multiplying the width, height, and length of the packed cargo. A maximum of 4 decimals should be provided.",
-CargoGrossWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
-- `KGM` (Kilograms)
-- `LBR` (Pounds)",
-CargoGrossWeight,value,number,,,,2400,"The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
-CargoItem,cargoGrossVolume,CargoGrossVolume,,,,,"Gross volume of the cargo.",
-CargoItem,cargoGrossWeight,CargoGrossWeight,,,,,"Gross weight of the cargo.",
-CargoItem,cargoNetVolume,CargoNetVolume,,,,,"Net volume of the cargo.",
-CargoItem,cargoNetWeight,CargoNetWeight,,,,,"Net weight of the cargo.",
+CargoItem,cargoGrossVolume,Volume,,,,,"Gross volume of the cargo item, calculated by multiplying the width, height, and length of the packaged cargo.",
+CargoItem,cargoGrossWeight,Weight,,,,,"Gross weight of the cargo item including packaging being carried in the container.
+Excludes the tare weight of the container.",
+CargoItem,cargoNetVolume,Volume,,,,,"Net volume of the cargo item, calculated by multiplying the width, height, and length of the cargo, excluding packaging.",
+CargoItem,cargoNetWeight,Weight,,,,,"Net weight of the cargo item, excluding packaging and excluding the tare weight of the container.",
 CargoItem,charges,"Charge list",,,,,"A list of `Charges`",
 CargoItem,customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
 CargoItem,equipmentReference,string,,maxLength=11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -168,14 +160,6 @@ CargoItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list of `Na
 CargoItem,outerPackaging,OuterPackaging,,,,,"Packaging information for this cargo item.",
 CargoItem,position,integer,,,,12,"The order in which the carrier submitted the pre-announcement to the customs authority (which may vary by country) is,
 in some cases, the same order the consignee must follow for the final customs release.",
-CargoNetVolume,unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
-- `FTQ` (Cubic foot)
-- `MTQ` (Cubic meter)",
-CargoNetVolume,value,number,,,,2.4,"Calculated by multiplying the width, height, and length of the cargo, excluding packaging.",
-CargoNetWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
-- `KGM` (Kilograms)
-- `LBR` (Pounds)",
-CargoNetWeight,value,number,,,,2400,"The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.",
 Charge,calculationBasis,string,,maxLength=50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
 Charge,carrierRateOfExchange,string,,maxLength=50,,"1.00 Euro = 1.17801 US Dollars","The quotation of the relative value of a currency unit against the unit of another currency
 in the foreign exchange market applicable to this charge item.
@@ -205,7 +189,8 @@ ClassifiedDate,classifier,string,,,,EST,"Classifier denoting whether a date/time
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-ClassifiedDate,value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.",
+ClassifiedDate,value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
+Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 ClassifiedDateTime,classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
@@ -248,6 +233,12 @@ CustomsReference,values,"string list",,maxLength=35,,,"
 Item description:
 The value of the `customsReference`",
 DangerousGoods,EMSNumber,string,,maxLength=7,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.",
+DangerousGoods,IMOClass,string,,maxLength=4,,1.4S,"The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:
+
+- `1.1A` (Substances and articles which have a mass explosion hazard)
+- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)
+- `2.1` (Flammable gases)
+- `8` (Corrosive substances)",
 DangerousGoods,NANumber,string,,maxLength=4,,9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.",
 DangerousGoods,UNNumber,string,,maxLength=4,,1463,"United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.",
 DangerousGoods,codedVariantList,string,,maxLength=4,,2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.
@@ -261,13 +252,7 @@ DangerousGoods,"competentAuthorityApproval",string,,maxLength=70,,"{Name and ref
 DangerousGoods,emergencyContactDetails,EmergencyContactDetails,,,,,"24 hr emergency contact details",
 DangerousGoods,endOfHoldingTime,"string(date)",,,,2021-09-03,"Date by when the refrigerated liquid needs to be delivered.",
 DangerousGoods,fumigationDateTime,"string(date-time)",,,,2024-09-04T09:41Z,"Date & time when the container was fumigated",
-DangerousGoods,grossWeight,GrossWeight,,,,,"Total weight of the goods carried, including packaging.",
-DangerousGoods,imoClass,string,,maxLength=4,,1.4S,"The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:
-
-- `1.1A` (Substances and articles which have a mass explosion hazard)
-- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)
-- `2.1` (Flammable gases)
-- `8` (Corrosive substances)",
+DangerousGoods,grossWeight,Weight,,,,,"Total weight of the goods carried, including packaging.",
 DangerousGoods,inhalationZone,string,,maxLength=1,,A,"The zone classification of the toxicity of the inhalant. Possible values are:
 
 - `A` (Hazard Zone A) can be assigned to specific gases and liquids
@@ -285,9 +270,9 @@ DangerousGoods,isReportableQuantity,boolean,,,,false,"Indicates if a container o
 DangerousGoods,isSalvagePackings,boolean,,,,false,"Indicates if the cargo has special packaging for the transport, recovery or disposal of damaged, defective, leaking or nonconforming hazardous materials packages, or hazardous materials that have spilled or leaked.",
 DangerousGoods,isWaste,boolean,,,,false,"Indicates if waste is being shipped",
 DangerousGoods,limits,Limits,,,,,"Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure.",
-DangerousGoods,netExplosiveContent,NetExplosiveContent,,,,,"The total weight of the explosive substances, without the packaging, casings, etc.",
-DangerousGoods,netVolume,NetVolume,,,,,"The volume of the referenced dangerous goods. Only applicable to liquids and gas.",
-DangerousGoods,netWeight,NetWeight,,,,,"Total weight of the goods carried, excluding packaging.",
+DangerousGoods,netExplosiveContent,Weight,,,,,"The total weight of the explosive substances, without the packaging, casings, etc.",
+DangerousGoods,netVolume,Volume,,,,,"The volume of the referenced dangerous goods. Only applicable to liquids and gas.",
+DangerousGoods,netWeight,Weight,,,,,"Total weight of the goods carried, excluding packaging.",
 DangerousGoods,packingGroup,integer,,,,3,"The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code.",
 DangerousGoods,properShippingName,string,,maxLength=250,,"Chromium Trioxide, anhydrous","The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code, or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to the MARPOL Convention.",
 DangerousGoods,segregationGroups,"string list",,maxLength=2,,,"List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.
@@ -355,7 +340,7 @@ Equipment,equipmentReference,string,,maxLength=11,,APZU4812090,"The unique ident
 According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
 
 If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
-Equipment,tareWeight,TareWeight,,,,,"The tare weight of the container.",
+Equipment,tareWeight,Weight,,,,,"The tare weight of the container.",
 ExportLicense,expiryDate,"string(date)",,,,2024-09-21,"Expiry date of the `Export License`.",
 ExportLicense,isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
 
@@ -398,7 +383,8 @@ If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.
 ",
-FreeTime,lastFreeDate,"string(date)",,,,2025-01-23,"The final day containers can be collected without incurring charges",
+FreeTime,lastFreeDate,ClassifiedDate,,,,,"The final date when the container(s) can be collected without incurring charges.",
+FreeTime,lastFreeDateTime,ClassifiedDateTime,,,,,"The final date and time when the container(s) can be collected without incurring charges.",
 FreeTime,timeUnit,string,,maxLength=3,,WD,"Code identifying the unit in which free time is expressed
 - `CD` - Calendar days
 - `WD` - Working days
@@ -417,10 +403,6 @@ At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.",
 "GetArrivalNoticesResponse",arrivalNotices,"ArrivalNotice list",,,,,"The list of arrival notices matching the filter specified by the request query parameters",
 "GetArrivalNoticesResponse",feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
-GrossWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
-- `KGM` (Kilograms)
-- `LBR` (Pounds)",
-GrossWeight,value,number,,,,12000.3,"The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.",
 IdentifyingCode,codeListName,string,,maxLength=100,,DID,"The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
@@ -438,6 +420,10 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `ETEU` (eTEU)
 - `TRAC` (Enigio trace:original)
 - `BRIT` (BRITC eBL)
+- `COVA` (Covantis)
+- `ETIT` (e-title)
+- `KTNE` (KTNET)
+- `CRED` (Credore)
 - `GSBN` (Global Shipping Business Network)
 - `WISE` (WiseTech)
 - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -447,13 +433,13 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `DCSA` (Digital Container Shipping Association)
 - `ZZZ` (Mutually defined)",
 IdentifyingCode,partyCode,string,,maxLength=150,,MSK,"Code to identify the party as provided by the code list provider",
-"ImmediateTransportationEntry",firmsCode,string,,maxLength=4,,a391,"The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
+"ImmediateTransportationEntry",FIRMSCode,string,,maxLength=4,,a391,"The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
 assigned by U.S. Customs and Border Protection (CBP) to facilities in the U.S. where imported goods are held or processed,
 such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
 It tells CBP and freight systems where the cargo is physically located.",
-"ImmediateTransportationEntry",itDate,"string(date)",,,,2025-01-23,"The date the in-bond movement began, i.e., when the Immediate Transportation (IT) entry was filed and accepted
+"ImmediateTransportationEntry",ITDate,"string(date)",,,,2025-01-23,"The date the in-bond movement began, i.e., when the Immediate Transportation (IT) entry was filed and accepted
 by U.S. Customs and Border Protection (CBP).",
-"ImmediateTransportationEntry",itNumber,string,,maxLength=100,,V4914303071,"The reference number of the bonded movement under a U.S. Customs and Border Protection (CBP) Immediate Transportation (IT) entry,
+"ImmediateTransportationEntry",ITNumber,string,,maxLength=100,,V4914303071,"The reference number of the bonded movement under a U.S. Customs and Border Protection (CBP) Immediate Transportation (IT) entry,
 often assigned by the carrier or customs broker. It allows goods to be moved under bond from the Port of Discharge
 to another inland port or bonded facility without paying duties at the first port. The IT number is used
 for tracking the movement and verifying arrival at the inland port or bonded facility.",
@@ -466,10 +452,10 @@ ImportLicense,reference,string,,maxLength=35,,EMC007123,"Reference number assign
 InnerPackaging,description,string,,maxLength=100,,"Woven plastic water resistant Bag","Description of the packaging.",
 InnerPackaging,material,string,,maxLength=100,,Plastic,"The `material` used for the `Inner Packaging` of the referenced `Dangerous Goods`.",
 InnerPackaging,quantity,integer,,,,20,"Count of `Inner Packagings` of the referenced `Dangerous Goods`.",
-Leg,arrivalDate,ClassifiedDate,,,,,"Arrival date",
-Leg,departureDate,ClassifiedDate,,,,,"Departure date",
-Leg,dischargeLocation,Location,,,,,"Discharge location",
-Leg,loadLocation,Location,,,,,"Load location",
+Leg,arrivalDate,ClassifiedDate,,,,,"The arrival date at the discharge location for this specific leg of the transport plan.",
+Leg,departureDate,ClassifiedDate,,,,,"The departure date from the load location for this specific leg of the transport plan.",
+Leg,dischargeLocation,Location,,,,,"The location where the cargo is discharged for this specific leg of the transport plan.",
+Leg,loadLocation,Location,,,,,"The location where the cargo is loaded for this specific leg of the transport plan.",
 Leg,modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA
 - `VESSEL` - Vessel
 - `RAIL` - Rail
@@ -499,9 +485,7 @@ Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specify
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 Location,address,Address,,,,,"Location address",
 Location,facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-Location,geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
-Location,locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
-Location,locationTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of location
+Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
 - `COFS` - Container freight station
@@ -510,6 +494,8 @@ Location,locationTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specifi
 - `INTE` - Inland terminal
 - `POTE` - Port terminal
 - `RAMP` - Ramp",
+Location,geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+Location,locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
 NationalCommodityCode,countryCode,string,,maxLength=2,,BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 NationalCommodityCode,type,string,,maxLength=10,,NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
 - `NCM` (Nomenclatura Comum do Mercosul)
@@ -521,24 +507,9 @@ NationalCommodityCode,type,string,,maxLength=10,,NCM,"The national commodity cla
 NationalCommodityCode,values,"string list",,maxLength=10,,,"A list of `national commodity codes` values.
 Item description:
 The value of the `National Commodity Code`",
-NetExplosiveContent,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
-- `KGM` (Kilograms)
-- `LBR` (Pounds)
-- `GRM` (Grams)
-- `ONZ` (Ounce)",
-NetExplosiveContent,value,number,,,,2.4,"The total weight of the explosive substances, without the packaging’s, casings, etc.",
-NetVolume,unit,string,,,,MTQ,"The unit of measure which can be expressed in imperial or metric terms:
-- `FTQ` (Cubic foot)
-- `MTQ` (Cubic meter)
-- `LTR` (Litre)",
-NetVolume,value,number,,,,2.4,"The volume of the referenced dangerous goods.",
-NetWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms:
-- `KGM` (Kilograms)
-- `LBR` (Pounds)",
-NetWeight,value,number,,,,2.4,"Total weight of the goods carried, excluding packaging.",
+OuterPackaging,IMOPackagingCode,string,,maxLength=5,,1A2,"The code of the packaging as per IMO.",
 OuterPackaging,dangerousGoods,"DangerousGoods list",,,,,"A list of `Dangerous Goods`",
 OuterPackaging,description,string,,maxLength=100,,"Drum, steel","Description of the outer packaging/overpack.",
-OuterPackaging,imoPackagingCode,string,,maxLength=5,,1A2,"The code of the packaging as per IMO.",
 OuterPackaging,numberOfPackages,integer,,,,18,"Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.",
 OuterPackaging,packageCode,string,,maxLength=2,,5H,"A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)",
 OuterPackaging,woodDeclaration,string,,maxLength=30,,TREATED_AND_CERTIFIED,"Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:
@@ -576,7 +547,10 @@ Instead, the relevant request object is indicated by the `propertyPath` of each 
 Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CA` (Carrier’s Reference)
 - `CR` (Customer’s Reference)
-- `AKG` (Vehicle Identification Number)",
+- `AKG` (Vehicle Identification Number)
+- `CPR` (Canadian Pacific Railway System)
+- `CNR` (Canadian National Railway Unit)
+- `VBN` (V-Bond Number)",
 Reference,value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
 ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)
@@ -586,6 +560,7 @@ ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes 
 ReferenceConsignmentItem,values,"string list",,maxLength=35,,,"List of `referenceValues` for a given `referenceType`.
 Item description:
 The value of the reference.",
+ReleaseInformation,"carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
 ReleaseInformation,freightReleaseDate,"string(date)",,,,2025-01-23,"Date when the customer has provided the payment and the relevant documents.",
 ReleaseInformation,isCustomsReleased,boolean,,,,false,"Indicates whether the shipment has been cleared by customs.",
 ReleaseInformation,isFreightReleased,boolean,,,,false,"Indicates whether the shipment has been ""freight released"", meaning the B/L has been surrendered
@@ -601,13 +576,10 @@ Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the se
 - `SHI` (Shipper)
 - `VET` (Veterinary)
 - `CUS` (Customs)",
-TareWeight,unit,string,,,,KGM,"The unit of measure which can be expressed in imperial or metric terms
-- `KGM` (Kilograms)
-- `LBR` (Pounds)",
-TareWeight,value,number,,,,4800,"The weight of an empty container (gross container weight).",
 TaxLegalReference,countryCode,string,,maxLength=2,,IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 TaxLegalReference,type,string,,maxLength=50,,PAN,"The reference type code as defined by the relevant tax and/or legal authority.",
 TaxLegalReference,value,string,,maxLength=35,,AAAAA0000A,"The value of the `taxLegalReference`",
+Transport,borderCrossingLocation,Location,,,,,"The inland location where the cargo is intended to cross an international border.",
 Transport,departureDate,ClassifiedDate,,,,,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
 Transport,generalOrderDateTime,ClassifiedDateTime,,,,,"The date and time when the shipment will be placed under General Order status
@@ -623,6 +595,9 @@ This indicates the point at which the shipping line takes on responsibility for 
 Transport,portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 Transport,"portOfDischargeArrivalDate",ClassifiedDate,,,,,"The date of arrival of the vessel at the Port of Discharge.",
 Transport,portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
+Transport,receivedForShipmentDate,ClassifiedDate,,,,,"The date on which the carrier takes possession of all containers under the bill of lading.
+For carrier haulage, this is when the carrier collects the last container at the place of receipt.
+For merchant haulage, this is when the last container is physically handed over to the terminal.",
 "UtilizedTransportEquipment",activeReeferSettings,ActiveReeferSettings,,,,,"Active reefer settings applied to this equipment.",
 "UtilizedTransportEquipment",charges,"Charge list",,,,,"A list of `Charges`",
 "UtilizedTransportEquipment",customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
@@ -657,3 +632,14 @@ VesselVoyage,vesselIMONumber,string,,maxLength=8,,12345678,"The unique reference
 The reference is the International Maritime Organisation (IMO) number,
 also sometimes known as the Lloyd's register code.",
 VesselVoyage,vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
+Volume,unit,string,,,,MTQ,"Measurement unit in which the volume `value` is expressed:
+- `FTQ` (Cubic foot)
+- `MTQ` (Cubic meter)
+- `LTR` (Litre)",
+Volume,value,number,,,,2.4,"Volume value expressed in the measurement `unit`",
+Weight,unit,string,,,,KGM,"Measurement unit in which the weight `value` is expressed:
+- `KGM` (Kilograms)
+- `LBR` (Pounds)
+- `GRM` (Grams)
+- `ONZ` (Ounce)",
+Weight,value,number,,,,2.4,"Weight value expressed in the measurement `unit`",

@@ -1,39 +1,43 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.BUYER_AND_SELLER_CONDITIONAL_CHECK;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POA;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.FEEDBACKS_PRESENCE;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POA;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POFD;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.NUMBER_OF_PACKAGES_CONDITIONAL_CHECK;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SEND_TO_PLATFORM_CONDITIONAL_CHECK;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALIDATE_DOCUMENT_PARTY;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION_HBL;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_REQUESTED_CARRIER_CLAUSES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.BUYER_AND_SELLER_CONDITIONAL_CHECK;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POA;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.FEEDBACKS_PRESENCE;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POA;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POFD;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.NUMBER_OF_PACKAGES_CONDITIONAL_CHECK;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SEND_TO_PLATFORM_CONDITIONAL_CHECK;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALIDATE_DOCUMENT_PARTY;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_PARTY_FUNCTION;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_PARTY_FUNCTION_HBL;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_REQUESTED_CARRIER_CLAUSES;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.function.Supplier;
+import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.junit.jupiter.api.Test;
 
-class EBLChecksTest {
+class EblChecksTest {
 
   private static final ObjectMapper objectMapper = new ObjectMapper();
   private final ObjectNode rootNode = objectMapper.createObjectNode();
@@ -566,5 +570,110 @@ class EBLChecksTest {
         ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
     rootNode.remove("feedbacks");
     assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckOneEquipmentValid() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_1U);
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+
+    assertTrue(
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckOneEquipmentsTooFew() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_1U);
+
+    assertFalse(
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckOneEquipmentTooMany() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_1U);
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+    utilizedTransportEquipments.addObject();
+
+    assertFalse(
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckTwoEquipmentsValid() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_2U);
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+    utilizedTransportEquipments.addObject();
+
+    assertTrue(
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckTwoEquipmentsTooFew() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_2U);
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+
+    assertFalse(
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckTwoEquipmentsTooMany() {
+    Supplier<DynamicScenarioParameters> dspSupplier =
+        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_2U);
+
+    ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
+    utilizedTransportEquipments.addObject();
+    utilizedTransportEquipments.addObject();
+    utilizedTransportEquipments.addObject();
+
+    assertFalse(
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  @Test
+  void testUtilizedTransportEquipmentsScenarioSizeCheckNoConstraint() {
+    Supplier<DynamicScenarioParameters> dspSupplierOther =
+        getDynamicScenarioParametersSupplier(ScenarioType.ACTIVE_REEFER);
+
+    assertTrue(
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplierOther)
+            .validate(rootNode, "")
+            .isEmpty());
+  }
+
+  private static Supplier<DynamicScenarioParameters> getDynamicScenarioParametersSupplier(
+      ScenarioType regular2c1u) {
+    return () -> {
+      DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
+      when(dsp.scenarioType()).thenReturn(regular2c1u);
+      return dsp;
+    };
   }
 }

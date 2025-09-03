@@ -7,8 +7,8 @@ public enum ScenarioType {
   ACTIVE_REEFER,
   NON_OPERATING_REEFER,
   DG,
-  REGULAR_2C_1U_1E,
-  REGULAR_2C_2U_2E,
+  REGULAR_2C_1U,
+  REGULAR_2C_2U,
   REGULAR_NO_COMMODITY_SUBREFERENCE,
   REGULAR_SWB_SOC_AND_REFERENCES,
   REGULAR_SWB_AMF,
@@ -46,8 +46,8 @@ public enum ScenarioType {
   public String eblPayload(String version) {
     String suffix =
         switch (this) {
-          case REGULAR_2C_1U_1E -> "2c1u1e";
-          case REGULAR_2C_2U_2E -> "2c2u2e";
+          case REGULAR_2C_1U -> "2c1u";
+          case REGULAR_2C_2U -> "2c2u";
           case REGULAR_NO_COMMODITY_SUBREFERENCE -> "no-commodity-subreference";
           case REGULAR_SWB_SOC_AND_REFERENCES -> "soc-references";
           case REGULAR_SWB_AMF -> "amf";

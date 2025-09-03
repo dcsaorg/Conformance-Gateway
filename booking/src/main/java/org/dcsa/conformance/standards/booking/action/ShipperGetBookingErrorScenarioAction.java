@@ -52,6 +52,7 @@ public class ShipperGetBookingErrorScenarioAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
+            new NothingToCheck(getMatchedExchangeUuid(), HttpMessageType.REQUEST),
             new ApiHeaderCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
@@ -61,8 +62,7 @@ public class ShipperGetBookingErrorScenarioAction extends BookingAction {
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                responseSchemaValidator))
-        ;
+                responseSchemaValidator));
       }
     };
   }

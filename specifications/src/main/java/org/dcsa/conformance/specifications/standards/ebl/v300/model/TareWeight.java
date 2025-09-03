@@ -1,14 +1,20 @@
-package org.dcsa.conformance.specifications.standards.dt.v100.model;
+package org.dcsa.conformance.specifications.standards.ebl.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Weight;
 
-@Schema(description = TareWeight.CLASS_SCHEMA_DESCRIPTION)
-@Data
-public class TareWeight {
-
-  public static final String CLASS_SCHEMA_DESCRIPTION =
-      "The weight of an empty container (gross container weight).";
+@Schema(description = "The weight of an empty container (gross container weight).")
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode(callSuper = true)
+public class TareWeight extends Weight {
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,

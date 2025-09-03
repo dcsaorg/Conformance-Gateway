@@ -87,13 +87,6 @@ The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (p
   @Schema(description = "The party to contact for any inquiries related to this Arrival Notice.")
   private List<PartyContactDetail> carrierContactInformation;
 
-  @Schema(
-      description =
-"""
-The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
-""")
-  private List<PartyContactDetail> carrierInformationForCargoRelease;
-
   @Schema()
   private PickupInformation pickupInformation;
 
@@ -107,8 +100,8 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
   private CustomsClearance customsClearance;
 
   @Schema(
-      maxLength = 500,
-      example = "FIRMS code: B986",
+      maxLength = 5000,
+      example = "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.",
       description =
 """
 Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
@@ -116,7 +109,7 @@ e.g. additional required documents to prepare and present for shipment release -
 """)
   private String additionalInformation;
 
-  @Schema(description = "A list of `References`")
+  @Schema(description = "References used by the customer or carrier to identify or track the shipment.")
   private List<Reference> references;
 
   @Schema(

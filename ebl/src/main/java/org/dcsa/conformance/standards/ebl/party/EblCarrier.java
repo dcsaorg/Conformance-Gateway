@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.ebl.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SI_ARRAY_ORDER_DEFINITIONS;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SI_ARRAY_ORDER_DEFINITIONS;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;

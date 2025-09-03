@@ -77,11 +77,11 @@ paths:
 
         The arrival notice publisher can decide to also allow retrieving arrival notices without specifying any of these filtering query parameters, instead filtering the results only based on the authorization and registration profile of the authenticated party calling this endpoint.
 
-        ### Filtering by ETA at POD
+        ### Filtering by POD arrival date
 
-        Whenever the query parameters filter could retrieve large number of historical arrival notices (for example when filtering only by vessel name or IMO number), the request should also include at least the `minEtaAtPortOfDischargeDate` query parameter and could also include the `maxEtaAtPortOfDischargeDate` query parameter.
+        Whenever the query parameters filter could retrieve large number of historical arrival notices (for example when filtering only by vessel name or IMO number), the request should also include at least the `portOfDischargeArrivalDateMin` query parameter and could also include the `portOfDischargeArrivalDateMax` query parameter.
 
-        The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `etaAtPortOfDischargeDate` within those ranges.
+        The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `portOfDischargeArrivalDate` within those ranges.
 
         ### Filtering by region or language
 
@@ -180,16 +180,16 @@ paths:
         schema:
           type: "string"
         example: "SR12345A"
-      - name: "minEtaAtPortOfDischargeDate"
+      - name: "portOfDischargeArrivalDateMin"
         in: "query"
-        description: "Retrieve arrival notices with an ETA at port of discharge on or after this date"
+        description: "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date"
         schema:
           type: "string"
           format: "date"
         example: "2025-01-23"
-      - name: "maxEtaAtPortOfDischargeDate"
+      - name: "portOfDischargeArrivalDateMax"
         in: "query"
-        description: "Retrieve arrival notices with an ETA at port of discharge on or before this date"
+        description: "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date"
         schema:
           type: "string"
           format: "date"
@@ -511,12 +511,6 @@ components:
           description: "The party to contact for any inquiries related to this Arrival Notice."
           items:
             $ref: "#/components/schemas/PartyContactDetail"
-        carrierInformationForCargoRelease:
-          type: "array"
-          description: |
-            The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
-          items:
-            $ref: "#/components/schemas/PartyContactDetail"
         pickupInformation:
           description: "Pickup information"
           allOf:
@@ -534,15 +528,15 @@ components:
           allOf:
           - $ref: "#/components/schemas/CustomsClearance"
         additionalInformation:
-          maxLength: 500
+          maxLength: 5000
           type: "string"
           description: |
             Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
             e.g. additional required documents to prepare and present for shipment release - country specific.
-          example: "FIRMS code: B986"
+          example: "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security."
         references:
           type: "array"
-          description: "A list of `References`"
+          description: "References used by the customer or carrier to identify or track the shipment."
           items:
             $ref: "#/components/schemas/Reference"
         transportDocumentReference:
@@ -725,60 +719,22 @@ components:
             The location where the cargo is discharged from the last sea-going vessel
           allOf:
           - $ref: "#/components/schemas/Location"
-        etaAtPortOfDischargeDate:
-          type: "string"
-          description: |
-            The expected date of arrival of the vessel at the port of discharge
-          format: "date"
-          example: "2025-01-23"
         placeOfDelivery:
           description: |
             The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
             responsibility of the shipping line ceases
           allOf:
           - $ref: "#/components/schemas/Location"
-        etaAtPlaceOfDeliveryDate:
-          type: "string"
-          description: |
-            The expected date of arrival of the shipment at place of delivery
-          format: "date"
-          example: "2025-01-23"
+        portOfDischargeArrivalDate:
+          description: "The date of arrival of the vessel at the Port of Discharge."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        placeOfDeliveryArrivalDate:
+          description: "The date of arrival of the shipment at Place of Delivery."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
       description: |
         Lightweight notification that can be sent when a new or updated Arrival Notice is available
-    CargoGrossVolume:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            Calculated by multiplying the width, height, and length of the packed cargo. A maximum of 4 decimals should be provided.
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `FTQ` (Cubic foot)
-            - `MTQ` (Cubic meter)
-          example: "MTQ"
-      description: "Calculated by multiplying the width, height, and length of the packed cargo."
-    CargoGrossWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
-          format: "float"
-          example: 2400
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "The weight of the cargo item including packaging, excluding the tare weight of the container."
     CargoItem:
       type: "object"
       properties:
@@ -792,21 +748,26 @@ components:
             If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.
           example: "APZU4812090"
         cargoGrossWeight:
-          description: "Gross weight of the cargo."
+          description: |
+            Gross weight of the cargo item including packaging being carried in the container.
+            Excludes the tare weight of the container.
           allOf:
-          - $ref: "#/components/schemas/CargoGrossWeight"
+          - $ref: "#/components/schemas/Weight"
         cargoGrossVolume:
-          description: "Gross volume of the cargo."
+          description: |
+            Gross volume of the cargo item, calculated by multiplying the width, height, and length of the packaged cargo.
           allOf:
-          - $ref: "#/components/schemas/CargoGrossVolume"
+          - $ref: "#/components/schemas/Volume"
         cargoNetWeight:
-          description: "Net weight of the cargo."
+          description: |
+            Net weight of the cargo item, excluding packaging and excluding the tare weight of the container.
           allOf:
-          - $ref: "#/components/schemas/CargoNetWeight"
+          - $ref: "#/components/schemas/Weight"
         cargoNetVolume:
-          description: "Net volume of the cargo."
+          description: |
+            Net volume of the cargo item, calculated by multiplying the width, height, and length of the cargo, excluding packaging.
           allOf:
-          - $ref: "#/components/schemas/CargoNetVolume"
+          - $ref: "#/components/schemas/Volume"
         exportLicense:
           description: "Export license applicable to this cargo item."
           allOf:
@@ -842,40 +803,6 @@ components:
           items:
             $ref: "#/components/schemas/Charge"
       description: "A cargoItem is the smallest unit used in stuffing. It cannot be split across containers."
-    CargoNetVolume:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            Calculated by multiplying the width, height, and length of the cargo, excluding packaging.
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `FTQ` (Cubic foot)
-            - `MTQ` (Cubic meter)
-          example: "MTQ"
-      description: "Volume of the cargo excluding packaging. Calculated by multiplying width, height, and length."
-    CargoNetWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.
-          format: "float"
-          example: 2400
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "The weight of the cargo item excluding packaging and container tare weight."
     Charge:
       type: "object"
       properties:
@@ -961,7 +888,9 @@ components:
       properties:
         value:
           type: "string"
-          description: "String representation of a date in yyyy-MM-dd format."
+          description: |
+            String representation of a date in yyyy-MM-dd format.
+            Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.
           format: "date"
           example: "2025-01-23"
         classifier:
@@ -1160,7 +1089,7 @@ components:
           type: "string"
           description: "The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code."
           example: "xylene and benzene"
-        imoClass:
+        IMOClass:
           maxLength: 4
           type: "string"
           description: |
@@ -1295,19 +1224,19 @@ components:
         grossWeight:
           description: "Total weight of the goods carried, including packaging."
           allOf:
-          - $ref: "#/components/schemas/GrossWeight"
+          - $ref: "#/components/schemas/Weight"
         netWeight:
           description: "Total weight of the goods carried, excluding packaging."
           allOf:
-          - $ref: "#/components/schemas/NetWeight"
+          - $ref: "#/components/schemas/Weight"
         netExplosiveContent:
           description: "The total weight of the explosive substances, without the packaging, casings, etc."
           allOf:
-          - $ref: "#/components/schemas/NetExplosiveContent"
+          - $ref: "#/components/schemas/Weight"
         netVolume:
           description: "The volume of the referenced dangerous goods. Only applicable to liquids and gas."
           allOf:
-          - $ref: "#/components/schemas/NetVolume"
+          - $ref: "#/components/schemas/Volume"
         limits:
           description: "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure."
           allOf:
@@ -1440,7 +1369,7 @@ components:
         tareWeight:
           description: "The tare weight of the container."
           allOf:
-          - $ref: "#/components/schemas/TareWeight"
+          - $ref: "#/components/schemas/Weight"
       description: "Used for storing cargo during transport. Equipment size/type is defined by the ISO 6346 code. Common sizes include 20'/40'/45' containers."
     ExportLicense:
       type: "object"
@@ -1581,10 +1510,13 @@ components:
             It can include references to the carrier website or individual charges as per service contract/agreement.
           example: "Calculated as..."
         lastFreeDate:
-          type: "string"
-          description: "The final day containers can be collected without incurring charges"
-          format: "date"
-          example: "2025-01-23"
+          description: "The final date when the container(s) can be collected without incurring charges."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
+        lastFreeDateTime:
+          description: "The final date and time when the container(s) can be collected without incurring charges."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
       description: "Free time condition applicable to this shipment at destination."
     GeoCoordinate:
       type: "object"
@@ -1633,23 +1565,6 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `GET ArrivalNotices` request
-    GrossWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.
-          format: "float"
-          example: 12000.3
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "Total weight of the goods carried, including packaging."
     IdentifyingCode:
       type: "object"
       properties:
@@ -1670,6 +1585,10 @@ components:
             - `ETEU` (eTEU)
             - `TRAC` (Enigio trace:original)
             - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
             - `GSBN` (Global Shipping Business Network)
             - `WISE` (WiseTech)
             - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -1697,7 +1616,7 @@ components:
     ImmediateTransportationEntry:
       type: "object"
       properties:
-        firmsCode:
+        FIRMSCode:
           maxLength: 4
           type: "string"
           description: |
@@ -1706,7 +1625,7 @@ components:
             such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
             It tells CBP and freight systems where the cargo is physically located.
           example: "a391"
-        itNumber:
+        ITNumber:
           maxLength: 100
           type: "string"
           description: |
@@ -1715,7 +1634,7 @@ components:
             to another inland port or bonded facility without paying duties at the first port. The IT number is used
             for tracking the movement and verifying arrival at the inland port or bonded facility.
           example: "V4914303071"
-        itDate:
+        ITDate:
           type: "string"
           description: |
             The date the in-bond movement began, i.e., when the Immediate Transportation (IT) entry was filed and accepted
@@ -1790,19 +1709,19 @@ components:
           format: "int32"
           example: 5
         loadLocation:
-          description: "Load location"
+          description: "The location where the cargo is loaded for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/Location"
         dischargeLocation:
-          description: "Discharge location"
+          description: "The location where the cargo is discharged for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/Location"
         departureDate:
-          description: "Departure date"
+          description: "The departure date from the load location for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/ClassifiedDate"
         arrivalDate:
-          description: "Arrival date"
+          description: "The arrival date at the discharge location for this specific leg of the transport plan."
           allOf:
           - $ref: "#/components/schemas/ClassifiedDate"
         modeOfTransport:
@@ -1820,7 +1739,7 @@ components:
           description: "Vessel and voyage details of a transport leg"
           allOf:
           - $ref: "#/components/schemas/VesselVoyage"
-      description: "Details of each leg of the `Transport`"
+      description: "Details of one specific leg of the transport plan"
     Limits:
       type: "object"
       properties:
@@ -1868,11 +1787,11 @@ components:
           type: "string"
           description: "The name of the location."
           example: "Port of Amsterdam"
-        locationTypeCode:
+        facilityTypeCode:
           maxLength: 10
           type: "string"
           description: |-
-            Code identifying a specific type of location
+            Code identifying a specific type of facility
 
             - `CLOC` - Customer location
             - `COFS` - Container freight station
@@ -1936,58 +1855,6 @@ components:
             description: "The value of the `National Commodity Code`"
             example: "1515"
       description: "The national commodity classification code linked to a country with a value. Examples: NCM (Brazil), HTS (US), TARIC (EU)."
-    NetExplosiveContent:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: |
-            The total weight of the explosive substances, without the packaging’s, casings, etc.
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-            - `GRM` (Grams)
-            - `ONZ` (Ounce)
-          example: "KGM"
-      description: "The total weight of the explosive substances, without the packaging, casings, etc."
-    NetVolume:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: "The volume of the referenced dangerous goods."
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `FTQ` (Cubic foot)
-            - `MTQ` (Cubic meter)
-            - `LTR` (Litre)
-          example: "MTQ"
-      description: "The volume of the referenced dangerous goods. Only applicable to liquids and gas."
-    NetWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: "Total weight of the goods carried, excluding packaging."
-          format: "float"
-          example: 2.4
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms:
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "Total weight of the goods carried, excluding packaging."
     OuterPackaging:
       type: "object"
       properties:
@@ -1997,7 +1864,7 @@ components:
           description: |
             A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
           example: "5H"
-        imoPackagingCode:
+        IMOPackagingCode:
           maxLength: 5
           type: "string"
           description: |
@@ -2161,6 +2028,9 @@ components:
             - `CA` (Carrier’s Reference)
             - `CR` (Customer’s Reference)
             - `AKG` (Vehicle Identification Number)
+            - `CPR` (Canadian Pacific Railway System)
+            - `CNR` (Canadian National Railway Unit)
+            - `VBN` (V-Bond Number)
           example: "CR"
         value:
           maxLength: 35
@@ -2168,7 +2038,7 @@ components:
           description: "The value of the reference."
           example: "HHL00103004"
       description: |
-        References used by the customer or carrier to identify the shipment in their internal system.
+        Reference used by the customer or carrier to identify or track the shipment.
     ReferenceConsignmentItem:
       type: "object"
       properties:
@@ -2217,6 +2087,12 @@ components:
           type: "boolean"
           description: "Indicates whether the shipment has been cleared by customs."
           example: false
+        carrierInformationForCargoRelease:
+          type: "array"
+          description: |
+            The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
+          items:
+            $ref: "#/components/schemas/PartyContactDetail"
       description: "Release information"
     ReturnInformation:
       type: "object"
@@ -2254,22 +2130,6 @@ components:
             - `CUS` (Customs)
           example: "CUS"
       description: "Seal-related information associated with shipment equipment. A seal is affixed once the equipment is loaded and remains until final destination."
-    TareWeight:
-      type: "object"
-      properties:
-        value:
-          type: "number"
-          description: "The weight of an empty container (gross container weight)."
-          format: "float"
-          example: 4800
-        unit:
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in imperial or metric terms
-            - `KGM` (Kilograms)
-            - `LBR` (Pounds)
-          example: "KGM"
-      description: "The weight of an empty container (gross container weight)."
     TaxLegalReference:
       type: "object"
       properties:
@@ -2323,6 +2183,13 @@ components:
             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
           allOf:
           - $ref: "#/components/schemas/ClassifiedDate"
+        receivedForShipmentDate:
+          description: |
+            The date on which the carrier takes possession of all containers under the bill of lading.
+            For carrier haulage, this is when the carrier collects the last container at the place of receipt.
+            For merchant haulage, this is when the last container is physically handed over to the terminal.
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDate"
         onBoardDate:
           description: |
             The date when the container was loaded onto the vessel at the port of origin.
@@ -2347,6 +2214,11 @@ components:
             (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
           allOf:
           - $ref: "#/components/schemas/ClassifiedDateTime"
+        borderCrossingLocation:
+          description: |
+            The inland location where the cargo is intended to cross an international border.
+          allOf:
+          - $ref: "#/components/schemas/Location"
         legs:
           type: "array"
           description: |
@@ -2485,9 +2357,44 @@ components:
             It can be used for customs clearance purposes in specific countries (e.g. NL, UK).
           example: "CRN1234"
       description: "Vessel and voyage details of a transport leg"
+    Volume:
+      type: "object"
+      properties:
+        value:
+          type: "number"
+          description: "Volume value expressed in the measurement `unit`"
+          format: "float"
+          example: 2.4
+        unit:
+          type: "string"
+          description: |
+            Measurement unit in which the volume `value` is expressed:
+            - `FTQ` (Cubic foot)
+            - `MTQ` (Cubic meter)
+            - `LTR` (Litre)
+          example: "MTQ"
+      description: "Volume value and measurement unit"
+    Weight:
+      type: "object"
+      properties:
+        value:
+          type: "number"
+          description: "Weight value expressed in the measurement `unit`"
+          format: "float"
+          example: 2.4
+        unit:
+          type: "string"
+          description: |
+            Measurement unit in which the weight `value` is expressed:
+            - `KGM` (Kilograms)
+            - `LBR` (Pounds)
+            - `GRM` (Grams)
+            - `ONZ` (Ounce)
+          example: "KGM"
+      description: "Weight value and measurement unit"
   headers:
     API-Version:
-      description: "SemVer used to indicate the version of the contract (API version) returned."
+      description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
       schema:
         type: "string"
         example: "1.0.0"

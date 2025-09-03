@@ -21,10 +21,10 @@ public class EblInputPayloadValidations {
 
   public static Set<String> validateEblContent(
       JsonNode eblNode, Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
-    List<JsonContentCheck> contentChecks = new ArrayList<>(EBLChecks.STATIC_SI_CHECKS);
-    contentChecks.add(EBLChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
-    contentChecks.add(EBLChecks.VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    contentChecks.addAll(EBLChecks.generateScenarioRelatedChecks(dspSupplier, isTD));
+    List<JsonContentCheck> contentChecks = new ArrayList<>(EblChecks.STATIC_SI_CHECKS);
+    contentChecks.add(EblChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
+    contentChecks.add(EblChecks.VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
+    contentChecks.addAll(EblChecks.generateScenarioRelatedChecks(dspSupplier, isTD));
     return contentChecks.stream()
         .flatMap(check -> check.validate(eblNode).stream())
         .collect(Collectors.toSet());

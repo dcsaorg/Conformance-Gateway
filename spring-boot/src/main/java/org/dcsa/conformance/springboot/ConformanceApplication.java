@@ -175,7 +175,12 @@ public class ConformanceApplication {
                     log.error("Deferred sandbox task execution failed", e);
                   }
                 },
-                5,
+                // Previous attempts to "optimize" this by setting it to a lower value
+                // have caused async notifications to be sent too early,
+                // which in turn caused the orchestrator to process the async notification exchange
+                // in parallel with the main exchange, finding matchedExchangeUuid not yet set,
+                // and therefore failing to complete the action successfully.
+                100,
                 TimeUnit.MILLISECONDS);
 
     Stream<AbstractComponentFactory> componentFactories =

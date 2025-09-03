@@ -104,7 +104,7 @@ ShipmentEventInfo,shipmentEventTypeCode,string,,,,APPR,"Code used to denote the 
 TNTEvent,equipmentEventInfo,EquipmentEventInfo,,,,,"Equipment event information",
 TNTEvent,eventDateTime,ClassifiedDateTime,yes,,,,"The date and time when the event has occurred.",
 TNTEvent,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the event.",
-TNTEvent,eventLocation,Location,,,,,"The date and time when the event has occurred.",
+TNTEvent,eventLocation,Location,,,,,"The location of the event.",
 TNTEvent,iotEventInfo,IotEventInfo,,,,,"IoT event information",
 TNTEvent,reeferEventInfo,ReeferEventInfo,,,,,"Reefer event information",
 TNTEvent,shipmentEventInfo,ShipmentEventInfo,,,,,"Shipment event information",

@@ -24,7 +24,7 @@ public class TNTEvent {
       description = "The date and time when the event has occurred.")
   private ClassifiedDateTime eventDateTime;
 
-  @Schema(description = "The date and time when the event has occurred.")
+  @Schema(description = "The location of the event.")
   private Location eventLocation;
 
   @Schema() private TransportEventInfo transportEventInfo;

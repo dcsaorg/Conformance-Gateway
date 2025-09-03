@@ -182,14 +182,14 @@ paths:
         description: "Retrieve events occurring at or after this timestamp"
         schema:
           type: "string"
-          format: "datetime"
+          format: "date-time"
         example: "2025-01-23T01:23:45Z"
       - name: "eventDateTimeMax"
         in: "query"
         description: "Retrieve events occurring at or before this timestamp"
         schema:
           type: "string"
-          format: "datetime"
+          format: "date-time"
         example: "2025-01-23T01:23:45Z"
       - name: "limit"
         in: "query"
@@ -592,7 +592,7 @@ components:
           allOf:
           - $ref: "#/components/schemas/ClassifiedDateTime"
         eventLocation:
-          description: "The date and time when the event has occurred."
+          description: "The location of the event."
           allOf:
           - $ref: "#/components/schemas/Location"
         transportEventInfo:

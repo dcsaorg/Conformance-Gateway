@@ -20,7 +20,7 @@ TNTEvent,,,,,,,,
 - `ACT` - Actual",
 "TNTEvent / eventDateTime / value",value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
 "TNTEvent / eventID",eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the event.",
-"TNTEvent / eventLocation",eventLocation,Location,,,,,"The date and time when the event has occurred.",
+"TNTEvent / eventLocation",eventLocation,Location,,,,,"The location of the event.",
 "TNTEvent / eventLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)

@@ -1,0 +1,129 @@
+{
+  "transportDocumentTypeCode": "SWB",
+  "isElectronic": true,
+  "isToOrder": false,
+  "freightPaymentTermCode": "PRE",
+  "isShippedOnBoardType": true,
+  "invoicePayableAt": {
+    "UNLocationCode": "SGSIN"
+  },
+  "isCargoDeliveredInICS2Zone": false,
+  "partyContactDetails": [
+    {
+      "name": "DCSA Test Person",
+      "email": "info@dcsa.org"
+    }
+  ],
+  "consignmentItems": [
+    {
+      "carrierBookingReference": "BOOKREQ-HBOL-1234567890123456",
+      "descriptionOfGoods": [
+        "Electronics - Consumer Devices"
+      ],
+      "HSCodes": [
+        "85171200"
+      ],
+      "commoditySubReference": "ELEC-2025A",
+      "cargoItems": [
+        {
+          "equipmentReference": "MSCU1234567",
+          "cargoGrossWeight": {
+            "value": 15000,
+            "unit": "KGM"
+          },
+          "outerPackaging": {
+            "description": "Cartons",
+            "numberOfPackages": 600
+          }
+        }
+      ]
+    },
+    {
+      "carrierBookingReference": "BOOKREQ-HBOL-1234567890123456",
+      "descriptionOfGoods": [
+        "Apparel - Summer Collection"
+      ],
+      "HSCodes": [
+        "62034200"
+      ],
+      "commoditySubReference": "APRL-2025B",
+      "cargoItems": [
+        {
+          "equipmentReference": "MSCU1234567",
+          "cargoGrossWeight": {
+            "value": 20000,
+            "unit": "KGM"
+          },
+          "outerPackaging": {
+            "description": "Boxes",
+            "numberOfPackages": 400
+          }
+        }
+      ]
+    }
+  ],
+  "utilizedTransportEquipments": [
+    {
+      "isShipperOwned": false,
+      "equipmentReference": "MSCU1234567",
+      "seals": [
+        {
+          "number": "NSL13386"
+        }
+      ]
+    }
+  ],
+  "documentParties": {
+    "shipper": {
+      "partyName": "DCSA Test Shipper",
+      "partyContactDetails": [
+        {
+          "name": "DCSA Test Person",
+          "email": "info@dcsa.org"
+        }
+      ],
+      "address": {
+        "street": "Ruijggoordweg 80",
+        "city": "Amsterdam",
+        "countryCode": "NL"
+      }
+    },
+    "issueTo": {
+      "partyName": "DCSA Shipper Agent",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "529900T8BM49ADCSAO55"
+        }
+      ],
+      "partyContactDetails": [
+        {
+          "name": "DCSA Test Person",
+          "email": "info@dcsa.org"
+        }
+      ]
+    },
+    "consignee": {
+      "partyName": "DCSA Final Consignee",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
+        }
+      ],
+      "partyContactDetails": [
+        {
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
+        }
+      ],
+      "address": {
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
+      }
+    }
+  }
+}

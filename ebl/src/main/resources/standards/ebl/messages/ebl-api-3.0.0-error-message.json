@@ -1,0 +1,16 @@
+{
+  "httpMethod": "HTTP_METHOD_PLACEHOLDER",
+  "requestUri": "REQUEST_URI_PLACEHOLDER",
+  "statusCode": 404,
+  "statusCodeText": "Not Found",
+  "statusCodeMessage": "documentReference not found",
+  "providerCorrelationReference": "REFERENCE_PLACEHOLDER",
+  "errorDateTime": "ERROR_DATE_TIME_PLACEHOLDER",
+  "errors": [
+    {
+      "errorCode": 7003,
+      "errorCodeText": "documentReference not found",
+      "errorCodeMessage": "ERROR_MESSAGE_PLACEHOLDER"
+    }
+  ]
+}

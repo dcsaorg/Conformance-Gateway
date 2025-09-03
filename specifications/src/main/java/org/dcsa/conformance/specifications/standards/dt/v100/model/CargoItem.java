@@ -24,17 +24,34 @@ If a container does not comply with [ISO 6346](https://www.iso.org/standard/8355
       pattern = "^\\S(?:.*\\S)?$")
   protected String equipmentReference;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Gross weight of the cargo.")
-  protected CargoGrossWeight cargoGrossWeight;
+  @Schema(
+      description =
+"""
+Gross weight of the cargo item including packaging being carried in the container.
+Excludes the tare weight of the container.
+""")
+  protected Weight cargoGrossWeight;
 
-  @Schema(description = "Gross volume of the cargo.")
-  protected CargoGrossVolume cargoGrossVolume;
+  @Schema(
+      description =
+"""
+Gross volume of the cargo item, calculated by multiplying the width, height, and length of the packaged cargo.
+""")
+  protected Volume cargoGrossVolume;
 
-  @Schema(description = "Net weight of the cargo.")
-  protected CargoNetWeight cargoNetWeight;
+  @Schema(
+      description =
+"""
+Net weight of the cargo item, excluding packaging and excluding the tare weight of the container.
+""")
+  protected Weight cargoNetWeight;
 
-  @Schema(description = "Net volume of the cargo.")
-  protected CargoNetVolume cargoNetVolume;
+  @Schema(
+      description =
+"""
+Net volume of the cargo item, calculated by multiplying the width, height, and length of the cargo, excluding packaging.
+""")
+  protected Volume cargoNetVolume;
 
   @Schema(description = "Export license applicable to this cargo item.")
   protected ExportLicense exportLicense;

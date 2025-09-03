@@ -45,4 +45,7 @@ A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
 
   @Schema()
   private ReturnInformation returnInformation;
+
+  @Schema(description = "A list of `Charges`")
+  private List<Charge> charges;
 }

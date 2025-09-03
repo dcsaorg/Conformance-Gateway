@@ -15,7 +15,7 @@ public class EblStandard extends AbstractStandard {
   @Override
   public SortedMap<String, SortedSet<String>> getScenarioSuitesByStandardVersion() {
     return new TreeMap<>(
-        Map.ofEntries(Map.entry("3.0.0", new TreeSet<>(EblScenarioListBuilder.SCENARIOS))));
+        Map.ofEntries(Map.entry("3.0.0", new TreeSet<>(EblScenarioListBuilder.SCENARIO_SUITES))));
   }
 
   @Override
@@ -59,6 +59,30 @@ public class EblStandard extends AbstractStandard {
                                 new TreeSet<>(Set.of("POST")))))))),
         Map.entry(
             EblScenarioListBuilder.SCENARIO_SUITE_SI_TD_COMBINED,
+            Map.ofEntries(
+                Map.entry(
+                    EblRole.CARRIER.getConfigName(),
+                    new TreeMap<>(
+                        Map.ofEntries(
+                            Map.entry("/v3/shipping-instructions", new TreeSet<>(Set.of("POST"))),
+                            Map.entry(
+                                "/v3/shipping-instructions/{documentReference}",
+                                new TreeSet<>(Set.of("PUT", "GET", "PATCH"))),
+                            Map.entry(
+                                "/v3/transport-documents/{transportDocumentReference}",
+                                new TreeSet<>(Set.of("GET", "PATCH")))))),
+                Map.entry(
+                    EblRole.SHIPPER.getConfigName(),
+                    new TreeMap<>(
+                        Map.ofEntries(
+                            Map.entry(
+                                "/v3/shipping-instructions-notifications",
+                                new TreeSet<>(Set.of("POST"))),
+                            Map.entry(
+                                "/v3/transport-document-notifications",
+                                new TreeSet<>(Set.of("POST")))))))),
+        Map.entry(
+            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS,
             Map.ofEntries(
                 Map.entry(
                     EblRole.CARRIER.getConfigName(),

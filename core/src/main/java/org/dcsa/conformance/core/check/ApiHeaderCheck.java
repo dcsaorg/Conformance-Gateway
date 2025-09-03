@@ -50,6 +50,7 @@ public class ApiHeaderCheck extends ActionCheck {
 
   private ApiHeaderCheck(
       String titlePrefix,
+      @SuppressWarnings("unused")
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
       HttpMessageType httpMessageType,
@@ -59,7 +60,7 @@ public class ApiHeaderCheck extends ActionCheck {
         titlePrefix,
         "The HTTP %s has a correct %s header"
             .formatted(httpMessageType.name().toLowerCase(), ConformanceParty.API_VERSION),
-        isRelevantForRoleName,
+        (ignored) -> false, // SD-2358 temporarily disabling the API-Version check (for all roles)
         matchedExchangeUuid,
         httpMessageType);
     this.expectedVersion = expectedVersion;

@@ -64,9 +64,7 @@ Character | Valid Characters | Description
   @Schema(description = "The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.", example = "xylene and benzene", maxLength = 250)
   protected String technicalName;
 
-  @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
-      description =
+  protected static final String IMO_CLASS_DESCRIPTION =
 """
 The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:
 
@@ -74,7 +72,11 @@ The hazard class code of the referenced dangerous goods according to the specifi
 - `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)
 - `2.1` (Flammable gases)
 - `8` (Corrosive substances)
-""",
+""";
+
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = IMO_CLASS_DESCRIPTION,
       example = "1.4S",
       maxLength = 4)
   protected String imoClass;
@@ -169,17 +171,17 @@ The zone classification of the toxicity of the inhalant. Possible values are:
       maxLength = 1)
   protected String inhalationZone;
 
-  @Schema
-  protected GrossWeight grossWeight;
+  @Schema(description = "Total weight of the goods carried, including packaging.")
+  protected Weight grossWeight;
 
-  @Schema
-  protected NetWeight netWeight;
+  @Schema(description = "Total weight of the goods carried, excluding packaging.")
+  protected Weight netWeight;
 
-  @Schema
-  protected NetExplosiveContent netExplosiveContent;
+  @Schema(description = "The total weight of the explosive substances, without the packaging, casings, etc.")
+  protected Weight netExplosiveContent;
 
-  @Schema
-  protected NetVolume netVolume;
+  @Schema(description = "The volume of the referenced dangerous goods. Only applicable to liquids and gas.")
+  protected Volume netVolume;
 
   @Schema
   protected Limits limits;

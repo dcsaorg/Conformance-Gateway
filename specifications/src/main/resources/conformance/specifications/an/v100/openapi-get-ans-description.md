@@ -33,11 +33,11 @@ As an alternative to retrieving arrival notices by the bill of lading using the 
 
 The arrival notice publisher can decide to also allow retrieving arrival notices without specifying any of these filtering query parameters, instead filtering the results only based on the authorization and registration profile of the authenticated party calling this endpoint.
 
-### Filtering by ETA at POD
+### Filtering by POD arrival date
 
-Whenever the query parameters filter could retrieve large number of historical arrival notices (for example when filtering only by vessel name or IMO number), the request should also include at least the `minEtaAtPortOfDischargeDate` query parameter and could also include the `maxEtaAtPortOfDischargeDate` query parameter.
+Whenever the query parameters filter could retrieve large number of historical arrival notices (for example when filtering only by vessel name or IMO number), the request should also include at least the `portOfDischargeArrivalDateMin` query parameter and could also include the `portOfDischargeArrivalDateMax` query parameter.
 
-The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `etaAtPortOfDischargeDate` within those ranges.
+The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `portOfDischargeArrivalDate` within those ranges.
 
 ### Filtering by region or language
 

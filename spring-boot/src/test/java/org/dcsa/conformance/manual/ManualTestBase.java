@@ -199,11 +199,12 @@ public abstract class ManualTestBase {
     if (!subReport.status.equals("CONFORMANT")) {
       StringBuilder messageBuilder = new StringBuilder();
       buildErrorMessage(subReport, messageBuilder);
-      log.error("Scenario '{}' is not conformant. Details: {}", scenarioName, messageBuilder);
+      String errorMessage = "Scenario '" + scenarioName + "' is not conformant. Details: " + messageBuilder;
+      log.error(errorMessage);
 
       // Note: developers can uncomment the next line, if they like to use the WebUI, at this point
       // waitForAsyncCalls(10 * 60 * 1000L);
-      fail();
+      fail(errorMessage);
     }
     assertTrue(
         subReport.errorMessages.isEmpty(),
@@ -437,8 +438,9 @@ public abstract class ManualTestBase {
         continue;
       }
       if (scenarioStatusJsonNode.has("jsonForPromptText")) {
-        log.error("While running '{}', found an unexpected jsonForPromptText, while no input is required, got text: {}", scenarioName, scenarioStatusJsonNode.get("jsonForPromptText"));
-        fail();
+        String errorMessage = "While running '" + scenarioName + "', found an unexpected jsonForPromptText, while no input is required, got text: " + scenarioStatusJsonNode.get("jsonForPromptText");
+        log.error(errorMessage);
+        fail(errorMessage);
       }
       if (hasPromptText && !scenarioStatusJsonNode.get("promptText").textValue().isEmpty()) {
         notifyAction(sandbox2, sandbox1);

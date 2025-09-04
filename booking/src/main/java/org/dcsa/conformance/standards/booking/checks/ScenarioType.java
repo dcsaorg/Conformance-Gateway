@@ -2,20 +2,15 @@ package org.dcsa.conformance.standards.booking.checks;
 
 public enum ScenarioType {
   REGULAR,
-  REGULAR_2RE1C,
-  REGULAR_2RE2C,
-  REGULAR_CHO_DEST,
-  REGULAR_CHO_ORIG,
-  REGULAR_NON_OPERATING_REEFER,
-  REGULAR_SHIPPER_OWNED,
+  NON_OPERATING_REEFER,
   REEFER,
-  REEFER_TEMP_CHANGE,
   DG;
 
   public String bookingPayload(String version) {
     String suffix =
         switch (this) {
           case REEFER -> "reefer";
+          case NON_OPERATING_REEFER -> "non-operating-reefer";
           case DG -> "dg";
           default -> "regular";
         };

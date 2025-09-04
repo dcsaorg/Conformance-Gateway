@@ -257,6 +257,33 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                             .then(
                                                                 shipperGetBooking(COMPLETED)))))))),
             Map.entry(
+                "Non Reefer containers",
+                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.NON_OPERATING_REEFER)
+                    .then(
+                        uc1ShipperSubmitBookingRequest()
+                            .then(
+                                shipperGetBooking(RECEIVED)
+                                    .thenEither(
+                                        uc3ShipperSubmitUpdatedBookingRequest()
+                                            .then(
+                                                shipperGetBooking(UPDATE_RECEIVED)
+                                                    .then(
+                                                        uc5CarrierConfirmBookingRequest()
+                                                            .then(
+                                                                shipperGetBooking(CONFIRMED)
+                                                                    .then(
+                                                                        uc12CarrierConfirmBookingCompleted()
+                                                                            .then(
+                                                                                shipperGetBooking(
+                                                                                    COMPLETED)))))),
+                                        uc5CarrierConfirmBookingRequest()
+                                            .then(
+                                                shipperGetBooking(CONFIRMED)
+                                                    .then(
+                                                        uc12CarrierConfirmBookingCompleted()
+                                                            .then(
+                                                                shipperGetBooking(COMPLETED)))))))),
+            Map.entry(
                 "Carrier error response conformance",
                 carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
                     .then(uc1ShipperSubmitBookingRequest().then(shipperGetBookingErrorScenario()))))

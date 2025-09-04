@@ -1,0 +1,48 @@
+{
+  "receiptTypeAtOrigin": "CY",
+  "deliveryTypeAtDestination": "CY",
+  "cargoMovementTypeAtOrigin": "FCL",
+  "cargoMovementTypeAtDestination": "FCL",
+  "serviceContractReference": "HHL51800000",
+  "vessel": {
+    "name": "OCEAN DESTROYER"
+  },
+  "carrierExportVoyageNumber": "403W",
+  "isEquipmentSubstitutionAllowed": true,
+  "documentParties": {
+    "bookingAgent": {
+      "partyName": "DCSA Team"
+    }
+  },
+  "shipmentLocations": [
+    {
+      "location": {
+        "UNLocationCode": "NLAMS"
+      },
+      "locationTypeCode": "POL"
+    },
+    {
+      "location": {
+        "UNLocationCode": "SGSIN"
+      },
+      "locationTypeCode": "POD"
+    }
+  ],
+  "requestedEquipments": [
+    {
+      "ISOEquipmentCode": "22RT",
+      "units": 1,
+      "isShipperOwned": false,
+      "isNonOperatingReefer": true,
+      "commodities": [
+        {
+          "commodityType": "Reefer cargo, Freight all kinds",
+          "cargoGrossWeight": {
+            "value": 3000.0,
+            "unit": "KGM"
+          }
+        }
+      ]
+    }
+  ]
+}

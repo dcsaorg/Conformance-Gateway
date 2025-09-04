@@ -427,19 +427,30 @@ public class BookingChecks {
               var scenario = dspSupplier.get().scenarioType();
               var activeReeferNode = nodeToValidate.path("activeReeferSettings");
               var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
+              var isoEquipmentNode = nodeToValidate.path("ISOEquipmentCode");
               var issues = new LinkedHashSet<String>();
               switch (scenario) {
-                case REEFER, REEFER_TEMP_CHANGE -> {
+                case REEFER -> {
                   if (!activeReeferNode.isObject()) {
                     issues.add(
                         "The scenario requires '%s' to have an active reefer"
                             .formatted(contextPath));
                   }
                 }
-                case REGULAR_NON_OPERATING_REEFER -> {
+                case NON_OPERATING_REEFER -> {
                   if (!nonOperatingReeferNode.asBoolean(false)) {
                     issues.add(
                         "The scenario requires '%s.isNonOperatingReefer' to be true"
+                            .formatted(contextPath));
+                  }
+                  if (!activeReeferNode.isMissingNode()) {
+                    issues.add(
+                        "The scenario requires '%s' to NOT have an active reefer"
+                            .formatted(contextPath));
+                  }
+                  if (!isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""))) {
+                    issues.add(
+                        "The scenario requires ISOEquipmentCode at '%s' to be a valid reefer container type"
                             .formatted(contextPath));
                   }
                 }
@@ -702,4 +713,3 @@ public class BookingChecks {
     return codeChar == 'R' || codeChar == 'H';
   }
 }
-

@@ -6,19 +6,17 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.dcsa.conformance.specifications.standards.tnt.v300.types.EventTypeCode;
+import org.dcsa.conformance.specifications.generator.ClearParentProperties;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.IotEventTypeCode;
 
-@Schema(description = "IoT event")
+@Schema(description = "IoT event details")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class IotEvent extends Event {
-
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allowableValues = "IOT")
-  private EventTypeCode eventTypeCode;
+@ClearParentProperties
+public class IotEventDetails extends AbstractEventDetails {
 
   @Schema() private IotEventTypeCode iotEventTypeCode;
 }

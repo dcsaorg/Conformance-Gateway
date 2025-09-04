@@ -1,37 +1,16 @@
 package org.dcsa.conformance.specifications.standards.tnt.v300.model;
 
-import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
-import org.dcsa.conformance.specifications.standards.tnt.v300.types.EventTypeCode;
 
 import java.util.List;
 
 @Data
-@Schema(
-    description = "Track and Trace event",
-    oneOf = {
-      ShipmentEvent.class,
-      TransportEvent.class,
-      EquipmentEvent.class,
-      IotEvent.class,
-      ReeferEvent.class
-    },
-    discriminatorProperty = "eventTypeCode",
-    discriminatorMapping = {
-      @DiscriminatorMapping(value = "SHIPMENT", schema = ShipmentEvent.class),
-      @DiscriminatorMapping(value = "TRANSPORT", schema = TransportEvent.class),
-      @DiscriminatorMapping(value = "EQUIPMENT", schema = EquipmentEvent.class),
-      @DiscriminatorMapping(value = "IOT", schema = IotEvent.class),
-      @DiscriminatorMapping(value = "REEFER", schema = ReeferEvent.class),
-    })
+@Schema(description = "Track and Trace event")
 public class Event {
-
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  private EventTypeCode eventTypeCode;
 
   @Schema(
       description =
@@ -53,4 +32,7 @@ An event overrides any other event that has the same `eventID` and an earlier `e
 
   @Schema(description = "List of shipment references related to this event")
   private List<ShipmentReference> shipmentReferences;
+
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  private AbstractEventDetails eventDetails;
 }

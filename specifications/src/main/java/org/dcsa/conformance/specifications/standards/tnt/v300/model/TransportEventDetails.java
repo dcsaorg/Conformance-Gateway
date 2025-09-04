@@ -6,21 +6,27 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.dcsa.conformance.specifications.standards.tnt.v300.types.EventTypeCode;
+import org.dcsa.conformance.specifications.generator.ClearParentProperties;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.TransportEventTypeCode;
 
-@Schema(description = "Transport event")
+@Schema(description = "Transport event details")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class TransportEvent extends Event {
-
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allowableValues = "TRANSPORT")
-  private EventTypeCode eventTypeCode;
+@ClearParentProperties
+public class TransportEventDetails extends AbstractEventDetails {
 
   @Schema() private TransportEventTypeCode transportEventTypeCode;
+
+  @Schema(
+      description =
+"""
+Code identifying the reason for the delay, as defined by SMDG here:
+https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+""")
+  private String delayReasonCode;
 
   @Schema(
       example = "Bad weather",
@@ -32,11 +38,5 @@ and/or plans to mitigate schedule slippage.
       maxLength = 250)
   private String changeRemark;
 
-  @Schema(
-      description =
-          """
-      Code identifying the reason for the delay, as defined by SMDG here:
-      https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
-      """)
-  private String delayReasonCode;
+  @Schema() private TransportCall transportCall;
 }

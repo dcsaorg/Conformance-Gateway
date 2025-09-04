@@ -6,15 +6,16 @@ Event,,,,,,,,
 - `EST` - Estimated
 - `ACT` - Actual",
 "Event / eventDateTime / value",value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+"Event / eventDetails",eventDetails,AbstractEventDetails,yes,,,,"Details specific to each Track and Trace event type",
+"Event / eventDetails / eventTypeCode",eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment event
+- `TRANSPORT` - Transport event
+- `EQUIPMENT` - Equipment event
+- `IOT` - IoT event
+- `REEFER` - Reefer event",
 "Event / eventID",eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
 
 An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
-"Event / eventTypeCode",eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
-- `SHIPMENT` - Shipment
-- `TRANSPORT` - Transport
-- `EQUIPMENT` - Equipment
-- `IOT` - IoT
-- `REEFER` - Reefer",
 "Event / eventUpdatedDateTime",eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
 "Event / relatedDocumentReferences","relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
 "Event / relatedDocumentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",

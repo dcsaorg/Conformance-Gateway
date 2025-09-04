@@ -6,20 +6,18 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.dcsa.conformance.specifications.generator.ClearParentProperties;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.EquipmentEventTypeCode;
-import org.dcsa.conformance.specifications.standards.tnt.v300.types.EventTypeCode;
 
-@Schema(description = "Equipment event")
+@Schema(description = "Equipment event details")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class EquipmentEvent extends Event {
-
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allowableValues = "EQUIPMENT")
-  private EventTypeCode eventTypeCode;
+@ClearParentProperties
+public class EquipmentEventDetails extends AbstractEventDetails {
 
   @Schema() private EquipmentEventTypeCode equipmentEventTypeCode;
 

@@ -36,15 +36,16 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEvents
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsError;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.AbstractEventDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEvent;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEventDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEvent;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEvent;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentEvent;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentEventDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportEvent;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportEventDetails;
 
 public class TNTStandardSpecification extends StandardSpecification {
 
@@ -78,26 +79,27 @@ public class TNTStandardSpecification extends StandardSpecification {
   @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
+        AbstractEventDetails.class,
         Address.class,
         ClassifiedDateTime.class,
         DocumentReference.class,
-        EquipmentEvent.class,
+        EquipmentEventDetails.class,
         Event.class,
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
         GetEventsError.class,
         GetEventsResponse.class,
-        IotEvent.class,
+        IotEventDetails.class,
         Location.class,
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,
-        ReeferEvent.class,
-        ShipmentEvent.class,
+        ReeferEventDetails.class,
+        ShipmentEventDetails.class,
         ShipmentReference.class,
         TransportCall.class,
-        TransportEvent.class);
+        TransportEventDetails.class);
   }
 
   @Override

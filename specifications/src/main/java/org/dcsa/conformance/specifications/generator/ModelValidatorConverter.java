@@ -151,6 +151,18 @@ public class ModelValidatorConverter implements ModelConverter {
         if (clearSchemaConstraints) {
           schema.required(null);
         }
+        boolean clearParentProperties =
+            getAnnotatedTypeClass(annotatedType)
+                    .getAnnotationsByType(ClearParentProperties.class)
+                    .length
+                > 0;
+        if (clearParentProperties) {
+          originalSchemasByClassAndField
+              .getOrDefault(
+                  getAnnotatedTypeClass(annotatedType).getSuperclass().getSimpleName(), Map.of())
+              .keySet()
+              .forEach(parentPropertyName -> schema.getProperties().remove(parentPropertyName));
+        }
         new TreeSet<>(schema.getProperties().keySet())
             .forEach(
                 propertyName -> {

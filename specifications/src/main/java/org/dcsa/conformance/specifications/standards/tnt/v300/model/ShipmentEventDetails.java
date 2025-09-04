@@ -6,20 +6,18 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.dcsa.conformance.specifications.generator.ClearParentProperties;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
-import org.dcsa.conformance.specifications.standards.tnt.v300.types.EventTypeCode;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.ShipmentEventTypeCode;
 
-@Schema(description = "Shipment event")
+@Schema(description = "Shipment event details")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class ShipmentEvent extends Event {
-
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allowableValues = "SHIPMENT")
-  private EventTypeCode eventTypeCode;
+@ClearParentProperties
+public class ShipmentEventDetails extends AbstractEventDetails {
 
   @Schema() private ShipmentEventTypeCode shipmentEventTypeCode;
 

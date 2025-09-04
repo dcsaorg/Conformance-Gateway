@@ -12,11 +12,11 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
     description = "Code used to denote the type of an event")
 @AllArgsConstructor
 public enum EventTypeCode implements EnumBase {
-  SHIPMENT("Shipment"),
-  TRANSPORT("Transport"),
-  EQUIPMENT("Equipment"),
-  IOT("IoT"),
-  REEFER("Reefer");
+  SHIPMENT("Shipment event"),
+  TRANSPORT("Transport event"),
+  EQUIPMENT("Equipment event"),
+  IOT("IoT event"),
+  REEFER("Reefer event");
 
   private final String valueDescription;
 }

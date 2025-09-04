@@ -1100,7 +1100,7 @@ public class EblChecks {
     }
 
     checks.addAll(STATIC_SI_CHECKS);
-    
+
     checks.add(FEEDBACKS_PRESENCE);
     /* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
         checks.add(JsonAttribute.lostAttributeCheck(
@@ -1220,13 +1220,12 @@ public class EblChecks {
       TransportDocumentStatus transportDocumentStatus,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
-        getTdPayloadChecks(standardVersion, transportDocumentStatus, dspSupplier);
+        getTdPayloadChecks(transportDocumentStatus, dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }
 
   public static List<JsonContentCheck> getTdPayloadChecks(
-      String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
@@ -1285,12 +1284,6 @@ public class EblChecks {
                 if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
                   return Set.of(
                       "The scenario requires '%s' to contain dangerous goods"
-                          .formatted(contextPath));
-                }
-              } else {
-                if (!nodeToValidate.isMissingNode() || !nodeToValidate.isEmpty()) {
-                  return Set.of(
-                      "The scenario requires '%s' to NOT contain any dangerous goods"
                           .formatted(contextPath));
                 }
               }

@@ -124,7 +124,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 noAction()
                     .thenEither(
                         Arrays.stream(ScenarioType.values())
-                            .filter(scenarioType -> scenarioType != ScenarioType.REGULAR_SWB_AMF)
+                            .filter(
+                                scenarioType ->
+                                    scenarioType != ScenarioType.REGULAR_SWB_AMF
+                                        && scenarioType
+                                            != ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE)
                             .map(scenarioType -> buildScenarioForType(scenarioType, isTd))
                             .toArray(EblScenarioListBuilder[]::new))),
             Map.entry(

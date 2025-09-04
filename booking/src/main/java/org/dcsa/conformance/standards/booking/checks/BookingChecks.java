@@ -425,47 +425,12 @@ public class BookingChecks {
             mav -> mav.submitAllMatching("requestedEquipments.*"),
             (nodeToValidate, contextPath) -> {
               var scenario = dspSupplier.get().scenarioType();
-              var activeReeferNode = nodeToValidate.path("activeReeferSettings");
-              var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
-              var isoEquipmentNode = nodeToValidate.path("ISOEquipmentCode");
               var issues = new LinkedHashSet<String>();
               switch (scenario) {
-                case REEFER -> {
-                  if (!activeReeferNode.isObject()) {
-                    issues.add(
-                        "The scenario requires '%s' to have an active reefer"
-                            .formatted(contextPath));
-                  }
-                }
-                case NON_OPERATING_REEFER -> {
-                  if (!nonOperatingReeferNode.asBoolean(false)) {
-                    issues.add(
-                        "The scenario requires '%s.isNonOperatingReefer' to be true"
-                            .formatted(contextPath));
-                  }
-                  if (!activeReeferNode.isMissingNode()) {
-                    issues.add(
-                        "The scenario requires '%s' to NOT have an active reefer"
-                            .formatted(contextPath));
-                  }
-                  if (!isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""))) {
-                    issues.add(
-                        "The scenario requires ISOEquipmentCode at '%s' to be a valid reefer container type"
-                            .formatted(contextPath));
-                  }
-                }
-                default -> {
-                  if (!activeReeferNode.isMissingNode()) {
-                    issues.add(
-                        "The scenario requires '%s' to NOT have an active reefer"
-                            .formatted(contextPath));
-                  }
-                  if (!nonOperatingReeferNode.isMissingNode()) {
-                    issues.add(
-                        "The scenario requires '%s.isNonOperatingReefer' to be omitted"
-                            .formatted(contextPath));
-                  }
-                }
+                case REEFER -> reeferContainerChecks(contextPath, nodeToValidate, issues);
+                case NON_OPERATING_REEFER ->
+                    nonOperatingReeferContainerChecks(contextPath, nodeToValidate, issues);
+                default -> defaultContainerChecks(contextPath, nodeToValidate, issues);
               }
               return issues;
             }));
@@ -491,7 +456,48 @@ public class BookingChecks {
     return checks;
   }
 
-  static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
+  private static void defaultContainerChecks(
+      String contextPath, JsonNode nodeToValidate, LinkedHashSet<String> issues) {
+    var activeReeferNode = nodeToValidate.path("activeReeferSettings");
+    var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
+    if (!activeReeferNode.isMissingNode()) {
+      issues.add("The scenario requires '%s' to NOT have an active reefer".formatted(contextPath));
+    }
+    if (!nonOperatingReeferNode.isMissingNode()) {
+      issues.add(
+          "The scenario requires '%s.isNonOperatingReefer' to be omitted".formatted(contextPath));
+    }
+  }
+
+  private static void nonOperatingReeferContainerChecks(
+      String contextPath, JsonNode nodeToValidate, LinkedHashSet<String> issues) {
+    var activeReeferNode = nodeToValidate.path("activeReeferSettings");
+    var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
+    var isoEquipmentNode = nodeToValidate.path("ISOEquipmentCode");
+
+    if (!nonOperatingReeferNode.asBoolean(false)) {
+      issues.add(
+          "The scenario requires '%s.isNonOperatingReefer' to be true".formatted(contextPath));
+    }
+    if (!activeReeferNode.isMissingNode()) {
+      issues.add("The scenario requires '%s' to NOT have an active reefer".formatted(contextPath));
+    }
+    if (!isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""))) {
+      issues.add(
+          "The scenario requires ISOEquipmentCode at '%s' to be a valid reefer container type"
+              .formatted(contextPath));
+    }
+  }
+
+  private static void reeferContainerChecks(
+      String contextPath, JsonNode nodeToValidate, LinkedHashSet<String> issues) {
+    var activeReeferNode = nodeToValidate.path("activeReeferSettings");
+    if (!activeReeferNode.isObject()) {
+      issues.add("The scenario requires '%s' to have an active reefer".formatted(contextPath));
+    }
+  }
+
+    static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate that 'feedbacks severity' is valid",
           mav -> mav.submitAllMatching("feedbacks.*.severity"),

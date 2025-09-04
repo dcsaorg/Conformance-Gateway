@@ -172,13 +172,15 @@ public class ModelValidatorConverter implements ModelConverter {
                             .getOrDefault(
                                 getAnnotatedTypeClass(annotatedType).getSimpleName(), Map.of())
                             .get(propertyName);
-                    schema
-                        .getProperties()
-                        .put(
-                            propertyName,
-                            new ComposedSchema()
-                                .allOf(List.of(new Schema<>().$ref(propertySchema.get$ref())))
-                                .description(originalPropertySchema.getDescription()));
+                    if (originalPropertySchema != null) {
+                      schema
+                          .getProperties()
+                          .put(
+                              propertyName,
+                              new ComposedSchema()
+                                  .allOf(List.of(new Schema<>().$ref(propertySchema.get$ref())))
+                                  .description(originalPropertySchema.getDescription()));
+                    }
                   } else if (propertySchema instanceof DateSchema) {
                     schema
                         .getProperties()

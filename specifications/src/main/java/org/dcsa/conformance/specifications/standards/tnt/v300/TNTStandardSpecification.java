@@ -36,12 +36,15 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEvents
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsError;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TNTEvent;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportEventInfo;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEvent;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEvent;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEvent;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentEvent;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportEvent;
 
 public class TNTStandardSpecification extends StandardSpecification {
 
@@ -69,8 +72,7 @@ public class TNTStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata(
-        "Track and Trace", "3.0.0-20250912-design", "", "", 4);
+    return new LegendMetadata("Track and Trace", "3.0.0-20250912-design", "", "", 4);
   }
 
   @Override
@@ -78,26 +80,29 @@ public class TNTStandardSpecification extends StandardSpecification {
     return Stream.of(
         Address.class,
         ClassifiedDateTime.class,
-        EquipmentEventInfo.class,
+        DocumentReference.class,
+        EquipmentEvent.class,
+        Event.class,
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
         GetEventsError.class,
         GetEventsResponse.class,
-        IotEventInfo.class,
+        IotEvent.class,
         Location.class,
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,
-        ReeferEventInfo.class,
-        ShipmentEventInfo.class,
-        TNTEvent.class,
-        TransportEventInfo.class);
+        ReeferEvent.class,
+        ShipmentEvent.class,
+        ShipmentReference.class,
+        TransportCall.class,
+        TransportEvent.class);
   }
 
   @Override
   protected List<String> getRootTypeNames() {
-    return List.of(TNTEvent.class.getSimpleName());
+    return List.of(Event.class.getSimpleName());
   }
 
   @Override

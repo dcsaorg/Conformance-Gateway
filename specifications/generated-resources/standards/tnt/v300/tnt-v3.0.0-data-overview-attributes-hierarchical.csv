@@ -1,84 +1,61 @@
 Path,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
-TNTEvent,,,,,,,,
-"TNTEvent / equipmentEventInfo",equipmentEventInfo,EquipmentEventInfo,,,,,"Equipment event information",
-"TNTEvent / equipmentEventInfo / equipmentEventTypeCode",equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
-- `LOAD` - Loaded
-- `DISC` - Discharged
-- `GTIN` - Gated in
-- `GTOT` - Gated out
-- `STUF` - Stuffed
-- `STRP` - Stripped
-- `PICK` - Pick-up
-- `DROP` - Drop-off
-- `INSP` - Inspected
-- `RSEA` - Resealed
-- `RMVD` - Removed",
-"TNTEvent / eventDateTime",eventDateTime,ClassifiedDateTime,yes,,,,"The date and time when the event has occurred.",
-"TNTEvent / eventDateTime / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+Event,,,,,,,,
+"Event / eventDateTime",eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
+"Event / eventDateTime / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"TNTEvent / eventDateTime / value",value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
-"TNTEvent / eventID",eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the event.",
-"TNTEvent / eventLocation",eventLocation,Location,,,,,"The location of the event.",
-"TNTEvent / eventLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"Event / eventDateTime / value",value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+"Event / eventID",eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
 
-- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
-
-More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-"TNTEvent / eventLocation / address",address,Address,,,,,"Location address",
-"TNTEvent / eventLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
-"TNTEvent / eventLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
-"TNTEvent / eventLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-"TNTEvent / eventLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
-"TNTEvent / eventLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
-"TNTEvent / eventLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
-"TNTEvent / eventLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
-"TNTEvent / eventLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"TNTEvent / eventLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
-"TNTEvent / eventLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
-"TNTEvent / eventLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
-- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
-- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"TNTEvent / eventLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
-
-- `CLOC` - Customer location
-- `COFS` - Container freight station
-- `OFFD` - Off-dock storage
-- `DEPO` - Depot
-- `INTE` - Inland terminal
-- `POTE` - Port terminal
-- `RAMP` - Ramp",
-"TNTEvent / eventLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
-"TNTEvent / eventLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
-"TNTEvent / eventLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"TNTEvent / eventLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
-"TNTEvent / iotEventInfo",iotEventInfo,IotEventInfo,,,,,"IoT event information",
-"TNTEvent / iotEventInfo / iotEventTypeCode",iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
-- `DETC` - Detected",
-"TNTEvent / reeferEventInfo",reeferEventInfo,ReeferEventInfo,,,,,"Reefer event information",
-"TNTEvent / reeferEventInfo / reeferEventTypeCode",reeferEventTypeCode,string,,,,MEAS,"Code used to denote the type of a reefer event
-- `MEAS` - Measured
-- `ADJU` - Adjusted",
-"TNTEvent / shipmentEventInfo",shipmentEventInfo,ShipmentEventInfo,,,,,"Shipment event information",
-"TNTEvent / shipmentEventInfo / shipmentEventTypeCode",shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
-- `RECE` - Received
-- `DRFT` - Drafted
-- `PENA` - Pending Approval
-- `PENU` - Pending Update
-- `REJE` - Rejected
-- `APPR` - Approved
-- `ISSU` - Arrived
-- `SURR` - Surrendered
-- `SUBM` - Submitted
-- `VOID` - Void
-- `CONF` - Confirmed
-- `REQS` - Requested
-- `CMPL` - Completed
-- `HOLD` - On Hold
-- `RELS` - Released",
-"TNTEvent / transportEventInfo",transportEventInfo,TransportEventInfo,,,,,"Transport event information",
-"TNTEvent / transportEventInfo / transportEventTypeCode",transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
-- `ARRI` - Arrived
-- `DEPA` - Departed",
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+"Event / eventTypeCode",eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment
+- `TRANSPORT` - Transport
+- `EQUIPMENT` - Equipment
+- `IOT` - IoT
+- `REEFER` - Reefer",
+"Event / eventUpdatedDateTime",eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+"Event / relatedDocumentReferences","relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
+"Event / relatedDocumentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+"Event / relatedDocumentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `CBR` - Carrier Booking Request
+- `BKG` - Booking
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `TRO` - Transport Order
+- `CRO` - Container Release Order
+- `ARN` - Arrival Notice
+- `VGM` - Verified Gross Mass
+- `CAS` - Cargo Survey
+- `CUC` - Customs Clearance
+- `DGD` - Dangerous Goods Declaration
+- `OOG` - Out of Gauge
+- `CQU` - Contract Quotation
+- `INV` - Invoice
+- `HCE` - Health Certificate
+- `PCE` - Phytosanitary Certificate
+- `VCE` - Veterinary Certificate
+- `FCE` - Fumigation Certificate
+- `ICE` - Inspection Certificate
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin",
+"Event / shipmentReferences",shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
+"Event / shipmentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
+"Event / shipmentReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference
+- `FF` - Freight Forwarder’s Reference
+- `SI` - Shipper’s Reference
+- `PO` - Purchase Order Reference
+- `CR` - Customer’s Reference
+- `AAO` - Consignee’s Reference
+- `ECR` - Empty container release reference
+- `CSI` - Customer shipment ID
+- `BPR` - Booking party reference number
+- `BID` - Booking Request ID
+- `EQ` - Equipment Reference
+- `RUC` - Registro Único del Contribuyente
+- `DUE` - Declaração Única de Exportação
+- `CER` - Canadian Export Reporting System
+- `AES` - Automated Export System",

@@ -325,9 +325,87 @@ components:
             - `ACT` - Actual
           example: "EST"
       description: "Date and time classified as planned, estimated or actual"
-    EquipmentEventInfo:
+    DocumentReference:
       type: "object"
       properties:
+        typeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a document
+            - `CBR` - Carrier Booking Request
+            - `BKG` - Booking
+            - `SHI` - Shipping Instruction
+            - `TRD` - Transport Document
+            - `DEI` - Delivery Instructions
+            - `DEO` - Delivery Order
+            - `TRO` - Transport Order
+            - `CRO` - Container Release Order
+            - `ARN` - Arrival Notice
+            - `VGM` - Verified Gross Mass
+            - `CAS` - Cargo Survey
+            - `CUC` - Customs Clearance
+            - `DGD` - Dangerous Goods Declaration
+            - `OOG` - Out of Gauge
+            - `CQU` - Contract Quotation
+            - `INV` - Invoice
+            - `HCE` - Health Certificate
+            - `PCE` - Phytosanitary Certificate
+            - `VCE` - Veterinary Certificate
+            - `FCE` - Fumigation Certificate
+            - `ICE` - Inspection Certificate
+            - `CEA` - Certificate of Analysis
+            - `CEO` - Certificate of Origin
+          example: "BKG"
+        reference:
+          maxLength: 100
+          type: "string"
+          description: "Reference identifying the document"
+          example: "123e4567e89b"
+      description: "Referenced document"
+    EquipmentEvent:
+      required:
+      - "eventTypeCode"
+      type: "object"
+      properties:
+        eventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an event
+            - `SHIPMENT` - Shipment
+            - `TRANSPORT` - Transport
+            - `EQUIPMENT` - Equipment
+            - `IOT` - IoT
+            - `REEFER` - Reefer
+          example: "EQUIPMENT"
+          enum:
+          - "EQUIPMENT"
+        eventID:
+          type: "string"
+          description: |
+            Unique ID of the event.
+
+            An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        eventDateTime:
+          description: "The date and time when the real-world event has occurred or will occur."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
+        eventUpdatedDateTime:
+          type: "string"
+          description: "The date and time when the technical event was last updated."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        relatedDocumentReferences:
+          type: "array"
+          description: "List of documents related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        shipmentReferences:
+          type: "array"
+          description: "List of shipment references related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
         equipmentEventTypeCode:
           type: "string"
           description: |-
@@ -344,7 +422,68 @@ components:
             - `RSEA` - Resealed
             - `RMVD` - Removed
           example: "LOAD"
-      description: "Equipment event information"
+        eventLocation:
+          description: "The location of the event."
+          allOf:
+          - $ref: "#/components/schemas/Location"
+      description: "Equipment event"
+    Event:
+      required:
+      - "eventTypeCode"
+      type: "object"
+      properties:
+        eventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an event
+            - `SHIPMENT` - Shipment
+            - `TRANSPORT` - Transport
+            - `EQUIPMENT` - Equipment
+            - `IOT` - IoT
+            - `REEFER` - Reefer
+          example: "EQUIPMENT"
+        eventID:
+          type: "string"
+          description: |
+            Unique ID of the event.
+
+            An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        eventDateTime:
+          description: "The date and time when the real-world event has occurred or will occur."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
+        eventUpdatedDateTime:
+          type: "string"
+          description: "The date and time when the technical event was last updated."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        relatedDocumentReferences:
+          type: "array"
+          description: "List of documents related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        shipmentReferences:
+          type: "array"
+          description: "List of shipment references related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
+      description: "Track and Trace event"
+      discriminator:
+        propertyName: "eventTypeCode"
+        mapping:
+          SHIPMENT: "#/components/schemas/ShipmentEvent"
+          TRANSPORT: "#/components/schemas/TransportEvent"
+          EQUIPMENT: "#/components/schemas/EquipmentEvent"
+          IOT: "#/components/schemas/IotEvent"
+          REEFER: "#/components/schemas/ReeferEvent"
+      oneOf:
+      - $ref: "#/components/schemas/ShipmentEvent"
+      - $ref: "#/components/schemas/TransportEvent"
+      - $ref: "#/components/schemas/EquipmentEvent"
+      - $ref: "#/components/schemas/IotEvent"
+      - $ref: "#/components/schemas/ReeferEvent"
     Facility:
       type: "object"
       properties:
@@ -429,7 +568,7 @@ components:
           description: |
             The list of events matching the filter specified by the request query parameters
           items:
-            $ref: "#/components/schemas/TNTEvent"
+            $ref: "#/components/schemas/Event"
         feedbackElements:
           type: "array"
           description: |
@@ -438,16 +577,57 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `GET Events` request
-    IotEventInfo:
+    IotEvent:
+      required:
+      - "eventTypeCode"
       type: "object"
       properties:
+        eventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an event
+            - `SHIPMENT` - Shipment
+            - `TRANSPORT` - Transport
+            - `EQUIPMENT` - Equipment
+            - `IOT` - IoT
+            - `REEFER` - Reefer
+          example: "EQUIPMENT"
+          enum:
+          - "IOT"
+        eventID:
+          type: "string"
+          description: |
+            Unique ID of the event.
+
+            An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        eventDateTime:
+          description: "The date and time when the real-world event has occurred or will occur."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
+        eventUpdatedDateTime:
+          type: "string"
+          description: "The date and time when the technical event was last updated."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        relatedDocumentReferences:
+          type: "array"
+          description: "List of documents related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        shipmentReferences:
+          type: "array"
+          description: "List of shipment references related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
         iotEventTypeCode:
           type: "string"
           description: |-
             Code used to denote the type of an IoT event
             - `DETC` - Detected
           example: "DETC"
-      description: "IoT event information"
+      description: "IoT event"
     Location:
       type: "object"
       properties:
@@ -524,7 +704,7 @@ components:
           type: "array"
           description: "List of events."
           items:
-            $ref: "#/components/schemas/TNTEvent"
+            $ref: "#/components/schemas/Event"
       description: "API message containing a list of events."
     PostEventsResponse:
       type: "object"
@@ -541,9 +721,50 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `POST Events` request
-    ReeferEventInfo:
+    ReeferEvent:
+      required:
+      - "eventTypeCode"
       type: "object"
       properties:
+        eventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an event
+            - `SHIPMENT` - Shipment
+            - `TRANSPORT` - Transport
+            - `EQUIPMENT` - Equipment
+            - `IOT` - IoT
+            - `REEFER` - Reefer
+          example: "EQUIPMENT"
+          enum:
+          - "REEFER"
+        eventID:
+          type: "string"
+          description: |
+            Unique ID of the event.
+
+            An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        eventDateTime:
+          description: "The date and time when the real-world event has occurred or will occur."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
+        eventUpdatedDateTime:
+          type: "string"
+          description: "The date and time when the technical event was last updated."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        relatedDocumentReferences:
+          type: "array"
+          description: "List of documents related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        shipmentReferences:
+          type: "array"
+          description: "List of shipment references related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
         reeferEventTypeCode:
           type: "string"
           description: |-
@@ -551,10 +772,51 @@ components:
             - `MEAS` - Measured
             - `ADJU` - Adjusted
           example: "MEAS"
-      description: "Reefer event information"
-    ShipmentEventInfo:
+      description: "Reefer event"
+    ShipmentEvent:
+      required:
+      - "eventTypeCode"
       type: "object"
       properties:
+        eventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an event
+            - `SHIPMENT` - Shipment
+            - `TRANSPORT` - Transport
+            - `EQUIPMENT` - Equipment
+            - `IOT` - IoT
+            - `REEFER` - Reefer
+          example: "EQUIPMENT"
+          enum:
+          - "SHIPMENT"
+        eventID:
+          type: "string"
+          description: |
+            Unique ID of the event.
+
+            An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        eventDateTime:
+          description: "The date and time when the real-world event has occurred or will occur."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
+        eventUpdatedDateTime:
+          type: "string"
+          description: "The date and time when the technical event was last updated."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        relatedDocumentReferences:
+          type: "array"
+          description: "List of documents related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        shipmentReferences:
+          type: "array"
+          description: "List of shipment references related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
         shipmentEventTypeCode:
           type: "string"
           description: |-
@@ -575,50 +837,132 @@ components:
             - `HOLD` - On Hold
             - `RELS` - Released
           example: "APPR"
-      description: "Shipment event information"
-    TNTEvent:
-      required:
-      - "eventDateTime"
+        documentReference:
+          description: "Referenced document"
+          allOf:
+          - $ref: "#/components/schemas/DocumentReference"
+        reason:
+          type: "string"
+          description: "The reason this ShipmentEvent was sent."
+        priceCalculationDate:
+          type: "string"
+          description: |
+            Date taken in consideration for the tariff applicability, that differs depending on the trade.
+            It can vary per carrier.
+          format: "date"
+          example: "2025-01-23"
+      description: "Shipment event"
+    ShipmentReference:
       type: "object"
       properties:
+        typeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a reference
+            - `FF` - Freight Forwarder’s Reference
+            - `SI` - Shipper’s Reference
+            - `PO` - Purchase Order Reference
+            - `CR` - Customer’s Reference
+            - `AAO` - Consignee’s Reference
+            - `ECR` - Empty container release reference
+            - `CSI` - Customer shipment ID
+            - `BPR` - Booking party reference number
+            - `BID` - Booking Request ID
+            - `EQ` - Equipment Reference
+            - `RUC` - Registro Único del Contribuyente
+            - `DUE` - Declaração Única de Exportação
+            - `CER` - Canadian Export Reporting System
+            - `AES` - Automated Export System
+          example: "FF"
+        reference:
+          maxLength: 100
+          type: "string"
+          description: "The actual reference value"
+          example: "123e4567e89b"
+      description: |
+        References provided by the shipper or freight forwarder at the time of booking or at the time of providing shipping instructions.
+        Carriers share it back when providing track and trace event updates, some are also printed on the B/L.
+        Customers can use these references to track shipments in their internal systems.
+
+        In addition to the References provided by the shipper or freight forwarder,
+        the carrier can provide an extra type called `EQ` which is a reference to an Equipment.
+    TransportCall:
+      type: "object"
+      properties:
+        transportCallID:
+          type: "string"
+          description: "Universally unique ID of the transport call."
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        carrierServiceCode:
+          type: "string"
+          description: "Carrier-specific identifier of a service."
+          example: "FE1"
+        universalServiceReference:
+          type: "string"
+          description: "Reference of a service agreed between the VSA partners."
+          example: "SR12345A"
+        carrierExportVoyageNumber:
+          type: "string"
+          description: "Carrier-specific identifier of the export voyage."
+          example: "2103S"
+        universalExportVoyageReference:
+          type: "string"
+          description: "Reference of the export voyage agreed between the VSA partners."
+          example: "SR12345A"
+        carrierImportVoyageNumber:
+          type: "string"
+          description: "Carrier-specific identifier of the import voyage."
+          example: "2103S"
+        universalImportVoyageReference:
+          type: "string"
+          description: "Reference of the import voyage agreed between the VSA partners."
+          example: "SR12345A"
+      description: "Transport call information"
+    TransportEvent:
+      required:
+      - "eventTypeCode"
+      type: "object"
+      properties:
+        eventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an event
+            - `SHIPMENT` - Shipment
+            - `TRANSPORT` - Transport
+            - `EQUIPMENT` - Equipment
+            - `IOT` - IoT
+            - `REEFER` - Reefer
+          example: "EQUIPMENT"
+          enum:
+          - "TRANSPORT"
         eventID:
           type: "string"
-          description: "Universally unique ID of the event."
+          description: |
+            Unique ID of the event.
+
+            An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
           format: "uuid"
           example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
         eventDateTime:
-          description: "The date and time when the event has occurred."
+          description: "The date and time when the real-world event has occurred or will occur."
           allOf:
           - $ref: "#/components/schemas/ClassifiedDateTime"
-        eventLocation:
-          description: "The location of the event."
-          allOf:
-          - $ref: "#/components/schemas/Location"
-        transportEventInfo:
-          description: "Transport event information"
-          allOf:
-          - $ref: "#/components/schemas/TransportEventInfo"
-        shipmentEventInfo:
-          description: "Shipment event information"
-          allOf:
-          - $ref: "#/components/schemas/ShipmentEventInfo"
-        equipmentEventInfo:
-          description: "Equipment event information"
-          allOf:
-          - $ref: "#/components/schemas/EquipmentEventInfo"
-        reeferEventInfo:
-          description: "Reefer event information"
-          allOf:
-          - $ref: "#/components/schemas/ReeferEventInfo"
-        iotEventInfo:
-          description: "IoT event information"
-          allOf:
-          - $ref: "#/components/schemas/IotEventInfo"
-      description: |
-        Track and Trace event
-    TransportEventInfo:
-      type: "object"
-      properties:
+        eventUpdatedDateTime:
+          type: "string"
+          description: "The date and time when the technical event was last updated."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        relatedDocumentReferences:
+          type: "array"
+          description: "List of documents related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        shipmentReferences:
+          type: "array"
+          description: "List of shipment references related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
         transportEventTypeCode:
           type: "string"
           description: |-
@@ -626,7 +970,19 @@ components:
             - `ARRI` - Arrived
             - `DEPA` - Departed
           example: "ARRI"
-      description: "Transport event information"
+        changeRemark:
+          maxLength: 250
+          type: "string"
+          description: |
+            Free text information provided by the vessel operator regarding the reasons for the change in schedule
+            and/or plans to mitigate schedule slippage.
+          example: "Bad weather"
+        delayReasonCode:
+          type: "string"
+          description: |
+            Code identifying the reason for the delay, as defined by SMDG here:
+            https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+      description: "Transport event"
   headers:
     API-Version:
       description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."

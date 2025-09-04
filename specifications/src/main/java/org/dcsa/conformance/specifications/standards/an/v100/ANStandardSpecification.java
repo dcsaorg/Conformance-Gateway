@@ -75,8 +75,6 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentRefe
 import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
-import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
-import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
@@ -146,8 +144,6 @@ public class ANStandardSpecification extends StandardSpecification {
         ExportLicense.class,
         Facility.class,
         FeedbackElement.class,
-        FormattedDate.class,
-        FormattedDateTime.class,
         FreeTime.class,
         FreeTimeTimeUnitCode.class,
         FreeTimeTypeCode.class,

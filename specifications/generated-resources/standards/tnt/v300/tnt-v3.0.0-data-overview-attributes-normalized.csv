@@ -12,7 +12,32 @@ ClassifiedDateTime,classifier,string,,,,EST,"Classifier denoting whether a date/
 - `EST` - Estimated
 - `ACT` - Actual",
 ClassifiedDateTime,value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
-EquipmentEventInfo,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
+DocumentReference,reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `CBR` - Carrier Booking Request
+- `BKG` - Booking
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `TRO` - Transport Order
+- `CRO` - Container Release Order
+- `ARN` - Arrival Notice
+- `VGM` - Verified Gross Mass
+- `CAS` - Cargo Survey
+- `CUC` - Customs Clearance
+- `DGD` - Dangerous Goods Declaration
+- `OOG` - Out of Gauge
+- `CQU` - Contract Quotation
+- `INV` - Invoice
+- `HCE` - Health Certificate
+- `PCE` - Phytosanitary Certificate
+- `VCE` - Veterinary Certificate
+- `FCE` - Fumigation Certificate
+- `ICE` - Inspection Certificate
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin",
+EquipmentEvent,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
 - `LOAD` - Loaded
 - `DISC` - Discharged
 - `GTIN` - Gated in
@@ -24,6 +49,33 @@ EquipmentEventInfo,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote th
 - `INSP` - Inspected
 - `RSEA` - Resealed
 - `RMVD` - Removed",
+EquipmentEvent,eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
+EquipmentEvent,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+EquipmentEvent,eventLocation,Location,,,,,"The location of the event.",
+EquipmentEvent,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment
+- `TRANSPORT` - Transport
+- `EQUIPMENT` - Equipment
+- `IOT` - IoT
+- `REEFER` - Reefer",
+EquipmentEvent,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+EquipmentEvent,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
+EquipmentEvent,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
+Event,eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
+Event,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+Event,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment
+- `TRANSPORT` - Transport
+- `EQUIPMENT` - Equipment
+- `IOT` - IoT
+- `REEFER` - Reefer",
+Event,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+Event,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
+Event,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
 Facility,facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
@@ -42,10 +94,23 @@ GetEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements in
 
 At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.",
-GetEventsResponse,events,"TNTEvent list",,,,,"The list of events matching the filter specified by the request query parameters",
+GetEventsResponse,events,"Event list",,,,,"The list of events matching the filter specified by the request query parameters",
 GetEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
-IotEventInfo,iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
+IotEvent,eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
+IotEvent,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+IotEvent,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment
+- `TRANSPORT` - Transport
+- `EQUIPMENT` - Equipment
+- `IOT` - IoT
+- `REEFER` - Reefer",
+IotEvent,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+IotEvent,iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
 - `DETC` - Detected",
+IotEvent,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
+IotEvent,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
@@ -73,16 +138,45 @@ Lower severity feedback elements may also be included.
 When sent in response to a request that contains an array of events,
 the order of the `feedbackElements` is not related to the list of request events.
 Instead, the relevant request event is indicated by the `propertyPath` of each `FeedbackElement`.",
-PostEventsRequest,events,"TNTEvent list",,,,,"List of events.",
+PostEventsRequest,events,"Event list",,,,,"List of events.",
 PostEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
 
 There can be zero, one or more feedback elements per event in the request.
 The order of `feedbackElements` is not related to the order of events in the request.
 Instead, the relevant request event is indicated by the `propertyPath` of each `FeedbackElement`.",
-ReeferEventInfo,reeferEventTypeCode,string,,,,MEAS,"Code used to denote the type of a reefer event
+ReeferEvent,eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
+ReeferEvent,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+ReeferEvent,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment
+- `TRANSPORT` - Transport
+- `EQUIPMENT` - Equipment
+- `IOT` - IoT
+- `REEFER` - Reefer",
+ReeferEvent,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+ReeferEvent,reeferEventTypeCode,string,,,,MEAS,"Code used to denote the type of a reefer event
 - `MEAS` - Measured
 - `ADJU` - Adjusted",
-ShipmentEventInfo,shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
+ReeferEvent,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
+ReeferEvent,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
+ShipmentEvent,documentReference,DocumentReference,,,,,"Referenced document",
+ShipmentEvent,eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
+ShipmentEvent,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+ShipmentEvent,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment
+- `TRANSPORT` - Transport
+- `EQUIPMENT` - Equipment
+- `IOT` - IoT
+- `REEFER` - Reefer",
+ShipmentEvent,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+ShipmentEvent,priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in consideration for the tariff applicability, that differs depending on the trade.
+It can vary per carrier.",
+ShipmentEvent,reason,string,,,,,"The reason this ShipmentEvent was sent.",
+ShipmentEvent,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
+ShipmentEvent,shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
 - `RECE` - Received
 - `DRFT` - Drafted
 - `PENA` - Pending Approval
@@ -98,14 +192,47 @@ ShipmentEventInfo,shipmentEventTypeCode,string,,,,APPR,"Code used to denote the 
 - `CMPL` - Completed
 - `HOLD` - On Hold
 - `RELS` - Released",
-TNTEvent,equipmentEventInfo,EquipmentEventInfo,,,,,"Equipment event information",
-TNTEvent,eventDateTime,ClassifiedDateTime,yes,,,,"The date and time when the event has occurred.",
-TNTEvent,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the event.",
-TNTEvent,eventLocation,Location,,,,,"The location of the event.",
-TNTEvent,iotEventInfo,IotEventInfo,,,,,"IoT event information",
-TNTEvent,reeferEventInfo,ReeferEventInfo,,,,,"Reefer event information",
-TNTEvent,shipmentEventInfo,ShipmentEventInfo,,,,,"Shipment event information",
-TNTEvent,transportEventInfo,TransportEventInfo,,,,,"Transport event information",
-TransportEventInfo,transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
+ShipmentEvent,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
+ShipmentReference,reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
+ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a reference
+- `FF` - Freight Forwarder’s Reference
+- `SI` - Shipper’s Reference
+- `PO` - Purchase Order Reference
+- `CR` - Customer’s Reference
+- `AAO` - Consignee’s Reference
+- `ECR` - Empty container release reference
+- `CSI` - Customer shipment ID
+- `BPR` - Booking party reference number
+- `BID` - Booking Request ID
+- `EQ` - Equipment Reference
+- `RUC` - Registro Único del Contribuyente
+- `DUE` - Declaração Única de Exportação
+- `CER` - Canadian Export Reporting System
+- `AES` - Automated Export System",
+TransportCall,"carrierExportVoyageNumber",string,,,,2103S,"Carrier-specific identifier of the export voyage.",
+TransportCall,"carrierImportVoyageNumber",string,,,,2103S,"Carrier-specific identifier of the import voyage.",
+TransportCall,carrierServiceCode,string,,,,FE1,"Carrier-specific identifier of a service.",
+TransportCall,transportCallID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the transport call.",
+TransportCall,"universalExportVoyageReference",string,,,,SR12345A,"Reference of the export voyage agreed between the VSA partners.",
+TransportCall,"universalImportVoyageReference",string,,,,SR12345A,"Reference of the import voyage agreed between the VSA partners.",
+TransportCall,"universalServiceReference",string,,,,SR12345A,"Reference of a service agreed between the VSA partners.",
+TransportEvent,changeRemark,string,,maxLength=250,,"Bad weather","Free text information provided by the vessel operator regarding the reasons for the change in schedule
+and/or plans to mitigate schedule slippage.",
+TransportEvent,delayReasonCode,string,,,,,"Code identifying the reason for the delay, as defined by SMDG here:
+https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/",
+TransportEvent,eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
+TransportEvent,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+TransportEvent,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment
+- `TRANSPORT` - Transport
+- `EQUIPMENT` - Equipment
+- `IOT` - IoT
+- `REEFER` - Reefer",
+TransportEvent,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+TransportEvent,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
+TransportEvent,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
+TransportEvent,transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
 - `ARRI` - Arrived
 - `DEPA` - Departed",

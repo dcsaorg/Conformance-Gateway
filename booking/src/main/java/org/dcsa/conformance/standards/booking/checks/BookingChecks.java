@@ -16,6 +16,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import com.fasterxml.jackson.databind.node.MissingNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
@@ -117,20 +120,39 @@ public class BookingChecks {
     )
   );
 
-  private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE = JsonAttribute.customValidator(
-    "Conditional Universal Service Reference",
-    body -> {
-      var universalExportVoyageReference = body.path("universalExportVoyageReference");
-      var universalImportVoyageReference = body.path("universalImportVoyageReference");
-      var universalServiceReference = body.path("universalServiceReference");
-      if (JsonAttribute.isJsonNodePresent(universalExportVoyageReference) || JsonAttribute.isJsonNodePresent(universalImportVoyageReference) ) {
-        if (JsonAttribute.isJsonNodeAbsent(universalServiceReference) ){
-          return Set.of("The universalServiceReference must be present as either universalExportVoyageReference or universalExportVoyageReference are present");
-        }
-      }
-      return Set.of();
-    }
-  );
+  private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE =
+      JsonAttribute.customValidator(
+          "Conditional Universal Service Reference",
+          body -> {
+            var routingReference = body.path("routingReference").asText("");
+            var universalExportVoyageReference = body.path("universalExportVoyageReference");
+            var universalImportVoyageReference = body.path("universalImportVoyageReference");
+            var universalServiceReference = body.path("universalServiceReference");
+            if (!routingReference.isBlank()) {
+              var issues = new LinkedHashSet<String>();
+              if (JsonAttribute.isJsonNodePresent(universalExportVoyageReference)) {
+                issues.add(
+                    "The universalExportVoyageReference must NOT be present when routingReference is provided");
+              }
+              if (JsonAttribute.isJsonNodePresent(universalImportVoyageReference)) {
+                issues.add(
+                    "The universalImportVoyageReference must NOT be present when routingReference is provided");
+              }
+              if (JsonAttribute.isJsonNodePresent(universalServiceReference)) {
+                issues.add(
+                    "The universalServiceReference must NOT be present when routingReference is provided");
+              }
+              return issues;
+            }
+            if ((JsonAttribute.isJsonNodePresent(universalExportVoyageReference)
+                    || JsonAttribute.isJsonNodePresent(universalImportVoyageReference))
+                && JsonAttribute.isJsonNodeAbsent(universalServiceReference)) {
+              return Set.of(
+                  "The universalServiceReference must be present as either universalExportVoyageReference or universalExportVoyageReference are present");
+            }
+
+            return Set.of();
+          });
 
   private static final JsonContentCheck REFERENCE_TYPE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate reference type field",
@@ -238,6 +260,7 @@ public class BookingChecks {
     "Validate shipmentLocations",
     body -> {
       var issues = new LinkedHashSet<String>();
+      var routingReference = body.path("routingReference").asText("");
       var receiptTypeAtOrigin = body.path("receiptTypeAtOrigin").asText("");
       var deliveryTypeAtDestination = body.path("deliveryTypeAtDestination").asText("");
       var polNode = getShipmentLocationTypeCode(body,"POL");
@@ -245,17 +268,19 @@ public class BookingChecks {
       var pdeNode = getShipmentLocationTypeCode(body,"PDE");
       var podNode = getShipmentLocationTypeCode(body,"POD");
 
-      if ((pdeNode == null || pdeNode.isEmpty()) && (podNode == null || podNode.isEmpty()) ) {
-        issues.add("Port of Discharge value must be provided");
-      }
-      if ((preNode == null || preNode.isEmpty()) && (polNode == null || polNode.isEmpty())) {
-        issues.add("Port of Load values must be provided");
-      }
-      if ((pdeNode == null || pdeNode.isEmpty()) && "SD".equals(deliveryTypeAtDestination)) {
-        issues.add("Place of Delivery value must be provided");
-      }
-      if ((preNode == null || preNode.isEmpty()) && "SD".equals(receiptTypeAtOrigin)) {
-        issues.add("Place of Receipt values must be provided");
+      if (routingReference.isBlank()) {
+          if (pdeNode.isMissingNode() && podNode.isMissingNode()) {
+            issues.add("Port of Discharge value must be provided (PDE or POD)");
+          }
+          if (preNode.isMissingNode() && polNode.isMissingNode()) {
+            issues.add("Port of Load values must be provided (PRE or POL)");
+          }
+          if (pdeNode.isMissingNode() && "SD".equals(deliveryTypeAtDestination)) {
+            issues.add("Place of Delivery value must be provided (PDE) when deliveryTypeAtDestination is 'SD'");
+          }
+          if (preNode.isMissingNode() && "SD".equals(receiptTypeAtOrigin)) {
+            issues.add("Place of Receipt values must be provided (PRE) when receiptTypeAtOrigin is 'SD'");
+          }
       }
       if("SD".equals(receiptTypeAtOrigin)) {
         var requestedEquipments = body.path("requestedEquipments");
@@ -278,70 +303,149 @@ public class BookingChecks {
       return issues;
     });
 
-  private static final JsonContentCheck VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS = JsonAttribute.customValidator(
-    "Validate shipper's minimum request fields",
-    body -> {
-      var issues = new LinkedHashSet<String>();
+  private static final JsonContentCheck VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS =
+      JsonAttribute.customValidator(
+          "Validate shipper's minimum request fields",
+          body -> {
+            var issues = new LinkedHashSet<String>();
 
-      // Check if routingReference is provided
-      var routingReference = body.path("routingReference").asText("");
-      if (!routingReference.isEmpty()) {
-        // If routingReference is provided, validation passes
-        return issues;
-      }
+            var routingReference = body.path("routingReference").asText("");
+            if (!routingReference.isBlank()) {
+              return routingReferenceRequestFieldsChecks(body);
+            }
 
-      // If no routingReference, check location-based requirements
-      var vesselName = body.path("vessel").path("name").asText("");
-      var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber").asText("");
-      var carrierServiceCode = body.path("carrierServiceCode").asText("");
-      var carrierServiceName = body.path("carrierServiceName").asText("");
-      var expectedDepartureDate = body.path("expectedDepartureDate").asText("");
-      var expectedDepartureFromPlaceOfReceiptDate = body.path("expectedDepartureFromPlaceOfReceiptDate").asText("");
+            var vesselName = body.path("vessel").path("name").asText("");
+            var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber").asText("");
+            var carrierServiceCode = body.path("carrierServiceCode").asText("");
+            var carrierServiceName = body.path("carrierServiceName").asText("");
+            var expectedDepartureDate = body.path("expectedDepartureDate").asText("");
+            var expectedDepartureFromPlaceOfReceiptDate =
+                body.path("expectedDepartureFromPlaceOfReceiptDate").asText("");
 
-      var polNode = getShipmentLocationTypeCode(body,"POL");
-      var preNode = getShipmentLocationTypeCode(body,"PRE");
-      var pdeNode = getShipmentLocationTypeCode(body,"PDE");
-      var podNode = getShipmentLocationTypeCode(body,"POD");
+            var polNode = getShipmentLocationTypeCode(body, "POL");
+            var preNode = getShipmentLocationTypeCode(body, "PRE");
+            var pdeNode = getShipmentLocationTypeCode(body, "PDE");
+            var podNode = getShipmentLocationTypeCode(body, "POD");
 
-      String providedArrivalStartDate = body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
-      String providedArrivalEndDate = body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
+            var providedArrivalStartDate =
+                body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
+            var providedArrivalEndDate =
+                body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
 
-      // Check (PRE or POL) AND (POD or PDE) requirement
-      var hasOriginLocation = (preNode != null && !preNode.isEmpty()) || (polNode != null && !polNode.isEmpty());
-      var hasDestinationLocation = (pdeNode != null && !pdeNode.isEmpty()) || (podNode != null && !podNode.isEmpty());
+            if (pdeNode.isMissingNode() && podNode.isMissingNode()) {
+              issues.add("Port of Discharge value must be provided (PDE or POD)");
+            }
+            if (preNode.isMissingNode() && polNode.isMissingNode()) {
+              issues.add("Port of Load values must be provided (PRE or POL)");
+            }
 
-      if (!hasOriginLocation || !hasDestinationLocation) {
-        issues.add("Either (PRE or POL) AND (POD or PDE) locations must be provided when routingReference is not available.");
-        return issues;
-      }
+            // Check minimum mandatory property combinations
+            var hasExpectedDepartureDate = !expectedDepartureDate.isEmpty();
+            var hasExpectedDepartureFromPlaceOfReceiptDate =
+                !expectedDepartureFromPlaceOfReceiptDate.isEmpty();
+            var hasArrivalDates =
+                !providedArrivalStartDate.isEmpty() && !providedArrivalEndDate.isEmpty();
+            var hasVoyageAndVessel = !carrierExportVoyageNumber.isEmpty() && !vesselName.isEmpty();
+            var hasVoyageAndServiceName =
+                !carrierExportVoyageNumber.isEmpty() && !carrierServiceName.isEmpty();
+            var hasVoyageAndServiceCode =
+                !carrierExportVoyageNumber.isEmpty() && !carrierServiceCode.isEmpty();
 
-      // Check minimum mandatory property combinations
-      var hasExpectedDepartureDate = !expectedDepartureDate.isEmpty();
-      var hasExpectedDepartureFromPlaceOfReceiptDate = !expectedDepartureFromPlaceOfReceiptDate.isEmpty();
-      var hasArrivalDates = !providedArrivalStartDate.isEmpty() && !providedArrivalEndDate.isEmpty();
-      var hasVoyageAndVessel = !carrierExportVoyageNumber.isEmpty() && !vesselName.isEmpty();
-      var hasVoyageAndServiceName = !carrierExportVoyageNumber.isEmpty() && !carrierServiceName.isEmpty();
-      var hasVoyageAndServiceCode = !carrierExportVoyageNumber.isEmpty() && !carrierServiceCode.isEmpty();
+            if (!hasExpectedDepartureDate
+                && !hasExpectedDepartureFromPlaceOfReceiptDate
+                && !hasArrivalDates
+                && !hasVoyageAndVessel
+                && !hasVoyageAndServiceName
+                && !hasVoyageAndServiceCode) {
+              issues.add(
+                  "At least one of the minimum mandatory property combinations must be provided: "
+                      + "expectedDepartureDate, expectedDepartureFromPlaceOfReceiptDate, "
+                      + "expectedArrival dates (both start and end), "
+                      + "carrierExportVoyageNumber + vesselName, "
+                      + "carrierExportVoyageNumber + carrierServiceName, or "
+                      + "carrierExportVoyageNumber + carrierServiceCode.");
+            }
 
-      if (!hasExpectedDepartureDate && !hasExpectedDepartureFromPlaceOfReceiptDate && !hasArrivalDates &&
-          !hasVoyageAndVessel && !hasVoyageAndServiceName && !hasVoyageAndServiceCode) {
-        issues.add("At least one of the minimum mandatory property combinations must be provided: " +
-                  "expectedDepartureDate, expectedDepartureFromPlaceOfReceiptDate, " +
-                  "expectedArrival dates (both start and end), " +
-                  "carrierExportVoyageNumber + vesselName, " +
-                  "carrierExportVoyageNumber + carrierServiceName, or " +
-                  "carrierExportVoyageNumber + carrierServiceCode.");
-      }
+            return issues;
+          });
 
-      return issues;
-    });
+  private static Set<String> routingReferenceRequestFieldsChecks(JsonNode body) {
+    var issues = new LinkedHashSet<String>();
+
+    var vesselName = body.path("vessel").path("name").asText("");
+    var vesselIMONumber = body.path("vessel").path("vesselIMONumber").asText("");
+    var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber").asText("");
+    var carrierServiceCode = body.path("carrierServiceCode").asText("");
+    var carrierServiceName = body.path("carrierServiceName").asText("");
+    var expectedDepartureDate = body.path("expectedDepartureDate").asText("");
+    var expectedDepartureFromPlaceOfReceiptDate =
+        body.path("expectedDepartureFromPlaceOfReceiptDate").asText("");
+
+    var polNode = getShipmentLocationTypeCode(body, "POL");
+    var preNode = getShipmentLocationTypeCode(body, "PRE");
+    var pdeNode = getShipmentLocationTypeCode(body, "PDE");
+    var podNode = getShipmentLocationTypeCode(body, "POD");
+
+    var providedArrivalStartDate =
+        body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
+    var providedArrivalEndDate = body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
+
+    if (!vesselName.isBlank()) {
+      issues.add("vessel.name must not be provided when routingReference is provided.");
+    }
+    if (!vesselIMONumber.isBlank()) {
+      issues.add("vessel.vesselIMONumber must not be provided when routingReference is provided.");
+    }
+    if (!carrierServiceName.isBlank()) {
+      issues.add("carrierServiceName must not be provided when routingReference is provided.");
+    }
+    if (!carrierServiceCode.isBlank()) {
+      issues.add("carrierServiceCode must not be provided when routingReference is provided.");
+    }
+    if (!carrierExportVoyageNumber.isBlank()) {
+      issues.add(
+          "carrierExportVoyageNumber must not be provided when routingReference is provided.");
+    }
+    if (!expectedDepartureDate.isBlank()) {
+      issues.add("expectedDepartureDate must not be provided when routingReference is provided.");
+    }
+    if (!expectedDepartureFromPlaceOfReceiptDate.isBlank()) {
+      issues.add(
+          "expectedDepartureFromPlaceOfReceiptDate must not be provided when routingReference is provided.");
+    }
+    if (!providedArrivalStartDate.isBlank()) {
+      issues.add(
+          "expectedArrivalAtPlaceOfDeliveryStartDate must not be provided when routingReference is provided.");
+    }
+    if (!providedArrivalEndDate.isBlank()) {
+      issues.add(
+          "expectedArrivalAtPlaceOfDeliveryEndDate must not be provided when routingReference is provided.");
+    }
+    if (!preNode.isMissingNode()) {
+      issues.add(
+          "shipmentLocations.locationTypeCode 'PRE' must not be provided when routingReference is provided.");
+    }
+    if (!polNode.isMissingNode()) {
+      issues.add(
+          "shipmentLocations.locationTypeCode 'POL' must not be provided when routingReference is provided.");
+    }
+    if (!pdeNode.isMissingNode()) {
+      issues.add(
+          "shipmentLocations.locationTypeCode 'PDE' must not be provided when routingReference is provided.");
+    }
+    if (!podNode.isMissingNode()) {
+      issues.add(
+          "shipmentLocations.locationTypeCode 'POD' must not be provided when routingReference is provided.");
+    }
+    return issues;
+  }
 
   private static JsonNode getShipmentLocationTypeCode(JsonNode body, @NonNull String locationTypeCode) {
     var shipmentLocations = body.path("shipmentLocations");
     return StreamSupport.stream(shipmentLocations.spliterator(), false)
       .filter(o ->  o.path("locationTypeCode").asText("").equals(locationTypeCode))
       .findFirst()
-      .orElse(null);
+      .orElse(MissingNode.getInstance());
   }
 
   static final JsonContentCheck FEEDBACKS_PRESENCE =
@@ -405,6 +509,23 @@ public class BookingChecks {
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> checks = new ArrayList<>();
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "[Scenario] Verify that a 'routingReference' is present",
+            body -> {
+              var issues = new LinkedHashSet<String>();
+
+              var scenario = dspSupplier.get().scenarioType();
+              var routingReference = body.path("routingReference").asText("");
+              if (ScenarioType.ROUTING_REFERENCE.equals(scenario)
+                  && routingReference.isBlank()) {
+                issues.add("The scenario requires the booking to have a routingReference");
+              }
+
+              return issues;
+            }));
+
     checks.add(
         JsonAttribute.customValidator(
             "[Scenario] Verify that the correct 'contractQuotationReference'/'serviceContractReference' is used",
@@ -457,7 +578,7 @@ public class BookingChecks {
   }
 
   private static void defaultContainerChecks(
-      String contextPath, JsonNode nodeToValidate, LinkedHashSet<String> issues) {
+      String contextPath, JsonNode nodeToValidate, Set<String> issues) {
     var activeReeferNode = nodeToValidate.path("activeReeferSettings");
     var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
     if (!activeReeferNode.isMissingNode()) {
@@ -470,7 +591,7 @@ public class BookingChecks {
   }
 
   private static void nonOperatingReeferContainerChecks(
-      String contextPath, JsonNode nodeToValidate, LinkedHashSet<String> issues) {
+      String contextPath, JsonNode nodeToValidate, Set<String> issues) {
     var activeReeferNode = nodeToValidate.path("activeReeferSettings");
     var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
     var isoEquipmentNode = nodeToValidate.path("ISOEquipmentCode");
@@ -490,7 +611,7 @@ public class BookingChecks {
   }
 
   private static void reeferContainerChecks(
-      String contextPath, JsonNode nodeToValidate, LinkedHashSet<String> issues) {
+      String contextPath, JsonNode nodeToValidate, Set<String> issues) {
     var activeReeferNode = nodeToValidate.path("activeReeferSettings");
     if (!activeReeferNode.isObject()) {
       issues.add("The scenario requires '%s' to have an active reefer".formatted(contextPath));

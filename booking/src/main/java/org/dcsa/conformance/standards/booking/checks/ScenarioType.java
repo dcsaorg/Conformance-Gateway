@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.booking.checks;
 
 public enum ScenarioType {
   REGULAR,
+  ROUTING_REFERENCE,
   NON_OPERATING_REEFER,
   REEFER,
   DG;
@@ -12,6 +13,7 @@ public enum ScenarioType {
           case REEFER -> "reefer";
           case NON_OPERATING_REEFER -> "non-operating-reefer";
           case DG -> "dg";
+          case ROUTING_REFERENCE -> "routing-reference";
           default -> "regular";
         };
     return "booking-api-" + version.toLowerCase() + "-" + suffix + ".json";

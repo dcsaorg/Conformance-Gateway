@@ -45,6 +45,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
                   case DG -> "DG";
                   case REEFER -> "Reefer";
                   case NON_OPERATING_REEFER -> "Non-Operating Reefer";
+                  case ROUTING_REFERENCE -> "Routing Reference";
                   default -> "Dry Cargo";
                 });
     return prompt.replace(

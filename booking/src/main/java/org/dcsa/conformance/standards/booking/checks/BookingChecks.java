@@ -285,18 +285,15 @@ public class BookingChecks {
       if("SD".equals(receiptTypeAtOrigin)) {
         var requestedEquipments = body.path("requestedEquipments");
         if (requestedEquipments.isArray()) {
-          AtomicInteger counter = new AtomicInteger(0);
           StreamSupport.stream(requestedEquipments.spliterator(), false)
             .forEach(element -> {
-              int currentCount = counter.getAndIncrement();
               var containerPositionings = element.path("containerPositionings");
               var containerPositionsDateTime = StreamSupport.stream(containerPositionings.spliterator(), false)
                 .filter(o ->  !o.path("dateTime").asText("").isEmpty())
                 .findFirst()
                 .orElse(null);
               if (containerPositionsDateTime == null){
-                issues.add("Empty container positioning DateTime at requestedEquipments position %s must be provided.".formatted(currentCount));
-              }
+                  issues.add("When receiptTypeAtOrigin is 'SD' (Store Door), requestedEquipments.containerPositionings.dateTime is required");              }
             });
         }
       }
@@ -528,6 +525,40 @@ public class BookingChecks {
 
     checks.add(
         JsonAttribute.customValidator(
+            "[Scenario] Verify store door scenario requirements",
+            body -> {
+              var issues = new LinkedHashSet<String>();
+              var scenario = dspSupplier.get().scenarioType();
+
+              if (ScenarioType.STORE_DOOR_AT_ORIGIN.equals(scenario)) {
+                issues.addAll(validateStoreDoorCommonRequirements(body));
+                var receiptTypeAtOrigin = body.path("receiptTypeAtOrigin").asText("");
+                if (!"SD".equals(receiptTypeAtOrigin)) {
+                  issues.add("The scenario requires the receiptTypeAtOrigin to be 'SD'");
+                }
+                var preNode = getShipmentLocationTypeCode(body, "PRE");
+                if (preNode.isMissingNode()) {
+                  issues.add("The scenario requires Port of Load value to be 'PRE'");
+                }
+              }
+
+              if (ScenarioType.STORE_DOOR_AT_DESTINATION.equals(scenario)) {
+                issues.addAll(validateStoreDoorCommonRequirements(body));
+                var deliveryTypeAtDestination = body.path("deliveryTypeAtDestination").asText("");
+                if (!"SD".equals(deliveryTypeAtDestination)) {
+                  issues.add("The scenario requires the deliveryTypeAtDestination to be 'SD'");
+                }
+                var pdeNode = getShipmentLocationTypeCode(body, "PDE");
+                if (pdeNode.isMissingNode()) {
+                  issues.add("The scenario requires Port of Discharge value to be 'PDE'");
+                }
+              }
+
+              return issues;
+            }));
+
+    checks.add(
+        JsonAttribute.customValidator(
             "[Scenario] Verify that the correct 'contractQuotationReference'/'serviceContractReference' is used",
             body -> {
               var contractQuotationReference = body.path("contractQuotationReference").asText("");
@@ -575,6 +606,21 @@ public class BookingChecks {
     ));
 
     return checks;
+  }
+
+  private static Set<String> validateStoreDoorCommonRequirements(JsonNode body) {
+    var issues = new LinkedHashSet<String>();
+    var cargoMovementTypeAtOrigin = body.path("cargoMovementTypeAtOrigin").asText("");
+    var cargoMovementTypeAtDestination = body.path("cargoMovementTypeAtDestination").asText("");
+
+    if (!"FCL".equals(cargoMovementTypeAtOrigin)) {
+      issues.add("The scenario requires the cargoMovementTypeAtOrigin to be 'FCL'");
+    }
+    if (!"FCL".equals(cargoMovementTypeAtDestination)) {
+      issues.add("The scenario requires the cargoMovementTypeAtDestination to be 'FCL'");
+    }
+
+    return issues;
   }
 
   private static void defaultContainerChecks(

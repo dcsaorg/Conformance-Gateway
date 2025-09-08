@@ -2,6 +2,7 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 
 @Data
 @Schema(description = "Return information")

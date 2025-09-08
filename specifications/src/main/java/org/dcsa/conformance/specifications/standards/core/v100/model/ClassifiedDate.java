@@ -1,9 +1,9 @@
-package org.dcsa.conformance.specifications.standards.an.v100.model;
+package org.dcsa.conformance.specifications.standards.core.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.DateTimeClassifierCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.types.DateTimeClassifierCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
 
 @Schema(description = "Date classified as planned, estimated or actual")
 @Data

@@ -37,3 +37,4 @@ build/
 /specifications/generated-resources/standards/ebl/v300/*.xlsx
 /specifications/generated-resources/standards/ebl/v300/*.csv
 /specifications/generated-resources/standards/ebl/v300/*.yaml
+/specifications/generated-resources/standards/tnt/v300/*.xlsx

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.FlatEvent;
 
 @Data
 @Schema(
@@ -19,6 +20,13 @@ public class GetEventsResponse {
 The list of events matching the filter specified by the request query parameters
 """)
   private List<Event> events;
+
+  @Schema(
+    description =
+"""
+Preview of what the API would look like with flat events instead of polymorphic ones 👀
+""")
+  private List<FlatEvent> flatEvents;
 
   @Schema(
       description =

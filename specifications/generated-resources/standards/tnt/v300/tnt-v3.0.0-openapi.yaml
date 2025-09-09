@@ -449,6 +449,10 @@ components:
           description: "The location of the event."
           allOf:
           - $ref: "#/components/schemas/Location"
+        transportCall:
+          description: "Transport call information"
+          allOf:
+          - $ref: "#/components/schemas/TransportCall"
         seals:
           type: "array"
           items:
@@ -537,6 +541,162 @@ components:
           example: "$.events[2].location"
       description: |
         An individual piece of feedback (potentially out of several) providing information on how an API request is processed
+    FlatEvent:
+      required:
+      - "eventTypeCode"
+      type: "object"
+      properties:
+        eventID:
+          type: "string"
+          description: |
+            Unique ID of the event.
+
+            An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        eventDateTime:
+          description: "The date and time when the real-world event has occurred or will occur."
+          allOf:
+          - $ref: "#/components/schemas/ClassifiedDateTime"
+        eventUpdatedDateTime:
+          type: "string"
+          description: "The date and time when the technical event was last updated."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        relatedDocumentReferences:
+          type: "array"
+          description: "List of documents related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        shipmentReferences:
+          type: "array"
+          description: "List of shipment references related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
+        eventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an event
+            - `SHIPMENT` - Shipment event
+            - `TRANSPORT` - Transport event
+            - `EQUIPMENT` - Equipment event
+            - `IOT` - IoT event
+            - `REEFER` - Reefer event
+          example: "EQUIPMENT"
+        shipmentEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a shipment event
+            - `RECE` - Received
+            - `DRFT` - Drafted
+            - `PENA` - Pending Approval
+            - `PENU` - Pending Update
+            - `REJE` - Rejected
+            - `APPR` - Approved
+            - `ISSU` - Arrived
+            - `SURR` - Surrendered
+            - `SUBM` - Submitted
+            - `VOID` - Void
+            - `CONF` - Confirmed
+            - `REQS` - Requested
+            - `CMPL` - Completed
+            - `HOLD` - On Hold
+            - `RELS` - Released
+          example: "APPR"
+        transportEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a transport event
+            - `ARRI` - Arrived
+            - `DEPA` - Departed
+          example: "ARRI"
+        documentReference:
+          description: "Referenced document"
+          allOf:
+          - $ref: "#/components/schemas/DocumentReference"
+        reason:
+          type: "string"
+          description: "The reason this event was sent"
+        priceCalculationDate:
+          type: "string"
+          description: |
+            Date taken in consideration for the tariff applicability, that differs depending on the trade.
+            It can vary per carrier.
+          format: "date"
+          example: "2025-01-23"
+        delayReasonCode:
+          type: "string"
+          description: |
+            Code identifying the reason for the delay, as defined by SMDG here:
+            https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+        changeRemark:
+          maxLength: 250
+          type: "string"
+          description: |
+            Free text information provided by the vessel operator regarding the reasons for the change in schedule
+            and/or plans to mitigate schedule slippage.
+          example: "Bad weather"
+        transportCall:
+          description: "Transport call information"
+          allOf:
+          - $ref: "#/components/schemas/TransportCall"
+        equipmentEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an equipment event
+            - `LOAD` - Loaded
+            - `DISC` - Discharged
+            - `GTIN` - Gated in
+            - `GTOT` - Gated out
+            - `STUF` - Stuffed
+            - `STRP` - Stripped
+            - `PICK` - Pick-up
+            - `DROP` - Drop-off
+            - `INSP` - Inspected
+            - `RSEA` - Resealed
+            - `RMVD` - Removed
+          example: "LOAD"
+        equipmentReference:
+          maxLength: 11
+          type: "string"
+          description: |
+            The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+            According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+            (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+            If a container does not comply with ISO 6346, it is suggested to follow
+            [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+            from SMDG.
+          example: "APZU4812090"
+        ISOEquipmentCode:
+          maxLength: 4
+          type: "string"
+          description: |
+            Unique code identifying the equipment size and type used to transport commodities.
+            The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+            following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
+          example: "22GP"
+        emptyIndicatorCode:
+          type: "string"
+          description: |-
+            Code to denote whether the equipment is empty or laden.
+            - `EMPTY` - Empty
+            - `LADEN` - Laden
+          example: "LADEN"
+        isTransshipmentMove:
+          type: "boolean"
+          description: |
+            Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.
+        eventLocation:
+          description: "The location of the event."
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        seals:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Seal"
+      description: "Track and Trace event"
     GeoCoordinate:
       type: "object"
       properties:
@@ -576,6 +736,12 @@ components:
             The list of events matching the filter specified by the request query parameters
           items:
             $ref: "#/components/schemas/Event"
+        flatEvents:
+          type: "array"
+          description: |
+            Preview of what the API would look like with flat events instead of polymorphic ones 👀
+          items:
+            $ref: "#/components/schemas/FlatEvent"
         feedbackElements:
           type: "array"
           description: |

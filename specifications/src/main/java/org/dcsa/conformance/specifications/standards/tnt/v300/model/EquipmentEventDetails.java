@@ -43,5 +43,7 @@ Indicates whether this event is originated in relation to an ocean transshipment
   @Schema(description = "The location of the event.")
   private Location eventLocation;
 
+  @Schema() private TransportCall transportCall;
+
   @Schema() private List<Seal> seals;
 }

@@ -30,11 +30,7 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedD
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ServiceCodeOrReference;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
 import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.FeedbackElement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsError;
@@ -46,12 +42,17 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.model.AbstractEven
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEventDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.FlatEvent;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentEventDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
 
 public class TNTStandardSpecification extends StandardSpecification {
 
@@ -93,6 +94,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         Event.class,
         Facility.class,
         FeedbackElement.class,
+        FlatEvent.class,
         GeoCoordinate.class,
         GetEventsError.class,
         GetEventsResponse.class,

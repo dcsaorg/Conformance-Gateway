@@ -30,6 +30,12 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedD
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ServiceCodeOrReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
+import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.FeedbackElement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsError;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsResponse;
@@ -95,11 +101,17 @@ public class TNTStandardSpecification extends StandardSpecification {
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,
+        RailTransport.class,
         ReeferEventDetails.class,
+        Seal.class,
+        ServiceCodeOrReference.class,
         ShipmentEventDetails.class,
         ShipmentReference.class,
         TransportCall.class,
-        TransportEventDetails.class);
+        TransportEventDetails.class,
+        TruckTransport.class,
+        VesselTransport.class,
+        VoyageNumberOrReference.class);
   }
 
   @Override

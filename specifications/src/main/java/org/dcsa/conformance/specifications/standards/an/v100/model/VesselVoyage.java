@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
+import org.dcsa.conformance.specifications.standards.core.v100.types.VesselIMONumber;
 
 @Data
 @Schema(description = "Vessel and voyage details of a transport leg")

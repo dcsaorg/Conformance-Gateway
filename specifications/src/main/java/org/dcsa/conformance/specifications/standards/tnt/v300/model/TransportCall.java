@@ -2,32 +2,54 @@ package org.dcsa.conformance.specifications.standards.tnt.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.core.v100.types.CarrierServiceCode;
-import org.dcsa.conformance.specifications.standards.core.v100.types.CarrierVoyageNumber;
-import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalServiceReference;
-import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalVoyageReference;
-import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ServiceCodeOrReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
+import org.dcsa.conformance.specifications.standards.core.v100.types.ModeOfTransportCode;
 
 @Data
 @Schema(description = "Transport call information")
 public class TransportCall {
 
-  @Schema(description = "Universally unique ID of the transport call.")
-  private UniversallyUniqueID transportCallID;
+  @Schema(
+      description =
+"""
+Carrier-defined reference of a `TransportCall`.
 
-  @Schema() private CarrierServiceCode carrierServiceCode;
+If the mode of transport is Vessel and the facility is a Port or Terminal,
+this reference should be considered a terminal call reference.
+""")
+  private String transportCallReference;
 
-  @Schema() private UniversalServiceReference universalServiceReference;
+  @Schema(
+      description =
+"""
+Transport operator's key that uniquely identifies each individual transport call.
+This key is essential to distinguish between two separate calls at the same location within one voyage.
+""")
+  private Integer transportCallSequenceNumber;
 
-  @Schema(description = "Carrier-specific identifier of the export voyage.")
-  private CarrierVoyageNumber carrierExportVoyageNumber;
+  @Schema() private Location location;
 
-  @Schema(description = "Reference of the export voyage agreed between the VSA partners.")
-  private UniversalVoyageReference universalExportVoyageReference;
+  @Schema() private ModeOfTransportCode modeOfTransport;
 
-  @Schema(description = "Carrier-specific identifier of the import voyage.")
-  private CarrierVoyageNumber carrierImportVoyageNumber;
+  @Schema(
+      description =
+"""
+The unique reference that can be used to link different `transportCallReferences` to the same port visit.
+The reference is provided by the port to uniquely identify a port call.
+""")
+  private String portVisitReference;
 
-  @Schema(description = "Reference of the import voyage agreed between the VSA partners.")
-  private UniversalVoyageReference universalImportVoyageReference;
+  @Schema() private ServiceCodeOrReference serviceCodeOrReference;
+
+  @Schema() private VoyageNumberOrReference exportVoyageNumberOrReference;
+
+  @Schema() private VoyageNumberOrReference importVoyageNumberOrReference;
+
+  @Schema() private VesselTransport vesselTransport;
+
+  @Schema() private RailTransport railTransport;
+
+  @Schema() private TruckTransport truckTransport;
 }

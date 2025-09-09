@@ -111,9 +111,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                     HttpMessageType.RESPONSE,
                     responseSchemaValidator),
                 EblChecks.siRequestContentChecks(
-                    getMatchedExchangeUuid(),
-                    expectedApiVersion,
-                    getDspSupplier()));
+                    getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()));
         return Stream.concat(
             primaryExchangeChecks,
             getSINotificationChecks(
@@ -121,7 +119,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 expectedApiVersion,
                 notificationSchemaValidator,
                 ShippingInstructionsStatus.SI_RECEIVED,
-                EblChecks.SIR_REQUIRED_IN_NOTIFICATION));
+                EblChecks.SIR_OR_TDR_REQUIRED_IN_NOTIFICATION));
       }
     };
   }

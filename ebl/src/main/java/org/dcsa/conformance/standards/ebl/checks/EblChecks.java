@@ -944,10 +944,8 @@ public class EblChecks {
           VALID_PARTY_FUNCTION,
           VALID_TYPE_OF_PERSON);
 
-  public static final JsonContentCheck SIR_REQUIRED_IN_NOTIFICATION =
-      JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
-  public static final JsonContentCheck TDR_REQUIRED_IN_NOTIFICATION =
-      JsonAttribute.mustBePresent(TD_REF_TDR_PTR);
+  public static final JsonContentCheck SIR_OR_TDR_REQUIRED_IN_NOTIFICATION =
+      JsonAttribute.atLeastOneOf(SI_REF_SIR_PTR, TD_REF_TDR_PTR);
 
   public static JsonContentCheck sirInNotificationMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.mustEqual(

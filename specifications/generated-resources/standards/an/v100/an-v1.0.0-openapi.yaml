@@ -19,7 +19,7 @@ info:
 
     The authentication and authorization in both directions between arrival notice publishers and subscribers is out of scope.
 
-    ### Work in progress
+    ### Work in progress ⚠️
 
     The DCSA Arrival Notice standard, including this API, is currently being designed and is **not** ready for general adoption yet.
   contact:
@@ -878,9 +878,9 @@ components:
           description: "Payment location"
           allOf:
           - $ref: "#/components/schemas/Location"
-        chargePartnerCode:
+        invoicePayerCode:
           type: "string"
-          description: "Code of the partner responsible for the payment"
+          description: "Code used to identify the party responsible for the payment"
           example: "000123456"
       description: "Addresses the monetary value of freight and other service charges for a shipment."
     ClassifiedDate:
@@ -1405,19 +1405,17 @@ components:
           maxLength: 6
           type: "string"
           description: |
-            The code used for identifying the specific facility. This code does not include the UN Location Code.
-            The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-            - `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-            - `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))
+            Code identifying a specific facility, as defined by the `facilityCodeListProvider`.
           example: "ADT"
         facilityCodeListProvider:
           type: "string"
           description: |
-            The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-            - `BIC` (Requires a UN Location Code)
-            - `SMDG` (Requires a UN Location Code)
+            Code list provider (each with its relevant code list) defining the `facilityCode`:
+            - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+            - `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))
           example: "SMDG"
-      description: "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC)."
+      description: |
+        Facility identified by a code as defined by a code list provider.
     FeedbackElement:
       type: "object"
       properties:
@@ -1817,7 +1815,8 @@ components:
             More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: "NLAMS"
         facility:
-          description: "Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC)."
+          description: |
+            Facility identified by a code as defined by a code list provider.
           allOf:
           - $ref: "#/components/schemas/Facility"
         geoCoordinate:

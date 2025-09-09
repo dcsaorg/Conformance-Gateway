@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
+import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreightPaymentStatus;
 
 @Schema(description = "Full content of an Arrival Notice document.")

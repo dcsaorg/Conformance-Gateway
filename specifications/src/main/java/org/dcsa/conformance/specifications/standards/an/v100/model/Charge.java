@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.dcsa.conformance.specifications.generator.ClearSchemaConstraints;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CurrencyCode;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 
 @Schema(
     description =
@@ -50,6 +51,8 @@ to a vessel rate of exchange or a daily rate of exchange.
   @Schema(description = "Payment location")
   protected Location paymentLocation;
 
-  @Schema(example = "000123456", description = "Code of the partner responsible for the payment")
-  protected String chargePartnerCode;
+  @Schema(
+      example = "000123456",
+      description = "Code used to identify the party responsible for the payment")
+  protected String invoicePayerCode;
 }

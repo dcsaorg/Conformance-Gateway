@@ -39,9 +39,9 @@ The publisher must clearly indicate in its API documentation whether the specifi
 to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / charges / chargeCode",chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 "ArrivalNotice / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
-"ArrivalNotice / charges / chargePartnerCode",chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
 "ArrivalNotice / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 "ArrivalNotice / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+"ArrivalNotice / charges / invoicePayerCode",invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
 "ArrivalNotice / charges / paymentCurrency",paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 "ArrivalNotice / charges / paymentLocation",paymentLocation,Location,,,,,"Payment location",
 "ArrivalNotice / charges / paymentLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -59,14 +59,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / charges / paymentLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / charges / paymentLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / charges / paymentLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / charges / paymentLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / charges / paymentLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / charges / paymentLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / charges / paymentLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / charges / paymentLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / charges / paymentLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / charges / paymentLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -138,9 +135,9 @@ The publisher must clearly indicate in its API documentation whether the specifi
 to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / chargeCode",chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 "ArrivalNotice / consignmentItems / cargoItems / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
-"ArrivalNotice / consignmentItems / cargoItems / charges / chargePartnerCode",chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
 "ArrivalNotice / consignmentItems / cargoItems / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+"ArrivalNotice / consignmentItems / cargoItems / charges / invoicePayerCode",invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentCurrency",paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation",paymentLocation,Location,,,,,"Payment location",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -158,14 +155,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -409,14 +403,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / customsClearance / customsClearancePoint / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / customsClearance / customsClearancePoint / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / customsClearance / customsClearancePoint / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / customsClearance / customsClearancePoint / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / customsClearance / customsClearancePoint / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / customsClearance / customsClearancePoint / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / customsClearance / customsClearancePoint / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / customsClearance / customsClearancePoint / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / customsClearance / customsClearancePoint / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / customsClearance / customsClearancePoint / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -603,14 +594,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / pickupInformation / pickupLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / pickupInformation / pickupLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / pickupInformation / pickupLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / pickupInformation / pickupLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / pickupInformation / pickupLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / pickupInformation / pickupLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / pickupInformation / pickupLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / pickupInformation / pickupLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / pickupInformation / pickupLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / pickupInformation / pickupLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -665,14 +653,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / returnInformation / returnLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / returnInformation / returnLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / returnInformation / returnLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / returnInformation / returnLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / returnInformation / returnLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / returnInformation / returnLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / returnInformation / returnLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / returnInformation / returnLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / returnInformation / returnLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / returnInformation / returnLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -706,14 +691,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / borderCrossingLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / transport / borderCrossingLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / transport / borderCrossingLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / transport / borderCrossingLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / transport / borderCrossingLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / transport / borderCrossingLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / transport / borderCrossingLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / transport / borderCrossingLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / transport / borderCrossingLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / transport / borderCrossingLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -780,14 +762,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / legs / dischargeLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / transport / legs / dischargeLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / transport / legs / dischargeLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / transport / legs / dischargeLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / transport / legs / dischargeLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / transport / legs / dischargeLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / transport / legs / dischargeLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / transport / legs / dischargeLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / transport / legs / dischargeLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / transport / legs / dischargeLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -817,14 +796,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / legs / loadLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / transport / legs / loadLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / transport / legs / loadLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / transport / legs / loadLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / transport / legs / loadLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / transport / legs / loadLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / transport / legs / loadLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / transport / legs / loadLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / transport / legs / loadLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / transport / legs / loadLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -893,14 +869,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / placeOfDelivery / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / transport / placeOfDelivery / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / transport / placeOfDelivery / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / transport / placeOfDelivery / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / transport / placeOfDelivery / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / transport / placeOfDelivery / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / transport / placeOfDelivery / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / transport / placeOfDelivery / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / transport / placeOfDelivery / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / transport / placeOfDelivery / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -938,14 +911,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / placeOfReceipt / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / transport / placeOfReceipt / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / transport / placeOfReceipt / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / transport / placeOfReceipt / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / transport / placeOfReceipt / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / transport / placeOfReceipt / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / transport / placeOfReceipt / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / transport / placeOfReceipt / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / transport / placeOfReceipt / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / transport / placeOfReceipt / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -975,14 +945,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / portOfDischarge / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / transport / portOfDischarge / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / transport / portOfDischarge / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / transport / portOfDischarge / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / transport / portOfDischarge / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / transport / portOfDischarge / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / transport / portOfDischarge / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / transport / portOfDischarge / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / transport / portOfDischarge / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / transport / portOfDischarge / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -1019,14 +986,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / portOfLoading / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / transport / portOfLoading / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / transport / portOfLoading / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / transport / portOfLoading / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / transport / portOfLoading / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / transport / portOfLoading / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / transport / portOfLoading / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / transport / portOfLoading / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / transport / portOfLoading / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / transport / portOfLoading / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -1105,9 +1069,9 @@ The publisher must clearly indicate in its API documentation whether the specifi
 to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / utilizedTransportEquipments / charges / chargeCode",chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 "ArrivalNotice / utilizedTransportEquipments / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
-"ArrivalNotice / utilizedTransportEquipments / charges / chargePartnerCode",chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
 "ArrivalNotice / utilizedTransportEquipments / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 "ArrivalNotice / utilizedTransportEquipments / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+"ArrivalNotice / utilizedTransportEquipments / charges / invoicePayerCode",invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentCurrency",paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation",paymentLocation,Location,,,,,"Payment location",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -1125,14 +1089,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -1190,14 +1151,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -1241,14 +1199,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNotice / utilizedTransportEquipments / returnInformation / returnLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -1311,14 +1266,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNoticeNotification / placeOfDelivery / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNoticeNotification / placeOfDelivery / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNoticeNotification / placeOfDelivery / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNoticeNotification / placeOfDelivery / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNoticeNotification / placeOfDelivery / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNoticeNotification / placeOfDelivery / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNoticeNotification / placeOfDelivery / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNoticeNotification / placeOfDelivery / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNoticeNotification / placeOfDelivery / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNoticeNotification / placeOfDelivery / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -1355,14 +1307,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNoticeNotification / portOfDischarge / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 "ArrivalNoticeNotification / portOfDischarge / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 "ArrivalNoticeNotification / portOfDischarge / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"ArrivalNoticeNotification / portOfDischarge / facility",facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
-"ArrivalNoticeNotification / portOfDischarge / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"ArrivalNoticeNotification / portOfDischarge / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+"ArrivalNoticeNotification / portOfDischarge / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"ArrivalNoticeNotification / portOfDischarge / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"ArrivalNoticeNotification / portOfDischarge / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 "ArrivalNoticeNotification / portOfDischarge / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location

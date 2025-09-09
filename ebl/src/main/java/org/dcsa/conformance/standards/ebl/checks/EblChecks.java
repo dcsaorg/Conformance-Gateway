@@ -996,16 +996,12 @@ public class EblChecks {
         ));
 
       checks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-          "[Scenario] CargoItem and DG vs. outerPackaging in the SI",
-          mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
-          JsonAttribute.ifMatchedThenElse(
-            ignored -> dspSupplier.get().scenarioType().hasDG(),
-            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBeAbsent()),
-            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent())
-          )
-        )
-      );
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "[Scenario] Non-DG: outerPackaging must be present in the SI",
+              mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
+              JsonAttribute.ifMatchedThen(
+                  ignored -> !dspSupplier.get().scenarioType().hasDG(),
+                  JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent()))));
     }
 
     checks.add(JsonAttribute.customValidator(
@@ -1022,6 +1018,11 @@ public class EblChecks {
         JsonAttribute.customValidator(
             "[Scenario] Verify that the scenario contains the required amount of 'utilizedTransportEquipments'",
             utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "[Scenario] Verify that the scenario contains the required amount of 'consignmentItems'",
+            consignmentItemsScenarioSizeCheck(dspSupplier)));
 
     return checks;
   }
@@ -1261,13 +1262,12 @@ public class EblChecks {
       TransportDocumentStatus transportDocumentStatus,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
-        getTdPayloadChecks(standardVersion, transportDocumentStatus, dspSupplier);
+        getTdPayloadChecks(transportDocumentStatus, dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }
 
   public static List<JsonContentCheck> getTdPayloadChecks(
-      String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
@@ -1283,6 +1283,7 @@ public class EblChecks {
               var scenario = dspSupplier.get().scenarioType();
               var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
               var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
+              var isShipperOwned = nodeToValidate.path("isShipperOwned");
               var issues = new LinkedHashSet<String>();
               switch (scenario) {
                 case ACTIVE_REEFER -> {
@@ -1296,18 +1297,6 @@ public class EblChecks {
                   if (!nonOperatingReeferNode.asBoolean(false)) {
                     issues.add(
                         "The scenario requires '%s.isNonOperatingReefer' to be true"
-                            .formatted(contextPath));
-                  }
-                }
-                default -> {
-                  if (!activeReeferNode.isMissingNode()) {
-                    issues.add(
-                        "The scenario requires '%s' to NOT have an active reefer"
-                            .formatted(contextPath));
-                  }
-                  if (nonOperatingReeferNode.asBoolean(false)) {
-                    issues.add(
-                        "The scenario requires '%s.isNonOperatingReefer' to be omitted or false (depending on the container ISO code)"
                             .formatted(contextPath));
                   }
                 }
@@ -1328,10 +1317,19 @@ public class EblChecks {
                       "The scenario requires '%s' to contain dangerous goods"
                           .formatted(contextPath));
                 }
-              } else {
-                if (!nodeToValidate.isMissingNode() || !nodeToValidate.isEmpty()) {
+              }
+              return Set.of();
+            }));
+    jsonContentChecks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "[Scenario] The 'isShipperOwned' should be 'true for SOC scenarios",
+            mav -> mav.submitAllMatching("utilizedTransportEquipments.*"),
+            (nodeToValidate, contextPath) -> {
+              var scenario = dspSupplier.get().scenarioType();
+              if (scenario == ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES) {
+                if (!nodeToValidate.path("isShipperOwned").asBoolean(false)) {
                   return Set.of(
-                      "The scenario requires '%s' to NOT contain any dangerous goods"
+                      "The scenario requires '%s.isShipperOwned' to be true"
                           .formatted(contextPath));
                 }
               }
@@ -1359,6 +1357,30 @@ public class EblChecks {
         String path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
         return Set.of(
             "The scenario requires exactly %d 'utilizedTransportEquipments' but found %d at %s"
+                .formatted(expectedSize, actualSize, path));
+      }
+
+      return Set.of();
+    };
+  }
+
+  public static JsonContentMatchedValidation consignmentItemsScenarioSizeCheck(
+      Supplier<DynamicScenarioParameters> dspSupplier) {
+    return (body, contextPath) -> {
+      var scenario = dspSupplier.get().scenarioType();
+      var consignmentItems = body.path(CONSIGNMENT_ITEMS);
+      int actualSize = consignmentItems.size();
+
+      Integer expectedSize =
+          switch (scenario) {
+            case ScenarioType.REGULAR_2C_1U, ScenarioType.REGULAR_2C_2U -> 2;
+            default -> null;
+          };
+
+      if (expectedSize != null && actualSize != expectedSize) {
+        String path = concatContextPath(contextPath, CONSIGNMENT_ITEMS);
+        return Set.of(
+            "The scenario requires exactly %d 'consignemntItems' but found %d at %s"
                 .formatted(expectedSize, actualSize, path));
       }
 

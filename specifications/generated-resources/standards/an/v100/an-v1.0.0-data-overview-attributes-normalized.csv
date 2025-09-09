@@ -174,9 +174,9 @@ The publisher must clearly indicate in its API documentation whether the specifi
 to a vessel rate of exchange or a daily rate of exchange.",
 Charge,chargeCode,string,,maxLength=50,,FRT00,"Code associated with the charge",
 Charge,chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
-Charge,chargePartnerCode,string,,,,000123456,"Code of the partner responsible for the payment",
 Charge,currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 Charge,currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
+Charge,invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
 Charge,paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 Charge,paymentLocation,Location,,,,,"Payment location",
 Charge,paymentTermCode,string,,,,PRE,"An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
@@ -347,13 +347,10 @@ ExportLicense,isRequired,boolean,,,,true,"Information provided by the shipper to
 **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.",
 ExportLicense,issueDate,"string(date)",,,,2024-09-14,"Issue date of the `Export License`.",
 ExportLicense,reference,string,,maxLength=35,,EMC007123,"Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.",
-Facility,facilityCode,string,,maxLength=6,,ADT,"The code used for identifying the specific facility. This code does not include the UN Location Code.
-The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:
-- `SMDG` (the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/))
-- `BIC` (the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-Facility,facilityCodeListProvider,string,,,,SMDG,"The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`
-- `BIC` (Requires a UN Location Code)
-- `SMDG` (Requires a UN Location Code)",
+Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+Facility,facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed
 to a user of the arrival notice publishing organization",
 FeedbackElement,propertyPath,string,,maxLength=1000,,"$.arrivalNotices[2].pickupInformation.location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
@@ -420,6 +417,10 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `ETEU` (eTEU)
 - `TRAC` (Enigio trace:original)
 - `BRIT` (BRITC eBL)
+- `COVA` (Covantis)
+- `ETIT` (e-title)
+- `KTNE` (KTNET)
+- `CRED` (Credore)
 - `GSBN` (Global Shipping Business Network)
 - `WISE` (WiseTech)
 - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -480,7 +481,7 @@ Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specify
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 Location,address,Address,,,,,"Location address",
-Location,facility,Facility,,,,,"Facility location expressed using a facility code. Requires a code and a provider (SMDG or BIC).",
+Location,facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
 Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
 - `CLOC` - Customer location
@@ -545,7 +546,8 @@ Reference,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA
 - `CR` (Customer’s Reference)
 - `AKG` (Vehicle Identification Number)
 - `CPR` (Canadian Pacific Railway System)
-- `CNR` (Canadian National Railway Unit)",
+- `CNR` (Canadian National Railway Unit)
+- `VBN` (V-Bond Number)",
 Reference,value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
 ReferenceConsignmentItem,type,string,,maxLength=3,,CR,"The reference type codes defined by DCSA. Possible values are:
 - `CR` (Customer’s Reference)

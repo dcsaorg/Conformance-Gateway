@@ -996,16 +996,12 @@ public class EblChecks {
         ));
 
       checks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-          "[Scenario] CargoItem and DG vs. outerPackaging in the SI",
-          mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
-          JsonAttribute.ifMatchedThenElse(
-            ignored -> dspSupplier.get().scenarioType().hasDG(),
-            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBeAbsent()),
-            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent())
-          )
-        )
-      );
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "[Scenario] Non-DG: outerPackaging must be present in the SI",
+              mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
+              JsonAttribute.ifMatchedThen(
+                  ignored -> !dspSupplier.get().scenarioType().hasDG(),
+                  JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent()))));
     }
 
     checks.add(JsonAttribute.customValidator(

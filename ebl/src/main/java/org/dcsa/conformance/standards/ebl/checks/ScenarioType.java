@@ -59,4 +59,21 @@ public enum ScenarioType {
         };
     return "ebl-api-" + version.toLowerCase() + "-" + suffix + ".json";
   }
+
+  public String getTDScenarioTypeName() {
+    return switch (this) {
+      case REGULAR_SWB -> "SWB";
+      case REGULAR_STRAIGHT_BL -> "STRAIGHT_BL";
+      case REGULAR_NEGOTIABLE_BL -> "NEGOTIABLE_BL";
+      case REGULAR_2C_1U -> "2C_1U";
+      case REGULAR_2C_2U -> "2C_2U";
+      case REGULAR_SWB_SOC_AND_REFERENCES -> "SOC";
+      case REGULAR_SWB_AMF -> "AMF";
+      case DG -> "DG";
+      case ACTIVE_REEFER -> "ACTIVE_REEFER";
+      case NON_OPERATING_REEFER -> "NON_OPERATING_REEFER";
+      case REGULAR_CLAD -> "CLAD";
+      default -> "";
+    };
+  }
 }

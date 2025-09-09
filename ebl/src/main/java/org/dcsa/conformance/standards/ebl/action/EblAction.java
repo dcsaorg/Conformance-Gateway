@@ -247,7 +247,6 @@ public abstract class EblAction extends ConformanceAction {
             notificationSchemaValidator),
         new CarrierTdNotificationPayloadRequestConformanceCheck(
             notificationExchangeUuid,
-            expectedApiVersion,
             transportDocumentStatus,
             tdrIsKnown,
             getDspSupplier()));

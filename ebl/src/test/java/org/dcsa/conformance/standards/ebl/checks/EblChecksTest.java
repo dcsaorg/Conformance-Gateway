@@ -174,6 +174,7 @@ class EblChecksTest {
     ObjectNode filing = advanceManifestFilings.addObject();
     filing.put("manifestTypeCode", "ENS");
     filing.put("advanceManifestFilingsHouseBLPerformedBy", "CARRIER");
+    rootNode.put("isHouseBillOfLadingsIssued", false);
     assertFalse(BUYER_AND_SELLER_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
 
     documentParties.putObject("buyer");
@@ -356,14 +357,13 @@ class EblChecksTest {
   }
 
   @Test
-  void testEBLSCannotHaveOriginalsWithCharges() {
+  void testSWBsCannotHaveOriginalsWithCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "SWB");
-    rootNode.put("numberOfOriginalsWithCharges", 0);
     assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);
@@ -378,14 +378,13 @@ class EblChecksTest {
   }
 
   @Test
-  void testEBLSCannotHaveOriginalsWithoutCharges() {
+  void testSWBsCannotHaveOriginalsWithoutCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "SWB");
-    rootNode.put("numberOfOriginalsWithoutCharges", 0);
     assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);

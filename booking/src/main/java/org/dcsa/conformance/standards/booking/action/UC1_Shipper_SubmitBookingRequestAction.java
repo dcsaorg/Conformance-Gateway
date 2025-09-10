@@ -36,22 +36,19 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
-    String prompt =
-        getMarkdownHumanReadablePrompt(
-                "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
-            .replace(
-                "BOOKING_TYPE_PLACEHOLDER",
-                switch (getDspSupplier().get().scenarioType()) {
-                  case DG -> "DG";
-                  case REEFER -> "Reefer";
-                  case NON_OPERATING_REEFER -> "Non-Operating Reefer";
-                  case ROUTING_REFERENCE -> "Routing Reference";
-                  case STORE_DOOR_AT_ORIGIN -> "Store Door at Origin";
-                  case STORE_DOOR_AT_DESTINATION -> "Store Door at Destination";
-                  default -> "Dry Cargo";
-                });
-    return prompt.replace(
-        "CARRIER_SCENARIO_PARAMETERS", getBookingPayloadSupplier().get().toString());
+    return getMarkdownHumanReadablePrompt(
+            "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
+        .replace(
+            "BOOKING_TYPE_PLACEHOLDER",
+            switch (getDspSupplier().get().scenarioType()) {
+              case DG -> "DG";
+              case REEFER -> "Reefer";
+              case NON_OPERATING_REEFER -> "Non-Operating Reefer";
+              case ROUTING_REFERENCE -> "Routing Reference";
+              case STORE_DOOR_AT_ORIGIN -> "Store Door at Origin";
+              case STORE_DOOR_AT_DESTINATION -> "Store Door at Destination";
+              default -> "Dry Cargo";
+            });
   }
 
   @Override

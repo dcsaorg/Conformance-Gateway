@@ -53,6 +53,7 @@
 		<module>sandbox</module>
 		<module>specifications</module>
 		<module>spring-boot</module>
+		<module>booking-and-ebl</module>
 	</modules>
 
 	<dependencyManagement>

@@ -88,7 +88,6 @@ public class ANStandardSpecification extends StandardSpecification {
 
   public static final String TAG_ARRIVAL_NOTICE_PUBLISHERS = "AN Publisher Endpoints";
   public static final String TAG_ARRIVAL_NOTICE_SUBSCRIBERS = "AN Subscriber Endpoints";
-  public static final String API_VERSION_HEADER_REF = "#/components/headers/" + API_VERSION_HEADER;
 
   private final GetArrivalNoticesEndpoint getArrivalNoticesEndpoint;
 

@@ -29,6 +29,7 @@ import org.dcsa.conformance.specifications.dataoverview.LegendMetadata;
 public abstract class StandardSpecification {
 
   public static final String API_VERSION_HEADER = "API-Version";
+  public static final String API_VERSION_HEADER_REF = "#/components/headers/" + API_VERSION_HEADER;
 
   private static final String API_VERSION_DESCRIPTION =
       "Every API request and response must contain the `API-Version` header,"

@@ -9,7 +9,8 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Schema(
     type = "string",
     example = "EST",
-    description = "Classifier denoting whether a date/time is planned, estimated or actual")
+    description = "Classifier denoting whether a date/time is planned, estimated or actual",
+    maxLength = 10)
 @AllArgsConstructor
 public enum DateTimeClassifierCode implements EnumBase {
   PLN("Planned"),

@@ -389,12 +389,14 @@ components:
       type: "object"
       properties:
         value:
+          maxLength: 30
           type: "string"
           description: |
             Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         classifier:
+          maxLength: 10
           type: "string"
           description: |-
             Classifier denoting whether a date/time is planned, estimated or actual
@@ -518,6 +520,7 @@ components:
           allOf:
           - $ref: "#/components/schemas/ClassifiedDateTime"
         eventUpdatedDateTime:
+          maxLength: 30
           type: "string"
           description: "The date and time when the technical event was last updated."
           format: "date-time"
@@ -576,6 +579,7 @@ components:
             Code identifying a specific facility, as defined by the `facilityCodeListProvider`.
           example: "ADT"
         facilityCodeListProvider:
+          maxLength: 10
           type: "string"
           description: |
             Code list provider (each with its relevant code list) defining the `facilityCode`:

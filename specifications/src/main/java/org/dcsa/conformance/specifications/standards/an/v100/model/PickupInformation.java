@@ -9,13 +9,14 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 public class PickupInformation {
 
   @Schema(
-      example="780379",
+      example = "780379",
       description =
 """
 A pickup number is a generated number assigned to each import container individually.
 A trucker picking up a container must present the correct pickup number.
 If the pickup number is incorrect, the trucker will have his pickup request denied.
-""")
+""",
+      maxLength = 50)
   protected String pickupNumber;
 
   @Schema(

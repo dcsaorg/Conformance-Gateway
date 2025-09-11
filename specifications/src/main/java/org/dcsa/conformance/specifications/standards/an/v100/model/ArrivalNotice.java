@@ -81,7 +81,8 @@ The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (p
       - `SMDG` (Ship Message Design Group)
       - `NMFTA` (National Motor Freight Traffic Association)
       """,
-      example = "NMFTA")
+      example = "NMFTA",
+      maxLength = 10)
   private String carrierCodeListProvider;
 
   @Schema(description = "The party to contact for any inquiries related to this Arrival Notice.")
@@ -123,7 +124,8 @@ e.g. additional required documents to prepare and present for shipment release -
   @Schema(
       description =
           "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)",
-      example = "SWB")
+      example = "SWB",
+      maxLength = 10)
   private String transportDocumentTypeCode;
 
   @Schema(

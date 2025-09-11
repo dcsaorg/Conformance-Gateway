@@ -26,6 +26,8 @@ Updated in object `Location` for property `facilityTypeCode` the list of values,
 
 Updated multiple property example values for consistency and correctness. (SD-2461)
 
+Added the missing maxLength to all String properties. (SD-2462)
+
 
 ## Snapshot v1.0.0-20250829-beta
 

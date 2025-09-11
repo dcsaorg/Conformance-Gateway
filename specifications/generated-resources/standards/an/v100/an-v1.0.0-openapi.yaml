@@ -352,6 +352,7 @@ components:
           format: "float"
           example: -15
         temperatureUnit:
+          maxLength: 10
           type: "string"
           description: |
             The unit for temperature in Celsius or Fahrenheit
@@ -381,6 +382,7 @@ components:
           format: "float"
           example: 15.4
         airExchangeUnit:
+          maxLength: 10
           type: "string"
           description: |
             The unit for `airExchange` in metrics- or imperial- units per hour
@@ -459,6 +461,7 @@ components:
       type: "object"
       properties:
         issueDateTime:
+          maxLength: 30
           type: "string"
           description: "The date and time when the Arrival Notice was issued."
           format: "date-time"
@@ -507,6 +510,7 @@ components:
             `carrierCodeListProvider` defines which list the `carrierCode` is based upon.
           example: "MMCU"
         carrierCodeListProvider:
+          maxLength: 10
           type: "string"
           description: |
             The code list provider for the `carrierCode`. Possible values are:
@@ -552,6 +556,7 @@ components:
           description: "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment."
           example: "HHL71800000"
         transportDocumentTypeCode:
+          maxLength: 10
           type: "string"
           description: |-
             Specifies the type of the transport document
@@ -661,6 +666,7 @@ components:
       type: "object"
       properties:
         issueDateTime:
+          maxLength: 30
           type: "string"
           description: "The date and time when the Arrival Notice was issued."
           format: "date-time"
@@ -832,6 +838,7 @@ components:
             The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).
           example: "DKK"
         paymentTermCode:
+          maxLength: 10
           type: "string"
           description: |
             An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
@@ -887,6 +894,7 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
         invoicePayerCode:
+          maxLength: 50
           type: "string"
           description: "Code used to identify the party responsible for the payment"
           example: "2066095"
@@ -902,6 +910,7 @@ components:
           format: "date"
           example: "2025-01-23"
         classifier:
+          maxLength: 10
           type: "string"
           description: |-
             Classifier denoting whether a date/time is planned, estimated or actual
@@ -914,12 +923,14 @@ components:
       type: "object"
       properties:
         value:
+          maxLength: 30
           type: "string"
           description: |
             Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         classifier:
+          maxLength: 10
           type: "string"
           description: |-
             Classifier denoting whether a date/time is planned, estimated or actual
@@ -1318,6 +1329,7 @@ components:
       type: "object"
       properties:
         name:
+          maxLength: 255
           type: "string"
           description: "Document name"
           example: "20250123 AN XYZ01234.docx"
@@ -1326,6 +1338,7 @@ components:
           description: "Base64 representation of the binary document content"
           example: "RXhhbXBsZSBBTiBjb250ZW50"
         contentType:
+          maxLength: 255
           type: "string"
           description: "Content type of document"
           example: "application/msword"
@@ -1417,6 +1430,7 @@ components:
             Code identifying a specific facility, as defined by the `facilityCodeListProvider`.
           example: "ADT"
         facilityCodeListProvider:
+          maxLength: 10
           type: "string"
           description: |
             Code list provider (each with its relevant code list) defining the `facilityCode`:
@@ -1461,6 +1475,7 @@ components:
           type: "array"
           description: "One or more types applicable to this free time condition."
           items:
+            maxLength: 10
             type: "string"
             description: |-
               Code used to denote the type of free time.
@@ -1751,6 +1766,7 @@ components:
       type: "object"
       properties:
         temperatureUnit:
+          maxLength: 10
           type: "string"
           description: |
             The unit for **all attributes in the limits structure** in Celsius or Fahrenheit
@@ -1961,6 +1977,7 @@ components:
       type: "object"
       properties:
         pickupNumber:
+          maxLength: 50
           type: "string"
           description: |
             A pickup number is a generated number assigned to each import container individually.
@@ -2109,6 +2126,7 @@ components:
       type: "object"
       properties:
         turnInReference:
+          maxLength: 50
           type: "string"
           description: "Code or reference required when returning equipment to the depot."
           example: "HLCSTD45"
@@ -2132,6 +2150,7 @@ components:
           description: "Identifies a seal affixed to the container."
           example: "VET123"
         source:
+          maxLength: 10
           type: "string"
           description: |
             The source of the seal, namely who has affixed the seal.
@@ -2376,6 +2395,7 @@ components:
           format: "float"
           example: 2.4
         unit:
+          maxLength: 10
           type: "string"
           description: |
             Measurement unit in which the volume `value` is expressed:
@@ -2393,6 +2413,7 @@ components:
           format: "float"
           example: 2.4
         unit:
+          maxLength: 10
           type: "string"
           description: |
             Measurement unit in which the weight `value` is expressed:

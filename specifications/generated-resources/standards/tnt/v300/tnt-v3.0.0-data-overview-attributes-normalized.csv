@@ -25,11 +25,11 @@ Address,postCode,string,,maxLength=10,,"1047 HM","The post code of the address."
 Address,stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 Address,street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 Address,streetNumber,string,,maxLength=50,,100,"The number of the street.",
-ClassifiedDateTime,classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+ClassifiedDateTime,classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-ClassifiedDateTime,value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+ClassifiedDateTime,value,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
 DocumentReference,reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a document
 - `CBR` - Carrier Booking Request
@@ -95,7 +95,7 @@ Event,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an e
 - `EQUIPMENT` - Equipment event
 - `IOT` - IoT event
 - `REEFER` - Reefer event",
-Event,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+Event,eventUpdatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
 Event,iotEventDetails,IotEventDetails,,,,,"IoT-specific event details",
 Event,reason,string,,,,,"The reason this event was sent",
 Event,reeferEventDetails,ReeferEventDetails,,,,,"Reefer-specific event details",
@@ -104,7 +104,7 @@ Event,shipmentEventDetails,ShipmentEventDetails,,,,,"Shipment-specific event det
 Event,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 Event,transportEventDetails,TransportEventDetails,,,,,"Transport-specific event details",
 Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
-Facility,facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+Facility,facilityCodeListProvider,string,,maxLength=10,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
 - `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed to a user of the event publishing organization",

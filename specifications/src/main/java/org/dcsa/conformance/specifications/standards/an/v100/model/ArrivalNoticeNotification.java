@@ -41,7 +41,8 @@ public class ArrivalNoticeNotification {
       description =
 """
 The reference of the transport document for which this arrival notice was created
-""")
+""",
+      maxLength = 20)
   private String transportDocumentReference;
 
   @Schema(

@@ -1365,7 +1365,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 - `ACT` - Actual",
 "ArrivalNoticeNotification / portOfDischargeArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
-"ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,,,TDR1234,"The reference of the transport document for which this arrival notice was created",
+"ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,maxLength=20,,TDR1234,"The reference of the transport document for which this arrival notice was created",
 "ArrivalNoticeNotification / typeLabel",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
 for example ""English, consignee, USD"" or ""No charges, French"".
 

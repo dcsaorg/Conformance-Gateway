@@ -700,6 +700,7 @@ components:
             which relies on the `issueDateTime` instead.
           example: "Warning"
         transportDocumentReference:
+          maxLength: 20
           type: "string"
           description: |
             The reference of the transport document for which this arrival notice was created

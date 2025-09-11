@@ -8,13 +8,15 @@ Updated the document party code list providers to match the list from version 3.
 
 Renamed in object `Charge` property `chargePartnerCode` to `invoicePayerCode`. (SD-2437)
 
-Added the `API-Version` header parameter. (SD-2450)
+Added the missing `API-Version` header parameter. (SD-2450)
 
 Fixed the type of the `limit` pagination parameter. (SD-2451)
 
 Fixed a typo in the GET endpoint description. (SD-2452)
 
 Fixed a typo in the FeedbackElement propertyPath example. (SD-2453)
+
+Added in object `ArrivalNoticeNotification` to the property `transportDocumentReference` the missing `maxLength`. (SD-2454)
 
 
 ## Snapshot v1.0.0-20250829-beta

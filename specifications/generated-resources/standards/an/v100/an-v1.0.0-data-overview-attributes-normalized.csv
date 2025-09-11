@@ -118,7 +118,7 @@ responsibility of the shipping line ceases",
 "ArrivalNoticeNotification","placeOfDeliveryArrivalDate",ClassifiedDate,,,,,"The date of arrival of the shipment at Place of Delivery.",
 "ArrivalNoticeNotification",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel",
 "ArrivalNoticeNotification","portOfDischargeArrivalDate",ClassifiedDate,,,,,"The date of arrival of the vessel at the Port of Discharge.",
-"ArrivalNoticeNotification","transportDocumentReference",string,yes,,,TDR1234,"The reference of the transport document for which this arrival notice was created",
+"ArrivalNoticeNotification","transportDocumentReference",string,yes,maxLength=20,,TDR1234,"The reference of the transport document for which this arrival notice was created",
 "ArrivalNoticeNotification",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
 for example ""English, consignee, USD"" or ""No charges, French"".
 

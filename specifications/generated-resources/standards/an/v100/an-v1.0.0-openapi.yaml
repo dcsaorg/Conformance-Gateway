@@ -81,7 +81,7 @@ paths:
 
         Whenever the query parameters filter could retrieve large number of historical arrival notices (for example when filtering only by vessel name or IMO number), the request should also include at least the `portOfDischargeArrivalDateMin` query parameter and could also include the `portOfDischargeArrivalDateMax` query parameter.
 
-        The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having an `portOfDischargeArrivalDate` within those ranges.
+        The arrival notice publisher can separately also decide to have default relative date ranges and only return arrival notices having a `portOfDischargeArrivalDate` within those ranges.
 
         ### Filtering by region or language
 

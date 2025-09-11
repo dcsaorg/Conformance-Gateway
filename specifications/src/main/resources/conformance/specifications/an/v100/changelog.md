@@ -12,6 +12,8 @@ Added the `API-Version` header parameter. (SD-2450)
 
 Fixed the type of the `limit` pagination parameter. (SD-2451)
 
+Fixed a typo in the GET endpoint description. (SD-2452)
+
 
 ## Snapshot v1.0.0-20250829-beta
 

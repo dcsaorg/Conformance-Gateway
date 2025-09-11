@@ -76,7 +76,7 @@ public class BookingAndEblComponentFactory extends AbstractComponentFactory {
   }
 
   @Override
-  protected Map<String, ScenarioListBuilder> createModuleScenarioListBuilders(
+  protected Map<String, BookingAndEblScenarioListBuilder> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
     return BookingAndEblScenarioListBuilder.createModuleScenarioListBuilders(

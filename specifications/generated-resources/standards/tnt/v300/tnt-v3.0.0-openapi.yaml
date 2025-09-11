@@ -991,11 +991,13 @@ components:
           allOf:
           - $ref: "#/components/schemas/ServiceCodeOrReference"
         exportVoyageNumberOrReference:
-          description: "Carrier voyage number and/or universal voyage reference"
+          description: "Export voyage number or reference"
           allOf:
           - $ref: "#/components/schemas/VoyageNumberOrReference"
         importVoyageNumberOrReference:
-          $ref: "#/components/schemas/VoyageNumberOrReference"
+          description: "Import voyage number or reference"
+          allOf:
+          - $ref: "#/components/schemas/VoyageNumberOrReference"
         vesselTransport:
           description: "Vessel or barge transport information"
           allOf:
@@ -1093,11 +1095,11 @@ components:
     VoyageNumberOrReference:
       type: "object"
       properties:
-        carrierExportVoyageNumber:
+        carrierVoyageNumber:
           type: "string"
           description: "Carrier-specific identifier of the voyage"
           example: "2103S"
-        universalExportVoyageReference:
+        universalVoyageReference:
           type: "string"
           description: "Reference of the voyage agreed between the VSA partners"
           example: "SR12345A"

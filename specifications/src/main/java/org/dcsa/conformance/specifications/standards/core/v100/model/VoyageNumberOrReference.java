@@ -11,11 +11,11 @@ public class VoyageNumberOrReference {
     type = "string",
     example = "2103S",
     description = "Carrier-specific identifier of the voyage")
-  private String carrierExportVoyageNumber;
+  private String carrierVoyageNumber;
 
   @Schema(
     type = "string",
     example = "SR12345A",
     description = "Reference of the voyage agreed between the VSA partners")
-  private String universalExportVoyageReference;
+  private String universalVoyageReference;
 }

@@ -229,8 +229,8 @@ ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a refer
 - `DUE` - Declaração Única de Exportação
 - `CER` - Canadian Export Reporting System
 - `AES` - Automated Export System",
-TransportCall,"exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Carrier voyage number and/or universal voyage reference",
-TransportCall,"importVoyageNumberOrReference",VoyageNumberOrReference,,,,,,
+TransportCall,"exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
+TransportCall,"importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
 TransportCall,modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA
 - `VESSEL` - Vessel
 - `RAIL` - Rail
@@ -270,5 +270,5 @@ indicated by the 2-character code defined in
 VesselTransport,vesselIMONumber,string,,maxLength=8,,9321483,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
 The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.",
 VesselTransport,vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
-VoyageNumberOrReference,"carrierExportVoyageNumber",string,,,,2103S,"Carrier-specific identifier of the voyage",
-VoyageNumberOrReference,"universalExportVoyageReference",string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+VoyageNumberOrReference,carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
+VoyageNumberOrReference,universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",

@@ -237,12 +237,12 @@ and/or plans to mitigate schedule slippage.",
 "Event / transportDetails / delayReasonCode",delayReasonCode,string,,,,,"Code identifying the reason for the delay, as defined by SMDG here:
 https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/",
 "Event / transportDetails / transportCall",transportCall,TransportCall,,,,,"Transport call information",
-"Event / transportDetails / transportCall / exportVoyageNumberOrReference","exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Carrier voyage number and/or universal voyage reference",
-"Event / transportDetails / transportCall / exportVoyageNumberOrReference / carrierExportVoyageNumber","carrierExportVoyageNumber",string,,,,2103S,"Carrier-specific identifier of the voyage",
-"Event / transportDetails / transportCall / exportVoyageNumberOrReference / universalExportVoyageReference","universalExportVoyageReference",string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
-"Event / transportDetails / transportCall / importVoyageNumberOrReference","importVoyageNumberOrReference",VoyageNumberOrReference,,,,,,
-"Event / transportDetails / transportCall / importVoyageNumberOrReference / carrierExportVoyageNumber","carrierExportVoyageNumber",string,,,,2103S,"Carrier-specific identifier of the voyage",
-"Event / transportDetails / transportCall / importVoyageNumberOrReference / universalExportVoyageReference","universalExportVoyageReference",string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"Event / transportDetails / transportCall / exportVoyageNumberOrReference","exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
+"Event / transportDetails / transportCall / exportVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
+"Event / transportDetails / transportCall / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"Event / transportDetails / transportCall / importVoyageNumberOrReference","importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
+"Event / transportDetails / transportCall / importVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
+"Event / transportDetails / transportCall / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
 "Event / transportDetails / transportCall / modeOfTransport",modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA
 - `VESSEL` - Vessel
 - `RAIL` - Rail

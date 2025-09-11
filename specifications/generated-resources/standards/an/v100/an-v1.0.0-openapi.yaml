@@ -1938,7 +1938,7 @@ components:
           type: "string"
           description: "Bank account number for receiving payment"
           example: "XYZ1234567890"
-        swiftCode:
+        SWIFTCode:
           maxLength: 11
           type: "string"
           description: "SWIFT/BIC code for international wire transfers"

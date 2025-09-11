@@ -519,11 +519,11 @@ OuterPackaging,woodDeclaration,string,,maxLength=30,,TREATED_AND_CERTIFIED,"Prop
 PartyContactDetail,email,string,,maxLength=100,,info@dcsa.org,"`E-mail` address to be used",
 PartyContactDetail,name,string,,maxLength=35,,Henrik,"Name of the contact",
 PartyContactDetail,phone,string,,maxLength=30,,"+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+PaymentRemittance,SWIFTCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
 PaymentRemittance,accountNumber,string,,maxLength=40,,XYZ1234567890,"Bank account number for receiving payment",
 PaymentRemittance,bankName,string,,maxLength=100,,"Example Bank","Name of the carrier's bank where payment should be sent",
 PaymentRemittance,beneficiary,string,,maxLength=100,,"Example Carrier","Legal name of the payment recipient (carrier)",
 PaymentRemittance,remittanceEmail,string,,maxLength=100,,carrier@example.com,"Email address where proof of payment remittance should be sent",
-PaymentRemittance,swiftCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
 PickupInformation,pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
 PickupInformation,pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
 A trucker picking up a container must present the correct pickup number.

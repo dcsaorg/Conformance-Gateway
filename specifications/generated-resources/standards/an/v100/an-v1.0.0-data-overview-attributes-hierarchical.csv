@@ -578,11 +578,11 @@ Code used to denote the type of free time.
 "ArrivalNotice / isElectronic",isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 "ArrivalNotice / issueDateTime",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNotice / paymentRemittance",paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
+"ArrivalNotice / paymentRemittance / SWIFTCode",SWIFTCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
 "ArrivalNotice / paymentRemittance / accountNumber",accountNumber,string,,maxLength=40,,XYZ1234567890,"Bank account number for receiving payment",
 "ArrivalNotice / paymentRemittance / bankName",bankName,string,,maxLength=100,,"Example Bank","Name of the carrier's bank where payment should be sent",
 "ArrivalNotice / paymentRemittance / beneficiary",beneficiary,string,,maxLength=100,,"Example Carrier","Legal name of the payment recipient (carrier)",
 "ArrivalNotice / paymentRemittance / remittanceEmail",remittanceEmail,string,,maxLength=100,,carrier@example.com,"Email address where proof of payment remittance should be sent",
-"ArrivalNotice / paymentRemittance / swiftCode",swiftCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
 "ArrivalNotice / pickupInformation",pickupInformation,PickupInformation,,,,,"Pickup information",
 "ArrivalNotice / pickupInformation / pickupLocation",pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
 "ArrivalNotice / pickupInformation / pickupLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be

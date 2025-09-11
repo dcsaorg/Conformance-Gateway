@@ -24,6 +24,7 @@ public class PaymentRemittance {
   private String accountNumber;
 
   @Schema(
+      name = "SWIFTCode",
       maxLength = 11,
       example = "XYZ123456",
       description = "SWIFT/BIC code for international wire transfers")

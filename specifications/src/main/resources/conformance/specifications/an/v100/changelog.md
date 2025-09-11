@@ -18,6 +18,8 @@ Fixed a typo in the FeedbackElement propertyPath example. (SD-2453)
 
 Added in object `ArrivalNoticeNotification` to the property `transportDocumentReference` the missing `maxLength`. (SD-2454)
 
+Renamed in object `PaymentRemittance` property `swiftCode` to `SWIFTCode`. (SD-2455)
+
 
 ## Snapshot v1.0.0-20250829-beta
 

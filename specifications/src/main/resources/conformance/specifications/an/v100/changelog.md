@@ -14,6 +14,8 @@ Fixed the type of the `limit` pagination parameter. (SD-2451)
 
 Fixed a typo in the GET endpoint description. (SD-2452)
 
+Fixed a typo in the FeedbackElement propertyPath example. (SD-2453)
+
 
 ## Snapshot v1.0.0-20250829-beta
 

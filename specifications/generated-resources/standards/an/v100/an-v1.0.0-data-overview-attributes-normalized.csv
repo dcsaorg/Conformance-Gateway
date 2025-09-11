@@ -353,7 +353,7 @@ Facility,facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with 
 - `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed
 to a user of the arrival notice publishing organization",
-FeedbackElement,propertyPath,string,,maxLength=1000,,"$.arrivalNotices[2].pickupInformation.location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
+FeedbackElement,propertyPath,string,,maxLength=1000,,"$.arrivalNotices[2].pickupInformation.pickupLocation","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
 about which the feedback is provided (if applicable)",
 FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity of a `FeedbackElement`
 

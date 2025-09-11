@@ -27,14 +27,12 @@ public class FreeTime {
   private List<EquipmentReference> equipmentReferences;
 
   @Schema(
-      type = "integer",
-      format = "int32",
       description = "The duration expressed in `timeUnit`s for which this free time item applies.",
-      example = "123")
-  private int duration;
+      example = "5",
+      format = "int32")
+  private Integer duration;
 
-  @Schema()
-  private FreeTimeTimeUnitCode timeUnit;
+  @Schema() private FreeTimeTimeUnitCode timeUnit;
 
   @Schema(
       maxLength = 1000,
@@ -46,9 +44,13 @@ It can include references to the carrier website or individual charges as per se
       example = "Calculated as...")
   private String calculationBasis;
 
-  @Schema(description = "The final date when the container(s) can be collected without incurring charges.")
+  @Schema(
+      description =
+          "The final date when the container(s) can be collected without incurring charges.")
   private ClassifiedDate lastFreeDate;
 
-  @Schema(description = "The final date and time when the container(s) can be collected without incurring charges.")
+  @Schema(
+      description =
+          "The final date and time when the container(s) can be collected without incurring charges.")
   private ClassifiedDateTime lastFreeDateTime;
 }

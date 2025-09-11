@@ -21,9 +21,10 @@ The content of the clause.",
 - `SMDG` (Ship Message Design Group)
 - `NMFTA` (National Motor Freight Traffic Association)",
 "ArrivalNotice / carrierContactInformation","carrierContactInformation","PartyContactDetail list",,,,,"The party to contact for any inquiries related to this Arrival Notice.",
-"ArrivalNotice / carrierContactInformation / email",email,string,,maxLength=100,,info@dcsa.org,"`E-mail` address to be used",
-"ArrivalNotice / carrierContactInformation / name",name,string,,maxLength=35,,Henrik,"Name of the contact",
-"ArrivalNotice / carrierContactInformation / phone",phone,string,,maxLength=30,,"+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+"ArrivalNotice / carrierContactInformation / email",email,string,,maxLength=255,,jane.doe@example.com,"Contact email address",
+"ArrivalNotice / carrierContactInformation / name",name,string,,maxLength=255,,"Jane Doe","Contact name",
+"ArrivalNotice / carrierContactInformation / phone",phone,string,,maxLength=30,,"+14155552671","Contact phone number, including an international phone number format
+as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 "ArrivalNotice / charges",charges,"Charge list",,,,,"A list of `Charges`",
 "ArrivalNotice / charges / calculationBasis",calculationBasis,string,,maxLength=50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
 "ArrivalNotice / charges / carrierRateOfExchange",carrierRateOfExchange,string,,maxLength=50,,"1.00 Euro = 1.17801 US Dollars","The quotation of the relative value of a currency unit against the unit of another currency
@@ -41,7 +42,7 @@ to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
 "ArrivalNotice / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 "ArrivalNotice / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
-"ArrivalNotice / charges / invoicePayerCode",invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
+"ArrivalNotice / charges / invoicePayerCode",invoicePayerCode,string,,,,2066095,"Code used to identify the party responsible for the payment",
 "ArrivalNotice / charges / paymentCurrency",paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 "ArrivalNotice / charges / paymentLocation",paymentLocation,Location,,,,,"Payment location",
 "ArrivalNotice / charges / paymentLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -139,7 +140,7 @@ to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
 "ArrivalNotice / consignmentItems / cargoItems / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 "ArrivalNotice / consignmentItems / cargoItems / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
-"ArrivalNotice / consignmentItems / cargoItems / charges / invoicePayerCode",invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
+"ArrivalNotice / consignmentItems / cargoItems / charges / invoicePayerCode",invoicePayerCode,string,,,,2066095,"Code used to identify the party responsible for the payment",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentCurrency",paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation",paymentLocation,Location,,,,,"Payment location",
 "ArrivalNotice / consignmentItems / cargoItems / charges / paymentLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -240,9 +241,10 @@ Character | Valid Characters | Description
 3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / competentAuthorityApproval","competentAuthorityApproval",string,,maxLength=70,,"{Name and reference...}","Name and reference number of the competent authority providing the approval.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails",emergencyContactDetails,EmergencyContactDetails,,,,,"24 hr emergency contact details",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / contact",contact,string,,maxLength=255,,"Henrik Larsen","Name of the Contact person during an emergency.",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / phone",phone,string,,maxLength=30,,"+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
-"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / provider",provider,string,,maxLength=255,,GlobeTeam,"Name of the third party vendor providing emergency support",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / contact",contact,string,,maxLength=255,,"Jane Doe","Name of the contact person during an emergency.",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / phone",phone,string,,maxLength=30,,"+14155552671","Phone number for the contact, including an international phone number format
+as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+"ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / provider",provider,string,,maxLength=255,,"ACME Inc","Name of the third party vendor providing emergency support",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / emergencyContactDetails / referenceNumber",referenceNumber,string,,maxLength=255,,12234,"Contract reference for the emergency support provided by an external third party vendor.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / endOfHoldingTime",endOfHoldingTime,"string(date)",,,,2021-09-03,"Date by when the refrigerated liquid needs to be delivered.",
 "ArrivalNotice / consignmentItems / cargoItems / outerPackaging / dangerousGoods / fumigationDateTime",fumigationDateTime,"string(date-time)",,,,2024-09-04T09:41Z,"Date & time when the container was fumigated",
@@ -431,7 +433,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / customsClearance / immediateTransportationEntry","immediateTransportationEntry","ImmediateTransportationEntry",,,,,"An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
 that allows imported cargo to be moved from the first port of arrival in the U.S.
 to another port or bonded facility without being physically cleared by CBP at the first port.",
-"ArrivalNotice / customsClearance / immediateTransportationEntry / FIRMSCode",FIRMSCode,string,,maxLength=4,,a391,"The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
+"ArrivalNotice / customsClearance / immediateTransportationEntry / FIRMSCode",FIRMSCode,string,,maxLength=4,,B456,"The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier
 assigned by U.S. Customs and Border Protection (CBP) to facilities in the U.S. where imported goods are held or processed,
 such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
 It tells CBP and freight systems where the cargo is physically located.",
@@ -441,8 +443,8 @@ by U.S. Customs and Border Protection (CBP).",
 often assigned by the carrier or customs broker. It allows goods to be moved under bond from the Port of Discharge
 to another inland port or bonded facility without paying duties at the first port. The IT number is used
 for tracking the movement and verifying arrival at the inland port or bonded facility.",
-"ArrivalNotice / customsClearance / manifestReferenceNumber",manifestReferenceNumber,string,,maxLength=35,,a1234,"Manifest reference number for manifest declaration and customs clearance in Korea.",
-"ArrivalNotice / customsClearance / masterSequenceNumber",masterSequenceNumber,string,,maxLength=35,,x12345,"A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of
+"ArrivalNotice / customsClearance / manifestReferenceNumber",manifestReferenceNumber,string,,maxLength=35,,24NDMUA430I,"Manifest reference number for manifest declaration and customs clearance in Korea.",
+"ArrivalNotice / customsClearance / masterSequenceNumber",masterSequenceNumber,string,,maxLength=35,,23,"A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of
 a particular vessel. Customers use this Master Sequence Number (MSN) as a reference when declaring all related House B/Ls.",
 "ArrivalNotice / deliveryTypeAtDestination","deliveryTypeAtDestination",string,,maxLength=3,,CY,"Indicates the type of service offered at `Destination`. The options are:
 
@@ -495,9 +497,10 @@ as it determines which of these parties is considered the third, fourth, fifth (
 - `ZZZ` (Mutually defined)",
 "ArrivalNotice / documentParties / identifyingCodes / partyCode",partyCode,string,,maxLength=150,,MSK,"Code to identify the party as provided by the code list provider",
 "ArrivalNotice / documentParties / partyContactDetails",partyContactDetails,"PartyContactDetail list",,,,,"Party contact details",
-"ArrivalNotice / documentParties / partyContactDetails / email",email,string,,maxLength=100,,info@dcsa.org,"`E-mail` address to be used",
-"ArrivalNotice / documentParties / partyContactDetails / name",name,string,,maxLength=35,,Henrik,"Name of the contact",
-"ArrivalNotice / documentParties / partyContactDetails / phone",phone,string,,maxLength=30,,"+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+"ArrivalNotice / documentParties / partyContactDetails / email",email,string,,maxLength=255,,jane.doe@example.com,"Contact email address",
+"ArrivalNotice / documentParties / partyContactDetails / name",name,string,,maxLength=255,,"Jane Doe","Contact name",
+"ArrivalNotice / documentParties / partyContactDetails / phone",phone,string,,maxLength=30,,"+14155552671","Contact phone number, including an international phone number format
+as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 "ArrivalNotice / documentParties / partyFunction",partyFunction,string,,maxLength=3,,N1,"Specifies the role of the party in a given context. Possible values are:
 
 - `OS` (Shipper)
@@ -534,7 +537,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
 ",
 "ArrivalNotice / freeTimes / calculationBasis",calculationBasis,string,,maxLength=1000,,"Calculated as...","Description of the conditions under which this free time item applies.
 It can include references to the carrier website or individual charges as per service contract/agreement.",
-"ArrivalNotice / freeTimes / duration",duration,integer,,,,123,"The duration expressed in `timeUnit`s for which this free time item applies.",
+"ArrivalNotice / freeTimes / duration",duration,integer,,,,5,"The duration expressed in `timeUnit`s for which this free time item applies.",
 "ArrivalNotice / freeTimes / equipmentReferences",equipmentReferences,"string list",,maxLength=11,,,"References of the equipments for which this free time applies
 Item description:
 The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -578,8 +581,8 @@ Code used to denote the type of free time.
 "ArrivalNotice / isElectronic",isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 "ArrivalNotice / issueDateTime",issueDateTime,"string(date-time)",yes,,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNotice / paymentRemittance",paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
-"ArrivalNotice / paymentRemittance / SWIFTCode",SWIFTCode,string,,maxLength=11,,XYZ123456,"SWIFT/BIC code for international wire transfers",
-"ArrivalNotice / paymentRemittance / accountNumber",accountNumber,string,,maxLength=40,,XYZ1234567890,"Bank account number for receiving payment",
+"ArrivalNotice / paymentRemittance / SWIFTCode",SWIFTCode,string,,maxLength=11,,ABNANL2A,"SWIFT/BIC code for international wire transfers",
+"ArrivalNotice / paymentRemittance / accountNumber",accountNumber,string,,maxLength=40,,NL99ABNA0123456789,"Bank account number for receiving payment",
 "ArrivalNotice / paymentRemittance / bankName",bankName,string,,maxLength=100,,"Example Bank","Name of the carrier's bank where payment should be sent",
 "ArrivalNotice / paymentRemittance / beneficiary",beneficiary,string,,maxLength=100,,"Example Carrier","Legal name of the payment recipient (carrier)",
 "ArrivalNotice / paymentRemittance / remittanceEmail",remittanceEmail,string,,maxLength=100,,carrier@example.com,"Email address where proof of payment remittance should be sent",
@@ -620,7 +623,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / pickupInformation / pickupLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / pickupInformation / pickupLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / pickupInformation / pickupLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
-"ArrivalNotice / pickupInformation / pickupNumber",pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
+"ArrivalNotice / pickupInformation / pickupNumber",pickupNumber,string,,,,780379,"A pickup number is a generated number assigned to each import container individually.
 A trucker picking up a container must present the correct pickup number.
 If the pickup number is incorrect, the trucker will have his pickup request denied.",
 "ArrivalNotice / references",references,"Reference list",,,,,"References used by the customer or carrier to identify or track the shipment.",
@@ -634,9 +637,10 @@ If the pickup number is incorrect, the trucker will have his pickup request deni
 "ArrivalNotice / references / value",value,string,,maxLength=35,,HHL00103004,"The value of the reference.",
 "ArrivalNotice / releaseInformation",releaseInformation,ReleaseInformation,,,,,"Release information",
 "ArrivalNotice / releaseInformation / carrierInformationForCargoRelease","carrierInformationForCargoRelease","PartyContactDetail list",,,,,"The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).",
-"ArrivalNotice / releaseInformation / carrierInformationForCargoRelease / email",email,string,,maxLength=100,,info@dcsa.org,"`E-mail` address to be used",
-"ArrivalNotice / releaseInformation / carrierInformationForCargoRelease / name",name,string,,maxLength=35,,Henrik,"Name of the contact",
-"ArrivalNotice / releaseInformation / carrierInformationForCargoRelease / phone",phone,string,,maxLength=30,,"+45 70262970","Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+"ArrivalNotice / releaseInformation / carrierInformationForCargoRelease / email",email,string,,maxLength=255,,jane.doe@example.com,"Contact email address",
+"ArrivalNotice / releaseInformation / carrierInformationForCargoRelease / name",name,string,,maxLength=255,,"Jane Doe","Contact name",
+"ArrivalNotice / releaseInformation / carrierInformationForCargoRelease / phone",phone,string,,maxLength=30,,"+14155552671","Contact phone number, including an international phone number format
+as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 "ArrivalNotice / releaseInformation / freightReleaseDate",freightReleaseDate,"string(date)",,,,2025-01-23,"Date when the customer has provided the payment and the relevant documents.",
 "ArrivalNotice / releaseInformation / isCustomsReleased",isCustomsReleased,boolean,,,,false,"Indicates whether the shipment has been cleared by customs.",
 "ArrivalNotice / releaseInformation / isFreightReleased",isFreightReleased,boolean,,,,false,"Indicates whether the shipment has been ""freight released"", meaning the B/L has been surrendered
@@ -842,10 +846,10 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 - `ONC` - On-Carriage Transport",
 "ArrivalNotice / transport / legs / transportPlanStageSequenceNumber","transportPlanStageSequenceNumber",integer,,,,5,"Sequence number of the transport plan stage",
 "ArrivalNotice / transport / legs / vesselVoyage",vesselVoyage,VesselVoyage,,,,,"Vessel and voyage details of a transport leg",
-"ArrivalNotice / transport / legs / vesselVoyage / callReferenceNumber",callReferenceNumber,string,,maxLength=100,,CRN1234,"A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
+"ArrivalNotice / transport / legs / vesselVoyage / callReferenceNumber",callReferenceNumber,string,,maxLength=100,,NLRTM25002178,"A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
 It can be used for customs clearance purposes in specific countries (e.g. NL, UK).",
-"ArrivalNotice / transport / legs / vesselVoyage / carrierExportVoyageNumber","carrierExportVoyageNumber",string,,maxLength=50,,1234N,"Carrier-specific identifier of the export voyage",
-"ArrivalNotice / transport / legs / vesselVoyage / carrierImportVoyageNumber","carrierImportVoyageNumber",string,,maxLength=50,,1234N,"Carrier-specific identifier of the import voyage",
+"ArrivalNotice / transport / legs / vesselVoyage / carrierExportVoyageNumber","carrierExportVoyageNumber",string,,maxLength=50,,2208N,"Carrier-specific identifier of the export voyage",
+"ArrivalNotice / transport / legs / vesselVoyage / carrierImportVoyageNumber","carrierImportVoyageNumber",string,,maxLength=50,,2208N,"Carrier-specific identifier of the import voyage",
 "ArrivalNotice / transport / legs / vesselVoyage / carrierServiceCode",carrierServiceCode,string,,maxLength=11,,FE1,"The carrier-specific code of the service for which the schedule details are published",
 "ArrivalNotice / transport / legs / vesselVoyage / universalExportVoyageReference","universalExportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the export voyage",
 "ArrivalNotice / transport / legs / vesselVoyage / universalImportVoyageReference","universalImportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the import voyage",
@@ -857,7 +861,7 @@ followed by one to four characters to identify the individual vessel.",
 "ArrivalNotice / transport / legs / vesselVoyage / vesselFlag",vesselFlag,string,,maxLength=2,,NL,"The national flag of the country under which a vessel is registered,
 indicated by the 2-character code defined in
 [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",
-"ArrivalNotice / transport / legs / vesselVoyage / vesselIMONumber",vesselIMONumber,string,,maxLength=8,,12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+"ArrivalNotice / transport / legs / vesselVoyage / vesselIMONumber",vesselIMONumber,string,,maxLength=8,,9321483,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
 The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.",
 "ArrivalNotice / transport / legs / vesselVoyage / vesselName",vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
 "ArrivalNotice / transport / onBoardDate",onBoardDate,ClassifiedDate,,,,,"The date when the container was loaded onto the vessel at the port of origin.",
@@ -1094,7 +1098,7 @@ to a vessel rate of exchange or a daily rate of exchange.",
 "ArrivalNotice / utilizedTransportEquipments / charges / chargeName",chargeName,string,,maxLength=50,,"Documentation fee - Destination","Free text field describing the charge to apply",
 "ArrivalNotice / utilizedTransportEquipments / charges / currencyAmount",currencyAmount,number,,,,1012.12,"The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.",
 "ArrivalNotice / utilizedTransportEquipments / charges / currencyCode",currencyCode,string,,maxLength=3,,DKK,"The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
-"ArrivalNotice / utilizedTransportEquipments / charges / invoicePayerCode",invoicePayerCode,string,,,,000123456,"Code used to identify the party responsible for the payment",
+"ArrivalNotice / utilizedTransportEquipments / charges / invoicePayerCode",invoicePayerCode,string,,,,2066095,"Code used to identify the party responsible for the payment",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentCurrency",paymentCurrency,string,,maxLength=3,,EUR,"Currency code as defined by ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation",paymentLocation,Location,,,,,"Payment location",
 "ArrivalNotice / utilizedTransportEquipments / charges / paymentLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -1196,7 +1200,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 "ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
-"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupNumber",pickupNumber,string,,,,123456,"A pickup number is a generated number assigned to each import container individually.
+"ArrivalNotice / utilizedTransportEquipments / pickupInformation / pickupNumber",pickupNumber,string,,,,780379,"A pickup number is a generated number assigned to each import container individually.
 A trucker picking up a container must present the correct pickup number.
 If the pickup number is incorrect, the trucker will have his pickup request denied.",
 "ArrivalNotice / utilizedTransportEquipments / references",references,"Reference list",,,,,"A list of `References`",
@@ -1365,7 +1369,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 - `ACT` - Actual",
 "ArrivalNoticeNotification / portOfDischargeArrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
-"ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,maxLength=20,,TDR1234,"The reference of the transport document for which this arrival notice was created",
+"ArrivalNoticeNotification / transportDocumentReference","transportDocumentReference",string,yes,maxLength=20,,HHL71800000,"The reference of the transport document for which this arrival notice was created",
 "ArrivalNoticeNotification / typeLabel",typeLabel,string,,maxLength=1000,,"English, consignee, USD","Free-format identifier used to specify a certain type of arrival notice,
 for example ""English, consignee, USD"" or ""No charges, French"".
 

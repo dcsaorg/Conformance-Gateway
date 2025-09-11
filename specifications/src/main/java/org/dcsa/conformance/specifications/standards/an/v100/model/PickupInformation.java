@@ -9,7 +9,7 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 public class PickupInformation {
 
   @Schema(
-      example="123456",
+      example="780379",
       description =
 """
 A pickup number is a generated number assigned to each import container individually.

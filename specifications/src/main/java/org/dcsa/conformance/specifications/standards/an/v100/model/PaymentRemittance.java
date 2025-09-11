@@ -19,14 +19,14 @@ public class PaymentRemittance {
 
   @Schema(
       maxLength = 40,
-      example = "XYZ1234567890",
+      example = "NL99ABNA0123456789",
       description = "Bank account number for receiving payment")
   private String accountNumber;
 
   @Schema(
       name = "SWIFTCode",
       maxLength = 11,
-      example = "XYZ123456",
+      example = "ABNANL2A",
       description = "SWIFT/BIC code for international wire transfers")
   private String swiftCode;
 

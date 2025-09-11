@@ -704,7 +704,7 @@ components:
           type: "string"
           description: |
             The reference of the transport document for which this arrival notice was created
-          example: "TDR1234"
+          example: "HHL71800000"
         equipmentReferences:
           type: "array"
           description: |
@@ -889,7 +889,7 @@ components:
         invoicePayerCode:
           type: "string"
           description: "Code used to identify the party responsible for the payment"
-          example: "000123456"
+          example: "2066095"
       description: "Addresses the monetary value of freight and other service charges for a shipment."
     ClassifiedDate:
       type: "object"
@@ -1023,14 +1023,14 @@ components:
           type: "string"
           description: |
             Manifest reference number for manifest declaration and customs clearance in Korea.
-          example: "a1234"
+          example: "24NDMUA430I"
         masterSequenceNumber:
           maxLength: 35
           type: "string"
           description: |
             A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of
             a particular vessel. Customers use this Master Sequence Number (MSN) as a reference when declaring all related House B/Ls.
-          example: "x12345"
+          example: "23"
       description: "Customs clearance information"
     CustomsReference:
       type: "object"
@@ -1337,19 +1337,20 @@ components:
         contact:
           maxLength: 255
           type: "string"
-          description: "Name of the Contact person during an emergency."
-          example: "Henrik Larsen"
+          description: "Name of the contact person during an emergency."
+          example: "Jane Doe"
         provider:
           maxLength: 255
           type: "string"
           description: "Name of the third party vendor providing emergency support"
-          example: "GlobeTeam"
+          example: "ACME Inc"
         phone:
           maxLength: 30
           type: "string"
           description: |
-            Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
-          example: "+45 70262970"
+            Phone number for the contact, including an international phone number format
+            as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
+          example: "+14155552671"
         referenceNumber:
           maxLength: 255
           type: "string"
@@ -1498,7 +1499,7 @@ components:
           type: "integer"
           description: "The duration expressed in `timeUnit`s for which this free time item applies."
           format: "int32"
-          example: 123
+          example: 5
         timeUnit:
           maxLength: 3
           type: "string"
@@ -1630,7 +1631,7 @@ components:
             assigned by U.S. Customs and Border Protection (CBP) to facilities in the U.S. where imported goods are held or processed,
             such as Container Freight Stations (CFS), bonded warehouses, intermodal rail ramps or temporary storage facilities near ports.
             It tells CBP and freight systems where the cargo is physically located.
-          example: "a391"
+          example: "B456"
         ITNumber:
           maxLength: 100
           type: "string"
@@ -1909,21 +1910,22 @@ components:
       type: "object"
       properties:
         name:
-          maxLength: 35
+          maxLength: 255
           type: "string"
-          description: "Name of the contact"
-          example: "Henrik"
+          description: "Contact name"
+          example: "Jane Doe"
         phone:
           maxLength: 30
           type: "string"
           description: |
-            Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
-          example: "+45 70262970"
+            Contact phone number, including an international phone number format
+            as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
+          example: "+14155552671"
         email:
-          maxLength: 100
+          maxLength: 255
           type: "string"
-          description: "`E-mail` address to be used"
-          example: "info@dcsa.org"
+          description: "Contact email address"
+          example: "jane.doe@example.com"
       description: "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided."
     PaymentRemittance:
       type: "object"
@@ -1937,12 +1939,12 @@ components:
           maxLength: 40
           type: "string"
           description: "Bank account number for receiving payment"
-          example: "XYZ1234567890"
+          example: "NL99ABNA0123456789"
         SWIFTCode:
           maxLength: 11
           type: "string"
           description: "SWIFT/BIC code for international wire transfers"
-          example: "XYZ123456"
+          example: "ABNANL2A"
         beneficiary:
           maxLength: 100
           type: "string"
@@ -1964,7 +1966,7 @@ components:
             A pickup number is a generated number assigned to each import container individually.
             A trucker picking up a container must present the correct pickup number.
             If the pickup number is incorrect, the trucker will have his pickup request denied.
-          example: "123456"
+          example: "780379"
         pickupLocation:
           description: |
             The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.
@@ -2317,7 +2319,7 @@ components:
           description: |
             The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
             The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.
-          example: "12345678"
+          example: "9321483"
         vesselCallSign:
           maxLength: 10
           type: "string"
@@ -2341,7 +2343,7 @@ components:
           maxLength: 50
           type: "string"
           description: "Carrier-specific identifier of the import voyage"
-          example: "1234N"
+          example: "2208N"
         universalImportVoyageReference:
           maxLength: 5
           type: "string"
@@ -2351,7 +2353,7 @@ components:
           maxLength: 50
           type: "string"
           description: "Carrier-specific identifier of the export voyage"
-          example: "1234N"
+          example: "2208N"
         universalExportVoyageReference:
           maxLength: 5
           type: "string"
@@ -2363,7 +2365,7 @@ components:
           description: |
             A registration number assigned by customs to the vessel before its arrival at Port of Discharge.
             It can be used for customs clearance purposes in specific countries (e.g. NL, UK).
-          example: "CRN1234"
+          example: "NLRTM25002178"
       description: "Vessel and voyage details of a transport leg"
     Volume:
       type: "object"

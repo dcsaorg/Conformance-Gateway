@@ -52,7 +52,7 @@ to a vessel rate of exchange or a daily rate of exchange.
   protected Location paymentLocation;
 
   @Schema(
-      example = "000123456",
+      example = "2066095",
       description = "Code used to identify the party responsible for the payment")
   protected String invoicePayerCode;
 }

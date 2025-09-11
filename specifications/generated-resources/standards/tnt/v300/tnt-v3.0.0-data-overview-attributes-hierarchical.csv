@@ -315,7 +315,7 @@ followed by one to four characters to identify the individual vessel.",
 "Event / transportEventDetails / transportCall / vesselTransport / vesselFlag",vesselFlag,string,,maxLength=2,,NL,"The national flag of the country under which a vessel is registered,
 indicated by the 2-character code defined in
 [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",
-"Event / transportEventDetails / transportCall / vesselTransport / vesselIMONumber",vesselIMONumber,string,,maxLength=8,,12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+"Event / transportEventDetails / transportCall / vesselTransport / vesselIMONumber",vesselIMONumber,string,,maxLength=8,,9321483,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
 The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.",
 "Event / transportEventDetails / transportCall / vesselTransport / vesselName",vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
 "Event / transportEventDetails / transportEventTypeCode",transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event

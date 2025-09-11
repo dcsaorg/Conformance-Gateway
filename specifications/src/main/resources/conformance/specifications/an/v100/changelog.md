@@ -20,6 +20,8 @@ Added in object `ArrivalNoticeNotification` to the property `transportDocumentRe
 
 Renamed in object `PaymentRemittance` property `swiftCode` to `SWIFTCode`. (SD-2455)
 
+Updated in object `IdentifyingCode` for property `codeListProvider` the list of values. (SD-2456)
+
 
 ## Snapshot v1.0.0-20250829-beta
 

@@ -407,7 +407,6 @@ IdentifyingCode,codeListName,string,,maxLength=100,,DID,"The name of the code li
 IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes identifying a party. Possible values are:
 - `WAVE` (Wave)
 - `CARX` (CargoX)
-- `ESSD` (EssDOCS)
 - `IDT` (ICE Digital Trade)
 - `BOLE` (Bolero)
 - `EDOX` (EdoxOnline)
@@ -421,6 +420,7 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `ETIT` (e-title)
 - `KTNE` (KTNET)
 - `CRED` (Credore)
+- `BLOC` (BlockPeer Technologies)
 - `GSBN` (Global Shipping Business Network)
 - `WISE` (WiseTech)
 - `GLEIF` (Global Legal Entity Identifier Foundation)

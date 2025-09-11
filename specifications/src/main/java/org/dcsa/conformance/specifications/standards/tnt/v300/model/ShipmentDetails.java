@@ -3,15 +3,15 @@ package org.dcsa.conformance.specifications.standards.tnt.v300.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
-import org.dcsa.conformance.specifications.standards.tnt.v300.types.ShipmentEventTypeCode;
 
-@Schema(description = "Shipment-specific event details")
+@Schema(description = "Shipment-specific details")
 @Data
-public class ShipmentEventDetails {
-
-  @Schema() private ShipmentEventTypeCode shipmentEventTypeCode;
+public class ShipmentDetails {
 
   @Schema() private DocumentReference documentReference;
+
+  @Schema(description = "The reason this event was sent")
+  private String reason;
 
   @Schema(
       description =

@@ -40,16 +40,17 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEvent
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventClassification;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
 
@@ -89,26 +90,27 @@ public class TNTStandardSpecification extends StandardSpecification {
         Address.class,
         ClassifiedDateTime.class,
         DocumentReference.class,
-        EquipmentEventDetails.class,
+        EquipmentDetails.class,
         Event.class,
+        EventClassification.class,
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
         GetEventsError.class,
         GetEventsResponse.class,
-        IotEventDetails.class,
+        IotDetails.class,
         Location.class,
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,
         RailTransport.class,
-        ReeferEventDetails.class,
+        ReeferDetails.class,
         Seal.class,
         ServiceCodeOrReference.class,
-        ShipmentEventDetails.class,
+        ShipmentDetails.class,
         ShipmentReference.class,
         TransportCall.class,
-        TransportEventDetails.class,
+        TransportDetails.class,
         TruckTransport.class,
         VesselTransport.class,
         VoyageNumberOrReference.class);

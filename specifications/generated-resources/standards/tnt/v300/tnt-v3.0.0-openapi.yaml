@@ -399,7 +399,7 @@ components:
           maxLength: 10
           type: "string"
           description: |-
-            Classifier denoting whether a date/time is planned, estimated or actual
+            Classifier denoting whether an event is planned, estimated or actual
             - `PLN` - Planned
             - `EST` - Estimated
             - `ACT` - Actual
@@ -442,25 +442,9 @@ components:
           description: "Reference identifying the document"
           example: "123e4567e89b"
       description: "Referenced document"
-    EquipmentEventDetails:
+    EquipmentDetails:
       type: "object"
       properties:
-        equipmentEventTypeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of an equipment event
-            - `LOAD` - Loaded
-            - `DISC` - Discharged
-            - `GTIN` - Gated in
-            - `GTOT` - Gated out
-            - `STUF` - Stuffed
-            - `STRP` - Stripped
-            - `PICK` - Pick-up
-            - `DROP` - Drop-off
-            - `INSP` - Inspected
-            - `RSEA` - Resealed
-            - `RMVD` - Removed
-          example: "LOAD"
         equipmentReference:
           maxLength: 11
           type: "string"
@@ -493,20 +477,20 @@ components:
           type: "boolean"
           description: |
             Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.
-        eventLocation:
-          description: "The location of the event."
-          allOf:
-          - $ref: "#/components/schemas/Location"
         seals:
           type: "array"
           items:
             $ref: "#/components/schemas/Seal"
-      description: "Equipment-specific event details"
+      description: "Equipment-specific details"
     Event:
       required:
-      - "eventTypeCode"
+      - "eventClassification"
       type: "object"
       properties:
+        eventClassification:
+          description: "Type, subtype and classifier of an event"
+          allOf:
+          - $ref: "#/components/schemas/EventClassification"
         eventID:
           type: "string"
           description: |
@@ -516,15 +500,21 @@ components:
           format: "uuid"
           example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
         eventDateTime:
+          maxLength: 30
+          type: "string"
           description: "The date and time when the real-world event has occurred or will occur."
-          allOf:
-          - $ref: "#/components/schemas/ClassifiedDateTime"
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
         eventUpdatedDateTime:
           maxLength: 30
           type: "string"
           description: "The date and time when the technical event was last updated."
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
+        eventLocation:
+          description: "The location of the event."
+          allOf:
+          - $ref: "#/components/schemas/Location"
         relatedDocumentReferences:
           type: "array"
           description: "List of documents related to this event"
@@ -535,9 +525,32 @@ components:
           description: "List of shipment references related to this event"
           items:
             $ref: "#/components/schemas/ShipmentReference"
-        reason:
-          type: "string"
-          description: "The reason this event was sent"
+        shipmentDetails:
+          description: "Shipment-specific details"
+          allOf:
+          - $ref: "#/components/schemas/ShipmentDetails"
+        transportDetails:
+          description: "Transport-specific details"
+          allOf:
+          - $ref: "#/components/schemas/TransportDetails"
+        equipmentDetails:
+          description: "Equipment-specific details"
+          allOf:
+          - $ref: "#/components/schemas/EquipmentDetails"
+        iotDetails:
+          description: "IoT-specific details"
+          allOf:
+          - $ref: "#/components/schemas/IotDetails"
+        reeferDetails:
+          description: "Reefer-specific details"
+          allOf:
+          - $ref: "#/components/schemas/ReeferDetails"
+      description: "Track and Trace event"
+    EventClassification:
+      required:
+      - "eventTypeCode"
+      type: "object"
+      properties:
         eventTypeCode:
           type: "string"
           description: |-
@@ -548,27 +561,72 @@ components:
             - `IOT` - IoT event
             - `REEFER` - Reefer event
           example: "EQUIPMENT"
-        shipmentEventDetails:
-          description: "Shipment-specific event details"
-          allOf:
-          - $ref: "#/components/schemas/ShipmentEventDetails"
-        transportEventDetails:
-          description: "Transport-specific event details"
-          allOf:
-          - $ref: "#/components/schemas/TransportEventDetails"
-        equipmentEventDetails:
-          description: "Equipment-specific event details"
-          allOf:
-          - $ref: "#/components/schemas/EquipmentEventDetails"
-        iotEventDetails:
-          description: "IoT-specific event details"
-          allOf:
-          - $ref: "#/components/schemas/IotEventDetails"
-        reeferEventDetails:
-          description: "Reefer-specific event details"
-          allOf:
-          - $ref: "#/components/schemas/ReeferEventDetails"
-      description: "Track and Trace event"
+        eventClassifierCode:
+          maxLength: 10
+          type: "string"
+          description: |-
+            Classifier denoting whether an event is planned, estimated or actual
+            - `PLN` - Planned
+            - `EST` - Estimated
+            - `ACT` - Actual
+          example: "EST"
+        shipmentEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a shipment event
+            - `RECE` - Received
+            - `DRFT` - Drafted
+            - `PENA` - Pending Approval
+            - `PENU` - Pending Update
+            - `REJE` - Rejected
+            - `APPR` - Approved
+            - `ISSU` - Arrived
+            - `SURR` - Surrendered
+            - `SUBM` - Submitted
+            - `VOID` - Void
+            - `CONF` - Confirmed
+            - `REQS` - Requested
+            - `CMPL` - Completed
+            - `HOLD` - On Hold
+            - `RELS` - Released
+          example: "APPR"
+        transportEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a transport event
+            - `ARRI` - Arrived
+            - `DEPA` - Departed
+          example: "ARRI"
+        equipmentEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an equipment event
+            - `LOAD` - Loaded
+            - `DISC` - Discharged
+            - `GTIN` - Gated in
+            - `GTOT` - Gated out
+            - `STUF` - Stuffed
+            - `STRP` - Stripped
+            - `PICK` - Pick-up
+            - `DROP` - Drop-off
+            - `INSP` - Inspected
+            - `RSEA` - Resealed
+            - `RMVD` - Removed
+          example: "LOAD"
+        iotEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an IoT event
+            - `DETC` - Detected
+          example: "DETC"
+        reeferEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a reefer event
+            - `MEAS` - Measured
+            - `ADJU` - Adjusted
+          example: "MEAS"
+      description: "Type, subtype and classifier of an event"
     Facility:
       type: "object"
       properties:
@@ -663,22 +721,16 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `GET Events` request
-    IotEventDetails:
+    IotDetails:
       type: "object"
       properties:
-        iotEventTypeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of an IoT event
-            - `DETC` - Detected
-          example: "DETC"
         iotEventCode:
           type: "string"
           description: |-
             Code used to denote the specific IoT event that has occurred
             - `DRO` - Door opened
           example: "DRO"
-      description: "IoT-specific event details"
+      description: "IoT-specific details"
     Location:
       type: "object"
       properties:
@@ -796,16 +848,9 @@ components:
             Unique identifying number or code that is assigned to a specific departure of a rail.
             (Also known as a departure reference number.)
       description: "Rail transport information"
-    ReeferEventDetails:
+    ReeferDetails:
       type: "object"
       properties:
-        reeferEventTypeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of a reefer event
-            - `MEAS` - Measured
-            - `ADJU` - Adjusted
-          example: "MEAS"
         setpointParameters:
           description: "Setpoint active reefer parameters"
           allOf:
@@ -814,7 +859,7 @@ components:
           description: "Measured active reefer parameters"
           allOf:
           - $ref: "#/components/schemas/ActiveReeferParameters"
-      description: "Reefer-specific event details"
+      description: "Reefer-specific details"
     Seal:
       type: "object"
       properties:
@@ -857,33 +902,16 @@ components:
           description: "Reference of a service agreed between the VSA partners."
           example: "SR12345A"
       description: "Carrier service code and/or universal service reference"
-    ShipmentEventDetails:
+    ShipmentDetails:
       type: "object"
       properties:
-        shipmentEventTypeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of a shipment event
-            - `RECE` - Received
-            - `DRFT` - Drafted
-            - `PENA` - Pending Approval
-            - `PENU` - Pending Update
-            - `REJE` - Rejected
-            - `APPR` - Approved
-            - `ISSU` - Arrived
-            - `SURR` - Surrendered
-            - `SUBM` - Submitted
-            - `VOID` - Void
-            - `CONF` - Confirmed
-            - `REQS` - Requested
-            - `CMPL` - Completed
-            - `HOLD` - On Hold
-            - `RELS` - Released
-          example: "APPR"
         documentReference:
           description: "Referenced document"
           allOf:
           - $ref: "#/components/schemas/DocumentReference"
+        reason:
+          type: "string"
+          description: "The reason this event was sent"
         priceCalculationDate:
           type: "string"
           description: |
@@ -891,7 +919,7 @@ components:
             It can vary per carrier.
           format: "date"
           example: "2025-01-23"
-      description: "Shipment-specific event details"
+      description: "Shipment-specific details"
     ShipmentReference:
       type: "object"
       properties:
@@ -942,10 +970,6 @@ components:
             Transport operator's key that uniquely identifies each individual transport call.
             This key is essential to distinguish between two separate calls at the same location within one voyage.
           format: "int32"
-        location:
-          description: "Location information"
-          allOf:
-          - $ref: "#/components/schemas/Location"
         modeOfTransport:
           maxLength: 50
           type: "string"
@@ -985,16 +1009,9 @@ components:
           allOf:
           - $ref: "#/components/schemas/TruckTransport"
       description: "Transport call information"
-    TransportEventDetails:
+    TransportDetails:
       type: "object"
       properties:
-        transportEventTypeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of a transport event
-            - `ARRI` - Arrived
-            - `DEPA` - Departed
-          example: "ARRI"
         delayReasonCode:
           type: "string"
           description: |
@@ -1011,7 +1028,7 @@ components:
           description: "Transport call information"
           allOf:
           - $ref: "#/components/schemas/TransportCall"
-      description: "Transport-specific event details"
+      description: "Transport-specific details"
     TruckTransport:
       type: "object"
       properties:

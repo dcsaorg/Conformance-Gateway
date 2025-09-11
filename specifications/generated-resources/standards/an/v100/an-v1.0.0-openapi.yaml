@@ -913,7 +913,7 @@ components:
           maxLength: 10
           type: "string"
           description: |-
-            Classifier denoting whether a date/time is planned, estimated or actual
+            Classifier denoting whether an event is planned, estimated or actual
             - `PLN` - Planned
             - `EST` - Estimated
             - `ACT` - Actual
@@ -933,7 +933,7 @@ components:
           maxLength: 10
           type: "string"
           description: |-
-            Classifier denoting whether a date/time is planned, estimated or actual
+            Classifier denoting whether an event is planned, estimated or actual
             - `PLN` - Planned
             - `EST` - Estimated
             - `ACT` - Actual

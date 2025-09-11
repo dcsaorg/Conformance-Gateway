@@ -2,13 +2,10 @@ package org.dcsa.conformance.specifications.standards.tnt.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.tnt.v300.types.TransportEventTypeCode;
 
-@Schema(description = "Transport-specific event details")
+@Schema(description = "Transport-specific details")
 @Data
-public class TransportEventDetails {
-
-  @Schema() private TransportEventTypeCode transportEventTypeCode;
+public class TransportDetails {
 
   @Schema(
       description =

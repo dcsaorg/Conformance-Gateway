@@ -29,8 +29,6 @@ This key is essential to distinguish between two separate calls at the same loca
 """)
   private Integer transportCallSequenceNumber;
 
-  @Schema() private Location location;
-
   @Schema() private ModeOfTransportCode modeOfTransport;
 
   @Schema(

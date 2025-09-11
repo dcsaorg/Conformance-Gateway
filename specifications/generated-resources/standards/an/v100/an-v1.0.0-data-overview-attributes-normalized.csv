@@ -185,13 +185,13 @@ Charge,paymentTermCode,string,,maxLength=10,,PRE,"An indicator of whether a char
 - `COL` (Collect)",
 Charge,quantity,number,,,,34.4,"The amount of unit for this charge item.",
 Charge,unitPrice,number,,,,3456.6,"The unit price of this charge item in the currency of the charge.",
-ClassifiedDate,classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+ClassifiedDate,classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
 ClassifiedDate,value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
-ClassifiedDateTime,classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+ClassifiedDateTime,classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",

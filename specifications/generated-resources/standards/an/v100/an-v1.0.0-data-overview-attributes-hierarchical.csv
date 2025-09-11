@@ -550,14 +550,14 @@ The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
 ",
 "ArrivalNotice / freeTimes / lastFreeDate",lastFreeDate,ClassifiedDate,,,,,"The final date when the container(s) can be collected without incurring charges.",
-"ArrivalNotice / freeTimes / lastFreeDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / freeTimes / lastFreeDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
 "ArrivalNotice / freeTimes / lastFreeDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / freeTimes / lastFreeDateTime",lastFreeDateTime,ClassifiedDateTime,,,,,"The final date and time when the container(s) can be collected without incurring charges.",
-"ArrivalNotice / freeTimes / lastFreeDateTime / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / freeTimes / lastFreeDateTime / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
@@ -727,7 +727,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / transport / departureDate",departureDate,ClassifiedDate,,,,,"The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.",
-"ArrivalNotice / transport / departureDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / transport / departureDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
@@ -735,13 +735,13 @@ to the shipping line. This can refer either to the Place of Receipt or the Port 
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / generalOrderDateTime",generalOrderDateTime,ClassifiedDateTime,,,,,"The date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).",
-"ArrivalNotice / transport / generalOrderDateTime / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / transport / generalOrderDateTime / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
 "ArrivalNotice / transport / generalOrderDateTime / value",value,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
 "ArrivalNotice / transport / inlandArrivalDate",inlandArrivalDate,ClassifiedDate,,,,,"The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).",
-"ArrivalNotice / transport / inlandArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / transport / inlandArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
@@ -749,14 +749,14 @@ Unless otherwise specified, it is a local date in the time zone of the implicitl
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / legs",legs,"Leg list",,,,,"Full or partial information, considered relevant in this context, on some or all `Legs` of the `Transport`",
 "ArrivalNotice / transport / legs / arrivalDate",arrivalDate,ClassifiedDate,,,,,"The arrival date at the discharge location for this specific leg of the transport plan.",
-"ArrivalNotice / transport / legs / arrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / transport / legs / arrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
 "ArrivalNotice / transport / legs / arrivalDate / value",value,"string(date)",,,,2025-01-23,"String representation of a date in yyyy-MM-dd format.
 Unless otherwise specified, it is a local date in the time zone of the implicitly associated event location.",
 "ArrivalNotice / transport / legs / departureDate",departureDate,ClassifiedDate,,,,,"The departure date from the load location for this specific leg of the transport plan.",
-"ArrivalNotice / transport / legs / departureDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / transport / legs / departureDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
@@ -865,7 +865,7 @@ indicated by the 2-character code defined in
 The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.",
 "ArrivalNotice / transport / legs / vesselVoyage / vesselName",vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
 "ArrivalNotice / transport / onBoardDate",onBoardDate,ClassifiedDate,,,,,"The date when the container was loaded onto the vessel at the port of origin.",
-"ArrivalNotice / transport / onBoardDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / transport / onBoardDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
@@ -909,7 +909,7 @@ by the shipping line and where responsibility of the shipping line ceases.",
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / transport / placeOfDeliveryArrivalDate","placeOfDeliveryArrivalDate",ClassifiedDate,,,,,"The date of arrival of the shipment at Place of Delivery.",
-"ArrivalNotice / transport / placeOfDeliveryArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / transport / placeOfDeliveryArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
@@ -989,7 +989,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNotice / transport / portOfDischargeArrivalDate","portOfDischargeArrivalDate",ClassifiedDate,,,,,"The date of arrival of the vessel at the Port of Discharge.",
-"ArrivalNotice / transport / portOfDischargeArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / transport / portOfDischargeArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
@@ -1034,7 +1034,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / transport / receivedForShipmentDate",receivedForShipmentDate,ClassifiedDate,,,,,"The date on which the carrier takes possession of all containers under the bill of lading.
 For carrier haulage, this is when the carrier collects the last container at the place of receipt.
 For merchant haulage, this is when the last container is physically handed over to the terminal.",
-"ArrivalNotice / transport / receivedForShipmentDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNotice / transport / receivedForShipmentDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
@@ -1320,7 +1320,7 @@ responsibility of the shipping line ceases",
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNoticeNotification / placeOfDeliveryArrivalDate","placeOfDeliveryArrivalDate",ClassifiedDate,,,,,"The date of arrival of the shipment at Place of Delivery.",
-"ArrivalNoticeNotification / placeOfDeliveryArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNoticeNotification / placeOfDeliveryArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
@@ -1363,7 +1363,7 @@ Unless otherwise specified, it is a local date in the time zone of the implicitl
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "ArrivalNoticeNotification / portOfDischargeArrivalDate","portOfDischargeArrivalDate",ClassifiedDate,,,,,"The date of arrival of the vessel at the Port of Discharge.",
-"ArrivalNoticeNotification / portOfDischargeArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+"ArrivalNoticeNotification / portOfDischargeArrivalDate / classifier",classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",

@@ -18,7 +18,7 @@ import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Slf4j
-class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
+public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
 
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 
@@ -36,7 +36,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   private static final String CANCEL_SCHEMA_NAME = "CancelBookingRequest";
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
-  private BookingScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
+  private   BookingScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
     super(actionBuilder);
   }
 
@@ -265,7 +265,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  private static BookingScenarioListBuilder carrierSupplyScenarioParameters(
+  public static BookingScenarioListBuilder carrierSupplyScenarioParameters(
       String carrierPartyName, ScenarioType scenarioType) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     return new BookingScenarioListBuilder(

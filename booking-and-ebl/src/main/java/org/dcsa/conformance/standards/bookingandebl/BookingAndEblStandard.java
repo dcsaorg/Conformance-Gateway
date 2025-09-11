@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.bookingandebl;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -8,6 +9,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.AbstractStandard;
+import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.bookingandebl.party.BookingAndEblRole;
+import org.dcsa.conformance.standards.ebl.EblStandard;
 
 public class BookingAndEblStandard extends AbstractStandard {
 
@@ -22,7 +26,7 @@ public class BookingAndEblStandard extends AbstractStandard {
     return new TreeMap<>(
         Map.ofEntries(
             Map.entry(
-                "2.0.0 + 3.0.0",
+                "2.0.0-+-3.0.0",
                 new TreeSet<>(
                     Set.of(BookingAndEblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE)))));
   }
@@ -30,8 +34,12 @@ public class BookingAndEblStandard extends AbstractStandard {
   @Override
   public Map<String, Map<String, SortedMap<String, SortedSet<String>>>>
       getEndpointUrisAndMethodsByScenarioSuiteAndRoleName() {
-    // TODO: merge both Booking and Ebl endpoints
-    return Map.of();
+    Map<String, Map<String, SortedMap<String, SortedSet<String>>>> result = new HashMap<>();
+
+    result.putAll(BookingStandard.INSTANCE.getEndpointUrisAndMethodsByScenarioSuiteAndRoleName());
+    result.putAll(EblStandard.INSTANCE.getEndpointUrisAndMethodsByScenarioSuiteAndRoleName());
+
+    return result;
   }
 
   @Override
@@ -42,7 +50,6 @@ public class BookingAndEblStandard extends AbstractStandard {
 
   @Override
   protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
-    // TODO: merge both Booking and Ebl roles
-    return Set.of();
+    return Set.of(BookingAndEblRole.SHIPPER.getConfigName());
   }
 }

@@ -41,22 +41,22 @@ public class EblShipper extends ConformanceParty {
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+  public void exportPartyJsonState(ObjectNode targetObjectNode) {
     // no state to export
   }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+  public void importPartyJsonState(ObjectNode sourceObjectNode) {
     // no state to import
   }
 
   @Override
-  protected void doReset() {
+  public void doReset() {
     // no state to reset
   }
 
   @Override
-  protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
+  public Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(UC1_Shipper_SubmitShippingInstructionsAction.class, this::sendShippingInstructionsRequest),
       Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),

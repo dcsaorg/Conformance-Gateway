@@ -58,22 +58,22 @@ public class EblCarrier extends ConformanceParty {
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+  public void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set("tdrToSir", StateManagementUtil.storeMap(tdrToSir));
   }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+  public void importPartyJsonState(ObjectNode sourceObjectNode) {
     StateManagementUtil.restoreIntoMap(tdrToSir, sourceObjectNode.get("tdrToSir"));
   }
 
   @Override
-  protected void doReset() {
+  public void doReset() {
     tdrToSir.clear();
   }
 
   @Override
-  protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
+  public Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(CarrierSupplyPayloadAction.class, this::supplyScenarioParameters),
         Map.entry(

@@ -11,15 +11,21 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.booking.party.BookingShipper;
+import org.dcsa.conformance.standards.ebl.party.EblShipper;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 @Slf4j
 public class BookingAndEblShipper extends ConformanceParty {
 
-  protected BookingAndEblShipper(
+  private final BookingShipper bookingShipper;
+  private final EblShipper eblShipper;
+
+  public BookingAndEblShipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
@@ -33,24 +39,55 @@ public class BookingAndEblShipper extends ConformanceParty {
         persistentMap,
         webClient,
         orchestratorAuthHeader);
+    String[] versions = apiVersion.split("-\\+-");
+    this.bookingShipper =
+        new BookingShipper(
+            versions[0],
+            partyConfiguration,
+            counterpartConfiguration,
+            persistentMap,
+            webClient,
+            orchestratorAuthHeader);
+    this.eblShipper =
+        new EblShipper(
+            versions[1],
+            partyConfiguration,
+            counterpartConfiguration,
+            persistentMap,
+            webClient,
+            orchestratorAuthHeader);
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {}
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+    bookingShipper.exportPartyJsonState(targetObjectNode);
+    eblShipper.exportPartyJsonState(targetObjectNode);
+  }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {}
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+    bookingShipper.importPartyJsonState(sourceObjectNode);
+    eblShipper.importPartyJsonState(sourceObjectNode);
+  }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    return null;
+    return bookingShipper.handleRequest(request);
   }
 
   @Override
-  protected void doReset() {}
+  protected void doReset() {
+    bookingShipper.doReset();
+    eblShipper.doReset();
+  }
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.of();
+    Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> handlers = new HashMap<>();
+
+    handlers.putAll(bookingShipper.getActionPromptHandlers());
+    handlers.putAll(eblShipper.getActionPromptHandlers());
+
+    return handlers;
   }
 }

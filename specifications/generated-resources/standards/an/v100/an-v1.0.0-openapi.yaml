@@ -242,6 +242,13 @@ paths:
         schema:
           type: "string"
         example: "ExampleNextPageCursor"
+      - name: "API-Version"
+        in: "header"
+        description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
+        required: false
+        schema:
+          type: "string"
+        example: "1.0.0"
       responses:
         "200":
           description: "List of arrival notices matching the query parameters"

@@ -222,11 +222,16 @@ public class ANStandardSpecification extends StandardSpecification {
                     "ArrivalNotice / consignmentItems / cargoItems / charges / chargePartnerCode",
                     "ArrivalNotice / consignmentItems / cargoItems / charges / invoicePayerCode"),
                 Map.entry(
+                    "ArrivalNotice / paymentRemittance / swiftCode",
+                    "ArrivalNotice / paymentRemittance / SWIFTCode"),
+                Map.entry(
                     "ArrivalNotice / utilizedTransportEquipments / charges / chargePartnerCode",
                     "ArrivalNotice / utilizedTransportEquipments / charges / invoicePayerCode"))),
         Map.entry(
             AttributesNormalizedSheet.class,
-            Map.ofEntries(Map.entry("Charge,chargePartnerCode", "Charge,invoicePayerCode"))),
+            Map.ofEntries(
+                Map.entry("Charge,chargePartnerCode", "Charge,invoicePayerCode"),
+                Map.entry("PaymentRemittance,swiftCode", "PaymentRemittance,SWIFTCode"))),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
   }

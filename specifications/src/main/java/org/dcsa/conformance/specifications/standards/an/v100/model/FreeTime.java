@@ -2,10 +2,10 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
+import org.dcsa.conformance.specifications.standards.core.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.IsoEquipmentCode;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 

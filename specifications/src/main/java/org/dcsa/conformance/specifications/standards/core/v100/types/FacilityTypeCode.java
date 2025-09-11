@@ -16,13 +16,15 @@ Code identifying a specific type of facility
 """)
 @AllArgsConstructor
 public enum FacilityTypeCode implements EnumBase {
+  BORD("Border"),
   CLOC("Customer location"),
   COFS("Container freight station"),
   OFFD("Off-dock storage"),
   DEPO("Depot"),
   INTE("Inland terminal"),
   POTE("Port terminal"),
-  RAMP("Ramp");
+  RAMP("Ramp"),
+  WAYP("Waypoint");
 
   private final String valueDescription;
 }

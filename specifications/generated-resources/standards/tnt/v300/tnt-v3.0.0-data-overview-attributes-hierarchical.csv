@@ -1,7 +1,13 @@
 Path,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
-TNTEvent,,,,,,,,
-"TNTEvent / equipmentEventInfo",equipmentEventInfo,EquipmentEventInfo,,,,,"Equipment event information",
-"TNTEvent / equipmentEventInfo / equipmentEventTypeCode",equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
+Event,,,,,,,,
+"Event / equipmentEventDetails",equipmentEventDetails,EquipmentEventDetails,,,,,"Equipment-specific event details",
+"Event / equipmentEventDetails / ISOEquipmentCode",ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
+The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
+"Event / equipmentEventDetails / emptyIndicatorCode",emptyIndicatorCode,string,,,,LADEN,"Code to denote whether the equipment is empty or laden.
+- `EMPTY` - Empty
+- `LADEN` - Laden",
+"Event / equipmentEventDetails / equipmentEventTypeCode",equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
 - `LOAD` - Loaded
 - `DISC` - Discharged
 - `GTIN` - Gated in
@@ -13,56 +19,183 @@ TNTEvent,,,,,,,,
 - `INSP` - Inspected
 - `RSEA` - Resealed
 - `RMVD` - Removed",
-"TNTEvent / eventDateTime",eventDateTime,ClassifiedDateTime,yes,,,,"The date and time when the event has occurred.",
-"TNTEvent / eventDateTime / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
-- `PLN` - Planned
-- `EST` - Estimated
-- `ACT` - Actual",
-"TNTEvent / eventDateTime / value",value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
-"TNTEvent / eventID",eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the event.",
-"TNTEvent / eventLocation",eventLocation,Location,,,,,"The date and time when the event has occurred.",
-"TNTEvent / eventLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+"Event / equipmentEventDetails / equipmentReference",equipmentReference,string,,maxLength=11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+If a container does not comply with ISO 6346, it is suggested to follow
+[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+from SMDG.",
+"Event / equipmentEventDetails / eventLocation",eventLocation,Location,,,,,"The location of the event.",
+"Event / equipmentEventDetails / eventLocation / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
 
 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-"TNTEvent / eventLocation / address",address,Address,,,,,"Location address",
-"TNTEvent / eventLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
-"TNTEvent / eventLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
-"TNTEvent / eventLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
-"TNTEvent / eventLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
-"TNTEvent / eventLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
-"TNTEvent / eventLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
-"TNTEvent / eventLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
-"TNTEvent / eventLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
-"TNTEvent / eventLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
-"TNTEvent / eventLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
-"TNTEvent / eventLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+"Event / equipmentEventDetails / eventLocation / address",address,Address,,,,,"Location address",
+"Event / equipmentEventDetails / eventLocation / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"Event / equipmentEventDetails / eventLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"Event / equipmentEventDetails / eventLocation / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"Event / equipmentEventDetails / eventLocation / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"Event / equipmentEventDetails / eventLocation / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"Event / equipmentEventDetails / eventLocation / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"Event / equipmentEventDetails / eventLocation / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"Event / equipmentEventDetails / eventLocation / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"Event / equipmentEventDetails / eventLocation / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"Event / equipmentEventDetails / eventLocation / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"Event / equipmentEventDetails / eventLocation / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
 - `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
-"TNTEvent / eventLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
+"Event / equipmentEventDetails / eventLocation / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
 
+- `BORD` - Border
 - `CLOC` - Customer location
 - `COFS` - Container freight station
 - `OFFD` - Off-dock storage
 - `DEPO` - Depot
 - `INTE` - Inland terminal
 - `POTE` - Port terminal
-- `RAMP` - Ramp",
-"TNTEvent / eventLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
-"TNTEvent / eventLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
-"TNTEvent / eventLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-"TNTEvent / eventLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
-"TNTEvent / iotEventInfo",iotEventInfo,IotEventInfo,,,,,"IoT event information",
-"TNTEvent / iotEventInfo / iotEventTypeCode",iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
+- `RAMP` - Ramp
+- `WAYP` - Waypoint",
+"Event / equipmentEventDetails / eventLocation / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"Event / equipmentEventDetails / eventLocation / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"Event / equipmentEventDetails / eventLocation / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"Event / equipmentEventDetails / eventLocation / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"Event / equipmentEventDetails / isTransshipmentMove",isTransshipmentMove,boolean,,,,,"Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.",
+"Event / equipmentEventDetails / seals",seals,"Seal list",,,,,,
+"Event / equipmentEventDetails / seals / number",number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
+"Event / equipmentEventDetails / seals / source",source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
+- `CAR` (Carrier)
+- `SHI` (Shipper)
+- `PHY` (Phytosanitary)
+- `VET` (Veterinary)
+- `CUS` (Customs)",
+"Event / equipmentEventDetails / seals / type",type,string,,,,WIR,"The type of seal.
+- `KLP` (Keyless padlock)
+- `BLT` (Bolt)
+- `WIR` (Wire)",
+"Event / eventDateTime",eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
+"Event / eventDateTime / classifier",classifier,string,,,,EST,"Classifier denoting whether a date/time is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+"Event / eventDateTime / value",value,"string(date-time)",,,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+"Event / eventID",eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+"Event / eventTypeCode",eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment event
+- `TRANSPORT` - Transport event
+- `EQUIPMENT` - Equipment event
+- `IOT` - IoT event
+- `REEFER` - Reefer event",
+"Event / eventUpdatedDateTime",eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+"Event / iotEventDetails",iotEventDetails,IotEventDetails,,,,,"IoT-specific event details",
+"Event / iotEventDetails / iotEventCode",iotEventCode,string,,,,DRO,"Code used to denote the specific IoT event that has occurred
+- `DRO` - Door opened",
+"Event / iotEventDetails / iotEventTypeCode",iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
 - `DETC` - Detected",
-"TNTEvent / reeferEventInfo",reeferEventInfo,ReeferEventInfo,,,,,"Reefer event information",
-"TNTEvent / reeferEventInfo / reeferEventTypeCode",reeferEventTypeCode,string,,,,MEAS,"Code used to denote the type of a reefer event
+"Event / reason",reason,string,,,,,"The reason this event was sent",
+"Event / reeferEventDetails",reeferEventDetails,ReeferEventDetails,,,,,"Reefer-specific event details",
+"Event / reeferEventDetails / measuredParameters",measuredParameters,ActiveReeferParameters,,,,,"Measured active reefer parameters",
+"Event / reeferEventDetails / measuredParameters / airExchangeUnit",airExchangeUnit,string,,,,MQH,"Unit in which the `airExchangeValue` is expressed:
+- `MQH` (Cubic metre per hour)
+- `FQH` (Cubic foot per hour)",
+"Event / reeferEventDetails / measuredParameters / airExchangeValue",airExchangeValue,number,,,,15.4,"Air exchange rate expressed in `airExchangeUnit`",
+"Event / reeferEventDetails / measuredParameters / ambientTemperatureValue",ambientTemperatureValue,number,,,,-15,"Ambient temperature value expressed in `temperatureUnit`",
+"Event / reeferEventDetails / measuredParameters / co2Percentage",co2Percentage,number,,,,25,"CO<sub>2</sub> percentage",
+"Event / reeferEventDetails / measuredParameters / humidityPercentage",humidityPercentage,number,,,,50,"Humidity percentage",
+"Event / reeferEventDetails / measuredParameters / isBulbMode",isBulbMode,boolean,,,,true,"Flag indicating whether bulb mode is active",
+"Event / reeferEventDetails / measuredParameters / isColdTreatmentRequired",isColdTreatmentRequired,boolean,,,,true,"Flag indicating whether cargo cold treatment is required prior to loading at origin,
+or during transit but prior arrival at POD.",
+"Event / reeferEventDetails / measuredParameters / isControlledAtmosphereRequired","isControlledAtmosphereRequired",boolean,,,,true,"Flag indicating whether controlled atmosphere is required",
+"Event / reeferEventDetails / measuredParameters / isDrainholesOpen",isDrainholesOpen,boolean,,,,true,"Flag indicating whether drainholes are open",
+"Event / reeferEventDetails / measuredParameters / isVentilationOpen",isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open",
+"Event / reeferEventDetails / measuredParameters / o2Percentage",o2Percentage,number,,,,25,"O<sub>2</sub> percentage",
+"Event / reeferEventDetails / measuredParameters / temperatureUnit",temperatureUnit,string,,,,CEL,"Unit in which the `temperatureValue` and `ambientTemperatureValue` are expressed:
+- `CEL` (Celsius)
+- `FAH` (Fahrenheit)",
+"Event / reeferEventDetails / measuredParameters / temperatureValue",temperatureValue,number,,,,-15,"Internal temperature value expressed in `temperatureUnit`",
+"Event / reeferEventDetails / reeferEventTypeCode",reeferEventTypeCode,string,,,,MEAS,"Code used to denote the type of a reefer event
 - `MEAS` - Measured
 - `ADJU` - Adjusted",
-"TNTEvent / shipmentEventInfo",shipmentEventInfo,ShipmentEventInfo,,,,,"Shipment event information",
-"TNTEvent / shipmentEventInfo / shipmentEventTypeCode",shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
+"Event / reeferEventDetails / setpointParameters",setpointParameters,ActiveReeferParameters,,,,,"Setpoint active reefer parameters",
+"Event / reeferEventDetails / setpointParameters / airExchangeUnit",airExchangeUnit,string,,,,MQH,"Unit in which the `airExchangeValue` is expressed:
+- `MQH` (Cubic metre per hour)
+- `FQH` (Cubic foot per hour)",
+"Event / reeferEventDetails / setpointParameters / airExchangeValue",airExchangeValue,number,,,,15.4,"Air exchange rate expressed in `airExchangeUnit`",
+"Event / reeferEventDetails / setpointParameters / ambientTemperatureValue",ambientTemperatureValue,number,,,,-15,"Ambient temperature value expressed in `temperatureUnit`",
+"Event / reeferEventDetails / setpointParameters / co2Percentage",co2Percentage,number,,,,25,"CO<sub>2</sub> percentage",
+"Event / reeferEventDetails / setpointParameters / humidityPercentage",humidityPercentage,number,,,,50,"Humidity percentage",
+"Event / reeferEventDetails / setpointParameters / isBulbMode",isBulbMode,boolean,,,,true,"Flag indicating whether bulb mode is active",
+"Event / reeferEventDetails / setpointParameters / isColdTreatmentRequired",isColdTreatmentRequired,boolean,,,,true,"Flag indicating whether cargo cold treatment is required prior to loading at origin,
+or during transit but prior arrival at POD.",
+"Event / reeferEventDetails / setpointParameters / isControlledAtmosphereRequired","isControlledAtmosphereRequired",boolean,,,,true,"Flag indicating whether controlled atmosphere is required",
+"Event / reeferEventDetails / setpointParameters / isDrainholesOpen",isDrainholesOpen,boolean,,,,true,"Flag indicating whether drainholes are open",
+"Event / reeferEventDetails / setpointParameters / isVentilationOpen",isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open",
+"Event / reeferEventDetails / setpointParameters / o2Percentage",o2Percentage,number,,,,25,"O<sub>2</sub> percentage",
+"Event / reeferEventDetails / setpointParameters / temperatureUnit",temperatureUnit,string,,,,CEL,"Unit in which the `temperatureValue` and `ambientTemperatureValue` are expressed:
+- `CEL` (Celsius)
+- `FAH` (Fahrenheit)",
+"Event / reeferEventDetails / setpointParameters / temperatureValue",temperatureValue,number,,,,-15,"Internal temperature value expressed in `temperatureUnit`",
+"Event / relatedDocumentReferences","relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
+"Event / relatedDocumentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+"Event / relatedDocumentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `CBR` - Carrier Booking Request
+- `BKG` - Booking
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `TRO` - Transport Order
+- `CRO` - Container Release Order
+- `ARN` - Arrival Notice
+- `VGM` - Verified Gross Mass
+- `CAS` - Cargo Survey
+- `CUC` - Customs Clearance
+- `DGD` - Dangerous Goods Declaration
+- `OOG` - Out of Gauge
+- `CQU` - Contract Quotation
+- `INV` - Invoice
+- `HCE` - Health Certificate
+- `PCE` - Phytosanitary Certificate
+- `VCE` - Veterinary Certificate
+- `FCE` - Fumigation Certificate
+- `ICE` - Inspection Certificate
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin",
+"Event / shipmentEventDetails",shipmentEventDetails,ShipmentEventDetails,,,,,"Shipment-specific event details",
+"Event / shipmentEventDetails / documentReference",documentReference,DocumentReference,,,,,"Referenced document",
+"Event / shipmentEventDetails / documentReference / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+"Event / shipmentEventDetails / documentReference / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `CBR` - Carrier Booking Request
+- `BKG` - Booking
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `TRO` - Transport Order
+- `CRO` - Container Release Order
+- `ARN` - Arrival Notice
+- `VGM` - Verified Gross Mass
+- `CAS` - Cargo Survey
+- `CUC` - Customs Clearance
+- `DGD` - Dangerous Goods Declaration
+- `OOG` - Out of Gauge
+- `CQU` - Contract Quotation
+- `INV` - Invoice
+- `HCE` - Health Certificate
+- `PCE` - Phytosanitary Certificate
+- `VCE` - Veterinary Certificate
+- `FCE` - Fumigation Certificate
+- `ICE` - Inspection Certificate
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin",
+"Event / shipmentEventDetails / priceCalculationDate",priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in consideration for the tariff applicability, that differs depending on the trade.
+It can vary per carrier.",
+"Event / shipmentEventDetails / shipmentEventTypeCode",shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
 - `RECE` - Received
 - `DRFT` - Drafted
 - `PENA` - Pending Approval
@@ -78,7 +211,113 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 - `CMPL` - Completed
 - `HOLD` - On Hold
 - `RELS` - Released",
-"TNTEvent / transportEventInfo",transportEventInfo,TransportEventInfo,,,,,"Transport event information",
-"TNTEvent / transportEventInfo / transportEventTypeCode",transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
+"Event / shipmentReferences",shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
+"Event / shipmentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
+"Event / shipmentReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference
+- `FF` - Freight Forwarder’s Reference
+- `SI` - Shipper’s Reference
+- `PO` - Purchase Order Reference
+- `CR` - Customer’s Reference
+- `AAO` - Consignee’s Reference
+- `ECR` - Empty container release reference
+- `CSI` - Customer shipment ID
+- `BPR` - Booking party reference number
+- `BID` - Booking Request ID
+- `EQ` - Equipment Reference
+- `RUC` - Registro Único del Contribuyente
+- `DUE` - Declaração Única de Exportação
+- `CER` - Canadian Export Reporting System
+- `AES` - Automated Export System",
+"Event / transportEventDetails",transportEventDetails,TransportEventDetails,,,,,"Transport-specific event details",
+"Event / transportEventDetails / changeRemark",changeRemark,string,,maxLength=250,,"Bad weather","Free text information provided by the vessel operator regarding the reasons for the change in schedule
+and/or plans to mitigate schedule slippage.",
+"Event / transportEventDetails / delayReasonCode",delayReasonCode,string,,,,,"Code identifying the reason for the delay, as defined by SMDG here:
+https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/",
+"Event / transportEventDetails / transportCall",transportCall,TransportCall,,,,,"Transport call information",
+"Event / transportEventDetails / transportCall / exportVoyageNumberOrReference","exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Carrier voyage number and/or universal voyage reference",
+"Event / transportEventDetails / transportCall / exportVoyageNumberOrReference / carrierExportVoyageNumber","carrierExportVoyageNumber",string,,,,2103S,"Carrier-specific identifier of the voyage",
+"Event / transportEventDetails / transportCall / exportVoyageNumberOrReference / universalExportVoyageReference","universalExportVoyageReference",string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"Event / transportEventDetails / transportCall / importVoyageNumberOrReference","importVoyageNumberOrReference",VoyageNumberOrReference,,,,,,
+"Event / transportEventDetails / transportCall / importVoyageNumberOrReference / carrierExportVoyageNumber","carrierExportVoyageNumber",string,,,,2103S,"Carrier-specific identifier of the voyage",
+"Event / transportEventDetails / transportCall / importVoyageNumberOrReference / universalExportVoyageReference","universalExportVoyageReference",string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"Event / transportEventDetails / transportCall / location",location,Location,,,,,"Location information",
+"Event / transportEventDetails / transportCall / location / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+"Event / transportEventDetails / transportCall / location / address",address,Address,,,,,"Location address",
+"Event / transportEventDetails / transportCall / location / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"Event / transportEventDetails / transportCall / location / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"Event / transportEventDetails / transportCall / location / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"Event / transportEventDetails / transportCall / location / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"Event / transportEventDetails / transportCall / location / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"Event / transportEventDetails / transportCall / location / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"Event / transportEventDetails / transportCall / location / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"Event / transportEventDetails / transportCall / location / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"Event / transportEventDetails / transportCall / location / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"Event / transportEventDetails / transportCall / location / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"Event / transportEventDetails / transportCall / location / facility / facilityCodeListProvider",facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
+"Event / transportEventDetails / transportCall / location / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
+
+- `BORD` - Border
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp
+- `WAYP` - Waypoint",
+"Event / transportEventDetails / transportCall / location / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"Event / transportEventDetails / transportCall / location / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"Event / transportEventDetails / transportCall / location / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"Event / transportEventDetails / transportCall / location / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"Event / transportEventDetails / transportCall / modeOfTransport",modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA
+- `VESSEL` - Vessel
+- `RAIL` - Rail
+- `TRUCK` - Truck
+- `BARGE` - Barge
+- `MULTIMODAL` - Multimodal",
+"Event / transportEventDetails / transportCall / portVisitReference",portVisitReference,string,,,,,"The unique reference that can be used to link different `transportCallReferences` to the same port visit.
+The reference is provided by the port to uniquely identify a port call.",
+"Event / transportEventDetails / transportCall / railTransport",railTransport,RailTransport,,,,,"Rail transport information",
+"Event / transportEventDetails / transportCall / railTransport / departureID",departureID,string,,maxLength=100,,,"Unique identifying number or code that is assigned to a specific departure of a rail.
+(Also known as a departure reference number.)",
+"Event / transportEventDetails / transportCall / railTransport / railCar",railCar,string,,maxLength=50,,,"A railcar is a type of railway vehicle that is designed to transport freight or passengers on a railway track.
+They are also known as rail vehicles, railcars, or rolling stock.
+Railcars can be powered by an on-board locomotive or they can be pulled by a separate locomotive.",
+"Event / transportEventDetails / transportCall / railTransport / railService",railService,string,,maxLength=50,,,"A rail service number is a unique identifying number assigned to a specific rail service or train.",
+"Event / transportEventDetails / transportCall / serviceCodeOrReference",serviceCodeOrReference,ServiceCodeOrReference,,,,,"Carrier service code and/or universal service reference",
+"Event / transportEventDetails / transportCall / serviceCodeOrReference / carrierServiceCode",carrierServiceCode,string,,,,FE1,"Carrier-specific identifier of a service.",
+"Event / transportEventDetails / transportCall / serviceCodeOrReference / universalServiceReference","universalServiceReference",string,,,,SR12345A,"Reference of a service agreed between the VSA partners.",
+"Event / transportEventDetails / transportCall / transportCallReference",transportCallReference,string,,,,,"Carrier-defined reference of a `TransportCall`.
+
+If the mode of transport is Vessel and the facility is a Port or Terminal,
+this reference should be considered a terminal call reference.",
+"Event / transportEventDetails / transportCall / transportCallSequenceNumber","transportCallSequenceNumber",integer,,,,,"Transport operator's key that uniquely identifies each individual transport call.
+This key is essential to distinguish between two separate calls at the same location within one voyage.",
+"Event / transportEventDetails / transportCall / truckTransport",truckTransport,TruckTransport,,,,,"Truck transport information",
+"Event / transportEventDetails / transportCall / truckTransport / chassisLicensePlate",chassisLicensePlate,string,,maxLength=15,,,"A chassis number is a unique identifying number or code assigned to the chassis of a vehicle.
+It may also be referred to as a ""vehicle identification number"" (VIN) or ""frame number"".",
+"Event / transportEventDetails / transportCall / truckTransport / licensePlate",licensePlate,string,,maxLength=15,,,"A license plate is a tag that is attached to a vehicle and displays a unique number or code assigned to the vehicle.
+The format, design, and issuing authority for license plates vary by country, state, and province.",
+"Event / transportEventDetails / transportCall / vesselTransport",vesselTransport,VesselTransport,,,,,"Vessel or barge transport information",
+"Event / transportEventDetails / transportCall / vesselTransport / operatorCarrierCode",operatorCarrierCode,string,,maxLength=10,,MAEU,"The carrier who is in charge of the vessel operation based on `operatorCarrierCodeListProvider`",
+"Event / transportEventDetails / transportCall / vesselTransport / operatorCarrierCodeListProvider","operatorCarrierCodeListProvider",string,,maxLength=10,,SMDG,"The code list provider used for the `operatorCarrierCode` (SMDG or NMFTA)",
+"Event / transportEventDetails / transportCall / vesselTransport / vesselCallSign",vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel
+and is assigned by the International Telecommunication Union (ITU).
+It consists of a three-letter alphanumeric prefix that indicates nationality,
+followed by one to four characters to identify the individual vessel.",
+"Event / transportEventDetails / transportCall / vesselTransport / vesselFlag",vesselFlag,string,,maxLength=2,,NL,"The national flag of the country under which a vessel is registered,
+indicated by the 2-character code defined in
+[ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).",
+"Event / transportEventDetails / transportCall / vesselTransport / vesselIMONumber",vesselIMONumber,string,,maxLength=8,,12345678,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.",
+"Event / transportEventDetails / transportCall / vesselTransport / vesselName",vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
+"Event / transportEventDetails / transportEventTypeCode",transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
 - `ARRI` - Arrived
 - `DEPA` - Departed",

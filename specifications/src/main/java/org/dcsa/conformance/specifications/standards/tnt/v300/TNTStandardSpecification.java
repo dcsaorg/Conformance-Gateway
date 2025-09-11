@@ -25,23 +25,33 @@ import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ActiveReeferParameters;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ServiceCodeOrReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.FeedbackElement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsError;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsResponse;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsError;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TNTEvent;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportEventInfo;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportEventDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
 
 public class TNTStandardSpecification extends StandardSpecification {
 
@@ -69,35 +79,44 @@ public class TNTStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata(
-        "Track and Trace", "3.0.0-20250912-design", "", "", 4);
+    return new LegendMetadata("Track and Trace", "3.0.0-20250912-design", "", "", 4);
   }
 
   @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
+        ActiveReeferParameters.class,
         Address.class,
         ClassifiedDateTime.class,
-        EquipmentEventInfo.class,
+        DocumentReference.class,
+        EquipmentEventDetails.class,
+        Event.class,
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
         GetEventsError.class,
         GetEventsResponse.class,
-        IotEventInfo.class,
+        IotEventDetails.class,
         Location.class,
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,
-        ReeferEventInfo.class,
-        ShipmentEventInfo.class,
-        TNTEvent.class,
-        TransportEventInfo.class);
+        RailTransport.class,
+        ReeferEventDetails.class,
+        Seal.class,
+        ServiceCodeOrReference.class,
+        ShipmentEventDetails.class,
+        ShipmentReference.class,
+        TransportCall.class,
+        TransportEventDetails.class,
+        TruckTransport.class,
+        VesselTransport.class,
+        VoyageNumberOrReference.class);
   }
 
   @Override
   protected List<String> getRootTypeNames() {
-    return List.of(TNTEvent.class.getSimpleName());
+    return List.of(Event.class.getSimpleName());
   }
 
   @Override

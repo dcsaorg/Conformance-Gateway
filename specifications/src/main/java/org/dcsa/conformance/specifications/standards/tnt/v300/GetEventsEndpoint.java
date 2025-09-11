@@ -106,7 +106,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
           .name("eventDateTimeMin")
           .description("Retrieve events occurring at or after this timestamp")
           .example("2025-01-23T01:23:45Z")
-          .schema(new Schema<String>().type("string").format("datetime"));
+          .schema(new Schema<String>().type("string").format("date-time"));
 
   private final Parameter eventDateTimeMax =
       new Parameter()
@@ -114,7 +114,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
           .name("eventDateTimeMax")
           .description("Retrieve events occurring at or before this timestamp")
           .example("2025-01-23T01:23:45Z")
-          .schema(new Schema<String>().type("string").format("datetime"));
+          .schema(new Schema<String>().type("string").format("date-time"));
 
   private final Parameter limit =
       new Parameter()

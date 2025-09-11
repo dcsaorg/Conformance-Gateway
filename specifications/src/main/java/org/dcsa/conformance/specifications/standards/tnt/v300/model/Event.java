@@ -36,12 +36,8 @@ An event overrides any other event that has the same `eventID` and an earlier `e
   @Schema(description = "The reason this event was sent")
   private String reason;
 
-  // event type
-
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private EventTypeCode eventTypeCode;
-
-  // event details
 
   @Schema() private ShipmentEventDetails shipmentEventDetails;
 

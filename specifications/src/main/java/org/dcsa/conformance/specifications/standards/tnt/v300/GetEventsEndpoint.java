@@ -122,7 +122,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
           .name("limit")
           .description("Maximum number of events to include in each page of the response.")
           .example(10)
-          .schema(new Schema<Integer>().type("number").format("int32").minimum(new BigDecimal(1)));
+          .schema(new Schema<Integer>().type("integer").format("int32").minimum(new BigDecimal(1)));
 
   private final Parameter cursor =
       new Parameter()

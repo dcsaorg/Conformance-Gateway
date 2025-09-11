@@ -222,11 +222,16 @@ public class ANStandardSpecification extends StandardSpecification {
                     "ArrivalNotice / consignmentItems / cargoItems / charges / chargePartnerCode",
                     "ArrivalNotice / consignmentItems / cargoItems / charges / invoicePayerCode"),
                 Map.entry(
+                    "ArrivalNotice / paymentRemittance / swiftCode",
+                    "ArrivalNotice / paymentRemittance / SWIFTCode"),
+                Map.entry(
                     "ArrivalNotice / utilizedTransportEquipments / charges / chargePartnerCode",
                     "ArrivalNotice / utilizedTransportEquipments / charges / invoicePayerCode"))),
         Map.entry(
             AttributesNormalizedSheet.class,
-            Map.ofEntries(Map.entry("Charge,chargePartnerCode", "Charge,invoicePayerCode"))),
+            Map.ofEntries(
+                Map.entry("Charge,chargePartnerCode", "Charge,invoicePayerCode"),
+                Map.entry("PaymentRemittance,swiftCode", "PaymentRemittance,SWIFTCode"))),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
   }
@@ -246,7 +251,11 @@ public class ANStandardSpecification extends StandardSpecification {
         .description(readResourceFile("openapi-get-ans-description.md"))
         .operationId("get-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_PUBLISHERS))
-        .parameters(new GetArrivalNoticesEndpoint().getQueryParameters())
+        .parameters(
+            Stream.concat(
+                    new GetArrivalNoticesEndpoint().getQueryParameters().stream(),
+                    Stream.of(getApiVersionHeaderParameter()))
+                .toList())
         .responses(
             new ApiResponses()
                 .addApiResponse(
@@ -256,8 +265,8 @@ public class ANStandardSpecification extends StandardSpecification {
                         .headers(
                             Stream.of(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")),
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)),
                                     Map.entry(
                                         "Next-Page-Cursor",
                                         new Header().$ref("#/components/headers/Next-Page-Cursor")))
@@ -310,8 +319,8 @@ public class ANStandardSpecification extends StandardSpecification {
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)))))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -355,8 +364,8 @@ public class ANStandardSpecification extends StandardSpecification {
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)))))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -376,8 +385,7 @@ public class ANStandardSpecification extends StandardSpecification {
         .headers(
             new LinkedHashMap<>(
                 Map.ofEntries(
-                    Map.entry(
-                        "API-Version", new Header().$ref("#/components/headers/API-Version")))))
+                    Map.entry(API_VERSION_HEADER, new Header().$ref(API_VERSION_HEADER_REF)))))
         .content(
             new Content()
                 .addMediaType(

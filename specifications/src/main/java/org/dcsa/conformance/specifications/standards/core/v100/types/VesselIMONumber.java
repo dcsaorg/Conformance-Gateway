@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(
     type = "string",
     maxLength = 8,
-    example = "12345678",
+    example = "9321483",
     description =
 """
 The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.

@@ -27,6 +27,7 @@ Code list provider (each with its relevant code list) defining the `facilityCode
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
 - `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))
 """,
-      example = "SMDG")
+      example = "SMDG",
+      maxLength = 10)
   protected String facilityCodeListProvider;
 }

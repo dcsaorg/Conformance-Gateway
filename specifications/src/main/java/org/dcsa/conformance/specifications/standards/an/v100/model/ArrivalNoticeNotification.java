@@ -37,11 +37,12 @@ public class ArrivalNoticeNotification {
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
-      example = "TDR1234",
+      example = "HHL71800000",
       description =
 """
 The reference of the transport document for which this arrival notice was created
-""")
+""",
+      maxLength = 20)
   private String transportDocumentReference;
 
   @Schema(

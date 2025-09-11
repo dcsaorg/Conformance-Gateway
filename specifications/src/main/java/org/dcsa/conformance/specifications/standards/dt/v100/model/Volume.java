@@ -21,6 +21,7 @@ Measurement unit in which the volume `value` is expressed:
 - `MTQ` (Cubic meter)
 - `LTR` (Litre)
 """,
-      example = "MTQ")
+      example = "MTQ",
+      maxLength = 10)
   protected String unit;
 }

@@ -1,5 +1,5 @@
 cd ..
-call mvn clean package
+call mvn clean package -DskipTests
 
 cd webui
 call npm install

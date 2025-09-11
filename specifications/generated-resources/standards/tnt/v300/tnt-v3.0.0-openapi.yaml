@@ -196,7 +196,7 @@ paths:
         description: "Maximum number of events to include in each page of the response."
         schema:
           minimum: 1
-          type: "number"
+          type: "integer"
           format: "int32"
         example: 10
       - name: "cursor"
@@ -205,6 +205,13 @@ paths:
         schema:
           type: "string"
         example: "ExampleNextPageCursor"
+      - name: "API-Version"
+        in: "header"
+        description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
+        required: false
+        schema:
+          type: "string"
+        example: "3.0.0"
       responses:
         "200":
           description: "List of events matching the query parameters"
@@ -382,12 +389,14 @@ components:
       type: "object"
       properties:
         value:
+          maxLength: 30
           type: "string"
           description: |
             Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         classifier:
+          maxLength: 10
           type: "string"
           description: |-
             Classifier denoting whether a date/time is planned, estimated or actual
@@ -511,6 +520,7 @@ components:
           allOf:
           - $ref: "#/components/schemas/ClassifiedDateTime"
         eventUpdatedDateTime:
+          maxLength: 30
           type: "string"
           description: "The date and time when the technical event was last updated."
           format: "date-time"
@@ -569,6 +579,7 @@ components:
             Code identifying a specific facility, as defined by the `facilityCodeListProvider`.
           example: "ADT"
         facilityCodeListProvider:
+          maxLength: 10
           type: "string"
           description: |
             Code list provider (each with its relevant code list) defining the `facilityCode`:
@@ -1026,7 +1037,7 @@ components:
           description: |
             The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
             The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.
-          example: "12345678"
+          example: "9321483"
         vesselName:
           maxLength: 50
           type: "string"

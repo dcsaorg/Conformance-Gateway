@@ -166,7 +166,11 @@ public class TNTStandardSpecification extends StandardSpecification {
         .description(readResourceFile("openapi-get-events-description.md"))
         .operationId("get-events")
         .tags(Collections.singletonList(TAG_EVENT_PUBLISHERS))
-        .parameters(new GetEventsEndpoint().getQueryParameters())
+        .parameters(
+            Stream.concat(
+                    new GetEventsEndpoint().getQueryParameters().stream(),
+                    Stream.of(getApiVersionHeaderParameter()))
+                .toList())
         .responses(
             new ApiResponses()
                 .addApiResponse(
@@ -176,8 +180,8 @@ public class TNTStandardSpecification extends StandardSpecification {
                         .headers(
                             Stream.of(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")),
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)),
                                     Map.entry(
                                         "Next-Page-Cursor",
                                         new Header().$ref("#/components/headers/Next-Page-Cursor")))
@@ -230,8 +234,8 @@ public class TNTStandardSpecification extends StandardSpecification {
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)))))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -251,8 +255,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         .headers(
             new LinkedHashMap<>(
                 Map.ofEntries(
-                    Map.entry(
-                        "API-Version", new Header().$ref("#/components/headers/API-Version")))))
+                    Map.entry(API_VERSION_HEADER, new Header().$ref(API_VERSION_HEADER_REF)))))
         .content(
             new Content()
                 .addMediaType(

@@ -22,6 +22,8 @@ Renamed in object `PaymentRemittance` property `swiftCode` to `SWIFTCode`. (SD-2
 
 Updated in object `IdentifyingCode` for property `codeListProvider` the list of values. (SD-2456)
 
+Updated in object `Location` for property `facilityTypeCode` the list of values, adding `Border` and `Waypoint` for consistency with TNT 3.0.0. (SD-2459)
+
 
 ## Snapshot v1.0.0-20250829-beta
 

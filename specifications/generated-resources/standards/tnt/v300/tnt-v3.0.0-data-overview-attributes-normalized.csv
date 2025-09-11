@@ -1,4 +1,21 @@
 Object,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
+ActiveReeferParameters,airExchangeUnit,string,,,,MQH,"Unit in which the `airExchangeValue` is expressed:
+- `MQH` (Cubic metre per hour)
+- `FQH` (Cubic foot per hour)",
+ActiveReeferParameters,airExchangeValue,number,,,,15.4,"Air exchange rate (at which outdoor air replaces indoor air) expressed in `airExchangeUnit`",
+ActiveReeferParameters,co2Percentage,number,,,,25,"CO<sub>2</sub> percentage",
+ActiveReeferParameters,humidityPercentage,number,,,,50,"Humidity percentage",
+ActiveReeferParameters,isBulbMode,boolean,,,,true,"Flag indicating whether bulb mode is active",
+ActiveReeferParameters,isColdTreatmentRequired,boolean,,,,true,"Flag indicating whether cargo cold treatment is required prior to loading at origin,
+or during transit but prior arrival at POD.",
+ActiveReeferParameters,"isControlledAtmosphereRequired",boolean,,,,true,"Flag indicating whether controlled atmosphere is required",
+ActiveReeferParameters,isDrainholesOpen,boolean,,,,true,"Flag indicating whether drainholes are open",
+ActiveReeferParameters,isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open",
+ActiveReeferParameters,o2Percentage,number,,,,25,"O<sub>2</sub> percentage",
+ActiveReeferParameters,temperatureUnit,string,,,,CEL,"Unit in which the `temperatureValue` is expressed:
+- `CEL` (Celsius)
+- `FAH` (Fahrenheit)",
+ActiveReeferParameters,temperatureValue,number,,,,-15,"Temperature value expressed in `temperatureUnit`",
 Address,POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
 Address,city,string,,maxLength=35,,Amsterdam,"The name of the city.",
 Address,countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
@@ -148,9 +165,11 @@ RailTransport,railCar,string,,maxLength=50,,,"A railcar is a type of railway veh
 They are also known as rail vehicles, railcars, or rolling stock.
 Railcars can be powered by an on-board locomotive or they can be pulled by a separate locomotive.",
 RailTransport,railService,string,,maxLength=50,,,"A rail service number is a unique identifying number assigned to a specific rail service or train.",
+ReeferEventDetails,measuredParameters,ActiveReeferParameters,,,,,"Measured active reefer parameters",
 ReeferEventDetails,reeferEventTypeCode,string,,,,MEAS,"Code used to denote the type of a reefer event
 - `MEAS` - Measured
 - `ADJU` - Adjusted",
+ReeferEventDetails,setpointParameters,ActiveReeferParameters,,,,,"Setpoint active reefer parameters",
 Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
 - `CAR` (Carrier)

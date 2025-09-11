@@ -263,6 +263,73 @@ paths:
                 $ref: "#/components/schemas/PostEventsError"
 components:
   schemas:
+    ActiveReeferParameters:
+      type: "object"
+      properties:
+        temperatureValue:
+          type: "number"
+          description: "Temperature value expressed in `temperatureUnit`"
+          format: "float"
+          example: -15
+        temperatureUnit:
+          type: "string"
+          description: |
+            Unit in which the `temperatureValue` is expressed:
+            - `CEL` (Celsius)
+            - `FAH` (Fahrenheit)
+          example: "CEL"
+        o2Percentage:
+          type: "number"
+          description: "O<sub>2</sub> percentage"
+          format: "float"
+          example: 25
+        co2Percentage:
+          type: "number"
+          description: "CO<sub>2</sub> percentage"
+          format: "float"
+          example: 25
+        humidityPercentage:
+          type: "number"
+          description: "Humidity percentage"
+          format: "float"
+          example: 50
+        airExchangeValue:
+          type: "number"
+          description: |
+            Air exchange rate (at which outdoor air replaces indoor air) expressed in `airExchangeUnit`
+          format: "float"
+          example: 15.4
+        airExchangeUnit:
+          type: "string"
+          description: |
+            Unit in which the `airExchangeValue` is expressed:
+            - `MQH` (Cubic metre per hour)
+            - `FQH` (Cubic foot per hour)
+          example: "MQH"
+        isVentilationOpen:
+          type: "boolean"
+          description: "Flag indicating whether the ventilation orifice is open"
+          example: true
+        isDrainholesOpen:
+          type: "boolean"
+          description: "Flag indicating whether drainholes are open"
+          example: true
+        isBulbMode:
+          type: "boolean"
+          description: "Flag indicating whether bulb mode is active"
+          example: true
+        isColdTreatmentRequired:
+          type: "boolean"
+          description: |
+            Flag indicating whether cargo cold treatment is required prior to loading at origin,
+            or during transit but prior arrival at POD.
+          example: true
+        isControlledAtmosphereRequired:
+          type: "boolean"
+          description: "Flag indicating whether controlled atmosphere is required"
+          example: true
+      description: |
+        Parameters of a Reefer equipment, usable as setpoint or as measured values.
     Address:
       type: "object"
       properties:
@@ -718,6 +785,14 @@ components:
             - `MEAS` - Measured
             - `ADJU` - Adjusted
           example: "MEAS"
+        setpointParameters:
+          description: "Setpoint active reefer parameters"
+          allOf:
+          - $ref: "#/components/schemas/ActiveReeferParameters"
+        measuredParameters:
+          description: "Measured active reefer parameters"
+          allOf:
+          - $ref: "#/components/schemas/ActiveReeferParameters"
       description: "Reefer-related information"
     Seal:
       type: "object"

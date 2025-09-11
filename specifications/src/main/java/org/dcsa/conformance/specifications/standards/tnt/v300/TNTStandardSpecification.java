@@ -25,6 +25,7 @@ import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ActiveReeferParameters;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
@@ -84,6 +85,7 @@ public class TNTStandardSpecification extends StandardSpecification {
   @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
+        ActiveReeferParameters.class,
         Address.class,
         ClassifiedDateTime.class,
         DocumentReference.class,

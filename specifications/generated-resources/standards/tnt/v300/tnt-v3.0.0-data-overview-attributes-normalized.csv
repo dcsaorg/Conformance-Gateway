@@ -1,10 +1,4 @@
 Object,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
-AbstractEventDetails,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
-- `SHIPMENT` - Shipment event
-- `TRANSPORT` - Transport event
-- `EQUIPMENT` - Equipment event
-- `IOT` - IoT event
-- `REEFER` - Reefer event",
 Address,POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
 Address,city,string,,maxLength=35,,Amsterdam,"The name of the city.",
 Address,countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
@@ -72,15 +66,25 @@ from SMDG.",
 EquipmentEventDetails,eventLocation,Location,,,,,"The location of the event.",
 EquipmentEventDetails,isTransshipmentMove,boolean,,,,,"Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.",
 EquipmentEventDetails,seals,"Seal list",,,,,,
-EquipmentEventDetails,transportCall,TransportCall,,,,,"Transport call information",
+Event,equipmentEventDetails,EquipmentEventDetails,,,,,"Equipment-related information",
 Event,eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
-Event,eventDetails,AbstractEventDetails,yes,,,,"Details specific to each Track and Trace event type",
 Event,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
 
 An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+Event,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+- `SHIPMENT` - Shipment event
+- `TRANSPORT` - Transport event
+- `EQUIPMENT` - Equipment event
+- `IOT` - IoT event
+- `REEFER` - Reefer event",
 Event,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
+Event,iotEventDetails,IotEventDetails,,,,,"IoT-related information",
+Event,reason,string,,,,,"The reason this event was sent",
+Event,reeferEventDetails,ReeferEventDetails,,,,,"Reefer-related information",
 Event,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
+Event,shipmentEventDetails,ShipmentEventDetails,,,,,"Shipment-related information",
 Event,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
+Event,transportEventDetails,TransportEventDetails,,,,,"Transport-related information",
 Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
 Facility,facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
@@ -93,76 +97,6 @@ FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity
 - `ERROR` - Error that fully or partially prevents the correct processing of the request
 - `WARN` - Warning about the request being processed in a potentially unexpected way
 - `INFO` - Informational message about how the request is processed",
-FlatEvent,ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
-The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
-following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
-FlatEvent,changeRemark,string,,maxLength=250,,"Bad weather","Free text information provided by the vessel operator regarding the reasons for the change in schedule
-and/or plans to mitigate schedule slippage.",
-FlatEvent,delayReasonCode,string,,,,,"Code identifying the reason for the delay, as defined by SMDG here:
-https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/",
-FlatEvent,documentReference,DocumentReference,,,,,"Referenced document",
-FlatEvent,emptyIndicatorCode,string,,,,LADEN,"Code to denote whether the equipment is empty or laden.
-- `EMPTY` - Empty
-- `LADEN` - Laden",
-FlatEvent,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
-- `LOAD` - Loaded
-- `DISC` - Discharged
-- `GTIN` - Gated in
-- `GTOT` - Gated out
-- `STUF` - Stuffed
-- `STRP` - Stripped
-- `PICK` - Pick-up
-- `DROP` - Drop-off
-- `INSP` - Inspected
-- `RSEA` - Resealed
-- `RMVD` - Removed",
-FlatEvent,equipmentReference,string,,maxLength=11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
-
-According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
-(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
-
-If a container does not comply with ISO 6346, it is suggested to follow
-[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
-from SMDG.",
-FlatEvent,eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
-FlatEvent,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
-
-An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
-FlatEvent,eventLocation,Location,,,,,"The location of the event.",
-FlatEvent,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
-- `SHIPMENT` - Shipment event
-- `TRANSPORT` - Transport event
-- `EQUIPMENT` - Equipment event
-- `IOT` - IoT event
-- `REEFER` - Reefer event",
-FlatEvent,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
-FlatEvent,isTransshipmentMove,boolean,,,,,"Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.",
-FlatEvent,priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in consideration for the tariff applicability, that differs depending on the trade.
-It can vary per carrier.",
-FlatEvent,reason,string,,,,,"The reason this event was sent",
-FlatEvent,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
-FlatEvent,seals,"Seal list",,,,,,
-FlatEvent,shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
-- `RECE` - Received
-- `DRFT` - Drafted
-- `PENA` - Pending Approval
-- `PENU` - Pending Update
-- `REJE` - Rejected
-- `APPR` - Approved
-- `ISSU` - Arrived
-- `SURR` - Surrendered
-- `SUBM` - Submitted
-- `VOID` - Void
-- `CONF` - Confirmed
-- `REQS` - Requested
-- `CMPL` - Completed
-- `HOLD` - On Hold
-- `RELS` - Released",
-FlatEvent,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
-FlatEvent,transportCall,TransportCall,,,,,"Transport call information",
-FlatEvent,transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
-- `ARRI` - Arrived
-- `DEPA` - Departed",
 GeoCoordinate,latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 GeoCoordinate,longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
 GetEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why the request could not be processed.
@@ -171,7 +105,6 @@ At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.",
 GetEventsResponse,events,"Event list",,,,,"The list of events matching the filter specified by the request query parameters",
 GetEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
-GetEventsResponse,flatEvents,"FlatEvent list",,,,,"Preview of what the API would look like with flat events instead of polymorphic ones 👀",
 IotEventDetails,iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
 - `DETC` - Detected",
 Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
@@ -234,7 +167,6 @@ ServiceCodeOrReference,"universalServiceReference",string,,,,SR12345A,"Reference
 ShipmentEventDetails,documentReference,DocumentReference,,,,,"Referenced document",
 ShipmentEventDetails,priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in consideration for the tariff applicability, that differs depending on the trade.
 It can vary per carrier.",
-ShipmentEventDetails,reason,string,,,,,"The reason this ShipmentEvent was sent.",
 ShipmentEventDetails,shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
 - `RECE` - Received
 - `DRFT` - Drafted

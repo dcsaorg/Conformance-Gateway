@@ -1,30 +1,17 @@
 package org.dcsa.conformance.specifications.standards.tnt.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import org.dcsa.conformance.specifications.generator.ClearParentProperties;
+import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.ShipmentEventTypeCode;
 
-@Schema(description = "Shipment event details")
-@Getter
-@Setter
-@RequiredArgsConstructor
-@ToString
-@EqualsAndHashCode(callSuper = true)
-@ClearParentProperties
-public class ShipmentEventDetails extends AbstractEventDetails {
+@Schema(description = "Shipment-related information")
+@Data
+public class ShipmentEventDetails {
 
   @Schema() private ShipmentEventTypeCode shipmentEventTypeCode;
 
   @Schema() private DocumentReference documentReference;
-
-  @Schema(description = "The reason this ShipmentEvent was sent.")
-  private String reason;
 
   @Schema(
       description =

@@ -38,11 +38,9 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEvents
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsError;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.AbstractEventDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEventDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.FlatEvent;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEventDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEventDetails;
@@ -86,7 +84,6 @@ public class TNTStandardSpecification extends StandardSpecification {
   @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
-        AbstractEventDetails.class,
         Address.class,
         ClassifiedDateTime.class,
         DocumentReference.class,
@@ -94,7 +91,6 @@ public class TNTStandardSpecification extends StandardSpecification {
         Event.class,
         Facility.class,
         FeedbackElement.class,
-        FlatEvent.class,
         GeoCoordinate.class,
         GetEventsError.class,
         GetEventsResponse.class,

@@ -196,7 +196,7 @@ paths:
         description: "Maximum number of events to include in each page of the response."
         schema:
           minimum: 1
-          type: "number"
+          type: "integer"
           format: "int32"
         example: 10
       - name: "cursor"

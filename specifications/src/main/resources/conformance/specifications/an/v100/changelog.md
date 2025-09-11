@@ -8,6 +8,10 @@ Updated the document party code list providers to match the list from version 3.
 
 Renamed in object `Charge` property `chargePartnerCode` to `invoicePayerCode`. (SD-2437)
 
+Added the `API-Version` header parameter. (SD-2450)
+
+Fixed the type of the `limit` pagination parameter. (SD-2451)
+
 
 ## Snapshot v1.0.0-20250829-beta
 

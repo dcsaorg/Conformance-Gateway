@@ -265,7 +265,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  public static BookingScenarioListBuilder carrierSupplyScenarioParameters(
+  private static BookingScenarioListBuilder carrierSupplyScenarioParameters(
       String carrierPartyName, ScenarioType scenarioType) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     return new BookingScenarioListBuilder(

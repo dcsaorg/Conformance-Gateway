@@ -7,9 +7,6 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 
 public class BookingStandard extends AbstractStandard {
 
-  public static final Set<String> BOOKING_ENDPOINT_PATTERNS =
-      Set.of(".*/v2/bookings(?:/[^/]+)?$", ".*/v2/booking-notifications$");
-
   public static final BookingStandard INSTANCE = new BookingStandard();
 
   private BookingStandard() {

@@ -52,6 +52,7 @@ public class BookingCarrier extends ConformanceParty {
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
 
+  public static final Set<String> BOOKING_ENDPOINT_PATTERNS = Set.of(".*/v2/bookings(?:/[^/]+)?$");
 
   public BookingCarrier(
       String apiVersion,

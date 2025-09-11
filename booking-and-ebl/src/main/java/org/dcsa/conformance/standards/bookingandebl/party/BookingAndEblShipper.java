@@ -2,6 +2,10 @@ package org.dcsa.conformance.standards.bookingandebl.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -13,11 +17,6 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.party.BookingShipper;
 import org.dcsa.conformance.standards.ebl.party.EblShipper;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
 
 @Slf4j
 public class BookingAndEblShipper extends ConformanceParty {
@@ -72,7 +71,18 @@ public class BookingAndEblShipper extends ConformanceParty {
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    return bookingShipper.handleRequest(request);
+    String requestUrl = request.url();
+
+    if (isBookingRequest(requestUrl)) {
+      log.debug("Routing request to Booking shipper: {}", request);
+      return bookingShipper.handleRequest(request);
+    }
+    if (isEblRequest(requestUrl)) {
+      log.debug("Routing request to EBL shipper: {}", request);
+      return eblShipper.handleRequest(request);
+    }
+
+    return invalidRequest(request, 404, "The request did not match any known URL");
   }
 
   @Override
@@ -89,5 +99,13 @@ public class BookingAndEblShipper extends ConformanceParty {
     handlers.putAll(eblShipper.getActionPromptHandlers());
 
     return handlers;
+  }
+
+  private boolean isBookingRequest(String url) {
+    return BookingShipper.BOOKING_ENDPOINT_PATTERNS.stream().anyMatch(url::matches);
+  }
+
+  private boolean isEblRequest(String url) {
+    return EblShipper.EBL_ENDPOINT_PATTERNS.stream().anyMatch(url::matches);
   }
 }

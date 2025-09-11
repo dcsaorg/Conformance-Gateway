@@ -371,4 +371,13 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   protected abstract Map<Class<? extends ConformanceAction>, Consumer<JsonNode>>
       getActionPromptHandlers();
+
+  protected ConformanceResponse invalidRequest(
+      ConformanceRequest request, int statusCode, String message) {
+    log.warn("Invalid request: %s", message);
+    return request.createResponse(
+        statusCode,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
+  }
 }

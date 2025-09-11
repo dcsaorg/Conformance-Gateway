@@ -15,9 +15,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.booking.BookingStandard;
 import org.dcsa.conformance.standards.booking.party.BookingCarrier;
-import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.ebl.party.EblCarrier;
 
 @Slf4j
@@ -25,7 +23,7 @@ public class BookingAndEblCarrier extends ConformanceParty {
 
   private final BookingCarrier bookingCarrier;
   private final EblCarrier eblCarrier;
-  
+
   public BookingAndEblCarrier(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -76,15 +74,15 @@ public class BookingAndEblCarrier extends ConformanceParty {
     String requestUrl = request.url();
 
     if (isBookingRequest(requestUrl)) {
-      log.debug("Routing request to Booking carrier: {}", requestUrl);
+      log.debug("Routing request to Booking carrier: {}", request);
       return bookingCarrier.handleRequest(request);
     }
     if (isEblRequest(requestUrl)) {
-      log.debug("Routing request to EBL carrier: {}", requestUrl);
+      log.debug("Routing request to EBL carrier: {}", request);
       return eblCarrier.handleRequest(request);
     }
 
-    return bookingCarrier.return404(request);
+    return invalidRequest(request, 404, "The request did not match any known URL");
   }
 
   @Override
@@ -104,10 +102,10 @@ public class BookingAndEblCarrier extends ConformanceParty {
   }
 
   private boolean isBookingRequest(String url) {
-    return BookingStandard.BOOKING_ENDPOINT_PATTERNS.stream().anyMatch(url::matches);
+    return BookingCarrier.BOOKING_ENDPOINT_PATTERNS.stream().anyMatch(url::matches);
   }
 
   private boolean isEblRequest(String url) {
-    return EblStandard.EBL_ENDPOINT_PATTERNS.stream().anyMatch(url::matches);
+    return EblCarrier.EBL_ENDPOINT_PATTERNS.stream().anyMatch(url::matches);
   }
 }

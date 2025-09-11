@@ -23,6 +23,10 @@ public class BookingShipper extends ConformanceParty {
 
   private static final String SERVICE_CONTRACT_REF = "serviceContractReference";
   private static final String SERVICE_REF_PUT = "serviceRefPut";
+
+  public static final Set<String> BOOKING_ENDPOINT_PATTERNS =
+      Set.of(".*/v2/booking-notifications$");
+
   public BookingShipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,

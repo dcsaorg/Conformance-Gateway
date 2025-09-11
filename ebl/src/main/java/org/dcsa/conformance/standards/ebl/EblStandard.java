@@ -7,13 +7,6 @@ import org.dcsa.conformance.standards.ebl.party.EblRole;
 
 public class EblStandard extends AbstractStandard {
 
-  public static final Set<String> EBL_ENDPOINT_PATTERNS =
-      Set.of(
-          ".*/v3/shipping-instructions(?:/[^/]+)?$",
-          ".*/v3/transport-documents(?:/[^/]+)?$",
-          ".*/v3/shipping-instructions-notifications$",
-          ".*/v3/transport-document-notifications$");
-
   public static final EblStandard INSTANCE = new EblStandard();
 
   private EblStandard() {

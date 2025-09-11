@@ -41,6 +41,9 @@ public class EblCarrier extends ConformanceParty {
 
   private final Map<String, String> tdrToSir = new HashMap<>();
 
+  public static final Set<String> EBL_ENDPOINT_PATTERNS =
+      Set.of(".*/v3/shipping-instructions(?:/[^/]+)?$", ".*/v3/transport-documents(?:/[^/]+)?$");
+
   public EblCarrier(
       String apiVersion,
       PartyConfiguration partyConfiguration,

@@ -24,6 +24,10 @@ import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 @Slf4j
 public class EblShipper extends ConformanceParty {
 
+  public static final Set<String> EBL_ENDPOINT_PATTERNS =
+      Set.of(
+          ".*/v3/shipping-instructions-notifications$", ".*/v3/transport-document-notifications$");
+
   public EblShipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,

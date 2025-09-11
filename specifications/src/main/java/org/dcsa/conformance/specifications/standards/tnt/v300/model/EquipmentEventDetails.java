@@ -9,7 +9,7 @@ import org.dcsa.conformance.specifications.standards.core.v100.types.IsoEquipmen
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.EmptyIndicatorCode;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.EquipmentEventTypeCode;
 
-@Schema(description = "Equipment-related information")
+@Schema(description = "Equipment-specific event details")
 @Data
 public class EquipmentEventDetails {
 

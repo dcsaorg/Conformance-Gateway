@@ -84,7 +84,7 @@ from SMDG.",
 EquipmentEventDetails,eventLocation,Location,,,,,"The location of the event.",
 EquipmentEventDetails,isTransshipmentMove,boolean,,,,,"Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.",
 EquipmentEventDetails,seals,"Seal list",,,,,,
-Event,equipmentEventDetails,EquipmentEventDetails,,,,,"Equipment-related information",
+Event,equipmentEventDetails,EquipmentEventDetails,,,,,"Equipment-specific event details",
 Event,eventDateTime,ClassifiedDateTime,,,,,"The date and time when the real-world event has occurred or will occur.",
 Event,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
 
@@ -96,13 +96,13 @@ Event,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an e
 - `IOT` - IoT event
 - `REEFER` - Reefer event",
 Event,eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
-Event,iotEventDetails,IotEventDetails,,,,,"IoT-related information",
+Event,iotEventDetails,IotEventDetails,,,,,"IoT-specific event details",
 Event,reason,string,,,,,"The reason this event was sent",
-Event,reeferEventDetails,ReeferEventDetails,,,,,"Reefer-related information",
+Event,reeferEventDetails,ReeferEventDetails,,,,,"Reefer-specific event details",
 Event,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
-Event,shipmentEventDetails,ShipmentEventDetails,,,,,"Shipment-related information",
+Event,shipmentEventDetails,ShipmentEventDetails,,,,,"Shipment-specific event details",
 Event,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
-Event,transportEventDetails,TransportEventDetails,,,,,"Transport-related information",
+Event,transportEventDetails,TransportEventDetails,,,,,"Transport-specific event details",
 Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
 Facility,facilityCodeListProvider,string,,,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
@@ -123,6 +123,8 @@ At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.",
 GetEventsResponse,events,"Event list",,,,,"The list of events matching the filter specified by the request query parameters",
 GetEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
+IotEventDetails,iotEventCode,string,,,,DRO,"Code used to denote the specific IoT event that has occurred
+- `DRO` - Door opened",
 IotEventDetails,iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
 - `DETC` - Detected",
 Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be

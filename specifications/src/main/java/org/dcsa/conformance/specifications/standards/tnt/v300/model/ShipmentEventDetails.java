@@ -5,7 +5,7 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.ShipmentEventTypeCode;
 
-@Schema(description = "Shipment-related information")
+@Schema(description = "Shipment-specific event details")
 @Data
 public class ShipmentEventDetails {
 

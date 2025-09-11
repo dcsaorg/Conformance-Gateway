@@ -5,7 +5,7 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ActiveReeferParameters;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.ReeferEventTypeCode;
 
-@Schema(description = "Reefer-related information")
+@Schema(description = "Reefer-specific event details")
 @Data
 public class ReeferEventDetails {
 

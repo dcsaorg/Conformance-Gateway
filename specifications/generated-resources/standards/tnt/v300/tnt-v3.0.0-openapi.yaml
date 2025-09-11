@@ -492,7 +492,7 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Seal"
-      description: "Equipment-related information"
+      description: "Equipment-specific event details"
     Event:
       required:
       - "eventTypeCode"
@@ -539,23 +539,23 @@ components:
             - `REEFER` - Reefer event
           example: "EQUIPMENT"
         shipmentEventDetails:
-          description: "Shipment-related information"
+          description: "Shipment-specific event details"
           allOf:
           - $ref: "#/components/schemas/ShipmentEventDetails"
         transportEventDetails:
-          description: "Transport-related information"
+          description: "Transport-specific event details"
           allOf:
           - $ref: "#/components/schemas/TransportEventDetails"
         equipmentEventDetails:
-          description: "Equipment-related information"
+          description: "Equipment-specific event details"
           allOf:
           - $ref: "#/components/schemas/EquipmentEventDetails"
         iotEventDetails:
-          description: "IoT-related information"
+          description: "IoT-specific event details"
           allOf:
           - $ref: "#/components/schemas/IotEventDetails"
         reeferEventDetails:
-          description: "Reefer-related information"
+          description: "Reefer-specific event details"
           allOf:
           - $ref: "#/components/schemas/ReeferEventDetails"
       description: "Track and Trace event"
@@ -661,7 +661,13 @@ components:
             Code used to denote the type of an IoT event
             - `DETC` - Detected
           example: "DETC"
-      description: "IoT-related information"
+        iotEventCode:
+          type: "string"
+          description: |-
+            Code used to denote the specific IoT event that has occurred
+            - `DRO` - Door opened
+          example: "DRO"
+      description: "IoT-specific event details"
     Location:
       type: "object"
       properties:
@@ -797,7 +803,7 @@ components:
           description: "Measured active reefer parameters"
           allOf:
           - $ref: "#/components/schemas/ActiveReeferParameters"
-      description: "Reefer-related information"
+      description: "Reefer-specific event details"
     Seal:
       type: "object"
       properties:
@@ -874,7 +880,7 @@ components:
             It can vary per carrier.
           format: "date"
           example: "2025-01-23"
-      description: "Shipment-related information"
+      description: "Shipment-specific event details"
     ShipmentReference:
       type: "object"
       properties:
@@ -994,7 +1000,7 @@ components:
           description: "Transport call information"
           allOf:
           - $ref: "#/components/schemas/TransportCall"
-      description: "Transport-related information"
+      description: "Transport-specific event details"
     TruckTransport:
       type: "object"
       properties:

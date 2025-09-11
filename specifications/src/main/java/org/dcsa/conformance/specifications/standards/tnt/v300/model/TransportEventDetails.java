@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.TransportEventTypeCode;
 
-@Schema(description = "Transport-related information")
+@Schema(description = "Transport-specific event details")
 @Data
 public class TransportEventDetails {
 

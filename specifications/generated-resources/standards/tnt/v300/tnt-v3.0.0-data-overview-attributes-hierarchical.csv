@@ -1,6 +1,6 @@
 Path,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
 Event,,,,,,,,
-"Event / equipmentEventDetails",equipmentEventDetails,EquipmentEventDetails,,,,,"Equipment-related information",
+"Event / equipmentEventDetails",equipmentEventDetails,EquipmentEventDetails,,,,,"Equipment-specific event details",
 "Event / equipmentEventDetails / ISOEquipmentCode",ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
@@ -92,11 +92,13 @@ An event overrides any other event that has the same `eventID` and an earlier `e
 - `IOT` - IoT event
 - `REEFER` - Reefer event",
 "Event / eventUpdatedDateTime",eventUpdatedDateTime,"string(date-time)",,,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
-"Event / iotEventDetails",iotEventDetails,IotEventDetails,,,,,"IoT-related information",
+"Event / iotEventDetails",iotEventDetails,IotEventDetails,,,,,"IoT-specific event details",
+"Event / iotEventDetails / iotEventCode",iotEventCode,string,,,,DRO,"Code used to denote the specific IoT event that has occurred
+- `DRO` - Door opened",
 "Event / iotEventDetails / iotEventTypeCode",iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
 - `DETC` - Detected",
 "Event / reason",reason,string,,,,,"The reason this event was sent",
-"Event / reeferEventDetails",reeferEventDetails,ReeferEventDetails,,,,,"Reefer-related information",
+"Event / reeferEventDetails",reeferEventDetails,ReeferEventDetails,,,,,"Reefer-specific event details",
 "Event / reeferEventDetails / measuredParameters",measuredParameters,ActiveReeferParameters,,,,,"Measured active reefer parameters",
 "Event / reeferEventDetails / measuredParameters / airExchangeUnit",airExchangeUnit,string,,,,MQH,"Unit in which the `airExchangeValue` is expressed:
 - `MQH` (Cubic metre per hour)
@@ -164,7 +166,7 @@ or during transit but prior arrival at POD.",
 - `ICE` - Inspection Certificate
 - `CEA` - Certificate of Analysis
 - `CEO` - Certificate of Origin",
-"Event / shipmentEventDetails",shipmentEventDetails,ShipmentEventDetails,,,,,"Shipment-related information",
+"Event / shipmentEventDetails",shipmentEventDetails,ShipmentEventDetails,,,,,"Shipment-specific event details",
 "Event / shipmentEventDetails / documentReference",documentReference,DocumentReference,,,,,"Referenced document",
 "Event / shipmentEventDetails / documentReference / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 "Event / shipmentEventDetails / documentReference / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
@@ -226,7 +228,7 @@ It can vary per carrier.",
 - `DUE` - Declaração Única de Exportação
 - `CER` - Canadian Export Reporting System
 - `AES` - Automated Export System",
-"Event / transportEventDetails",transportEventDetails,TransportEventDetails,,,,,"Transport-related information",
+"Event / transportEventDetails",transportEventDetails,TransportEventDetails,,,,,"Transport-specific event details",
 "Event / transportEventDetails / changeRemark",changeRemark,string,,maxLength=250,,"Bad weather","Free text information provided by the vessel operator regarding the reasons for the change in schedule
 and/or plans to mitigate schedule slippage.",
 "Event / transportEventDetails / delayReasonCode",delayReasonCode,string,,,,,"Code identifying the reason for the delay, as defined by SMDG here:

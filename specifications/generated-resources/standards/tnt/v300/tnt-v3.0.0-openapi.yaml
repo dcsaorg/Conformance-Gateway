@@ -268,16 +268,21 @@ components:
       properties:
         temperatureValue:
           type: "number"
-          description: "Temperature value expressed in `temperatureUnit`"
+          description: "Internal temperature value expressed in `temperatureUnit`"
           format: "float"
           example: -15
         temperatureUnit:
           type: "string"
           description: |
-            Unit in which the `temperatureValue` is expressed:
+            Unit in which the `temperatureValue` and `ambientTemperatureValue` are expressed:
             - `CEL` (Celsius)
             - `FAH` (Fahrenheit)
           example: "CEL"
+        ambientTemperatureValue:
+          type: "number"
+          description: "Ambient temperature value expressed in `temperatureUnit`"
+          format: "float"
+          example: -15
         o2Percentage:
           type: "number"
           description: "O<sub>2</sub> percentage"
@@ -295,8 +300,7 @@ components:
           example: 50
         airExchangeValue:
           type: "number"
-          description: |
-            Air exchange rate (at which outdoor air replaces indoor air) expressed in `airExchangeUnit`
+          description: "Air exchange rate expressed in `airExchangeUnit`"
           format: "float"
           example: 15.4
         airExchangeUnit:

@@ -2,7 +2,8 @@ Object,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
 ActiveReeferParameters,airExchangeUnit,string,,,,MQH,"Unit in which the `airExchangeValue` is expressed:
 - `MQH` (Cubic metre per hour)
 - `FQH` (Cubic foot per hour)",
-ActiveReeferParameters,airExchangeValue,number,,,,15.4,"Air exchange rate (at which outdoor air replaces indoor air) expressed in `airExchangeUnit`",
+ActiveReeferParameters,airExchangeValue,number,,,,15.4,"Air exchange rate expressed in `airExchangeUnit`",
+ActiveReeferParameters,ambientTemperatureValue,number,,,,-15,"Ambient temperature value expressed in `temperatureUnit`",
 ActiveReeferParameters,co2Percentage,number,,,,25,"CO<sub>2</sub> percentage",
 ActiveReeferParameters,humidityPercentage,number,,,,50,"Humidity percentage",
 ActiveReeferParameters,isBulbMode,boolean,,,,true,"Flag indicating whether bulb mode is active",
@@ -12,10 +13,10 @@ ActiveReeferParameters,"isControlledAtmosphereRequired",boolean,,,,true,"Flag in
 ActiveReeferParameters,isDrainholesOpen,boolean,,,,true,"Flag indicating whether drainholes are open",
 ActiveReeferParameters,isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open",
 ActiveReeferParameters,o2Percentage,number,,,,25,"O<sub>2</sub> percentage",
-ActiveReeferParameters,temperatureUnit,string,,,,CEL,"Unit in which the `temperatureValue` is expressed:
+ActiveReeferParameters,temperatureUnit,string,,,,CEL,"Unit in which the `temperatureValue` and `ambientTemperatureValue` are expressed:
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)",
-ActiveReeferParameters,temperatureValue,number,,,,-15,"Temperature value expressed in `temperatureUnit`",
+ActiveReeferParameters,temperatureValue,number,,,,-15,"Internal temperature value expressed in `temperatureUnit`",
 Address,POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
 Address,city,string,,maxLength=35,,Amsterdam,"The name of the city.",
 Address,countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",

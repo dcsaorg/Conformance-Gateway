@@ -101,7 +101,8 @@ An event overrides any other event that has the same `eventID` and an earlier `e
 "Event / reeferEventDetails / measuredParameters / airExchangeUnit",airExchangeUnit,string,,,,MQH,"Unit in which the `airExchangeValue` is expressed:
 - `MQH` (Cubic metre per hour)
 - `FQH` (Cubic foot per hour)",
-"Event / reeferEventDetails / measuredParameters / airExchangeValue",airExchangeValue,number,,,,15.4,"Air exchange rate (at which outdoor air replaces indoor air) expressed in `airExchangeUnit`",
+"Event / reeferEventDetails / measuredParameters / airExchangeValue",airExchangeValue,number,,,,15.4,"Air exchange rate expressed in `airExchangeUnit`",
+"Event / reeferEventDetails / measuredParameters / ambientTemperatureValue",ambientTemperatureValue,number,,,,-15,"Ambient temperature value expressed in `temperatureUnit`",
 "Event / reeferEventDetails / measuredParameters / co2Percentage",co2Percentage,number,,,,25,"CO<sub>2</sub> percentage",
 "Event / reeferEventDetails / measuredParameters / humidityPercentage",humidityPercentage,number,,,,50,"Humidity percentage",
 "Event / reeferEventDetails / measuredParameters / isBulbMode",isBulbMode,boolean,,,,true,"Flag indicating whether bulb mode is active",
@@ -111,10 +112,10 @@ or during transit but prior arrival at POD.",
 "Event / reeferEventDetails / measuredParameters / isDrainholesOpen",isDrainholesOpen,boolean,,,,true,"Flag indicating whether drainholes are open",
 "Event / reeferEventDetails / measuredParameters / isVentilationOpen",isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open",
 "Event / reeferEventDetails / measuredParameters / o2Percentage",o2Percentage,number,,,,25,"O<sub>2</sub> percentage",
-"Event / reeferEventDetails / measuredParameters / temperatureUnit",temperatureUnit,string,,,,CEL,"Unit in which the `temperatureValue` is expressed:
+"Event / reeferEventDetails / measuredParameters / temperatureUnit",temperatureUnit,string,,,,CEL,"Unit in which the `temperatureValue` and `ambientTemperatureValue` are expressed:
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)",
-"Event / reeferEventDetails / measuredParameters / temperatureValue",temperatureValue,number,,,,-15,"Temperature value expressed in `temperatureUnit`",
+"Event / reeferEventDetails / measuredParameters / temperatureValue",temperatureValue,number,,,,-15,"Internal temperature value expressed in `temperatureUnit`",
 "Event / reeferEventDetails / reeferEventTypeCode",reeferEventTypeCode,string,,,,MEAS,"Code used to denote the type of a reefer event
 - `MEAS` - Measured
 - `ADJU` - Adjusted",
@@ -122,7 +123,8 @@ or during transit but prior arrival at POD.",
 "Event / reeferEventDetails / setpointParameters / airExchangeUnit",airExchangeUnit,string,,,,MQH,"Unit in which the `airExchangeValue` is expressed:
 - `MQH` (Cubic metre per hour)
 - `FQH` (Cubic foot per hour)",
-"Event / reeferEventDetails / setpointParameters / airExchangeValue",airExchangeValue,number,,,,15.4,"Air exchange rate (at which outdoor air replaces indoor air) expressed in `airExchangeUnit`",
+"Event / reeferEventDetails / setpointParameters / airExchangeValue",airExchangeValue,number,,,,15.4,"Air exchange rate expressed in `airExchangeUnit`",
+"Event / reeferEventDetails / setpointParameters / ambientTemperatureValue",ambientTemperatureValue,number,,,,-15,"Ambient temperature value expressed in `temperatureUnit`",
 "Event / reeferEventDetails / setpointParameters / co2Percentage",co2Percentage,number,,,,25,"CO<sub>2</sub> percentage",
 "Event / reeferEventDetails / setpointParameters / humidityPercentage",humidityPercentage,number,,,,50,"Humidity percentage",
 "Event / reeferEventDetails / setpointParameters / isBulbMode",isBulbMode,boolean,,,,true,"Flag indicating whether bulb mode is active",
@@ -132,10 +134,10 @@ or during transit but prior arrival at POD.",
 "Event / reeferEventDetails / setpointParameters / isDrainholesOpen",isDrainholesOpen,boolean,,,,true,"Flag indicating whether drainholes are open",
 "Event / reeferEventDetails / setpointParameters / isVentilationOpen",isVentilationOpen,boolean,,,,true,"Flag indicating whether the ventilation orifice is open",
 "Event / reeferEventDetails / setpointParameters / o2Percentage",o2Percentage,number,,,,25,"O<sub>2</sub> percentage",
-"Event / reeferEventDetails / setpointParameters / temperatureUnit",temperatureUnit,string,,,,CEL,"Unit in which the `temperatureValue` is expressed:
+"Event / reeferEventDetails / setpointParameters / temperatureUnit",temperatureUnit,string,,,,CEL,"Unit in which the `temperatureValue` and `ambientTemperatureValue` are expressed:
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)",
-"Event / reeferEventDetails / setpointParameters / temperatureValue",temperatureValue,number,,,,-15,"Temperature value expressed in `temperatureUnit`",
+"Event / reeferEventDetails / setpointParameters / temperatureValue",temperatureValue,number,,,,-15,"Internal temperature value expressed in `temperatureUnit`",
 "Event / relatedDocumentReferences","relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
 "Event / relatedDocumentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 "Event / relatedDocumentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document

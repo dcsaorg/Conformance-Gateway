@@ -12,7 +12,7 @@ Parameters of a Reefer equipment, usable as setpoint or as measured values.
 public class ActiveReeferParameters {
 
   @Schema(
-      description = "Temperature value expressed in `temperatureUnit`",
+      description = "Internal temperature value expressed in `temperatureUnit`",
       example = "-15",
       format = "float")
   protected Double temperatureValue;
@@ -20,12 +20,18 @@ public class ActiveReeferParameters {
   @Schema(
       description =
 """
-Unit in which the `temperatureValue` is expressed:
+Unit in which the `temperatureValue` and `ambientTemperatureValue` are expressed:
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)
 """,
       example = "CEL")
   protected String temperatureUnit;
+
+  @Schema(
+      description = "Ambient temperature value expressed in `temperatureUnit`",
+      example = "-15",
+      format = "float")
+  protected Double ambientTemperatureValue;
 
   @Schema(description = "O<sub>2</sub> percentage", example = "25", format = "float")
   protected Double o2Percentage;
@@ -37,10 +43,7 @@ Unit in which the `temperatureValue` is expressed:
   protected Double humidityPercentage;
 
   @Schema(
-      description =
-"""
-Air exchange rate (at which outdoor air replaces indoor air) expressed in `airExchangeUnit`
-""",
+      description = "Air exchange rate expressed in `airExchangeUnit`",
       example = "15.4",
       format = "float")
   protected Double airExchangeValue;

@@ -16,10 +16,10 @@ ActiveReeferSettings,temperatureUnit,string,,maxLength=10,,CEL,"The unit for tem
 
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)",
-Address,POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
 Address,city,string,,maxLength=35,,Amsterdam,"The name of the city.",
 Address,countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 Address,floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+Address,POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
 Address,postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
 Address,stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 Address,street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
@@ -196,6 +196,13 @@ ClassifiedDateTime,classifier,string,,maxLength=10,,EST,"Classifier denoting whe
 - `EST` - Estimated
 - `ACT` - Actual",
 ClassifiedDateTime,value,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+ConsignmentItem,cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",
+ConsignmentItem,carrierBookingReference,string,,maxLength=35,,ABC709951,"The associated booking number provided by the carrier for this `Consignment Item`.",
+ConsignmentItem,customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
+ConsignmentItem,descriptionOfGoods,"string list",,maxLength=35,,,"A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.
+Item description:
+A line describing the cargo",
+ConsignmentItem,exportLicense,ExportLicense,,,,,"Export license for the consignment item.",
 ConsignmentItem,HSCodes,"string list",,maxLength=10,,,"A list of `HS Codes` that apply to this `consignmentItem`.
 HS codes are used by customs to classify the product being shipped.
 The code must be at least 6 and at most 10 digits.
@@ -204,13 +211,6 @@ Used by customs to classify the product being shipped. The type of HS code depen
 
 More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
 ",
-ConsignmentItem,cargoItems,"CargoItem list",,,,,"A list of all `cargoItems`",
-ConsignmentItem,carrierBookingReference,string,,maxLength=35,,ABC709951,"The associated booking number provided by the carrier for this `Consignment Item`.",
-ConsignmentItem,customsReferences,"CustomsReference list",,,,,"A list of `Customs references`",
-ConsignmentItem,descriptionOfGoods,"string list",,maxLength=35,,,"A plain language description that is precise enough for Customs services to be able to identify the goods. General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise description cannot be accepted.
-Item description:
-A line describing the cargo",
-ConsignmentItem,exportLicense,ExportLicense,,,,,"Export license for the consignment item.",
 ConsignmentItem,importLicense,ImportLicense,,,,,"Import license for the consignment item.",
 ConsignmentItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"A list of `National Commodity Codes` that apply to this `commodity`",
 ConsignmentItem,references,"ReferenceConsignmentItem list",,,,,"A list of `References`",
@@ -232,15 +232,6 @@ CustomsReference,type,string,,maxLength=50,,CUS,"The reference type code as defi
 CustomsReference,values,"string list",,maxLength=35,,,"
 Item description:
 The value of the `customsReference`",
-DangerousGoods,EMSNumber,string,,maxLength=7,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.",
-DangerousGoods,IMOClass,string,,maxLength=4,,1.4S,"The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:
-
-- `1.1A` (Substances and articles which have a mass explosion hazard)
-- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)
-- `2.1` (Flammable gases)
-- `8` (Corrosive substances)",
-DangerousGoods,NANumber,string,,maxLength=4,,9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.",
-DangerousGoods,UNNumber,string,,maxLength=4,,1463,"United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.",
 DangerousGoods,codedVariantList,string,,maxLength=4,,2200,"Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.
 
 Character | Valid Characters | Description
@@ -250,9 +241,16 @@ Character | Valid Characters | Description
 3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.",
 DangerousGoods,"competentAuthorityApproval",string,,maxLength=70,,"{Name and reference...}","Name and reference number of the competent authority providing the approval.",
 DangerousGoods,emergencyContactDetails,EmergencyContactDetails,,,,,"24 hr emergency contact details",
+DangerousGoods,EMSNumber,string,,maxLength=7,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.",
 DangerousGoods,endOfHoldingTime,"string(date)",,,,2021-09-03,"Date by when the refrigerated liquid needs to be delivered.",
 DangerousGoods,fumigationDateTime,"string(date-time)",,,,2024-09-04T09:41Z,"Date & time when the container was fumigated",
 DangerousGoods,grossWeight,Weight,,,,,"Total weight of the goods carried, including packaging.",
+DangerousGoods,IMOClass,string,,maxLength=4,,1.4S,"The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:
+
+- `1.1A` (Substances and articles which have a mass explosion hazard)
+- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)
+- `2.1` (Flammable gases)
+- `8` (Corrosive substances)",
 DangerousGoods,inhalationZone,string,,maxLength=1,,A,"The zone classification of the toxicity of the inhalant. Possible values are:
 
 - `A` (Hazard Zone A) can be assigned to specific gases and liquids
@@ -270,6 +268,7 @@ DangerousGoods,isReportableQuantity,boolean,,,,false,"Indicates if a container o
 DangerousGoods,isSalvagePackings,boolean,,,,false,"Indicates if the cargo has special packaging for the transport, recovery or disposal of damaged, defective, leaking or nonconforming hazardous materials packages, or hazardous materials that have spilled or leaked.",
 DangerousGoods,isWaste,boolean,,,,false,"Indicates if waste is being shipped",
 DangerousGoods,limits,Limits,,,,,"Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure.",
+DangerousGoods,NANumber,string,,maxLength=4,,9037,"Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.",
 DangerousGoods,netExplosiveContent,Weight,,,,,"The total weight of the explosive substances, without the packaging, casings, etc.",
 DangerousGoods,netVolume,Volume,,,,,"The volume of the referenced dangerous goods. Only applicable to liquids and gas.",
 DangerousGoods,netWeight,Weight,,,,,"Total weight of the goods carried, excluding packaging.",
@@ -301,6 +300,7 @@ Grouping of Dangerous Goods having certain similar chemical properties. Possible
 DangerousGoods,subsidiaryRisk1,string,,maxLength=3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,subsidiaryRisk2,string,,maxLength=3,,1.2,"Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.",
 DangerousGoods,technicalName,string,,maxLength=250,,"xylene and benzene","The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.",
+DangerousGoods,UNNumber,string,,maxLength=4,,1463,"United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.",
 DocumentParty,address,Address,,,,,"Party  address",
 DocumentParty,identifyingCodes,"IdentifyingCode list",,,,,"List of codes identifying the party",
 DocumentParty,partyContactDetails,"PartyContactDetail list",,,,,"Party contact details",
@@ -336,11 +336,11 @@ EmergencyContactDetails,phone,string,,maxLength=30,,"+14155552671","Phone number
 as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
 EmergencyContactDetails,provider,string,,maxLength=255,,"ACME Inc","Name of the third party vendor providing emergency support",
 EmergencyContactDetails,referenceNumber,string,,maxLength=255,,12234,"Contract reference for the emergency support provided by an external third party vendor.",
-Equipment,ISOEquipmentCode,string,,maxLength=4,,22G1,"Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.",
 Equipment,equipmentReference,string,,maxLength=11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 According to [ISO 6346](https://www.iso.org/standard/83558.html), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
 
 If a container does not comply with [ISO 6346](https://www.iso.org/standard/83558.html), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.",
+Equipment,ISOEquipmentCode,string,,maxLength=4,,22G1,"Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.",
 Equipment,tareWeight,Weight,,,,,"The tare weight of the container.",
 ExportLicense,expiryDate,"string(date)",,,,2024-09-21,"Expiry date of the `Export License`.",
 ExportLicense,isRequired,boolean,,,,true,"Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
@@ -361,12 +361,6 @@ FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity
 - `ERROR` - Error that fully or partially prevents the correct processing of the request
 - `WARN` - Warning about the request being processed in a potentially unexpected way
 - `INFO` - Informational message about how the request is processed",
-FreeTime,ISOEquipmentCodes,"string list",,maxLength=4,,,"Equipment type codes for which this free time applies
-Item description:
-Unique code identifying the equipment size and type used to transport commodities.
-The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
-following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
-",
 FreeTime,calculationBasis,string,,maxLength=1000,,"Calculated as...","Description of the conditions under which this free time item applies.
 It can include references to the carrier website or individual charges as per service contract/agreement.",
 FreeTime,duration,integer,,,,5,"The duration expressed in `timeUnit`s for which this free time item applies.",
@@ -380,6 +374,12 @@ According to ISO 6346, a container identification code consists of a 4-letter pr
 If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.
+",
+FreeTime,ISOEquipmentCodes,"string list",,maxLength=4,,,"Equipment type codes for which this free time applies
+Item description:
+Unique code identifying the equipment size and type used to transport commodities.
+The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
 ",
 FreeTime,lastFreeDate,ClassifiedDate,,,,,"The final date when the container(s) can be collected without incurring charges.",
 FreeTime,lastFreeDateTime,ClassifiedDateTime,,,,,"The final date and time when the container(s) can be collected without incurring charges.",
@@ -466,21 +466,15 @@ Leg,transportPlanStage,string,,maxLength=10,,MNC,"A specific stage of transport
 - `ONC` - On-Carriage Transport",
 Leg,"transportPlanStageSequenceNumber",integer,,,,5,"Sequence number of the transport plan stage",
 Leg,vesselVoyage,VesselVoyage,,,,,"Vessel and voyage details of a transport leg",
+Limits,flashPoint,number,,,,42.0,"Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.",
 Limits,SADT,number,,,,54.1,"Lowest temperature in which self-accelerating decomposition may occur in a substance",
 Limits,SAPT,number,,,,70.0,"Lowest temperature in which self-accelerating polymerization may occur in a substance",
-Limits,flashPoint,number,,,,42.0,"Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.",
 Limits,temperatureUnit,string,,maxLength=10,,CEL,"The unit for **all attributes in the limits structure** in Celsius or Fahrenheit
 
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)",
 Limits,"transportControlTemperature",number,,,,24.1,"Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.",
 Limits,"transportEmergencyTemperature",number,,,,74.1,"Temperature at which emergency procedures shall be implemented",
-Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
-
-- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
-
-More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 Location,address,Address,,,,,"Location address",
 Location,facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
 Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
@@ -496,6 +490,12 @@ Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specifi
 - `WAYP` - Waypoint",
 Location,geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
 Location,locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 NationalCommodityCode,countryCode,string,,maxLength=2,,BR,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 NationalCommodityCode,type,string,,maxLength=10,,NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
 - `NCM` (Nomenclatura Comum do Mercosul)
@@ -507,9 +507,9 @@ NationalCommodityCode,type,string,,maxLength=10,,NCM,"The national commodity cla
 NationalCommodityCode,values,"string list",,maxLength=10,,,"A list of `national commodity codes` values.
 Item description:
 The value of the `National Commodity Code`",
-OuterPackaging,IMOPackagingCode,string,,maxLength=5,,1A2,"The code of the packaging as per IMO.",
 OuterPackaging,dangerousGoods,"DangerousGoods list",,,,,"A list of `Dangerous Goods`",
 OuterPackaging,description,string,,maxLength=100,,"Drum, steel","Description of the outer packaging/overpack.",
+OuterPackaging,IMOPackagingCode,string,,maxLength=5,,1A2,"The code of the packaging as per IMO.",
 OuterPackaging,numberOfPackages,integer,,,,18,"Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.",
 OuterPackaging,packageCode,string,,maxLength=2,,5H,"A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)",
 OuterPackaging,woodDeclaration,string,,maxLength=30,,TREATED_AND_CERTIFIED,"Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:
@@ -521,11 +521,11 @@ PartyContactDetail,email,string,,maxLength=255,,jane.doe@example.com,"Contact em
 PartyContactDetail,name,string,,maxLength=255,,"Jane Doe","Contact name",
 PartyContactDetail,phone,string,,maxLength=30,,"+14155552671","Contact phone number, including an international phone number format
 as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
-PaymentRemittance,SWIFTCode,string,,maxLength=11,,ABNANL2A,"SWIFT/BIC code for international wire transfers",
 PaymentRemittance,accountNumber,string,,maxLength=40,,NL99ABNA0123456789,"Bank account number for receiving payment",
 PaymentRemittance,bankName,string,,maxLength=100,,"Example Bank","Name of the carrier's bank where payment should be sent",
 PaymentRemittance,beneficiary,string,,maxLength=100,,"Example Carrier","Legal name of the payment recipient (carrier)",
 PaymentRemittance,remittanceEmail,string,,maxLength=100,,carrier@example.com,"Email address where proof of payment remittance should be sent",
+PaymentRemittance,SWIFTCode,string,,maxLength=11,,ABNANL2A,"SWIFT/BIC code for international wire transfers",
 PickupInformation,pickupLocation,Location,,,,,"The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.",
 PickupInformation,pickupNumber,string,,maxLength=50,,780379,"A pickup number is a generated number assigned to each import container individually.
 A trucker picking up a container must present the correct pickup number.

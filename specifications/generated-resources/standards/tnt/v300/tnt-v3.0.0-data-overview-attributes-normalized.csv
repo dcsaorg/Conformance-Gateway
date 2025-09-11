@@ -17,10 +17,10 @@ ActiveReeferParameters,temperatureUnit,string,,,,CEL,"Unit in which the `tempera
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)",
 ActiveReeferParameters,temperatureValue,number,,,,-15,"Internal temperature value expressed in `temperatureUnit`",
-Address,POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
 Address,city,string,,maxLength=35,,Amsterdam,"The name of the city.",
 Address,countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
 Address,floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+Address,POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
 Address,postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
 Address,stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 Address,street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
@@ -55,9 +55,6 @@ DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a docu
 - `ICE` - Inspection Certificate
 - `CEA` - Certificate of Analysis
 - `CEO` - Certificate of Origin",
-EquipmentEventDetails,ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
-The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
-following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 EquipmentEventDetails,emptyIndicatorCode,string,,,,LADEN,"Code to denote whether the equipment is empty or laden.
 - `EMPTY` - Empty
 - `LADEN` - Laden",
@@ -82,6 +79,9 @@ If a container does not comply with ISO 6346, it is suggested to follow
 [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
 from SMDG.",
 EquipmentEventDetails,eventLocation,Location,,,,,"The location of the event.",
+EquipmentEventDetails,ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
+The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 EquipmentEventDetails,isTransshipmentMove,boolean,,,,,"Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.",
 EquipmentEventDetails,seals,"Seal list",,,,,,
 Event,equipmentEventDetails,EquipmentEventDetails,,,,,"Equipment-specific event details",
@@ -127,12 +127,6 @@ IotEventDetails,iotEventCode,string,,,,DRO,"Code used to denote the specific IoT
 - `DRO` - Door opened",
 IotEventDetails,iotEventTypeCode,string,,,,DETC,"Code used to denote the type of an IoT event
 - `DETC` - Detected",
-Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
-
-- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
-
-More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 Location,address,Address,,,,,"Location address",
 Location,facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
 Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
@@ -148,6 +142,12 @@ Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specifi
 - `WAYP` - Waypoint",
 Location,geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
 Location,locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 PostEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
 
 At least one feedback element of severity `ERROR` is expected.

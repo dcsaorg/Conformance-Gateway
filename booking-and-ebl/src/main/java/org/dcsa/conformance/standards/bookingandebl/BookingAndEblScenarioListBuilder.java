@@ -1,6 +1,14 @@
 package org.dcsa.conformance.standards.bookingandebl;
 
+import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_CONFIRMED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_RECEIVED;
 import static org.dcsa.conformance.standards.booking.party.BookingState.CONFIRMED;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB;
+import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.SI_ANY;
+import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.SI_RECEIVED;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_APPROVED;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_DRAFT;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_ISSUED;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,6 +29,17 @@ import org.dcsa.conformance.standards.booking.action.UC8_Carrier_ProcessAmendmen
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standards.ebl.EblScenarioListBuilder;
+import org.dcsa.conformance.standards.ebl.action.CarrierSupplyPayloadAction;
+import org.dcsa.conformance.standards.ebl.action.EblAction;
+import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;
+import org.dcsa.conformance.standards.ebl.action.Shipper_GetTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.action.UC1_Shipper_SubmitShippingInstructionsAction;
+import org.dcsa.conformance.standards.ebl.action.UC6_Carrier_PublishDraftTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.action.UC7_Shipper_ApproveDraftTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.action.UC8_Carrier_IssueTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
+import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Slf4j
 public class BookingAndEblScenarioListBuilder
@@ -58,7 +77,7 @@ public class BookingAndEblScenarioListBuilder
     return Stream.of(
             Map.entry(
                 "Dry Cargo",
-                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
+                carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
                     .then(
                         uc1ShipperSubmitBookingRequest()
                             .then(
@@ -66,8 +85,63 @@ public class BookingAndEblScenarioListBuilder
                                     .then(
                                         uc5CarrierConfirmBookingRequest()
                                             .then(
-                                                shipperGetBooking(
-                                                    CONFIRMED, null, null, false)))))))
+                                                shipperGetBooking(CONFIRMED, null, null, false)
+                                                    .then(
+                                                        carrierEblSupplyScenarioParameters(
+                                                                REGULAR_SWB, false)
+                                                            .then(
+                                                                uc1ShipperSubmitShippingInstructions()
+                                                                    .then(
+                                                                        shipperGetShippingInstructions(
+                                                                                ShippingInstructionsStatus
+                                                                                    .SI_RECEIVED,
+                                                                                null,
+                                                                                false,
+                                                                                false,
+                                                                                false)
+                                                                            .then(
+                                                                                uc6CarrierPublishDraftTransportDocument(
+                                                                                        false)
+                                                                                    .then(
+                                                                                        shipperGetTransportDocument(
+                                                                                                TD_DRAFT)
+                                                                                            .then(
+                                                                                                shipperGetShippingInstructions(
+                                                                                                        SI_RECEIVED,
+                                                                                                        SI_ANY,
+                                                                                                        false,
+                                                                                                        true,
+                                                                                                        false)
+                                                                                                    .then(
+                                                                                                        uc7ShipperApproveDraftTransportDocument()
+                                                                                                            .then(
+                                                                                                                shipperGetTransportDocument(
+                                                                                                                        TD_APPROVED)
+                                                                                                                    .then(
+                                                                                                                        uc8CarrierIssueTransportDocument()
+                                                                                                                            .then(
+                                                                                                                                shipperGetTransportDocument(
+                                                                                                                                        TD_ISSUED)
+                                                                                                                                    .then(
+                                                                                                                                        uc7ShipperSubmitBookingAmendment(
+                                                                                                                                                BookingState
+                                                                                                                                                    .CONFIRMED)
+                                                                                                                                            .then(
+                                                                                                                                                shipperGetBooking(
+                                                                                                                                                        CONFIRMED,
+                                                                                                                                                        AMENDMENT_RECEIVED,
+                                                                                                                                                        null,
+                                                                                                                                                        true)
+                                                                                                                                                    .then(
+                                                                                                                                                        uc8aCarrierApproveBookingAmendment()
+                                                                                                                                                            .then(
+                                                                                                                                                                shipperGetBooking(
+                                                                                                                                                                        CONFIRMED,
+                                                                                                                                                                        AMENDMENT_CONFIRMED,
+                                                                                                                                                                        null,
+                                                                                                                                                                        false)
+                                                                                                                                                                    .then(
+                                                                                                                                                                        uc8CarrierIssueTransportDocument())))))))))))))))))))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -90,12 +164,12 @@ public class BookingAndEblScenarioListBuilder
                 expectedBookingStatus,
                 expectedAmendedBookingStatus,
                 expectedCancellationState,
-                componentFactory.getMessageSchemaValidator(
+                componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.GET_BOOKING_SCHEMA_NAME),
                 requestAmendedContent));
   }
 
-  private static BookingAndEblScenarioListBuilder carrierSupplyScenarioParameters(
+  private static BookingAndEblScenarioListBuilder carrierSupplyBookingScenarioParameters(
       String carrierPartyName, ScenarioType scenarioType) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     var version = componentFactory.getStandardVersion().split("-\\+-")[0];
@@ -105,7 +179,7 @@ public class BookingAndEblScenarioListBuilder
                 carrierPartyName,
                 scenarioType,
                 version,
-                componentFactory.getMessageSchemaValidator(
+                componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.CREATE_BOOKING_SCHEMA_NAME)));
   }
 
@@ -119,11 +193,11 @@ public class BookingAndEblScenarioListBuilder
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
-                componentFactory.getMessageSchemaValidator(
+                componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.CREATE_BOOKING_SCHEMA_NAME),
-                componentFactory.getMessageSchemaValidator(
+                componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
-                componentFactory.getMessageSchemaValidator(
+                componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
@@ -144,11 +218,11 @@ public class BookingAndEblScenarioListBuilder
                 (BookingAction) previousAction,
                 bookingState,
                 BookingState.AMENDMENT_RECEIVED,
-                componentFactory.getMessageSchemaValidator(
+                componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.UPDATE_BOOKING_SCHEMA_NAME),
-                componentFactory.getMessageSchemaValidator(
+                componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
-                componentFactory.getMessageSchemaValidator(
+                componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
@@ -165,6 +239,126 @@ public class BookingAndEblScenarioListBuilder
                 true));
   }
 
+  private static BookingAndEblScenarioListBuilder shipperGetShippingInstructions(
+      ShippingInstructionsStatus expectedSiStatus,
+      ShippingInstructionsStatus expectedUpdatedSiStatus,
+      boolean requestAmendedSI,
+      boolean recordTDR,
+      boolean useBothRef) {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            new Shipper_GetShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                expectedSiStatus,
+                expectedUpdatedSiStatus,
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.GET_EBL_SCHEMA_NAME),
+                requestAmendedSI,
+                recordTDR,
+                useBothRef));
+  }
+
+  private static BookingAndEblScenarioListBuilder shipperGetTransportDocument(
+      TransportDocumentStatus expectedTdStatus) {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            new Shipper_GetTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                expectedTdStatus,
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.GET_TD_SCHEMA_NAME)));
+  }
+
+  private static BookingAndEblScenarioListBuilder carrierEblSupplyScenarioParameters(
+      org.dcsa.conformance.standards.ebl.checks.ScenarioType scenarioType, boolean isTd) {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String standardVersion = componentFactory.getStandardVersion().split("-\\+-")[1];
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            new CarrierSupplyPayloadAction(
+                carrierPartyName,
+                scenarioType,
+                standardVersion,
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.POST_EBL_SCHEMA_NAME),
+                isTd));
+  }
+
+  private static BookingAndEblScenarioListBuilder uc1ShipperSubmitShippingInstructions() {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            new UC1_Shipper_SubmitShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.POST_EBL_SCHEMA_NAME),
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static BookingAndEblScenarioListBuilder uc6CarrierPublishDraftTransportDocument(
+      boolean skipSI) {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            new UC6_Carrier_PublishDraftTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                skipSI));
+  }
+
+  private static BookingAndEblScenarioListBuilder uc7ShipperApproveDraftTransportDocument() {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            new UC7_Shipper_ApproveDraftTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.PATCH_TD_SCHEMA_NAME),
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static BookingAndEblScenarioListBuilder uc8CarrierIssueTransportDocument() {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            new UC8_Carrier_IssueTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
   private static BookingAndEblScenarioListBuilder carrierStateChange(
       BookingScenarioListBuilder.CarrierNotificationUseCase constructor) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
@@ -176,7 +370,7 @@ public class BookingAndEblScenarioListBuilder
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
-                componentFactory.getMessageSchemaValidator(
+                componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 }

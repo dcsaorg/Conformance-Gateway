@@ -17,7 +17,6 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
-import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.bookingandebl.party.BookingAndEblCarrier;
 import org.dcsa.conformance.standards.bookingandebl.party.BookingAndEblRole;
@@ -110,9 +109,15 @@ public class BookingAndEblComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toSet());
   }
 
-  public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {
+  public JsonSchemaValidator getBookingMessageSchemaValidator(String jsonSchema) {
     String[] versions = standardVersion.split("-\\+-");
     String schemaFilePath = "/standards/booking/schemas/BKG_v%s.yaml".formatted(versions[0]);
     return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
+  }
+
+  public JsonSchemaValidator getEblMessageSchemaValidator(String schema) {
+    String[] versions = standardVersion.split("-\\+-");
+    String schemaFilePath = "/standards/ebl/schemas/EBL_v%s.yaml".formatted(versions[1]);
+    return JsonSchemaValidator.getInstance(schemaFilePath, schema);
   }
 }

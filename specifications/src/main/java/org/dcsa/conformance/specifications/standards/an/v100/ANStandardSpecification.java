@@ -185,7 +185,9 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected List<String> getRootTypeNames() {
     return List.of(
-        ArrivalNotice.class.getSimpleName(), ArrivalNoticeNotification.class.getSimpleName());
+        ArrivalNotice.class.getSimpleName(),
+        ArrivalNoticeNotification.class.getSimpleName(),
+        FeedbackElement.class.getSimpleName());
   }
 
   @Override

@@ -1394,3 +1394,13 @@ for example ""Warning"", ""Updated"", ""Second"", ""Third"" etc.
 This is a high-level label with business semantics that does not influence the technical versioning
 of arrival notices of the same `typeLabel` issued for the same `transportDocumentReference`,
 which relies on the `issueDateTime` instead.",
+FeedbackElement,,,,,,,,
+"FeedbackElement / message",message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed
+to a user of the arrival notice publishing organization",
+"FeedbackElement / propertyPath",propertyPath,string,,maxLength=1000,,"$.arrivalNotices[2].pickupInformation.pickupLocation","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
+about which the feedback is provided (if applicable)",
+"FeedbackElement / severity",severity,string,,maxLength=50,,ERROR,"Code denoting the severity of a `FeedbackElement`
+
+- `ERROR` - Error that fully or partially prevents the correct processing of the request
+- `WARN` - Warning about the request being processed in a potentially unexpected way
+- `INFO` - Informational message about how the request is processed",

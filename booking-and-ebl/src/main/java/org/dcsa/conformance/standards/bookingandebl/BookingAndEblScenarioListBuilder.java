@@ -30,6 +30,7 @@ import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standards.ebl.EblScenarioListBuilder;
+import org.dcsa.conformance.standards.ebl.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.action.CarrierSupplyPayloadAction;
 import org.dcsa.conformance.standards.ebl.action.EblAction;
 import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;
@@ -215,7 +216,7 @@ public class BookingAndEblScenarioListBuilder
             new UC7_Shipper_SubmitBookingAmendment(
                 carrierPartyName,
                 shipperPartyName,
-                (BookingAction) previousAction,
+                (BookingAndEblAction) previousAction,
                 bookingState,
                 BookingState.AMENDMENT_RECEIVED,
                 componentFactory.getBookingMessageSchemaValidator(
@@ -288,6 +289,7 @@ public class BookingAndEblScenarioListBuilder
         previousAction ->
             new CarrierSupplyPayloadAction(
                 carrierPartyName,
+                (BookingAndEblAction) previousAction,
                 scenarioType,
                 standardVersion,
                 componentFactory.getEblMessageSchemaValidator(
@@ -354,7 +356,7 @@ public class BookingAndEblScenarioListBuilder
             new UC8_Carrier_IssueTransportDocumentAction(
                 carrierPartyName,
                 shipperPartyName,
-                (EblAction) previousAction,
+                (BookingAndEblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }

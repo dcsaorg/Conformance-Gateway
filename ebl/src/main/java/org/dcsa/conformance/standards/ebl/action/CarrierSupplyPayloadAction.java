@@ -19,7 +19,7 @@ import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 public class CarrierSupplyPayloadAction extends EblAction {
 
   public static final String CARRIER_PAYLOAD = "carrierPayload";
-  private static final String SCENARIO_TYPE = "scenarioType";
+  private static final String SCENARIO_TYPE = "eblScenarioType";
   private static final String INPUT = "input";
 
   private JsonNode carrierPayload;
@@ -35,7 +35,26 @@ public class CarrierSupplyPayloadAction extends EblAction {
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
-    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
+    this.getDspConsumer().accept(getDspSupplier().get().withEblScenarioType(scenarioType.name()));
+  }
+
+  public CarrierSupplyPayloadAction(
+      String carrierPartyName,
+      BookingAndEblAction previousAction,
+      @NonNull ScenarioType scenarioType,
+      String standardVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isTd) {
+    super(
+        carrierPartyName,
+        null,
+        previousAction,
+        "SupplyCSP [%s]".formatted(scenarioType.name()),
+        -1);
+    this.scenarioType = scenarioType;
+    this.standardVersion = standardVersion;
+    this.requestSchemaValidator = requestSchemaValidator;
+    this.isTd = isTd;
   }
 
   @Override
@@ -46,6 +65,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   @Override
   public ObjectNode asJsonNode() {
+    this.getDspConsumer().accept(getDspSupplier().get().withEblScenarioType(scenarioType.name()));
     return super.asJsonNode().put(SCENARIO_TYPE, scenarioType.name());
   }
 

@@ -20,23 +20,21 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.*;
+import org.dcsa.conformance.standards.ebl.action.BookingAndEblAction;
+import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 
-public abstract class BookingAction extends ConformanceAction {
+public abstract class BookingAction extends BookingAndEblAction {
+
   protected final int expectedStatus;
-  private final OverwritingReference<DynamicScenarioParameters> dspReference;
 
   protected BookingAction(
       String sourcePartyName,
       String targetPartyName,
-      BookingAction previousAction,
+      BookingAndEblAction previousAction,
       String actionTitle,
       int expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
-    this.dspReference =
-        previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null))
-            : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
   @Override
@@ -85,7 +83,8 @@ public abstract class BookingAction extends ConformanceAction {
     return dspReference::set;
   }
 
-  private <T> DynamicScenarioParameters updateIfNotNull(DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+  private <T> DynamicScenarioParameters updateIfNotNull(
+      DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }
@@ -95,16 +94,19 @@ public abstract class BookingAction extends ConformanceAction {
   protected void updateDSPFromResponsePayload(ConformanceExchange exchange) {
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
     JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
-    String newCbr = getCbrFromNotificationPayload(requestJsonNode) != null ?
-      getCbrFromNotificationPayload(requestJsonNode) :
-      responseJsonNode.path("carrierBookingReference").asText(null);
+    String newCbr =
+        getCbrFromNotificationPayload(requestJsonNode) != null
+            ? getCbrFromNotificationPayload(requestJsonNode)
+            : responseJsonNode.path("carrierBookingReference").asText(null);
     var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
 
     DynamicScenarioParameters dsp = dspReference.get();
     var updatedDsp = dsp;
-    updatedDsp = updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
+    updatedDsp =
+        updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
     updatedDsp = updateIfNotNull(updatedDsp, newCbr, updatedDsp::withCarrierBookingReference);
-    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
+    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not
+    // have been added to the DSP
     updatedDsp = updatedDsp.withBooking(null).withUpdatedBooking(null);
 
     if (!dsp.equals(updatedDsp)) {
@@ -128,8 +130,7 @@ public abstract class BookingAction extends ConformanceAction {
         .map(
             fileName ->
                 IOToolkit.templateFileToText(
-                    "/standards/booking/instructions/" + fileName,
-                    replacementsMap))
+                    "/standards/booking/instructions/" + fileName, replacementsMap))
         .collect(Collectors.joining());
   }
 
@@ -152,22 +153,23 @@ public abstract class BookingAction extends ConformanceAction {
 
   protected static String withCbrOrCbrr(String cbr, String cbrr) {
     return (cbr != null ? "with CBR '%s'".formatted(cbr) : "")
-      + (cbr != null && cbrr != null ? " and " : "")
-      + (cbrr != null ? "with CBRR '%s'".formatted(cbrr) : "");
+        + (cbr != null && cbrr != null ? " and " : "")
+        + (cbrr != null ? "with CBRR '%s'".formatted(cbrr) : "");
   }
 
   public static String createMessageForUIPrompt(String message, String cbr, String cbrr) {
     return message + " " + withCbrOrCbrr(cbr, cbrr);
   }
 
-
   protected Stream<ActionCheck> getNotificationChecks(
-    String expectedApiVersion,
-    JsonSchemaValidator notificationSchemaValidator,
-    BookingState bookingState,
-    BookingState amendedBookingState) {
-    return getNotificationChecks(expectedApiVersion, notificationSchemaValidator, bookingState, amendedBookingState,null);
+      String expectedApiVersion,
+      JsonSchemaValidator notificationSchemaValidator,
+      BookingState bookingState,
+      BookingState amendedBookingState) {
+    return getNotificationChecks(
+        expectedApiVersion, notificationSchemaValidator, bookingState, amendedBookingState, null);
   }
+
   protected Stream<ActionCheck> getNotificationChecks(
       String expectedApiVersion,
       JsonSchemaValidator notificationSchemaValidator,

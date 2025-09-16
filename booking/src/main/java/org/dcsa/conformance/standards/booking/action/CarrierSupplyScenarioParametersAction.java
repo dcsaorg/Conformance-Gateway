@@ -18,7 +18,7 @@ import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 
 public class CarrierSupplyScenarioParametersAction extends BookingAction {
 
-  private static final String SCENARIO_TYPE = "scenarioType";
+  private static final String SCENARIO_TYPE = "bookingScenarioType";
   private static final String BOOKING_PAYLOAD = "bookingPayload";
   private static final String INPUT = "input";
 
@@ -36,7 +36,7 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
-    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
+    this.getDspConsumer().accept(getDspSupplier().get().withBookingScenarioType(scenarioType.name()));
   }
 
   @Override

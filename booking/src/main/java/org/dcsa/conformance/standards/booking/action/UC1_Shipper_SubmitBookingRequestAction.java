@@ -1,6 +1,9 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.booking.checks.ScenarioType.DG;
+import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REEFER;
+import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REEFER_TEMP_CHANGE;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
@@ -10,6 +13,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
+import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -40,7 +44,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
             "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
         .replace(
             "BOOKING_TYPE_PLACEHOLDER",
-            switch (getDspSupplier().get().scenarioType()) {
+            switch (ScenarioType.valueOf(getDspSupplier().get().bookingScenarioType())) {
               case DG -> "DG";
               case REEFER, REEFER_TEMP_CHANGE -> "Reefer";
               default -> "Dry Cargo";
@@ -51,7 +55,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set("bookingPayload", getBookingPayloadSupplier().get());
-    jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
+    jsonNode.put("bookingScenarioType", getDspSupplier().get().bookingScenarioType());
     return jsonNode;
   }
 

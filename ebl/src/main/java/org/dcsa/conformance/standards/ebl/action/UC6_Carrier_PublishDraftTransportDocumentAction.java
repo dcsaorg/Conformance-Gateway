@@ -88,7 +88,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     var dr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
     var node = super.asJsonNode()
       .put("documentReference", dr)
-      .put("scenarioType", dsp.scenarioType().name())
+      .put("eblScenarioType", dsp.eblScenarioType())
       .put("skipSI", skipSI);
     node.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
     return node;

@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.ebl.action;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,24 +13,21 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.CarrierSiNotificationPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.ebl.checks.CarrierTdNotificationPayloadRequestConformanceCheck;
-import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.*;
 
-public abstract class EblAction extends ConformanceAction {
+public abstract class EblAction extends BookingAndEblAction {
+
   protected final Set<Integer> expectedStatus;
-  private final OverwritingReference<DynamicScenarioParameters> dspReference;
 
   protected EblAction(
       String sourcePartyName,
       String targetPartyName,
-      EblAction previousAction,
+      BookingAndEblAction previousAction,
       String actionTitle,
       int expectedStatus) {
     this(sourcePartyName, targetPartyName, previousAction, actionTitle, Set.of(expectedStatus));
@@ -40,16 +36,11 @@ public abstract class EblAction extends ConformanceAction {
   protected EblAction(
     String sourcePartyName,
     String targetPartyName,
-    EblAction previousAction,
+    BookingAndEblAction previousAction,
     String actionTitle,
     Set<Integer> expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
-    this.dspReference =
-      previousAction == null
-        ? new OverwritingReference<>(
-        null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, false, OBJECT_MAPPER.createObjectNode(), OBJECT_MAPPER.createObjectNode()))
-        : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
   @Override

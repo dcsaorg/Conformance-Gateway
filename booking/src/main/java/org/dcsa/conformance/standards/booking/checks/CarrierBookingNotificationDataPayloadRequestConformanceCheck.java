@@ -8,7 +8,7 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 
 public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
     extends AbstractCarrierPayloadConformanceCheck {

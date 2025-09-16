@@ -6,12 +6,15 @@ import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.ebl.action.BookingAndEblAction;
 
 public abstract class StateChangingBookingAction extends BookingAction {
-  protected StateChangingBookingAction(String sourcePartyName, String targetPartyName, BookingAction previousAction,
+
+  protected StateChangingBookingAction(String sourcePartyName, String targetPartyName, BookingAndEblAction previousAction,
                                     String actionTitle, int expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus);
   }

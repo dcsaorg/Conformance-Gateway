@@ -4,6 +4,9 @@ import static org.dcsa.conformance.standards.booking.checks.AbstractCarrierPaylo
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_CODE;
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_SEVERITY;
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATIONAL_COMMODITY_TYPE_CODES;
+import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REEFER;
+import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REEFER_TEMP_CHANGE;
+import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REGULAR_NON_OPERATING_REEFER;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,6 +24,7 @@ import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.*;
+import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 
 @UtilityClass
 public class BookingChecks {
@@ -424,11 +428,11 @@ public class BookingChecks {
             "[Scenario] Validate the containers reefer settings",
             mav -> mav.submitAllMatching("requestedEquipments.*"),
             (nodeToValidate, contextPath) -> {
-              var scenario = dspSupplier.get().scenarioType();
+              var scenario = dspSupplier.get().bookingScenarioType();
               var activeReeferNode = nodeToValidate.path("activeReeferSettings");
               var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
               var issues = new LinkedHashSet<String>();
-              switch (scenario) {
+              switch (ScenarioType.valueOf(scenario)) {
                 case REEFER, REEFER_TEMP_CHANGE -> {
                   if (!activeReeferNode.isObject()) {
                     issues.add(
@@ -463,7 +467,7 @@ public class BookingChecks {
       "[Scenario] Whether the cargo should be DG",
       mav-> mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").submitPath(),
       (nodeToValidate, contextPath) -> {
-        var scenario = dspSupplier.get().scenarioType();
+        var scenario = ScenarioType.valueOf(dspSupplier.get().bookingScenarioType());
         if (scenario == ScenarioType.DG) {
           if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
             return Set.of("The scenario requires '%s' to contain dangerous goods".formatted(contextPath));

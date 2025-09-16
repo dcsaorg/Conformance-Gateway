@@ -672,7 +672,7 @@ class EblChecksTest {
       ScenarioType regular2c1u) {
     return () -> {
       DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
-      when(dsp.scenarioType()).thenReturn(regular2c1u);
+      when(ScenarioType.valueOf(dsp.eblScenarioType())).thenReturn(regular2c1u);
       return dsp;
     };
   }

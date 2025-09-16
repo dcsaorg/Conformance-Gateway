@@ -37,7 +37,7 @@ public class EblCarrier extends ConformanceParty {
   private static final String MESSAGE = "message";
   private static final String ACTION_ID = "actionId";
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
-  public static final String SCENARIO_TYPE = "scenarioType";
+  public static final String SCENARIO_TYPE = "eblScenarioType";
 
   private final Map<String, String> tdrToSir = new HashMap<>();
 

@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

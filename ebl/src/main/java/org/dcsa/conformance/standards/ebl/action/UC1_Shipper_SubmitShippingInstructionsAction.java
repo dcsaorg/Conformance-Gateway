@@ -1,6 +1,18 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.ACTIVE_REEFER;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.DG;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.NON_OPERATING_REEFER;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_2C_1U;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_2C_2U;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_CLAD;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_NEGOTIABLE_BL;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_STRAIGHT_BL;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB_AMF;
+import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
@@ -11,6 +23,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EblChecks;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -47,7 +60,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   }
 
   private String getScenarioType() {
-    return switch (getDSP().scenarioType()) {
+    return switch (ScenarioType.valueOf(getDSP().eblScenarioType())) {
       case REGULAR_2C_1U ->
           "with 2 Commodities, 1 Utilized transport equipment";
       case REGULAR_2C_2U ->
@@ -70,7 +83,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
-    return jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
+    return jsonNode.put("eblScenarioType", getDspSupplier().get().eblScenarioType());
   }
 
   @Override

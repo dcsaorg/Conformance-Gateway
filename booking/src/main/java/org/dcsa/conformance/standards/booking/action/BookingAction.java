@@ -12,16 +12,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.*;
-import org.dcsa.conformance.standards.ebl.action.BookingAndEblAction;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 public abstract class BookingAction extends BookingAndEblAction {
 

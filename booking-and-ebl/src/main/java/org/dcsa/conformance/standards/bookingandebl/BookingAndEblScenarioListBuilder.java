@@ -30,7 +30,7 @@ import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standards.ebl.EblScenarioListBuilder;
-import org.dcsa.conformance.standards.ebl.action.BookingAndEblAction;
+import org.dcsa.conformance.standards.booking.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.action.CarrierSupplyPayloadAction;
 import org.dcsa.conformance.standards.ebl.action.EblAction;
 import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;

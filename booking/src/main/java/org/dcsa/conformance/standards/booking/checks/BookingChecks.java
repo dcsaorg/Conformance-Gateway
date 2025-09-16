@@ -4,9 +4,6 @@ import static org.dcsa.conformance.standards.booking.checks.AbstractCarrierPaylo
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_CODE;
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_SEVERITY;
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATIONAL_COMMODITY_TYPE_CODES;
-import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REEFER;
-import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REEFER_TEMP_CHANGE;
-import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REGULAR_NON_OPERATING_REEFER;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,7 +21,7 @@ import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.*;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 @UtilityClass
 public class BookingChecks {

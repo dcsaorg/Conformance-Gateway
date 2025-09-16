@@ -1,10 +1,10 @@
-package org.dcsa.conformance.standards.ebl.action;
+package org.dcsa.conformance.standards.booking.action;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 public abstract class BookingAndEblAction extends ConformanceAction {
 

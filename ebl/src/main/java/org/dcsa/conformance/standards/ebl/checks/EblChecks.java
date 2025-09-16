@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.models.TriConsumer;
 import org.dcsa.conformance.standards.ebl.party.*;
 
@@ -927,7 +928,7 @@ public class EblChecks {
   }
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
-      Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
+          Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
     List<JsonContentCheck> checks = new ArrayList<>();
     checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'transportDocumentTypeCode' is used",

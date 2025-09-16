@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 @UtilityClass
 public class EblInputPayloadValidations {
@@ -20,7 +20,7 @@ public class EblInputPayloadValidations {
   }
 
   public static Set<String> validateEblContent(
-      JsonNode eblNode, Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
+          JsonNode eblNode, Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
     List<JsonContentCheck> contentChecks = new ArrayList<>(EblChecks.STATIC_SI_CHECKS);
     contentChecks.add(EblChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     contentChecks.add(EblChecks.VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);

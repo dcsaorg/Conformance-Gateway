@@ -8,6 +8,7 @@ import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.booking.action.BookingAndEblAction;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
@@ -21,6 +22,17 @@ public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAct
       JsonSchemaValidator requestSchemaValidator) {
     super(carrierPartyName, shipperPartyName, previousAction, "UC8", 204);
     this.requestSchemaValidator = requestSchemaValidator;
+  }
+
+  public UC8_Carrier_IssueTransportDocumentAction(
+          String carrierPartyName,
+          String shipperPartyName,
+          BookingAndEblAction previousAction,
+          ScenarioType scenarioType,
+          JsonSchemaValidator requestSchemaValidator) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC8", 204);
+    this.requestSchemaValidator = requestSchemaValidator;
+    this.scenarioType = scenarioType;
   }
 
   @Override

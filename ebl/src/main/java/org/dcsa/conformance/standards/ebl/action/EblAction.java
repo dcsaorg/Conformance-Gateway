@@ -20,11 +20,13 @@ import org.dcsa.conformance.standards.booking.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.checks.CarrierSiNotificationPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.ebl.checks.CarrierTdNotificationPayloadRequestConformanceCheck;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.*;
 
 public abstract class EblAction extends BookingAndEblAction {
 
   protected final Set<Integer> expectedStatus;
+  protected ScenarioType scenarioType;
 
   protected EblAction(
       String sourcePartyName,
@@ -33,6 +35,9 @@ public abstract class EblAction extends BookingAndEblAction {
       String actionTitle,
       int expectedStatus) {
     this(sourcePartyName, targetPartyName, previousAction, actionTitle, Set.of(expectedStatus));
+    if (previousAction instanceof EblAction previousEblAction && scenarioType == null) {
+      this.scenarioType = previousEblAction.scenarioType;
+    }
   }
 
   protected EblAction(
@@ -43,6 +48,9 @@ public abstract class EblAction extends BookingAndEblAction {
     Set<Integer> expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
+    if (previousAction instanceof EblAction previousEblAction && scenarioType == null) {
+      this.scenarioType = previousEblAction.scenarioType;
+    }
   }
 
   @Override
@@ -195,6 +203,7 @@ public abstract class EblAction extends BookingAndEblAction {
             expectedApiVersion,
             expectedStatus,
             expectedUpdatedStatus,
+            scenarioType,
             getDspSupplier(),
             extraChecks));
   }
@@ -243,6 +252,7 @@ public abstract class EblAction extends BookingAndEblAction {
             expectedApiVersion,
             transportDocumentStatus,
             tdrIsKnown,
-            getDspSupplier()));
+            getDspSupplier(),
+            scenarioType));
   }
 }

@@ -119,7 +119,8 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                 shipperGetTransportDocument(
                                                                                                                         TD_APPROVED)
                                                                                                                     .then(
-                                                                                                                        uc8CarrierIssueTransportDocument()
+                                                                                                                        uc8CarrierIssueTransportDocument(
+                                                                                                                                REGULAR_SWB)
                                                                                                                             .then(
                                                                                                                                 shipperGetTransportDocument(
                                                                                                                                         TD_ISSUED)
@@ -142,7 +143,8 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                         null,
                                                                                                                                                                         false)
                                                                                                                                                                     .then(
-                                                                                                                                                                        uc8CarrierIssueTransportDocument())))))))))))))))))))))
+                                                                                                                                                                        uc8CarrierIssueTransportDocument(
+                                                                                                                                                                            REGULAR_SWB))))))))))))))))))))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -347,7 +349,8 @@ public class BookingAndEblScenarioListBuilder
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }
 
-  private static BookingAndEblScenarioListBuilder uc8CarrierIssueTransportDocument() {
+  private static BookingAndEblScenarioListBuilder uc8CarrierIssueTransportDocument(
+      org.dcsa.conformance.standards.ebl.checks.ScenarioType scenarioType) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -357,6 +360,7 @@ public class BookingAndEblScenarioListBuilder
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAndEblAction) previousAction,
+                scenarioType,
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }

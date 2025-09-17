@@ -29,7 +29,6 @@ public abstract class BookingAndEblAction extends ConformanceAction {
                 null,
                 null,
                 null,
-                null,
                 false,
                 OBJECT_MAPPER.createObjectNode(),
                 OBJECT_MAPPER.createObjectNode(),

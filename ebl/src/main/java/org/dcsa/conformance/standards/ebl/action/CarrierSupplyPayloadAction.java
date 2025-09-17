@@ -24,7 +24,6 @@ public class CarrierSupplyPayloadAction extends EblAction {
   private static final String INPUT = "input";
 
   private JsonNode carrierPayload;
-  private ScenarioType scenarioType;
   private final String standardVersion;
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean isTd;
@@ -36,7 +35,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
-    this.getDspConsumer().accept(getDspSupplier().get().withEblScenarioType(scenarioType.name()));
+    //this.getDspConsumer().accept(getDspSupplier().get().withEblScenarioType(scenarioType.name()));
   }
 
   public CarrierSupplyPayloadAction(
@@ -66,7 +65,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    this.getDspConsumer().accept(getDspSupplier().get().withEblScenarioType(scenarioType.name()));
+    //this.getDspConsumer().accept(getDspSupplier().get().withEblScenarioType(scenarioType.name()));
     return super.asJsonNode().put(SCENARIO_TYPE, scenarioType.name());
   }
 
@@ -121,7 +120,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
         EblInputPayloadValidations.validateEblSchema(inputNode, requestSchemaValidator);
 
     Set<String> contentChecksErrors =
-        EblInputPayloadValidations.validateEblContent(inputNode, getDspSupplier(), isTd);
+        EblInputPayloadValidations.validateEblContent(inputNode, scenarioType, isTd);
 
     Set<String> allErrors =
         Stream.of(schemaChecksErrors, contentChecksErrors)

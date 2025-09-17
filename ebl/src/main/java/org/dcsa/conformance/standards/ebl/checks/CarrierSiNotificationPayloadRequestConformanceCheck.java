@@ -28,6 +28,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   private final String standardsVersion;
   private final ShippingInstructionsStatus shippingInstructionsStatus;
   private final ShippingInstructionsStatus updatedShippingInstructionsStatus;
+  private final ScenarioType scenarioType;
   private final Supplier<DynamicScenarioParameters> dspSupplier;
   private final List<JsonContentCheck> extraChecks;
 
@@ -36,12 +37,14 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
       String standardsVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
+      ScenarioType scenarioType,
       Supplier<DynamicScenarioParameters> dspSupplier,
       JsonContentCheck... extraChecks) {
     super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
     this.standardsVersion = standardsVersion;
     this.shippingInstructionsStatus = shippingInstructionsStatus;
     this.updatedShippingInstructionsStatus = updatedShippingInstructionsStatus;
+    this.scenarioType = scenarioType;
     this.dspSupplier = dspSupplier;
     this.extraChecks = List.of(extraChecks);
   }
@@ -65,6 +68,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
                         standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
+                        scenarioType,
                         dspSupplier,
                         false)),
             buildChecksWithCondition(
@@ -76,6 +80,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
                         standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
+                        scenarioType,
                         dspSupplier,
                         false)))
         .flatMap(Function.identity());

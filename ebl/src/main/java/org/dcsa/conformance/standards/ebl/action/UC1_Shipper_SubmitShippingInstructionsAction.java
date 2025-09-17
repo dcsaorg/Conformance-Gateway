@@ -60,7 +60,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   }
 
   private String getScenarioType() {
-    return switch (ScenarioType.valueOf(getDSP().eblScenarioType())) {
+    return switch (this.scenarioType) {
       case REGULAR_2C_1U ->
           "with 2 Commodities, 1 Utilized transport equipment";
       case REGULAR_2C_2U ->
@@ -83,7 +83,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
-    return jsonNode.put("eblScenarioType", getDspSupplier().get().eblScenarioType());
+    return jsonNode.put("eblScenarioType", this.scenarioType.name());
   }
 
   @Override
@@ -126,7 +126,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 EblChecks.siRequestContentChecks(
                     getMatchedExchangeUuid(),
                     expectedApiVersion,
-                    getDspSupplier()));
+                    scenarioType));
         return Stream.concat(
             primaryExchangeChecks,
             getSINotificationChecks(

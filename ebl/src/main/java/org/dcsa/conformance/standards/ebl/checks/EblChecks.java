@@ -928,20 +928,20 @@ public class EblChecks {
   }
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
-          Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
+          ScenarioType scenarioType, boolean isTD) {
     List<JsonContentCheck> checks = new ArrayList<>();
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'transportDocumentTypeCode' is used",
-      "transportDocumentTypeCode",
-      delayedValue(dspSupplier, dsp -> ScenarioType.valueOf(dsp.eblScenarioType()).transportDocumentTypeCode())
-    ));
+    checks.add(
+        JsonAttribute.mustEqual(
+            "[Scenario] Verify that the correct 'transportDocumentTypeCode' is used",
+            "transportDocumentTypeCode",
+            scenarioType::transportDocumentTypeCode));
     if (isTD) {
 /* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
       checks.add(
         JsonAttribute.ifThen(
           "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
           ignored -> {
-            var dsp = dspSupplier.get();
+            var dsp = scenarioType.get();
             return dsp.shippingInstructions().path("isCarriersAgentAtDestinationRequired").asBoolean(false) || dsp.eblScenarioType().isCarriersAgentAtDestinationRequired();
           },
           JsonAttribute.path(DOCUMENT_PARTIES, JsonAttribute.path("carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))
@@ -951,7 +951,7 @@ public class EblChecks {
       checks.add(
         JsonAttribute.ifThen(
           "[Scenario] Verify that the shippingInstructions had 'isCarriersAgentAtDestinationRequired' as true if scenario requires it",
-          ignored -> ScenarioType.valueOf(dspSupplier.get().eblScenarioType()).isCarriersAgentAtDestinationRequired(),
+          ignored -> scenarioType.isCarriersAgentAtDestinationRequired(),
           JsonAttribute.path("isCarriersAgentAtDestinationRequired", JsonAttribute.matchedMustBeTrue())
         ));
 
@@ -960,7 +960,7 @@ public class EblChecks {
           "[Scenario] CargoItem and DG vs. outerPackaging in the SI",
           mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
           JsonAttribute.ifMatchedThenElse(
-            ignored -> ScenarioType.valueOf(dspSupplier.get().eblScenarioType()).hasDG(),
+            ignored -> scenarioType.hasDG(),
             JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBeAbsent()),
             JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent())
           )
@@ -970,26 +970,24 @@ public class EblChecks {
 
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the scenario contained references when the scenario requires it",
-      scenarioReferencesCheck(dspSupplier)
+      scenarioReferencesCheck(scenarioType)
     ));
 
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that 'customsReferences' is used when the scenario requires it",
-      scenarioCustomsReferencesCheck(dspSupplier)
+      scenarioCustomsReferencesCheck(scenarioType)
     ));
 
     checks.add(
         JsonAttribute.customValidator(
             "[Scenario] Verify that the scenario contains the required amount of 'utilizedTransportEquipments'",
-            utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)));
+            utilizedTransportEquipmentsScenarioSizeCheck(scenarioType)));
 
     return checks;
   }
 
-  private static JsonContentMatchedValidation scenarioCustomsReferencesCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
+  private static JsonContentMatchedValidation scenarioCustomsReferencesCheck(ScenarioType scenarioType) {
     return (nodeToValidate,contextPath) -> {
-      var dsp = dspSupplier.get();
-      var scenarioType = ScenarioType.valueOf(dsp.eblScenarioType());
       if (!scenarioType.isCustomsReferencesRequired()) {
         return Set.of();
       }
@@ -1011,9 +1009,9 @@ public class EblChecks {
     JsonPointer.compile("/documentParties/consignee/reference")
   };
 
-  private static JsonContentMatchedValidation scenarioReferencesCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
+  private static JsonContentMatchedValidation scenarioReferencesCheck(ScenarioType scenarioType) {
     return JsonAttribute.ifMatchedThen(
-      ignored -> ScenarioType.valueOf(dspSupplier.get().eblScenarioType()).isReferencesRequired(),
+      ignored -> scenarioType.isReferencesRequired(),
       JsonAttribute.atLeastOneOfMatched((body, ptrs) -> {
         ptrs.addAll(Arrays.asList(REFERENCE_PATHS));
         var uteCount = body.path(UTILIZED_TRANSPORT_EQUIPMENTS).size();
@@ -1047,11 +1045,11 @@ public class EblChecks {
   }
 
   public static ActionCheck siRequestContentChecks(
-      UUID matched, String standardVersion, Supplier<DynamicScenarioParameters> dspSupplier) {
+      UUID matched, String standardVersion, ScenarioType scenarioType) {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
     checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     checks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    checks.addAll(generateScenarioRelatedChecks(dspSupplier, false));
+    checks.addAll(generateScenarioRelatedChecks(scenarioType, false));
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
       matched,
@@ -1064,15 +1062,17 @@ public class EblChecks {
   public static ActionCheck siResponseContentChecks(
       UUID matched,
       String standardVersion,
-      Supplier<DynamicScenarioParameters> dspSupplier,
+      ScenarioType scenarioType,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
-      boolean requestAmendedStatus) {
+      boolean requestAmendedStatus,
+      Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks =
         getSiPayloadChecks(
             standardVersion,
             shippingInstructionsStatus,
             updatedShippingInstructionsStatus,
+            scenarioType,
             dspSupplier,
             requestAmendedStatus);
     return JsonAttribute.contentChecks(
@@ -1083,6 +1083,7 @@ public class EblChecks {
       String standardVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
+      ScenarioType scenarioType,
       Supplier<DynamicScenarioParameters> dspSupplier,
       boolean requestedAmendment) {
     var checks = new ArrayList<JsonContentCheck>();
@@ -1110,7 +1111,7 @@ public class EblChecks {
           SI_NORMALIZER
         ));
     */
-    checks.addAll(generateScenarioRelatedChecks(dspSupplier, false));
+    checks.addAll(generateScenarioRelatedChecks(scenarioType, false));
     return checks;
   }
 
@@ -1219,9 +1220,10 @@ public class EblChecks {
       UUID matched,
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
+      ScenarioType scenarioType,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
-        getTdPayloadChecks(standardVersion, transportDocumentStatus, dspSupplier);
+        getTdPayloadChecks(standardVersion, transportDocumentStatus, scenarioType,dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }
@@ -1229,6 +1231,7 @@ public class EblChecks {
   public static List<JsonContentCheck> getTdPayloadChecks(
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
+      ScenarioType scenarioType,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
     genericTdContentChecks(
@@ -1240,11 +1243,10 @@ public class EblChecks {
             "[Scenario] Validate the containers reefer settings",
             mav -> mav.submitAllMatching("utilizedTransportEquipments.*"),
             (nodeToValidate, contextPath) -> {
-              var scenario = ScenarioType.valueOf(dspSupplier.get().eblScenarioType());
               var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
               var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
               var issues = new LinkedHashSet<String>();
-              switch (scenario) {
+              switch (scenarioType) {
                 case ACTIVE_REEFER -> {
                   if (!activeReeferNode.isObject()) {
                     issues.add(
@@ -1281,8 +1283,7 @@ public class EblChecks {
                 mav.submitAllMatching(
                     "consignmentItems.*.cargoItems.*.outerPackaging.*.dangerousGoods"),
             (nodeToValidate, contextPath) -> {
-              var scenario = ScenarioType.valueOf(dspSupplier.get().eblScenarioType());
-              if (scenario == ScenarioType.DG) {
+              if (scenarioType == ScenarioType.DG) {
                 if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
                   return Set.of(
                       "The scenario requires '%s' to contain dangerous goods"
@@ -1297,19 +1298,18 @@ public class EblChecks {
               }
               return Set.of();
             }));
-    jsonContentChecks.addAll(generateScenarioRelatedChecks(dspSupplier, true));
+    jsonContentChecks.addAll(generateScenarioRelatedChecks(scenarioType, true));
     return jsonContentChecks;
   }
 
   public static JsonContentMatchedValidation utilizedTransportEquipmentsScenarioSizeCheck(
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      ScenarioType scenarioType) {
     return (body, contextPath) -> {
-      var scenario = ScenarioType.valueOf(dspSupplier.get().eblScenarioType());
       var utilizedTransportEquipments = body.path(UTILIZED_TRANSPORT_EQUIPMENTS);
       int actualSize = utilizedTransportEquipments.size();
 
       Integer expectedSize =
-          switch (scenario) {
+          switch (scenarioType) {
             case ScenarioType.REGULAR_2C_1U -> 1;
             case ScenarioType.REGULAR_2C_2U -> 2;
             default -> null;

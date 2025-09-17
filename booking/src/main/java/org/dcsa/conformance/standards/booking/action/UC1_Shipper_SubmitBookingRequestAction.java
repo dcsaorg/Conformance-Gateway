@@ -1,9 +1,6 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.booking.checks.ScenarioType.DG;
-import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REEFER;
-import static org.dcsa.conformance.standards.booking.checks.ScenarioType.REEFER_TEMP_CHANGE;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;

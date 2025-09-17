@@ -44,7 +44,7 @@ public class UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction extends S
     var dsp = getDspSupplier().get();
     return super.asJsonNode()
       .put("documentReference", dsp.transportDocumentReference())
-      .put("eblScenarioType", dsp.eblScenarioType());
+      .put("eblScenarioType", scenarioType.name());
   }
 
   @Override

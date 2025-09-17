@@ -1,14 +1,15 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.EblDynamicScenarioParameters;
 
 public abstract class BookingAndEblAction extends ConformanceAction {
 
-  public final OverwritingReference<DynamicScenarioParameters> dspReference;
+  public final OverwritingReference<EblDynamicScenarioParameters> eblDspReference;
+  public final OverwritingReference<BookingDynamicScenarioParameters> bookingDspReference;
 
   protected BookingAndEblAction(
       String sourcePartyName,
@@ -16,27 +17,25 @@ public abstract class BookingAndEblAction extends ConformanceAction {
       BookingAndEblAction previousAction,
       String actionTitle) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
-    this.dspReference = getDspReference(previousAction);
+    this.eblDspReference = getEblDspReference(previousAction);
+    this.bookingDspReference = getBookingDspReference(previousAction);
   }
 
-  private OverwritingReference<DynamicScenarioParameters> getDspReference(
+  private OverwritingReference<EblDynamicScenarioParameters> getEblDspReference(
       BookingAndEblAction previousAction) {
-    return previousAction == null
-        ? new OverwritingReference<>(
-            null,
-            new DynamicScenarioParameters(
-                null,
-                null,
-                null,
-                null,
-                false,
-                OBJECT_MAPPER.createObjectNode(),
-                OBJECT_MAPPER.createObjectNode(),
-                null,
-                null,
-                null,
-                null,
-                null))
-        : new OverwritingReference<>(previousAction.dspReference, null);
+    if (previousAction == null) {
+      return new OverwritingReference<>(
+          null, new EblDynamicScenarioParameters(null, null, null, null, false));
+    }
+    return new OverwritingReference<>(previousAction.eblDspReference, null);
+  }
+
+  private OverwritingReference<BookingDynamicScenarioParameters> getBookingDspReference(
+      BookingAndEblAction previousAction) {
+    if (previousAction == null) {
+      return new OverwritingReference<>(
+          null, new BookingDynamicScenarioParameters(null, null, null));
+    }
+    return new OverwritingReference<>(previousAction.bookingDspReference, null);
   }
 }

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
 
 @UtilityClass
 public class BookingInputPayloadValidations {
@@ -23,7 +23,7 @@ public class BookingInputPayloadValidations {
   }
 
   public static Set<String> validateBookingContent(
-      JsonNode bookingNode, Supplier<DynamicScenarioParameters> dspSupplier) {
+      JsonNode bookingNode, Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> contentChecks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     contentChecks.addAll(generateScenarioRelatedChecks(dspSupplier));
     return contentChecks.stream()

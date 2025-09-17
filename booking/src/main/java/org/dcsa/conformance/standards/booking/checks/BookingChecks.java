@@ -21,7 +21,7 @@ import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.*;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
 
 @UtilityClass
 public class BookingChecks {
@@ -43,7 +43,7 @@ public class BookingChecks {
   public static ActionCheck requestContentChecks(
       UUID matched,
       String standardVersion,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     checks.addAll(generateScenarioRelatedChecks(dspSupplier));
     return JsonAttribute.contentChecks(
@@ -404,7 +404,7 @@ public class BookingChecks {
           });
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> checks = new ArrayList<>();
     checks.add(
         JsonAttribute.customValidator(
@@ -587,7 +587,7 @@ public class BookingChecks {
   public static ActionCheck responseContentChecks(
       UUID matched,
       String standardVersion,
-      Supplier<DynamicScenarioParameters> dspSupplier,
+      Supplier<BookingDynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
       BookingCancellationState expectedCancelledBookingStatus,
@@ -605,7 +605,7 @@ public class BookingChecks {
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(
-      Supplier<DynamicScenarioParameters> dspSupplier,
+      Supplier<BookingDynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
       BookingCancellationState expectedCancelledBookingStatus,
@@ -681,7 +681,7 @@ public class BookingChecks {
     return checks;
   }
 
-  public static JsonContentCheck cbrrOrCbr(Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static JsonContentCheck cbrrOrCbr(Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
         "Validate Carrier Booking Request Reference and Carrier Booking Reference",
         body -> {

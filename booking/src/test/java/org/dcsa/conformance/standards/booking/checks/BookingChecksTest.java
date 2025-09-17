@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.JsonContentCheck;
+import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class BookingChecksTest {
   private ArrayNode requestedEquipments;
   private ObjectNode commodity;
   private ArrayNode commodities;
-  private Supplier<DynamicScenarioParameters> dspSupplier;
+  private Supplier<BookingDynamicScenarioParameters> dspSupplier;
   private static final ObjectMapper mapper = new ObjectMapper();
 
   @BeforeEach
@@ -36,7 +37,8 @@ class BookingChecksTest {
     commodity = OBJECT_MAPPER.createObjectNode();
     commodities = OBJECT_MAPPER.createArrayNode();
     dspSupplier =
-        () -> new DynamicScenarioParameters(ScenarioType.REGULAR, "CBRR123", "CBR456", null, null);
+        () ->
+            new BookingDynamicScenarioParameters(ScenarioType.REGULAR.name(), "CBRR123", "CBR456");
   }
 
   @Test

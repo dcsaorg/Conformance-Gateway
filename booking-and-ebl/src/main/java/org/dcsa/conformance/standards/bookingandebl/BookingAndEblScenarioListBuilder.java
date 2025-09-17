@@ -119,8 +119,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                 shipperGetTransportDocument(
                                                                                                                         TD_APPROVED)
                                                                                                                     .then(
-                                                                                                                        uc8CarrierIssueTransportDocument(
-                                                                                                                                REGULAR_SWB)
+                                                                                                                        uc8CarrierIssueTransportDocument()
                                                                                                                             .then(
                                                                                                                                 shipperGetTransportDocument(
                                                                                                                                         TD_ISSUED)
@@ -361,6 +360,20 @@ public class BookingAndEblScenarioListBuilder
                 shipperPartyName,
                 (BookingAndEblAction) previousAction,
                 scenarioType,
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static BookingAndEblScenarioListBuilder uc8CarrierIssueTransportDocument() {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            new UC8_Carrier_IssueTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (BookingAndEblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.EblDynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -29,7 +29,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   private final ShippingInstructionsStatus shippingInstructionsStatus;
   private final ShippingInstructionsStatus updatedShippingInstructionsStatus;
   private final ScenarioType scenarioType;
-  private final Supplier<DynamicScenarioParameters> dspSupplier;
+  private final Supplier<EblDynamicScenarioParameters> dspSupplier;
   private final List<JsonContentCheck> extraChecks;
 
   public CarrierSiNotificationPayloadRequestConformanceCheck(
@@ -38,7 +38,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
       ScenarioType scenarioType,
-      Supplier<DynamicScenarioParameters> dspSupplier,
+      Supplier<EblDynamicScenarioParameters> dspSupplier,
       JsonContentCheck... extraChecks) {
     super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
     this.standardsVersion = standardsVersion;

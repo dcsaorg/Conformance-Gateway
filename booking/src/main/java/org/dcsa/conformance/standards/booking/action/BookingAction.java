@@ -18,7 +18,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.*;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
 
 public abstract class BookingAction extends BookingAndEblAction {
 
@@ -38,15 +38,15 @@ public abstract class BookingAction extends BookingAndEblAction {
   public void reset() {
     super.reset();
     if (previousAction != null) {
-      this.dspReference.set(null);
+      bookingDspReference.set(null);
     }
   }
 
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (dspReference.hasCurrentValue()) {
-      jsonState.set("currentDsp", dspReference.get().toJson());
+    if (bookingDspReference.hasCurrentValue()) {
+      jsonState.set("currentDsp", bookingDspReference.get().toJson());
     }
     return jsonState;
   }
@@ -56,7 +56,7 @@ public abstract class BookingAction extends BookingAndEblAction {
     super.importJsonState(jsonState);
     JsonNode dspNode = jsonState.get("currentDsp");
     if (dspNode != null) {
-      dspReference.set(DynamicScenarioParameters.fromJson(dspNode));
+      bookingDspReference.set(BookingDynamicScenarioParameters.fromJson(dspNode));
     }
   }
 
@@ -72,16 +72,16 @@ public abstract class BookingAction extends BookingAndEblAction {
     return getPreviousBookingAction().getBookingPayloadSupplier();
   }
 
-  protected Supplier<DynamicScenarioParameters> getDspSupplier() {
-    return dspReference::get;
+  protected Supplier<BookingDynamicScenarioParameters> getDspSupplier() {
+    return bookingDspReference::get;
   }
 
-  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
-    return dspReference::set;
+  protected Consumer<BookingDynamicScenarioParameters> getDspConsumer() {
+    return bookingDspReference::set;
   }
 
-  private <T> DynamicScenarioParameters updateIfNotNull(
-      DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+  private <T> BookingDynamicScenarioParameters updateIfNotNull(
+          BookingDynamicScenarioParameters dsp, T value, Function<T, BookingDynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }
@@ -97,17 +97,16 @@ public abstract class BookingAction extends BookingAndEblAction {
             : responseJsonNode.path("carrierBookingReference").asText(null);
     var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
 
-    DynamicScenarioParameters dsp = dspReference.get();
+    BookingDynamicScenarioParameters dsp = bookingDspReference.get();
     var updatedDsp = dsp;
     updatedDsp =
         updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
     updatedDsp = updateIfNotNull(updatedDsp, newCbr, updatedDsp::withCarrierBookingReference);
     // SD-1997 gradually wiping out from production orchestrator states the big docs that should not
     // have been added to the DSP
-    updatedDsp = updatedDsp.withBooking(null).withUpdatedBooking(null);
 
     if (!dsp.equals(updatedDsp)) {
-      dspReference.set(updatedDsp);
+      bookingDspReference.set(updatedDsp);
     }
   }
 
@@ -174,8 +173,8 @@ public abstract class BookingAction extends BookingAndEblAction {
       BookingState amendedBookingState,
       BookingCancellationState bookingCancellationState) {
     String titlePrefix = "[Notification]";
-    var cbr = dspReference.get().carrierBookingReference();
-    var cbrr = dspReference.get().carrierBookingRequestReference();
+    var cbr = bookingDspReference.get().carrierBookingReference();
+    var cbrr = bookingDspReference.get().carrierBookingRequestReference();
     return Stream.of(
             new HttpMethodCheck(
                 titlePrefix, BookingRole::isCarrier, getMatchedNotificationExchangeUuid(), "POST"),

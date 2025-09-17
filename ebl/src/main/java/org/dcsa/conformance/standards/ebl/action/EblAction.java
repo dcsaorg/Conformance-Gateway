@@ -17,7 +17,7 @@ import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.action.BookingAndEblAction;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.EblDynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.checks.CarrierSiNotificationPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.ebl.checks.CarrierTdNotificationPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
@@ -57,15 +57,15 @@ public abstract class EblAction extends BookingAndEblAction {
   public void reset() {
     super.reset();
     if (previousAction != null) {
-      this.dspReference.set(null);
+      eblDspReference.set(null);
     }
   }
 
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (dspReference.hasCurrentValue()) {
-      jsonState.set("currentDsp", dspReference.get().toJson());
+    if (eblDspReference.hasCurrentValue()) {
+      jsonState.set("currentDsp", eblDspReference.get().toJson());
     }
     return jsonState;
   }
@@ -75,11 +75,11 @@ public abstract class EblAction extends BookingAndEblAction {
     super.importJsonState(jsonState);
     JsonNode dspNode = jsonState.get("currentDsp");
     if (dspNode != null) {
-      dspReference.set(DynamicScenarioParameters.fromJson(dspNode));
+      eblDspReference.set(EblDynamicScenarioParameters.fromJson(dspNode));
     }
   }
 
-  protected DynamicScenarioParameters getDSP() {
+  protected EblDynamicScenarioParameters getDSP() {
     return getDspSupplier().get();
   }
 
@@ -106,16 +106,16 @@ public abstract class EblAction extends BookingAndEblAction {
     return getPreviousEblAction().getCarrierPayloadSupplier();
   }
 
-  protected Supplier<DynamicScenarioParameters> getDspSupplier() {
-    return dspReference::get;
+  protected Supplier<EblDynamicScenarioParameters> getDspSupplier() {
+    return eblDspReference::get;
   }
 
-  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
-    return dspReference::set;
+  protected Consumer<EblDynamicScenarioParameters> getDspConsumer() {
+    return eblDspReference::set;
   }
 
   protected void updateDSPFromSIResponsePayload(ConformanceExchange exchange) {
-    DynamicScenarioParameters dsp = dspReference.get();
+    EblDynamicScenarioParameters dsp = eblDspReference.get();
 
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
     var newShippingInstructionsReference =
@@ -137,12 +137,12 @@ public abstract class EblAction extends BookingAndEblAction {
     updatedDsp = updatedDsp.withShippingInstructions(null).withUpdatedShippingInstructions(null);
 
     if (!dsp.equals(updatedDsp)) {
-      dspReference.set(updatedDsp);
+      eblDspReference.set(updatedDsp);
     }
   }
 
-  private <T> DynamicScenarioParameters updateIfNotNull(
-      DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+  private <T> EblDynamicScenarioParameters updateIfNotNull(
+          EblDynamicScenarioParameters dsp, T value, Function<T, EblDynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }

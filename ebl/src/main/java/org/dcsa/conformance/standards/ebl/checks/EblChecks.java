@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.EblDynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.models.TriConsumer;
 import org.dcsa.conformance.standards.ebl.party.*;
 
@@ -907,12 +907,12 @@ public class EblChecks {
   public static final JsonContentCheck TDR_REQUIRED_IN_NOTIFICATION =
       JsonAttribute.mustBePresent(TD_REF_TDR_PTR);
 
-  public static JsonContentCheck sirInNotificationMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static JsonContentCheck sirInNotificationMustMatchDSP(Supplier<EblDynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.mustEqual(
         SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference());
   }
 
-  public static JsonContentCheck tdrInNotificationMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static JsonContentCheck tdrInNotificationMustMatchDSP(Supplier<EblDynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.mustEqual(
         TD_REF_TDR_PTR, () -> dspSupplier.get().transportDocumentReference());
   }
@@ -1066,7 +1066,7 @@ public class EblChecks {
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
       boolean requestAmendedStatus,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<EblDynamicScenarioParameters> dspSupplier) {
     var checks =
         getSiPayloadChecks(
             standardVersion,
@@ -1084,7 +1084,7 @@ public class EblChecks {
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
       ScenarioType scenarioType,
-      Supplier<DynamicScenarioParameters> dspSupplier,
+      Supplier<EblDynamicScenarioParameters> dspSupplier,
       boolean requestedAmendment) {
     var checks = new ArrayList<JsonContentCheck>();
 
@@ -1141,7 +1141,7 @@ public class EblChecks {
             return issues;
           });
 
-  public static ActionCheck tdRefStatusChecks(UUID matched, String standardVersion, Supplier<DynamicScenarioParameters> dspSupplier, TransportDocumentStatus transportDocumentStatus) {
+  public static ActionCheck tdRefStatusChecks(UUID matched, String standardVersion, Supplier<EblDynamicScenarioParameters> dspSupplier, TransportDocumentStatus transportDocumentStatus) {
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,
@@ -1221,7 +1221,7 @@ public class EblChecks {
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       ScenarioType scenarioType,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<EblDynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
         getTdPayloadChecks(standardVersion, transportDocumentStatus, scenarioType,dspSupplier);
     return JsonAttribute.contentChecks(
@@ -1232,7 +1232,7 @@ public class EblChecks {
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       ScenarioType scenarioType,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<EblDynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
     genericTdContentChecks(
         jsonContentChecks,

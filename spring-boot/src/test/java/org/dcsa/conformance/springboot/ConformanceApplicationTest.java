@@ -33,6 +33,7 @@ class ConformanceApplicationTest {
         "adoption-100-conformance-auto-all-in-one",
         "an-100-conformance-auto-all-in-one",
         "booking-200-conformance-auto-all-in-one",
+        "booking+ebl-200+300-conformance-auto-all-in-one",
         "cs-100-conformance-auto-all-in-one",
         "ebl-300-conformance-si-+-td-auto-all-in-one",
         "ebl-300-conformance-si-only-auto-all-in-one",

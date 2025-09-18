@@ -8,12 +8,7 @@ import org.junit.jupiter.api.Test;
 class EblDynamicScenarioParametersTest {
 
   private final EblDynamicScenarioParameters dsp =
-      new EblDynamicScenarioParameters(
-          null,
-          null,
-          null,
-          null,
-          false);
+      new EblDynamicScenarioParameters(null, null, null, null, null, false);
 
   @Test
   void testDSPToJsonConversion() {

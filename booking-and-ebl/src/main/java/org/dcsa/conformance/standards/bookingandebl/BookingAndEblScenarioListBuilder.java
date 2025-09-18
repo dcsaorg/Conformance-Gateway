@@ -276,7 +276,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                     .then(
                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                 TD_ISSUED)
-                                                                                                                                            .then(
+                                                                                                                                            .thenEither(
                                                                                                                                                 uc7ShipperSubmitBookingAmendment(
                                                                                                                                                         BookingState
                                                                                                                                                             .CONFIRMED)
@@ -304,6 +304,203 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                                     .then(
                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                 TD_SURRENDERED_FOR_AMENDMENT)
+                                                                                                                                                                                                            .then(
+                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                            TD_ISSUED)))))))))),
+                                                                                                                                                uc9CarrierAwaitSurrenderRequestForAmendment()
+                                                                                                                                                    .then(
+                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                TD_PENDING_SURRENDER_FOR_AMENDMENT)
+                                                                                                                                                            .thenEither(
+                                                                                                                                                                uc7ShipperSubmitBookingAmendment(
+                                                                                                                                                                        BookingState
+                                                                                                                                                                            .CONFIRMED)
+                                                                                                                                                                    .then(
+                                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                                AMENDMENT_RECEIVED,
+                                                                                                                                                                                null,
+                                                                                                                                                                                true)
+                                                                                                                                                                            .then(
+                                                                                                                                                                                uc8aCarrierApproveBookingAmendment()
+                                                                                                                                                                                    .then(
+                                                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                                                AMENDMENT_CONFIRMED,
+                                                                                                                                                                                                null,
+                                                                                                                                                                                                false)
+                                                                                                                                                                                            .then(
+                                                                                                                                                                                                uc10aCarrierAcceptSurrenderRequestForAmendment()
+                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                TD_SURRENDERED_FOR_AMENDMENT)
+                                                                                                                                                                                                            .then(
+                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                            TD_ISSUED)))))))),
+                                                                                                                                                                uc10aCarrierAcceptSurrenderRequestForAmendment()
+                                                                                                                                                                    .then(
+                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                TD_SURRENDERED_FOR_AMENDMENT)
+                                                                                                                                                                            .then(
+                                                                                                                                                                                uc7ShipperSubmitBookingAmendment(
+                                                                                                                                                                                        BookingState
+                                                                                                                                                                                            .CONFIRMED)
+                                                                                                                                                                                    .then(
+                                                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                                                AMENDMENT_RECEIVED,
+                                                                                                                                                                                                null,
+                                                                                                                                                                                                true)
+                                                                                                                                                                                            .then(
+                                                                                                                                                                                                uc8aCarrierApproveBookingAmendment()
+                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                                                                AMENDMENT_CONFIRMED,
+                                                                                                                                                                                                                null,
+                                                                                                                                                                                                                false)
+                                                                                                                                                                                                            .then(
+                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                            TD_ISSUED))))))))))))))))))))))))),
+                        carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.DG)
+                            .then(
+                                uc1ShipperSubmitBookingRequest()
+                                    .then(
+                                        shipperGetBooking(BookingState.RECEIVED, null, null, false)
+                                            .then(
+                                                uc5CarrierConfirmBookingRequest()
+                                                    .then(
+                                                        shipperGetBooking(
+                                                                CONFIRMED, null, null, false)
+                                                            .then(
+                                                                carrierEblSupplyScenarioParameters(
+                                                                        REGULAR_STRAIGHT_BL, false)
+                                                                    .then(
+                                                                        uc1ShipperSubmitShippingInstructions()
+                                                                            .then(
+                                                                                shipperGetShippingInstructions(
+                                                                                        ShippingInstructionsStatus
+                                                                                            .SI_RECEIVED,
+                                                                                        null,
+                                                                                        false,
+                                                                                        false,
+                                                                                        false)
+                                                                                    .then(
+                                                                                        uc6CarrierPublishDraftTransportDocument(
+                                                                                                false)
+                                                                                            .then(
+                                                                                                shipperGetTransportDocument(
+                                                                                                        TD_DRAFT)
+                                                                                                    .then(
+                                                                                                        shipperGetShippingInstructions(
+                                                                                                                SI_RECEIVED,
+                                                                                                                SI_ANY,
+                                                                                                                false,
+                                                                                                                true,
+                                                                                                                false)
+                                                                                                            .then(
+                                                                                                                uc7ShipperApproveDraftTransportDocument()
+                                                                                                                    .then(
+                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                TD_APPROVED)
+                                                                                                                            .then(
+                                                                                                                                uc8CarrierIssueTransportDocument()
+                                                                                                                                    .then(
+                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                TD_ISSUED)
+                                                                                                                                            .thenEither(
+                                                                                                                                                uc7ShipperSubmitBookingAmendment(
+                                                                                                                                                        BookingState
+                                                                                                                                                            .CONFIRMED)
+                                                                                                                                                    .then(
+                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                AMENDMENT_RECEIVED,
+                                                                                                                                                                null,
+                                                                                                                                                                true)
+                                                                                                                                                            .then(
+                                                                                                                                                                uc8aCarrierApproveBookingAmendment()
+                                                                                                                                                                    .then(
+                                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                                AMENDMENT_CONFIRMED,
+                                                                                                                                                                                null,
+                                                                                                                                                                                false)
+                                                                                                                                                                            .then(
+                                                                                                                                                                                uc9CarrierAwaitSurrenderRequestForAmendment()
+                                                                                                                                                                                    .then(
+                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                TD_PENDING_SURRENDER_FOR_AMENDMENT)
+                                                                                                                                                                                            .then(
+                                                                                                                                                                                                uc10aCarrierAcceptSurrenderRequestForAmendment()
+                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                TD_SURRENDERED_FOR_AMENDMENT)
+                                                                                                                                                                                                            .then(
+                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                            TD_ISSUED)))))))))),
+                                                                                                                                                uc9CarrierAwaitSurrenderRequestForAmendment()
+                                                                                                                                                    .then(
+                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                TD_PENDING_SURRENDER_FOR_AMENDMENT)
+                                                                                                                                                            .thenEither(
+                                                                                                                                                                uc7ShipperSubmitBookingAmendment(
+                                                                                                                                                                        BookingState
+                                                                                                                                                                            .CONFIRMED)
+                                                                                                                                                                    .then(
+                                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                                AMENDMENT_RECEIVED,
+                                                                                                                                                                                null,
+                                                                                                                                                                                true)
+                                                                                                                                                                            .then(
+                                                                                                                                                                                uc8aCarrierApproveBookingAmendment()
+                                                                                                                                                                                    .then(
+                                                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                                                AMENDMENT_CONFIRMED,
+                                                                                                                                                                                                null,
+                                                                                                                                                                                                false)
+                                                                                                                                                                                            .then(
+                                                                                                                                                                                                uc10aCarrierAcceptSurrenderRequestForAmendment()
+                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                TD_SURRENDERED_FOR_AMENDMENT)
+                                                                                                                                                                                                            .then(
+                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                            TD_ISSUED)))))))),
+                                                                                                                                                                uc10aCarrierAcceptSurrenderRequestForAmendment()
+                                                                                                                                                                    .then(
+                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                TD_SURRENDERED_FOR_AMENDMENT)
+                                                                                                                                                                            .then(
+                                                                                                                                                                                uc7ShipperSubmitBookingAmendment(
+                                                                                                                                                                                        BookingState
+                                                                                                                                                                                            .CONFIRMED)
+                                                                                                                                                                                    .then(
+                                                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                                                AMENDMENT_RECEIVED,
+                                                                                                                                                                                                null,
+                                                                                                                                                                                                true)
+                                                                                                                                                                                            .then(
+                                                                                                                                                                                                uc8aCarrierApproveBookingAmendment()
+                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                        shipperGetBooking(
+                                                                                                                                                                                                                CONFIRMED,
+                                                                                                                                                                                                                AMENDMENT_CONFIRMED,
+                                                                                                                                                                                                                null,
+                                                                                                                                                                                                                false)
                                                                                                                                                                                                             .then(
                                                                                                                                                                                                                 uc11CarrierVoidTDandIssueAmendedTransportDocument()
                                                                                                                                                                                                                     .then(
@@ -550,7 +747,7 @@ public class BookingAndEblScenarioListBuilder
             new UC10_Carrier_ProcessSurrenderRequestForAmendmentAction(
                 carrierPartyName,
                 shipperPartyName,
-                (EblAction) previousAction,
+                (BookingAndEblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
                 true));
@@ -566,7 +763,7 @@ public class BookingAndEblScenarioListBuilder
             new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
                 carrierPartyName,
                 shipperPartyName,
-                (EblAction) previousAction,
+                (BookingAndEblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }

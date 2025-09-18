@@ -31,7 +31,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
 - `WIR` (Wire)",
-"Event / eventClassification",eventClassification,EventClassification,yes,,,,"Type, subtype and classifier of an event",
+"Event / eventClassification",eventClassification,EventClassification,,,,,"Type, subtype and classifier of an event",
 "Event / eventClassification / equipmentEventTypeCode",equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
 - `LOAD` - Loaded
 - `DISC` - Discharged
@@ -48,7 +48,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"Event / eventClassification / eventTypeCode",eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+"Event / eventClassification / eventTypeCode",eventTypeCode,string,,,,EQUIPMENT,"Code used to denote the type of an event
 - `SHIPMENT` - Shipment event
 - `TRANSPORT` - Transport event
 - `EQUIPMENT` - Equipment event
@@ -118,6 +118,115 @@ An event overrides any other event that has the same `eventID` and an earlier `e
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+"Event / eventRouting",eventRouting,EventRouting,,,,,"Routing of an event from the originating party, via forwarding parties, to the destination party.",
+"Event / eventRouting / destinationParty",destinationParty,Party,,,,,"The final party intended as destination of the event.",
+"Event / eventRouting / destinationParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+"Event / eventRouting / destinationParty / codeListProvider",codeListProvider,string,yes,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `EDOX` (EdoxOnline)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+"Event / eventRouting / destinationParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+"Event / eventRouting / destinationParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
+"Event / eventRouting / forwardingParties",forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
+"Event / eventRouting / forwardingParties / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+"Event / eventRouting / forwardingParties / codeListProvider",codeListProvider,string,yes,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `EDOX` (EdoxOnline)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+"Event / eventRouting / forwardingParties / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+"Event / eventRouting / forwardingParties / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
+"Event / eventRouting / originatingParty",originatingParty,Party,,,,,"The initial party with which the event originated.",
+"Event / eventRouting / originatingParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+"Event / eventRouting / originatingParty / codeListProvider",codeListProvider,string,yes,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `EDOX` (EdoxOnline)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+"Event / eventRouting / originatingParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+"Event / eventRouting / originatingParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
 "Event / eventUpdatedDateTime",eventUpdatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
 "Event / iotDetails",iotDetails,IotDetails,,,,,"IoT-specific details",
 "Event / iotDetails / iotEventCode",iotEventCode,string,,,,DRO,"Code used to denote the specific IoT event that has occurred

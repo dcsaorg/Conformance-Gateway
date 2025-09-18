@@ -6,6 +6,8 @@ Added to type `Event` attribute `shipmentLocationType` of type `ShipmentLocation
 
 Replaced in type `EquipmentDetails` attribute `isTransshipmentMove` with a new `movementType` with values `IMPORT`, `EXPORT`, `TRANSSHIPMENT`. (SD-2475)
 
+Added `EventRouting` including originating, destination and forwarding parties. (SD-2145)
+
 
 ## Snapshot v3.0.0-20250912-design
 

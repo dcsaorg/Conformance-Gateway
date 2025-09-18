@@ -12,8 +12,7 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.types.ShipmentLoca
 @Schema(description = "Track and Trace event")
 public class Event {
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  private EventClassification eventClassification;
+  @Schema() private EventRouting eventRouting;
 
   @Schema(
       description =
@@ -40,6 +39,8 @@ An event overrides any other event that has the same `eventID` and an earlier `e
 
   @Schema(description = "List of shipment references related to this event")
   private List<ShipmentReference> shipmentReferences;
+
+  @Schema() private EventClassification eventClassification;
 
   @Schema() private ShipmentDetails shipmentDetails;
 

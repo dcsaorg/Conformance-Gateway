@@ -43,7 +43,9 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentRefe
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventClassification;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventRouting;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Party;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
@@ -94,6 +96,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         EquipmentDetails.class,
         Event.class,
         EventClassification.class,
+        EventRouting.class,
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
@@ -101,6 +104,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         GetEventsResponse.class,
         IotDetails.class,
         Location.class,
+        Party.class,
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,

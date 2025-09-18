@@ -10,6 +10,8 @@ import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatu
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_APPROVED;
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_DRAFT;
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_ISSUED;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_PENDING_SURRENDER_FOR_AMENDMENT;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_SURRENDERED_FOR_AMENDMENT;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -293,10 +295,20 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                 null,
                                                                                                                                                                                 false)
                                                                                                                                                                             .then(
-                                                                                                                                                                                uc8CarrierIssueTransportDocument()
+                                                                                                                                                                                uc9CarrierAwaitSurrenderRequestForAmendment()
                                                                                                                                                                                     .then(
                                                                                                                                                                                         shipperGetTransportDocument(
-                                                                                                                                                                                            TD_ISSUED))))))))))))))))))))))))
+                                                                                                                                                                                                TD_PENDING_SURRENDER_FOR_AMENDMENT)
+                                                                                                                                                                                            .then(
+                                                                                                                                                                                                uc10aCarrierAcceptSurrenderRequestForAmendment()
+                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                TD_SURRENDERED_FOR_AMENDMENT)
+                                                                                                                                                                                                            .then(
+                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                    .then(
+                                                                                                                                                                                                                        shipperGetTransportDocument(
+                                                                                                                                                                                                                            TD_ISSUED))))))))))))))))))))))))))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -524,7 +536,7 @@ public class BookingAndEblScenarioListBuilder
             new UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
                 carrierPartyName,
                 shipperPartyName,
-                (EblAction) previousAction,
+                (BookingAndEblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }

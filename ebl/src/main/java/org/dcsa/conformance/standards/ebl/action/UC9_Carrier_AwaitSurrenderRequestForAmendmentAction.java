@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.standards.booking.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
@@ -15,7 +16,7 @@ public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends StateCh
   public UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
       String carrierPartyName,
       String shipperPartyName,
-      EblAction previousAction,
+      BookingAndEblAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
     super(carrierPartyName, shipperPartyName, previousAction, "UC9", 204);
     this.requestSchemaValidator = requestSchemaValidator;

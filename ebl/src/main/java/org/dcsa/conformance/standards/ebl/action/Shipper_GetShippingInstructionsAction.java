@@ -139,7 +139,6 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
             EblChecks.siResponseContentChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
-                scenarioType,
                 expectedSiStatus,
                 expectedAmendedSiStatus,
                 requestAmendedStatus,

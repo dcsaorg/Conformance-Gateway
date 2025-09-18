@@ -23,6 +23,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
   private static final String SCENARIO_TYPE = "eblScenarioType";
   private static final String INPUT = "input";
 
+  private ScenarioType scenarioType;
   private JsonNode carrierPayload;
   private final String standardVersion;
   private final JsonSchemaValidator requestSchemaValidator;
@@ -31,12 +32,10 @@ public class CarrierSupplyPayloadAction extends EblAction {
   public CarrierSupplyPayloadAction(
       String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion, JsonSchemaValidator requestSchemaValidator, boolean isTd) {
     super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1);
-    this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
-    //TODO
-    this.getDspConsumer().accept(getDspSupplier().get().withUpdatedShippingInstructions(null));
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
   public CarrierSupplyPayloadAction(
@@ -56,8 +55,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
-    // TODO
-    this.getDspConsumer().accept(getDspSupplier().get().withUpdatedShippingInstructions(null));
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
   @Override

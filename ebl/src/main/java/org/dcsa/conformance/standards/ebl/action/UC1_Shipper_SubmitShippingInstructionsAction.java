@@ -60,11 +60,9 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   }
 
   private String getScenarioType() {
-    return switch (this.scenarioType) {
-      case REGULAR_2C_1U ->
-          "with 2 Commodities, 1 Utilized transport equipment";
-      case REGULAR_2C_2U ->
-          "with  2 Commodities, 2 Utilized transport equipments";
+    return switch (ScenarioType.valueOf(getDspSupplier().get().scenarioType())) {
+      case REGULAR_2C_1U -> "with 2 Commodities, 1 Utilized transport equipment";
+      case REGULAR_2C_2U -> "with  2 Commodities, 2 Utilized transport equipments";
       case REGULAR_NO_COMMODITY_SUBREFERENCE -> "with No Commodity Subreference";
       case REGULAR_SWB_SOC_AND_REFERENCES -> "for Regular SWB and with SOC References";
       case REGULAR_SWB_AMF -> "for Regular SWB with Advance Manifest Filing";
@@ -83,7 +81,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
-    return jsonNode.put("eblScenarioType", this.scenarioType.name());
+    return jsonNode.put("eblScenarioType", getDspSupplier().get().scenarioType());
   }
 
   @Override
@@ -126,7 +124,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 EblChecks.siRequestContentChecks(
                     getMatchedExchangeUuid(),
                     expectedApiVersion,
-                    scenarioType));
+                    ScenarioType.valueOf(getDspSupplier().get().scenarioType())));
         return Stream.concat(
             primaryExchangeChecks,
             getSINotificationChecks(

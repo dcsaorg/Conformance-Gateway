@@ -85,7 +85,7 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
             // checkTDChanged(getMatchedExchangeUuid(), expectedApiVersion, dsp), // see commit
             // history
             EblChecks.tdPlusScenarioContentChecks(
-                getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, scenarioType, getDspSupplier()));
+                getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getDspSupplier()));
       }
     };
   }

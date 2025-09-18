@@ -150,8 +150,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                 null,
                                                                                                                                                                                 false)
                                                                                                                                                                             .then(
-                                                                                                                                                                                uc8CarrierIssueTransportDocument(
-                                                                                                                                                                                        REGULAR_SWB)
+                                                                                                                                                                                uc8CarrierIssueTransportDocument()
                                                                                                                                                                                     .then(
                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                             TD_ISSUED))))))))))))))))))))),
@@ -220,8 +219,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                 null,
                                                                                                                                                                                 false)
                                                                                                                                                                             .then(
-                                                                                                                                                                                uc8CarrierIssueTransportDocument(
-                                                                                                                                                                                        REGULAR_SWB)
+                                                                                                                                                                                uc8CarrierIssueTransportDocument()
                                                                                                                                                                                     .then(
                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                             TD_ISSUED))))))))))))))))))))))),
@@ -295,8 +293,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                 null,
                                                                                                                                                                                 false)
                                                                                                                                                                             .then(
-                                                                                                                                                                                uc8CarrierIssueTransportDocument(
-                                                                                                                                                                                        REGULAR_SWB)
+                                                                                                                                                                                uc8CarrierIssueTransportDocument()
                                                                                                                                                                                     .then(
                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                             TD_ISSUED))))))))))))))))))))))))
@@ -504,22 +501,6 @@ public class BookingAndEblScenarioListBuilder
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }
 
-  private static BookingAndEblScenarioListBuilder uc8CarrierIssueTransportDocument(
-      org.dcsa.conformance.standards.ebl.checks.ScenarioType scenarioType) {
-    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC8_Carrier_IssueTransportDocumentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAndEblAction) previousAction,
-                scenarioType,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-  }
-
   private static BookingAndEblScenarioListBuilder uc8CarrierIssueTransportDocument() {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
@@ -563,18 +544,19 @@ public class BookingAndEblScenarioListBuilder
                 true));
   }
 
-  private static BookingAndEblScenarioListBuilder uc11CarrierVoidTDandIssueAmendedTransportDocument() {
+  private static BookingAndEblScenarioListBuilder
+      uc11CarrierVoidTDandIssueAmendedTransportDocument() {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingAndEblScenarioListBuilder(
-            previousAction ->
-                    new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
-                            carrierPartyName,
-                            shipperPartyName,
-                            (EblAction) previousAction,
-                            componentFactory.getEblMessageSchemaValidator(
-                                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+        previousAction ->
+            new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getEblMessageSchemaValidator(
+                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static BookingAndEblScenarioListBuilder carrierStateChange(

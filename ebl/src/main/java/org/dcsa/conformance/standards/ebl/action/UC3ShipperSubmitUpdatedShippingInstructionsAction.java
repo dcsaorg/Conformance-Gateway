@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EblChecks;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -57,8 +58,8 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
       throw new IllegalStateException("Missing document reference for use-case 3");
     }
     return super.asJsonNode()
-      .put("sir", dsp.shippingInstructionsReference())
-      .put("documentReference", documentReference);
+        .put("sir", dsp.shippingInstructionsReference())
+        .put("documentReference", documentReference);
   }
 
   @Override
@@ -103,7 +104,7 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
                 EblChecks.siRequestContentChecks(
                     getMatchedExchangeUuid(),
                     expectedApiVersion,
-                    scenarioType));
+                    ScenarioType.valueOf(getDspSupplier().get().scenarioType())));
         return Stream.concat(
             primaryExchangeChecks,
             getSINotificationChecks(

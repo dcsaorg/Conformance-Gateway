@@ -41,7 +41,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
             "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
         .replace(
             "BOOKING_TYPE_PLACEHOLDER",
-            switch (ScenarioType.valueOf(getDspSupplier().get().bookingScenarioType())) {
+            switch (ScenarioType.valueOf(getDspSupplier().get().scenarioType())) {
               case DG -> "DG";
               case REEFER, REEFER_TEMP_CHANGE -> "Reefer";
               default -> "Dry Cargo";
@@ -52,7 +52,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set("bookingPayload", getBookingPayloadSupplier().get());
-    jsonNode.put("bookingScenarioType", getDspSupplier().get().bookingScenarioType());
+    jsonNode.put("scenarioType", getDspSupplier().get().scenarioType());
     return jsonNode;
   }
 

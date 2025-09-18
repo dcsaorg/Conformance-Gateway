@@ -111,7 +111,7 @@ public class BookingCarrier extends ConformanceParty {
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     if (log.isInfoEnabled())
       log.info("Carrier.supplyScenarioParameters({})", actionPrompt.toPrettyString());
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("bookingScenarioType").asText());
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     ObjectNode bookingPayload = (ObjectNode) getBookingPayload(scenarioType);
     asyncOrchestratorPostPartyInput(actionPrompt.get("actionId").asText(), bookingPayload);
     addOperatorLogEntry(

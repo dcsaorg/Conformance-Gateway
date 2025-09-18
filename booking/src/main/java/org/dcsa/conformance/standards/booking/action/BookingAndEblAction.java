@@ -26,7 +26,7 @@ public abstract class BookingAndEblAction extends ConformanceAction {
       BookingAndEblAction previousAction) {
     if (previousAction == null) {
       return new OverwritingReference<>(
-          null, new EblDynamicScenarioParameters(null, null, null, null, false));
+          null, new EblDynamicScenarioParameters(null, null, null, null, null, false));
     }
     return new OverwritingReference<>(previousAction.eblDspReference, null);
   }

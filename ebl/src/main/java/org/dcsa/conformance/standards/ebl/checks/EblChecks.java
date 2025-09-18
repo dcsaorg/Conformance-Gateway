@@ -917,16 +917,6 @@ public class EblChecks {
         TD_REF_TDR_PTR, () -> dspSupplier.get().transportDocumentReference());
   }
 
-  private static <T, O> Supplier<T> delayedValue(Supplier<O> supplier, Function<O, T> field) {
-    return () -> {
-      var csp = supplier.get();
-      if (csp == null) {
-        return null;
-      }
-      return field.apply(csp);
-    };
-  }
-
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
           ScenarioType scenarioType, boolean isTD) {
     List<JsonContentCheck> checks = new ArrayList<>();
@@ -1062,7 +1052,6 @@ public class EblChecks {
   public static ActionCheck siResponseContentChecks(
       UUID matched,
       String standardVersion,
-      ScenarioType scenarioType,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
       boolean requestAmendedStatus,
@@ -1072,7 +1061,6 @@ public class EblChecks {
             standardVersion,
             shippingInstructionsStatus,
             updatedShippingInstructionsStatus,
-            scenarioType,
             dspSupplier,
             requestAmendedStatus);
     return JsonAttribute.contentChecks(
@@ -1083,7 +1071,6 @@ public class EblChecks {
       String standardVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
-      ScenarioType scenarioType,
       Supplier<EblDynamicScenarioParameters> dspSupplier,
       boolean requestedAmendment) {
     var checks = new ArrayList<JsonContentCheck>();
@@ -1111,7 +1098,7 @@ public class EblChecks {
           SI_NORMALIZER
         ));
     */
-    checks.addAll(generateScenarioRelatedChecks(scenarioType, false));
+    checks.addAll(generateScenarioRelatedChecks(ScenarioType.valueOf(dspSupplier.get().scenarioType()), false));
     return checks;
   }
 
@@ -1220,10 +1207,9 @@ public class EblChecks {
       UUID matched,
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
-      ScenarioType scenarioType,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
-        getTdPayloadChecks(standardVersion, transportDocumentStatus, scenarioType,dspSupplier);
+        getTdPayloadChecks(standardVersion, transportDocumentStatus,dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }
@@ -1231,7 +1217,6 @@ public class EblChecks {
   public static List<JsonContentCheck> getTdPayloadChecks(
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
-      ScenarioType scenarioType,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
     genericTdContentChecks(
@@ -1246,7 +1231,7 @@ public class EblChecks {
               var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
               var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
               var issues = new LinkedHashSet<String>();
-              switch (scenarioType) {
+              switch (ScenarioType.valueOf(dspSupplier.get().scenarioType())) {
                 case ACTIVE_REEFER -> {
                   if (!activeReeferNode.isObject()) {
                     issues.add(
@@ -1283,7 +1268,7 @@ public class EblChecks {
                 mav.submitAllMatching(
                     "consignmentItems.*.cargoItems.*.outerPackaging.*.dangerousGoods"),
             (nodeToValidate, contextPath) -> {
-              if (scenarioType == ScenarioType.DG) {
+              if (ScenarioType.valueOf(dspSupplier.get().scenarioType()) == ScenarioType.DG) {
                 if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
                   return Set.of(
                       "The scenario requires '%s' to contain dangerous goods"
@@ -1298,7 +1283,7 @@ public class EblChecks {
               }
               return Set.of();
             }));
-    jsonContentChecks.addAll(generateScenarioRelatedChecks(scenarioType, true));
+    jsonContentChecks.addAll(generateScenarioRelatedChecks(ScenarioType.valueOf(dspSupplier.get().scenarioType()), true));
     return jsonContentChecks;
   }
 

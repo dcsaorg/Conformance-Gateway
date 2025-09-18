@@ -425,7 +425,7 @@ public class BookingChecks {
             "[Scenario] Validate the containers reefer settings",
             mav -> mav.submitAllMatching("requestedEquipments.*"),
             (nodeToValidate, contextPath) -> {
-              var scenario = dspSupplier.get().bookingScenarioType();
+              var scenario = dspSupplier.get().scenarioType();
               var activeReeferNode = nodeToValidate.path("activeReeferSettings");
               var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
               var issues = new LinkedHashSet<String>();
@@ -464,7 +464,7 @@ public class BookingChecks {
       "[Scenario] Whether the cargo should be DG",
       mav-> mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").submitPath(),
       (nodeToValidate, contextPath) -> {
-        var scenario = ScenarioType.valueOf(dspSupplier.get().bookingScenarioType());
+        var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
         if (scenario == ScenarioType.DG) {
           if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
             return Set.of("The scenario requires '%s' to contain dangerous goods".formatted(contextPath));

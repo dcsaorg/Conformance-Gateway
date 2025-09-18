@@ -8,6 +8,7 @@ import org.dcsa.conformance.core.party.ScenarioParameters;
 @With
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record EblDynamicScenarioParameters(
+    String scenarioType,
     String shippingInstructionsReference,
     String transportDocumentReference,
     JsonNode shippingInstructions,
@@ -17,6 +18,7 @@ public record EblDynamicScenarioParameters(
 
   public static EblDynamicScenarioParameters fromJson(JsonNode jsonNode) {
     return new EblDynamicScenarioParameters(
+        jsonNode.path("scenarioType").asText(null),
         jsonNode.path("shippingInstructionsReference").asText(null),
         jsonNode.path("transportDocumentReference").asText(null),
         jsonNode.path("shippingInstructions"),

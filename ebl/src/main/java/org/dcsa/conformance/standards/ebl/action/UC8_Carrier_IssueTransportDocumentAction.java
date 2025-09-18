@@ -24,17 +24,6 @@ public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAct
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
-  public UC8_Carrier_IssueTransportDocumentAction(
-          String carrierPartyName,
-          String shipperPartyName,
-          BookingAndEblAction previousAction,
-          ScenarioType scenarioType,
-          JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC8", 204);
-    this.requestSchemaValidator = requestSchemaValidator;
-    this.scenarioType = scenarioType;
-  }
-
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(

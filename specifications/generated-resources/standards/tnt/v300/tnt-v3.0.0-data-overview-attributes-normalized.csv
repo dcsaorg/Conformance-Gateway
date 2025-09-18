@@ -83,6 +83,18 @@ Event,iotDetails,IotDetails,,,,,"IoT-specific details",
 Event,reeferDetails,ReeferDetails,,,,,"Reefer-specific details",
 Event,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
 Event,shipmentDetails,ShipmentDetails,,,,,"Shipment-specific details",
+Event,shipmentLocationType,string,,,,PRE,"Code used to denote the type of a shipment location
+- `PRE` - Place of Receipt
+- `POL` - Port of Loading
+- `POD` - Port of Discharge
+- `PDE` - Place of Delivery
+- `PCF` - Pre-carriage From
+- `OIR` - Onward Inland Routing
+- `ORI` - Origin of goods
+- `IEL` - Container intermediate export stop-off location
+- `PTP` - Prohibited transshipment port
+- `RTP` - Requested transshipment port
+- `FCD` - Full container drop-off location",
 Event,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 Event,transportDetails,TransportDetails,,,,,"Transport-specific details",
 EventClassification,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event

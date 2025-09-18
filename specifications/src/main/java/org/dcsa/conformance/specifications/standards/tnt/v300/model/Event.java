@@ -6,6 +6,7 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
+import org.dcsa.conformance.specifications.standards.tnt.v300.types.ShipmentLocationTypeCode;
 
 @Data
 @Schema(description = "Track and Trace event")
@@ -31,6 +32,8 @@ An event overrides any other event that has the same `eventID` and an earlier `e
 
   @Schema(description = "The location of the event.")
   private Location eventLocation;
+
+  @Schema() private ShipmentLocationTypeCode shipmentLocationType;
 
   @Schema(description = "List of documents related to this event")
   private List<DocumentReference> relatedDocumentReferences;

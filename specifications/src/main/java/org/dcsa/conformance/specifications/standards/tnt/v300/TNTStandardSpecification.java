@@ -80,7 +80,8 @@ public class TNTStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata("Track and Trace", "3.0.0-20250912-design", "", "", 4);
+    return new LegendMetadata(
+        "Track and Trace", "3.0.0-20250926-design", "TNT", "3.0.0-20250912-design", 4);
   }
 
   @Override
@@ -135,12 +136,10 @@ public class TNTStandardSpecification extends StandardSpecification {
             Collectors.toMap(
                 Map.Entry::getKey,
                 entry ->
-                    System.currentTimeMillis() > 0 // TODO remove for the second snapshot
-                        ? List.of()
-                        : DataOverviewSheet.importFromString(
-                            SpecificationToolkit.readRemoteFile(
-                                "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/TBD/specifications/generated-resources/standards/ct/v300/ct-v3.0.0-data-overview-%s.csv"
-                                    .formatted(entry.getValue())))));
+                    DataOverviewSheet.importFromString(
+                        SpecificationToolkit.readRemoteFile(
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/4f01c4530e2cfbccc8abd9e21b45baee122ef94c/specifications/generated-resources/standards/tnt/v300/tnt-v3.0.0-data-overview-%s.csv"
+                                .formatted(entry.getValue())))));
   }
 
   @Override

@@ -214,6 +214,18 @@ or during transit but prior arrival at POD.",
 "Event / shipmentDetails / priceCalculationDate",priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in consideration for the tariff applicability, that differs depending on the trade.
 It can vary per carrier.",
 "Event / shipmentDetails / reason",reason,string,,,,,"The reason this event was sent",
+"Event / shipmentLocationType",shipmentLocationType,string,,,,PRE,"Code used to denote the type of a shipment location
+- `PRE` - Place of Receipt
+- `POL` - Port of Loading
+- `POD` - Port of Discharge
+- `PDE` - Place of Delivery
+- `PCF` - Pre-carriage From
+- `OIR` - Onward Inland Routing
+- `ORI` - Origin of goods
+- `IEL` - Container intermediate export stop-off location
+- `PTP` - Prohibited transshipment port
+- `RTP` - Requested transshipment port
+- `FCD` - Full container drop-off location",
 "Event / shipmentReferences",shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 "Event / shipmentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
 "Event / shipmentReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference

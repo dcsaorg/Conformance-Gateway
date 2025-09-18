@@ -16,6 +16,8 @@ Added `DocumentTypeCode` value `AMF` for an "Advance Manifest Filing" of any sub
 
 Added `DocumentTypeCode` value `PFD` for "Proof of Delivery". (SD-2460)
 
+Added `IotEventCode` value `LOC` for "Location update". (SD-2480)
+
 
 ## Snapshot v3.0.0-20250912-design
 

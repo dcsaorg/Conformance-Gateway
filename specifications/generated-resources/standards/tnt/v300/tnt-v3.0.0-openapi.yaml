@@ -810,6 +810,7 @@ components:
           description: |-
             Code used to denote the specific IoT event that has occurred
             - `DRO` - Door opened
+            - `LOC` - Location update
           example: "DRO"
       description: "IoT-specific details"
     Location:

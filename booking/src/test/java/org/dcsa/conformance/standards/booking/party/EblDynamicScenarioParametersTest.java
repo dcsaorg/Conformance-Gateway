@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.booking.party;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.junit.jupiter.api.Test;
 
 class EblDynamicScenarioParametersTest {
@@ -14,14 +13,7 @@ class EblDynamicScenarioParametersTest {
           null,
           null,
           null,
-          false,
-          null,
-          null,
-          ScenarioType.DG.name(),
-          "cbrr",
-          "cbr",
-          null,
-          null);
+          false);
 
   @Test
   void testDSPToJsonConversion() {

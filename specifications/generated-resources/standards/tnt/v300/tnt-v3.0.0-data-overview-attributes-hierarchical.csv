@@ -15,7 +15,10 @@ from SMDG.",
 "Event / equipmentDetails / ISOEquipmentCode",ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
-"Event / equipmentDetails / isTransshipmentMove",isTransshipmentMove,boolean,,,,,"Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.",
+"Event / equipmentDetails / movementType",movementType,string,,,,EXPORT,"Code used to denote the type of movement
+- `IMPORT` - Import movement
+- `EXPORT` - Export movement
+- `TRANSSHIPMENT` - Transshipment movement",
 "Event / equipmentDetails / seals",seals,"Seal list",,,,,,
 "Event / equipmentDetails / seals / number",number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 "Event / equipmentDetails / seals / source",source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.

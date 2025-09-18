@@ -473,10 +473,14 @@ components:
             - `EMPTY` - Empty
             - `LADEN` - Laden
           example: "LADEN"
-        isTransshipmentMove:
-          type: "boolean"
-          description: |
-            Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.
+        movementType:
+          type: "string"
+          description: |-
+            Code used to denote the type of movement
+            - `IMPORT` - Import movement
+            - `EXPORT` - Export movement
+            - `TRANSSHIPMENT` - Transshipment movement
+          example: "EXPORT"
         seals:
           type: "array"
           items:

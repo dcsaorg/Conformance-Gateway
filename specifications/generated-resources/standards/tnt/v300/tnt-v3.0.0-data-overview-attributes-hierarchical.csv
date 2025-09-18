@@ -1,5 +1,84 @@
 Path,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
 Event,,,,,,,,
+"Event / documentReferenceReplacements","documentReferenceReplacements","DocumentReferenceReplacement list",,,,,"List of document replacements related to this event",
+"Event / documentReferenceReplacements / newReferences",newReferences,"DocumentReference list",,,,,"References of the documents replacing those with the `oldReferences`.",
+"Event / documentReferenceReplacements / newReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+"Event / documentReferenceReplacements / newReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `CBR` - Carrier Booking Request
+- `BKG` - Booking
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `TRO` - Transport Order
+- `CRO` - Container Release Order
+- `ARN` - Arrival Notice
+- `VGM` - Verified Gross Mass
+- `CAS` - Cargo Survey
+- `CUC` - Customs Clearance
+- `DGD` - Dangerous Goods Declaration
+- `OOG` - Out of Gauge
+- `CQU` - Contract Quotation
+- `INV` - Invoice
+- `HCE` - Health Certificate
+- `PCE` - Phytosanitary Certificate
+- `VCE` - Veterinary Certificate
+- `FCE` - Fumigation Certificate
+- `ICE` - Inspection Certificate
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin",
+"Event / documentReferenceReplacements / oldReferences",oldReferences,"DocumentReference list",,,,,"References of the documents replaced by those with the `newReferences`.",
+"Event / documentReferenceReplacements / oldReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+"Event / documentReferenceReplacements / oldReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `CBR` - Carrier Booking Request
+- `BKG` - Booking
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `TRO` - Transport Order
+- `CRO` - Container Release Order
+- `ARN` - Arrival Notice
+- `VGM` - Verified Gross Mass
+- `CAS` - Cargo Survey
+- `CUC` - Customs Clearance
+- `DGD` - Dangerous Goods Declaration
+- `OOG` - Out of Gauge
+- `CQU` - Contract Quotation
+- `INV` - Invoice
+- `HCE` - Health Certificate
+- `PCE` - Phytosanitary Certificate
+- `VCE` - Veterinary Certificate
+- `FCE` - Fumigation Certificate
+- `ICE` - Inspection Certificate
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin",
+"Event / documentReferences",documentReferences,"DocumentReference list",,,,,"List of documents related to this event",
+"Event / documentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+"Event / documentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `CBR` - Carrier Booking Request
+- `BKG` - Booking
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `TRO` - Transport Order
+- `CRO` - Container Release Order
+- `ARN` - Arrival Notice
+- `VGM` - Verified Gross Mass
+- `CAS` - Cargo Survey
+- `CUC` - Customs Clearance
+- `DGD` - Dangerous Goods Declaration
+- `OOG` - Out of Gauge
+- `CQU` - Contract Quotation
+- `INV` - Invoice
+- `HCE` - Health Certificate
+- `PCE` - Phytosanitary Certificate
+- `VCE` - Veterinary Certificate
+- `FCE` - Fumigation Certificate
+- `ICE` - Inspection Certificate
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin",
 "Event / equipmentDetails",equipmentDetails,EquipmentDetails,,,,,"Equipment-specific details",
 "Event / equipmentDetails / emptyIndicatorCode",emptyIndicatorCode,string,,,,LADEN,"Code to denote whether the equipment is empty or laden.
 - `EMPTY` - Empty
@@ -275,32 +354,6 @@ or during transit but prior arrival at POD.",
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)",
 "Event / reeferDetails / setpointParameters / temperatureValue",temperatureValue,number,,,,-15,"Internal temperature value expressed in `temperatureUnit`",
-"Event / relatedDocumentReferences","relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
-"Event / relatedDocumentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-"Event / relatedDocumentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
-- `CBR` - Carrier Booking Request
-- `BKG` - Booking
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
-- `DEI` - Delivery Instructions
-- `DEO` - Delivery Order
-- `TRO` - Transport Order
-- `CRO` - Container Release Order
-- `ARN` - Arrival Notice
-- `VGM` - Verified Gross Mass
-- `CAS` - Cargo Survey
-- `CUC` - Customs Clearance
-- `DGD` - Dangerous Goods Declaration
-- `OOG` - Out of Gauge
-- `CQU` - Contract Quotation
-- `INV` - Invoice
-- `HCE` - Health Certificate
-- `PCE` - Phytosanitary Certificate
-- `VCE` - Veterinary Certificate
-- `FCE` - Fumigation Certificate
-- `ICE` - Inspection Certificate
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin",
 "Event / shipmentDetails",shipmentDetails,ShipmentDetails,,,,,"Shipment-specific details",
 "Event / shipmentDetails / documentReference",documentReference,DocumentReference,,,,,"Referenced document",
 "Event / shipmentDetails / documentReference / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
@@ -343,6 +396,41 @@ It can vary per carrier.",
 - `PTP` - Prohibited transshipment port
 - `RTP` - Requested transshipment port
 - `FCD` - Full container drop-off location",
+"Event / shipmentReferenceReplacements","shipmentReferenceReplacements","ShipmentReferenceReplacement list",,,,,"List of shipment reference replacements related to this event",
+"Event / shipmentReferenceReplacements / newReferences",newReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replacing those with the `oldReferences`.",
+"Event / shipmentReferenceReplacements / newReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
+"Event / shipmentReferenceReplacements / newReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference
+- `FF` - Freight Forwarder’s Reference
+- `SI` - Shipper’s Reference
+- `PO` - Purchase Order Reference
+- `CR` - Customer’s Reference
+- `AAO` - Consignee’s Reference
+- `ECR` - Empty container release reference
+- `CSI` - Customer shipment ID
+- `BPR` - Booking party reference number
+- `BID` - Booking Request ID
+- `EQ` - Equipment Reference
+- `RUC` - Registro Único del Contribuyente
+- `DUE` - Declaração Única de Exportação
+- `CER` - Canadian Export Reporting System
+- `AES` - Automated Export System",
+"Event / shipmentReferenceReplacements / oldReferences",oldReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replaced by those with the `newReferences`.",
+"Event / shipmentReferenceReplacements / oldReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
+"Event / shipmentReferenceReplacements / oldReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference
+- `FF` - Freight Forwarder’s Reference
+- `SI` - Shipper’s Reference
+- `PO` - Purchase Order Reference
+- `CR` - Customer’s Reference
+- `AAO` - Consignee’s Reference
+- `ECR` - Empty container release reference
+- `CSI` - Customer shipment ID
+- `BPR` - Booking party reference number
+- `BID` - Booking Request ID
+- `EQ` - Equipment Reference
+- `RUC` - Registro Único del Contribuyente
+- `DUE` - Declaração Única de Exportação
+- `CER` - Canadian Export Reporting System
+- `AES` - Automated Export System",
 "Event / shipmentReferences",shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 "Event / shipmentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
 "Event / shipmentReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference

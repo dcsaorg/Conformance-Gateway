@@ -442,6 +442,25 @@ components:
           description: "Reference identifying the document"
           example: "123e4567e89b"
       description: "Referenced document"
+    DocumentReferenceReplacement:
+      type: "object"
+      properties:
+        oldReferences:
+          type: "array"
+          description: |
+            References of the documents replaced by those with the `newReferences`.
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        newReferences:
+          type: "array"
+          description: |
+            References of the documents replacing those with the `oldReferences`.
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+      description: |
+        Object used to indicate that one or more documents were replaced by one or more other documents.
+
+        Used in scenarios including booking split / combine or transport document void / reissue.
     EquipmentDetails:
       type: "object"
       properties:
@@ -542,16 +561,26 @@ components:
             - `RTP` - Requested transshipment port
             - `FCD` - Full container drop-off location
           example: "PRE"
-        relatedDocumentReferences:
+        documentReferences:
           type: "array"
           description: "List of documents related to this event"
           items:
             $ref: "#/components/schemas/DocumentReference"
+        documentReferenceReplacements:
+          type: "array"
+          description: "List of document replacements related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReferenceReplacement"
         shipmentReferences:
           type: "array"
           description: "List of shipment references related to this event"
           items:
             $ref: "#/components/schemas/ShipmentReference"
+        shipmentReferenceReplacements:
+          type: "array"
+          description: "List of shipment reference replacements related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReferenceReplacement"
         eventClassification:
           description: "Type, subtype and classifier of an event"
           allOf:
@@ -1065,6 +1094,25 @@ components:
 
         In addition to the References provided by the shipper or freight forwarder,
         the carrier can provide an extra type called `EQ` which is a reference to an Equipment.
+    ShipmentReferenceReplacement:
+      type: "object"
+      properties:
+        oldReferences:
+          type: "array"
+          description: |
+            References of the shipment elements or equipments replaced by those with the `newReferences`.
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
+        newReferences:
+          type: "array"
+          description: |
+            References of the shipment elements or equipments replacing those with the `oldReferences`.
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
+      description: |
+        Object used to indicate that one or more shipment elements were replaced by one or more other elements.
+
+        Used in scenarios including the replacement of shipment references or equipments.
     TransportCall:
       type: "object"
       properties:

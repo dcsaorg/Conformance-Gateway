@@ -40,6 +40,7 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEvent
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReferenceReplacement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventClassification;
@@ -51,6 +52,7 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferDetail
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReferenceReplacement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
@@ -93,6 +95,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         Address.class,
         ClassifiedDateTime.class,
         DocumentReference.class,
+        DocumentReferenceReplacement.class,
         EquipmentDetails.class,
         Event.class,
         EventClassification.class,
@@ -114,6 +117,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         ServiceCodeOrReference.class,
         ShipmentDetails.class,
         ShipmentReference.class,
+        ShipmentReferenceReplacement.class,
         TransportCall.class,
         TransportDetails.class,
         TruckTransport.class,
@@ -150,8 +154,14 @@ public class TNTStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
-        Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
+        Map.entry(
+            AttributesHierarchicalSheet.class,
+            Map.ofEntries(
+                Map.entry("Event / relatedDocumentReferences", "Event / documentReferences"))),
+        Map.entry(
+            AttributesNormalizedSheet.class,
+            Map.ofEntries(
+                Map.entry("Event,relatedDocumentReferences", "Event,documentReferences"))),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
   }

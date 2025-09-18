@@ -55,6 +55,8 @@ DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a docu
 - `ICE` - Inspection Certificate
 - `CEA` - Certificate of Analysis
 - `CEO` - Certificate of Origin",
+"DocumentReferenceReplacement",newReferences,"DocumentReference list",,,,,"References of the documents replacing those with the `oldReferences`.",
+"DocumentReferenceReplacement",oldReferences,"DocumentReference list",,,,,"References of the documents replaced by those with the `newReferences`.",
 EquipmentDetails,emptyIndicatorCode,string,,,,LADEN,"Code to denote whether the equipment is empty or laden.
 - `EMPTY` - Empty
 - `LADEN` - Laden",
@@ -74,6 +76,8 @@ EquipmentDetails,movementType,string,,,,EXPORT,"Code used to denote the type of 
 - `EXPORT` - Export movement
 - `TRANSSHIPMENT` - Transshipment movement",
 EquipmentDetails,seals,"Seal list",,,,,,
+Event,"documentReferenceReplacements","DocumentReferenceReplacement list",,,,,"List of document replacements related to this event",
+Event,documentReferences,"DocumentReference list",,,,,"List of documents related to this event",
 Event,equipmentDetails,EquipmentDetails,,,,,"Equipment-specific details",
 Event,eventClassification,EventClassification,,,,,"Type, subtype and classifier of an event",
 Event,eventDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the real-world event has occurred or will occur.",
@@ -90,7 +94,6 @@ The data in this and all previously transmitted events with the same `eventID` m
 
 If this flag is set, any event data other than the `eventID` is irrelevant (if present).",
 Event,reeferDetails,ReeferDetails,,,,,"Reefer-specific details",
-Event,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
 Event,shipmentDetails,ShipmentDetails,,,,,"Shipment-specific details",
 Event,shipmentLocationType,string,,,,PRE,"Code used to denote the type of a shipment location
 - `PRE` - Place of Receipt
@@ -104,6 +107,7 @@ Event,shipmentLocationType,string,,,,PRE,"Code used to denote the type of a ship
 - `PTP` - Prohibited transshipment port
 - `RTP` - Requested transshipment port
 - `FCD` - Full container drop-off location",
+Event,"shipmentReferenceReplacements","ShipmentReferenceReplacement list",,,,,"List of shipment reference replacements related to this event",
 Event,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 Event,transportDetails,TransportDetails,,,,,"Transport-specific details",
 EventClassification,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
@@ -288,6 +292,8 @@ ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a refer
 - `DUE` - Declaração Única de Exportação
 - `CER` - Canadian Export Reporting System
 - `AES` - Automated Export System",
+"ShipmentReferenceReplacement",newReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replacing those with the `oldReferences`.",
+"ShipmentReferenceReplacement",oldReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replaced by those with the `newReferences`.",
 TransportCall,"exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
 TransportCall,"importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
 TransportCall,modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA

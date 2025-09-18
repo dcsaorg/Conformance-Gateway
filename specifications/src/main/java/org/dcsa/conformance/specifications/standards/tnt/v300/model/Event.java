@@ -46,10 +46,16 @@ If this flag is set, any event data other than the `eventID` is irrelevant (if p
   @Schema() private ShipmentLocationTypeCode shipmentLocationType;
 
   @Schema(description = "List of documents related to this event")
-  private List<DocumentReference> relatedDocumentReferences;
+  private List<DocumentReference> documentReferences;
+
+  @Schema(description = "List of document replacements related to this event")
+  private List<DocumentReferenceReplacement> documentReferenceReplacements;
 
   @Schema(description = "List of shipment references related to this event")
   private List<ShipmentReference> shipmentReferences;
+
+  @Schema(description = "List of shipment reference replacements related to this event")
+  private List<ShipmentReferenceReplacement> shipmentReferenceReplacements;
 
   @Schema() private EventClassification eventClassification;
 

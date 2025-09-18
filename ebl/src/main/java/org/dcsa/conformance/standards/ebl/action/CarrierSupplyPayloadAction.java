@@ -35,7 +35,8 @@ public class CarrierSupplyPayloadAction extends EblAction {
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
-    //this.getDspConsumer().accept(getDspSupplier().get().withEblScenarioType(scenarioType.name()));
+    //TODO
+    this.getDspConsumer().accept(getDspSupplier().get().withUpdatedShippingInstructions(null));
   }
 
   public CarrierSupplyPayloadAction(
@@ -55,6 +56,8 @@ public class CarrierSupplyPayloadAction extends EblAction {
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
+    // TODO
+    this.getDspConsumer().accept(getDspSupplier().get().withUpdatedShippingInstructions(null));
   }
 
   @Override
@@ -65,7 +68,6 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    //this.getDspConsumer().accept(getDspSupplier().get().withEblScenarioType(scenarioType.name()));
     return super.asJsonNode().put(SCENARIO_TYPE, scenarioType.name());
   }
 

@@ -84,6 +84,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 noAction()
                     .thenEither(
                         Arrays.stream(ScenarioType.values())
+                            .filter(EblScenarioListBuilder::isSupportedScenarioType)
                             .map(
                                 scenarioType ->
                                     carrierSupplyScenarioParameters(scenarioType, isTd)
@@ -116,6 +117,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
+  private static boolean isSupportedScenarioType(ScenarioType scenarioType) {
+    return scenarioType != ScenarioType.DG
+        && scenarioType != ScenarioType.ACTIVE_REEFER
+        && scenarioType != ScenarioType.NON_OPERATING_REEFER
+        && scenarioType != ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE;
+  }
+
   private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceTdOnlyScenarios(
       boolean isTd) {
     return Stream.of(
@@ -124,7 +132,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 noAction()
                     .thenEither(
                         Arrays.stream(ScenarioType.values())
-                            .filter(scenarioType -> scenarioType != ScenarioType.REGULAR_SWB_AMF)
+                            .filter(
+                                scenarioType ->
+                                    scenarioType != ScenarioType.REGULAR_SWB_AMF
+                                        && scenarioType
+                                            != ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE)
                             .map(scenarioType -> buildScenarioForType(scenarioType, isTd))
                             .toArray(EblScenarioListBuilder[]::new))),
             Map.entry(

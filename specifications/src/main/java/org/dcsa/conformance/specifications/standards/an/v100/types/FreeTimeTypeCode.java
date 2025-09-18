@@ -9,7 +9,8 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Schema(
     type = "string",
     example = "DEM",
-    description = "Code used to denote the type of free time.")
+    description = "Code used to denote the type of free time.",
+    maxLength = 10)
 @AllArgsConstructor
 public enum FreeTimeTypeCode implements EnumBase {
   DEM("Demurrage"),

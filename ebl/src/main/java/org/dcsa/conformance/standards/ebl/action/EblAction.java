@@ -240,7 +240,6 @@ public abstract class EblAction extends BookingAndEblAction {
             notificationSchemaValidator),
         new CarrierTdNotificationPayloadRequestConformanceCheck(
             notificationExchangeUuid,
-            expectedApiVersion,
             transportDocumentStatus,
             tdrIsKnown,
             getDspSupplier()));

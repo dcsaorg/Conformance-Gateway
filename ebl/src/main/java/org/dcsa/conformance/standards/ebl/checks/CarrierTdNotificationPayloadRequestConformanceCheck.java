@@ -20,20 +20,17 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   private static final String ROOT_LABEL = "";
   private static final String TRANSPORT_DOCUMENT_LABEL = "[Transport Document]";
 
-  private final String standardVersion;
   private final TransportDocumentStatus transportDocumentStatus;
   private final Boolean tdrIsKnown;
   private final Supplier<EblDynamicScenarioParameters> dspSupplier;
 
   public CarrierTdNotificationPayloadRequestConformanceCheck(
       UUID matchedExchangeUuid,
-      String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Boolean tdrIsKnown,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
 
     super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
-    this.standardVersion = standardVersion;
     this.transportDocumentStatus = transportDocumentStatus;
     this.tdrIsKnown = Boolean.TRUE.equals(tdrIsKnown);
     this.dspSupplier = dspSupplier;
@@ -49,9 +46,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
             buildChecks(
                 TRANSPORT_DOCUMENT_LABEL,
                 TRANSPORT_DOCUMENT_PATH,
-                () ->
-                    EblChecks.getTdPayloadChecks(
-                        standardVersion, transportDocumentStatus, dspSupplier)))
+                () -> EblChecks.getTdPayloadChecks(transportDocumentStatus, dspSupplier)))
         .flatMap(Function.identity());
   }
 

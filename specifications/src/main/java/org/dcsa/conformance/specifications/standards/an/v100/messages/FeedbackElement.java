@@ -25,7 +25,7 @@ to a user of the arrival notice publishing organization
 
   @Schema(
       maxLength = 1000,
-      example = "$.arrivalNotices[2].pickupInformation.location",
+      example = "$.arrivalNotices[2].pickupInformation.pickupLocation",
       description =
 """
 [JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property

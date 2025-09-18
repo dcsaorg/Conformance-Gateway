@@ -25,23 +25,34 @@ import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ActiveReeferParameters;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ServiceCodeOrReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.FeedbackElement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsError;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsResponse;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsError;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TNTEvent;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentEventInfo;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportEventInfo;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventClassification;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
 
 public class TNTStandardSpecification extends StandardSpecification {
 
@@ -69,35 +80,45 @@ public class TNTStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata(
-        "Track and Trace", "3.0.0-20250912-design", "", "", 4);
+    return new LegendMetadata("Track and Trace", "3.0.0-20250912-design", "", "", 4);
   }
 
   @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
+        ActiveReeferParameters.class,
         Address.class,
         ClassifiedDateTime.class,
-        EquipmentEventInfo.class,
+        DocumentReference.class,
+        EquipmentDetails.class,
+        Event.class,
+        EventClassification.class,
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
         GetEventsError.class,
         GetEventsResponse.class,
-        IotEventInfo.class,
+        IotDetails.class,
         Location.class,
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,
-        ReeferEventInfo.class,
-        ShipmentEventInfo.class,
-        TNTEvent.class,
-        TransportEventInfo.class);
+        RailTransport.class,
+        ReeferDetails.class,
+        Seal.class,
+        ServiceCodeOrReference.class,
+        ShipmentDetails.class,
+        ShipmentReference.class,
+        TransportCall.class,
+        TransportDetails.class,
+        TruckTransport.class,
+        VesselTransport.class,
+        VoyageNumberOrReference.class);
   }
 
   @Override
   protected List<String> getRootTypeNames() {
-    return List.of(TNTEvent.class.getSimpleName());
+    return List.of(Event.class.getSimpleName());
   }
 
   @Override
@@ -147,7 +168,11 @@ public class TNTStandardSpecification extends StandardSpecification {
         .description(readResourceFile("openapi-get-events-description.md"))
         .operationId("get-events")
         .tags(Collections.singletonList(TAG_EVENT_PUBLISHERS))
-        .parameters(new GetEventsEndpoint().getQueryParameters())
+        .parameters(
+            Stream.concat(
+                    new GetEventsEndpoint().getQueryParameters().stream(),
+                    Stream.of(getApiVersionHeaderParameter()))
+                .toList())
         .responses(
             new ApiResponses()
                 .addApiResponse(
@@ -157,8 +182,8 @@ public class TNTStandardSpecification extends StandardSpecification {
                         .headers(
                             Stream.of(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")),
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)),
                                     Map.entry(
                                         "Next-Page-Cursor",
                                         new Header().$ref("#/components/headers/Next-Page-Cursor")))
@@ -211,8 +236,8 @@ public class TNTStandardSpecification extends StandardSpecification {
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)))))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -232,8 +257,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         .headers(
             new LinkedHashMap<>(
                 Map.ofEntries(
-                    Map.entry(
-                        "API-Version", new Header().$ref("#/components/headers/API-Version")))))
+                    Map.entry(API_VERSION_HEADER, new Header().$ref(API_VERSION_HEADER_REF)))))
         .content(
             new Content()
                 .addMediaType(

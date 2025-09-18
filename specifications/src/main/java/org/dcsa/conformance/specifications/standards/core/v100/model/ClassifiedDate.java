@@ -2,7 +2,7 @@ package org.dcsa.conformance.specifications.standards.core.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.core.v100.types.DateTimeClassifierCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.EventClassifierCode;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
 
 @Schema(description = "Date classified as planned, estimated or actual")
@@ -13,5 +13,5 @@ public class ClassifiedDate {
   private FormattedDate value;
 
   @Schema
-  private DateTimeClassifierCode classifier;
+  private EventClassifierCode classifier;
 }

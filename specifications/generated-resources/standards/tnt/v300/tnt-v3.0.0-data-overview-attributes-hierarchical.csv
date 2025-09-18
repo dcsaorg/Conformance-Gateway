@@ -23,6 +23,7 @@ Event,,,,,,,,
 - `INV` - Invoice
 - `OOG` - Out of Gauge
 - `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
 - `SHI` - Shipping Instruction
 - `TRD` - Transport Document
 - `TRO` - Transport Order
@@ -50,6 +51,7 @@ Event,,,,,,,,
 - `INV` - Invoice
 - `OOG` - Out of Gauge
 - `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
 - `SHI` - Shipping Instruction
 - `TRD` - Transport Document
 - `TRO` - Transport Order
@@ -77,6 +79,7 @@ Event,,,,,,,,
 - `INV` - Invoice
 - `OOG` - Out of Gauge
 - `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
 - `SHI` - Shipping Instruction
 - `TRD` - Transport Document
 - `TRO` - Transport Order
@@ -380,6 +383,7 @@ or during transit but prior arrival at POD.",
 - `INV` - Invoice
 - `OOG` - Out of Gauge
 - `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
 - `SHI` - Shipping Instruction
 - `TRD` - Transport Document
 - `TRO` - Transport Order

@@ -31,6 +31,7 @@ public enum DocumentTypeCode implements EnumBase {
   INV("Invoice"),
   OOG("Out of Gauge"),
   PCE("Phytosanitary Certificate"),
+  PFD("Proof of Delivery"),
   SHI("Shipping Instruction"),
   TRD("Transport Document"),
   TRO("Transport Order"),

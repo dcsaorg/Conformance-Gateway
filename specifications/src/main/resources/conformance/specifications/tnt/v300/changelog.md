@@ -14,6 +14,8 @@ Added to type `Event` attributes `documentReferenceReplacements` and `shipmentRe
 
 Added `DocumentTypeCode` value `AMF` for an "Advance Manifest Filing" of any subtype. (SD-305)
 
+Added `DocumentTypeCode` value `PFD` for "Proof of Delivery". (SD-2460)
+
 
 ## Snapshot v3.0.0-20250912-design
 

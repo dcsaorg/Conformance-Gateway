@@ -51,6 +51,7 @@ DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a docu
 - `INV` - Invoice
 - `OOG` - Out of Gauge
 - `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
 - `SHI` - Shipping Instruction
 - `TRD` - Transport Document
 - `TRO` - Transport Order

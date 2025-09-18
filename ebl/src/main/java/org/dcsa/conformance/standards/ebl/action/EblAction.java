@@ -36,7 +36,7 @@ public abstract class EblAction extends BookingAndEblAction {
       int expectedStatus) {
     this(sourcePartyName, targetPartyName, previousAction, actionTitle, Set.of(expectedStatus));
     if (previousAction instanceof EblAction previousEblAction && scenarioType == null) {
-      this.scenarioType = previousEblAction.scenarioType;
+      scenarioType = previousEblAction.scenarioType;
     }
   }
 
@@ -49,7 +49,7 @@ public abstract class EblAction extends BookingAndEblAction {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
     if (previousAction instanceof EblAction previousEblAction && scenarioType == null) {
-      this.scenarioType = previousEblAction.scenarioType;
+      scenarioType = previousEblAction.scenarioType;
     }
   }
 
@@ -57,15 +57,15 @@ public abstract class EblAction extends BookingAndEblAction {
   public void reset() {
     super.reset();
     if (previousAction != null) {
-      eblDspReference.set(null);
+      getEblDspReference().set(null);
     }
   }
 
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (eblDspReference.hasCurrentValue()) {
-      jsonState.set("currentDsp", eblDspReference.get().toJson());
+    if (getEblDspReference().hasCurrentValue()) {
+      jsonState.set("currentDsp", getEblDspReference().get().toJson());
     }
     return jsonState;
   }
@@ -75,7 +75,7 @@ public abstract class EblAction extends BookingAndEblAction {
     super.importJsonState(jsonState);
     JsonNode dspNode = jsonState.get("currentDsp");
     if (dspNode != null) {
-      eblDspReference.set(EblDynamicScenarioParameters.fromJson(dspNode));
+      getEblDspReference().set(EblDynamicScenarioParameters.fromJson(dspNode));
     }
   }
 
@@ -107,15 +107,15 @@ public abstract class EblAction extends BookingAndEblAction {
   }
 
   protected Supplier<EblDynamicScenarioParameters> getDspSupplier() {
-    return eblDspReference::get;
+    return getEblDspReference()::get;
   }
 
   protected Consumer<EblDynamicScenarioParameters> getDspConsumer() {
-    return eblDspReference::set;
+    return getEblDspReference()::set;
   }
 
   protected void updateDSPFromSIResponsePayload(ConformanceExchange exchange) {
-    EblDynamicScenarioParameters dsp = eblDspReference.get();
+    EblDynamicScenarioParameters dsp = getEblDspReference().get();
 
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
     var newShippingInstructionsReference =
@@ -137,7 +137,7 @@ public abstract class EblAction extends BookingAndEblAction {
     updatedDsp = updatedDsp.withShippingInstructions(null).withUpdatedShippingInstructions(null);
 
     if (!dsp.equals(updatedDsp)) {
-      eblDspReference.set(updatedDsp);
+      getEblDspReference().set(updatedDsp);
     }
   }
 

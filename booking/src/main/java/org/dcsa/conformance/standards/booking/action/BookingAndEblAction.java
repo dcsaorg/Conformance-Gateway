@@ -1,15 +1,16 @@
 package org.dcsa.conformance.standards.booking.action;
 
-
+import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.EblDynamicScenarioParameters;
 
+@Getter
 public abstract class BookingAndEblAction extends ConformanceAction {
 
-  public final OverwritingReference<EblDynamicScenarioParameters> eblDspReference;
-  public final OverwritingReference<BookingDynamicScenarioParameters> bookingDspReference;
+  private final OverwritingReference<EblDynamicScenarioParameters> eblDspReference;
+  private final OverwritingReference<BookingDynamicScenarioParameters> bookingDspReference;
 
   protected BookingAndEblAction(
       String sourcePartyName,

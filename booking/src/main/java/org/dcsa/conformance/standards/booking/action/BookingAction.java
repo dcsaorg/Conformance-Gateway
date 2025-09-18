@@ -38,15 +38,15 @@ public abstract class BookingAction extends BookingAndEblAction {
   public void reset() {
     super.reset();
     if (previousAction != null) {
-      bookingDspReference.set(null);
+      getBookingDspReference().set(null);
     }
   }
 
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (bookingDspReference.hasCurrentValue()) {
-      jsonState.set("currentDsp", bookingDspReference.get().toJson());
+    if (getBookingDspReference().hasCurrentValue()) {
+      jsonState.set("currentDsp", getBookingDspReference().get().toJson());
     }
     return jsonState;
   }
@@ -56,7 +56,7 @@ public abstract class BookingAction extends BookingAndEblAction {
     super.importJsonState(jsonState);
     JsonNode dspNode = jsonState.get("currentDsp");
     if (dspNode != null) {
-      bookingDspReference.set(BookingDynamicScenarioParameters.fromJson(dspNode));
+      getBookingDspReference().set(BookingDynamicScenarioParameters.fromJson(dspNode));
     }
   }
 
@@ -73,11 +73,11 @@ public abstract class BookingAction extends BookingAndEblAction {
   }
 
   protected Supplier<BookingDynamicScenarioParameters> getDspSupplier() {
-    return bookingDspReference::get;
+    return getBookingDspReference()::get;
   }
 
   protected Consumer<BookingDynamicScenarioParameters> getDspConsumer() {
-    return bookingDspReference::set;
+    return getBookingDspReference()::set;
   }
 
   private <T> BookingDynamicScenarioParameters updateIfNotNull(
@@ -97,7 +97,7 @@ public abstract class BookingAction extends BookingAndEblAction {
             : responseJsonNode.path("carrierBookingReference").asText(null);
     var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
 
-    BookingDynamicScenarioParameters dsp = bookingDspReference.get();
+    BookingDynamicScenarioParameters dsp = getBookingDspReference().get();
     var updatedDsp = dsp;
     updatedDsp =
         updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
@@ -106,7 +106,7 @@ public abstract class BookingAction extends BookingAndEblAction {
     // have been added to the DSP
 
     if (!dsp.equals(updatedDsp)) {
-      bookingDspReference.set(updatedDsp);
+      getBookingDspReference().set(updatedDsp);
     }
   }
 
@@ -173,8 +173,8 @@ public abstract class BookingAction extends BookingAndEblAction {
       BookingState amendedBookingState,
       BookingCancellationState bookingCancellationState) {
     String titlePrefix = "[Notification]";
-    var cbr = bookingDspReference.get().carrierBookingReference();
-    var cbrr = bookingDspReference.get().carrierBookingRequestReference();
+    var cbr = getBookingDspReference().get().carrierBookingReference();
+    var cbrr = getBookingDspReference().get().carrierBookingRequestReference();
     return Stream.of(
             new HttpMethodCheck(
                 titlePrefix, BookingRole::isCarrier, getMatchedNotificationExchangeUuid(), "POST"),

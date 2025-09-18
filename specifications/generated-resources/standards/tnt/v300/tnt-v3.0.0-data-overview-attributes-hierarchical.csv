@@ -231,6 +231,11 @@ or a subsequent revision.",
 "Event / iotDetails",iotDetails,IotDetails,,,,,"IoT-specific details",
 "Event / iotDetails / iotEventCode",iotEventCode,string,,,,DRO,"Code used to denote the specific IoT event that has occurred
 - `DRO` - Door opened",
+"Event / isRetracted",isRetracted,boolean,,,,,"Flag indicating that the event is retracted.
+
+The data in this and all previously transmitted events with the same `eventID` must be discarded or ignored.
+
+If this flag is set, any event data other than the `eventID` is irrelevant (if present).",
 "Event / reeferDetails",reeferDetails,ReeferDetails,,,,,"Reefer-specific details",
 "Event / reeferDetails / measuredParameters",measuredParameters,ActiveReeferParameters,,,,,"Measured active reefer parameters",
 "Event / reeferDetails / measuredParameters / airExchangeUnit",airExchangeUnit,string,,,,MQH,"Unit in which the `airExchangeValue` is expressed:

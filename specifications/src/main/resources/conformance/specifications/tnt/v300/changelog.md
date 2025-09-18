@@ -8,6 +8,8 @@ Replaced in type `EquipmentDetails` attribute `isTransshipmentMove` with a new `
 
 Added `EventRouting` including originating, destination and forwarding parties. (SD-2145)
 
+Added to type `Event` attribute `isRetracted`. (SD-2477)
+
 
 ## Snapshot v3.0.0-20250912-design
 

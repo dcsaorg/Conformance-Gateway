@@ -23,6 +23,17 @@ An event overrides any other event that has the same `eventID` and an earlier `e
 """)
   private UniversallyUniqueID eventID;
 
+  @Schema(
+      description =
+"""
+Flag indicating that the event is retracted.
+
+The data in this and all previously transmitted events with the same `eventID` must be discarded or ignored.
+
+If this flag is set, any event data other than the `eventID` is irrelevant (if present).
+""")
+  private Boolean isRetracted;
+
   @Schema(description = "The date and time when the real-world event has occurred or will occur.")
   private FormattedDateTime eventDateTime;
 

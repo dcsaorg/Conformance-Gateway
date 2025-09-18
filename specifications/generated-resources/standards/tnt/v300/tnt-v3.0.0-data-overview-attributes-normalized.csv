@@ -84,6 +84,11 @@ Event,eventLocation,Location,,,,,"The location of the event.",
 Event,eventRouting,EventRouting,,,,,"Routing of an event from the originating party, via forwarding parties, to the destination party.",
 Event,eventUpdatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
 Event,iotDetails,IotDetails,,,,,"IoT-specific details",
+Event,isRetracted,boolean,,,,,"Flag indicating that the event is retracted.
+
+The data in this and all previously transmitted events with the same `eventID` must be discarded or ignored.
+
+If this flag is set, any event data other than the `eventID` is irrelevant (if present).",
 Event,reeferDetails,ReeferDetails,,,,,"Reefer-specific details",
 Event,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
 Event,shipmentDetails,ShipmentDetails,,,,,"Shipment-specific details",

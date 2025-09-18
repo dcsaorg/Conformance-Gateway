@@ -32,6 +32,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
   public CarrierSupplyPayloadAction(
       String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion, JsonSchemaValidator requestSchemaValidator, boolean isTd) {
     super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1);
+    this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;

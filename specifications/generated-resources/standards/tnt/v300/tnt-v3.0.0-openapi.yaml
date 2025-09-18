@@ -412,29 +412,30 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of a document
-            - `CBR` - Carrier Booking Request
-            - `BKG` - Booking
-            - `SHI` - Shipping Instruction
-            - `TRD` - Transport Document
-            - `DEI` - Delivery Instructions
-            - `DEO` - Delivery Order
-            - `TRO` - Transport Order
-            - `CRO` - Container Release Order
+            - `AMF` - Advance Manifest Filing (of any subtype)
             - `ARN` - Arrival Notice
-            - `VGM` - Verified Gross Mass
+            - `BKG` - Booking
             - `CAS` - Cargo Survey
-            - `CUC` - Customs Clearance
-            - `DGD` - Dangerous Goods Declaration
-            - `OOG` - Out of Gauge
-            - `CQU` - Contract Quotation
-            - `INV` - Invoice
-            - `HCE` - Health Certificate
-            - `PCE` - Phytosanitary Certificate
-            - `VCE` - Veterinary Certificate
-            - `FCE` - Fumigation Certificate
-            - `ICE` - Inspection Certificate
+            - `CBR` - Carrier Booking Request
             - `CEA` - Certificate of Analysis
             - `CEO` - Certificate of Origin
+            - `CQU` - Contract Quotation
+            - `CRO` - Container Release Order
+            - `CUC` - Customs Clearance
+            - `DEI` - Delivery Instructions
+            - `DEO` - Delivery Order
+            - `DGD` - Dangerous Goods Declaration
+            - `FCE` - Fumigation Certificate
+            - `HCE` - Health Certificate
+            - `ICE` - Inspection Certificate
+            - `INV` - Invoice
+            - `OOG` - Out of Gauge
+            - `PCE` - Phytosanitary Certificate
+            - `SHI` - Shipping Instruction
+            - `TRD` - Transport Document
+            - `TRO` - Transport Order
+            - `VCE` - Veterinary Certificate
+            - `VGM` - Verified Gross Mass
           example: "BKG"
         reference:
           maxLength: 100

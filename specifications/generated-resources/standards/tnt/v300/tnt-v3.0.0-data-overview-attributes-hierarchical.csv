@@ -4,81 +4,84 @@ Event,,,,,,,,
 "Event / documentReferenceReplacements / newReferences",newReferences,"DocumentReference list",,,,,"References of the documents replacing those with the `oldReferences`.",
 "Event / documentReferenceReplacements / newReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 "Event / documentReferenceReplacements / newReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
-- `CBR` - Carrier Booking Request
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
 - `BKG` - Booking
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
 - `DEI` - Delivery Instructions
 - `DEO` - Delivery Order
-- `TRO` - Transport Order
-- `CRO` - Container Release Order
-- `ARN` - Arrival Notice
-- `VGM` - Verified Gross Mass
-- `CAS` - Cargo Survey
-- `CUC` - Customs Clearance
 - `DGD` - Dangerous Goods Declaration
-- `OOG` - Out of Gauge
-- `CQU` - Contract Quotation
-- `INV` - Invoice
-- `HCE` - Health Certificate
-- `PCE` - Phytosanitary Certificate
-- `VCE` - Veterinary Certificate
 - `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
 - `ICE` - Inspection Certificate
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin",
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
 "Event / documentReferenceReplacements / oldReferences",oldReferences,"DocumentReference list",,,,,"References of the documents replaced by those with the `newReferences`.",
 "Event / documentReferenceReplacements / oldReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 "Event / documentReferenceReplacements / oldReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
-- `CBR` - Carrier Booking Request
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
 - `BKG` - Booking
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
 - `DEI` - Delivery Instructions
 - `DEO` - Delivery Order
-- `TRO` - Transport Order
-- `CRO` - Container Release Order
-- `ARN` - Arrival Notice
-- `VGM` - Verified Gross Mass
-- `CAS` - Cargo Survey
-- `CUC` - Customs Clearance
 - `DGD` - Dangerous Goods Declaration
-- `OOG` - Out of Gauge
-- `CQU` - Contract Quotation
-- `INV` - Invoice
-- `HCE` - Health Certificate
-- `PCE` - Phytosanitary Certificate
-- `VCE` - Veterinary Certificate
 - `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
 - `ICE` - Inspection Certificate
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin",
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
 "Event / documentReferences",documentReferences,"DocumentReference list",,,,,"List of documents related to this event",
 "Event / documentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 "Event / documentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
-- `CBR` - Carrier Booking Request
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
 - `BKG` - Booking
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
 - `DEI` - Delivery Instructions
 - `DEO` - Delivery Order
-- `TRO` - Transport Order
-- `CRO` - Container Release Order
-- `ARN` - Arrival Notice
-- `VGM` - Verified Gross Mass
-- `CAS` - Cargo Survey
-- `CUC` - Customs Clearance
 - `DGD` - Dangerous Goods Declaration
-- `OOG` - Out of Gauge
-- `CQU` - Contract Quotation
-- `INV` - Invoice
-- `HCE` - Health Certificate
-- `PCE` - Phytosanitary Certificate
-- `VCE` - Veterinary Certificate
 - `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
 - `ICE` - Inspection Certificate
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin",
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
 "Event / equipmentDetails",equipmentDetails,EquipmentDetails,,,,,"Equipment-specific details",
 "Event / equipmentDetails / emptyIndicatorCode",emptyIndicatorCode,string,,,,LADEN,"Code to denote whether the equipment is empty or laden.
 - `EMPTY` - Empty
@@ -358,29 +361,30 @@ or during transit but prior arrival at POD.",
 "Event / shipmentDetails / documentReference",documentReference,DocumentReference,,,,,"Referenced document",
 "Event / shipmentDetails / documentReference / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 "Event / shipmentDetails / documentReference / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
-- `CBR` - Carrier Booking Request
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
 - `BKG` - Booking
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
 - `DEI` - Delivery Instructions
 - `DEO` - Delivery Order
-- `TRO` - Transport Order
-- `CRO` - Container Release Order
-- `ARN` - Arrival Notice
-- `VGM` - Verified Gross Mass
-- `CAS` - Cargo Survey
-- `CUC` - Customs Clearance
 - `DGD` - Dangerous Goods Declaration
-- `OOG` - Out of Gauge
-- `CQU` - Contract Quotation
-- `INV` - Invoice
-- `HCE` - Health Certificate
-- `PCE` - Phytosanitary Certificate
-- `VCE` - Veterinary Certificate
 - `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
 - `ICE` - Inspection Certificate
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin",
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
 "Event / shipmentDetails / priceCalculationDate",priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in consideration for the tariff applicability, that differs depending on the trade.
 It can vary per carrier.",
 "Event / shipmentDetails / reason",reason,string,,,,,"The reason this event was sent",

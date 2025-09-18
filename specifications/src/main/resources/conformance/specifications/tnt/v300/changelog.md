@@ -12,6 +12,8 @@ Added to type `Event` attribute `isRetracted`. (SD-2477)
 
 Added to type `Event` attributes `documentReferenceReplacements` and `shipmentReferenceReplacements` to support split / combine and related use cases. (SD-302)
 
+Added `DocumentTypeCode` value `AMF` for an "Advance Manifest Filing" of any subtype. (SD-305)
+
 
 ## Snapshot v3.0.0-20250912-design
 

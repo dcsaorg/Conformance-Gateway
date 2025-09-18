@@ -273,13 +273,13 @@ public class BookingChecks {
             issues.add("Port of Discharge value must be provided (PDE or POD)");
           }
           if (preNode.isMissingNode() && polNode.isMissingNode()) {
-            issues.add("Port of Load values must be provided (PRE or POL)");
+            issues.add("Port of Load value must be provided (PRE or POL)");
           }
           if (pdeNode.isMissingNode() && "SD".equals(deliveryTypeAtDestination)) {
             issues.add("Place of Delivery value must be provided (PDE) when deliveryTypeAtDestination is 'SD'");
           }
           if (preNode.isMissingNode() && "SD".equals(receiptTypeAtOrigin)) {
-            issues.add("Place of Receipt values must be provided (PRE) when receiptTypeAtOrigin is 'SD'");
+            issues.add("Place of Receipt value must be provided (PRE) when receiptTypeAtOrigin is 'SD'");
           }
       }
       if("SD".equals(receiptTypeAtOrigin)) {

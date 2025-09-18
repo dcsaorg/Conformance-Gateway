@@ -230,7 +230,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                             .then(
                                                                 shipperGetBooking(COMPLETED)))))))),
             Map.entry(
-                "Store Door at origin",
+                "Store Door at Origin",
                 carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.STORE_DOOR_AT_ORIGIN)
                     .then(
                         uc1ShipperSubmitBookingRequest()
@@ -257,7 +257,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                             .then(
                                                                 shipperGetBooking(COMPLETED)))))))),
             Map.entry(
-                "Store Door at destination",
+                "Store Door at Destination",
                 carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.STORE_DOOR_AT_DESTINATION)
                     .then(
                         uc1ShipperSubmitBookingRequest()
@@ -338,7 +338,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                             .then(
                                                                 shipperGetBooking(COMPLETED)))))))),
             Map.entry(
-                "Non Reefer containers",
+                "Non Reefer Containers",
                 carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.NON_OPERATING_REEFER)
                     .then(
                         uc1ShipperSubmitBookingRequest()

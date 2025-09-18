@@ -22,7 +22,7 @@ Instructions on the administrative processes for submitting import customs decla
 
   @Schema(
     maxLength = 35,
-    example = "a1234",
+    example = "24NDMUA430I",
     description =
 """
 Manifest reference number for manifest declaration and customs clearance in Korea.
@@ -31,7 +31,7 @@ Manifest reference number for manifest declaration and customs clearance in Kore
 
   @Schema(
     maxLength = 35,
-    example = "x12345",
+    example = "23",
     description =
 """
 A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of

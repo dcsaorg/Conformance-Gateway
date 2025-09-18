@@ -10,7 +10,8 @@ public class ReturnInformation {
 
   @Schema(
       example = "HLCSTD45",
-      description = "Code or reference required when returning equipment to the depot.")
+      description = "Code or reference required when returning equipment to the depot.",
+      maxLength = 50)
   protected String turnInReference;
 
   @Schema(

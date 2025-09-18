@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +30,7 @@ public class AttributesData {
       Map<String, Schema<?>> schemas,
       List<String> rootTypeNames) {
     this.rootTypeNames = rootTypeNames;
-    new TreeSet<>(schemas.keySet())
+    sortedCaseInsensitive(schemas.keySet())
         .forEach(
             typeName -> {
               Schema<?> typeSchema = schemas.get(typeName);
@@ -38,7 +39,7 @@ public class AttributesData {
                       Objects.requireNonNullElse(typeSchema.getRequired(), Collections.emptySet()));
               Map<String, Schema<?>> typeAttributeProperties =
                   SpecificationToolkit.parameterizeStringRawSchemaMap(typeSchema.getProperties());
-              new TreeSet<>(typeAttributeProperties.keySet())
+              sortedCaseInsensitive(typeAttributeProperties.keySet())
                   .forEach(
                       attributeName -> {
                         AttributeInfo attributeInfo = new AttributeInfo();
@@ -173,6 +174,12 @@ public class AttributesData {
             });
   }
 
+  private static Stream<String> sortedCaseInsensitive(Collection<String> values) {
+    TreeSet<String> sortedSet = new TreeSet<>(String::compareToIgnoreCase);
+    sortedSet.addAll(values);
+    return sortedSet.stream();
+  }
+
   public List<List<String>> getNormalizedRows() {
     return attributeInfoList.stream()
         .map(
@@ -191,7 +198,7 @@ public class AttributesData {
   }
 
   public List<List<String>> getHierarchicalRows() {
-    TreeMap<String, AttributeInfo> attributesByPath = new TreeMap<>();
+    TreeMap<String, AttributeInfo> attributesByPath = new TreeMap<>(String::compareToIgnoreCase);
     rootTypeNames.forEach(
         rootTypeName ->
             attributesByPath.put(

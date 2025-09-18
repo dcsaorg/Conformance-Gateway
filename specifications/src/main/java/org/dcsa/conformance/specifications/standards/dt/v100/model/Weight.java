@@ -22,6 +22,7 @@ Measurement unit in which the weight `value` is expressed:
 - `GRM` (Grams)
 - `ONZ` (Ounce)
 """,
-      example = "KGM")
+      example = "KGM",
+      maxLength = 10)
   protected String unit;
 }

@@ -182,21 +182,21 @@ paths:
         description: "Retrieve events occurring at or after this timestamp"
         schema:
           type: "string"
-          format: "datetime"
+          format: "date-time"
         example: "2025-01-23T01:23:45Z"
       - name: "eventDateTimeMax"
         in: "query"
         description: "Retrieve events occurring at or before this timestamp"
         schema:
           type: "string"
-          format: "datetime"
+          format: "date-time"
         example: "2025-01-23T01:23:45Z"
       - name: "limit"
         in: "query"
         description: "Maximum number of events to include in each page of the response."
         schema:
           minimum: 1
-          type: "number"
+          type: "integer"
           format: "int32"
         example: 10
       - name: "cursor"
@@ -205,6 +205,13 @@ paths:
         schema:
           type: "string"
         example: "ExampleNextPageCursor"
+      - name: "API-Version"
+        in: "header"
+        description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
+        required: false
+        schema:
+          type: "string"
+        example: "3.0.0"
       responses:
         "200":
           description: "List of events matching the query parameters"
@@ -263,6 +270,77 @@ paths:
                 $ref: "#/components/schemas/PostEventsError"
 components:
   schemas:
+    ActiveReeferParameters:
+      type: "object"
+      properties:
+        temperatureValue:
+          type: "number"
+          description: "Internal temperature value expressed in `temperatureUnit`"
+          format: "float"
+          example: -15
+        temperatureUnit:
+          type: "string"
+          description: |
+            Unit in which the `temperatureValue` and `ambientTemperatureValue` are expressed:
+            - `CEL` (Celsius)
+            - `FAH` (Fahrenheit)
+          example: "CEL"
+        ambientTemperatureValue:
+          type: "number"
+          description: "Ambient temperature value expressed in `temperatureUnit`"
+          format: "float"
+          example: -15
+        o2Percentage:
+          type: "number"
+          description: "O<sub>2</sub> percentage"
+          format: "float"
+          example: 25
+        co2Percentage:
+          type: "number"
+          description: "CO<sub>2</sub> percentage"
+          format: "float"
+          example: 25
+        humidityPercentage:
+          type: "number"
+          description: "Humidity percentage"
+          format: "float"
+          example: 50
+        airExchangeValue:
+          type: "number"
+          description: "Air exchange rate expressed in `airExchangeUnit`"
+          format: "float"
+          example: 15.4
+        airExchangeUnit:
+          type: "string"
+          description: |
+            Unit in which the `airExchangeValue` is expressed:
+            - `MQH` (Cubic metre per hour)
+            - `FQH` (Cubic foot per hour)
+          example: "MQH"
+        isVentilationOpen:
+          type: "boolean"
+          description: "Flag indicating whether the ventilation orifice is open"
+          example: true
+        isDrainholesOpen:
+          type: "boolean"
+          description: "Flag indicating whether drainholes are open"
+          example: true
+        isBulbMode:
+          type: "boolean"
+          description: "Flag indicating whether bulb mode is active"
+          example: true
+        isColdTreatmentRequired:
+          type: "boolean"
+          description: |
+            Flag indicating whether cargo cold treatment is required prior to loading at origin,
+            or during transit but prior arrival at POD.
+          example: true
+        isControlledAtmosphereRequired:
+          type: "boolean"
+          description: "Flag indicating whether controlled atmosphere is required"
+          example: true
+      description: |
+        Parameters of a Reefer equipment, usable as setpoint or as measured values.
     Address:
       type: "object"
       properties:
@@ -311,23 +389,214 @@ components:
       type: "object"
       properties:
         value:
+          maxLength: 30
           type: "string"
           description: |
             Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         classifier:
+          maxLength: 10
           type: "string"
           description: |-
-            Classifier denoting whether a date/time is planned, estimated or actual
+            Classifier denoting whether an event is planned, estimated or actual
             - `PLN` - Planned
             - `EST` - Estimated
             - `ACT` - Actual
           example: "EST"
       description: "Date and time classified as planned, estimated or actual"
-    EquipmentEventInfo:
+    DocumentReference:
       type: "object"
       properties:
+        typeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a document
+            - `CBR` - Carrier Booking Request
+            - `BKG` - Booking
+            - `SHI` - Shipping Instruction
+            - `TRD` - Transport Document
+            - `DEI` - Delivery Instructions
+            - `DEO` - Delivery Order
+            - `TRO` - Transport Order
+            - `CRO` - Container Release Order
+            - `ARN` - Arrival Notice
+            - `VGM` - Verified Gross Mass
+            - `CAS` - Cargo Survey
+            - `CUC` - Customs Clearance
+            - `DGD` - Dangerous Goods Declaration
+            - `OOG` - Out of Gauge
+            - `CQU` - Contract Quotation
+            - `INV` - Invoice
+            - `HCE` - Health Certificate
+            - `PCE` - Phytosanitary Certificate
+            - `VCE` - Veterinary Certificate
+            - `FCE` - Fumigation Certificate
+            - `ICE` - Inspection Certificate
+            - `CEA` - Certificate of Analysis
+            - `CEO` - Certificate of Origin
+          example: "BKG"
+        reference:
+          maxLength: 100
+          type: "string"
+          description: "Reference identifying the document"
+          example: "123e4567e89b"
+      description: "Referenced document"
+    EquipmentDetails:
+      type: "object"
+      properties:
+        equipmentReference:
+          maxLength: 11
+          type: "string"
+          description: |
+            The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+            According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+            (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+            If a container does not comply with ISO 6346, it is suggested to follow
+            [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+            from SMDG.
+          example: "APZU4812090"
+        ISOEquipmentCode:
+          maxLength: 4
+          type: "string"
+          description: |
+            Unique code identifying the equipment size and type used to transport commodities.
+            The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+            following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.
+          example: "22GP"
+        emptyIndicatorCode:
+          type: "string"
+          description: |-
+            Code to denote whether the equipment is empty or laden.
+            - `EMPTY` - Empty
+            - `LADEN` - Laden
+          example: "LADEN"
+        isTransshipmentMove:
+          type: "boolean"
+          description: |
+            Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.
+        seals:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Seal"
+      description: "Equipment-specific details"
+    Event:
+      required:
+      - "eventClassification"
+      type: "object"
+      properties:
+        eventClassification:
+          description: "Type, subtype and classifier of an event"
+          allOf:
+          - $ref: "#/components/schemas/EventClassification"
+        eventID:
+          type: "string"
+          description: |
+            Unique ID of the event.
+
+            An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        eventDateTime:
+          maxLength: 30
+          type: "string"
+          description: "The date and time when the real-world event has occurred or will occur."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        eventUpdatedDateTime:
+          maxLength: 30
+          type: "string"
+          description: "The date and time when the technical event was last updated."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
+        eventLocation:
+          description: "The location of the event."
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        relatedDocumentReferences:
+          type: "array"
+          description: "List of documents related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        shipmentReferences:
+          type: "array"
+          description: "List of shipment references related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
+        shipmentDetails:
+          description: "Shipment-specific details"
+          allOf:
+          - $ref: "#/components/schemas/ShipmentDetails"
+        transportDetails:
+          description: "Transport-specific details"
+          allOf:
+          - $ref: "#/components/schemas/TransportDetails"
+        equipmentDetails:
+          description: "Equipment-specific details"
+          allOf:
+          - $ref: "#/components/schemas/EquipmentDetails"
+        iotDetails:
+          description: "IoT-specific details"
+          allOf:
+          - $ref: "#/components/schemas/IotDetails"
+        reeferDetails:
+          description: "Reefer-specific details"
+          allOf:
+          - $ref: "#/components/schemas/ReeferDetails"
+      description: "Track and Trace event"
+    EventClassification:
+      required:
+      - "eventTypeCode"
+      type: "object"
+      properties:
+        eventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an event
+            - `SHIPMENT` - Shipment event
+            - `TRANSPORT` - Transport event
+            - `EQUIPMENT` - Equipment event
+            - `IOT` - IoT event
+            - `REEFER` - Reefer event
+          example: "EQUIPMENT"
+        eventClassifierCode:
+          maxLength: 10
+          type: "string"
+          description: |-
+            Classifier denoting whether an event is planned, estimated or actual
+            - `PLN` - Planned
+            - `EST` - Estimated
+            - `ACT` - Actual
+          example: "EST"
+        shipmentEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a shipment event
+            - `RECE` - Received
+            - `DRFT` - Drafted
+            - `PENA` - Pending Approval
+            - `PENU` - Pending Update
+            - `REJE` - Rejected
+            - `APPR` - Approved
+            - `ISSU` - Arrived
+            - `SURR` - Surrendered
+            - `SUBM` - Submitted
+            - `VOID` - Void
+            - `CONF` - Confirmed
+            - `REQS` - Requested
+            - `CMPL` - Completed
+            - `HOLD` - On Hold
+            - `RELS` - Released
+          example: "APPR"
+        transportEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a transport event
+            - `ARRI` - Arrived
+            - `DEPA` - Departed
+          example: "ARRI"
         equipmentEventTypeCode:
           type: "string"
           description: |-
@@ -344,7 +613,20 @@ components:
             - `RSEA` - Resealed
             - `RMVD` - Removed
           example: "LOAD"
-      description: "Equipment event information"
+        iotEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of an IoT event
+            - `DETC` - Detected
+          example: "DETC"
+        reeferEventTypeCode:
+          type: "string"
+          description: |-
+            Code used to denote the type of a reefer event
+            - `MEAS` - Measured
+            - `ADJU` - Adjusted
+          example: "MEAS"
+      description: "Type, subtype and classifier of an event"
     Facility:
       type: "object"
       properties:
@@ -355,6 +637,7 @@ components:
             Code identifying a specific facility, as defined by the `facilityCodeListProvider`.
           example: "ADT"
         facilityCodeListProvider:
+          maxLength: 10
           type: "string"
           description: |
             Code list provider (each with its relevant code list) defining the `facilityCode`:
@@ -429,7 +712,7 @@ components:
           description: |
             The list of events matching the filter specified by the request query parameters
           items:
-            $ref: "#/components/schemas/TNTEvent"
+            $ref: "#/components/schemas/Event"
         feedbackElements:
           type: "array"
           description: |
@@ -438,16 +721,16 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `GET Events` request
-    IotEventInfo:
+    IotDetails:
       type: "object"
       properties:
-        iotEventTypeCode:
+        iotEventCode:
           type: "string"
           description: |-
-            Code used to denote the type of an IoT event
-            - `DETC` - Detected
-          example: "DETC"
-      description: "IoT event information"
+            Code used to denote the specific IoT event that has occurred
+            - `DRO` - Door opened
+          example: "DRO"
+      description: "IoT-specific details"
     Location:
       type: "object"
       properties:
@@ -462,6 +745,7 @@ components:
           description: |-
             Code identifying a specific type of facility
 
+            - `BORD` - Border
             - `CLOC` - Customer location
             - `COFS` - Container freight station
             - `OFFD` - Off-dock storage
@@ -469,6 +753,7 @@ components:
             - `INTE` - Inland terminal
             - `POTE` - Port terminal
             - `RAMP` - Ramp
+            - `WAYP` - Waypoint
           example: "RAMP"
         address:
           description: "Location address"
@@ -524,7 +809,7 @@ components:
           type: "array"
           description: "List of events."
           items:
-            $ref: "#/components/schemas/TNTEvent"
+            $ref: "#/components/schemas/Event"
       description: "API message containing a list of events."
     PostEventsResponse:
       type: "object"
@@ -541,92 +826,284 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `POST Events` request
-    ReeferEventInfo:
+    RailTransport:
       type: "object"
       properties:
-        reeferEventTypeCode:
+        railCar:
+          maxLength: 50
           type: "string"
-          description: |-
-            Code used to denote the type of a reefer event
-            - `MEAS` - Measured
-            - `ADJU` - Adjusted
-          example: "MEAS"
-      description: "Reefer event information"
-    ShipmentEventInfo:
+          description: |
+            A railcar is a type of railway vehicle that is designed to transport freight or passengers on a railway track.
+            They are also known as rail vehicles, railcars, or rolling stock.
+            Railcars can be powered by an on-board locomotive or they can be pulled by a separate locomotive.
+        railService:
+          maxLength: 50
+          type: "string"
+          description: |
+            A rail service number is a unique identifying number assigned to a specific rail service or train.
+        departureID:
+          maxLength: 100
+          type: "string"
+          description: |
+            Unique identifying number or code that is assigned to a specific departure of a rail.
+            (Also known as a departure reference number.)
+      description: "Rail transport information"
+    ReeferDetails:
       type: "object"
       properties:
-        shipmentEventTypeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of a shipment event
-            - `RECE` - Received
-            - `DRFT` - Drafted
-            - `PENA` - Pending Approval
-            - `PENU` - Pending Update
-            - `REJE` - Rejected
-            - `APPR` - Approved
-            - `ISSU` - Arrived
-            - `SURR` - Surrendered
-            - `SUBM` - Submitted
-            - `VOID` - Void
-            - `CONF` - Confirmed
-            - `REQS` - Requested
-            - `CMPL` - Completed
-            - `HOLD` - On Hold
-            - `RELS` - Released
-          example: "APPR"
-      description: "Shipment event information"
-    TNTEvent:
-      required:
-      - "eventDateTime"
+        setpointParameters:
+          description: "Setpoint active reefer parameters"
+          allOf:
+          - $ref: "#/components/schemas/ActiveReeferParameters"
+        measuredParameters:
+          description: "Measured active reefer parameters"
+          allOf:
+          - $ref: "#/components/schemas/ActiveReeferParameters"
+      description: "Reefer-specific details"
+    Seal:
       type: "object"
       properties:
-        eventID:
+        number:
+          maxLength: 15
           type: "string"
-          description: "Universally unique ID of the event."
-          format: "uuid"
-          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
-        eventDateTime:
-          description: "The date and time when the event has occurred."
-          allOf:
-          - $ref: "#/components/schemas/ClassifiedDateTime"
-        eventLocation:
-          description: "The date and time when the event has occurred."
-          allOf:
-          - $ref: "#/components/schemas/Location"
-        transportEventInfo:
-          description: "Transport event information"
-          allOf:
-          - $ref: "#/components/schemas/TransportEventInfo"
-        shipmentEventInfo:
-          description: "Shipment event information"
-          allOf:
-          - $ref: "#/components/schemas/ShipmentEventInfo"
-        equipmentEventInfo:
-          description: "Equipment event information"
-          allOf:
-          - $ref: "#/components/schemas/EquipmentEventInfo"
-        reeferEventInfo:
-          description: "Reefer event information"
-          allOf:
-          - $ref: "#/components/schemas/ReeferEventInfo"
-        iotEventInfo:
-          description: "IoT event information"
-          allOf:
-          - $ref: "#/components/schemas/IotEventInfo"
+          description: "Identifies a seal affixed to the container."
+          example: "VET123"
+        source:
+          type: "string"
+          description: |
+            The source of the seal, namely who has affixed the seal.
+            - `CAR` (Carrier)
+            - `SHI` (Shipper)
+            - `PHY` (Phytosanitary)
+            - `VET` (Veterinary)
+            - `CUS` (Customs)
+          example: "CUS"
+        type:
+          type: "string"
+          description: |
+            The type of seal.
+            - `KLP` (Keyless padlock)
+            - `BLT` (Bolt)
+            - `WIR` (Wire)
+          example: "WIR"
       description: |
-        Track and Trace event
-    TransportEventInfo:
+        Seal-related information associated with the shipment equipment.
+        A seal is put on a shipment equipment once it is loaded.
+        This seal is meant to stay on until the shipment equipment reaches its final destination.
+    ServiceCodeOrReference:
       type: "object"
       properties:
-        transportEventTypeCode:
+        carrierServiceCode:
+          type: "string"
+          description: "Carrier-specific identifier of a service."
+          example: "FE1"
+        universalServiceReference:
+          type: "string"
+          description: "Reference of a service agreed between the VSA partners."
+          example: "SR12345A"
+      description: "Carrier service code and/or universal service reference"
+    ShipmentDetails:
+      type: "object"
+      properties:
+        documentReference:
+          description: "Referenced document"
+          allOf:
+          - $ref: "#/components/schemas/DocumentReference"
+        reason:
+          type: "string"
+          description: "The reason this event was sent"
+        priceCalculationDate:
+          type: "string"
+          description: |
+            Date taken in consideration for the tariff applicability, that differs depending on the trade.
+            It can vary per carrier.
+          format: "date"
+          example: "2025-01-23"
+      description: "Shipment-specific details"
+    ShipmentReference:
+      type: "object"
+      properties:
+        typeCode:
           type: "string"
           description: |-
-            Code used to denote the type of a transport event
-            - `ARRI` - Arrived
-            - `DEPA` - Departed
-          example: "ARRI"
-      description: "Transport event information"
+            Code used to denote the type of a reference
+            - `FF` - Freight Forwarder’s Reference
+            - `SI` - Shipper’s Reference
+            - `PO` - Purchase Order Reference
+            - `CR` - Customer’s Reference
+            - `AAO` - Consignee’s Reference
+            - `ECR` - Empty container release reference
+            - `CSI` - Customer shipment ID
+            - `BPR` - Booking party reference number
+            - `BID` - Booking Request ID
+            - `EQ` - Equipment Reference
+            - `RUC` - Registro Único del Contribuyente
+            - `DUE` - Declaração Única de Exportação
+            - `CER` - Canadian Export Reporting System
+            - `AES` - Automated Export System
+          example: "FF"
+        reference:
+          maxLength: 100
+          type: "string"
+          description: "The actual reference value"
+          example: "123e4567e89b"
+      description: |
+        References provided by the shipper or freight forwarder at the time of booking or at the time of providing shipping instructions.
+        Carriers share it back when providing track and trace event updates, some are also printed on the B/L.
+        Customers can use these references to track shipments in their internal systems.
+
+        In addition to the References provided by the shipper or freight forwarder,
+        the carrier can provide an extra type called `EQ` which is a reference to an Equipment.
+    TransportCall:
+      type: "object"
+      properties:
+        transportCallReference:
+          type: "string"
+          description: |
+            Carrier-defined reference of a `TransportCall`.
+
+            If the mode of transport is Vessel and the facility is a Port or Terminal,
+            this reference should be considered a terminal call reference.
+        transportCallSequenceNumber:
+          type: "integer"
+          description: |
+            Transport operator's key that uniquely identifies each individual transport call.
+            This key is essential to distinguish between two separate calls at the same location within one voyage.
+          format: "int32"
+        modeOfTransport:
+          maxLength: 50
+          type: "string"
+          description: |-
+            The mode of transport as defined by DCSA
+            - `VESSEL` - Vessel
+            - `RAIL` - Rail
+            - `TRUCK` - Truck
+            - `BARGE` - Barge
+            - `MULTIMODAL` - Multimodal
+          example: "VESSEL"
+        portVisitReference:
+          type: "string"
+          description: |
+            The unique reference that can be used to link different `transportCallReferences` to the same port visit.
+            The reference is provided by the port to uniquely identify a port call.
+        serviceCodeOrReference:
+          description: "Carrier service code and/or universal service reference"
+          allOf:
+          - $ref: "#/components/schemas/ServiceCodeOrReference"
+        exportVoyageNumberOrReference:
+          description: "Export voyage number or reference"
+          allOf:
+          - $ref: "#/components/schemas/VoyageNumberOrReference"
+        importVoyageNumberOrReference:
+          description: "Import voyage number or reference"
+          allOf:
+          - $ref: "#/components/schemas/VoyageNumberOrReference"
+        vesselTransport:
+          description: "Vessel or barge transport information"
+          allOf:
+          - $ref: "#/components/schemas/VesselTransport"
+        railTransport:
+          description: "Rail transport information"
+          allOf:
+          - $ref: "#/components/schemas/RailTransport"
+        truckTransport:
+          description: "Truck transport information"
+          allOf:
+          - $ref: "#/components/schemas/TruckTransport"
+      description: "Transport call information"
+    TransportDetails:
+      type: "object"
+      properties:
+        delayReasonCode:
+          type: "string"
+          description: |
+            Code identifying the reason for the delay, as defined by SMDG here:
+            https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+        changeRemark:
+          maxLength: 250
+          type: "string"
+          description: |
+            Free text information provided by the vessel operator regarding the reasons for the change in schedule
+            and/or plans to mitigate schedule slippage.
+          example: "Bad weather"
+        transportCall:
+          description: "Transport call information"
+          allOf:
+          - $ref: "#/components/schemas/TransportCall"
+      description: "Transport-specific details"
+    TruckTransport:
+      type: "object"
+      properties:
+        licensePlate:
+          maxLength: 15
+          type: "string"
+          description: |
+            A license plate is a tag that is attached to a vehicle and displays a unique number or code assigned to the vehicle.
+            The format, design, and issuing authority for license plates vary by country, state, and province.
+        chassisLicensePlate:
+          maxLength: 15
+          type: "string"
+          description: |
+            A chassis number is a unique identifying number or code assigned to the chassis of a vehicle.
+            It may also be referred to as a "vehicle identification number" (VIN) or "frame number".
+      description: "Truck transport information"
+    VesselTransport:
+      type: "object"
+      properties:
+        vesselIMONumber:
+          maxLength: 8
+          type: "string"
+          description: |
+            The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+            The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.
+          example: "9321483"
+        vesselName:
+          maxLength: 50
+          type: "string"
+          description: "Vessel name"
+          example: "King of the Seas"
+        vesselFlag:
+          maxLength: 2
+          type: "string"
+          description: |
+            The national flag of the country under which a vessel is registered,
+            indicated by the 2-character code defined in
+            [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).
+          example: "NL"
+        vesselCallSign:
+          maxLength: 10
+          type: "string"
+          description: |
+            A unique alphanumeric identity that belongs to the vessel
+            and is assigned by the International Telecommunication Union (ITU).
+            It consists of a three-letter alphanumeric prefix that indicates nationality,
+            followed by one to four characters to identify the individual vessel.
+          example: "NCVV"
+        operatorCarrierCode:
+          maxLength: 10
+          type: "string"
+          description: |
+            The carrier who is in charge of the vessel operation based on `operatorCarrierCodeListProvider`
+          example: "MAEU"
+        operatorCarrierCodeListProvider:
+          maxLength: 10
+          type: "string"
+          description: |
+            The code list provider used for the `operatorCarrierCode` (SMDG or NMFTA)
+          example: "SMDG"
+      description: "Vessel or barge transport information"
+    VoyageNumberOrReference:
+      type: "object"
+      properties:
+        carrierVoyageNumber:
+          type: "string"
+          description: "Carrier-specific identifier of the voyage"
+          example: "2103S"
+        universalVoyageReference:
+          type: "string"
+          description: "Reference of the voyage agreed between the VSA partners"
+          example: "SR12345A"
+      description: "Carrier voyage number and/or universal voyage reference"
   headers:
     API-Version:
       description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."

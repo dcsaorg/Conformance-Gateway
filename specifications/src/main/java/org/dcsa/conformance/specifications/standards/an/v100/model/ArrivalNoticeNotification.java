@@ -3,7 +3,7 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
+import org.dcsa.conformance.specifications.standards.core.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
@@ -37,11 +37,12 @@ public class ArrivalNoticeNotification {
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
-      example = "TDR1234",
+      example = "HHL71800000",
       description =
 """
 The reference of the transport document for which this arrival notice was created
-""")
+""",
+      maxLength = 20)
   private String transportDocumentReference;
 
   @Schema(

@@ -20,7 +20,7 @@ import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 public class CarrierSupplyPayloadAction extends EblAction {
 
   public static final String CARRIER_PAYLOAD = "carrierPayload";
-  private static final String SCENARIO_TYPE = "eblScenarioType";
+  private static final String SCENARIO_TYPE = "scenarioType";
   private static final String INPUT = "input";
 
   private ScenarioType scenarioType;

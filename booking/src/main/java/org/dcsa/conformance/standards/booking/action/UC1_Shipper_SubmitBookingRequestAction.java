@@ -42,7 +42,11 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
             "BOOKING_TYPE_PLACEHOLDER",
             switch (getDspSupplier().get().scenarioType()) {
               case DG -> "DG";
-              case REEFER, REEFER_TEMP_CHANGE -> "Reefer";
+              case REEFER -> "Reefer";
+              case NON_OPERATING_REEFER -> "Non-Operating Reefer";
+              case ROUTING_REFERENCE -> "Routing Reference";
+              case STORE_DOOR_AT_ORIGIN -> "Store Door at Origin";
+              case STORE_DOOR_AT_DESTINATION -> "Store Door at Destination";
               default -> "Dry Cargo";
             });
   }

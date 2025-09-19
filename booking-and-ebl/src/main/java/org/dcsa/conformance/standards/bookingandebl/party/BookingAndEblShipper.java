@@ -3,10 +3,14 @@ package org.dcsa.conformance.standards.bookingandebl.party;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.logs.TimestampedLogEntry;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -99,6 +103,40 @@ public class BookingAndEblShipper extends ConformanceParty {
     handlers.putAll(eblShipper.getActionPromptHandlers());
 
     return handlers;
+  }
+
+  @Override
+  public JsonNode exportJsonState() {
+    JsonNode bookingState = this.bookingShipper.exportJsonState();
+    JsonNode eblState = this.eblShipper.exportJsonState();
+
+    ObjectNode combinedState = bookingState.deepCopy();
+
+    if (eblState.isObject()) {
+      eblState
+          .fields()
+          .forEachRemaining(field -> combinedState.set(field.getKey(), field.getValue()));
+    }
+
+    return combinedState;
+  }
+
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    this.bookingShipper.importJsonState(jsonState);
+    this.eblShipper.importJsonState(jsonState);
+  }
+
+  @Override
+  public List<TimestampedLogEntry> getOperatorLog() {
+    List<TimestampedLogEntry> operatorLogs = new LinkedList<>();
+
+    operatorLogs.addAll(this.bookingShipper.getOperatorLog());
+    operatorLogs.addAll(this.eblShipper.getOperatorLog());
+
+    operatorLogs.sort(Collections.reverseOrder());
+
+    return operatorLogs;
   }
 
   private boolean isBookingRequest(String url) {

@@ -365,7 +365,8 @@ public class ConformanceSandbox {
             sandboxId,
             partyName,
             "getting operator log for party " + partyName,
-            party -> party.getOperatorLog().forEach(operatorLogNode::add))
+            party ->
+                party.getOperatorLog().forEach(entry -> operatorLogNode.add(entry.message())))
         .run();
     return operatorLogNode;
   }

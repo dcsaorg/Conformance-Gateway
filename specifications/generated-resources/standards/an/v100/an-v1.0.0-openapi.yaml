@@ -128,7 +128,7 @@ paths:
           type: "array"
           items:
             type: "string"
-        example: "TDR0123456,TDR1234567"
+        example: "HHL71800000,HHL71800001"
       - name: "equipmentReferences"
         in: "query"
         description: "Reference(s) of the equipment for which to return the associated arrival notices"
@@ -149,7 +149,7 @@ paths:
         description: "IMO number of the vessel for which to retrieve available arrival notices"
         schema:
           type: "string"
-        example: "12345678"
+        example: "9321483"
       - name: "vesselName"
         in: "query"
         description: "Name of the vessel for which to retrieve available arrival notices"
@@ -161,7 +161,7 @@ paths:
         description: "The identifier of an import voyage. The carrier-specific identifier of the import Voyage."
         schema:
           type: "string"
-        example: "1234N"
+        example: "2208N"
       - name: "universalImportVoyageReference"
         in: "query"
         description: "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
@@ -186,7 +186,7 @@ paths:
         schema:
           type: "string"
           format: "date"
-        example: "2025-01-23"
+        example: "2025-01-22"
       - name: "portOfDischargeArrivalDateMax"
         in: "query"
         description: "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date"

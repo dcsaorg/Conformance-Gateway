@@ -4,6 +4,8 @@
 
 Refined attribute descriptions. (SD-2458)
 
+Adjusted query parameter examples. (SD-2479)
+
 
 ## Snapshot v1.0.0-20250912-beta
 

@@ -177,16 +177,16 @@ paths:
         schema:
           type: "string"
         example: "SR12345A"
-      - name: "eventDateTimeMin"
+      - name: "dateTimeMin"
         in: "query"
-        description: "Retrieve events occurring at or after this timestamp"
+        description: "Retrieve events with an `eventUpdatedDateTime` at or after this timestamp"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
-      - name: "eventDateTimeMax"
+      - name: "dateTimeMax"
         in: "query"
-        description: "Retrieve events occurring at or before this timestamp"
+        description: "Retrieve events with an `eventUpdatedDateTime` at or before this timestamp"
         schema:
           type: "string"
           format: "date-time"

@@ -22,7 +22,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.models.TriConsumer;
 import org.dcsa.conformance.standards.ebl.party.*;
-import org.dcsa.conformance.standards.standardscommons.party.EblDynamicScenarioParameters;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 
 @UtilityClass
 public class EblChecks {

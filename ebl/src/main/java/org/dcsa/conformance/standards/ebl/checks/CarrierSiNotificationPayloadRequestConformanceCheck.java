@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.standardscommons.party.EblDynamicScenarioParameters;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 

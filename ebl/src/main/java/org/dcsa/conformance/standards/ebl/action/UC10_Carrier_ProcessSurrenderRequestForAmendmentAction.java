@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standards.standardscommons.action.BookingAndEblAction;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter

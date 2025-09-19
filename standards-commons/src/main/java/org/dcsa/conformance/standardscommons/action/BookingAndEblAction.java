@@ -1,10 +1,10 @@
-package org.dcsa.conformance.standards.standardscommons.action;
+package org.dcsa.conformance.standardscommons.action;
 
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
-import org.dcsa.conformance.standards.standardscommons.party.BookingDynamicScenarioParameters;
-import org.dcsa.conformance.standards.standardscommons.party.EblDynamicScenarioParameters;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 
 @Getter
 public abstract class BookingAndEblAction extends ConformanceAction {

@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standards.standardscommons.action.BookingAndEblAction;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 import java.util.Set;
 

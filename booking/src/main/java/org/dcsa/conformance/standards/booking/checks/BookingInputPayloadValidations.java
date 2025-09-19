@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
-import org.dcsa.conformance.standards.standardscommons.party.BookingDynamicScenarioParameters;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 
 @UtilityClass
 public class BookingInputPayloadValidations {

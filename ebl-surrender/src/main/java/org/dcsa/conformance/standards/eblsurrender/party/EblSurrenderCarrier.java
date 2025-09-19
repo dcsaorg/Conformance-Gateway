@@ -135,7 +135,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
         OBJECT_MAPPER
             .createObjectNode()
             .put("surrenderRequestReference", srr)
-            .put("org/dcsa/conformance/standards/standardscommons", action);
+            .put("action", action);
     asyncCounterpartNotification(null, "/v3/ebl-surrender-responses", carrierResponse);
 
     if (Objects.equals(

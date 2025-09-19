@@ -8,7 +8,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.standardscommons.action.BookingAndEblAction;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 @Getter
 @Slf4j

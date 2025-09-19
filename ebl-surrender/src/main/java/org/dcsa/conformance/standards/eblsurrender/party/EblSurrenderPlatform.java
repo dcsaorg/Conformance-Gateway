@@ -122,7 +122,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblSurrenderPlatform.handleRequest(%s)".formatted(request));
     JsonNode jsonRequest = request.message().body().getJsonBody();
-    String action = jsonRequest.get("org/dcsa/conformance/standards/standardscommons").asText();
+    String action = jsonRequest.get("action").asText();
     boolean isSurrenderAccepted = Objects.equals("SURR", action);
     String srr = jsonRequest.get("surrenderRequestReference").asText();
     String tdr = tdrsBySrr.remove(srr);

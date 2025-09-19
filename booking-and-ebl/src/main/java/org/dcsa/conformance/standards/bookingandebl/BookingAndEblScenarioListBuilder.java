@@ -305,7 +305,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                 TD_SURRENDERED_FOR_AMENDMENT)
                                                                                                                                                                                                             .then(
-                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                uc11CarrierVoidTDAndIssueAmendedTransportDocument()
                                                                                                                                                                                                                     .then(
                                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                             TD_ISSUED)))))))))),
@@ -337,7 +337,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                 TD_SURRENDERED_FOR_AMENDMENT)
                                                                                                                                                                                                             .then(
-                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                uc11CarrierVoidTDAndIssueAmendedTransportDocument()
                                                                                                                                                                                                                     .then(
                                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                             TD_ISSUED)))))))),
@@ -364,7 +364,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                                                 null,
                                                                                                                                                                                                                 false)
                                                                                                                                                                                                             .then(
-                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                uc11CarrierVoidTDAndIssueAmendedTransportDocument()
                                                                                                                                                                                                                     .then(
                                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                             TD_ISSUED))))))))))))))))))))))))),
@@ -443,7 +443,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                 TD_SURRENDERED_FOR_AMENDMENT)
                                                                                                                                                                                                             .then(
-                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                uc11CarrierVoidTDAndIssueAmendedTransportDocument()
                                                                                                                                                                                                                     .then(
                                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                             TD_ISSUED)))))))))),
@@ -475,7 +475,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                 TD_SURRENDERED_FOR_AMENDMENT)
                                                                                                                                                                                                             .then(
-                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                uc11CarrierVoidTDAndIssueAmendedTransportDocument()
                                                                                                                                                                                                                     .then(
                                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                             TD_ISSUED)))))))),
@@ -502,7 +502,7 @@ public class BookingAndEblScenarioListBuilder
                                                                                                                                                                                                                 null,
                                                                                                                                                                                                                 false)
                                                                                                                                                                                                             .then(
-                                                                                                                                                                                                                uc11CarrierVoidTDandIssueAmendedTransportDocument()
+                                                                                                                                                                                                                uc11CarrierVoidTDAndIssueAmendedTransportDocument()
                                                                                                                                                                                                                     .then(
                                                                                                                                                                                                                         shipperGetTransportDocument(
                                                                                                                                                                                                                             TD_ISSUED))))))))))))))))))))))))))))
@@ -754,7 +754,7 @@ public class BookingAndEblScenarioListBuilder
   }
 
   private static BookingAndEblScenarioListBuilder
-      uc11CarrierVoidTDandIssueAmendedTransportDocument() {
+      uc11CarrierVoidTDAndIssueAmendedTransportDocument() {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();

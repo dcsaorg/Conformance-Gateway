@@ -1,5 +1,10 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250926-beta
+
+Refined attribute descriptions. (SD-2458)
+
+
 ## Snapshot v1.0.0-20250912-beta
 
 Added `Reference` type code `VBN` for V-Bond Number. (SD-2435)

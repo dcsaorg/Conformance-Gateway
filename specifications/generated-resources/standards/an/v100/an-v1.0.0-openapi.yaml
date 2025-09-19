@@ -523,15 +523,15 @@ components:
           items:
             $ref: "#/components/schemas/PartyContactDetail"
         pickupInformation:
-          description: "Pickup information"
+          description: "Consolidates the information required to pick up the container."
           allOf:
           - $ref: "#/components/schemas/PickupInformation"
         returnInformation:
-          description: "Return information"
+          description: "Groups the information regarding empty-equipment return."
           allOf:
           - $ref: "#/components/schemas/ReturnInformation"
         releaseInformation:
-          description: "Release information"
+          description: "Compiles the information relevant to shipment release."
           allOf:
           - $ref: "#/components/schemas/ReleaseInformation"
         customsClearance:
@@ -615,7 +615,7 @@ components:
           items:
             $ref: "#/components/schemas/DocumentParty"
         transport:
-          description: "Transport info"
+          description: "Transport details relevant to the arrival notice."
           allOf:
           - $ref: "#/components/schemas/Transport"
         freeTimes:
@@ -1014,7 +1014,7 @@ components:
       type: "object"
       properties:
         customsClearancePoint:
-          description: "Location information"
+          description: "The location where customs clearance occurs."
           allOf:
           - $ref: "#/components/schemas/Location"
         immediateTransportationEntry:
@@ -1260,7 +1260,8 @@ components:
           description: "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure."
           allOf:
           - $ref: "#/components/schemas/Limits"
-      description: "Specification for `Dangerous Goods`. It is mandatory to provide one of `UNNumber` or `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**."
+      description: |
+        Specification for Dangerous Goods. Provide one of UNNumber or NANumber. Based on IMDG Code Amendment 41-22.
     DocumentParty:
       type: "object"
       properties:
@@ -1942,7 +1943,9 @@ components:
           type: "string"
           description: "Contact email address"
           example: "jane.doe@example.com"
-      description: "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided."
+      description: |
+        The contact details of the person to contact.
+        Provide either phone and/or email along with the name; both may be provided.
     PaymentRemittance:
       type: "object"
       properties:
@@ -1989,7 +1992,7 @@ components:
             The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.
           allOf:
           - $ref: "#/components/schemas/Location"
-      description: "Pickup information"
+      description: "Consolidates the information required to pick up the container."
     PostArrivalNoticeNotificationsRequest:
       type: "object"
       properties:
@@ -2121,7 +2124,7 @@ components:
             The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
           items:
             $ref: "#/components/schemas/PartyContactDetail"
-      description: "Release information"
+      description: "Compiles the information relevant to shipment release."
     ReturnInformation:
       type: "object"
       properties:
@@ -2138,9 +2141,9 @@ components:
         returnInstructions:
           maxLength: 5000
           type: "string"
-          description: "Return instructions"
+          description: "Instructions for returning the empty equipment."
           example: "Please place the container..."
-      description: "Return information"
+      description: "Groups the information regarding empty-equipment return."
     Seal:
       type: "object"
       properties:
@@ -2255,7 +2258,7 @@ components:
             Full or partial information, considered relevant in this context, on some or all `Legs` of the `Transport`
           items:
             $ref: "#/components/schemas/Leg"
-      description: "Transport info"
+      description: "Transport details relevant to the arrival notice."
     UtilizedTransportEquipment:
       type: "object"
       properties:
@@ -2303,11 +2306,11 @@ components:
           items:
             $ref: "#/components/schemas/CustomsReference"
         pickupInformation:
-          description: "Pickup information"
+          description: "Consolidates the information required to pick up the container."
           allOf:
           - $ref: "#/components/schemas/PickupInformation"
         returnInformation:
-          description: "Return information"
+          description: "Groups the information regarding empty-equipment return."
           allOf:
           - $ref: "#/components/schemas/ReturnInformation"
         charges:

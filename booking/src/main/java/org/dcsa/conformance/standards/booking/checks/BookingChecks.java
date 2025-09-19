@@ -18,13 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.databind.node.MissingNode;
-import com.fasterxml.jackson.databind.node.NullNode;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.*;
-import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
+import org.dcsa.conformance.standards.standardscommons.party.BookingDynamicScenarioParameters;
 
 @UtilityClass
 public class BookingChecks {

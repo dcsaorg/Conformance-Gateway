@@ -181,7 +181,7 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
                     EblSurrenderRole::isCarrier,
                     getMatchedNotificationExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    JsonPointer.compile("/action"),
+                    JsonPointer.compile("/org/dcsa/conformance/standards/standardscommons"),
                     accept ? "SURR" : "SREJ")));
       }
     };

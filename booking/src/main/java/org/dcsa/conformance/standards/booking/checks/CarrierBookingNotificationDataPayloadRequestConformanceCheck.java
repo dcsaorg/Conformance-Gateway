@@ -7,9 +7,8 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
-import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
+import org.dcsa.conformance.standards.standardscommons.party.BookingDynamicScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.EblDynamicScenarioParameters;
 
 public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
     extends AbstractCarrierPayloadConformanceCheck {

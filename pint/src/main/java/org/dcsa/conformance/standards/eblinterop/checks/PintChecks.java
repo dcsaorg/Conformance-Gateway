@@ -423,7 +423,7 @@ public class PintChecks {
               var issues = new LinkedHashSet<String>();
               var hadIssuance = false;
               for (var transaction : payload.path("transactions")) {
-                if (transaction.path("action").asText("").equals("ISSU")) {
+                if (transaction.path("org/dcsa/conformance/standards/standardscommons").asText("").equals("ISSU")) {
                   hadIssuance = true;
                   break;
                 }

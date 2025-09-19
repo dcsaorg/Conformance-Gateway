@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.party.EblDynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.models.TriConsumer;
 import org.dcsa.conformance.standards.ebl.party.*;
+import org.dcsa.conformance.standards.standardscommons.party.EblDynamicScenarioParameters;
 
 @UtilityClass
 public class EblChecks {

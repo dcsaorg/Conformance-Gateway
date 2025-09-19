@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
+import org.dcsa.conformance.standards.standardscommons.party.BookingDynamicScenarioParameters;
 import org.junit.jupiter.api.Test;
 
 class BookingDynamicScenarioParametersTest {

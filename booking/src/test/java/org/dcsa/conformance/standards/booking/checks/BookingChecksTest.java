@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
+import org.dcsa.conformance.standards.standardscommons.party.BookingDynamicScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

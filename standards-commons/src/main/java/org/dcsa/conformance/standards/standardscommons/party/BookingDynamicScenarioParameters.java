@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.booking.party;
+package org.dcsa.conformance.standards.standardscommons.party;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;

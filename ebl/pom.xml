@@ -16,11 +16,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.dcsa.conformance</groupId>
-			<artifactId>core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.dcsa.conformance</groupId>
-			<artifactId>booking</artifactId>
+			<artifactId>standards-commons</artifactId>
 		</dependency>
 
 		<dependency>

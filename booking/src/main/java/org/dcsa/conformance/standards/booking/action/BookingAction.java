@@ -18,7 +18,8 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.*;
-import org.dcsa.conformance.standards.booking.party.BookingDynamicScenarioParameters;
+import org.dcsa.conformance.standards.standardscommons.party.BookingDynamicScenarioParameters;
+import org.dcsa.conformance.standards.standardscommons.action.BookingAndEblAction;
 
 public abstract class BookingAction extends BookingAndEblAction {
 

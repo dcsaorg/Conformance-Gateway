@@ -13,7 +13,7 @@ import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.util.ErrorFormatter;
-import org.dcsa.conformance.standards.booking.action.BookingAndEblAction;
+import org.dcsa.conformance.standards.standardscommons.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.checks.EblInputPayloadValidations;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 

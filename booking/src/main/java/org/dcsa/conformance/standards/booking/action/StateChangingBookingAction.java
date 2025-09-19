@@ -9,6 +9,7 @@ import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.standardscommons.action.BookingAndEblAction;
 
 public abstract class StateChangingBookingAction extends BookingAction {
 

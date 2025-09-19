@@ -119,7 +119,7 @@ public class TDSendingState {
       .put("partyCode", sendingEPUI)
       .put("codeListProvider", sendingPlatform);
     var transaction = OBJECT_MAPPER.createObjectNode()
-      .put("action", action)
+      .put("org/dcsa/conformance/standards/standardscommons", action)
       .put("timestamp", Instant.now().toEpochMilli());
     transaction.set("actor", actor);
     transaction.set("recipient", receiverParty);

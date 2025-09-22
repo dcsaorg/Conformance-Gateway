@@ -152,7 +152,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                     true,
                                     ScenarioType.REGULAR_STRAIGHT_BL,
                                     uc8Get(uc12Get(uc13Get())))),
-                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get())))))))))*/
+                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get())))))))))
             /*            Map.entry(
             "Carrier error response conformance",
             carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)

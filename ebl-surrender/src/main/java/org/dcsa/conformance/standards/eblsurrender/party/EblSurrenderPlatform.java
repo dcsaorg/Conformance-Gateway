@@ -5,7 +5,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseAction;
-import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseCarrierErrorAction;
-import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponsePlatformErrorAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseErrorAction;
 
 @Slf4j
 public class EblSurrenderPlatform extends ConformanceParty {
@@ -71,8 +69,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(SurrenderRequestResponseAction.class, this::requestSurrender),
-        Map.entry(SurrenderRequestResponsePlatformErrorAction.class, this::requestSurrender),
-        Map.entry(SurrenderRequestResponseCarrierErrorAction.class, this::requestSurrender));
+        Map.entry(SurrenderRequestResponseErrorAction.class, this::requestSurrender));
   }
 
   private void requestSurrender(JsonNode actionPrompt) {
@@ -118,11 +115,11 @@ public class EblSurrenderPlatform extends ConformanceParty {
                     "SURRENDER_ACTION_CODE_PLACEHOLDER",
                     forAmendment ? "SURRENDER_FOR_AMENDMENT" : "SURRENDER_FOR_DELIVERY")));
 
-    boolean platformErrorScenario =
+    boolean errorScenario =
         actionPrompt
-            .path(SurrenderRequestResponsePlatformErrorAction.SEND_NO_TRANSPORT_DOCUMENT_REFERENCE)
+            .path(SurrenderRequestResponseErrorAction.SEND_NO_TRANSPORT_DOCUMENT_REFERENCE)
             .asBoolean(false);
-    if (platformErrorScenario) {
+    if (errorScenario) {
       ((ObjectNode) jsonRequestBody).put("transportDocumentReference", INVALID_TDR);
     }
 
@@ -169,36 +166,21 @@ public class EblSurrenderPlatform extends ConformanceParty {
               new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
     } else {
       response =
-          return409(
-              request,
-              "Rejecting '%s' for document '%s' because it is in state '%s'"
-                  .formatted(action, tdr, eblStatesById.get(tdr)));
+          request.createResponse(
+              409,
+              Map.of(API_VERSION, List.of(apiVersion)),
+              new ConformanceMessageBody(
+                  OBJECT_MAPPER
+                      .createObjectNode()
+                      .put(
+                          "comments",
+                          "Rejecting '%s' for document '%s' because it is in state '%s'"
+                              .formatted(action, tdr, eblStatesById.get(tdr)))));
     }
 
     addOperatorLogEntry(
         "Handling notification with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
             .formatted(action, srr, tdr, eblStatesById.get(tdr)));
     return response;
-  }
-
-  private ConformanceResponse return409(ConformanceRequest request, String message) {
-    ObjectNode response =
-        (ObjectNode)
-            JsonToolkit.templateFileToJsonNode(
-                "/standards/eblsurrender/messages/eblsurrender-api-v3.0.0-error-message.json",
-                Map.of(
-                    "HTTP_METHOD_PLACEHOLDER",
-                    request.method(),
-                    "REQUEST_URI_PLACEHOLDER",
-                    request.url(),
-                    "REFERENCE_PLACEHOLDER",
-                    UUID.randomUUID().toString(),
-                    "ERROR_DATE_TIME_PLACEHOLDER",
-                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
-                    "ERROR_MESSAGE_PLACEHOLDER",
-                    message));
-
-    return request.createResponse(
-        409, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 }

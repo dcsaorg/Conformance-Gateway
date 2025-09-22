@@ -10,8 +10,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseAction;
-import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseCarrierErrorAction;
-import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponsePlatformErrorAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseErrorAction;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
 @Slf4j
@@ -35,42 +34,37 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
     return Stream.of(
-//            Map.entry(
-//                "Surrender Accepted",
-//                noAction()
-//                    .thenEither(
-//                        supplyAvailableTdrAction("SURR", "Straight eBL")
-//                            .thenEither(
-//                                requestSurrenderForDeliveryAnd(true),
-//                                requestSurrenderForAmendmentAnd(true, false),
-//                                requestSurrenderForAmendmentAnd(true, true)),
-//                        supplyAvailableTdrAction("SURR", "Negotiable eBL")
-//                            .thenEither(
-//                                requestSurrenderForDeliveryAnd(true),
-//                                requestSurrenderForAmendmentAnd(true, false),
-//                                requestSurrenderForAmendmentAnd(true, true)))),
-//            Map.entry(
-//                "Surrender Rejected",
-//                noAction()
-//                    .thenEither(
-//                        supplyAvailableTdrAction("SREJ", "Straight eBL")
-//                            .thenEither(
-//                                requestSurrenderForDeliveryAnd(false),
-//                                requestSurrenderForAmendmentAnd(false, false),
-//                                requestSurrenderForAmendmentAnd(false, true)),
-//                        supplyAvailableTdrAction("SREJ", "Negotiable eBL")
-//                            .thenEither(
-//                                requestSurrenderForDeliveryAnd(false),
-//                                requestSurrenderForAmendmentAnd(false, false),
-//                                requestSurrenderForAmendmentAnd(false, true)))),
-//            Map.entry(
-//                "Carrier error response conformance",
-//                supplyAvailableTdrAction("SURR", "Straight eBl")
-//                    .then(requestSurrenderCarrierErrorResponse())),
             Map.entry(
-                "Platform error response conformance",
-                supplyAvailableTdrActionError("SURR", "Straight eBl")
-                    .then(requestSurrenderPlatformErrorResponse())))
+                "Surrender Accepted",
+                noAction()
+                    .thenEither(
+                        supplyAvailableTdrAction("SURR", "Straight eBL")
+                            .thenEither(
+                                requestSurrenderForDeliveryAnd(true),
+                                requestSurrenderForAmendmentAnd(true, false),
+                                requestSurrenderForAmendmentAnd(true, true)),
+                        supplyAvailableTdrAction("SURR", "Negotiable eBL")
+                            .thenEither(
+                                requestSurrenderForDeliveryAnd(true),
+                                requestSurrenderForAmendmentAnd(true, false),
+                                requestSurrenderForAmendmentAnd(true, true)))),
+            Map.entry(
+                "Surrender Rejected",
+                noAction()
+                    .thenEither(
+                        supplyAvailableTdrAction("SREJ", "Straight eBL")
+                            .thenEither(
+                                requestSurrenderForDeliveryAnd(false),
+                                requestSurrenderForAmendmentAnd(false, false),
+                                requestSurrenderForAmendmentAnd(false, true)),
+                        supplyAvailableTdrAction("SREJ", "Negotiable eBL")
+                            .thenEither(
+                                requestSurrenderForDeliveryAnd(false),
+                                requestSurrenderForAmendmentAnd(false, false),
+                                requestSurrenderForAmendmentAnd(false, true)))),
+            Map.entry(
+                "Carrier error response conformance",
+                supplyAvailableTdrAction("SURR", "Straight eBl").then(requestSurrenderError())))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -86,16 +80,7 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblSurrenderScenarioListBuilder(
         noPreviousAction ->
-            new SupplyScenarioParametersAction(carrierPartyName, null, response, eblType,false));
-  }
-
-  private static EblSurrenderScenarioListBuilder supplyAvailableTdrActionError(
-      String response, String eblType) {
-    log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrActionError()");
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    return new EblSurrenderScenarioListBuilder(
-        noPreviousAction ->
-            new SupplyScenarioParametersAction(carrierPartyName, null, response, eblType, true));
+            new SupplyScenarioParametersAction(carrierPartyName, null, response, eblType));
   }
 
   private static EblSurrenderScenarioListBuilder requestSurrenderForAmendmentAnd(
@@ -135,26 +120,13 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                 isSWTP));
   }
 
-  private static EblSurrenderScenarioListBuilder requestSurrenderCarrierErrorResponse() {
+  private static EblSurrenderScenarioListBuilder requestSurrenderError() {
     EblSurrenderComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblSurrenderScenarioListBuilder(
         previousAction ->
-            new SurrenderRequestResponsePlatformErrorAction(
-                platformPartyName,
-                carrierPartyName,
-                previousAction,
-                componentFactory.getMessageSchemaValidator("ErrorResponse")));
-  }
-
-  private static EblSurrenderScenarioListBuilder requestSurrenderPlatformErrorResponse() {
-    EblSurrenderComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String platformPartyName = threadLocalPlatformPartyName.get();
-    return new EblSurrenderScenarioListBuilder(
-        previousAction ->
-            new SurrenderRequestResponseCarrierErrorAction(
+            new SurrenderRequestResponseErrorAction(
                 platformPartyName,
                 carrierPartyName,
                 previousAction,

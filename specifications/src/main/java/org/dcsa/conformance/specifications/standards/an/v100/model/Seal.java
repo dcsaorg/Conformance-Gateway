@@ -29,6 +29,7 @@ The source of the seal, namely who has affixed the seal.
 - `CUS` (Customs)
 """,
       example = "CUS",
-      enumAsRef = true)
+      enumAsRef = true,
+      maxLength = 10)
   protected String source;
 }

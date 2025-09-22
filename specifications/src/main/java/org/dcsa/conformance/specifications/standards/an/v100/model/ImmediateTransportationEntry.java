@@ -17,7 +17,7 @@ public class ImmediateTransportationEntry {
   @Schema(
       name = "FIRMSCode",
       maxLength = 4,
-      example = "a391",
+      example = "B456",
       description =
 """
 The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier

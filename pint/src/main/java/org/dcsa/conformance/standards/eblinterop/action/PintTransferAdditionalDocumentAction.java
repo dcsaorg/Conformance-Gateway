@@ -43,7 +43,7 @@ public class PintTransferAdditionalDocumentAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Send transfer-transaction request");
+    return getMarkdownHumanReadablePrompt("prompt-initiate-transfer.md");
   }
 
   @Override

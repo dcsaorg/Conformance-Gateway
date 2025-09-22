@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +37,9 @@ public class PintReceiverValidationAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Request receiver validation for:  " + getDsp().receiverValidation().toString());
+    return getMarkdownHumanReadablePrompt(
+        Map.of("RECEIVER_VALIDATION", getDsp().receiverValidation().toString()),
+        "prompt-receiver-validation.md");
   }
 
   @Override

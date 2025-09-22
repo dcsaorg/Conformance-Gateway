@@ -1,0 +1,1 @@
+Retry the transfer-transaction request with the latest transaction entry resigned.

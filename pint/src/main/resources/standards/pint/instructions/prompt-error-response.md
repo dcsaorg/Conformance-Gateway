@@ -1,0 +1,1 @@
+Not relevant for human operators: used only by synthetic sending parties when starting an envelope transfer with an invalid facilityCode.

@@ -1,0 +1,1 @@
+Provide parameters for the receiver validation endpoint.

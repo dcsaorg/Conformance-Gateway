@@ -51,7 +51,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
                 TRANSPORT_DOCUMENT_PATH,
                 () ->
                     EblChecks.getTdPayloadChecks(
-                        standardVersion, transportDocumentStatus, dspSupplier)))
+                        standardVersion, transportDocumentStatus, dspSupplier, tdrIsKnown)))
         .flatMap(Function.identity());
   }
 

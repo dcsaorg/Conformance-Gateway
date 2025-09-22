@@ -26,7 +26,7 @@ public class UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTran
     var node = super.asJsonNode()
       .put("documentReference", dsp.transportDocumentReference())
       .put("scenarioType", dsp.scenarioType().name());
-    node.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
+    // node.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
     return node;
   }
 

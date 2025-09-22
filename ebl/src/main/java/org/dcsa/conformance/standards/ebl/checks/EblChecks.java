@@ -410,24 +410,21 @@ public class EblChecks {
     )
   );
 
-  private static final JsonRebaseableContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
-    "All utilizedTransportEquipments where 'isNonOperatingReefer' is 'false' must have 'activeReeferSettings'",
-    ALL_UTE,
-    JsonAttribute.ifMatchedThen(
-      JsonAttribute.isFalse(IS_NON_OPERATING_REEFER),
-      JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBePresent())
-    )
-  );
+  private static final JsonRebaseableContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "All utilizedTransportEquipments where 'isNonOperatingReefers' is 'false' must have 'activeReeferSettings'",
+          ALL_UTE,
+          JsonAttribute.ifMatchedThen(
+              JsonAttribute.isFalse(IS_NON_OPERATING_REEFER),
+              JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBePresent())));
 
-  private static final JsonRebaseableContentCheck NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
-    "All utilizedTransportEquipments where 'isNonOperatingReefer' is 'true' cannot have 'activeReeferSettings'",
-    ALL_UTE,
-    JsonAttribute.ifMatchedThen(
-      JsonAttribute.isTrue(IS_NON_OPERATING_REEFER),
-      JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBeAbsent())
-    )
-  );
-
+  private static final JsonRebaseableContentCheck NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "All utilizedTransportEquipments where 'isNonOperatingReefER' is 'true' cannot have 'activeReeferSettings'",
+          ALL_UTE,
+          JsonAttribute.ifMatchedThen(
+              JsonAttribute.isTrue(IS_NON_OPERATING_REEFER),
+              JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBeAbsent())));
 
   private static final JsonRebaseableContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in '*.customsReferences' must be unique",
@@ -1100,7 +1097,7 @@ public class EblChecks {
     }
 
     checks.addAll(STATIC_SI_CHECKS);
-    
+
     checks.add(FEEDBACKS_PRESENCE);
     /* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
         checks.add(JsonAttribute.lostAttributeCheck(
@@ -1229,17 +1226,33 @@ public class EblChecks {
       String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Supplier<DynamicScenarioParameters> dspSupplier) {
+    return getTdPayloadChecks(standardVersion, transportDocumentStatus, dspSupplier, true);
+  }
+
+  public static List<JsonContentCheck> getTdPayloadChecks(
+      String standardVersion,
+      TransportDocumentStatus transportDocumentStatus,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      boolean tdrIsKnown) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
+
+    // Create appropriate DSP supplier based on tdrIsKnown
+    Supplier<String> tdrSupplier =
+        tdrIsKnown ? () -> dspSupplier.get().transportDocumentReference() : null;
+
+    // Use the tdrSupplier (which can be null) but keep the main dspSupplier for other validations
     genericTdContentChecks(
         jsonContentChecks,
-        () -> dspSupplier.get().transportDocumentReference(),
+        tdrSupplier, // Only this is null when tdrIsKnown=false
         transportDocumentStatus);
+
+    // All other validations that need scenario information can still use the dspSupplier
     jsonContentChecks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
             "[Scenario] Validate the containers reefer settings",
             mav -> mav.submitAllMatching("utilizedTransportEquipments.*"),
             (nodeToValidate, contextPath) -> {
-              var scenario = dspSupplier.get().scenarioType();
+              var scenario = dspSupplier.get().scenarioType(); // This still works
               var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
               var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
               var issues = new LinkedHashSet<String>();

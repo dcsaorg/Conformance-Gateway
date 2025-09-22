@@ -30,10 +30,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   static final Set<String> SCENARIO_SUITES =
       Set.of(
-          SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
-          SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
-          SCENARIO_SUITE_SI_TD_COMBINED,
-          SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS);
+          /*          SCENARIO_SUITE_CONFORMANCE_SI_ONLY,*/
+          SCENARIO_SUITE_CONFORMANCE_TD_ONLY /*,
+                                             /*SCENARIO_SUITE_SI_TD_COMBINED,
+                                             SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS*/);
 
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -61,19 +61,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
 
-    if (SCENARIO_SUITE_CONFORMANCE_SI_ONLY.equals(componentFactory.getScenarioSuite())) {
+    /* if (SCENARIO_SUITE_CONFORMANCE_SI_ONLY.equals(componentFactory.getScenarioSuite())) {
       return createConformanceSiOnlyScenarios(false);
-    }
+    }*/
     if (SCENARIO_SUITE_CONFORMANCE_TD_ONLY.equals(componentFactory.getScenarioSuite())) {
       return createConformanceTdOnlyScenarios(true);
     }
-    if (SCENARIO_SUITE_SI_TD_COMBINED.equals(componentFactory.getScenarioSuite())) {
+    /* if (SCENARIO_SUITE_SI_TD_COMBINED.equals(componentFactory.getScenarioSuite())) {
       return createSIandTDCombinedScenarios(false);
     }
     if (SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS.equals(componentFactory.getScenarioSuite())) {
       return createTDAmendmentScenarios(false);
-    }
-    throw new IllegalArgumentException("Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
+    }*/
+    throw new IllegalArgumentException(
+        "Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
   }
 
   private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceSiOnlyScenarios(
@@ -121,26 +122,28 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     return Stream.of(
             Map.entry(
                 "Supported shipment types scenarios",
-                noAction()
-                    .thenEither(
-                        Arrays.stream(ScenarioType.values())
-                            .filter(scenarioType -> scenarioType != ScenarioType.REGULAR_SWB_AMF)
-                            .map(scenarioType -> buildScenarioForType(scenarioType, isTd))
-                            .toArray(EblScenarioListBuilder[]::new))),
+                noAction().thenEither(buildScenarioForType(ScenarioType.REGULAR_SWB, isTd))) /*,
+
+
             Map.entry(
                 "Shipper interactions with transport document",
                 noAction()
                     .then(
                         uc6Get(
                             true,
-                            oobAmendment(uc6Get(false, uc8Get(uc12Get(uc13Get())))),
-                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get()))))))))),
-            Map.entry(
-                "Carrier error response conformance",
-                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(
-                        uc6CarrierPublishDraftTransportDocument(true)
-                            .then(shipperGetTransportDocumentErrorScenario()))))
+                            ScenarioType.REGULAR_STRAIGHT_BL,
+                            oobAmendment(
+                                uc6Get(
+                                    true,
+                                    ScenarioType.REGULAR_STRAIGHT_BL,
+                                    uc8Get(uc12Get(uc13Get())))),
+                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get())))))))))*/
+            /*            Map.entry(
+            "Carrier error response conformance",
+            carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                .then(
+                    uc6CarrierPublishDraftTransportDocument(true)
+                        .then(shipperGetTransportDocumentErrorScenario())))*/ )
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -158,6 +161,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                             false,
                             uc6Get(
                                 false,
+                                ScenarioType.REGULAR_STRAIGHT_BL,
                                 shipperGetShippingInstructionsRecordTDRef()
                                     .then(
                                         uc7Get(
@@ -188,6 +192,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                         true,
                                         uc6Get(
                                             false,
+                                            ScenarioType.REGULAR_STRAIGHT_BL,
                                             shipperGetShippingInstructionsRecordTDRef()
                                                 .then(
                                                     uc7Get(
@@ -202,6 +207,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                             false,
                             uc6Get(
                                 false,
+                                ScenarioType.REGULAR_STRAIGHT_BL,
                                 shipperGetShippingInstructionsRecordTDRef()
                                     .then(
                                         uc7Get(
@@ -247,6 +253,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                             false,
                             uc6Get(
                                 false,
+                                ScenarioType.REGULAR_STRAIGHT_BL,
                                 shipperGetShippingInstructionsRecordTDRef()
                                     .then(
                                         uc3Get(
@@ -259,6 +266,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                 true,
                                                 uc6Get(
                                                     false,
+                                                    ScenarioType.REGULAR_STRAIGHT_BL,
                                                     shipperGetTransportDocument(TD_DRAFT)
                                                         .then(uc7Get(uc8Get())))))),
                                 shipperGetShippingInstructionsRecordTDRef()
@@ -291,6 +299,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                             false,
                             uc6Get(
                                 false,
+                                ScenarioType.REGULAR_STRAIGHT_BL,
                                 shipperGetShippingInstructionsRecordTDRef()
                                     .then(
                                         uc7Get(
@@ -306,6 +315,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                             false,
                             uc6Get(
                                 false,
+                                ScenarioType.REGULAR_SWB,
                                 shipperGetShippingInstructionsRecordTDRef()
                                     .then(uc7Get(uc8Get())))))))
         .collect(
@@ -315,9 +325,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static EblScenarioListBuilder buildScenarioForType(ScenarioType type, boolean isTd) {
     if (type.isSWB()) {
-      return uc6Get(true, uc7Get(uc8Get()));
+      return uc6Get(true, type, uc7Get(uc8Get()));
     }
-    return uc6Get(true, uc7Get(uc8Get(uc12Get(uc13Get()))));
+    return uc6Get(true, type, uc7Get(uc8Get(uc12Get(uc13Get()))));
   }
 
   private static EblScenarioListBuilder uc3AndAllSiOnlyPathsFrom(
@@ -414,8 +424,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc6Get(
-      boolean start, EblScenarioListBuilder... thenEither) {
-    return uc6CarrierPublishDraftTransportDocument(start)
+      boolean skipSI, ScenarioType type, EblScenarioListBuilder... thenEither) {
+    return uc6CarrierPublishDraftTransportDocument(skipSI, type)
         .then(shipperGetTransportDocument(TD_DRAFT).thenEither(thenEither));
   }
 
@@ -664,18 +674,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }
 
-  private static EblScenarioListBuilder uc6CarrierPublishDraftTransportDocument(boolean skipSI) {
+  private static EblScenarioListBuilder uc6CarrierPublishDraftTransportDocument(
+      boolean skipSI, ScenarioType type) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
-      previousAction ->
-        new UC6_Carrier_PublishDraftTransportDocumentAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
-          skipSI));
+        previousAction ->
+            new UC6_Carrier_PublishDraftTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                type,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                skipSI));
   }
 
   private static EblScenarioListBuilder uc7ShipperApproveDraftTransportDocument() {

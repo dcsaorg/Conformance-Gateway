@@ -57,7 +57,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt("prompt-initiate-transfer.md");
+    return getMarkdownHumanReadablePrompt("prompt-initiate-and-close-transfer.md");
   }
 
   @Override

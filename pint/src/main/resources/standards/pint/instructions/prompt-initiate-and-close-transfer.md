@@ -1,5 +1,5 @@
-This action initiates an electronic Bill of Lading (eBL) transfer from your sending platform to the receiving platform
-in a PINT (Platform Interoperability) scenario.
+This action initiates and completes an electronic Bill of Lading (eBL) transfer in a single request-response cycle in a
+PINT (Platform Interoperability) scenario.
 
 **What your sending platform should do:**
 
@@ -20,16 +20,16 @@ in a PINT (Platform Interoperability) scenario.
 
 **Expected response:**
 
-- HTTP 201 Created status
-- Response may include `missingAdditionalDocumentChecksums` if additional documents are required
+- Variable HTTP status code based on the scenario being tested
+- **Signed response payload** confirming the transfer completion
+- The receiving platform validates and accepts the transfer immediately
 
 **Technical requirements:**
 
 - Use proper cryptographic signing with your configured X.509 certificates
 - Generate SHA-256 checksums for document validation
 - Follow PINT envelope structure specifications
-- Handle potential missing document scenarios appropriately
+- The receiving platform must return a properly signed completion response
 
-This tests your platform's ability to properly package, sign, and transmit eBL documents according to PINT
-interoperability standards.
-
+This tests your platforms' ability to perform a complete eBL transfer and closure in a single atomic operation according
+to PINT interoperability standards.

@@ -13,13 +13,21 @@ The reference is provided by the port to uniquely identify a port call.",
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "Event / portCall / vessel",vessel,Vessel,,,,,"Vessel information relevant for a port call service",
-"Event / portCall / vessel / dimensionUnit",dimensionUnit,string,,maxLength=3,,MTR,"The unit of measure which can be expressed in:
+"Event / portCall / vessel / aftDraft",aftDraft,number,,,,37,"The vertical distance between the waterline and the bottom of the hull (keel) at the stern (after part) of the vessel.
+The depth to which the after part of the ship is immersed in water.",
+"Event / portCall / vessel / airDraft",airDraft,number,,,,55.0,"The vertical distance from the surface of the water to the highest point of mast or aerial.",
+"Event / portCall / vessel / dimensionUnit",dimensionUnit,string,,maxLength=3,,MTR,"The unit of measure in which the vessel size and draft are expressed:
 - `MTR` (Meter)
-- `FOT` (Foot)",
-"Event / portCall / vessel / lengthOverall",lengthOverall,number,,,,245.45,"The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).
+- `FOT` (Foot)
 
-If the length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+If a length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
 E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
+"Event / portCall / vessel / draft",draft,number,,,,12.5,"The vertical distance between the waterline and the bottom of the hull (keel) of a ship.
+The depth to which a ship is immersed in water.",
+"Event / portCall / vessel / forwardDraft",forwardDraft,number,,,,35,"The vertical distance between the waterline and the bottom of the hull (keel) at the bow (forward part) of the vessel.
+The depth to which the forward part of the ship is immersed in water.",
+"Event / portCall / vessel / lengthOverall",lengthOverall,number,,,,245.45,"The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).",
+"Event / portCall / vessel / milesToDestinationPort",milesToDestinationPort,number,,,,245.45,"Remaining distance reported by the vessel to the berth in the next destination port, expressed in nautical miles.",
 "Event / portCall / vessel / vesselCallSign",vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU).
 It consists of a three-letter alphanumeric prefix that indicates nationality, followed by one to four characters
 to identify the individual vessel.",
@@ -28,6 +36,42 @@ The reference is the International Maritime Organisation (IMO) number, also some
 "Event / portCall / vessel / vesselMMSINumber",vesselMMSINumber,string,,maxLength=9,,278111222,"Maritime Mobile Service Identities (MMSIs) are nine-digit numbers used by maritime digital selective calling (DSC),
 automatic identification systems (AIS) and certain other equipment to uniquely identify a ship or a coast radio station.",
 "Event / portCall / vessel / vesselName",vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
+"Event / portCall / vessel / vesselPosition",vesselPosition,Location,,,,,"Current location of the vessel",
+"Event / portCall / vessel / vesselPosition / address",address,Address,,,,,"Location address",
+"Event / portCall / vessel / vesselPosition / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+"Event / portCall / vessel / vesselPosition / address / countryCode",countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+"Event / portCall / vessel / vesselPosition / address / floor",floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+"Event / portCall / vessel / vesselPosition / address / POBox",POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+"Event / portCall / vessel / vesselPosition / address / postCode",postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+"Event / portCall / vessel / vesselPosition / address / stateRegion",stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+"Event / portCall / vessel / vesselPosition / address / street",street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+"Event / portCall / vessel / vesselPosition / address / streetNumber",streetNumber,string,,maxLength=50,,100,"The number of the street.",
+"Event / portCall / vessel / vesselPosition / facility",facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+"Event / portCall / vessel / vesselPosition / facility / facilityCode",facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+"Event / portCall / vessel / vesselPosition / facility / facilityCodeListProvider",facilityCodeListProvider,string,,maxLength=10,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
+"Event / portCall / vessel / vesselPosition / facilityTypeCode",facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
+
+- `BORD` - Border
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp
+- `WAYP` - Waypoint",
+"Event / portCall / vessel / vesselPosition / geoCoordinate",geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+"Event / portCall / vessel / vesselPosition / geoCoordinate / latitude",latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+"Event / portCall / vessel / vesselPosition / geoCoordinate / longitude",longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+"Event / portCall / vessel / vesselPosition / locationName",locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+"Event / portCall / vessel / vesselPosition / UNLocationCode",UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
 "Event / portCall / vessel / vesselTypeCode",vesselTypeCode,string,,maxLength=4,,CONT,"Categorization of ocean-going vessels distinguished by the main cargo the vessel carries:
 - `GCGO` (General cargo)
 - `CONT` (Container)
@@ -40,10 +84,7 @@ automatic identification systems (AIS) and certain other equipment to uniquely i
 - `LGTK` (Liquefied gas tanker)
 - `ASSI` (Assistance)
 - `PILO` (Pilot boat)",
-"Event / portCall / vessel / width",width,number,,,,37.33,"Overall width of the ship measured at the widest point of the nominal waterline.
-
-If the width is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
-E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
+"Event / portCall / vessel / width",width,number,,,,37.33,"Overall width of the ship measured at the widest point of the nominal waterline.",
 "Event / portCallService",portCallService,PortCallService,,,,,"Port call service information",
 "Event / portCallService / facilityTypeCode",facilityTypeCode,string,,maxLength=4,,BRTH,"Code identifying a specific type of facility involved in a port call service:
 - `PBPL` (Pilot boarding place)

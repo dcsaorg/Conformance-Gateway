@@ -1069,32 +1069,6 @@ components:
           type: "string"
           description: "Vessel name"
           example: "King of the Seas"
-        lengthOverall:
-          type: "number"
-          description: |
-            The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).
-
-            If the length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
-            E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
-          format: "float"
-          example: 245.45
-        width:
-          type: "number"
-          description: |
-            Overall width of the ship measured at the widest point of the nominal waterline.
-
-            If the width is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
-            E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
-          format: "float"
-          example: 37.33
-        dimensionUnit:
-          maxLength: 3
-          type: "string"
-          description: |
-            The unit of measure which can be expressed in:
-            - `MTR` (Meter)
-            - `FOT` (Foot)
-          example: "MTR"
         vesselCallSign:
           maxLength: 10
           type: "string"
@@ -1120,6 +1094,66 @@ components:
             - `ASSI` (Assistance)
             - `PILO` (Pilot boat)
           example: "CONT"
+        vesselPosition:
+          description: "Current location of the vessel"
+          allOf:
+          - $ref: "#/components/schemas/Location"
+        milesToDestinationPort:
+          type: "number"
+          description: |
+            Remaining distance reported by the vessel to the berth in the next destination port, expressed in nautical miles.
+          format: "double"
+          example: 245.45
+        dimensionUnit:
+          maxLength: 3
+          type: "string"
+          description: |
+            The unit of measure in which the vessel size and draft are expressed:
+            - `MTR` (Meter)
+            - `FOT` (Foot)
+
+            If a length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+            E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
+          example: "MTR"
+        lengthOverall:
+          type: "number"
+          description: |
+            The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).
+          format: "float"
+          example: 245.45
+        width:
+          type: "number"
+          description: |
+            Overall width of the ship measured at the widest point of the nominal waterline.
+          format: "float"
+          example: 37.33
+        airDraft:
+          type: "number"
+          description: |
+            The vertical distance from the surface of the water to the highest point of mast or aerial.
+          format: "float"
+          example: 55.0
+        draft:
+          type: "number"
+          description: |
+            The vertical distance between the waterline and the bottom of the hull (keel) of a ship.
+            The depth to which a ship is immersed in water.
+          format: "float"
+          example: 12.5
+        aftDraft:
+          type: "number"
+          description: |
+            The vertical distance between the waterline and the bottom of the hull (keel) at the stern (after part) of the vessel.
+            The depth to which the after part of the ship is immersed in water.
+          format: "float"
+          example: 37
+        forwardDraft:
+          type: "number"
+          description: |
+            The vertical distance between the waterline and the bottom of the hull (keel) at the bow (forward part) of the vessel.
+            The depth to which the forward part of the ship is immersed in water.
+          format: "float"
+          example: 35
       description: "Vessel information relevant for a port call service"
   headers:
     API-Version:

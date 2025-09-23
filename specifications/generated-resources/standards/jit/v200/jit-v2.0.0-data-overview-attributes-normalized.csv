@@ -283,13 +283,21 @@ Timestamp,remark,string,,maxLength=500,,"Port closed due to strike","Free text u
 Timestamp,replyToTimestampID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the timestamp to which this timestamp is a reply",
 Timestamp,serviceDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the service was provided or is expected to be provided.",
 Timestamp,timestampID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the timestamp",
-Vessel,dimensionUnit,string,,maxLength=3,,MTR,"The unit of measure which can be expressed in:
+Vessel,aftDraft,number,,,,37,"The vertical distance between the waterline and the bottom of the hull (keel) at the stern (after part) of the vessel.
+The depth to which the after part of the ship is immersed in water.",
+Vessel,airDraft,number,,,,55.0,"The vertical distance from the surface of the water to the highest point of mast or aerial.",
+Vessel,dimensionUnit,string,,maxLength=3,,MTR,"The unit of measure in which the vessel size and draft are expressed:
 - `MTR` (Meter)
-- `FOT` (Foot)",
-Vessel,lengthOverall,number,,,,245.45,"The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).
+- `FOT` (Foot)
 
-If the length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+If a length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
 E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
+Vessel,draft,number,,,,12.5,"The vertical distance between the waterline and the bottom of the hull (keel) of a ship.
+The depth to which a ship is immersed in water.",
+Vessel,forwardDraft,number,,,,35,"The vertical distance between the waterline and the bottom of the hull (keel) at the bow (forward part) of the vessel.
+The depth to which the forward part of the ship is immersed in water.",
+Vessel,lengthOverall,number,,,,245.45,"The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).",
+Vessel,milesToDestinationPort,number,,,,245.45,"Remaining distance reported by the vessel to the berth in the next destination port, expressed in nautical miles.",
 Vessel,vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU).
 It consists of a three-letter alphanumeric prefix that indicates nationality, followed by one to four characters
 to identify the individual vessel.",
@@ -298,6 +306,7 @@ The reference is the International Maritime Organisation (IMO) number, also some
 Vessel,vesselMMSINumber,string,,maxLength=9,,278111222,"Maritime Mobile Service Identities (MMSIs) are nine-digit numbers used by maritime digital selective calling (DSC),
 automatic identification systems (AIS) and certain other equipment to uniquely identify a ship or a coast radio station.",
 Vessel,vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
+Vessel,vesselPosition,Location,,,,,"Current location of the vessel",
 Vessel,vesselTypeCode,string,,maxLength=4,,CONT,"Categorization of ocean-going vessels distinguished by the main cargo the vessel carries:
 - `GCGO` (General cargo)
 - `CONT` (Container)
@@ -310,7 +319,4 @@ Vessel,vesselTypeCode,string,,maxLength=4,,CONT,"Categorization of ocean-going v
 - `LGTK` (Liquefied gas tanker)
 - `ASSI` (Assistance)
 - `PILO` (Pilot boat)",
-Vessel,width,number,,,,37.33,"Overall width of the ship measured at the widest point of the nominal waterline.
-
-If the width is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
-E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
+Vessel,width,number,,,,37.33,"Overall width of the ship measured at the widest point of the nominal waterline.",

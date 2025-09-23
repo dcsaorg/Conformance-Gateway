@@ -33,6 +33,9 @@ import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEvent
 import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsResponse;
 import org.dcsa.conformance.specifications.standards.jit.v200.model.Event;
+import org.dcsa.conformance.specifications.standards.jit.v200.model.PortCall;
+import org.dcsa.conformance.specifications.standards.jit.v200.model.TerminalCall;
+import org.dcsa.conformance.specifications.standards.jit.v200.model.Vessel;
 
 public class JITStandardSpecification extends StandardSpecification {
 
@@ -74,9 +77,12 @@ public class JITStandardSpecification extends StandardSpecification {
         FeedbackElement.class,
         GetEventsError.class,
         GetEventsResponse.class,
+        PortCall.class,
         PostEventsError.class,
         PostEventsRequest.class,
-        PostEventsResponse.class);
+        PostEventsResponse.class,
+        TerminalCall.class,
+        Vessel.class);
   }
 
   @Override

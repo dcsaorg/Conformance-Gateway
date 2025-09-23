@@ -352,11 +352,19 @@ components:
     Event:
       type: "object"
       properties:
-        portCallID:
-          type: "string"
-          description: "Universally unique ID of the port call."
-          format: "uuid"
-          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        isFYI:
+          type: "boolean"
+          description: |
+            Flag indicating that this event is primarily meant for another party - but is sent as a FYI (for your information).
+          example: false
+        portCall:
+          description: "Port call information"
+          allOf:
+          - $ref: "#/components/schemas/PortCall"
+        terminalCall:
+          description: "Terminal call information"
+          allOf:
+          - $ref: "#/components/schemas/TerminalCall"
       description: "Just in Time Port Call event"
     FeedbackElement:
       type: "object"
@@ -417,6 +425,41 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `GET Events` request
+    PortCall:
+      type: "object"
+      properties:
+        portCallID:
+          type: "string"
+          description: "Universal unique identifier of the port call"
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        portVisitReference:
+          maxLength: 50
+          type: "string"
+          description: |
+            The unique reference that can be used to link different terminal calls to the same port visit.
+            The reference is provided by the port to uniquely identify a port call.
+          example: "NLAMS1234589"
+        UNLocationCode:
+          maxLength: 5
+          type: "string"
+          description: |
+            The UN Location code specifying where the place is located. The pattern used must be
+
+            - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+            - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+            More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
+          example: "NLAMS"
+        vessel:
+          description: "Vessel information relevant for a port call service"
+          allOf:
+          - $ref: "#/components/schemas/Vessel"
+        isOmitted:
+          type: "boolean"
+          description: "Flag indicating whether the port call is omitted by the carrier."
+          example: false
+      description: "Port call information"
     PostEventsError:
       type: "object"
       properties:
@@ -463,6 +506,144 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `POST Events` request
+    TerminalCall:
+      type: "object"
+      properties:
+        terminalCallID:
+          type: "string"
+          description: "Universal unique identifier of the terminal call"
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        terminalCallReference:
+          maxLength: 100
+          type: "string"
+          description: |
+            The unique reference of a terminal call, provided by the vessel operator.
+
+            This corresponds to the property `transportCallReference` from the DCSA Operational Vessel Schedules (OVS) 3.0 standard.
+          example: "15063401"
+        sequenceNumber:
+          type: "integer"
+          description: |
+            Sequential number assigned to each terminal call within a port call,
+            indicating the order in which the terminal calls are scheduled to occur.
+            This number helps differentiate multiple terminal visits in the same port call.
+          format: "int32"
+          example: 2
+        carrierServiceName:
+          maxLength: 50
+          type: "string"
+          description: "The carrier-specific name of the service for which the schedule details are published."
+          example: "Great Lion Service"
+        carrierServiceCode:
+          maxLength: 11
+          type: "string"
+          description: "The carrier-specific code of the service for which the schedule details are published."
+          example: "FE1"
+        universalServiceReference:
+          maxLength: 8
+          type: "string"
+          description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
+          example: "SR12345A"
+        carrierImportVoyageNumber:
+          maxLength: 50
+          type: "string"
+          description: "Carrier-specific identifier of the import voyage."
+          example: "2208N"
+        universalImportVoyageReference:
+          maxLength: 5
+          type: "string"
+          description: "Universal identifier of the import voyage."
+          example: "2301W"
+        carrierExportVoyageNumber:
+          maxLength: 50
+          type: "string"
+          description: "Carrier-specific identifier of the export voyage."
+          example: "2208N"
+        universalExportVoyageReference:
+          maxLength: 5
+          type: "string"
+          description: "Universal identifier of the export voyage."
+          example: "2301W"
+        isOmitted:
+          type: "boolean"
+          description: "Flag indicating whether the terminal call is omitted by the carrier."
+          example: false
+      description: "Terminal call information"
+    Vessel:
+      type: "object"
+      properties:
+        vesselIMONumber:
+          maxLength: 8
+          type: "string"
+          description: |
+            The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+            The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.
+          example: "9321483"
+        vesselMMSINumber:
+          maxLength: 9
+          type: "string"
+          description: |
+            Maritime Mobile Service Identities (MMSIs) are nine-digit numbers used by maritime digital selective calling (DSC),
+            automatic identification systems (AIS) and certain other equipment to uniquely identify a ship or a coast radio station.
+          example: "278111222"
+        vesselName:
+          maxLength: 50
+          type: "string"
+          description: "Vessel name"
+          example: "King of the Seas"
+        lengthOverall:
+          type: "number"
+          description: |
+            The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).
+
+            If the length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+            E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
+          format: "float"
+          example: 245.45
+        width:
+          type: "number"
+          description: |
+            Overall width of the ship measured at the widest point of the nominal waterline.
+
+            If the width is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+            E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
+          format: "float"
+          example: 37.33
+        dimensionUnit:
+          maxLength: 3
+          type: "string"
+          description: |
+            The unit of measure which can be expressed in:
+            - `MTR` (Meter)
+            - `FOT` (Foot)
+          example: "MTR"
+        vesselCallSign:
+          maxLength: 10
+          type: "string"
+          description: |
+            A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU).
+            It consists of a three-letter alphanumeric prefix that indicates nationality, followed by one to four characters
+            to identify the individual vessel.
+          example: "NCVV"
+        vesselTypeCode:
+          maxLength: 4
+          type: "string"
+          description: |
+            Categorization of ocean-going vessels distinguished by the main cargo the vessel carries:
+            - `GCGO` (General cargo)
+            - `CONT` (Container)
+            - `RORO` (RoRo)
+            - `CARC` (Car carrier)
+            - `PASS` (Passenger)
+            - `FERY` (Ferry)
+            - `BULK` (Bulk)
+            - `TANK` (Tanker)
+            - `LGTK` (Liquefied gas tanker)
+            - `ASSI` (Assistance)
+            - `PILO` (Pilot boat)
+          example: "CONT"
+      description: "Vessel information relevant for a port call service"
   headers:
     API-Version:
       description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."

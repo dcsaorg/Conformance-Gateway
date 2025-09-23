@@ -1,5 +1,7 @@
 Object,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
-Event,portCallID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the port call.",
+Event,isFYI,boolean,,,,false,"Flag indicating that this event is primarily meant for another party - but is sent as a FYI (for your information).",
+Event,portCall,PortCall,,,,,"Port call information",
+Event,terminalCall,TerminalCall,,,,,"Terminal call information",
 FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed to a user of the event publishing organization",
 FeedbackElement,propertyPath,string,,maxLength=1000,,"$.events[2].location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
 about which the feedback is provided (if applicable)",
@@ -14,6 +16,17 @@ At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.",
 GetEventsResponse,events,"Event list",,,,,"The list of events matching the filter specified by the request query parameters",
 GetEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
+PortCall,isOmitted,boolean,,,,false,"Flag indicating whether the port call is omitted by the carrier.",
+PortCall,portCallID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the port call",
+PortCall,portVisitReference,string,,maxLength=50,,NLAMS1234589,"The unique reference that can be used to link different terminal calls to the same port visit.
+The reference is provided by the port to uniquely identify a port call.",
+PortCall,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+PortCall,vessel,Vessel,,,,,"Vessel information relevant for a port call service",
 PostEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
 
 At least one feedback element of severity `ERROR` is expected.
@@ -28,3 +41,49 @@ PostEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of
 There can be zero, one or more feedback elements per event in the request.
 The order of `feedbackElements` is not related to the order of events in the request.
 Instead, the relevant request event is indicated by the `propertyPath` of each `FeedbackElement`.",
+TerminalCall,"carrierExportVoyageNumber",string,,maxLength=50,,2208N,"Carrier-specific identifier of the export voyage.",
+TerminalCall,"carrierImportVoyageNumber",string,,maxLength=50,,2208N,"Carrier-specific identifier of the import voyage.",
+TerminalCall,carrierServiceCode,string,,maxLength=11,,FE1,"The carrier-specific code of the service for which the schedule details are published.",
+TerminalCall,carrierServiceName,string,,maxLength=50,,"Great Lion Service","The carrier-specific name of the service for which the schedule details are published.",
+TerminalCall,isOmitted,boolean,,,,false,"Flag indicating whether the terminal call is omitted by the carrier.",
+TerminalCall,sequenceNumber,integer,,,,2,"Sequential number assigned to each terminal call within a port call,
+indicating the order in which the terminal calls are scheduled to occur.
+This number helps differentiate multiple terminal visits in the same port call.",
+TerminalCall,terminalCallID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the terminal call",
+TerminalCall,terminalCallReference,string,,maxLength=100,,15063401,"The unique reference of a terminal call, provided by the vessel operator.
+
+This corresponds to the property `transportCallReference` from the DCSA Operational Vessel Schedules (OVS) 3.0 standard.",
+TerminalCall,"universalExportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the export voyage.",
+TerminalCall,"universalImportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the import voyage.",
+TerminalCall,"universalServiceReference",string,,maxLength=8,,SR12345A,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",
+Vessel,dimensionUnit,string,,maxLength=3,,MTR,"The unit of measure which can be expressed in:
+- `MTR` (Meter)
+- `FOT` (Foot)",
+Vessel,lengthOverall,number,,,,245.45,"The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).
+
+If the length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
+Vessel,vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU).
+It consists of a three-letter alphanumeric prefix that indicates nationality, followed by one to four characters
+to identify the individual vessel.",
+Vessel,vesselIMONumber,string,,maxLength=8,,9321483,"The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
+The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.",
+Vessel,vesselMMSINumber,string,,maxLength=9,,278111222,"Maritime Mobile Service Identities (MMSIs) are nine-digit numbers used by maritime digital selective calling (DSC),
+automatic identification systems (AIS) and certain other equipment to uniquely identify a ship or a coast radio station.",
+Vessel,vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
+Vessel,vesselTypeCode,string,,maxLength=4,,CONT,"Categorization of ocean-going vessels distinguished by the main cargo the vessel carries:
+- `GCGO` (General cargo)
+- `CONT` (Container)
+- `RORO` (RoRo)
+- `CARC` (Car carrier)
+- `PASS` (Passenger)
+- `FERY` (Ferry)
+- `BULK` (Bulk)
+- `TANK` (Tanker)
+- `LGTK` (Liquefied gas tanker)
+- `ASSI` (Assistance)
+- `PILO` (Pilot boat)",
+Vessel,width,number,,,,37.33,"Overall width of the ship measured at the widest point of the nominal waterline.
+
+If the width is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",

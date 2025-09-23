@@ -823,7 +823,8 @@ class BookingChecksTest {
     booking.set(
         "confirmedEquipments",
         OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
-    booking.set("transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
 
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
@@ -859,7 +860,8 @@ class BookingChecksTest {
   void testCheckConfirmedBookingFields_confirmedStatusEmptyConfirmedEquipments_invalid() {
     booking.put("bookingStatus", "CONFIRMED");
     booking.set("confirmedEquipments", OBJECT_MAPPER.createArrayNode()); // Empty array
-    booking.set("transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
     booking.set(
         "shipmentCutOffTimes",
         OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
@@ -876,7 +878,8 @@ class BookingChecksTest {
     booking.set(
         "confirmedEquipments",
         OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
-    booking.set("transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
     booking.set("shipmentCutOffTimes", OBJECT_MAPPER.createArrayNode()); // Empty array
 
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
@@ -902,7 +905,8 @@ class BookingChecksTest {
   @Test
   void testCheckConfirmedBookingFields_pendingAmendmentPartialFields_invalid() {
     booking.put("bookingStatus", "PENDING_AMENDMENT");
-    booking.set("transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
 
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
@@ -916,7 +920,7 @@ class BookingChecksTest {
     booking.put("bookingStatus", "UNKNOWN_STATUS");
 
     Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+        IllegalArgumentException.class,
+        () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
   }
 }

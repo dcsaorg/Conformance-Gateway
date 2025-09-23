@@ -145,7 +145,7 @@ as the original sending party of the API request.
 The assignment of party identifiers by the JIT proxy and the distribution of identifiers
 to the parties connecting through the JIT proxy are out of scope.
 """)
-                .schema(new Schema<>().type("string").maxLength(4096).example("Carrier-123"))),
+                .schema(new Schema<>().type("string").example("Carrier-123"))),
         Map.entry(
             REQUEST_RECEIVING_PARTY_HEADER,
             new Header()
@@ -158,7 +158,7 @@ the API client sets this request header to identify to the JIT proxy the target 
 The assignment of party identifiers by the JIT proxy and the distribution of identifiers
 to the parties connecting through the JIT proxy are out of scope.
 """)
-                .schema(new Schema<>().type("string").maxLength(4096).example("Terminal-456"))));
+                .schema(new Schema<>().type("string").example("Terminal-456"))));
   }
 
   private Stream<Map.Entry<String, Header>> getResponseCustomHeaders() {
@@ -178,7 +178,7 @@ The value of this response header must be the same as the value of the request h
 The assignment of party identifiers by the JIT proxy and the distribution of identifiers
 to the parties connecting through the JIT proxy are out of scope.
 """)
-                .schema(new Schema<>().type("string").maxLength(4096).example("Terminal-456"))),
+                .schema(new Schema<>().type("string").example("Terminal-456"))),
         Map.entry(
             RESPONSE_RECEIVING_PARTY_HEADER,
             new Header()
@@ -193,7 +193,7 @@ The value of this response header must be the same as the value of the request h
 The assignment of party identifiers by the JIT proxy and the distribution of identifiers
 to the parties connecting through the JIT proxy are out of scope.
 """)
-                .schema(new Schema<>().type("string").maxLength(4096).example("Carrier-123"))));
+                .schema(new Schema<>().type("string").example("Carrier-123"))));
   }
 
   private Operation operationEventsGet() {

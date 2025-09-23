@@ -111,30 +111,42 @@ paths:
         When responding with the last page of results, the event publisher no longer includes a `Next-Page-Cursor` response header. The last page of results may be empty, for example in the case of a stateless pagination implementation by the event publisher.
       operationId: "get-events"
       parameters:
-      - name: "vesselIMONumber"
+      - name: "UNLocationCode"
         in: "query"
-        description: "IMO number of the vessel for which to retrieve available events"
+        description: "UN location code."
         schema:
           type: "string"
-        example: "12345678"
-      - name: "vesselName"
+        example: "NLAMS"
+      - name: "portVisitReference"
         in: "query"
-        description: "Name of the vessel for which to retrieve available events"
+        description: "Port visit reference."
         schema:
           type: "string"
-        example: "King of the Seas"
-      - name: "carrierExportVoyageNumber"
+        example: "NLAMS1234589"
+      - name: "carrierServiceName"
         in: "query"
-        description: "The identifier of an export voyage. The carrier-specific identifier of the export Voyage."
+        description: "Carrier-specific service name."
         schema:
           type: "string"
-        example: "1234N"
-      - name: "universalExportVoyageReference"
+        example: "Great Lion Service"
+      - name: "carrierServiceCode"
         in: "query"
-        description: "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
+        description: "Carrier-specific service code."
         schema:
           type: "string"
-        example: "2301W"
+        example: "FE1"
+      - name: "universalServiceReference"
+        in: "query"
+        description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
+        schema:
+          type: "string"
+        example: "SR12345A"
+      - name: "terminalCallReference"
+        in: "query"
+        description: "The terminal call reference for which to retrieve available events."
+        schema:
+          type: "string"
+        example: "15063401"
       - name: "carrierImportVoyageNumber"
         in: "query"
         description: "The identifier of an import voyage. The carrier-specific identifier of the import Voyage."
@@ -147,18 +159,72 @@ paths:
         schema:
           type: "string"
         example: "2301W"
-      - name: "carrierServiceCode"
+      - name: "carrierExportVoyageNumber"
         in: "query"
-        description: "The carrier specific code of the service for which the schedule details are published."
+        description: "The identifier of an export voyage. The carrier-specific identifier of the export Voyage."
         schema:
           type: "string"
-        example: "FE1"
-      - name: "universalServiceReference"
+        example: "1234N"
+      - name: "universalExportVoyageReference"
         in: "query"
-        description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
+        description: "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
         schema:
           type: "string"
-        example: "SR12345A"
+        example: "2301W"
+      - name: "portCallServiceTypeCode"
+        in: "query"
+        description: "Port call service type."
+        schema:
+          type: "string"
+        example: "BERTH"
+      - name: "vesselIMONumber"
+        in: "query"
+        description: "Vessel IMO number."
+        schema:
+          type: "string"
+        example: "12345678"
+      - name: "vesselName"
+        in: "query"
+        description: "Vessel name."
+        schema:
+          type: "string"
+        example: "King of the Seas"
+      - name: "vesselMMSINumber"
+        in: "query"
+        description: "Vessel MMSI number."
+        schema:
+          type: "string"
+        example: "278111222"
+      - name: "portCallID"
+        in: "query"
+        description: "Unique identifier of a port call"
+        schema:
+          type: "string"
+        example: "0342254a-5927-4856-b9c9-aa12e7c00563"
+      - name: "terminalCallID"
+        in: "query"
+        description: "Unique identifier of a terminal call"
+        schema:
+          type: "string"
+        example: "0342254a-5927-4856-b9c9-aa12e7c00563"
+      - name: "portCallServiceID"
+        in: "query"
+        description: "Unique identifier of a port call service"
+        schema:
+          type: "string"
+        example: "0342254a-5927-4856-b9c9-aa12e7c00563"
+      - name: "timestampID"
+        in: "query"
+        description: "Unique identifier of a timestamp"
+        schema:
+          type: "string"
+        example: "0342254a-5927-4856-b9c9-aa12e7c00563"
+      - name: "classifierCode"
+        in: "query"
+        description: "Classifier code (EST / REQ / PLN / ACT)"
+        schema:
+          type: "string"
+        example: "ACT"
       - name: "eventDateTimeMin"
         in: "query"
         description: "Retrieve events occurring at or after this timestamp"
@@ -206,7 +272,6 @@ paths:
           to the parties connecting through the JIT proxy are out of scope.
         required: false
         schema:
-          maxLength: 4096
           type: "string"
           example: "Carrier-123"
       - name: "Request-Receiving-Party"
@@ -220,7 +285,6 @@ paths:
           to the parties connecting through the JIT proxy are out of scope.
         required: false
         schema:
-          maxLength: 4096
           type: "string"
           example: "Terminal-456"
       responses:
@@ -420,7 +484,6 @@ components:
         The assignment of party identifiers by the JIT proxy and the distribution of identifiers
         to the parties connecting through the JIT proxy are out of scope.
       schema:
-        maxLength: 4096
         type: "string"
         example: "Carrier-123"
     Request-Receiving-Party:
@@ -432,7 +495,6 @@ components:
         The assignment of party identifiers by the JIT proxy and the distribution of identifiers
         to the parties connecting through the JIT proxy are out of scope.
       schema:
-        maxLength: 4096
         type: "string"
         example: "Terminal-456"
     Response-Sending-Party:
@@ -447,7 +509,6 @@ components:
         The assignment of party identifiers by the JIT proxy and the distribution of identifiers
         to the parties connecting through the JIT proxy are out of scope.
       schema:
-        maxLength: 4096
         type: "string"
         example: "Terminal-456"
     Response-Receiving-Party:
@@ -461,6 +522,5 @@ components:
         The assignment of party identifiers by the JIT proxy and the distribution of identifiers
         to the parties connecting through the JIT proxy are out of scope.
       schema:
-        maxLength: 4096
         type: "string"
         example: "Carrier-123"

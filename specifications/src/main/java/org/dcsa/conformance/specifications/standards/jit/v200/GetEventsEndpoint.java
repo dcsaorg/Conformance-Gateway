@@ -9,75 +9,92 @@ import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoi
 
 public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
 
-  private final Parameter vesselIMONumber =
-      new Parameter()
-          .in("query")
-          .name("vesselIMONumber")
-          .description("IMO number of the vessel for which to retrieve available events")
-          .example("12345678")
-          .schema(new Schema<String>().type("string"));
+  private final Parameter unLocationCode =
+      createStringQueryParameter("UNLocationCode", "NLAMS", "UN location code.");
 
-  private final Parameter vesselName =
-      new Parameter()
-          .in("query")
-          .name("vesselName")
-          .description("Name of the vessel for which to retrieve available events")
-          .example("King of the Seas")
-          .schema(new Schema<String>().type("string"));
+  private final Parameter portVisitReference =
+      createStringQueryParameter("portVisitReference", "NLAMS1234589", "Port visit reference.");
 
-  private final Parameter carrierImportVoyageNumber =
-      new Parameter()
-          .in("query")
-          .name("carrierImportVoyageNumber")
-          .description(
-              "The identifier of an import voyage. The carrier-specific identifier of the import Voyage.")
-          .example("1234N")
-          .schema(new Schema<String>().type("string"));
-
-  private final Parameter universalImportVoyageReference =
-      new Parameter()
-          .in("query")
-          .name("universalImportVoyageReference")
-          .description(
-              "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.")
-          .example("2301W")
-          .schema(new Schema<String>().type("string"));
-
-  private final Parameter carrierExportVoyageNumber =
-      new Parameter()
-          .in("query")
-          .name("carrierExportVoyageNumber")
-          .description(
-              "The identifier of an export voyage. The carrier-specific identifier of the export Voyage.")
-          .example("1234N")
-          .schema(new Schema<String>().type("string"));
-
-  private final Parameter universalExportVoyageReference =
-      new Parameter()
-          .in("query")
-          .name("universalExportVoyageReference")
-          .description(
-              "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.")
-          .example("2301W")
-          .schema(new Schema<String>().type("string"));
+  private final Parameter carrierServiceName =
+      createStringQueryParameter(
+          "carrierServiceName", "Great Lion Service", "Carrier-specific service name.");
 
   private final Parameter carrierServiceCode =
-      new Parameter()
-          .in("query")
-          .name("carrierServiceCode")
-          .description(
-              "The carrier specific code of the service for which the schedule details are published.")
-          .example("FE1")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter("carrierServiceCode", "FE1", "Carrier-specific service code.");
 
   private final Parameter universalServiceReference =
-      new Parameter()
-          .in("query")
-          .name("universalServiceReference")
-          .description(
-              "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.")
-          .example("SR12345A")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "universalServiceReference",
+          "SR12345A",
+          "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.");
+
+  private final Parameter terminalCallReference =
+      createStringQueryParameter(
+          "terminalCallReference",
+          "15063401",
+          "The terminal call reference for which to retrieve available events.");
+
+  private final Parameter carrierImportVoyageNumber =
+      createStringQueryParameter(
+          "carrierImportVoyageNumber",
+          "1234N",
+          "The identifier of an import voyage. The carrier-specific identifier of the import Voyage.");
+
+  private final Parameter universalImportVoyageReference =
+      createStringQueryParameter(
+          "universalImportVoyageReference",
+          "2301W",
+          "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.");
+
+  private final Parameter carrierExportVoyageNumber =
+      createStringQueryParameter(
+          "carrierExportVoyageNumber",
+          "1234N",
+          "The identifier of an export voyage. The carrier-specific identifier of the export Voyage.");
+
+  private final Parameter universalExportVoyageReference =
+      createStringQueryParameter(
+          "universalExportVoyageReference",
+          "2301W",
+          "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.");
+
+  private final Parameter portCallServiceTypeCode =
+      createStringQueryParameter("portCallServiceTypeCode", "BERTH", "Port call service type.");
+
+  private final Parameter vesselIMONumber =
+      createStringQueryParameter("vesselIMONumber", "12345678", "Vessel IMO number.");
+
+  private final Parameter vesselName =
+      createStringQueryParameter("vesselName", "King of the Seas", "Vessel name.");
+
+  private final Parameter vesselMMSINumber =
+      createStringQueryParameter("vesselMMSINumber", "278111222", "Vessel MMSI number.");
+
+  private final Parameter portCallID =
+      createStringQueryParameter(
+          "portCallID", "0342254a-5927-4856-b9c9-aa12e7c00563", "Unique identifier of a port call");
+
+  private final Parameter terminalCallID =
+      createStringQueryParameter(
+          "terminalCallID",
+          "0342254a-5927-4856-b9c9-aa12e7c00563",
+          "Unique identifier of a terminal call");
+
+  private final Parameter portCallServiceID =
+      createStringQueryParameter(
+          "portCallServiceID",
+          "0342254a-5927-4856-b9c9-aa12e7c00563",
+          "Unique identifier of a port call service");
+
+  private final Parameter timestampID =
+      createStringQueryParameter(
+          "timestampID",
+          "0342254a-5927-4856-b9c9-aa12e7c00563",
+          "Unique identifier of a timestamp");
+
+  private final Parameter classifierCode =
+      createStringQueryParameter(
+          "classifierCode", "ACT", "Classifier code (EST / REQ / PLN / ACT)");
 
   private final Parameter eventDateTimeMin =
       new Parameter()
@@ -115,14 +132,25 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
   @Override
   public List<Parameter> getQueryParameters() {
     return List.of(
-        vesselIMONumber,
-        vesselName,
-        carrierExportVoyageNumber,
-        universalExportVoyageReference,
-        carrierImportVoyageNumber,
-        universalImportVoyageReference,
+        unLocationCode,
+        portVisitReference,
+        carrierServiceName,
         carrierServiceCode,
         universalServiceReference,
+        terminalCallReference,
+        carrierImportVoyageNumber,
+        universalImportVoyageReference,
+        carrierExportVoyageNumber,
+        universalExportVoyageReference,
+        portCallServiceTypeCode,
+        vesselIMONumber,
+        vesselName,
+        vesselMMSINumber,
+        portCallID,
+        terminalCallID,
+        portCallServiceID,
+        timestampID,
+        classifierCode,
         eventDateTimeMin,
         eventDateTimeMax,
         limit,
@@ -132,5 +160,15 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
   @Override
   public Map<Boolean, List<List<Parameter>>> getRequiredAndOptionalFilters() {
     return Map.ofEntries(Map.entry(Boolean.TRUE, List.of()), Map.entry(Boolean.FALSE, List.of()));
+  }
+
+  private static Parameter createStringQueryParameter(
+      String name, String example, String description) {
+    return new Parameter()
+        .in("query")
+        .name(name)
+        .example(example)
+        .description(description)
+        .schema(new Schema<String>().type("string"));
   }
 }

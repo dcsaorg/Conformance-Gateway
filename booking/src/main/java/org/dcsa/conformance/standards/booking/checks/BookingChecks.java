@@ -30,9 +30,7 @@ public class BookingChecks {
 
   private static final Set<BookingState> CONFIRMED_BOOKING_STATES = Set.of(
     BookingState.CONFIRMED,
-    BookingState.PENDING_AMENDMENT,
-    BookingState.COMPLETED,
-    BookingState.DECLINED
+    BookingState.PENDING_AMENDMENT
   );
 
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
@@ -459,7 +457,7 @@ public class BookingChecks {
             return issues;
           });
 
-  private static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS =
+  static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS =
       JsonAttribute.customValidator(
           "check confirmed booking fields availability",
           body -> {

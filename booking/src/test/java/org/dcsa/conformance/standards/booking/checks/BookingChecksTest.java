@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -717,5 +718,205 @@ class BookingChecksTest {
 
     Set<String> errors = BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking);
     assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_noBookingStatus_throwException() {
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_emptyBookingStatus_throwException() {
+    booking.put("bookingStatus", "");
+
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_nonConfirmedStatus_valid() {
+    String[] nonConfirmedStates = {
+      "RECEIVED", "PENDING_UPDATE", "UPDATE_RECEIVED", "DECLINED", "COMPLETED"
+    };
+
+    for (String status : nonConfirmedStates) {
+      ObjectNode testBooking = OBJECT_MAPPER.createObjectNode();
+      testBooking.put("bookingStatus", status);
+
+      Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(testBooking);
+
+      assertTrue(errors.isEmpty());
+    }
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_confirmedStatusAllFieldsPresent_valid() {
+    booking.put("bookingStatus", "CONFIRMED");
+    booking.set(
+        "confirmedEquipments",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "shipmentCutOffTimes",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_pendingAmendmentAllFieldsPresent_valid() {
+    booking.put("bookingStatus", "PENDING_AMENDMENT");
+    booking.set(
+        "confirmedEquipments",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "shipmentCutOffTimes",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_confirmedStatusMissingConfirmedEquipments_invalid() {
+    booking.put("bookingStatus", "CONFIRMED");
+    booking.set(
+        "transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "shipmentCutOffTimes",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_confirmedStatusMissingTransportPlan_invalid() {
+    booking.put("bookingStatus", "CONFIRMED");
+    booking.set(
+        "confirmedEquipments",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "shipmentCutOffTimes",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("transportPlan for confirmed booking is not present"));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_confirmedStatusMissingShipmentCutOffTimes_invalid() {
+    booking.put("bookingStatus", "CONFIRMED");
+    booking.set(
+        "confirmedEquipments",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set("transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_confirmedStatusMissingAllFields_invalid() {
+    booking.put("bookingStatus", "CONFIRMED");
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(3, errors.size());
+    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
+    assertTrue(errors.contains("transportPlan for confirmed booking is not present"));
+    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_pendingAmendmentMissingAllFields_invalid() {
+    booking.put("bookingStatus", "PENDING_AMENDMENT");
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(3, errors.size());
+    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
+    assertTrue(errors.contains("transportPlan for confirmed booking is not present"));
+    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_confirmedStatusEmptyConfirmedEquipments_invalid() {
+    booking.put("bookingStatus", "CONFIRMED");
+    booking.set("confirmedEquipments", OBJECT_MAPPER.createArrayNode()); // Empty array
+    booking.set("transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set(
+        "shipmentCutOffTimes",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_confirmedStatusEmptyShipmentCutOffTimes_invalid() {
+    booking.put("bookingStatus", "CONFIRMED");
+    booking.set(
+        "confirmedEquipments",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set("transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+    booking.set("shipmentCutOffTimes", OBJECT_MAPPER.createArrayNode()); // Empty array
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_confirmedStatusPartialFields_invalid() {
+    booking.put("bookingStatus", "CONFIRMED");
+    booking.set(
+        "shipmentCutOffTimes",
+        OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(2, errors.size());
+    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
+    assertTrue(errors.contains("transportPlan for confirmed booking is not present"));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_pendingAmendmentPartialFields_invalid() {
+    booking.put("bookingStatus", "PENDING_AMENDMENT");
+    booking.set("transportPlan", OBJECT_MAPPER.createArrayNode().add(OBJECT_MAPPER.createObjectNode()));
+
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(2, errors.size());
+    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
+    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+  }
+
+  @Test
+  void testCheckConfirmedBookingFields_unknownBookingStatus_throwsException() {
+    booking.put("bookingStatus", "UNKNOWN_STATUS");
+
+    Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
   }
 }

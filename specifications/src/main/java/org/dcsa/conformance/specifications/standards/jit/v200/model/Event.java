@@ -20,4 +20,6 @@ Flag indicating that this event is primarily meant for another party - but is se
   @Schema() private TerminalCall terminalCall;
 
   @Schema() private PortCallService portCallService;
+
+  @Schema() private Timestamp timestamp;
 }

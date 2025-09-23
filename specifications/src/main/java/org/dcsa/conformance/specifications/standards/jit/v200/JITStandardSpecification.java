@@ -43,6 +43,7 @@ import org.dcsa.conformance.specifications.standards.jit.v200.model.MovesForecas
 import org.dcsa.conformance.specifications.standards.jit.v200.model.PortCall;
 import org.dcsa.conformance.specifications.standards.jit.v200.model.PortCallService;
 import org.dcsa.conformance.specifications.standards.jit.v200.model.TerminalCall;
+import org.dcsa.conformance.specifications.standards.jit.v200.model.Timestamp;
 import org.dcsa.conformance.specifications.standards.jit.v200.model.Vessel;
 
 public class JITStandardSpecification extends StandardSpecification {
@@ -98,6 +99,7 @@ public class JITStandardSpecification extends StandardSpecification {
         PostEventsRequest.class,
         PostEventsResponse.class,
         TerminalCall.class,
+        Timestamp.class,
         Vessel.class);
   }
 

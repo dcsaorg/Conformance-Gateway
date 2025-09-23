@@ -20,6 +20,8 @@ Event,isFYI,boolean,,,,false,"Flag indicating that this event is primarily meant
 Event,portCall,PortCall,,,,,"Port call information",
 Event,portCallService,PortCallService,,,,,"Port call service information",
 Event,terminalCall,TerminalCall,,,,,"Terminal call information",
+Event,timestamp,Timestamp,,,,,"Date and time (and related metadata) of a port call service,
+exchanged between the service provider and service consumer as part of the ""ERP"" pattern.",
 Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
 Facility,facilityCodeListProvider,string,,maxLength=10,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
@@ -253,6 +255,34 @@ This corresponds to the property `transportCallReference` from the DCSA Operatio
 TerminalCall,"universalExportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the export voyage.",
 TerminalCall,"universalImportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the import voyage.",
 TerminalCall,"universalServiceReference",string,,maxLength=8,,SR12345A,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",
+Timestamp,classifierCode,string,,maxLength=3,,EST,"Code identifying the type of this timestamp:
+- `ACT` (Actual)
+- `EST` (Estimated)
+- `PLN` (Planned)
+- `REQ` (Requested)
+
+Timestamps of type `EST`, `PLN` and `ACT` are sent by the service provider to the service consumer.
+
+Timestamps of type `REQ` are sent by the service consumer to the service provider.
+
+Timestamps of type `ACT` are relevant in port call services of every type except for `MOVES`.
+
+Timestamps of type `EST`, `REQ` and `PLN` are relevant in port call services of these types:
+- `BERTH` (Berth)
+- `CARGO_OPERATIONS` (Cargo operations)
+- `PILOTAGE` (Pilotage)
+- `TOWAGE` (Towage)
+- `MOORING` (Mooring)
+- `BUNKERING` (Bunkering)
+- `PILOT_BOARDING_PLACE` (Pilot Boarding Place)
+- `ANCHORAGE` (Anchorage)
+- `SLUDGE` (Sludge)",
+Timestamp,delayReasonCode,string,,maxLength=3,,STR,"Code identifying the reason for a delay, as defined by SMDG here:
+https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/",
+Timestamp,remark,string,,maxLength=500,,"Port closed due to strike","Free text used to provide any relevant additional information.",
+Timestamp,replyToTimestampID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the timestamp to which this timestamp is a reply",
+Timestamp,serviceDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the service was provided or is expected to be provided.",
+Timestamp,timestampID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the timestamp",
 Vessel,dimensionUnit,string,,maxLength=3,,MTR,"The unit of measure which can be expressed in:
 - `MTR` (Meter)
 - `FOT` (Foot)",

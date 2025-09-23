@@ -302,3 +302,33 @@ This corresponds to the property `transportCallReference` from the DCSA Operatio
 "Event / terminalCall / universalExportVoyageReference","universalExportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the export voyage.",
 "Event / terminalCall / universalImportVoyageReference","universalImportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the import voyage.",
 "Event / terminalCall / universalServiceReference","universalServiceReference",string,,maxLength=8,,SR12345A,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",
+"Event / timestamp",timestamp,Timestamp,,,,,"Date and time (and related metadata) of a port call service,
+exchanged between the service provider and service consumer as part of the ""ERP"" pattern.",
+"Event / timestamp / classifierCode",classifierCode,string,,maxLength=3,,EST,"Code identifying the type of this timestamp:
+- `ACT` (Actual)
+- `EST` (Estimated)
+- `PLN` (Planned)
+- `REQ` (Requested)
+
+Timestamps of type `EST`, `PLN` and `ACT` are sent by the service provider to the service consumer.
+
+Timestamps of type `REQ` are sent by the service consumer to the service provider.
+
+Timestamps of type `ACT` are relevant in port call services of every type except for `MOVES`.
+
+Timestamps of type `EST`, `REQ` and `PLN` are relevant in port call services of these types:
+- `BERTH` (Berth)
+- `CARGO_OPERATIONS` (Cargo operations)
+- `PILOTAGE` (Pilotage)
+- `TOWAGE` (Towage)
+- `MOORING` (Mooring)
+- `BUNKERING` (Bunkering)
+- `PILOT_BOARDING_PLACE` (Pilot Boarding Place)
+- `ANCHORAGE` (Anchorage)
+- `SLUDGE` (Sludge)",
+"Event / timestamp / delayReasonCode",delayReasonCode,string,,maxLength=3,,STR,"Code identifying the reason for a delay, as defined by SMDG here:
+https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/",
+"Event / timestamp / remark",remark,string,,maxLength=500,,"Port closed due to strike","Free text used to provide any relevant additional information.",
+"Event / timestamp / replyToTimestampID",replyToTimestampID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the timestamp to which this timestamp is a reply",
+"Event / timestamp / serviceDateTime",serviceDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the service was provided or is expected to be provided.",
+"Event / timestamp / timestampID",timestampID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the timestamp",

@@ -64,14 +64,14 @@ Remaining distance reported by the vessel to the berth in the next destination p
       example = "MTR",
       description =
 """
-The unit of measure in which the vessel size and draft are expressed:
+The unit of measure in which the vessel length and width are expressed:
 - `MTR` (Meter)
 - `FOT` (Foot)
 
-If a length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+If values are specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
 E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
 """)
-  private String dimensionUnit;
+  private String vesselSizeUnit;
 
   @Schema(
       format = "float",
@@ -90,6 +90,20 @@ The maximum length of a ship's hull measured parallel to the waterline (Length O
 Overall width of the ship measured at the widest point of the nominal waterline.
 """)
   private Double width;
+
+  @Schema(
+    maxLength = 3,
+    example = "MTR",
+    description =
+"""
+The unit of measure in which the draft values are expressed:
+- `MTR` (Meter)
+- `FOT` (Foot)
+
+If values are specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
+""")
+  private String draftUnit;
 
   @Schema(
       format = "float",

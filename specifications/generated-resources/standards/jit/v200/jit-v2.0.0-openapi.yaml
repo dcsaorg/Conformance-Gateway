@@ -59,11 +59,11 @@ paths:
 
         When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 
-        ### Filtering by event date-time
+        ### Filtering by event timestamp
 
-        Whenever the query parameters filter could retrieve large number of historical events, the request should also include at least the `serviceDateTimeMin` query parameter and could also include the `serviceDateTimeMax` query parameter.
+        Whenever the query parameters filter could retrieve large number of historical events, the request should also include at least the `eventTimestampMin` query parameter and could also include the `eventTimestampMax` query parameter.
 
-        The event publisher can separately also decide to have default relative date ranges and only return events having a service timestamp within those ranges.
+        The event publisher can separately also decide to have default relative date ranges and only return events having a timestamp within those ranges.
 
         ## Pagination
 
@@ -212,16 +212,16 @@ paths:
         schema:
           type: "string"
         example: "ACT"
-      - name: "serviceDateTimeMin"
+      - name: "eventTimestampMin"
         in: "query"
-        description: "Retrieve events about services performed at or after this timestamp"
+        description: "Retrieve events with a timestamp at or after this date-time"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
-      - name: "serviceDateTimeMax"
+      - name: "eventTimestampMax"
         in: "query"
-        description: "Retrieve events about services performed at or before this timestamp"
+        description: "Retrieve events with a timestamp at or before this date-time"
         schema:
           type: "string"
           format: "date-time"
@@ -1091,15 +1091,15 @@ components:
             Remaining distance reported by the vessel to the berth in the next destination port, expressed in nautical miles.
           format: "double"
           example: 245.45
-        dimensionUnit:
+        vesselSizeUnit:
           maxLength: 3
           type: "string"
           description: |
-            The unit of measure in which the vessel size and draft are expressed:
+            The unit of measure in which the vessel length and width are expressed:
             - `MTR` (Meter)
             - `FOT` (Foot)
 
-            If a length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+            If values are specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
             E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
           example: "MTR"
         lengthOverall:
@@ -1114,6 +1114,17 @@ components:
             Overall width of the ship measured at the widest point of the nominal waterline.
           format: "float"
           example: 37.33
+        draftUnit:
+          maxLength: 3
+          type: "string"
+          description: |
+            The unit of measure in which the draft values are expressed:
+            - `MTR` (Meter)
+            - `FOT` (Foot)
+
+            If values are specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+            E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
+          example: "MTR"
         airDraft:
           type: "number"
           description: |

@@ -16,14 +16,14 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "Event / portCall / vessel / aftDraft",aftDraft,number,,,,37,"The vertical distance between the waterline and the bottom of the hull (keel) at the stern (after part) of the vessel.
 The depth to which the after part of the ship is immersed in water.",
 "Event / portCall / vessel / airDraft",airDraft,number,,,,55.0,"The vertical distance from the surface of the water to the highest point of mast or aerial.",
-"Event / portCall / vessel / dimensionUnit",dimensionUnit,string,,maxLength=3,,MTR,"The unit of measure in which the vessel size and draft are expressed:
+"Event / portCall / vessel / draft",draft,number,,,,12.5,"The vertical distance between the waterline and the bottom of the hull (keel) of a ship.
+The depth to which a ship is immersed in water.",
+"Event / portCall / vessel / draftUnit",draftUnit,string,,maxLength=3,,MTR,"The unit of measure in which the draft values are expressed:
 - `MTR` (Meter)
 - `FOT` (Foot)
 
-If a length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+If values are specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
 E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
-"Event / portCall / vessel / draft",draft,number,,,,12.5,"The vertical distance between the waterline and the bottom of the hull (keel) of a ship.
-The depth to which a ship is immersed in water.",
 "Event / portCall / vessel / forwardDraft",forwardDraft,number,,,,35,"The vertical distance between the waterline and the bottom of the hull (keel) at the bow (forward part) of the vessel.
 The depth to which the forward part of the ship is immersed in water.",
 "Event / portCall / vessel / lengthOverall",lengthOverall,number,,,,245.45,"The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).",
@@ -72,6 +72,12 @@ automatic identification systems (AIS) and certain other equipment to uniquely i
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+"Event / portCall / vessel / vesselSizeUnit",vesselSizeUnit,string,,maxLength=3,,MTR,"The unit of measure in which the vessel length and width are expressed:
+- `MTR` (Meter)
+- `FOT` (Foot)
+
+If values are specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
 "Event / portCall / vessel / vesselTypeCode",vesselTypeCode,string,,maxLength=4,,CONT,"Categorization of ocean-going vessels distinguished by the main cargo the vessel carries:
 - `GCGO` (General cargo)
 - `CONT` (Container)

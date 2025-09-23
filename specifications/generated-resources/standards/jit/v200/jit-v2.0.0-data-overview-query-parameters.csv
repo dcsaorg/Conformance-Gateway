@@ -18,7 +18,7 @@ terminalCallID,string,"Unique identifier of a terminal call","0342254a-5927-4856
 portCallServiceID,string,"Unique identifier of a port call service","0342254a-5927-4856-b9c9-aa12e7c00563"
 timestampID,string,"Unique identifier of a timestamp","0342254a-5927-4856-b9c9-aa12e7c00563"
 classifierCode,string,"Classifier code (EST / REQ / PLN / ACT)",ACT
-serviceDateTimeMin,string,"Retrieve events about services performed at or after this timestamp",2025-01-23T01:23:45Z
-serviceDateTimeMax,string,"Retrieve events about services performed at or before this timestamp",2025-01-23T01:23:45Z
+eventTimestampMin,string,"Retrieve events with a timestamp at or after this date-time",2025-01-23T01:23:45Z
+eventTimestampMax,string,"Retrieve events with a timestamp at or before this date-time",2025-01-23T01:23:45Z
 limit,integer,"Maximum number of events to include in each page of the response.",10
 cursor,string,"Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.",ExampleNextPageCursor

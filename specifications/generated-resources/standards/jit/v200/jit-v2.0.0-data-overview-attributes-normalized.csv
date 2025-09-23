@@ -286,14 +286,14 @@ Timestamp,timestampID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","
 Vessel,aftDraft,number,,,,37,"The vertical distance between the waterline and the bottom of the hull (keel) at the stern (after part) of the vessel.
 The depth to which the after part of the ship is immersed in water.",
 Vessel,airDraft,number,,,,55.0,"The vertical distance from the surface of the water to the highest point of mast or aerial.",
-Vessel,dimensionUnit,string,,maxLength=3,,MTR,"The unit of measure in which the vessel size and draft are expressed:
+Vessel,draft,number,,,,12.5,"The vertical distance between the waterline and the bottom of the hull (keel) of a ship.
+The depth to which a ship is immersed in water.",
+Vessel,draftUnit,string,,maxLength=3,,MTR,"The unit of measure in which the draft values are expressed:
 - `MTR` (Meter)
 - `FOT` (Foot)
 
-If a length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+If values are specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
 E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
-Vessel,draft,number,,,,12.5,"The vertical distance between the waterline and the bottom of the hull (keel) of a ship.
-The depth to which a ship is immersed in water.",
 Vessel,forwardDraft,number,,,,35,"The vertical distance between the waterline and the bottom of the hull (keel) at the bow (forward part) of the vessel.
 The depth to which the forward part of the ship is immersed in water.",
 Vessel,lengthOverall,number,,,,245.45,"The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).",
@@ -307,6 +307,12 @@ Vessel,vesselMMSINumber,string,,maxLength=9,,278111222,"Maritime Mobile Service 
 automatic identification systems (AIS) and certain other equipment to uniquely identify a ship or a coast radio station.",
 Vessel,vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
 Vessel,vesselPosition,Location,,,,,"Current location of the vessel",
+Vessel,vesselSizeUnit,string,,maxLength=3,,MTR,"The unit of measure in which the vessel length and width are expressed:
+- `MTR` (Meter)
+- `FOT` (Foot)
+
+If values are specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches.
+E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
 Vessel,vesselTypeCode,string,,maxLength=4,,CONT,"Categorization of ocean-going vessels distinguished by the main cargo the vessel carries:
 - `GCGO` (General cargo)
 - `CONT` (Container)

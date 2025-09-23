@@ -26,14 +26,22 @@ import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
+import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.jit.v200.messages.FeedbackElement;
 import org.dcsa.conformance.specifications.standards.jit.v200.messages.GetEventsError;
 import org.dcsa.conformance.specifications.standards.jit.v200.messages.GetEventsResponse;
 import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsError;
 import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsResponse;
+import org.dcsa.conformance.specifications.standards.jit.v200.model.ContainerCountBySize;
+import org.dcsa.conformance.specifications.standards.jit.v200.model.ContainerCountByTypeAndSize;
 import org.dcsa.conformance.specifications.standards.jit.v200.model.Event;
+import org.dcsa.conformance.specifications.standards.jit.v200.model.MovesForecast;
 import org.dcsa.conformance.specifications.standards.jit.v200.model.PortCall;
+import org.dcsa.conformance.specifications.standards.jit.v200.model.PortCallService;
 import org.dcsa.conformance.specifications.standards.jit.v200.model.TerminalCall;
 import org.dcsa.conformance.specifications.standards.jit.v200.model.Vessel;
 
@@ -73,11 +81,19 @@ public class JITStandardSpecification extends StandardSpecification {
   @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
+        Address.class,
+        ContainerCountBySize.class,
+        ContainerCountByTypeAndSize.class,
         Event.class,
+        Facility.class,
         FeedbackElement.class,
+        GeoCoordinate.class,
         GetEventsError.class,
         GetEventsResponse.class,
+        Location.class,
+        MovesForecast.class,
         PortCall.class,
+        PortCallService.class,
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,

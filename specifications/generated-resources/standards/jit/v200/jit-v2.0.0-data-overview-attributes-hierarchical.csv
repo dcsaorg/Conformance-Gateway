@@ -1,0 +1,3 @@
+Path,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
+Event,,,,,,,,
+"Event / portCallID",portCallID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the port call.",

@@ -1,0 +1,13 @@
+Name,Type,Description,Example
+vesselIMONumber,string,"IMO number of the vessel for which to retrieve available events",12345678
+vesselName,string,"Name of the vessel for which to retrieve available events","King of the Seas"
+"carrierExportVoyageNumber",string,"The identifier of an export voyage. The carrier-specific identifier of the export Voyage.",1234N
+"universalExportVoyageReference",string,"A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",2301W
+"carrierImportVoyageNumber",string,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage.",1234N
+"universalImportVoyageReference",string,"A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",2301W
+carrierServiceCode,string,"The carrier specific code of the service for which the schedule details are published.",FE1
+"universalServiceReference",string,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",SR12345A
+eventDateTimeMin,string,"Retrieve events occurring at or after this timestamp",2025-01-23T01:23:45Z
+eventDateTimeMax,string,"Retrieve events occurring at or before this timestamp",2025-01-23T01:23:45Z
+limit,integer,"Maximum number of events to include in each page of the response.",10
+cursor,string,"Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.",ExampleNextPageCursor

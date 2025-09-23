@@ -1,0 +1,30 @@
+Object,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
+Event,portCallID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universally unique ID of the port call.",
+FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed to a user of the event publishing organization",
+FeedbackElement,propertyPath,string,,maxLength=1000,,"$.events[2].location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
+about which the feedback is provided (if applicable)",
+FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity of a `FeedbackElement`
+
+- `ERROR` - Error that fully or partially prevents the correct processing of the request
+- `WARN` - Warning about the request being processed in a potentially unexpected way
+- `INFO` - Informational message about how the request is processed",
+GetEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why the request could not be processed.
+
+At least one feedback element of severity `ERROR` is expected.
+Lower severity feedback elements may also be included.",
+GetEventsResponse,events,"Event list",,,,,"The list of events matching the filter specified by the request query parameters",
+GetEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
+PostEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
+
+At least one feedback element of severity `ERROR` is expected.
+Lower severity feedback elements may also be included.
+
+When sent in response to a request that contains an array of events,
+the order of the `feedbackElements` is not related to the list of request events.
+Instead, the relevant request event is indicated by the `propertyPath` of each `FeedbackElement`.",
+PostEventsRequest,events,"Event list",,,,,"List of events.",
+PostEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
+
+There can be zero, one or more feedback elements per event in the request.
+The order of `feedbackElements` is not related to the order of events in the request.
+Instead, the relevant request event is indicated by the `propertyPath` of each `FeedbackElement`.",

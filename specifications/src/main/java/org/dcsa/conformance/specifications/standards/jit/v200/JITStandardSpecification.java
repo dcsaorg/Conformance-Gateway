@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.standards.tnt.v300;
+package org.dcsa.conformance.specifications.standards.jit.v200;
 
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -25,44 +26,27 @@ import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
-import org.dcsa.conformance.specifications.standards.core.v100.model.ActiveReeferParameters;
-import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
-import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
-import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
-import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
-import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
-import org.dcsa.conformance.specifications.standards.core.v100.model.ServiceCodeOrReference;
-import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.FeedbackElement;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsError;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsResponse;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsError;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventClassification;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
+import org.dcsa.conformance.specifications.standards.jit.v200.messages.FeedbackElement;
+import org.dcsa.conformance.specifications.standards.jit.v200.messages.GetEventsError;
+import org.dcsa.conformance.specifications.standards.jit.v200.messages.GetEventsResponse;
+import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsError;
+import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsRequest;
+import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsResponse;
+import org.dcsa.conformance.specifications.standards.jit.v200.model.Event;
 
-public class TNTStandardSpecification extends StandardSpecification {
+public class JITStandardSpecification extends StandardSpecification {
 
-  public static final String TAG_EVENT_PUBLISHERS = "Event Publisher Endpoints";
-  public static final String TAG_EVENT_SUBSCRIBERS = "Event Subscriber Endpoints";
+  private static final String TAG_EVENT_PUBLISHERS = "Event Publisher Endpoints";
+  private static final String TAG_EVENT_SUBSCRIBERS = "Event Subscriber Endpoints";
+  private static final String REQUEST_SENDING_PARTY_HEADER = "Request-Sending-Party";
+  private static final String REQUEST_RECEIVING_PARTY_HEADER = "Request-Receiving-Party";
+  private static final String RESPONSE_SENDING_PARTY_HEADER = "Response-Sending-Party";
+  private static final String RESPONSE_RECEIVING_PARTY_HEADER = "Response-Receiving-Party";
 
   private final GetEventsEndpoint getEventsEndpoint;
 
-  public TNTStandardSpecification() {
-    super("Track and Trace", "TNT", "3.0.0");
+  public JITStandardSpecification() {
+    super("Just in Time Port Call", "JIT", "2.0.0");
 
     openAPI.addTagsItem(
         new Tag()
@@ -80,40 +64,19 @@ public class TNTStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata("Track and Trace", "3.0.0-20250912-design", "", "", 4);
+    return new LegendMetadata("Just in Time Port Call", "2.0.0-20250926-design", "", "", 4);
   }
 
   @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
-        ActiveReeferParameters.class,
-        Address.class,
-        ClassifiedDateTime.class,
-        DocumentReference.class,
-        EquipmentDetails.class,
         Event.class,
-        EventClassification.class,
-        Facility.class,
         FeedbackElement.class,
-        GeoCoordinate.class,
         GetEventsError.class,
         GetEventsResponse.class,
-        IotDetails.class,
-        Location.class,
         PostEventsError.class,
         PostEventsRequest.class,
-        PostEventsResponse.class,
-        RailTransport.class,
-        ReeferDetails.class,
-        Seal.class,
-        ServiceCodeOrReference.class,
-        ShipmentDetails.class,
-        ShipmentReference.class,
-        TransportCall.class,
-        TransportDetails.class,
-        TruckTransport.class,
-        VesselTransport.class,
-        VoyageNumberOrReference.class);
+        PostEventsResponse.class);
   }
 
   @Override
@@ -139,7 +102,7 @@ public class TNTStandardSpecification extends StandardSpecification {
                         ? List.of()
                         : DataOverviewSheet.importFromString(
                             SpecificationToolkit.readRemoteFile(
-                                "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/TBD/specifications/generated-resources/standards/ct/v300/ct-v3.0.0-data-overview-%s.csv"
+                                "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/TBD/specifications/generated-resources/standards/jit/v200/jit-v2.0.0-data-overview-%s.csv"
                                     .formatted(entry.getValue())))));
   }
 
@@ -162,6 +125,77 @@ public class TNTStandardSpecification extends StandardSpecification {
     return false;
   }
 
+  @Override
+  protected Stream<Map.Entry<String, Header>> getCustomHeaders() {
+    return Stream.concat(getRequestCustomHeaders(), getResponseCustomHeaders());
+  }
+
+  private Stream<Map.Entry<String, Header>> getRequestCustomHeaders() {
+    return Stream.of(
+        Map.entry(
+            REQUEST_SENDING_PARTY_HEADER,
+            new Header()
+                .description(
+"""
+When communicating through an optional system that acts as an application level JIT communication proxy,
+forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
+the API client sets this request header to identify itself to the JIT proxy and to the API server
+as the original sending party of the API request.
+
+The assignment of party identifiers by the JIT proxy and the distribution of identifiers
+to the parties connecting through the JIT proxy are out of scope.
+""")
+                .schema(new Schema<>().type("string").maxLength(4096).example("Carrier-123"))),
+        Map.entry(
+            REQUEST_RECEIVING_PARTY_HEADER,
+            new Header()
+                .description(
+"""
+When communicating through an optional system that acts as an application level JIT communication proxy,
+forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
+the API client sets this request header to identify to the JIT proxy the target receiving party of the API request.
+
+The assignment of party identifiers by the JIT proxy and the distribution of identifiers
+to the parties connecting through the JIT proxy are out of scope.
+""")
+                .schema(new Schema<>().type("string").maxLength(4096).example("Terminal-456"))));
+  }
+
+  private Stream<Map.Entry<String, Header>> getResponseCustomHeaders() {
+    return Stream.of(
+        Map.entry(
+            RESPONSE_SENDING_PARTY_HEADER,
+            new Header()
+                .description(
+"""
+When communicating through an optional system that acts as an application level JIT communication proxy,
+forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
+the API server sets this response header to identify itself to the JIT proxy and to the API client
+as the original sending party of the API response.
+
+The value of this response header must be the same as the value of the request header `Request-Receiving-Party`.
+
+The assignment of party identifiers by the JIT proxy and the distribution of identifiers
+to the parties connecting through the JIT proxy are out of scope.
+""")
+                .schema(new Schema<>().type("string").maxLength(4096).example("Terminal-456"))),
+        Map.entry(
+            RESPONSE_RECEIVING_PARTY_HEADER,
+            new Header()
+                .description(
+"""
+When communicating through an optional system that acts as an application level JIT communication proxy,
+forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
+the API server sets this response header to identify to the JIT proxy the target receiving party of the API response.
+
+The value of this response header must be the same as the value of the request header `Request-Sending-Party`.
+
+The assignment of party identifiers by the JIT proxy and the distribution of identifiers
+to the parties connecting through the JIT proxy are out of scope.
+""")
+                .schema(new Schema<>().type("string").maxLength(4096).example("Carrier-123"))));
+  }
+
   private Operation operationEventsGet() {
     return new Operation()
         .summary("Retrieves a list of events")
@@ -171,7 +205,18 @@ public class TNTStandardSpecification extends StandardSpecification {
         .parameters(
             Stream.concat(
                     new GetEventsEndpoint().getQueryParameters().stream(),
-                    Stream.of(getApiVersionHeaderParameter()))
+                    Stream.concat(
+                        Stream.of(getApiVersionHeaderParameter()),
+                        getRequestCustomHeaders()
+                            .map(
+                                nameAndHeader ->
+                                    new Parameter()
+                                        .in("header")
+                                        .name(nameAndHeader.getKey())
+                                        .description(nameAndHeader.getValue().getDescription())
+                                        .required(false)
+                                        .schema(nameAndHeader.getValue().getSchema())
+                                        .example(nameAndHeader.getValue().getExample()))))
                 .toList())
         .responses(
             new ApiResponses()
@@ -181,12 +226,16 @@ public class TNTStandardSpecification extends StandardSpecification {
                         .description("List of events matching the query parameters")
                         .headers(
                             Stream.of(
-                                    Map.entry(
-                                        API_VERSION_HEADER,
-                                        new Header().$ref(API_VERSION_HEADER_REF)),
-                                    Map.entry(
-                                        NEXT_PAGE_CURSOR_HEADER,
-                                        new Header().$ref(NEXT_PAGE_CURSOR_HEADER_REF)))
+                                    API_VERSION_HEADER,
+                                    NEXT_PAGE_CURSOR_HEADER,
+                                    RESPONSE_SENDING_PARTY_HEADER,
+                                    RESPONSE_RECEIVING_PARTY_HEADER)
+                                .map(
+                                    headerName ->
+                                        Map.entry(
+                                            headerName,
+                                            new Header()
+                                                .$ref(COMPONENTS_HEADERS_REF_PATH + headerName)))
                                 .collect(
                                     Collectors.toMap(
                                         Map.Entry::getKey,

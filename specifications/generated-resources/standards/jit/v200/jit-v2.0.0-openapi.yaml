@@ -9,6 +9,11 @@ info:
 
     This API allows the transfer of structured JIT events from a publisher to a subscriber.
 
+    JIT events are used by port call service providers and consumers to exchange information about the service, including:
+    - estimated, requested and planned service timestamps as part of the "ERP" pattern defined by the [IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf);
+    - actual service timestamps;
+    - container move counts (loads, discharges and restows).
+
     The event publisher implements the `GET /events` endpoint, which can be called by authorized API consumers to retrieve relevant available events.
 
     The event subscribers implement the `POST /events` endpoint, which can be called by event publishers call to send relevant events as they become available.
@@ -48,35 +53,17 @@ paths:
 
         The event publisher is expected to additionally filter the events based on the authorization and registration profile of the authenticated party calling this endpoint. Authorization, registration and any such additional filtering are out of scope in this standard.
 
-        ## Filtering
+        ## Supported filtering parameters
 
-        Every event publisher **must** support the retrieval of events based on the transport document references of one or more bills of lading, specified as the value(s) of the `transportDocumentReferences` query parameter.
+        Every event publisher **must** specify which of the query parameters below it supports in filtering events.
 
-        Each event publisher can decide whether to support any of the additional filtering query parameters defined in the standard for this endpoint, and should document the decision in their published copy of the API specification.
-
-        When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400. In particular, the publisher can reject with HTTP 400 a GET request with a number of `transportDocumentReferences` or `equipmentReferences` larger than the maximum supported (which in the case of some publishers is likely to be `1`). Publishers should document these limits in their copy of the API specification.
-
-        ### Filtering by transport document reference
-
-        When filtering using the `transportDocumentReferences` query parameter, the response contains events for all the bills of lading with the specified transport document reference for which an event is available (and accessible by the party making the API request).
-
-        Even when requesting event for a single transport document reference, in the absence of further explicit filtering in the request or implicit filtering by the event publisher, the response is expected to contain all the events corresponding to that bill of lading.
-
-        ### Filtering alternatives to the transport document reference
-
-        As an alternative to retrieving events by the bill of lading using the `transportDocumentReferences` query parameter, if support is implemented by the event publisher, it is also possible to filter events using these query parameters:
-        * `equipmentReferences`
-        * `vesselIMONumber` or `vesselName`
-        * `carrierImportVoyageNumber` or `universalImportVoyageReference`
-        * `carrierServiceCode` or `universalServiceReference`
-
-        The event publisher can decide to also allow retrieving events without specifying any of these filtering query parameters, instead filtering the results only based on the authorization and registration profile of the authenticated party calling this endpoint.
+        When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 
         ### Filtering by event date-time
 
-        Whenever the query parameters filter could retrieve large number of historical events (for example when filtering only by vessel name or IMO number), the request should also include at least the `eventDateTimeMin` query parameter and could also include the `eventDateTimeMax` query parameter.
+        Whenever the query parameters filter could retrieve large number of historical events, the request should also include at least the `serviceDateTimeMin` query parameter and could also include the `serviceDateTimeMax` query parameter.
 
-        The event publisher can separately also decide to have default relative date ranges and only return events having an `eventDateTime` within those ranges.
+        The event publisher can separately also decide to have default relative date ranges and only return events having a service timestamp within those ranges.
 
         ## Pagination
 
@@ -225,16 +212,16 @@ paths:
         schema:
           type: "string"
         example: "ACT"
-      - name: "eventDateTimeMin"
+      - name: "serviceDateTimeMin"
         in: "query"
-        description: "Retrieve events occurring at or after this timestamp"
+        description: "Retrieve events about services performed at or after this timestamp"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
-      - name: "eventDateTimeMax"
+      - name: "serviceDateTimeMax"
         in: "query"
-        description: "Retrieve events occurring at or before this timestamp"
+        description: "Retrieve events about services performed at or before this timestamp"
         schema:
           type: "string"
           format: "date-time"

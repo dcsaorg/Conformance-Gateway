@@ -96,19 +96,19 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
       createStringQueryParameter(
           "classifierCode", "ACT", "Classifier code (EST / REQ / PLN / ACT)");
 
-  private final Parameter eventDateTimeMin =
+  private final Parameter eventTimestampMin =
       new Parameter()
           .in("query")
-          .name("eventDateTimeMin")
-          .description("Retrieve events occurring at or after this timestamp")
+          .name("eventTimestampMin")
+          .description("Retrieve events with a timestamp at or after this date-time")
           .example("2025-01-23T01:23:45Z")
           .schema(new Schema<String>().type("string").format("date-time"));
 
-  private final Parameter eventDateTimeMax =
+  private final Parameter eventTimestampMax =
       new Parameter()
           .in("query")
-          .name("eventDateTimeMax")
-          .description("Retrieve events occurring at or before this timestamp")
+          .name("eventTimestampMax")
+          .description("Retrieve events with a timestamp at or before this date-time")
           .example("2025-01-23T01:23:45Z")
           .schema(new Schema<String>().type("string").format("date-time"));
 
@@ -151,8 +151,8 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
         portCallServiceID,
         timestampID,
         classifierCode,
-        eventDateTimeMin,
-        eventDateTimeMax,
+      eventTimestampMin,
+      eventTimestampMax,
         limit,
         cursor);
   }

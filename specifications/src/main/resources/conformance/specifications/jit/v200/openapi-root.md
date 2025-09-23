@@ -4,6 +4,11 @@ This is the OpenAPI specification of the **DCSA Just in Time Port Call** standar
 
 This API allows the transfer of structured JIT events from a publisher to a subscriber.
 
+JIT events are used by port call service providers and consumers to exchange information about the service, including:
+- estimated, requested and planned service timestamps as part of the "ERP" pattern defined by the [IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf);
+- actual service timestamps;
+- container move counts (loads, discharges and restows).
+
 The event publisher implements the `GET /events` endpoint, which can be called by authorized API consumers to retrieve relevant available events.
 
 The event subscribers implement the `POST /events` endpoint, which can be called by event publishers call to send relevant events as they become available.

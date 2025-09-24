@@ -1226,11 +1226,10 @@ public class EblChecks {
   public static List<JsonContentCheck> getTdPayloadChecks(
       TransportDocumentStatus transportDocumentStatus,
       Supplier<DynamicScenarioParameters> dspSupplier) {
-    return getTdPayloadChecks(standardVersion, transportDocumentStatus, dspSupplier, true);
+    return getTdPayloadChecks(transportDocumentStatus, dspSupplier, true);
   }
 
   public static List<JsonContentCheck> getTdPayloadChecks(
-      String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Supplier<DynamicScenarioParameters> dspSupplier,
       boolean tdrIsKnown) {

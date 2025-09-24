@@ -182,7 +182,8 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
     if (standardName.equals(EblStandard.INSTANCE.getName())) {
       if (testedPartyRole.equals(EblRole.CARRIER.getConfigName())
-          && currentAction.equals(UC6_Carrier_PublishDraftTransportDocumentAction.ACTION_TITLE)) {
+          && currentAction.startsWith(
+              UC6_Carrier_PublishDraftTransportDocumentAction.ACTION_TITLE)) {
         jsonForPrompt = fetchTransportDocument(jsonForPrompt);
       }
     } else if (standardName.equals(PintStandard.INSTANCE.getName())) {

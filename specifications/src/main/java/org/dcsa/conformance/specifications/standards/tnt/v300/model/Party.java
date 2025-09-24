@@ -17,7 +17,6 @@ Code identifying the party as per the `codeListProvider` and `codeListName`.
   private String partyCode;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
 """
 Code of the provider of a list of codes identifying a party, including but not limited to:

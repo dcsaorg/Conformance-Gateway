@@ -209,7 +209,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
-"Event / eventRouting / destinationParty / codeListProvider",codeListProvider,string,yes,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+"Event / eventRouting / destinationParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
 - `BOLE` (Bolero)
 - `BRIT` (BRITC eBL)
 - `CARX` (CargoX)
@@ -245,7 +245,7 @@ or a subsequent revision.",
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
-"Event / eventRouting / forwardingParties / codeListProvider",codeListProvider,string,yes,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+"Event / eventRouting / forwardingParties / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
 - `BOLE` (Bolero)
 - `BRIT` (BRITC eBL)
 - `CARX` (CargoX)
@@ -281,7 +281,7 @@ or a subsequent revision.",
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
-"Event / eventRouting / originatingParty / codeListProvider",codeListProvider,string,yes,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+"Event / eventRouting / originatingParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
 - `BOLE` (Bolero)
 - `BRIT` (BRITC eBL)
 - `CARX` (CargoX)

@@ -863,8 +863,6 @@ components:
           - $ref: "#/components/schemas/GeoCoordinate"
       description: "Location information"
     Party:
-      required:
-      - "codeListProvider"
       type: "object"
       properties:
         partyCode:

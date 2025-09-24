@@ -209,7 +209,7 @@ Party,codeListName,string,,maxLength=100,,DID,"Name of the code list in which th
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
-Party,codeListProvider,string,yes,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+Party,codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
 - `BOLE` (Bolero)
 - `BRIT` (BRITC eBL)
 - `CARX` (CargoX)

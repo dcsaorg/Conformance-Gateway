@@ -1,5 +1,90 @@
 Path,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
 Event,,,,,,,,
+"Event / documentReferenceReplacements","documentReferenceReplacements","DocumentReferenceReplacement list",,,,,"List of document replacements related to this event",
+"Event / documentReferenceReplacements / newReferences",newReferences,"DocumentReference list",,,,,"References of the documents replacing those with the `oldReferences`.",
+"Event / documentReferenceReplacements / newReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+"Event / documentReferenceReplacements / newReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
+- `BKG` - Booking
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `DGD` - Dangerous Goods Declaration
+- `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
+- `ICE` - Inspection Certificate
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
+"Event / documentReferenceReplacements / oldReferences",oldReferences,"DocumentReference list",,,,,"References of the documents replaced by those with the `newReferences`.",
+"Event / documentReferenceReplacements / oldReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+"Event / documentReferenceReplacements / oldReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
+- `BKG` - Booking
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `DGD` - Dangerous Goods Declaration
+- `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
+- `ICE` - Inspection Certificate
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
+"Event / documentReferences",documentReferences,"DocumentReference list",,,,,"List of documents related to this event",
+"Event / documentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+"Event / documentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
+- `BKG` - Booking
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `DGD` - Dangerous Goods Declaration
+- `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
+- `ICE` - Inspection Certificate
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
 "Event / equipmentDetails",equipmentDetails,EquipmentDetails,,,,,"Equipment-specific details",
 "Event / equipmentDetails / emptyIndicatorCode",emptyIndicatorCode,string,,,,LADEN,"Code to denote whether the equipment is empty or laden.
 - `EMPTY` - Empty
@@ -15,7 +100,10 @@ from SMDG.",
 "Event / equipmentDetails / ISOEquipmentCode",ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
-"Event / equipmentDetails / isTransshipmentMove",isTransshipmentMove,boolean,,,,,"Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.",
+"Event / equipmentDetails / movementType",movementType,string,,,,EXPORT,"Code used to denote the type of movement
+- `IMPORT` - Import movement
+- `EXPORT` - Export movement
+- `TRANSSHIPMENT` - Transshipment movement",
 "Event / equipmentDetails / seals",seals,"Seal list",,,,,,
 "Event / equipmentDetails / seals / number",number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 "Event / equipmentDetails / seals / source",source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
@@ -28,7 +116,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
 - `WIR` (Wire)",
-"Event / eventClassification",eventClassification,EventClassification,yes,,,,"Type, subtype and classifier of an event",
+"Event / eventClassification",eventClassification,EventClassification,,,,,"Type, subtype and classifier of an event",
 "Event / eventClassification / equipmentEventTypeCode",equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
 - `LOAD` - Loaded
 - `DISC` - Discharged
@@ -45,7 +133,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-"Event / eventClassification / eventTypeCode",eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+"Event / eventClassification / eventTypeCode",eventTypeCode,string,,,,EQUIPMENT,"Code used to denote the type of an event
 - `SHIPMENT` - Shipment event
 - `TRANSPORT` - Transport event
 - `EQUIPMENT` - Equipment event
@@ -76,9 +164,16 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `ARRI` - Arrived
 - `DEPA` - Departed",
 "Event / eventDateTime",eventDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the real-world event has occurred or will occur.",
-"Event / eventID",eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+"Event / eventID",eventID,string,,maxLength=500,,"event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z","ID of the event, unique among all the events published by a T&T event publisher.
 
-An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+
+Each event is uniquely identified within each T&T 3.x standard ecosystem of connected implementers
+by a composite key including:
+- `eventRouting.originatingParty.partyCode`
+- `eventRouting.originatingParty.codeListProvider`
+- `eventRouting.originatingParty.codeListName`
+- `eventID`",
 "Event / eventLocation",eventLocation,Location,,,,,"The location of the event.",
 "Event / eventLocation / address",address,Address,,,,,"Location address",
 "Event / eventLocation / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
@@ -115,10 +210,125 @@ An event overrides any other event that has the same `eventID` and an earlier `e
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+"Event / eventRouting",eventRouting,EventRouting,,,,,"Routing of an event from the originating party, via forwarding parties, to the destination party.",
+"Event / eventRouting / destinationParty",destinationParty,Party,,,,,"The final party intended as destination of the event.",
+"Event / eventRouting / destinationParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+"Event / eventRouting / destinationParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `EDOX` (EdoxOnline)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+"Event / eventRouting / destinationParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+"Event / eventRouting / destinationParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
+"Event / eventRouting / forwardingParties",forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
+"Event / eventRouting / forwardingParties / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+"Event / eventRouting / forwardingParties / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `EDOX` (EdoxOnline)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+"Event / eventRouting / forwardingParties / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+"Event / eventRouting / forwardingParties / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
+"Event / eventRouting / originatingParty",originatingParty,Party,,,,,"The initial party with which the event originated.",
+"Event / eventRouting / originatingParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+"Event / eventRouting / originatingParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `EDOX` (EdoxOnline)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+"Event / eventRouting / originatingParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+"Event / eventRouting / originatingParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
 "Event / eventUpdatedDateTime",eventUpdatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
 "Event / iotDetails",iotDetails,IotDetails,,,,,"IoT-specific details",
 "Event / iotDetails / iotEventCode",iotEventCode,string,,,,DRO,"Code used to denote the specific IoT event that has occurred
-- `DRO` - Door opened",
+- `DRO` - Door opened
+- `LOC` - Location update",
+"Event / isRetracted",isRetracted,boolean,,,,,"Flag indicating that the event is retracted.
+
+The data in this and all previously transmitted events with the same `eventID` must be discarded or ignored.
+
+If this flag is set, any event data other than the `eventID` is irrelevant (if present).",
 "Event / reeferDetails",reeferDetails,ReeferDetails,,,,,"Reefer-specific details",
 "Event / reeferDetails / measuredParameters",measuredParameters,ActiveReeferParameters,,,,,"Measured active reefer parameters",
 "Event / reeferDetails / measuredParameters / airExchangeUnit",airExchangeUnit,string,,,,MQH,"Unit in which the `airExchangeValue` is expressed:
@@ -158,62 +368,85 @@ or during transit but prior arrival at POD.",
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)",
 "Event / reeferDetails / setpointParameters / temperatureValue",temperatureValue,number,,,,-15,"Internal temperature value expressed in `temperatureUnit`",
-"Event / relatedDocumentReferences","relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
-"Event / relatedDocumentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-"Event / relatedDocumentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
-- `CBR` - Carrier Booking Request
-- `BKG` - Booking
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
-- `DEI` - Delivery Instructions
-- `DEO` - Delivery Order
-- `TRO` - Transport Order
-- `CRO` - Container Release Order
-- `ARN` - Arrival Notice
-- `VGM` - Verified Gross Mass
-- `CAS` - Cargo Survey
-- `CUC` - Customs Clearance
-- `DGD` - Dangerous Goods Declaration
-- `OOG` - Out of Gauge
-- `CQU` - Contract Quotation
-- `INV` - Invoice
-- `HCE` - Health Certificate
-- `PCE` - Phytosanitary Certificate
-- `VCE` - Veterinary Certificate
-- `FCE` - Fumigation Certificate
-- `ICE` - Inspection Certificate
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin",
 "Event / shipmentDetails",shipmentDetails,ShipmentDetails,,,,,"Shipment-specific details",
 "Event / shipmentDetails / documentReference",documentReference,DocumentReference,,,,,"Referenced document",
 "Event / shipmentDetails / documentReference / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 "Event / shipmentDetails / documentReference / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
-- `CBR` - Carrier Booking Request
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
 - `BKG` - Booking
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
 - `DEI` - Delivery Instructions
 - `DEO` - Delivery Order
-- `TRO` - Transport Order
-- `CRO` - Container Release Order
-- `ARN` - Arrival Notice
-- `VGM` - Verified Gross Mass
-- `CAS` - Cargo Survey
-- `CUC` - Customs Clearance
 - `DGD` - Dangerous Goods Declaration
-- `OOG` - Out of Gauge
-- `CQU` - Contract Quotation
-- `INV` - Invoice
-- `HCE` - Health Certificate
-- `PCE` - Phytosanitary Certificate
-- `VCE` - Veterinary Certificate
 - `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
 - `ICE` - Inspection Certificate
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin",
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
 "Event / shipmentDetails / priceCalculationDate",priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in consideration for the tariff applicability, that differs depending on the trade.
 It can vary per carrier.",
 "Event / shipmentDetails / reason",reason,string,,,,,"The reason this event was sent",
+"Event / shipmentLocationType",shipmentLocationType,string,,,,PRE,"Code used to denote the type of a shipment location
+- `PRE` - Place of Receipt
+- `POL` - Port of Loading
+- `POD` - Port of Discharge
+- `PDE` - Place of Delivery
+- `PCF` - Pre-carriage From
+- `OIR` - Onward Inland Routing
+- `ORI` - Origin of goods
+- `IEL` - Container intermediate export stop-off location
+- `PTP` - Prohibited transshipment port
+- `RTP` - Requested transshipment port
+- `FCD` - Full container drop-off location",
+"Event / shipmentReferenceReplacements","shipmentReferenceReplacements","ShipmentReferenceReplacement list",,,,,"List of shipment reference replacements related to this event",
+"Event / shipmentReferenceReplacements / newReferences",newReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replacing those with the `oldReferences`.",
+"Event / shipmentReferenceReplacements / newReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
+"Event / shipmentReferenceReplacements / newReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference
+- `FF` - Freight Forwarder’s Reference
+- `SI` - Shipper’s Reference
+- `PO` - Purchase Order Reference
+- `CR` - Customer’s Reference
+- `AAO` - Consignee’s Reference
+- `ECR` - Empty container release reference
+- `CSI` - Customer shipment ID
+- `BPR` - Booking party reference number
+- `BID` - Booking Request ID
+- `EQ` - Equipment Reference
+- `RUC` - Registro Único del Contribuyente
+- `DUE` - Declaração Única de Exportação
+- `CER` - Canadian Export Reporting System
+- `AES` - Automated Export System",
+"Event / shipmentReferenceReplacements / oldReferences",oldReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replaced by those with the `newReferences`.",
+"Event / shipmentReferenceReplacements / oldReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
+"Event / shipmentReferenceReplacements / oldReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference
+- `FF` - Freight Forwarder’s Reference
+- `SI` - Shipper’s Reference
+- `PO` - Purchase Order Reference
+- `CR` - Customer’s Reference
+- `AAO` - Consignee’s Reference
+- `ECR` - Empty container release reference
+- `CSI` - Customer shipment ID
+- `BPR` - Booking party reference number
+- `BID` - Booking Request ID
+- `EQ` - Equipment Reference
+- `RUC` - Registro Único del Contribuyente
+- `DUE` - Declaração Única de Exportação
+- `CER` - Canadian Export Reporting System
+- `AES` - Automated Export System",
 "Event / shipmentReferences",shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 "Event / shipmentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
 "Event / shipmentReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference

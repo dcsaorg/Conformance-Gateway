@@ -83,9 +83,16 @@ Event,documentReferences,"DocumentReference list",,,,,"List of documents related
 Event,equipmentDetails,EquipmentDetails,,,,,"Equipment-specific details",
 Event,eventClassification,EventClassification,,,,,"Type, subtype and classifier of an event",
 Event,eventDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the real-world event has occurred or will occur.",
-Event,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+Event,eventID,string,,maxLength=500,,"event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z","ID of the event, unique among all the events published by a T&T event publisher.
 
-An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+
+Each event is uniquely identified within each T&T 3.x standard ecosystem of connected implementers
+by a composite key including:
+- `eventRouting.originatingParty.partyCode`
+- `eventRouting.originatingParty.codeListProvider`
+- `eventRouting.originatingParty.codeListName`
+- `eventID`",
 Event,eventLocation,Location,,,,,"The location of the event.",
 Event,eventRouting,EventRouting,,,,,"Routing of an event from the originating party, via forwarding parties, to the destination party.",
 Event,eventUpdatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",

@@ -18,6 +18,8 @@ Added `DocumentTypeCode` value `PFD` for "Proof of Delivery". (SD-2460)
 
 Added `IotEventCode` value `LOC` for "Location update". (SD-2480)
 
+Updated in type `Event` the attribute `eventID` removing the `uuid` format constraint. (SD-2478)
+
 
 ## Snapshot v3.0.0-20250912-design
 

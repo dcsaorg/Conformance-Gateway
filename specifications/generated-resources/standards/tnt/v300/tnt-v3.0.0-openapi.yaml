@@ -454,13 +454,20 @@ components:
           allOf:
           - $ref: "#/components/schemas/EventRouting"
         eventID:
+          maxLength: 500
           type: "string"
           description: |
-            Unique ID of the event.
+            ID of the event, unique among all the events published by a T&T event publisher.
 
             An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
-          format: "uuid"
-          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+
+            Each event is uniquely identified within each T&T 3.x standard ecosystem of connected implementers
+            by a composite key including:
+            - `eventRouting.originatingParty.partyCode`
+            - `eventRouting.originatingParty.codeListProvider`
+            - `eventRouting.originatingParty.codeListName`
+            - `eventID`
+          example: "event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z"
         isRetracted:
           type: "boolean"
           description: |

@@ -5,7 +5,6 @@ import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.ShipmentLocationTypeCode;
 
 @Data
@@ -15,13 +14,22 @@ public class Event {
   @Schema() private EventRouting eventRouting;
 
   @Schema(
+      maxLength = 500,
+      example = "event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z",
       description =
 """
-Unique ID of the event.
+ID of the event, unique among all the events published by a T&T event publisher.
 
 An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+
+Each event is uniquely identified within each T&T 3.x standard ecosystem of connected implementers
+by a composite key including:
+- `eventRouting.originatingParty.partyCode`
+- `eventRouting.originatingParty.codeListProvider`
+- `eventRouting.originatingParty.codeListName`
+- `eventID`
 """)
-  private UniversallyUniqueID eventID;
+  private String eventID;
 
   @Schema(
       description =

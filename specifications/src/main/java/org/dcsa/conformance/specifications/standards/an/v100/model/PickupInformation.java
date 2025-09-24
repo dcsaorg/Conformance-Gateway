@@ -5,7 +5,7 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 
 @Data
-@Schema(description = "Pickup information")
+@Schema(description = "Consolidates the information required to pick up the container.")
 public class PickupInformation {
 
   @Schema(

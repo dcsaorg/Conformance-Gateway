@@ -38,6 +38,16 @@ public class ANAction extends ConformanceAction {
   }
 
   @Override
+  public void reset() {
+    super.reset();
+    if (previousAction != null) {
+      this.dsp.set(null);
+    } else {
+      this.dsp.set(new DynamicScenarioParameters(null));
+    }
+  }
+
+  @Override
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
 

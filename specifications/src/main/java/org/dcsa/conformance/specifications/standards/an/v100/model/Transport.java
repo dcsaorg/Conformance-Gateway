@@ -8,7 +8,7 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedD
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 
 @Data
-@Schema(description = "Transport info")
+@Schema(description = "Transport details relevant to the arrival notice.")
 public class Transport {
 
   @Schema(

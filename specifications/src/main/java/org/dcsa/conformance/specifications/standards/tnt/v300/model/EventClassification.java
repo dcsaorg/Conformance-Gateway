@@ -14,10 +14,9 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.types.TransportEve
 @Data
 public class EventClassification {
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  private EventTypeCode eventTypeCode;
+  @Schema() private EventTypeCode eventTypeCode;
 
-  private EventClassifierCode eventClassifierCode;
+  @Schema() private EventClassifierCode eventClassifierCode;
 
   @Schema() private ShipmentEventTypeCode shipmentEventTypeCode;
 

@@ -3,12 +3,9 @@ package org.dcsa.conformance.specifications.standards.dt.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = PartyContactDetail.CLASS_SCHEMA_DESCRIPTION)
+@Schema(description = "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided.")
 @Data
 public class PartyContactDetail {
-
-  public static final String CLASS_SCHEMA_DESCRIPTION =
-      "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided.";
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,

@@ -1256,6 +1256,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "ArrivalNotice / utilizedTransportEquipments / seals / source",source,string,,maxLength=10,,CUS,"The source of the seal, namely who has affixed the seal.
 - `CAR` (Carrier)
 - `SHI` (Shipper)
+- `PHY` (Phytosanitary)
 - `VET` (Veterinary)
 - `CUS` (Customs)",
 "ArrivalNotice / utilizedTransportEquipments / shippingMarks",shippingMarks,"string list",,"maxItems=50

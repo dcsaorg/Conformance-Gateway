@@ -2159,6 +2159,7 @@ components:
             The source of the seal, namely who has affixed the seal.
             - `CAR` (Carrier)
             - `SHI` (Shipper)
+            - `PHY` (Phytosanitary)
             - `VET` (Veterinary)
             - `CUS` (Customs)
           example: "CUS"

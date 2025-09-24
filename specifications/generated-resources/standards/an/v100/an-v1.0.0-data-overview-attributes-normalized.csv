@@ -575,6 +575,7 @@ Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the conta
 Seal,source,string,,maxLength=10,,CUS,"The source of the seal, namely who has affixed the seal.
 - `CAR` (Carrier)
 - `SHI` (Shipper)
+- `PHY` (Phytosanitary)
 - `VET` (Veterinary)
 - `CUS` (Customs)",
 TaxLegalReference,countryCode,string,,maxLength=2,,IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",

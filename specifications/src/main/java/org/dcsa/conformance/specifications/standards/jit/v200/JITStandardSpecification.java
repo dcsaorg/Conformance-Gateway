@@ -58,7 +58,7 @@ public class JITStandardSpecification extends StandardSpecification {
   private final GetEventsEndpoint getEventsEndpoint;
 
   public JITStandardSpecification() {
-    super("Just in Time Port Call", "JIT", "2.0.0");
+    super("Port Call (JIT)", "JIT", "2.0.0");
 
     openAPI.addTagsItem(
         new Tag()
@@ -76,7 +76,7 @@ public class JITStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata("Just in Time Port Call", "2.0.0-20250926-design", "", "", 4);
+    return new LegendMetadata("Port Call (JIT)", "2.0.0-20250926-design", "", "", 4);
   }
 
   @Override
@@ -161,13 +161,13 @@ public class JITStandardSpecification extends StandardSpecification {
             new Header()
                 .description(
 """
-When communicating through an optional system that acts as an application level JIT communication proxy,
-forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-the API client sets this request header to identify itself to the JIT proxy and to the API server
+When communicating through an optional system that acts as an application level Port Call communication proxy,
+forwarding API calls between Port Call service providers and Port Call service consumers,
+the API client sets this request header to identify itself to the Port Call proxy and to the API server
 as the original sending party of the API request.
 
-The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-to the parties connecting through the JIT proxy are out of scope.
+The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+to the parties connecting through the Port Call proxy are out of scope.
 """)
                 .schema(new Schema<>().type("string").example("Carrier-123"))),
         Map.entry(
@@ -175,12 +175,12 @@ to the parties connecting through the JIT proxy are out of scope.
             new Header()
                 .description(
 """
-When communicating through an optional system that acts as an application level JIT communication proxy,
-forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-the API client sets this request header to identify to the JIT proxy the target receiving party of the API request.
+When communicating through an optional system that acts as an application level Port Call communication proxy,
+forwarding API calls between Port Call service providers and Port Call service consumers,
+the API client sets this request header to identify to the Port Call proxy the target receiving party of the API request.
 
-The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-to the parties connecting through the JIT proxy are out of scope.
+The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+to the parties connecting through the Port Call proxy are out of scope.
 """)
                 .schema(new Schema<>().type("string").example("Terminal-456"))));
   }
@@ -192,15 +192,15 @@ to the parties connecting through the JIT proxy are out of scope.
             new Header()
                 .description(
 """
-When communicating through an optional system that acts as an application level JIT communication proxy,
-forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-the API server sets this response header to identify itself to the JIT proxy and to the API client
+When communicating through an optional system that acts as an application level Port Call communication proxy,
+forwarding API calls between Port Call service providers and Port Call service consumers,
+the API server sets this response header to identify itself to the Port Call proxy and to the API client
 as the original sending party of the API response.
 
 The value of this response header must be the same as the value of the request header `Request-Receiving-Party`.
 
-The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-to the parties connecting through the JIT proxy are out of scope.
+The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+to the parties connecting through the Port Call proxy are out of scope.
 """)
                 .schema(new Schema<>().type("string").example("Terminal-456"))),
         Map.entry(
@@ -208,14 +208,14 @@ to the parties connecting through the JIT proxy are out of scope.
             new Header()
                 .description(
 """
-When communicating through an optional system that acts as an application level JIT communication proxy,
-forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-the API server sets this response header to identify to the JIT proxy the target receiving party of the API response.
+When communicating through an optional system that acts as an application level Port Call communication proxy,
+forwarding API calls between Port Call service providers and Port Call service consumers,
+the API server sets this response header to identify to the Port Call proxy the target receiving party of the API response.
 
 The value of this response header must be the same as the value of the request header `Request-Sending-Party`.
 
-The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-to the parties connecting through the JIT proxy are out of scope.
+The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+to the parties connecting through the Port Call proxy are out of scope.
 """)
                 .schema(new Schema<>().type("string").example("Carrier-123"))));
   }

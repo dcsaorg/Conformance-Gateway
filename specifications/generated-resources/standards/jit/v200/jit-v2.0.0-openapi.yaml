@@ -1,15 +1,15 @@
 ---
 openapi: "3.0.3"
 info:
-  title: "DCSA Just in Time Port Call API"
+  title: "DCSA Port Call (JIT) API"
   description: |
-    # DCSA Just in Time Port Call API
+    # DCSA Port Call (JIT) API
 
-    This is the OpenAPI specification of the **DCSA Just in Time Port Call** standard.
+    This is the OpenAPI specification of the **DCSA Port Call (JIT)** standard.
 
-    This API allows the transfer of structured JIT events from a publisher to a subscriber.
+    This API allows the transfer of structured Port Call events from a publisher to a subscriber.
 
-    JIT events are used by port call service providers and consumers to exchange information about the service, including:
+    Port Call events are used by port call service providers and consumers to exchange information about the service, including:
     - estimated, requested and planned service timestamps as part of the "ERP" pattern defined by the [IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf);
     - actual service timestamps;
     - container move counts (loads, discharges and restows).
@@ -24,7 +24,7 @@ info:
 
     ### Work in progress ⚠️
 
-    The DCSA Just in Time Port Call standard, including this API, is currently being designed and is **not** ready for general adoption yet.
+    The DCSA Port Call (JIT) standard, including this API, is currently being designed and is **not** ready for general adoption yet.
   contact:
     name: "Digital Container Shipping Association (DCSA)"
     url: "https://dcsa.org"
@@ -250,13 +250,13 @@ paths:
       - name: "Request-Sending-Party"
         in: "header"
         description: |
-          When communicating through an optional system that acts as an application level JIT communication proxy,
-          forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-          the API client sets this request header to identify itself to the JIT proxy and to the API server
+          When communicating through an optional system that acts as an application level Port Call communication proxy,
+          forwarding API calls between Port Call service providers and Port Call service consumers,
+          the API client sets this request header to identify itself to the Port Call proxy and to the API server
           as the original sending party of the API request.
 
-          The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-          to the parties connecting through the JIT proxy are out of scope.
+          The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+          to the parties connecting through the Port Call proxy are out of scope.
         required: false
         schema:
           type: "string"
@@ -264,12 +264,12 @@ paths:
       - name: "Request-Receiving-Party"
         in: "header"
         description: |
-          When communicating through an optional system that acts as an application level JIT communication proxy,
-          forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-          the API client sets this request header to identify to the JIT proxy the target receiving party of the API request.
+          When communicating through an optional system that acts as an application level Port Call communication proxy,
+          forwarding API calls between Port Call service providers and Port Call service consumers,
+          the API client sets this request header to identify to the Port Call proxy the target receiving party of the API request.
 
-          The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-          to the parties connecting through the JIT proxy are out of scope.
+          The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+          to the parties connecting through the Port Call proxy are out of scope.
         required: false
         schema:
           type: "string"
@@ -459,7 +459,9 @@ components:
             exchanged between the service provider and service consumer as part of the "ERP" pattern.
           allOf:
           - $ref: "#/components/schemas/Timestamp"
-      description: "Just in Time Port Call event"
+      description: |
+        Generic event used to exchange timestamps, move forecasts and related port call service information
+        between service providers and service consumers.
     Facility:
       type: "object"
       properties:
@@ -1166,51 +1168,51 @@ components:
         example: "ExampleNextPageCursor"
     Request-Sending-Party:
       description: |
-        When communicating through an optional system that acts as an application level JIT communication proxy,
-        forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-        the API client sets this request header to identify itself to the JIT proxy and to the API server
+        When communicating through an optional system that acts as an application level Port Call communication proxy,
+        forwarding API calls between Port Call service providers and Port Call service consumers,
+        the API client sets this request header to identify itself to the Port Call proxy and to the API server
         as the original sending party of the API request.
 
-        The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-        to the parties connecting through the JIT proxy are out of scope.
+        The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+        to the parties connecting through the Port Call proxy are out of scope.
       schema:
         type: "string"
         example: "Carrier-123"
     Request-Receiving-Party:
       description: |
-        When communicating through an optional system that acts as an application level JIT communication proxy,
-        forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-        the API client sets this request header to identify to the JIT proxy the target receiving party of the API request.
+        When communicating through an optional system that acts as an application level Port Call communication proxy,
+        forwarding API calls between Port Call service providers and Port Call service consumers,
+        the API client sets this request header to identify to the Port Call proxy the target receiving party of the API request.
 
-        The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-        to the parties connecting through the JIT proxy are out of scope.
+        The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+        to the parties connecting through the Port Call proxy are out of scope.
       schema:
         type: "string"
         example: "Terminal-456"
     Response-Sending-Party:
       description: |
-        When communicating through an optional system that acts as an application level JIT communication proxy,
-        forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-        the API server sets this response header to identify itself to the JIT proxy and to the API client
+        When communicating through an optional system that acts as an application level Port Call communication proxy,
+        forwarding API calls between Port Call service providers and Port Call service consumers,
+        the API server sets this response header to identify itself to the Port Call proxy and to the API client
         as the original sending party of the API response.
 
         The value of this response header must be the same as the value of the request header `Request-Receiving-Party`.
 
-        The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-        to the parties connecting through the JIT proxy are out of scope.
+        The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+        to the parties connecting through the Port Call proxy are out of scope.
       schema:
         type: "string"
         example: "Terminal-456"
     Response-Receiving-Party:
       description: |
-        When communicating through an optional system that acts as an application level JIT communication proxy,
-        forwarding API calls between JIT **Service Providers** and JIT **Service Consumers**,
-        the API server sets this response header to identify to the JIT proxy the target receiving party of the API response.
+        When communicating through an optional system that acts as an application level Port Call communication proxy,
+        forwarding API calls between Port Call service providers and Port Call service consumers,
+        the API server sets this response header to identify to the Port Call proxy the target receiving party of the API response.
 
         The value of this response header must be the same as the value of the request header `Request-Sending-Party`.
 
-        The assignment of party identifiers by the JIT proxy and the distribution of identifiers
-        to the parties connecting through the JIT proxy are out of scope.
+        The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+        to the parties connecting through the Port Call proxy are out of scope.
       schema:
         type: "string"
         example: "Carrier-123"

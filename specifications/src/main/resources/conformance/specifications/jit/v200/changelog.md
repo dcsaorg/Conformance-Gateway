@@ -1,5 +1,7 @@
-# Just in Time Port Call v2.0.0 Changelog
+# Port Call (JIT) v2.0.0 Changelog
 
 ## Snapshot v2.0.0-20250926-design
 
-Rebuilt Just in Time Port Call v2.0.0 using DCSA's latest technical approach.
+Rebuilt Port Call (JIT) v2.0.0 using DCSA's latest technical approach.
+
+Renamed the standard from "Just in Time" to "Port Call (JIT)". (SD-2489)

@@ -4,7 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(description = "Just in Time Port Call event")
+@Schema(
+    description =
+"""
+Generic event used to exchange timestamps, move forecasts and related port call service information
+between service providers and service consumers.
+""")
 public class Event {
 
   @Schema(

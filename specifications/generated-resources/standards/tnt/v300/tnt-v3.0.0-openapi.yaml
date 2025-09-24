@@ -48,35 +48,22 @@ paths:
 
         The event publisher is expected to additionally filter the events based on the authorization and registration profile of the authenticated party calling this endpoint. Authorization, registration and any such additional filtering are out of scope in this standard.
 
-        ## Filtering
+        ## Event filtering
 
-        Every event publisher **must** support the retrieval of events based on the transport document references of one or more bills of lading, specified as the value(s) of the `transportDocumentReferences` query parameter.
+        Every event publisher must support the following combinations of query parameter filters:
+        * `carrierBookingReference`
+        * `carrierBookingReference`, `equipmentReference`
+        * `transportDocumentReference`
+        * `transportDocumentReference`, `equipmentReference`
 
-        Each event publisher can decide whether to support any of the additional filtering query parameters defined in the standard for this endpoint, and should document the decision in their published copy of the API specification.
+        Every event publisher must support combining any of the query parameter filters above with all of these additional filters:
+        * `eventUpdatedDateTimeMin`
+        * `eventUpdatedDateTimeMax`
+        * `eventUpdatedDateTimeMin`, `eventUpdatedDateTimeMax`
 
-        When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400. In particular, the publisher can reject with HTTP 400 a GET request with a number of `transportDocumentReferences` or `equipmentReferences` larger than the maximum supported (which in the case of some publishers is likely to be `1`). Publishers should document these limits in their copy of the API specification.
+        Each event publisher can separately also decide to have default relative date ranges and only return events having an `eventUpdatedDateTime` within those ranges.
 
-        ### Filtering by transport document reference
-
-        When filtering using the `transportDocumentReferences` query parameter, the response contains events for all the bills of lading with the specified transport document reference for which an event is available (and accessible by the party making the API request).
-
-        Even when requesting event for a single transport document reference, in the absence of further explicit filtering in the request or implicit filtering by the event publisher, the response is expected to contain all the events corresponding to that bill of lading.
-
-        ### Filtering alternatives to the transport document reference
-
-        As an alternative to retrieving events by the bill of lading using the `transportDocumentReferences` query parameter, if support is implemented by the event publisher, it is also possible to filter events using these query parameters:
-        * `equipmentReferences`
-        * `vesselIMONumber` or `vesselName`
-        * `carrierImportVoyageNumber` or `universalImportVoyageReference`
-        * `carrierServiceCode` or `universalServiceReference`
-
-        The event publisher can decide to also allow retrieving events without specifying any of these filtering query parameters, instead filtering the results only based on the authorization and registration profile of the authenticated party calling this endpoint.
-
-        ### Filtering by event date-time
-
-        Whenever the query parameters filter could retrieve large number of historical events (for example when filtering only by vessel name or IMO number), the request should also include at least the `eventDateTimeMin` query parameter and could also include the `eventDateTimeMax` query parameter.
-
-        The event publisher can separately also decide to have default relative date ranges and only return events having an `eventDateTime` within those ranges.
+        When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 
         ## Pagination
 
@@ -111,80 +98,32 @@ paths:
         When responding with the last page of results, the event publisher no longer includes a `Next-Page-Cursor` response header. The last page of results may be empty, for example in the case of a stateless pagination implementation by the event publisher.
       operationId: "get-events"
       parameters:
-      - name: "transportDocumentReferences"
+      - name: "carrierBookingReference"
         in: "query"
-        description: "Reference(s) of the transport document(s) for which to return the associated events"
-        explode: false
-        schema:
-          type: "array"
-          items:
-            type: "string"
-        example: "TDR0123456,TDR1234567"
-      - name: "equipmentReferences"
-        in: "query"
-        description: "Reference(s) of the equipment for which to return the associated events"
-        explode: false
-        schema:
-          type: "array"
-          items:
-            type: "string"
-        example: "APZU4812090,APZU4812091"
-      - name: "vesselIMONumber"
-        in: "query"
-        description: "IMO number of the vessel for which to retrieve available events"
+        description: "Reference of the transport document for which to return the associated events"
         schema:
           type: "string"
-        example: "12345678"
-      - name: "vesselName"
+        example: "HHL71800000"
+      - name: "transportDocumentReference"
         in: "query"
-        description: "Name of the vessel for which to retrieve available events"
+        description: "Reference of the transport document for which to return the associated events"
         schema:
           type: "string"
-        example: "King of the Seas"
-      - name: "carrierExportVoyageNumber"
+        example: "HHL71800000"
+      - name: "equipmentReference"
         in: "query"
-        description: "The identifier of an export voyage. The carrier-specific identifier of the export Voyage."
+        description: "Reference of the equipment for which to return the associated events"
         schema:
           type: "string"
-        example: "1234N"
-      - name: "universalExportVoyageReference"
-        in: "query"
-        description: "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
-        schema:
-          type: "string"
-        example: "2301W"
-      - name: "carrierImportVoyageNumber"
-        in: "query"
-        description: "The identifier of an import voyage. The carrier-specific identifier of the import Voyage."
-        schema:
-          type: "string"
-        example: "1234N"
-      - name: "universalImportVoyageReference"
-        in: "query"
-        description: "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
-        schema:
-          type: "string"
-        example: "2301W"
-      - name: "carrierServiceCode"
-        in: "query"
-        description: "The carrier specific code of the service for which the schedule details are published."
-        schema:
-          type: "string"
-        example: "FE1"
-      - name: "universalServiceReference"
-        in: "query"
-        description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
-        schema:
-          type: "string"
-        example: "SR12345A"
-      - name: "dateTimeMin"
+        example: "APZU4812090"
+      - name: "eventUpdatedDateTimeMin"
         in: "query"
         description: "Retrieve events with an `eventUpdatedDateTime` at or after this timestamp"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
-      - name: "dateTimeMax"
+      - name: "eventUpdatedDateTimeMax"
         in: "query"
         description: "Retrieve events with an `eventUpdatedDateTime` at or before this timestamp"
         schema:
@@ -195,7 +134,6 @@ paths:
         in: "query"
         description: "Maximum number of events to include in each page of the response."
         schema:
-          minimum: 1
           type: "integer"
           format: "int32"
         example: 10

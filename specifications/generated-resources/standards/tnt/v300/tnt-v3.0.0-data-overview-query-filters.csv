@@ -1,4 +1,5 @@
 FilterParameters,Required
-"transportDocumentReferences",yes
-equipmentReferences,yes
-"transportDocumentReferences, equipmentReferences",
+carrierBookingReference,yes
+"carrierBookingReference, equipmentReference",yes
+"transportDocumentReference",yes
+"transportDocumentReference, equipmentReference",yes

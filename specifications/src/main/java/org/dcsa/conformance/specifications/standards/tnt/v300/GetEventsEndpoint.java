@@ -4,6 +4,8 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 
 public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
@@ -63,12 +65,28 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
     return Map.ofEntries(
         Map.entry(
             Boolean.TRUE,
-            List.of(
-                List.of(carrierBookingReference),
-                List.of(carrierBookingReference, equipmentReference),
-                List.of(transportDocumentReference),
-                List.of(transportDocumentReference, equipmentReference))),
+            allCombinationsOf(
+                List.of(
+                    List.of(carrierBookingReference),
+                    List.of(carrierBookingReference, equipmentReference),
+                    List.of(transportDocumentReference),
+                    List.of(transportDocumentReference, equipmentReference)),
+                List.of(
+                    List.of(eventUpdatedDateTimeMin),
+                    List.of(eventUpdatedDateTimeMax),
+                    List.of(eventUpdatedDateTimeMin, eventUpdatedDateTimeMax)))),
         Map.entry(Boolean.FALSE, List.of()));
+  }
+
+  private static List<List<Parameter>> allCombinationsOf(
+      List<List<Parameter>> leftListList, List<List<Parameter>> rightListList) {
+    return leftListList.stream()
+        .flatMap(
+            leftList ->
+                rightListList.stream()
+                    .map(
+                        rightList -> Stream.concat(leftList.stream(), rightList.stream()).toList()))
+        .toList();
   }
 
   private static Parameter createStringQueryParameter(

@@ -8,12 +8,13 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Getter
 @Schema(
     type = "string",
-    example = "DRO",
-    description = "Code used to denote the specific IoT event that has occurred")
+    example = "EXPORT",
+    description = "Code used to denote the type of movement")
 @AllArgsConstructor
-public enum IotEventCode implements EnumBase {
-  DRO("Door opened"),
-  LOC("Location update");
+public enum MovementTypeCode implements EnumBase {
+  IMPORT("Import movement"),
+  EXPORT("Export movement"),
+  TRANSSHIPMENT("Transshipment movement");
 
   private final String valueDescription;
 }

@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 @Slf4j
 public class IssuanceRequestErrorResponseAction extends IssuanceAction {
 
-  private static final int RESPONSE_CODE = 400;
   public static final String SEND_NO_ISSUING_PARTY = "sendNoIssuingParty";
 
   private final AtomicReference<String> transportDocumentReference;
@@ -41,7 +40,7 @@ public class IssuanceRequestErrorResponseAction extends IssuanceAction {
                 latestPlatformScenarioParametersAction(previousAction)
                     .getResponseCode()
                     .standardCode),
-        RESPONSE_CODE);
+            400);
     this.responseSchemaValidator = responseSchemaValidator;
     this.transportDocumentReference =
         previousAction != null && !(this.previousAction instanceof PlatformScenarioParametersAction)
@@ -83,8 +82,6 @@ public class IssuanceRequestErrorResponseAction extends IssuanceAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new HttpMethodCheck(EblIssuanceRole::isCarrier, getMatchedExchangeUuid(), "PUT"),
-            new ResponseStatusCheck(
-                EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), RESPONSE_CODE),
             new ApiHeaderCheck(
                 EblIssuanceRole::isCarrier,
                 getMatchedExchangeUuid(),

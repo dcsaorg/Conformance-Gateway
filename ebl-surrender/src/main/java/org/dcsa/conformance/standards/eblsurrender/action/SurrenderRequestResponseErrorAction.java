@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.eblsurrender.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -13,7 +12,6 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
-import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
@@ -22,7 +20,6 @@ import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 @Slf4j
 public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
 
-  private static final int RESPONSE_CODE = 409;
   public static final String SEND_NO_TRANSPORT_DOCUMENT_REFERENCE =
       "sendNoTransportDocumentReference";
 
@@ -38,7 +35,6 @@ public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
     super(
         platformPartyName,
         carrierPartyName,
-        RESPONSE_CODE,
         previousAction,
         "SurrenderForDelivery (not available for surrender)");
     this.responseSchemaValidator = responseSchemaValidator;

@@ -35,6 +35,7 @@ public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
     super(
         platformPartyName,
         carrierPartyName,
+        400,
         previousAction,
         "SurrenderForDelivery (not available for surrender)");
     this.responseSchemaValidator = responseSchemaValidator;

@@ -14,14 +14,17 @@ import org.dcsa.conformance.standards.eblsurrender.party.SuppliedScenarioParamet
 public abstract class EblSurrenderAction extends ConformanceAction {
 
   protected final Supplier<SuppliedScenarioParameters> sspSupplier;
+  private final int expectedStatus;
 
   protected EblSurrenderAction(
       String sourcePartyName,
       String targetPartyName,
+      int expectedStatus,
       ConformanceAction previousAction,
       String actionTitle) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.sspSupplier = _getSspSupplier(previousAction);
+    this.expectedStatus = expectedStatus;
   }
 
   public abstract Supplier<String> getSrrSupplier();

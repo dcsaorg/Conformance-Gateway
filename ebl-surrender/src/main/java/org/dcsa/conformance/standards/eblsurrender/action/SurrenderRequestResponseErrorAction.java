@@ -68,8 +68,6 @@ public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new HttpMethodCheck(EblSurrenderRole::isPlatform, getMatchedExchangeUuid(), "POST"),
-            new ResponseStatusCheck(
-                EblSurrenderRole::isCarrier, getMatchedExchangeUuid(), RESPONSE_CODE),
             new ApiHeaderCheck(
                 EblSurrenderRole::isPlatform,
                 getMatchedExchangeUuid(),

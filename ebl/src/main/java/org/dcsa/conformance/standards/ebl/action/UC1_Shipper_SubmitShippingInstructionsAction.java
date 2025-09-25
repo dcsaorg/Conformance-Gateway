@@ -1,18 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.ACTIVE_REEFER;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.DG;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.NON_OPERATING_REEFER;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_2C_1U;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_2C_2U;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_CLAD;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_NEGOTIABLE_BL;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_STRAIGHT_BL;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB_AMF;
-import static org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
@@ -77,7 +65,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
-    return jsonNode.put("eblScenarioType", getDspSupplier().get().scenarioType());
+    return jsonNode;
   }
 
   @Override

@@ -144,6 +144,27 @@ public class BookingAndEblScenarioListBuilder
                                                             uc10TDGet(
                                                                 uc7BookingGet(
                                                                     uc8BookingGet(
+                                                                        uc11TDGet())))))))))))),
+                carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.DG)
+                    .then(
+                        uc1BookingGet(
+                            uc5BookingGet(
+                                carrierEblSupplyScenarioParameters()
+                                    .then(
+                                        uc1SIGet(
+                                            uc6TDGetSIGet(
+                                                uc7TDGet(
+                                                    uc8TDGet(
+                                                        uc7BookingGet(
+                                                            uc8BookingGet(
+                                                                uc9TDGet(uc10TDGet(uc11TDGet())))),
+                                                        uc9TDGet(
+                                                            uc7BookingGet(
+                                                                uc8BookingGet(
+                                                                    uc10TDGet(uc11TDGet()))),
+                                                            uc10TDGet(
+                                                                uc7BookingGet(
+                                                                    uc8BookingGet(
                                                                         uc11TDGet()))))))))))))));
   }
 

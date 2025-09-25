@@ -23,6 +23,10 @@ public class BookingShipper extends ConformanceParty {
 
   private static final String SERVICE_CONTRACT_REF = "serviceContractReference";
   private static final String SERVICE_REF_PUT = "serviceRefPut";
+
+  public static final Set<String> BOOKING_ENDPOINT_PATTERNS =
+      Set.of(".*/v2/booking-notifications$");
+
   public BookingShipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -40,22 +44,22 @@ public class BookingShipper extends ConformanceParty {
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+  public void exportPartyJsonState(ObjectNode targetObjectNode) {
     // no state to export
   }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+  public void importPartyJsonState(ObjectNode sourceObjectNode) {
     // no state to import
   }
 
   @Override
-  protected void doReset() {
+  public void doReset() {
     // no state to reset
   }
 
   @Override
-  protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
+  public Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
         Map.entry(ShipperGetBookingAction.class, this::getBookingRequest),

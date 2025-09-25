@@ -5,6 +5,7 @@ import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.standards.adoption.AdoptionStandard;
 import org.dcsa.conformance.standards.an.AnStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.bookingandebl.BookingAndEblStandard;
 import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
@@ -22,6 +23,7 @@ public enum SupportedStandard {
   EBL(EblStandard.INSTANCE),
   EBL_ISSUANCE(EblIssuanceStandard.INSTANCE),
   EBL_SURRENDER(EblSurrenderStandard.INSTANCE),
+  BOOKING_AND_EBL(BookingAndEblStandard.INSTANCE),
   JIT(JitStandard.INSTANCE),
   OVS(OvsStandard.INSTANCE),
   PINT(PintStandard.INSTANCE),

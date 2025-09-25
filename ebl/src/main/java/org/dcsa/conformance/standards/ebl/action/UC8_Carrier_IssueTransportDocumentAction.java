@@ -1,12 +1,12 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
@@ -16,7 +16,7 @@ public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAct
   public UC8_Carrier_IssueTransportDocumentAction(
       String carrierPartyName,
       String shipperPartyName,
-      EblAction previousAction,
+      BookingAndEblAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
     super(carrierPartyName, shipperPartyName, previousAction, "UC8", 204);
     this.requestSchemaValidator = requestSchemaValidator;

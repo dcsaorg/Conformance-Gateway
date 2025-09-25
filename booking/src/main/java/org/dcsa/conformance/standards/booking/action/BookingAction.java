@@ -12,46 +12,42 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.*;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
-public abstract class BookingAction extends ConformanceAction {
+public abstract class BookingAction extends BookingAndEblAction {
+
   protected final int expectedStatus;
-  private final OverwritingReference<DynamicScenarioParameters> dspReference;
 
   protected BookingAction(
       String sourcePartyName,
       String targetPartyName,
-      BookingAction previousAction,
+      BookingAndEblAction previousAction,
       String actionTitle,
       int expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
-    this.dspReference =
-        previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null))
-            : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
   @Override
   public void reset() {
     super.reset();
     if (previousAction != null) {
-      this.dspReference.set(null);
+      getBookingDspReference().set(null);
     }
   }
 
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (dspReference.hasCurrentValue()) {
-      jsonState.set("currentDsp", dspReference.get().toJson());
+    if (getBookingDspReference().hasCurrentValue()) {
+      jsonState.set("currentDsp", getBookingDspReference().get().toJson());
     }
     return jsonState;
   }
@@ -61,7 +57,7 @@ public abstract class BookingAction extends ConformanceAction {
     super.importJsonState(jsonState);
     JsonNode dspNode = jsonState.get("currentDsp");
     if (dspNode != null) {
-      dspReference.set(DynamicScenarioParameters.fromJson(dspNode));
+      getBookingDspReference().set(BookingDynamicScenarioParameters.fromJson(dspNode));
     }
   }
 
@@ -77,15 +73,16 @@ public abstract class BookingAction extends ConformanceAction {
     return getPreviousBookingAction().getBookingPayloadSupplier();
   }
 
-  protected Supplier<DynamicScenarioParameters> getDspSupplier() {
-    return dspReference::get;
+  protected Supplier<BookingDynamicScenarioParameters> getDspSupplier() {
+    return getBookingDspReference()::get;
   }
 
-  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
-    return dspReference::set;
+  protected Consumer<BookingDynamicScenarioParameters> getDspConsumer() {
+    return getBookingDspReference()::set;
   }
 
-  private <T> DynamicScenarioParameters updateIfNotNull(DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+  private <T> BookingDynamicScenarioParameters updateIfNotNull(
+          BookingDynamicScenarioParameters dsp, T value, Function<T, BookingDynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }
@@ -95,20 +92,22 @@ public abstract class BookingAction extends ConformanceAction {
   protected void updateDSPFromResponsePayload(ConformanceExchange exchange) {
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
     JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
-    String newCbr = getCbrFromNotificationPayload(requestJsonNode) != null ?
-      getCbrFromNotificationPayload(requestJsonNode) :
-      responseJsonNode.path("carrierBookingReference").asText(null);
+    String newCbr =
+        getCbrFromNotificationPayload(requestJsonNode) != null
+            ? getCbrFromNotificationPayload(requestJsonNode)
+            : responseJsonNode.path("carrierBookingReference").asText(null);
     var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
 
-    DynamicScenarioParameters dsp = dspReference.get();
+    BookingDynamicScenarioParameters dsp = getBookingDspReference().get();
     var updatedDsp = dsp;
-    updatedDsp = updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
+    updatedDsp =
+        updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
     updatedDsp = updateIfNotNull(updatedDsp, newCbr, updatedDsp::withCarrierBookingReference);
-    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
-    updatedDsp = updatedDsp.withBooking(null).withUpdatedBooking(null);
+    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not
+    // have been added to the DSP
 
     if (!dsp.equals(updatedDsp)) {
-      dspReference.set(updatedDsp);
+      getBookingDspReference().set(updatedDsp);
     }
   }
 
@@ -128,8 +127,7 @@ public abstract class BookingAction extends ConformanceAction {
         .map(
             fileName ->
                 IOToolkit.templateFileToText(
-                    "/standards/booking/instructions/" + fileName,
-                    replacementsMap))
+                    "/standards/booking/instructions/" + fileName, replacementsMap))
         .collect(Collectors.joining());
   }
 
@@ -152,22 +150,23 @@ public abstract class BookingAction extends ConformanceAction {
 
   protected static String withCbrOrCbrr(String cbr, String cbrr) {
     return (cbr != null ? "with CBR '%s'".formatted(cbr) : "")
-      + (cbr != null && cbrr != null ? " and " : "")
-      + (cbrr != null ? "with CBRR '%s'".formatted(cbrr) : "");
+        + (cbr != null && cbrr != null ? " and " : "")
+        + (cbrr != null ? "with CBRR '%s'".formatted(cbrr) : "");
   }
 
   public static String createMessageForUIPrompt(String message, String cbr, String cbrr) {
     return message + " " + withCbrOrCbrr(cbr, cbrr);
   }
 
-
   protected Stream<ActionCheck> getNotificationChecks(
-    String expectedApiVersion,
-    JsonSchemaValidator notificationSchemaValidator,
-    BookingState bookingState,
-    BookingState amendedBookingState) {
-    return getNotificationChecks(expectedApiVersion, notificationSchemaValidator, bookingState, amendedBookingState,null);
+      String expectedApiVersion,
+      JsonSchemaValidator notificationSchemaValidator,
+      BookingState bookingState,
+      BookingState amendedBookingState) {
+    return getNotificationChecks(
+        expectedApiVersion, notificationSchemaValidator, bookingState, amendedBookingState, null);
   }
+
   protected Stream<ActionCheck> getNotificationChecks(
       String expectedApiVersion,
       JsonSchemaValidator notificationSchemaValidator,
@@ -175,8 +174,8 @@ public abstract class BookingAction extends ConformanceAction {
       BookingState amendedBookingState,
       BookingCancellationState bookingCancellationState) {
     String titlePrefix = "[Notification]";
-    var cbr = dspReference.get().carrierBookingReference();
-    var cbrr = dspReference.get().carrierBookingRequestReference();
+    var cbr = getBookingDspReference().get().carrierBookingReference();
+    var cbrr = getBookingDspReference().get().carrierBookingRequestReference();
     return Stream.of(
             new HttpMethodCheck(
                 titlePrefix, BookingRole::isCarrier, getMatchedNotificationExchangeUuid(), "POST"),

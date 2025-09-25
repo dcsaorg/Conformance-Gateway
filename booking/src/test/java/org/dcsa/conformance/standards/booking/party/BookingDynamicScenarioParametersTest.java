@@ -4,12 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 import org.junit.jupiter.api.Test;
 
-class DynamicScenarioParametersTest {
+class BookingDynamicScenarioParametersTest {
 
-  private final DynamicScenarioParameters dsp =
-      new DynamicScenarioParameters(ScenarioType.DG, "cbrr", "cbr", null, null);
+  private final BookingDynamicScenarioParameters dsp =
+      new BookingDynamicScenarioParameters(ScenarioType.DG.name(), "12345", "54321");
 
   @Test
   void testDSPToJsonConversion() {
@@ -19,7 +20,8 @@ class DynamicScenarioParametersTest {
 
   @Test
   void testDSPFromJsonNode() {
-    DynamicScenarioParameters dspNew = DynamicScenarioParameters.fromJson(dsp.toJson());
+    BookingDynamicScenarioParameters dspNew =
+        BookingDynamicScenarioParameters.fromJson(dsp.toJson());
     assertEquals(dsp.toString(), dspNew.toString());
   }
 }

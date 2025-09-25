@@ -7,7 +7,7 @@ import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDa
 import java.util.List;
 
 @Data
-@Schema(description = "Release information")
+@Schema(description = "Compiles the information relevant to shipment release.")
 public class ReleaseInformation {
 
   @Schema(

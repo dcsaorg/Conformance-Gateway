@@ -5,23 +5,42 @@ import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
+import org.dcsa.conformance.specifications.standards.tnt.v300.types.ShipmentLocationTypeCode;
 
 @Data
 @Schema(description = "Track and Trace event")
 public class Event {
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-  private EventClassification eventClassification;
+  @Schema() private EventRouting eventRouting;
+
+  @Schema(
+      maxLength = 500,
+      example = "event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z",
+      description =
+"""
+ID of the event, unique among all the events published by a T&T event publisher.
+
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+
+Each event is uniquely identified within each T&T 3.x standard ecosystem of connected implementers
+by a composite key including:
+- `eventRouting.originatingParty.partyCode`
+- `eventRouting.originatingParty.codeListProvider`
+- `eventRouting.originatingParty.codeListName`
+- `eventID`
+""")
+  private String eventID;
 
   @Schema(
       description =
 """
-Unique ID of the event.
+Flag indicating that the event is retracted.
 
-An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+The data in this and all previously transmitted events with the same `eventID` must be discarded or ignored.
+
+If this flag is set, any event data other than the `eventID` is irrelevant (if present).
 """)
-  private UniversallyUniqueID eventID;
+  private Boolean isRetracted;
 
   @Schema(description = "The date and time when the real-world event has occurred or will occur.")
   private FormattedDateTime eventDateTime;
@@ -32,11 +51,21 @@ An event overrides any other event that has the same `eventID` and an earlier `e
   @Schema(description = "The location of the event.")
   private Location eventLocation;
 
+  @Schema() private ShipmentLocationTypeCode shipmentLocationType;
+
   @Schema(description = "List of documents related to this event")
-  private List<DocumentReference> relatedDocumentReferences;
+  private List<DocumentReference> documentReferences;
+
+  @Schema(description = "List of document replacements related to this event")
+  private List<DocumentReferenceReplacement> documentReferenceReplacements;
 
   @Schema(description = "List of shipment references related to this event")
   private List<ShipmentReference> shipmentReferences;
+
+  @Schema(description = "List of shipment reference replacements related to this event")
+  private List<ShipmentReferenceReplacement> shipmentReferenceReplacements;
+
+  @Schema() private EventClassification eventClassification;
 
   @Schema() private ShipmentDetails shipmentDetails;
 

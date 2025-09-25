@@ -48,35 +48,22 @@ paths:
 
         The event publisher is expected to additionally filter the events based on the authorization and registration profile of the authenticated party calling this endpoint. Authorization, registration and any such additional filtering are out of scope in this standard.
 
-        ## Filtering
+        ## Event filtering
 
-        Every event publisher **must** support the retrieval of events based on the transport document references of one or more bills of lading, specified as the value(s) of the `transportDocumentReferences` query parameter.
+        Every event publisher must support the following combinations of query parameter filters:
+        * `carrierBookingReference`
+        * `carrierBookingReference`, `equipmentReference`
+        * `transportDocumentReference`
+        * `transportDocumentReference`, `equipmentReference`
 
-        Each event publisher can decide whether to support any of the additional filtering query parameters defined in the standard for this endpoint, and should document the decision in their published copy of the API specification.
+        Every event publisher must support combining any of the query parameter filters above with all of these additional filters:
+        * `eventUpdatedDateTimeMin`
+        * `eventUpdatedDateTimeMax`
+        * `eventUpdatedDateTimeMin`, `eventUpdatedDateTimeMax`
 
-        When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400. In particular, the publisher can reject with HTTP 400 a GET request with a number of `transportDocumentReferences` or `equipmentReferences` larger than the maximum supported (which in the case of some publishers is likely to be `1`). Publishers should document these limits in their copy of the API specification.
+        Each event publisher can separately also decide to have default relative date ranges and only return events having an `eventUpdatedDateTime` within those ranges.
 
-        ### Filtering by transport document reference
-
-        When filtering using the `transportDocumentReferences` query parameter, the response contains events for all the bills of lading with the specified transport document reference for which an event is available (and accessible by the party making the API request).
-
-        Even when requesting event for a single transport document reference, in the absence of further explicit filtering in the request or implicit filtering by the event publisher, the response is expected to contain all the events corresponding to that bill of lading.
-
-        ### Filtering alternatives to the transport document reference
-
-        As an alternative to retrieving events by the bill of lading using the `transportDocumentReferences` query parameter, if support is implemented by the event publisher, it is also possible to filter events using these query parameters:
-        * `equipmentReferences`
-        * `vesselIMONumber` or `vesselName`
-        * `carrierImportVoyageNumber` or `universalImportVoyageReference`
-        * `carrierServiceCode` or `universalServiceReference`
-
-        The event publisher can decide to also allow retrieving events without specifying any of these filtering query parameters, instead filtering the results only based on the authorization and registration profile of the authenticated party calling this endpoint.
-
-        ### Filtering by event date-time
-
-        Whenever the query parameters filter could retrieve large number of historical events (for example when filtering only by vessel name or IMO number), the request should also include at least the `eventDateTimeMin` query parameter and could also include the `eventDateTimeMax` query parameter.
-
-        The event publisher can separately also decide to have default relative date ranges and only return events having an `eventDateTime` within those ranges.
+        When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 
         ## Pagination
 
@@ -111,82 +98,34 @@ paths:
         When responding with the last page of results, the event publisher no longer includes a `Next-Page-Cursor` response header. The last page of results may be empty, for example in the case of a stateless pagination implementation by the event publisher.
       operationId: "get-events"
       parameters:
-      - name: "transportDocumentReferences"
+      - name: "carrierBookingReference"
         in: "query"
-        description: "Reference(s) of the transport document(s) for which to return the associated events"
-        explode: false
-        schema:
-          type: "array"
-          items:
-            type: "string"
-        example: "TDR0123456,TDR1234567"
-      - name: "equipmentReferences"
-        in: "query"
-        description: "Reference(s) of the equipment for which to return the associated events"
-        explode: false
-        schema:
-          type: "array"
-          items:
-            type: "string"
-        example: "APZU4812090,APZU4812091"
-      - name: "vesselIMONumber"
-        in: "query"
-        description: "IMO number of the vessel for which to retrieve available events"
+        description: "Reference of the transport document for which to return the associated events"
         schema:
           type: "string"
-        example: "12345678"
-      - name: "vesselName"
+        example: "HHL71800000"
+      - name: "transportDocumentReference"
         in: "query"
-        description: "Name of the vessel for which to retrieve available events"
+        description: "Reference of the transport document for which to return the associated events"
         schema:
           type: "string"
-        example: "King of the Seas"
-      - name: "carrierExportVoyageNumber"
+        example: "HHL71800000"
+      - name: "equipmentReference"
         in: "query"
-        description: "The identifier of an export voyage. The carrier-specific identifier of the export Voyage."
+        description: "Reference of the equipment for which to return the associated events"
         schema:
           type: "string"
-        example: "1234N"
-      - name: "universalExportVoyageReference"
+        example: "APZU4812090"
+      - name: "eventUpdatedDateTimeMin"
         in: "query"
-        description: "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
-        schema:
-          type: "string"
-        example: "2301W"
-      - name: "carrierImportVoyageNumber"
-        in: "query"
-        description: "The identifier of an import voyage. The carrier-specific identifier of the import Voyage."
-        schema:
-          type: "string"
-        example: "1234N"
-      - name: "universalImportVoyageReference"
-        in: "query"
-        description: "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
-        schema:
-          type: "string"
-        example: "2301W"
-      - name: "carrierServiceCode"
-        in: "query"
-        description: "The carrier specific code of the service for which the schedule details are published."
-        schema:
-          type: "string"
-        example: "FE1"
-      - name: "universalServiceReference"
-        in: "query"
-        description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
-        schema:
-          type: "string"
-        example: "SR12345A"
-      - name: "eventDateTimeMin"
-        in: "query"
-        description: "Retrieve events occurring at or after this timestamp"
+        description: "Retrieve events with an `eventUpdatedDateTime` at or after this timestamp"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
-      - name: "eventDateTimeMax"
+      - name: "eventUpdatedDateTimeMax"
         in: "query"
-        description: "Retrieve events occurring at or before this timestamp"
+        description: "Retrieve events with an `eventUpdatedDateTime` at or before this timestamp"
         schema:
           type: "string"
           format: "date-time"
@@ -195,7 +134,6 @@ paths:
         in: "query"
         description: "Maximum number of events to include in each page of the response."
         schema:
-          minimum: 1
           type: "integer"
           format: "int32"
         example: 10
@@ -412,29 +350,31 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of a document
-            - `CBR` - Carrier Booking Request
-            - `BKG` - Booking
-            - `SHI` - Shipping Instruction
-            - `TRD` - Transport Document
-            - `DEI` - Delivery Instructions
-            - `DEO` - Delivery Order
-            - `TRO` - Transport Order
-            - `CRO` - Container Release Order
+            - `AMF` - Advance Manifest Filing (of any subtype)
             - `ARN` - Arrival Notice
-            - `VGM` - Verified Gross Mass
+            - `BKG` - Booking
             - `CAS` - Cargo Survey
-            - `CUC` - Customs Clearance
-            - `DGD` - Dangerous Goods Declaration
-            - `OOG` - Out of Gauge
-            - `CQU` - Contract Quotation
-            - `INV` - Invoice
-            - `HCE` - Health Certificate
-            - `PCE` - Phytosanitary Certificate
-            - `VCE` - Veterinary Certificate
-            - `FCE` - Fumigation Certificate
-            - `ICE` - Inspection Certificate
+            - `CBR` - Carrier Booking Request
             - `CEA` - Certificate of Analysis
             - `CEO` - Certificate of Origin
+            - `CQU` - Contract Quotation
+            - `CRO` - Container Release Order
+            - `CUC` - Customs Clearance
+            - `DEI` - Delivery Instructions
+            - `DEO` - Delivery Order
+            - `DGD` - Dangerous Goods Declaration
+            - `FCE` - Fumigation Certificate
+            - `HCE` - Health Certificate
+            - `ICE` - Inspection Certificate
+            - `INV` - Invoice
+            - `OOG` - Out of Gauge
+            - `PCE` - Phytosanitary Certificate
+            - `PFD` - Proof of Delivery
+            - `SHI` - Shipping Instruction
+            - `TRD` - Transport Document
+            - `TRO` - Transport Order
+            - `VCE` - Veterinary Certificate
+            - `VGM` - Verified Gross Mass
           example: "BKG"
         reference:
           maxLength: 100
@@ -442,6 +382,25 @@ components:
           description: "Reference identifying the document"
           example: "123e4567e89b"
       description: "Referenced document"
+    DocumentReferenceReplacement:
+      type: "object"
+      properties:
+        oldReferences:
+          type: "array"
+          description: |
+            References of the documents replaced by those with the `newReferences`.
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+        newReferences:
+          type: "array"
+          description: |
+            References of the documents replacing those with the `oldReferences`.
+          items:
+            $ref: "#/components/schemas/DocumentReference"
+      description: |
+        Object used to indicate that one or more documents were replaced by one or more other documents.
+
+        Used in scenarios including booking split / combine or transport document void / reissue.
     EquipmentDetails:
       type: "object"
       properties:
@@ -473,32 +432,50 @@ components:
             - `EMPTY` - Empty
             - `LADEN` - Laden
           example: "LADEN"
-        isTransshipmentMove:
-          type: "boolean"
-          description: |
-            Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.
+        movementType:
+          type: "string"
+          description: |-
+            Code used to denote the type of movement
+            - `IMPORT` - Import movement
+            - `EXPORT` - Export movement
+            - `TRANSSHIPMENT` - Transshipment movement
+          example: "EXPORT"
         seals:
           type: "array"
           items:
             $ref: "#/components/schemas/Seal"
       description: "Equipment-specific details"
     Event:
-      required:
-      - "eventClassification"
       type: "object"
       properties:
-        eventClassification:
-          description: "Type, subtype and classifier of an event"
+        eventRouting:
+          description: |
+            Routing of an event from the originating party, via forwarding parties, to the destination party.
           allOf:
-          - $ref: "#/components/schemas/EventClassification"
+          - $ref: "#/components/schemas/EventRouting"
         eventID:
+          maxLength: 500
           type: "string"
           description: |
-            Unique ID of the event.
+            ID of the event, unique among all the events published by a T&T event publisher.
 
             An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
-          format: "uuid"
-          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+
+            Each event is uniquely identified within each T&T 3.x standard ecosystem of connected implementers
+            by a composite key including:
+            - `eventRouting.originatingParty.partyCode`
+            - `eventRouting.originatingParty.codeListProvider`
+            - `eventRouting.originatingParty.codeListName`
+            - `eventID`
+          example: "event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z"
+        isRetracted:
+          type: "boolean"
+          description: |
+            Flag indicating that the event is retracted.
+
+            The data in this and all previously transmitted events with the same `eventID` must be discarded or ignored.
+
+            If this flag is set, any event data other than the `eventID` is irrelevant (if present).
         eventDateTime:
           maxLength: 30
           type: "string"
@@ -515,16 +492,46 @@ components:
           description: "The location of the event."
           allOf:
           - $ref: "#/components/schemas/Location"
-        relatedDocumentReferences:
+        shipmentLocationType:
+          type: "string"
+          description: |-
+            Code used to denote the type of a shipment location
+            - `PRE` - Place of Receipt
+            - `POL` - Port of Loading
+            - `POD` - Port of Discharge
+            - `PDE` - Place of Delivery
+            - `PCF` - Pre-carriage From
+            - `OIR` - Onward Inland Routing
+            - `ORI` - Origin of goods
+            - `IEL` - Container intermediate export stop-off location
+            - `PTP` - Prohibited transshipment port
+            - `RTP` - Requested transshipment port
+            - `FCD` - Full container drop-off location
+          example: "PRE"
+        documentReferences:
           type: "array"
           description: "List of documents related to this event"
           items:
             $ref: "#/components/schemas/DocumentReference"
+        documentReferenceReplacements:
+          type: "array"
+          description: "List of document replacements related to this event"
+          items:
+            $ref: "#/components/schemas/DocumentReferenceReplacement"
         shipmentReferences:
           type: "array"
           description: "List of shipment references related to this event"
           items:
             $ref: "#/components/schemas/ShipmentReference"
+        shipmentReferenceReplacements:
+          type: "array"
+          description: "List of shipment reference replacements related to this event"
+          items:
+            $ref: "#/components/schemas/ShipmentReferenceReplacement"
+        eventClassification:
+          description: "Type, subtype and classifier of an event"
+          allOf:
+          - $ref: "#/components/schemas/EventClassification"
         shipmentDetails:
           description: "Shipment-specific details"
           allOf:
@@ -547,8 +554,6 @@ components:
           - $ref: "#/components/schemas/ReeferDetails"
       description: "Track and Trace event"
     EventClassification:
-      required:
-      - "eventTypeCode"
       type: "object"
       properties:
         eventTypeCode:
@@ -627,6 +632,27 @@ components:
             - `ADJU` - Adjusted
           example: "MEAS"
       description: "Type, subtype and classifier of an event"
+    EventRouting:
+      type: "object"
+      properties:
+        originatingParty:
+          description: |
+            The initial party with which the event originated.
+          allOf:
+          - $ref: "#/components/schemas/Party"
+        forwardingParties:
+          type: "array"
+          description: |
+            Ordered list of parties forwarding the event between the originating and destination party.
+          items:
+            $ref: "#/components/schemas/Party"
+        destinationParty:
+          description: |
+            The final party intended as destination of the event.
+          allOf:
+          - $ref: "#/components/schemas/Party"
+      description: |
+        Routing of an event from the originating party, via forwarding parties, to the destination party.
     Facility:
       type: "object"
       properties:
@@ -729,6 +755,7 @@ components:
           description: |-
             Code used to denote the specific IoT event that has occurred
             - `DRO` - Door opened
+            - `LOC` - Location update
           example: "DRO"
       description: "IoT-specific details"
     Location:
@@ -780,6 +807,65 @@ components:
           allOf:
           - $ref: "#/components/schemas/GeoCoordinate"
       description: "Location information"
+    Party:
+      type: "object"
+      properties:
+        partyCode:
+          maxLength: 150
+          type: "string"
+          description: |
+            Code identifying the party as per the `codeListProvider` and `codeListName`.
+          example: "MSK"
+        codeListProvider:
+          maxLength: 100
+          type: "string"
+          description: |
+            Code of the provider of a list of codes identifying a party, including but not limited to:
+            - `BOLE` (Bolero)
+            - `BRIT` (BRITC eBL)
+            - `CARX` (CargoX)
+            - `COVA` (Covantis)
+            - `CRED` (Credore)
+            - `DCSA` (Digital Container Shipping Association)
+            - `DNB` (Dun and Bradstreet)
+            - `EDOX` (EdoxOnline)
+            - `ESSD` (EssDOCS)
+            - `ETEU` (eTEU)
+            - `ETIT` (e-title)
+            - `FMC` (Federal Maritime Commission)
+            - `GLEIF` (Global Legal Entity Identifier Foundation)
+            - `GSBN` (Global Shipping Business Network)
+            - `IDT` (ICE Digital Trade)
+            - `IQAX` (IQAX)
+            - `KTNE` (KTNET)
+            - `NMFTA` (National Motor Freight Traffic Association)
+            - `SECR` (Secro)
+            - `SMDG` (Ship Message Design Group)
+            - `TRAC` (Enigio trace:original)
+            - `TRGO` (TradeGO)
+            - `W3C` (World Wide Web Consortium)
+            - `WAVE` (Wave)
+            - `WISE` (WiseTech)
+            - `ZZZ` (Mutually defined)
+          example: "W3C"
+        codeListName:
+          maxLength: 100
+          type: "string"
+          description: |
+            Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+            - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+            - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+            - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`
+          example: "DID"
+        partyFunction:
+          maxLength: 3
+          type: "string"
+          description: |
+            Code identifying the function of the party, as defined in
+            [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+            or a subsequent revision.
+          example: "CA"
+      description: "Identification of a container shipping party"
     PostEventsError:
       type: "object"
       properties:
@@ -954,6 +1040,25 @@ components:
 
         In addition to the References provided by the shipper or freight forwarder,
         the carrier can provide an extra type called `EQ` which is a reference to an Equipment.
+    ShipmentReferenceReplacement:
+      type: "object"
+      properties:
+        oldReferences:
+          type: "array"
+          description: |
+            References of the shipment elements or equipments replaced by those with the `newReferences`.
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
+        newReferences:
+          type: "array"
+          description: |
+            References of the shipment elements or equipments replacing those with the `oldReferences`.
+          items:
+            $ref: "#/components/schemas/ShipmentReference"
+      description: |
+        Object used to indicate that one or more shipment elements were replaced by one or more other elements.
+
+        Used in scenarios including the replacement of shipment references or equipments.
     TransportCall:
       type: "object"
       properties:

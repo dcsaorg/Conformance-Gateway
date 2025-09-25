@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.ebl.checks;
 
 import lombok.NoArgsConstructor;
 import org.dcsa.conformance.core.check.KeywordDataset;
+
 @NoArgsConstructor
 public class EblDatasets {
 
@@ -30,6 +31,12 @@ public class EblDatasets {
 
   public static final KeywordDataset CONSIGNMENT_ITEMS_REFERENCE_TYPE =
       KeywordDataset.staticDataset("CR", "AKG", "SPO", "CPO");
+
+  public static final KeywordDataset METHOD_OF_PAYMENT =
+      KeywordDataset.staticDataset("A", "B", "C", "D", "H", "Y", "Z");
+
+  public static final KeywordDataset TYPE_OF_PERSON =
+      KeywordDataset.staticDataset("NATURAL_PERSON", "LEGAL_PERSON", "ASSOCIATION_OF_PERSONS");
 
   public static final KeywordDataset EXEMPT_PACKAGE_CODES = KeywordDataset.staticDataset("VY", "VS", "VR", "VQ", "VO", "VL", "NG", "NF", "NE", "VG");
 

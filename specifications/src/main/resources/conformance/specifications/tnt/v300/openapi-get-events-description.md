@@ -6,35 +6,22 @@ The ordering of events in the response message is unspecified.
 
 The event publisher is expected to additionally filter the events based on the authorization and registration profile of the authenticated party calling this endpoint. Authorization, registration and any such additional filtering are out of scope in this standard.
 
-## Filtering
+## Event filtering
 
-Every event publisher **must** support the retrieval of events based on the transport document references of one or more bills of lading, specified as the value(s) of the `transportDocumentReferences` query parameter.
+Every event publisher must support the following combinations of query parameter filters:
+* `carrierBookingReference`
+* `carrierBookingReference`, `equipmentReference`
+* `transportDocumentReference`
+* `transportDocumentReference`, `equipmentReference`
 
-Each event publisher can decide whether to support any of the additional filtering query parameters defined in the standard for this endpoint, and should document the decision in their published copy of the API specification.
+Every event publisher must support combining any of the query parameter filters above with all of these additional filters:
+* `eventUpdatedDateTimeMin`
+* `eventUpdatedDateTimeMax`
+* `eventUpdatedDateTimeMin`, `eventUpdatedDateTimeMax`
 
-When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400. In particular, the publisher can reject with HTTP 400 a GET request with a number of `transportDocumentReferences` or `equipmentReferences` larger than the maximum supported (which in the case of some publishers is likely to be `1`). Publishers should document these limits in their copy of the API specification.
+Each event publisher can separately also decide to have default relative date ranges and only return events having an `eventUpdatedDateTime` within those ranges.
 
-### Filtering by transport document reference
-
-When filtering using the `transportDocumentReferences` query parameter, the response contains events for all the bills of lading with the specified transport document reference for which an event is available (and accessible by the party making the API request).
-
-Even when requesting event for a single transport document reference, in the absence of further explicit filtering in the request or implicit filtering by the event publisher, the response is expected to contain all the events corresponding to that bill of lading.
-
-### Filtering alternatives to the transport document reference
-
-As an alternative to retrieving events by the bill of lading using the `transportDocumentReferences` query parameter, if support is implemented by the event publisher, it is also possible to filter events using these query parameters:
-* `equipmentReferences`
-* `vesselIMONumber` or `vesselName`
-* `carrierImportVoyageNumber` or `universalImportVoyageReference`
-* `carrierServiceCode` or `universalServiceReference`
-
-The event publisher can decide to also allow retrieving events without specifying any of these filtering query parameters, instead filtering the results only based on the authorization and registration profile of the authenticated party calling this endpoint.
-
-### Filtering by event date-time
-
-Whenever the query parameters filter could retrieve large number of historical events (for example when filtering only by vessel name or IMO number), the request should also include at least the `eventDateTimeMin` query parameter and could also include the `eventDateTimeMax` query parameter.
-
-The event publisher can separately also decide to have default relative date ranges and only return events having an `eventDateTime` within those ranges.
+When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 
 ## Pagination
 

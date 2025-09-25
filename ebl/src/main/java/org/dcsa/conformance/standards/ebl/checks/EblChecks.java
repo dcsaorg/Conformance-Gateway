@@ -214,10 +214,12 @@ public class EblChecks {
 
   static final JsonRebaseableContentCheck SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES =
       eblsCannotHaveOriginalsCheck(
-          "numberOfOriginalsWithCharges", "SWBs cannot have originals with charges");
+          "numberOfOriginalsWithCharges",
+          "Number of originals with charges must be absent for SWBs");
   static final JsonRebaseableContentCheck SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES =
       eblsCannotHaveOriginalsCheck(
-          "numberOfOriginalsWithoutCharges", "SWBs cannot have originals without charges");
+          "numberOfOriginalsWithoutCharges",
+          "Number of originals without charges must be absent for SWBs");
 
   private static JsonRebaseableContentCheck eblsCannotHaveOriginalsCheck(
       String fieldName, String errorMessage) {
@@ -226,8 +228,7 @@ public class EblChecks {
         (node, contextPath) -> {
           JsonNode numberOfOriginalsNode = node.path(fieldName);
           if (node.path("transportDocumentTypeCode").asText("").equals("SWB")) {
-            if (numberOfOriginalsNode.isMissingNode()
-                || numberOfOriginalsNode.asText().equals("0")) {
+            if (numberOfOriginalsNode.isMissingNode()) {
               return Set.of();
             }
             String path = concatContextPath(contextPath, fieldName);
@@ -237,21 +238,28 @@ public class EblChecks {
         });
   }
 
-  static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES =
+  static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_TOTAL =
       JsonAttribute.ifThen(
-          "Cannot have more than one original without charges when isElectronic",
+          "Cannot have more than one original in total when isElectronic",
           IS_AN_EBL,
-          JsonAttribute.path("numberOfOriginalsWithoutCharges", JsonAttribute.matchedMaximum(1)));
+          JsonAttribute.customValidator(
+              "Sum of numberOfOriginalsWithoutCharges and numberOfOriginalsWithCharges must be at most 1 for EBLs",
+              (node, contextPath) -> {
+                int withoutCharges = node.path("numberOfOriginalsWithoutCharges").asInt(0);
+                int withCharges = node.path("numberOfOriginalsWithCharges").asInt(0);
+                int total = withoutCharges + withCharges;
 
-  static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES =
-      JsonAttribute.ifThen(
-          "Cannot have more than one original without charges when isElectronic",
-          IS_AN_EBL,
-          JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1)));
+                if (total > 1) {
+                  return Set.of(
+                      "The sum of numberOfOriginalsWithoutCharges (%d) and numberOfOriginalsWithCharges (%d) cannot exceed 1 for EBLs, but was %d at %s"
+                          .formatted(withoutCharges, withCharges, total, contextPath));
+                }
+                return Set.of();
+              }));
 
   static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTY =
       JsonAttribute.customValidator(
-          "Validate document party for address and identifyingCodes",
+          "Validate if address or identifyingCodes present in document parties - shipper, consignee,endorsee, notify parties and 'other' ",
           (body, contextPath) -> {
             var documentParties = body.path(DOCUMENT_PARTIES);
             var issues = new LinkedHashSet<String>();
@@ -366,13 +374,11 @@ public class EblChecks {
       };
 
   private static final JsonRebaseableContentCheck EBL_DISPLAYED_ADDRESS_LIMIT =
-      JsonAttribute.ifThenElse(
+      JsonAttribute.ifThen(
           "Validate displayed address length for EBLs",
           td -> td.path("isElectronic").asBoolean(true),
           JsonAttribute.allIndividualMatchesMustBeValid(
-              "(not used)", DISPLAYED_ADDRESS_MAV_CONSUMER, JsonAttribute.matchedMaxLength(6)),
-          JsonAttribute.allIndividualMatchesMustBeValid(
-              "(not used)", DISPLAYED_ADDRESS_MAV_CONSUMER, JsonAttribute.matchedMaxLength(2)));
+              "(not used)", DISPLAYED_ADDRESS_MAV_CONSUMER, JsonAttribute.matchedMaxLength(6)));
 
   private static final Consumer<MultiAttributeValidator> ALL_UTE = mav -> mav.submitAllMatching("utilizedTransportEquipments.*");
 
@@ -462,10 +468,6 @@ public class EblChecks {
       var documentParties = body.path(DOCUMENT_PARTIES);
       var isToOrder = body.path(IS_TO_ORDER).asBoolean(false);
 
-      if (!documentParties.has("shipper")) {
-        var documentPartiesPath = concatContextPath(contextPath, "documentParties.shipper");
-        issues.add("The '%s' party is mandatory in the eBL phase (SI/TD)".formatted(documentPartiesPath));
-      }
       var isToOrderPath = concatContextPath(contextPath, IS_TO_ORDER);
 
       if (isToOrder) {
@@ -565,6 +567,49 @@ public class EblChecks {
             return Set.of();
           });
 
+  static final JsonRebaseableContentCheck VALID_HBL_METHOD_OF_PAYMENT =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "All houseBillOfLadings methodOfPayment must be valid",
+          mav -> mav.submitAllMatching("houseBillOfLadings.*.methodOfPayment"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.METHOD_OF_PAYMENT));
+
+  private static final JsonRebaseableContentCheck VALIDATE_CARRIER_CODE_AND_LIST_PROVIDER =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "If 'carrierCode' is present, 'carrierCodeListProvider' is required and vice versa",
+          mav -> {
+            mav.submitAllMatching("carrierCode");
+            mav.submitAllMatching("carrierCodeListProvider");
+          },
+          (node, contextPath) -> {
+            boolean hasCarrierCode = !node.path("carrierCode").isMissingNode();
+            boolean hasProvider = !node.path("carrierCodeListProvider").isMissingNode();
+
+            if (hasCarrierCode && !hasProvider) {
+              return Set.of(
+                  "'carrierCodeListProvider' is required when 'carrierCode' is present at %s"
+                      .formatted(contextPath));
+            }
+            if (!hasCarrierCode && hasProvider) {
+              return Set.of(
+                  "'carrierCode' is required when 'carrierCodeListProvider' is present at %s"
+                      .formatted(contextPath));
+            }
+            return Set.of();
+          });
+
+  private static final JsonRebaseableContentCheck VALID_TYPE_OF_PERSON =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate 'typeOfPerson' values in documentParties",
+          mav -> {
+            // single objects
+            mav.submitAllMatching("documentParties.shipper.typeOfPerson");
+            mav.submitAllMatching("documentParties.consignee.typeOfPerson");
+            mav.submitAllMatching("documentParties.seller.typeOfPerson");
+            mav.submitAllMatching("documentParties.buyer.typeOfPerson");
+            // array of notifyParty objects
+            mav.submitAllMatching("documentParties.notifyParties.*.typeOfPerson");
+          },
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.TYPE_OF_PERSON));
   private static final Predicate<JsonNode> NUMBER_OF_PACKAGES_REQUIRED =
       packaging -> {
         String packageCode = packaging.path("packageCode").asText(null);
@@ -683,7 +728,7 @@ public class EblChecks {
 
   static final JsonRebaseableContentCheck BUYER_AND_SELLER_CONDITIONAL_CHECK =
       JsonAttribute.customValidator(
-          "If isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' then Buyer and Seller is required",
+          "If isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER', manifestTypeCode is 'ENS' and isHouseBillOfLadingsIssued is false, then Buyer and Seller is required",
           (node, contextPath) -> {
             JsonNode houseBillOfLadings = node.path(HOUSE_BILL_OF_LADINGS);
             if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
@@ -693,20 +738,21 @@ public class EblChecks {
             if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
               return Set.of();
             }
+            boolean isHouseBlsIssued = node.path("isHouseBillOfLadingsIssued").asBoolean(true);
             int index = 0;
             for (JsonNode hbl : houseBillOfLadings) {
               if (hbl.path("isCargoDeliveredInICS2Zone").asBoolean(false)) {
                 for (JsonNode filing : advanceManifestFilings) {
-                  if ("CARRIER"
-                          .equals(filing.path(AMF_HBL_PERFORMED_BY).asText())
+                  if ("CARRIER".equals(filing.path(AMF_HBL_PERFORMED_BY).asText())
                       && "ENS".equals(filing.path(MANIFEST_TYPE_CODE).asText())
+                      && !isHouseBlsIssued
                       && (hbl.path(DOCUMENT_PARTIES).path("buyer").isMissingNode()
                           || hbl.path(DOCUMENT_PARTIES).path(SELLER).isMissingNode())) {
                     String specificContextPath =
                         concatContextPath(
                             contextPath, "houseBillOfLadings[" + index + "].documentParties");
                     return Set.of(
-                        "Buyer and Seller is required in documentParties in houseBillOfLadings when isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' at %s"
+                        "Buyer and Seller is required in documentParties in houseBillOfLadings when isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER', manifestTypeCode is 'ENS' and and isHouseBillOfLadingsIssued is false at %s"
                             .formatted(specificContextPath));
                   }
                 }
@@ -772,8 +818,7 @@ public class EblChecks {
           VALID_PARTY_FUNCTION,
           VALID_PARTY_FUNCTION_HBL,
           ONLY_EBLS_CAN_BE_NEGOTIABLE,
-          EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
-          EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
+          EBL_AT_MOST_ONE_ORIGINAL_TOTAL,
           EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
           EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
           SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
@@ -793,118 +838,114 @@ public class EblChecks {
           NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
           TLR_CC_T_COMBINATION_UNIQUE,
           VALID_FEEDBACKS_SEVERITY,
-          VALID_FEEDBACKS_CODE);
+          VALID_FEEDBACKS_CODE,
+          VALID_HBL_METHOD_OF_PAYMENT,
+          VALIDATE_CARRIER_CODE_AND_LIST_PROVIDER,
+          VALID_TYPE_OF_PERSON);
 
-  private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS = Arrays.asList(
-    ONLY_EBLS_CAN_BE_NEGOTIABLE,
-    EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
-    EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
-    EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
-    EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
-    SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
-    SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
-    VALIDATE_DOCUMENT_PARTY,
-    JsonAttribute.ifThenElse(
-      "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
-      JsonAttribute.isTrue(JsonPointer.compile("/isShippedOnBoardType")),
-      JsonAttribute.mustBePresent(JsonPointer.compile("/shippedOnBoardDate")),
-      JsonAttribute.mustBePresent(JsonPointer.compile("/receivedForShipmentDate"))
-    ),
-    JsonAttribute.atMostOneOf(
-      JsonPointer.compile("/shippedOnBoardDate"),
-      JsonPointer.compile("/receivedForShipmentDate")
-    ),
-    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), EblDatasets.CARGO_MOVEMENT_TYPE),
-    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), EblDatasets.CARGO_MOVEMENT_TYPE),
-    // receiptTypeAtOrigin + deliveryTypeAtDestination are schema validated
-    JsonAttribute.allOrNoneArePresent(
-      JsonPointer.compile("/declaredValue"),
-      JsonPointer.compile("/declaredValueCurrency")
-    ),
-    JsonAttribute.ifThen(
-      "Pre-Carriage By implies Place of Receipt",
-      JsonAttribute.isNotNull(JsonPointer.compile("/transports/preCarriageBy")),
-      JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfReceipt"), "'preCarriageBy' is present")
-    ),
-    JsonAttribute.ifThen(
-      "On Carriage By implies Place of Delivery",
-      JsonAttribute.isNotNull(JsonPointer.compile("/transports/onCarriageBy")),
-      JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfDelivery"), "'onCarriageBy' is present")
-    ),
-    DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
-    VALID_WOOD_DECLARATIONS,
-    NATIONAL_COMMODITY_CODE_IS_VALID,
-    VALID_REFERENCE_TYPES,
-    VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES,
-    ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
-    NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
-    NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER,
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'commoditySubReference' must not be present in the transport document",
-      mav -> mav.submitAllMatching("consignmentItems.*.commoditySubReference"),
-      JsonAttribute.matchedMustBeAbsent()
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "DangerousGoods implies packagingCode or imoPackagingCode",
-      mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging"),
-      (nodeToValidate, contextPath) -> {
-        var dg = nodeToValidate.path("dangerousGoods");
-        if (!dg.isArray() || dg.isEmpty()) {
-          return Set.of();
-        }
-        if (nodeToValidate.path("packageCode").isMissingNode() && nodeToValidate.path("imoPackagingCode").isMissingNode()) {
-          return Set.of("The '%s' object did not have a 'packageCode' nor an 'imoPackagingCode', which is required due to dangerousGoods"
-            .formatted(contextPath));
-        }
-        return Set.of();
-      }
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'inhalationZone' values must be from dataset",
-      allDg(dg -> dg.path("inhalationZone").submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_INHALATION_ZONES)
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'segregationGroups' values must be from dataset",
-      allDg(dg -> dg.path("segregationGroups").all().submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_SEGREGATION_GROUPS)
-    ),
-    UTE_EQUIPMENT_REFERENCE_UNIQUE,
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'temperatureSetpoint' implies 'temperatureUnit'",
-      mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
-      JsonAttribute.presenceImpliesOtherField(
-        "temperatureSetpoint",
-        "temperatureUnit"
-    )),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'airExchangeSetpoint' implies 'airExchangeUnit'",
-      mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
-      JsonAttribute.presenceImpliesOtherField(
-        "airExchangeSetpoint",
-        "airExchangeUnit"
-      )),
-    EBL_DISPLAYED_ADDRESS_LIMIT,
-    CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
-    ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-    CR_CC_T_CODES_UNIQUE,
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "Validate mode of transport type",
-      mav -> {
-        mav.submitAllMatching("transports.preCarriageBy");
-        mav.submitAllMatching("transports.onCarriageBy");
-      },
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(MODE_OF_TRANSPORT)
-    ),
-    NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
-    TLR_CC_T_COMBINATION_UNIQUE,
-    VALID_PARTY_FUNCTION
-  );
+  private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS =
+      Arrays.asList(
+          ONLY_EBLS_CAN_BE_NEGOTIABLE,
+          EBL_AT_MOST_ONE_ORIGINAL_TOTAL,
+          EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
+          EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
+          SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
+          SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
+          VALIDATE_DOCUMENT_PARTY,
+          JsonAttribute.ifThenElse(
+              "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
+              JsonAttribute.isTrue(JsonPointer.compile("/isShippedOnBoardType")),
+              JsonAttribute.mustBePresent(JsonPointer.compile("/shippedOnBoardDate")),
+              JsonAttribute.mustBePresent(JsonPointer.compile("/receivedForShipmentDate"))),
+          JsonAttribute.atMostOneOf(
+              JsonPointer.compile("/shippedOnBoardDate"),
+              JsonPointer.compile("/receivedForShipmentDate")),
+          JsonAttribute.mustBeDatasetKeywordIfPresent(
+              JsonPointer.compile("/cargoMovementTypeAtOrigin"), EblDatasets.CARGO_MOVEMENT_TYPE),
+          JsonAttribute.mustBeDatasetKeywordIfPresent(
+              JsonPointer.compile("/cargoMovementTypeAtDestination"),
+              EblDatasets.CARGO_MOVEMENT_TYPE),
+          // receiptTypeAtOrigin + deliveryTypeAtDestination are schema validated
+          JsonAttribute.allOrNoneArePresent(
+              JsonPointer.compile("/declaredValue"), JsonPointer.compile("/declaredValueCurrency")),
+          JsonAttribute.ifThen(
+              "Pre-Carriage By implies Place of Receipt",
+              JsonAttribute.isNotNull(JsonPointer.compile("/transports/preCarriageBy")),
+              JsonAttribute.mustBeNotNull(
+                  JsonPointer.compile("/transports/placeOfReceipt"), "'preCarriageBy' is present")),
+          JsonAttribute.ifThen(
+              "On Carriage By implies Place of Delivery",
+              JsonAttribute.isNotNull(JsonPointer.compile("/transports/onCarriageBy")),
+              JsonAttribute.mustBeNotNull(
+                  JsonPointer.compile("/transports/placeOfDelivery"), "'onCarriageBy' is present")),
+          DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
+          VALID_WOOD_DECLARATIONS,
+          NATIONAL_COMMODITY_CODE_IS_VALID,
+          VALID_REFERENCE_TYPES,
+          VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES,
+          ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
+          NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
+          NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER,
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "DangerousGoods implies packagingCode or imoPackagingCode",
+              mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging"),
+              (nodeToValidate, contextPath) -> {
+                var dg = nodeToValidate.path("dangerousGoods");
+                if (!dg.isArray() || dg.isEmpty()) {
+                  return Set.of();
+                }
+                if (nodeToValidate.path("packageCode").isMissingNode()
+                    && nodeToValidate.path("imoPackagingCode").isMissingNode()) {
+                  return Set.of(
+                      "The '%s' object did not have a 'packageCode' nor an 'imoPackagingCode', which is required due to dangerousGoods"
+                          .formatted(contextPath));
+                }
+                return Set.of();
+              }),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The 'inhalationZone' values must be from dataset",
+              allDg(dg -> dg.path("inhalationZone").submitPath()),
+              JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_INHALATION_ZONES)),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The 'segregationGroups' values must be from dataset",
+              allDg(dg -> dg.path("segregationGroups").all().submitPath()),
+              JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+                  EblDatasets.DG_SEGREGATION_GROUPS)),
+          UTE_EQUIPMENT_REFERENCE_UNIQUE,
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "If 'temperatureSetpoint' is present, 'temperatureUnit' must be present (and vice versa)",
+              mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
+              JsonAttribute.presenceImpliesOtherField("temperatureSetpoint", "temperatureUnit")),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "If 'temperatureUnit' is present, 'temperatureSetpoint' must be present",
+              mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
+              JsonAttribute.presenceImpliesOtherField("temperatureUnit", "temperatureSetpoint")),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "The 'airExchangeSetpoint' implies 'airExchangeUnit'",
+              mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
+              JsonAttribute.presenceImpliesOtherField("airExchangeSetpoint", "airExchangeUnit")),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "If 'airExchangeUnit' is present, 'airExchangeSetpoint' must be present",
+              mav -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
+              JsonAttribute.presenceImpliesOtherField("airExchangeUnit", "airExchangeSetpoint")),
+          EBL_DISPLAYED_ADDRESS_LIMIT,
+          CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
+          ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
+          CR_CC_T_CODES_UNIQUE,
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "Validate mode of transport type",
+              mav -> {
+                mav.submitAllMatching("transports.preCarriageBy");
+                mav.submitAllMatching("transports.onCarriageBy");
+              },
+              JsonAttribute.matchedMustBeDatasetKeywordIfPresent(MODE_OF_TRANSPORT)),
+          NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
+          TLR_CC_T_COMBINATION_UNIQUE,
+          VALID_PARTY_FUNCTION,
+          VALID_TYPE_OF_PERSON);
 
-  public static final JsonContentCheck SIR_REQUIRED_IN_NOTIFICATION =
-      JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
-  public static final JsonContentCheck TDR_REQUIRED_IN_NOTIFICATION =
-      JsonAttribute.mustBePresent(TD_REF_TDR_PTR);
+  public static final JsonContentCheck SIR_OR_TDR_REQUIRED_IN_NOTIFICATION =
+      JsonAttribute.atLeastOneOf(SI_REF_SIR_PTR, TD_REF_TDR_PTR);
 
   public static JsonContentCheck sirInNotificationMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.mustEqual(
@@ -955,16 +996,12 @@ public class EblChecks {
         ));
 
       checks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-          "[Scenario] CargoItem and DG vs. outerPackaging in the SI",
-          mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
-          JsonAttribute.ifMatchedThenElse(
-            ignored -> dspSupplier.get().scenarioType().hasDG(),
-            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBeAbsent()),
-            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent())
-          )
-        )
-      );
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "[Scenario] Non-DG: outerPackaging must be present in the SI",
+              mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
+              JsonAttribute.ifMatchedThen(
+                  ignored -> !dspSupplier.get().scenarioType().hasDG(),
+                  JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent()))));
     }
 
     checks.add(JsonAttribute.customValidator(
@@ -981,6 +1018,11 @@ public class EblChecks {
         JsonAttribute.customValidator(
             "[Scenario] Verify that the scenario contains the required amount of 'utilizedTransportEquipments'",
             utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "[Scenario] Verify that the scenario contains the required amount of 'consignmentItems'",
+            consignmentItemsScenarioSizeCheck(dspSupplier)));
 
     return checks;
   }
@@ -1100,7 +1142,7 @@ public class EblChecks {
     }
 
     checks.addAll(STATIC_SI_CHECKS);
-    
+
     checks.add(FEEDBACKS_PRESENCE);
     /* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
         checks.add(JsonAttribute.lostAttributeCheck(
@@ -1220,13 +1262,12 @@ public class EblChecks {
       TransportDocumentStatus transportDocumentStatus,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
-        getTdPayloadChecks(standardVersion, transportDocumentStatus, dspSupplier);
+        getTdPayloadChecks(transportDocumentStatus, dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }
 
   public static List<JsonContentCheck> getTdPayloadChecks(
-      String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
@@ -1242,6 +1283,7 @@ public class EblChecks {
               var scenario = dspSupplier.get().scenarioType();
               var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
               var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
+              var isShipperOwned = nodeToValidate.path("isShipperOwned");
               var issues = new LinkedHashSet<String>();
               switch (scenario) {
                 case ACTIVE_REEFER -> {
@@ -1255,18 +1297,6 @@ public class EblChecks {
                   if (!nonOperatingReeferNode.asBoolean(false)) {
                     issues.add(
                         "The scenario requires '%s.isNonOperatingReefer' to be true"
-                            .formatted(contextPath));
-                  }
-                }
-                default -> {
-                  if (!activeReeferNode.isMissingNode()) {
-                    issues.add(
-                        "The scenario requires '%s' to NOT have an active reefer"
-                            .formatted(contextPath));
-                  }
-                  if (nonOperatingReeferNode.asBoolean(false)) {
-                    issues.add(
-                        "The scenario requires '%s.isNonOperatingReefer' to be omitted or false (depending on the container ISO code)"
                             .formatted(contextPath));
                   }
                 }
@@ -1287,10 +1317,19 @@ public class EblChecks {
                       "The scenario requires '%s' to contain dangerous goods"
                           .formatted(contextPath));
                 }
-              } else {
-                if (!nodeToValidate.isMissingNode() || !nodeToValidate.isEmpty()) {
+              }
+              return Set.of();
+            }));
+    jsonContentChecks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "[Scenario] The 'isShipperOwned' should be 'true for SOC scenarios",
+            mav -> mav.submitAllMatching("utilizedTransportEquipments.*"),
+            (nodeToValidate, contextPath) -> {
+              var scenario = dspSupplier.get().scenarioType();
+              if (scenario == ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES) {
+                if (!nodeToValidate.path("isShipperOwned").asBoolean(false)) {
                   return Set.of(
-                      "The scenario requires '%s' to NOT contain any dangerous goods"
+                      "The scenario requires '%s.isShipperOwned' to be true"
                           .formatted(contextPath));
                 }
               }
@@ -1318,6 +1357,30 @@ public class EblChecks {
         String path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
         return Set.of(
             "The scenario requires exactly %d 'utilizedTransportEquipments' but found %d at %s"
+                .formatted(expectedSize, actualSize, path));
+      }
+
+      return Set.of();
+    };
+  }
+
+  public static JsonContentMatchedValidation consignmentItemsScenarioSizeCheck(
+      Supplier<DynamicScenarioParameters> dspSupplier) {
+    return (body, contextPath) -> {
+      var scenario = dspSupplier.get().scenarioType();
+      var consignmentItems = body.path(CONSIGNMENT_ITEMS);
+      int actualSize = consignmentItems.size();
+
+      Integer expectedSize =
+          switch (scenario) {
+            case ScenarioType.REGULAR_2C_1U, ScenarioType.REGULAR_2C_2U -> 2;
+            default -> null;
+          };
+
+      if (expectedSize != null && actualSize != expectedSize) {
+        String path = concatContextPath(contextPath, CONSIGNMENT_ITEMS);
+        return Set.of(
+            "The scenario requires exactly %d 'consignemntItems' but found %d at %s"
                 .formatted(expectedSize, actualSize, path));
       }
 

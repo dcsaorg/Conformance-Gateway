@@ -29,7 +29,8 @@ The unit for temperature in Celsius or Fahrenheit
 - `CEL` (Celsius)
 - `FAH` (Fahrenheit)
 """,
-      example = "CEL")
+      example = "CEL",
+      maxLength = 10)
   protected String temperatureUnit;
 
   @Schema(
@@ -39,6 +40,7 @@ The unit for `airExchange` in metrics- or imperial- units per hour
 - `MQH` (Cubic metre per hour)
 - `FQH` (Cubic foot per hour)
 """,
-      example = "MQH")
+      example = "MQH",
+      maxLength = 10)
   protected String airExchangeUnit;
 }

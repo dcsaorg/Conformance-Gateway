@@ -2,7 +2,7 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
 
 @Data
 @Schema(
@@ -17,7 +17,7 @@ public class ImmediateTransportationEntry {
   @Schema(
       name = "FIRMSCode",
       maxLength = 4,
-      example = "a391",
+      example = "B456",
       description =
 """
 The Facilities Information and Resources Management System (FIRMS) code is a unique four-digit alpha-numeric identifier

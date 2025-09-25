@@ -2,12 +2,12 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
 
 import java.util.List;
 
 @Data
-@Schema(description = "Release information")
+@Schema(description = "Compiles the information relevant to shipment release.")
 public class ReleaseInformation {
 
   @Schema(

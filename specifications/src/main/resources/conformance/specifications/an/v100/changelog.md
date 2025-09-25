@@ -1,10 +1,41 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250926-beta
+
+Refined attribute descriptions. (SD-2458)
+
+Adjusted query parameter examples. (SD-2479)
+
+Added in type `Seal` for attribute `source` option `PHY` (Phytosanitary). (SD-2488)
+
+
 ## Snapshot v1.0.0-20250912-beta
 
 Added `Reference` type code `VBN` for V-Bond Number. (SD-2435)
 
 Updated the document party code list providers to match the list from version 3.0.1 of the Bill of Lading standard. (SD-2335)
+
+Renamed in object `Charge` property `chargePartnerCode` to `invoicePayerCode`. (SD-2437)
+
+Added the missing `API-Version` header parameter. (SD-2450)
+
+Fixed the type of the `limit` pagination parameter. (SD-2451)
+
+Fixed a typo in the GET endpoint description. (SD-2452)
+
+Fixed a typo in the FeedbackElement propertyPath example. (SD-2453)
+
+Added in object `ArrivalNoticeNotification` to the property `transportDocumentReference` the missing `maxLength`. (SD-2454)
+
+Renamed in object `PaymentRemittance` property `swiftCode` to `SWIFTCode`. (SD-2455)
+
+Updated in object `IdentifyingCode` for property `codeListProvider` the list of values. (SD-2456)
+
+Updated in object `Location` for property `facilityTypeCode` the list of values, adding `Border` and `Waypoint` for consistency with TNT 3.0.0. (SD-2459)
+
+Updated multiple property example values for consistency and correctness. (SD-2461)
+
+Added the missing maxLength to all String properties. (SD-2462)
 
 
 ## Snapshot v1.0.0-20250829-beta

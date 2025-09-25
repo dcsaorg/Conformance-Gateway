@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
+import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreightPaymentStatus;
 
 @Schema(description = "Full content of an Arrival Notice document.")
@@ -81,27 +81,25 @@ The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (p
       - `SMDG` (Ship Message Design Group)
       - `NMFTA` (National Motor Freight Traffic Association)
       """,
-      example = "NMFTA")
+      example = "NMFTA",
+      maxLength = 10)
   private String carrierCodeListProvider;
 
   @Schema(description = "The party to contact for any inquiries related to this Arrival Notice.")
   private List<PartyContactDetail> carrierContactInformation;
 
-  @Schema()
-  private PickupInformation pickupInformation;
+  @Schema() private PickupInformation pickupInformation;
 
-  @Schema()
-  private ReturnInformation returnInformation;
+  @Schema() private ReturnInformation returnInformation;
 
-  @Schema()
-  private ReleaseInformation releaseInformation;
+  @Schema() private ReleaseInformation releaseInformation;
 
-  @Schema()
-  private CustomsClearance customsClearance;
+  @Schema() private CustomsClearance customsClearance;
 
   @Schema(
       maxLength = 5000,
-      example = "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.",
+      example =
+          "Valid port entry pass required for drivers. Ensure vehicle registration is pre-submitted to port security.",
       description =
 """
 Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
@@ -109,7 +107,8 @@ e.g. additional required documents to prepare and present for shipment release -
 """)
   private String additionalInformation;
 
-  @Schema(description = "References used by the customer or carrier to identify or track the shipment.")
+  @Schema(
+      description = "References used by the customer or carrier to identify or track the shipment.")
   private List<Reference> references;
 
   @Schema(
@@ -123,7 +122,8 @@ e.g. additional required documents to prepare and present for shipment release -
   @Schema(
       description =
           "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)",
-      example = "SWB")
+      example = "SWB",
+      maxLength = 10)
   private String transportDocumentTypeCode;
 
   @Schema(
@@ -165,9 +165,7 @@ Reference number for agreement between shipper and carrier, which optionally inc
       maxLength = 30)
   private String serviceContractReference;
 
-  @Schema(
-      maxLength = 50000,
-      description = "Carrier terms and conditions for the Arrival Notice.")
+  @Schema(maxLength = 50000, description = "Carrier terms and conditions for the Arrival Notice.")
   private String termsAndConditions;
 
   @Schema(
@@ -175,7 +173,8 @@ Reference number for agreement between shipper and carrier, which optionally inc
           "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
   private List<CarrierClause> carrierClauses;
 
-  @Schema(description =
+  @Schema(
+      description =
 """
 Document parties.
 
@@ -185,8 +184,7 @@ as it determines which of these parties is considered the third, fourth, fifth (
 """)
   private List<DocumentParty> documentParties;
 
-  @Schema()
-  private Transport transport;
+  @Schema() private Transport transport;
 
   @Schema(description = "List of free time conditions applicable to this shipment at destination")
   private List<FreeTime> freeTimes;
@@ -194,11 +192,9 @@ as it determines which of these parties is considered the third, fourth, fifth (
   @Schema(description = "A list of `Charges`")
   private List<Charge> charges;
 
-  @Schema()
-  private PaymentRemittance paymentRemittance;
+  @Schema() private PaymentRemittance paymentRemittance;
 
-  @Schema()
-  private FreightPaymentStatus freightPaymentStatus;
+  @Schema() private FreightPaymentStatus freightPaymentStatus;
 
   @Schema(description = "The equipments being used.")
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;

@@ -2,19 +2,21 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 
 @Data
-@Schema(description = "Pickup information")
+@Schema(description = "Consolidates the information required to pick up the container.")
 public class PickupInformation {
 
   @Schema(
-      example="123456",
+      example = "780379",
       description =
 """
 A pickup number is a generated number assigned to each import container individually.
 A trucker picking up a container must present the correct pickup number.
 If the pickup number is incorrect, the trucker will have his pickup request denied.
-""")
+""",
+      maxLength = 50)
   protected String pickupNumber;
 
   @Schema(

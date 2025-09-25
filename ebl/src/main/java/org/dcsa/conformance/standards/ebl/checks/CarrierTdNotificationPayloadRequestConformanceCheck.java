@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -42,7 +45,12 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
             buildChecks(
                 ROOT_LABEL,
                 DATA_PATH,
-                () -> EblChecks.getTdNotificationChecks(transportDocumentStatus, getTdrCheck())),
+                () -> {
+                  List<JsonContentCheck> checks =
+                      new ArrayList<>(EblChecks.getTdNotificationChecks(transportDocumentStatus));
+                  getTdrCheck().ifPresent(checks::add);
+                  return checks;
+                }),
             buildChecks(
                 TRANSPORT_DOCUMENT_LABEL,
                 TRANSPORT_DOCUMENT_PATH,
@@ -50,9 +58,10 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
         .flatMap(Function.identity());
   }
 
-  private JsonContentCheck getTdrCheck() {
-    return Boolean.TRUE.equals(tdrIsKnown)
-        ? EblChecks.tdrInNotificationMustMatchDSP(dspSupplier)
-        : EblChecks.TDR_REQUIRED_IN_NOTIFICATION;
+  private Optional<JsonContentCheck> getTdrCheck() {
+    if (Boolean.TRUE.equals(tdrIsKnown)) {
+      return Optional.of(EblChecks.tdrInNotificationMustMatchDSP(dspSupplier));
+    }
+    return Optional.empty();
   }
 }

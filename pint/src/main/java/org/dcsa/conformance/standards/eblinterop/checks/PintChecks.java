@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.eblinterop.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.matchedMustEqual;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.genericTDContentChecks;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.SignatureChecks.*;
 import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNode;

@@ -22,6 +22,18 @@ public class Limits extends org.dcsa.conformance.specifications.standards.dt.v10
   @Schema(
       description =
 """
+The unit for **all attributes in the limits structure** in Celsius or Fahrenheit
+
+- `CEL` (Celsius)
+- `FAH` (Fahrenheit)
+""",
+      example = "CEL",
+      maxLength = 10)
+  protected String temperatureUnit;
+
+  @Schema(
+      description =
+"""
 Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.
 """,
       example = "42.0",

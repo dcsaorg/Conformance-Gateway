@@ -3,11 +3,12 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 
 @Data
-@Schema(description = "Transport info")
+@Schema(description = "Transport details relevant to the arrival notice.")
 public class Transport {
 
   @Schema(
@@ -46,36 +47,56 @@ by the shipping line and where responsibility of the shipping line ceases.
 The date of departure from the location where the cargo is handed over by the shipper, or his agent,
 to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
 """)
-  private FormattedDate departureDate;
+  private ClassifiedDate departureDate;
+
+  @Schema(
+      description =
+"""
+The date on which the carrier takes possession of all containers under the bill of lading.
+For carrier haulage, this is when the carrier collects the last container at the place of receipt.
+For merchant haulage, this is when the last container is physically handed over to the terminal.
+""")
+  private ClassifiedDate receivedForShipmentDate;
 
   @Schema(
       description =
 """
 The date when the container was loaded onto the vessel at the port of origin.
 """)
-  private FormattedDate onBoardDate;
+  private ClassifiedDate onBoardDate;
 
-  @Schema(description = "The expected date of arrival of the vessel at the Port of Discharge.")
-  private FormattedDate etaAtPortOfDischargeDate;
+  @Schema(description = "The date of arrival of the vessel at the Port of Discharge.")
+  private ClassifiedDate portOfDischargeArrivalDate;
 
-  @Schema(description = "The expected date of arrival of the shipment at Place of Delivery.")
-  private FormattedDate etaAtPlaceOfDeliveryDate;
+  @Schema(description = "The date of arrival of the shipment at Place of Delivery.")
+  private ClassifiedDate placeOfDeliveryArrivalDate;
 
   @Schema(
       description =
 """
-The estimated date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
+The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
 """)
-  private FormattedDate estimatedInlandArrivalDate;
+  private ClassifiedDate inlandArrivalDate;
 
   @Schema(
       description =
 """
-The estimated date and time when the shipment will be placed under General Order status
+The date and time when the shipment will be placed under General Order status
 (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
 """)
-  private FormattedDateTime estimatedGeneralOrderDateTime;
+  private ClassifiedDateTime generalOrderDateTime;
 
-  @Schema(description = "The legs of the transport that are relevant in this context")
+  @Schema(
+      description =
+"""
+The inland location where the cargo is intended to cross an international border.
+""")
+  private Location borderCrossingLocation;
+
+  @Schema(
+      description =
+"""
+Full or partial information, considered relevant in this context, on some or all `Legs` of the `Transport`
+""")
   private List<Leg> legs;
 }

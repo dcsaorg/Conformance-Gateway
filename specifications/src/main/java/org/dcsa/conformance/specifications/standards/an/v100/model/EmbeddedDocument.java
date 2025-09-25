@@ -10,7 +10,8 @@ public class EmbeddedDocument {
   @Schema(
       type = "string",
       example = "20250123 AN XYZ01234.docx",
-      description = "Document name")
+      description = "Document name",
+      maxLength = 255)
   private String name;
 
   @Schema(
@@ -23,6 +24,7 @@ public class EmbeddedDocument {
       type = "string",
       defaultValue = "application/pdf",
       example = "application/msword",
-      description = "Content type of document")
+      description = "Content type of document",
+      maxLength = 255)
   private String contentType;
 }

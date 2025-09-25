@@ -88,7 +88,7 @@ We use standard REST semantics and error codes for all endpoints:
 
 ### Headers
 
-All API requests and responses must include the `API-Version` header, set to the full version of the standard.
+Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard.
 
 We do not use deprecated `X-` headers.
 
@@ -180,6 +180,10 @@ While DCSA generally leaves "additionalProperties" unset, which according to the
 ### Endpoint URLs
 
 While not strictly required by the OpenAPI specification, API providers should deploy all the implemented endpoints of a standard under a single common base URL expanded with the exact URI path of each endpoint from the DCSA standard OpenAPI specification.
+
+### Headers
+
+Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard.
 
 ### Pseudo-enum string values
 

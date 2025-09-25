@@ -2,12 +2,13 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.ModeOfTransportCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.TransportPlanStageCode;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 
 @Data
-@Schema(description = "Details of one transport leg")
+@Schema(description = "Details of one specific leg of the transport plan")
 public class Leg {
 
   @Schema() private TransportPlanStageCode transportPlanStage;
@@ -19,17 +20,17 @@ public class Leg {
       example = "5")
   protected int transportPlanStageSequenceNumber;
 
-  @Schema(description = "Load location")
+  @Schema(description = "The location where the cargo is loaded for this specific leg of the transport plan.")
   private Location loadLocation;
 
-  @Schema(description = "Discharge location")
+  @Schema(description = "The location where the cargo is discharged for this specific leg of the transport plan.")
   private Location dischargeLocation;
 
-  @Schema(description = "Planned departure date")
-  private FormattedDate plannedDepartureDate;
+  @Schema(description = "The departure date from the load location for this specific leg of the transport plan.")
+  private ClassifiedDate departureDate;
 
-  @Schema(description = "Planned arrival date")
-  private FormattedDate plannedArrivalDate;
+  @Schema(description = "The arrival date at the discharge location for this specific leg of the transport plan.")
+  private ClassifiedDate arrivalDate;
 
   @Schema() ModeOfTransportCode modeOfTransport;
 

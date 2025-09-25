@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import io.swagger.v3.oas.models.parameters.Parameter;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,14 @@ import org.dcsa.conformance.specifications.dataoverview.LegendMetadata;
 
 @Slf4j
 public abstract class StandardSpecification {
+
+  public static final String API_VERSION_HEADER = "API-Version";
+  public static final String API_VERSION_HEADER_REF = "#/components/headers/" + API_VERSION_HEADER;
+
+  private static final String API_VERSION_DESCRIPTION =
+      "Every API request and response must contain the `API-Version` header,"
+          + " set to the full version of the implemented DCSA standard.";
+
   private final String standardAbbreviation;
   private final String standardVersion;
 
@@ -58,10 +68,9 @@ public abstract class StandardSpecification {
     openAPI
         .getComponents()
         .addHeaders(
-            "API-Version",
+            API_VERSION_HEADER,
             new Header()
-                .description(
-                    "SemVer used to indicate the version of the contract (API version) returned.")
+                .description(API_VERSION_DESCRIPTION)
                 .schema(new Schema<>().type("string").example(standardVersion)))
         .addHeaders(
             "Next-Page-Cursor",
@@ -164,5 +173,15 @@ public abstract class StandardSpecification {
         exportFileDir + "%s-data-overview.xlsx".formatted(fileNamePrefix));
     dataOverview.exportToCsvFiles(
         exportFileDir + "%s-data-overview-%s.csv".formatted(fileNamePrefix, "%s")); // pass the %s
+  }
+
+  protected Parameter getApiVersionHeaderParameter() {
+    return new Parameter()
+        .in("header")
+        .name(API_VERSION_HEADER)
+        .description(API_VERSION_DESCRIPTION)
+        .required(false)
+        .schema(new Schema<String>().type("string"))
+        .example(standardVersion);
   }
 }

@@ -1,0 +1,55 @@
+{
+  "receiptTypeAtOrigin": "SD",
+  "deliveryTypeAtDestination": "CY",
+  "cargoMovementTypeAtOrigin": "FCL",
+  "cargoMovementTypeAtDestination": "FCL",
+  "serviceContractReference": "HHL51800000",
+  "vessel": {
+    "name": "OCEAN DESTROYER"
+  },
+  "carrierExportVoyageNumber": "403W",
+  "isEquipmentSubstitutionAllowed": true,
+  "documentParties": {
+    "bookingAgent": {
+      "partyName": "DCSA Team"
+    }
+  },
+  "shipmentLocations": [
+    {
+      "location": {
+        "UNLocationCode": "NLAMS"
+      },
+      "locationTypeCode": "POD"
+    },
+    {
+      "location": {
+        "UNLocationCode": "SGSIN"
+      },
+      "locationTypeCode": "PRE"
+    }
+  ],
+  "requestedEquipments": [
+    {
+      "ISOEquipmentCode": "22GP",
+      "units": 1,
+      "isShipperOwned": false,
+      "commodities": [
+        {
+          "commodityType": "Dry cargo, Freight all kinds",
+          "cargoGrossWeight": {
+            "value": 3000.0,
+            "unit": "KGM"
+          }
+        }
+      ],
+      "containerPositionings":[
+        {
+          "location": {
+            "UNLocationCode": "SGSIN"
+          },
+          "dateTime": "2026-09-04T09:41:00Z"
+        }
+      ]
+    }
+  ]
+}

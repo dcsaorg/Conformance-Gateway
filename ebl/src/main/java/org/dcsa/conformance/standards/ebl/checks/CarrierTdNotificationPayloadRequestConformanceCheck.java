@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -20,20 +23,17 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
   private static final String ROOT_LABEL = "";
   private static final String TRANSPORT_DOCUMENT_LABEL = "[Transport Document]";
 
-  private final String standardVersion;
   private final TransportDocumentStatus transportDocumentStatus;
   private final Boolean tdrIsKnown;
   private final Supplier<DynamicScenarioParameters> dspSupplier;
 
   public CarrierTdNotificationPayloadRequestConformanceCheck(
       UUID matchedExchangeUuid,
-      String standardVersion,
       TransportDocumentStatus transportDocumentStatus,
       Boolean tdrIsKnown,
       Supplier<DynamicScenarioParameters> dspSupplier) {
 
     super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
-    this.standardVersion = standardVersion;
     this.transportDocumentStatus = transportDocumentStatus;
     this.tdrIsKnown = Boolean.TRUE.equals(tdrIsKnown);
     this.dspSupplier = dspSupplier;
@@ -45,19 +45,23 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
             buildChecks(
                 ROOT_LABEL,
                 DATA_PATH,
-                () -> EBLChecks.getTdNotificationChecks(transportDocumentStatus, getTdrCheck())),
+                () -> {
+                  List<JsonContentCheck> checks =
+                      new ArrayList<>(EblChecks.getTdNotificationChecks(transportDocumentStatus));
+                  getTdrCheck().ifPresent(checks::add);
+                  return checks;
+                }),
             buildChecks(
                 TRANSPORT_DOCUMENT_LABEL,
                 TRANSPORT_DOCUMENT_PATH,
-                () ->
-                    EBLChecks.getTdPayloadChecks(
-                        standardVersion, transportDocumentStatus, dspSupplier)))
+                () -> EblChecks.getTdPayloadChecks(transportDocumentStatus, dspSupplier)))
         .flatMap(Function.identity());
   }
 
-  private JsonContentCheck getTdrCheck() {
-    return Boolean.TRUE.equals(tdrIsKnown)
-        ? EBLChecks.tdrInNotificationMustMatchDSP(dspSupplier)
-        : EBLChecks.TDR_REQUIRED_IN_NOTIFICATION;
+  private Optional<JsonContentCheck> getTdrCheck() {
+    if (Boolean.TRUE.equals(tdrIsKnown)) {
+      return Optional.of(EblChecks.tdrInNotificationMustMatchDSP(dspSupplier));
+    }
+    return Optional.empty();
   }
 }

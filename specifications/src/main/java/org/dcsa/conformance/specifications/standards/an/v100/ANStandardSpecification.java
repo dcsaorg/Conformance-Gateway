@@ -31,17 +31,14 @@ import org.dcsa.conformance.specifications.standards.an.v100.messages.GetArrival
 import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticesError;
 import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticesResponse;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ActiveReeferSettings;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNotice;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ArrivalNoticeNotification;
 import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticeNotificationsRequest;
 import org.dcsa.conformance.specifications.standards.an.v100.messages.PostArrivalNoticesRequest;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CargoGrossVolume;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CargoGrossWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CargoItem;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetVolume;
-import org.dcsa.conformance.specifications.standards.an.v100.model.CargoNetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Charge;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ConsignmentItem;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsClearance;
 import org.dcsa.conformance.specifications.standards.an.v100.model.CustomsReference;
@@ -51,44 +48,41 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.EmbeddedDocum
 import org.dcsa.conformance.specifications.standards.an.v100.model.EmergencyContactDetails;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Equipment;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ExportLicense;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.an.v100.model.FreeTime;
-import org.dcsa.conformance.specifications.standards.an.v100.model.GeoCoordinate;
-import org.dcsa.conformance.specifications.standards.an.v100.model.GrossWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.IdentifyingCode;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ImmediateTransportationEntry;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ImportLicense;
 import org.dcsa.conformance.specifications.standards.an.v100.model.InnerPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Leg;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Limits;
-import org.dcsa.conformance.specifications.standards.an.v100.model.Location;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.an.v100.model.NationalCommodityCode;
-import org.dcsa.conformance.specifications.standards.an.v100.model.NetExplosiveContent;
-import org.dcsa.conformance.specifications.standards.an.v100.model.NetVolume;
-import org.dcsa.conformance.specifications.standards.an.v100.model.NetWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.OuterPackaging;
 import org.dcsa.conformance.specifications.standards.an.v100.model.PartyContactDetail;
 import org.dcsa.conformance.specifications.standards.an.v100.model.PaymentRemittance;
 import org.dcsa.conformance.specifications.standards.an.v100.model.PickupInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Reference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReferenceConsignmentItem;
+import org.dcsa.conformance.specifications.standards.an.v100.model.ReleaseInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.ReturnInformation;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Seal;
-import org.dcsa.conformance.specifications.standards.an.v100.model.TareWeight;
 import org.dcsa.conformance.specifications.standards.an.v100.model.TaxLegalReference;
 import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
 import org.dcsa.conformance.specifications.standards.an.v100.model.UtilizedTransportEquipment;
 import org.dcsa.conformance.specifications.standards.an.v100.model.VesselVoyage;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
+import org.dcsa.conformance.specifications.standards.core.v100.types.EquipmentReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
+import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.IsoEquipmentCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.ModeOfTransportCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
+import org.dcsa.conformance.specifications.standards.core.v100.types.VesselIMONumber;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Volume;
+import org.dcsa.conformance.specifications.standards.dt.v100.model.Weight;
 
 public class ANStandardSpecification extends StandardSpecification {
 
@@ -122,7 +116,7 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250815-alpha", "AN", "1.0.0-20250801-alpha", 4);
+        "Arrival Notice", "1.0.0-20250926-beta", "AN", "1.0.0-20250912-beta", 4);
   }
 
   @Override
@@ -132,12 +126,10 @@ public class ANStandardSpecification extends StandardSpecification {
         Address.class,
         ArrivalNotice.class,
         ArrivalNoticeNotification.class,
-        CargoGrossVolume.class,
-        CargoGrossWeight.class,
         CargoItem.class,
-        CargoNetVolume.class,
-        CargoNetWeight.class,
         Charge.class,
+        ClassifiedDate.class,
+        ClassifiedDateTime.class,
         ConsignmentItem.class,
         CountryCode.class,
         CustomsClearance.class,
@@ -152,14 +144,11 @@ public class ANStandardSpecification extends StandardSpecification {
         ExportLicense.class,
         Facility.class,
         FeedbackElement.class,
-        FormattedDate.class,
-        FormattedDateTime.class,
         FreeTime.class,
         FreeTimeTimeUnitCode.class,
         FreeTimeTypeCode.class,
         GeoCoordinate.class,
         GetArrivalNoticesResponse.class,
-        GrossWeight.class,
         IdentifyingCode.class,
         ImmediateTransportationEntry.class,
         ImportLicense.class,
@@ -170,9 +159,6 @@ public class ANStandardSpecification extends StandardSpecification {
         Location.class,
         ModeOfTransportCode.class,
         NationalCommodityCode.class,
-        NetExplosiveContent.class,
-        NetVolume.class,
-        NetWeight.class,
         OuterPackaging.class,
         PartyContactDetail.class,
         PaymentRemittance.class,
@@ -183,21 +169,25 @@ public class ANStandardSpecification extends StandardSpecification {
         PostArrivalNoticesResponse.class,
         Reference.class,
         ReferenceConsignmentItem.class,
+        ReleaseInformation.class,
         ReturnInformation.class,
         Seal.class,
-        TareWeight.class,
         TaxLegalReference.class,
         Transport.class,
         UniversalVoyageReference.class,
         UtilizedTransportEquipment.class,
         VesselIMONumber.class,
-        VesselVoyage.class);
+        VesselVoyage.class,
+        Volume.class,
+        Weight.class);
   }
 
   @Override
   protected List<String> getRootTypeNames() {
     return List.of(
-        ArrivalNotice.class.getSimpleName(), ArrivalNoticeNotification.class.getSimpleName());
+        ArrivalNotice.class.getSimpleName(),
+        ArrivalNoticeNotification.class.getSimpleName(),
+        FeedbackElement.class.getSimpleName());
   }
 
   @Override
@@ -216,7 +206,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/28a61d04bad06c0a9aa2894f48f0958116cb4f84/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/375eee09878a8a481884257ded71b2f35edc65bf/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 
@@ -224,27 +214,7 @@ public class ANStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(
-            AttributesHierarchicalSheet.class,
-            Map.ofEntries(
-                Map.entry(
-                    "ArrivalNotice / transport / dischargeLocation",
-                    "ArrivalNotice / transport / legs / dischargeLocation"),
-                Map.entry(
-                    "ArrivalNotice / transport / loadLocation",
-                    "ArrivalNotice / transport / legs / loadLocation"),
-                Map.entry(
-                    "ArrivalNotice / transport / onCarriageBy",
-                    "ArrivalNotice / transport / legs / modeOfTransport"),
-                Map.entry(
-                    "ArrivalNotice / transport / vesselVoyages",
-                    "ArrivalNotice / transport / legs / vesselVoyage"),
-                Map.entry(
-                    "ArrivalNotice / transport / plannedArrivalDate",
-                    "ArrivalNotice / transport / legs / plannedArrivalDate"),
-                Map.entry(
-                    "ArrivalNotice / transport / plannedDepartureDate",
-                    "ArrivalNotice / transport / legs / plannedDepartureDate"))),
+        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
         Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
@@ -265,7 +235,11 @@ public class ANStandardSpecification extends StandardSpecification {
         .description(readResourceFile("openapi-get-ans-description.md"))
         .operationId("get-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_PUBLISHERS))
-        .parameters(new GetArrivalNoticesEndpoint().getQueryParameters())
+        .parameters(
+            Stream.concat(
+                    new GetArrivalNoticesEndpoint().getQueryParameters().stream(),
+                    Stream.of(getApiVersionHeaderParameter()))
+                .toList())
         .responses(
             new ApiResponses()
                 .addApiResponse(
@@ -275,8 +249,8 @@ public class ANStandardSpecification extends StandardSpecification {
                         .headers(
                             Stream.of(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")),
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)),
                                     Map.entry(
                                         "Next-Page-Cursor",
                                         new Header().$ref("#/components/headers/Next-Page-Cursor")))
@@ -329,8 +303,8 @@ public class ANStandardSpecification extends StandardSpecification {
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)))))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -374,8 +348,8 @@ public class ANStandardSpecification extends StandardSpecification {
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)))))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -395,8 +369,7 @@ public class ANStandardSpecification extends StandardSpecification {
         .headers(
             new LinkedHashMap<>(
                 Map.ofEntries(
-                    Map.entry(
-                        "API-Version", new Header().$ref("#/components/headers/API-Version")))))
+                    Map.entry(API_VERSION_HEADER, new Header().$ref(API_VERSION_HEADER_REF)))))
         .content(
             new Content()
                 .addMediaType(

@@ -36,5 +36,5 @@ Unique code for the different equipment size and type used to transport commodit
   protected String isoEquipmentCode;
 
   @Schema(description = "The tare weight of the container.")
-  protected TareWeight tareWeight;
+  protected Weight tareWeight;
 }

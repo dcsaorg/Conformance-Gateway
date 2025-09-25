@@ -12,8 +12,9 @@ import org.dcsa.conformance.specifications.standards.dt.v100.types.SegregationGr
 
 @Schema(
     description =
-        org.dcsa.conformance.specifications.standards.dt.v100.model.DangerousGoods
-            .CLASS_SCHEMA_DESCRIPTION)
+"""
+Specification for Dangerous Goods. Provide one of UNNumber or NANumber. Based on IMDG Code Amendment 41-22.
+""")
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -22,6 +23,13 @@ import org.dcsa.conformance.specifications.standards.dt.v100.types.SegregationGr
 @ClearSchemaConstraints
 public class DangerousGoods
     extends org.dcsa.conformance.specifications.standards.dt.v100.model.DangerousGoods {
+
+  @Schema(
+    name = "IMOClass",
+    description = IMO_CLASS_DESCRIPTION,
+    example = "1.4S",
+    maxLength = 4)
+  protected String imoClass;
 
   @Schema(
       description =

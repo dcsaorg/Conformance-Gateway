@@ -20,7 +20,7 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .explode(Boolean.FALSE)
           .description(
               "Reference(s) of the transport document(s) for which to return the associated arrival notices")
-          .example("TDR0123456,TDR1234567");
+          .example("HHL71800000,HHL71800001");
 
   private final Parameter equipmentReferences =
       new Parameter()
@@ -46,7 +46,7 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .in("query")
           .name("vesselIMONumber")
           .description("IMO number of the vessel for which to retrieve available arrival notices")
-          .example("12345678")
+          .example("9321483")
           .schema(new Schema<String>().type("string"));
 
   private final Parameter vesselName =
@@ -63,7 +63,7 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .name("carrierImportVoyageNumber")
           .description(
               "The identifier of an import voyage. The carrier-specific identifier of the import Voyage.")
-          .example("1234N")
+          .example("2208N")
           .schema(new Schema<String>().type("string"));
 
   private final Parameter universalImportVoyageReference =
@@ -93,21 +93,21 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .example("SR12345A")
           .schema(new Schema<String>().type("string"));
 
-  private final Parameter minEtaAtPortOfDischargeDate =
+  private final Parameter portOfDischargeArrivalDateMin =
       new Parameter()
           .in("query")
-          .name("minEtaAtPortOfDischargeDate")
+          .name("portOfDischargeArrivalDateMin")
           .description(
-              "Retrieve arrival notices with an ETA at port of discharge on or after this date")
-          .example("2025-01-23")
+              "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date")
+          .example("2025-01-22")
           .schema(new Schema<String>().type("string").format("date"));
 
-  private final Parameter maxEtaAtPortOfDischargeDate =
+  private final Parameter portOfDischargeArrivalDateMax =
       new Parameter()
           .in("query")
-          .name("maxEtaAtPortOfDischargeDate")
+          .name("portOfDischargeArrivalDateMax")
           .description(
-              "Retrieve arrival notices with an ETA at port of discharge on or before this date")
+              "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date")
           .example("2025-01-23")
           .schema(new Schema<String>().type("string").format("date"));
 
@@ -159,7 +159,7 @@ the publisher should **not** include the PDF visualization if this parameter is 
           .name("limit")
           .description("Maximum number of arrival notices to include in each page of the response.")
           .example(10)
-          .schema(new Schema<Integer>().type("number").format("int32").minimum(new BigDecimal(1)));
+          .schema(new Schema<Integer>().type("integer").format("int32").minimum(new BigDecimal(1)));
 
   private final Parameter cursor =
       new Parameter()
@@ -182,8 +182,8 @@ the publisher should **not** include the PDF visualization if this parameter is 
         universalImportVoyageReference,
         carrierServiceCode,
         universalServiceReference,
-        minEtaAtPortOfDischargeDate,
-        maxEtaAtPortOfDischargeDate,
+        portOfDischargeArrivalDateMin,
+        portOfDischargeArrivalDateMax,
         includeVisualization,
         removeCharges,
         limit,
@@ -205,80 +205,84 @@ the publisher should **not** include the PDF visualization if this parameter is 
                 List.of(transportDocumentReferences, equipmentReferences),
                 List.of(equipmentReferences),
                 List.of(
-                    minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, equipmentReferences),
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
+                    equipmentReferences),
                 // POD
-                List.of(minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, portOfDischarge),
-                // vessel IMO + voyage number (+ service)
-                List.of(minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, vesselIMONumber),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin, portOfDischargeArrivalDateMax, portOfDischarge),
+                // vessel IMO + voyage number (+ service)
+                List.of(
+                    portOfDischargeArrivalDateMin, portOfDischargeArrivalDateMax, vesselIMONumber),
+                List.of(
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselIMONumber,
                     carrierImportVoyageNumber),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselIMONumber,
                     carrierImportVoyageNumber,
                     carrierServiceCode),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselIMONumber,
                     carrierImportVoyageNumber,
                     universalServiceReference),
                 // vessel IMO + voyage reference (+ service)
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselIMONumber,
                     universalImportVoyageReference),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselIMONumber,
                     universalImportVoyageReference,
                     carrierServiceCode),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselIMONumber,
                     universalImportVoyageReference,
                     universalServiceReference),
                 // vessel name + voyage number (+ service)
-                List.of(minEtaAtPortOfDischargeDate, maxEtaAtPortOfDischargeDate, vesselName),
+                List.of(portOfDischargeArrivalDateMin, portOfDischargeArrivalDateMax, vesselName),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselName,
                     carrierImportVoyageNumber),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselName,
                     carrierImportVoyageNumber,
                     carrierServiceCode),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselName,
                     carrierImportVoyageNumber,
                     universalServiceReference),
                 // vessel name + voyage reference (+ service)
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselName,
                     universalImportVoyageReference),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselName,
                     universalImportVoyageReference,
                     carrierServiceCode),
                 List.of(
-                    minEtaAtPortOfDischargeDate,
-                    maxEtaAtPortOfDischargeDate,
+                    portOfDischargeArrivalDateMin,
+                    portOfDischargeArrivalDateMax,
                     vesselName,
                     universalImportVoyageReference,
                     universalServiceReference))));

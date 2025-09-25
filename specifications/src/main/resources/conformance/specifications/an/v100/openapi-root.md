@@ -14,6 +14,6 @@ The registration of subscribers with arrival notice publishers is out of scope.
 
 The authentication and authorization in both directions between arrival notice publishers and subscribers is out of scope.
 
-### Work in progress
+### Work in progress ⚠️
 
 The DCSA Arrival Notice standard, including this API, is currently being designed and is **not** ready for general adoption yet.

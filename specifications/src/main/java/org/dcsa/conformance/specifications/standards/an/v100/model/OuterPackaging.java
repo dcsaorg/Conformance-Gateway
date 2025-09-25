@@ -33,6 +33,7 @@ A code identifying the outer packaging/overpack. `PackageCode` must follow the c
   protected String packageCode;
 
   @Schema(
+      name = "IMOPackagingCode",
       description =
 """
 The code of the packaging as per IMO.

@@ -2,11 +2,12 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.IsoEquipmentCode;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 
 import java.util.List;
 
@@ -26,14 +27,12 @@ public class FreeTime {
   private List<EquipmentReference> equipmentReferences;
 
   @Schema(
-      type = "integer",
-      format = "int32",
       description = "The duration expressed in `timeUnit`s for which this free time item applies.",
-      example = "123")
-  private int duration;
+      example = "5",
+      format = "int32")
+  private Integer duration;
 
-  @Schema()
-  private FreeTimeTimeUnitCode timeUnit;
+  @Schema() private FreeTimeTimeUnitCode timeUnit;
 
   @Schema(
       maxLength = 1000,
@@ -45,6 +44,13 @@ It can include references to the carrier website or individual charges as per se
       example = "Calculated as...")
   private String calculationBasis;
 
-  @Schema(description = "The final day containers can be collected without incurring charges")
-  private FormattedDate lastFreeDate;
+  @Schema(
+      description =
+          "The final date when the container(s) can be collected without incurring charges.")
+  private ClassifiedDate lastFreeDate;
+
+  @Schema(
+      description =
+          "The final date and time when the container(s) can be collected without incurring charges.")
+  private ClassifiedDateTime lastFreeDateTime;
 }

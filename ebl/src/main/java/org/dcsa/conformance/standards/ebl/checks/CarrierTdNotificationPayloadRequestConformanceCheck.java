@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
@@ -25,13 +25,13 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
 
   private final TransportDocumentStatus transportDocumentStatus;
   private final Boolean tdrIsKnown;
-  private final Supplier<DynamicScenarioParameters> dspSupplier;
+  private final Supplier<EblDynamicScenarioParameters> dspSupplier;
 
   public CarrierTdNotificationPayloadRequestConformanceCheck(
       UUID matchedExchangeUuid,
       TransportDocumentStatus transportDocumentStatus,
       Boolean tdrIsKnown,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<EblDynamicScenarioParameters> dspSupplier) {
 
     super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
     this.transportDocumentStatus = transportDocumentStatus;

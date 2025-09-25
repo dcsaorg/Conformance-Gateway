@@ -11,6 +11,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -20,6 +21,7 @@ import java.util.stream.StreamSupport;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.logs.TimestampedLogEntry;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StatefulEntity;
@@ -33,6 +35,8 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 @Slf4j
 public abstract class ConformanceParty implements StatefulEntity {
   public static final String API_VERSION = "Api-Version";
+
+  public final String operatorLogName = "operatorLog" + getClass().getSimpleName();
 
   protected final String apiVersion;
   protected final PartyConfiguration partyConfiguration;
@@ -53,7 +57,7 @@ public abstract class ConformanceParty implements StatefulEntity {
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
   private static final int MAX_OPERATOR_LOG_RECORDS = 12;
-  private final LinkedList<String> operatorLog = new LinkedList<>();
+  private final List<TimestampedLogEntry> operatorLog = new LinkedList<>();
 
   protected ConformanceParty(
       String apiVersion,
@@ -82,9 +86,14 @@ public abstract class ConformanceParty implements StatefulEntity {
     ObjectNode jsonPartyState = OBJECT_MAPPER.createObjectNode();
     jsonPartyState.set("actionPromptsQueue", actionPromptsQueue.exportJsonState());
 
-    ArrayNode operatorLogNode = jsonPartyState.putArray("operatorLog");
-    operatorLog.forEach(operatorLogNode::add);
-    jsonPartyState.set("operatorLog", operatorLogNode);
+    ArrayNode operatorLogNode = jsonPartyState.putArray(operatorLogName);
+    operatorLog.forEach(
+        entry -> {
+          ObjectNode entryNode = OBJECT_MAPPER.createObjectNode();
+          entryNode.put("message", entry.message());
+          entryNode.put("timestamp", entry.timestamp().toString());
+          operatorLogNode.add(entryNode);
+        });
 
     exportPartyJsonState(jsonPartyState);
     return jsonPartyState;
@@ -95,23 +104,31 @@ public abstract class ConformanceParty implements StatefulEntity {
   @Override
   public void importJsonState(JsonNode jsonState) {
     actionPromptsQueue.importJsonState(jsonState.get("actionPromptsQueue"));
-    StreamSupport.stream(jsonState.get("operatorLog").spliterator(), false)
-        .forEach(entryNode -> operatorLog.add(entryNode.asText()));
+
+    JsonNode operatorLogNode = jsonState.get(operatorLogName);
+    StreamSupport.stream(operatorLogNode.spliterator(), false)
+        .forEach(
+            entryNode -> {
+              String message = entryNode.get("message").asText();
+              Instant timestamp = Instant.parse(entryNode.get("timestamp").asText());
+              operatorLog.add(new TimestampedLogEntry(message, timestamp));
+            });
+
     importPartyJsonState((ObjectNode) jsonState);
   }
 
   protected abstract void importPartyJsonState(ObjectNode sourceObjectNode);
 
   public void addOperatorLogEntry(String logEntry) {
-    operatorLog.addFirst(logEntry);
+    operatorLog.addFirst(new TimestampedLogEntry(logEntry));
     if (operatorLog.size() > MAX_OPERATOR_LOG_RECORDS - 1) {
       operatorLog.removeLast();
       operatorLog.removeLast();
-      operatorLog.addLast("...");
+      operatorLog.addLast(new TimestampedLogEntry("..."));
     }
   }
 
-  public List<String> getOperatorLog() {
+  public List<TimestampedLogEntry> getOperatorLog() {
     return List.copyOf(operatorLog);
   }
 
@@ -371,4 +388,13 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   protected abstract Map<Class<? extends ConformanceAction>, Consumer<JsonNode>>
       getActionPromptHandlers();
+
+  protected ConformanceResponse invalidRequest(
+      ConformanceRequest request, int statusCode, String message) {
+    log.warn("Invalid request: %s", message);
+    return request.createResponse(
+        statusCode,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
+  }
 }

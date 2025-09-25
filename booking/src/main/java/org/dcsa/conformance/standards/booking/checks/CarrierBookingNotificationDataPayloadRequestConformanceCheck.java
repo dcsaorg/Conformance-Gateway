@@ -7,8 +7,8 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
     extends AbstractCarrierPayloadConformanceCheck {
@@ -21,12 +21,12 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   private static final String BOOKING_PREFIX = "[Booking]";
   private static final String AMENDED_BOOKING_PREFIX = "[Amended Booking]";
 
-  private final Supplier<DynamicScenarioParameters> dspSupplier;
+  private final Supplier<BookingDynamicScenarioParameters> dspSupplier;
 
   public CarrierBookingNotificationDataPayloadRequestConformanceCheck(
       UUID matchedExchangeUuid,
       BookingState bookingStatus,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     super(matchedExchangeUuid, HttpMessageType.REQUEST, bookingStatus);
     this.dspSupplier = dspSupplier;
   }
@@ -35,7 +35,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
       UUID matchedExchangeUuid,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     super(
         matchedExchangeUuid, HttpMessageType.REQUEST, bookingStatus, expectedAmendedBookingStatus);
     this.dspSupplier = dspSupplier;
@@ -46,7 +46,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
       BookingCancellationState expectedBookingCancellationStatus,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     super(
         matchedExchangeUuid,
         HttpMessageType.REQUEST,

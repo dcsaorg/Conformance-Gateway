@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
+import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -40,7 +41,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
             "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
         .replace(
             "BOOKING_TYPE_PLACEHOLDER",
-            switch (getDspSupplier().get().scenarioType()) {
+            switch (ScenarioType.valueOf(getDspSupplier().get().scenarioType())) {
               case DG -> "DG";
               case REEFER -> "Reefer";
               case NON_OPERATING_REEFER -> "Non-Operating Reefer";
@@ -55,7 +56,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set("bookingPayload", getBookingPayloadSupplier().get());
-    jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
+    jsonNode.put("scenarioType", getDspSupplier().get().scenarioType());
     return jsonNode;
   }
 

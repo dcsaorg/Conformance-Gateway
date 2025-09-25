@@ -30,9 +30,7 @@ public class BookingChecks {
 
   private static final Set<BookingState> CONFIRMED_BOOKING_STATES = Set.of(
     BookingState.CONFIRMED,
-    BookingState.PENDING_AMENDMENT,
-    BookingState.COMPLETED,
-    BookingState.DECLINED
+    BookingState.PENDING_AMENDMENT
   );
 
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
@@ -459,21 +457,25 @@ public class BookingChecks {
             return issues;
           });
 
-  private static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS = JsonAttribute.customValidator(
-    "check confirmed booking fields availability",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      var bookingStatus = body.path("bookingStatus").asText("");
-      if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
-        if (body.path("confirmedEquipments").isEmpty()) {
-          issues.add("confirmedEquipments for confirmed booking is not present");
-        }
-        if (body.path("transportPlan").isEmpty()) {
-          issues.add("transportPlan for confirmed booking is not present");
-        }
-      }
-      return issues;
-    });
+  static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS =
+      JsonAttribute.customValidator(
+          "check confirmed booking fields availability",
+          body -> {
+            var issues = new LinkedHashSet<String>();
+            var bookingStatus = body.path("bookingStatus").asText("");
+            if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
+              if (body.path("confirmedEquipments").isEmpty()) {
+                issues.add("confirmedEquipments for confirmed booking is not present");
+              }
+              if (body.path("transportPlan").isEmpty()) {
+                issues.add("transportPlan for confirmed booking is not present");
+              }
+              if (body.path("shipmentCutOffTimes").isEmpty()) {
+                issues.add("shipmentCutOffTimes for confirmed booking is not present");
+              }
+            }
+            return issues;
+          });
 
   static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_CONDITIONS =
       JsonAttribute.allIndividualMatchesMustBeValid(

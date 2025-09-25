@@ -410,7 +410,6 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `CARX` (CargoX)
 - `IDT` (ICE Digital Trade)
 - `BOLE` (Bolero)
-- `EDOX` (EdoxOnline)
 - `IQAX` (IQAX)
 - `SECR` (Secro)
 - `TRGO` (TradeGO)

@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseErrorAction;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
 @Slf4j
@@ -24,7 +25,7 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
     super(actionBuilder);
   }
 
-  public static LinkedHashMap<String, EblSurrenderScenarioListBuilder>
+  public static Map<String, EblSurrenderScenarioListBuilder>
       createModuleScenarioListBuilders(
           EblSurrenderComponentFactory componentFactory,
           String carrierPartyName,
@@ -60,7 +61,10 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                             .thenEither(
                                 requestSurrenderForDeliveryAnd(false),
                                 requestSurrenderForAmendmentAnd(false, false),
-                                requestSurrenderForAmendmentAnd(false, true)))))
+                                requestSurrenderForAmendmentAnd(false, true)))),
+            Map.entry(
+                "Carrier error response conformance",
+                supplyAvailableTdrAction("SURR", "Straight eBl").then(requestSurrenderError())))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -114,5 +118,18 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                 accept,
                 title,
                 isSWTP));
+  }
+
+  private static EblSurrenderScenarioListBuilder requestSurrenderError() {
+    EblSurrenderComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String platformPartyName = threadLocalPlatformPartyName.get();
+    return new EblSurrenderScenarioListBuilder(
+        previousAction ->
+            new SurrenderRequestResponseErrorAction(
+                platformPartyName,
+                carrierPartyName,
+                previousAction,
+                componentFactory.getMessageSchemaValidator("ErrorResponse")));
   }
 }

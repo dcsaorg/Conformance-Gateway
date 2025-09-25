@@ -12,29 +12,31 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
     description = "Code used to denote the type of a document")
 @AllArgsConstructor
 public enum DocumentTypeCode implements EnumBase {
-  CBR("Carrier Booking Request"),
+  AMF("Advance Manifest Filing (of any subtype)"),
+  ARN("Arrival Notice"),
   BKG("Booking"),
-  SHI("Shipping Instruction"),
-  TRD("Transport Document"),
+  CAS("Cargo Survey"),
+  CBR("Carrier Booking Request"),
+  CEA("Certificate of Analysis"),
+  CEO("Certificate of Origin"),
+  CQU("Contract Quotation"),
+  CRO("Container Release Order"),
+  CUC("Customs Clearance"),
   DEI("Delivery Instructions"),
   DEO("Delivery Order"),
-  TRO("Transport Order"),
-  CRO("Container Release Order"),
-  ARN("Arrival Notice"),
-  VGM("Verified Gross Mass"),
-  CAS("Cargo Survey"),
-  CUC("Customs Clearance"),
   DGD("Dangerous Goods Declaration"),
-  OOG("Out of Gauge"),
-  CQU("Contract Quotation"),
-  INV("Invoice"),
-  HCE("Health Certificate"),
-  PCE("Phytosanitary Certificate"),
-  VCE("Veterinary Certificate"),
   FCE("Fumigation Certificate"),
+  HCE("Health Certificate"),
   ICE("Inspection Certificate"),
-  CEA("Certificate of Analysis"),
-  CEO("Certificate of Origin");
+  INV("Invoice"),
+  OOG("Out of Gauge"),
+  PCE("Phytosanitary Certificate"),
+  PFD("Proof of Delivery"),
+  SHI("Shipping Instruction"),
+  TRD("Transport Document"),
+  TRO("Transport Order"),
+  VCE("Veterinary Certificate"),
+  VGM("Verified Gross Mass");
 
   private final String valueDescription;
 }

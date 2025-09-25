@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblsurrender;
+package org.dcsa.conformance.standards.eblsurrender.checks;
 
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 

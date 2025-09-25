@@ -116,7 +116,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 expectedApiVersion,
                 notificationSchemaValidator,
                 ShippingInstructionsStatus.SI_RECEIVED,
-                EblChecks.SIR_REQUIRED_IN_NOTIFICATION));
+                EblChecks.SIR_OR_TDR_REQUIRED_IN_NOTIFICATION));
       }
     };
   }

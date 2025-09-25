@@ -3,7 +3,7 @@ package org.dcsa.conformance.specifications.standards.tnt.v300.messages;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TNTEvent;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
 
 @Data
 @Schema(
@@ -18,7 +18,7 @@ public class GetEventsResponse {
 """
 The list of events matching the filter specified by the request query parameters
 """)
-  private List<TNTEvent> events;
+  private List<Event> events;
 
   @Schema(
       description =

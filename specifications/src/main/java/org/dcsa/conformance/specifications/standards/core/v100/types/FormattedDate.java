@@ -8,6 +8,7 @@ import lombok.Data;
     type = "string",
     format = "date",
     example = "2025-01-23",
+    maxLength = 10,
     description =
 """
 String representation of a date in yyyy-MM-dd format.

@@ -404,7 +404,7 @@
       "paymentRemittance": {
         "bankName": "Example Bank",
         "accountNumber": "XYZ1234567890",
-        "swiftCode": "XYZ123456",
+        "SWIFTCode": "XYZ123456",
         "beneficiary": "Example Carrier",
         "remittanceEmail": "carrier@example.com"
       },

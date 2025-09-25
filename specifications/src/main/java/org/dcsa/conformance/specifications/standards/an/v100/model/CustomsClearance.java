@@ -8,7 +8,8 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 @Schema(description = "Customs clearance information")
 public class CustomsClearance {
 
-  @Schema() private Location customsClearancePoint;
+  @Schema(description = "The location where customs clearance occurs.")
+  private Location customsClearancePoint;
 
   @Schema() private ImmediateTransportationEntry immediateTransportationEntry;
 
@@ -21,18 +22,18 @@ Instructions on the administrative processes for submitting import customs decla
   private String customsImportDeclarationProcedure;
 
   @Schema(
-    maxLength = 35,
-    example = "a1234",
-    description =
+      maxLength = 35,
+      example = "24NDMUA430I",
+      description =
 """
 Manifest reference number for manifest declaration and customs clearance in Korea.
 """)
   private String manifestReferenceNumber;
 
   @Schema(
-    maxLength = 35,
-    example = "x12345",
-    description =
+      maxLength = 35,
+      example = "23",
+      description =
 """
 A unique sequential number assigned by the shipping line to each Master Bill of Lading issued under a specific voyage of
 a particular vessel. Customers use this Master Sequence Number (MSN) as a reference when declaring all related House B/Ls.

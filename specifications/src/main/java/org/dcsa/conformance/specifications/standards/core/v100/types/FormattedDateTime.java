@@ -8,6 +8,7 @@ import lombok.Data;
     type = "string",
     format = "date-time",
     example = "2025-01-23T01:23:45Z",
+    maxLength = 30,
     description =
 """
 Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)

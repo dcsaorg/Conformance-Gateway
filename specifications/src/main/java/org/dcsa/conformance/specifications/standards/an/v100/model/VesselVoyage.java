@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
+import org.dcsa.conformance.specifications.standards.core.v100.types.VesselIMONumber;
 
 @Data
 @Schema(description = "Vessel and voyage details of a transport leg")
@@ -52,7 +52,7 @@ followed by one to four characters to identify the individual vessel.
 
   @Schema(
       maxLength = 50,
-      example = "1234N",
+      example = "2208N",
       description = "Carrier-specific identifier of the import voyage")
   private String carrierImportVoyageNumber;
 
@@ -61,7 +61,7 @@ followed by one to four characters to identify the individual vessel.
 
   @Schema(
       maxLength = 50,
-      example = "1234N",
+      example = "2208N",
       description = "Carrier-specific identifier of the export voyage")
   private String carrierExportVoyageNumber;
 
@@ -70,7 +70,7 @@ followed by one to four characters to identify the individual vessel.
 
   @Schema(
       maxLength = 100,
-      example = "CRN1234",
+      example = "NLRTM25002178",
       description =
 """
 A registration number assigned by customs to the vessel before its arrival at Port of Discharge.

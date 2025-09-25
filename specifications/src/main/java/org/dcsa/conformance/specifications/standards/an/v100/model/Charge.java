@@ -42,7 +42,7 @@ to a vessel rate of exchange or a daily rate of exchange.
 """)
   protected String carrierRateOfExchange;
 
-  @Schema(description = PAYMENT_TERM_CODE_DESCRIPTION, example = "PRE")
+  @Schema(description = PAYMENT_TERM_CODE_DESCRIPTION, example = "PRE", maxLength = 10)
   protected String paymentTermCode;
 
   @Schema(maxLength = 50, example = "FRT00", description = "Code associated with the charge")
@@ -52,7 +52,8 @@ to a vessel rate of exchange or a daily rate of exchange.
   protected Location paymentLocation;
 
   @Schema(
-      example = "000123456",
-      description = "Code used to identify the party responsible for the payment")
+      example = "2066095",
+      description = "Code used to identify the party responsible for the payment",
+      maxLength = 50)
   protected String invoicePayerCode;
 }

@@ -1,14 +1,14 @@
 Name,Type,Description,Example
-"transportDocumentReferences",array,"Reference(s) of the transport document(s) for which to return the associated arrival notices","TDR0123456,TDR1234567"
+"transportDocumentReferences",array,"Reference(s) of the transport document(s) for which to return the associated arrival notices","HHL71800000,HHL71800001"
 equipmentReferences,array,"Reference(s) of the equipment for which to return the associated arrival notices","APZU4812090,APZU4812091"
 portOfDischarge,string,"UN location of the port of discharge for which to retrieve available arrival notices",NLRTM
-vesselIMONumber,string,"IMO number of the vessel for which to retrieve available arrival notices",12345678
+vesselIMONumber,string,"IMO number of the vessel for which to retrieve available arrival notices",9321483
 vesselName,string,"Name of the vessel for which to retrieve available arrival notices","King of the Seas"
-"carrierImportVoyageNumber",string,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage.",1234N
+"carrierImportVoyageNumber",string,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage.",2208N
 "universalImportVoyageReference",string,"A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",2301W
 carrierServiceCode,string,"The carrier specific code of the service for which the schedule details are published.",FE1
 "universalServiceReference",string,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",SR12345A
-"portOfDischargeArrivalDateMin",string,"Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date",2025-01-23
+"portOfDischargeArrivalDateMin",string,"Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date",2025-01-22
 "portOfDischargeArrivalDateMax",string,"Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date",2025-01-23
 includeVisualization,boolean,"Optional flag indicating whether the PDF `arrivalNoticeVisualization` should be included in each returned arrival notice.
 
@@ -32,5 +32,5 @@ However, if the removal of charges (from the arrival notices that have them) res
 in which some become exact duplicates, publishers may choose to remove duplicates from the response.
 
 The default value is `false`, which leaves unchanged the presence or absence of charges in each returned arrival notice.",true
-limit,number,"Maximum number of arrival notices to include in each page of the response.",10
+limit,integer,"Maximum number of arrival notices to include in each page of the response.",10
 cursor,string,"Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.",ExampleNextPageCursor

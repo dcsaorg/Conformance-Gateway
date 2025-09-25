@@ -71,18 +71,16 @@ import org.dcsa.conformance.specifications.standards.an.v100.model.Transport;
 import org.dcsa.conformance.specifications.standards.an.v100.model.UtilizedTransportEquipment;
 import org.dcsa.conformance.specifications.standards.an.v100.model.VesselVoyage;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CountryCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
+import org.dcsa.conformance.specifications.standards.core.v100.types.EquipmentReference;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
-import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
-import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.IsoEquipmentCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.ModeOfTransportCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.IsoEquipmentCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.ModeOfTransportCode;
 import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.VesselIMONumber;
+import org.dcsa.conformance.specifications.standards.core.v100.types.VesselIMONumber;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Volume;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Weight;
 
@@ -118,7 +116,7 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250912-beta", "AN", "1.0.0-20250829-beta", 4);
+        "Arrival Notice", "1.0.0-20250926-beta", "AN", "1.0.0-20250912-beta", 4);
   }
 
   @Override
@@ -146,8 +144,6 @@ public class ANStandardSpecification extends StandardSpecification {
         ExportLicense.class,
         Facility.class,
         FeedbackElement.class,
-        FormattedDate.class,
-        FormattedDateTime.class,
         FreeTime.class,
         FreeTimeTimeUnitCode.class,
         FreeTimeTypeCode.class,
@@ -189,7 +185,9 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected List<String> getRootTypeNames() {
     return List.of(
-        ArrivalNotice.class.getSimpleName(), ArrivalNoticeNotification.class.getSimpleName());
+        ArrivalNotice.class.getSimpleName(),
+        ArrivalNoticeNotification.class.getSimpleName(),
+        FeedbackElement.class.getSimpleName());
   }
 
   @Override
@@ -208,7 +206,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/8f172898ecdff2d5df2bb1af3f06e42928286671/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/375eee09878a8a481884257ded71b2f35edc65bf/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 
@@ -216,21 +214,8 @@ public class ANStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(
-            AttributesHierarchicalSheet.class,
-            Map.ofEntries(
-                Map.entry(
-                    "ArrivalNotice / charges / chargePartnerCode",
-                    "ArrivalNotice / charges / invoicePayerCode"),
-                Map.entry(
-                    "ArrivalNotice / consignmentItems / cargoItems / charges / chargePartnerCode",
-                    "ArrivalNotice / consignmentItems / cargoItems / charges / invoicePayerCode"),
-                Map.entry(
-                    "ArrivalNotice / utilizedTransportEquipments / charges / chargePartnerCode",
-                    "ArrivalNotice / utilizedTransportEquipments / charges / invoicePayerCode"))),
-        Map.entry(
-            AttributesNormalizedSheet.class,
-            Map.ofEntries(Map.entry("Charge,chargePartnerCode", "Charge,invoicePayerCode"))),
+        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
+        Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
   }
@@ -250,7 +235,11 @@ public class ANStandardSpecification extends StandardSpecification {
         .description(readResourceFile("openapi-get-ans-description.md"))
         .operationId("get-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_PUBLISHERS))
-        .parameters(new GetArrivalNoticesEndpoint().getQueryParameters())
+        .parameters(
+            Stream.concat(
+                    new GetArrivalNoticesEndpoint().getQueryParameters().stream(),
+                    Stream.of(getApiVersionHeaderParameter()))
+                .toList())
         .responses(
             new ApiResponses()
                 .addApiResponse(
@@ -260,8 +249,8 @@ public class ANStandardSpecification extends StandardSpecification {
                         .headers(
                             Stream.of(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")),
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)),
                                     Map.entry(
                                         "Next-Page-Cursor",
                                         new Header().$ref("#/components/headers/Next-Page-Cursor")))
@@ -314,8 +303,8 @@ public class ANStandardSpecification extends StandardSpecification {
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)))))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -359,8 +348,8 @@ public class ANStandardSpecification extends StandardSpecification {
                             new LinkedHashMap<>(
                                 Map.ofEntries(
                                     Map.entry(
-                                        "API-Version",
-                                        new Header().$ref("#/components/headers/API-Version")))))
+                                        API_VERSION_HEADER,
+                                        new Header().$ref(API_VERSION_HEADER_REF)))))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -380,8 +369,7 @@ public class ANStandardSpecification extends StandardSpecification {
         .headers(
             new LinkedHashMap<>(
                 Map.ofEntries(
-                    Map.entry(
-                        "API-Version", new Header().$ref("#/components/headers/API-Version")))))
+                    Map.entry(API_VERSION_HEADER, new Header().$ref(API_VERSION_HEADER_REF)))))
         .content(
             new Content()
                 .addMediaType(

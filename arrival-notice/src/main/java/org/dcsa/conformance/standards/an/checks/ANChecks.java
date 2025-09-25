@@ -402,7 +402,6 @@ public class ANChecks {
           issues.addAll(validateChargeAttribute("paymentTermCode").validate(body));
           issues.addAll(validateChargeAttribute("unitPrice").validate(body));
           issues.addAll(validateChargeAttribute("quantity").validate(body));
-          issues.addAll(validateChargeAttribute("carrierRateOfExchange").validate(body));
           return issues;
         });
   }

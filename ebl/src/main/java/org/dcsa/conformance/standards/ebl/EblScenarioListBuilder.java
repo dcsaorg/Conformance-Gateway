@@ -25,13 +25,15 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   public static final String SCENARIO_SUITE_CONFORMANCE_SI_ONLY = "Conformance SI-only";
   public static final String SCENARIO_SUITE_CONFORMANCE_TD_ONLY = "Conformance TD-only";
-  static final String SCENARIO_SUITE_SI_TD_COMBINED = "SI and TD Combined";
+  static final String SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS = "Conformance TD Amendments";
+  static final String SCENARIO_SUITE_SI_TD_COMBINED = "Conformance SI + TD";
 
-  static final Set<String> SCENARIOS =
+  static final Set<String> SCENARIO_SUITES =
       Set.of(
           SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
           SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
-          SCENARIO_SUITE_SI_TD_COMBINED);
+          SCENARIO_SUITE_SI_TD_COMBINED,
+          SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS);
 
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -40,15 +42,16 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String EBL_API = "api";
 
   private static final String EBL_NOTIFICATIONS_API = "api";
-  private static final String GET_EBL_SCHEMA_NAME = "ShippingInstructions";
-  private static final String GET_TD_SCHEMA_NAME = "TransportDocument";
-  private static final String POST_EBL_SCHEMA_NAME = "CreateShippingInstructions";
+  public static final String GET_EBL_SCHEMA_NAME = "ShippingInstructions";
+  public static final String GET_TD_SCHEMA_NAME = "TransportDocument";
+  public static final String POST_EBL_SCHEMA_NAME = "CreateShippingInstructions";
   private static final String PUT_EBL_SCHEMA_NAME = "UpdateShippingInstructions";
   private static final String PATCH_SI_SCHEMA_NAME = "CancelShippingInstructionsUpdate";
-  private static final String PATCH_TD_SCHEMA_NAME = "ApproveTransportDocument";
-  private static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "CreateShippingInstructionsResponse";
-  private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
-  private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
+  public static final String PATCH_TD_SCHEMA_NAME = "ApproveTransportDocument";
+  public static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "CreateShippingInstructionsResponse";
+  public static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
+  public static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
+  private static final String ERROR_RESPONSE_SCHEMA_NAME = "ErrorResponse";
 
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
@@ -67,6 +70,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     if (SCENARIO_SUITE_SI_TD_COMBINED.equals(componentFactory.getScenarioSuite())) {
       return createSIandTDCombinedScenarios(false);
     }
+    if (SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS.equals(componentFactory.getScenarioSuite())) {
+      return createTDAmendmentScenarios(false);
+    }
     throw new IllegalArgumentException("Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
   }
 
@@ -78,6 +84,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 noAction()
                     .thenEither(
                         Arrays.stream(ScenarioType.values())
+                            .filter(EblScenarioListBuilder::isSupportedScenarioType)
                             .map(
                                 scenarioType ->
                                     carrierSupplyScenarioParameters(scenarioType, isTd)
@@ -98,10 +105,23 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             Map.entry(
                 "Shipper initiated update scenarios",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))))
+                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))),
+            Map.entry(
+                "Carrier error response conformance",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(
+                        uc1ShipperSubmitShippingInstructions()
+                            .then(shipperGetShippingInstructionsErrorScenario()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  private static boolean isSupportedScenarioType(ScenarioType scenarioType) {
+    return scenarioType != ScenarioType.DG
+        && scenarioType != ScenarioType.ACTIVE_REEFER
+        && scenarioType != ScenarioType.NON_OPERATING_REEFER
+        && scenarioType != ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE;
   }
 
   private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceTdOnlyScenarios(
@@ -112,6 +132,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 noAction()
                     .thenEither(
                         Arrays.stream(ScenarioType.values())
+                            .filter(
+                                scenarioType ->
+                                    scenarioType != ScenarioType.REGULAR_SWB_AMF
+                                        && scenarioType
+                                            != ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE)
                             .map(scenarioType -> buildScenarioForType(scenarioType, isTd))
                             .toArray(EblScenarioListBuilder[]::new))),
             Map.entry(
@@ -121,19 +146,25 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                         uc6Get(
                             true,
                             oobAmendment(uc6Get(false, uc8Get(uc12Get(uc13Get())))),
-                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get()))))))))))
+                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get()))))))))),
+            Map.entry(
+                "Carrier error response conformance",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(
+                        uc6CarrierPublishDraftTransportDocument(true)
+                            .then(shipperGetTransportDocumentErrorScenario()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  private static LinkedHashMap<String, EblScenarioListBuilder> createSIandTDCombinedScenarios(
+  private static LinkedHashMap<String, EblScenarioListBuilder> createTDAmendmentScenarios(
       boolean isTd) {
     return Stream.of(
             Map.entry(
                 "Straight eBL",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(
+                    .thenEither(
                         uc1Get(
                             SI_RECEIVED,
                             false,
@@ -143,7 +174,6 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                     .then(
                                         uc7Get(
                                             uc8Get(
-                                                uc12Get(uc13Get(uc14Get(SI_COMPLETED, true))),
                                                 uc9Get(
                                                     uc10Get(
                                                         uc3Get(
@@ -178,7 +208,48 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                                 uc13Get(
                                                                     uc14Get(
                                                                         SI_COMPLETED,
-                                                                        true))))))))))))),
+                                                                        true))))))))))),
+                        uc1Get(
+                            SI_RECEIVED,
+                            false,
+                            uc6Get(
+                                false,
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(
+                                        uc7Get(
+                                            uc8Get(
+                                                uc3Get(
+                                                    SI_RECEIVED,
+                                                    SI_UPDATE_RECEIVED,
+                                                    true,
+                                                    uc4aGet(
+                                                        SI_RECEIVED,
+                                                        SI_UPDATE_CONFIRMED,
+                                                        true,
+                                                        uc9Get(
+                                                            uc10Get(
+                                                                uc11Get(
+                                                                    uc12Get(
+                                                                        uc13Get(
+                                                                            uc14Get(
+                                                                                SI_COMPLETED,
+                                                                                true)))))))),
+                                                uc9Get(
+                                                    uc3Get(
+                                                        SI_RECEIVED,
+                                                        SI_UPDATE_RECEIVED,
+                                                        true,
+                                                        uc4aGet(
+                                                            SI_RECEIVED,
+                                                            SI_UPDATE_CONFIRMED,
+                                                            true,
+                                                            uc10Get(
+                                                                uc11Get(
+                                                                    uc12Get(
+                                                                        uc13Get(
+                                                                            uc14Get(
+                                                                                SI_COMPLETED,
+                                                                                true))))))))))))))),
             Map.entry(
                 "Sea Waybill",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_SWB, isTd)
@@ -188,19 +259,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                             false,
                             uc6Get(
                                 false,
-                                shipperGetShippingInstructionsRecordTDRef().then(uc7Get(uc8Get())),
-                                uc3Get(
-                                    SI_RECEIVED,
-                                    SI_UPDATE_RECEIVED,
-                                    true,
-                                    uc4aGet(
-                                        SI_RECEIVED,
-                                        SI_UPDATE_CONFIRMED,
-                                        true,
-                                        uc6Get(
-                                            false,
-                                            shipperGetTransportDocument(TD_DRAFT)
-                                                .then(uc7Get(uc8Get()))))),
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(
+                                        uc3Get(
+                                            SI_RECEIVED,
+                                            SI_UPDATE_RECEIVED,
+                                            true,
+                                            uc4aGet(
+                                                SI_RECEIVED,
+                                                SI_UPDATE_CONFIRMED,
+                                                true,
+                                                uc6Get(
+                                                    false,
+                                                    shipperGetTransportDocument(TD_DRAFT)
+                                                        .then(uc7Get(uc8Get())))))),
                                 shipperGetShippingInstructionsRecordTDRef()
                                     .then(
                                         uc7Get(
@@ -214,6 +286,40 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                         SI_UPDATE_CONFIRMED,
                                                         true,
                                                         uc8Get()))))))))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  private static LinkedHashMap<String, EblScenarioListBuilder> createSIandTDCombinedScenarios(
+      boolean isTd) {
+    return Stream.of(
+            Map.entry(
+                "Straight eBL",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+                    .then(
+                        uc1Get(
+                            SI_RECEIVED,
+                            false,
+                            uc6Get(
+                                false,
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(
+                                        uc7Get(
+                                            uc8Get(
+                                                uc12Get(
+                                                    uc13Get(uc14Get(SI_COMPLETED, true)))))))))),
+            Map.entry(
+                "Sea Waybill",
+                carrierSupplyScenarioParameters(ScenarioType.REGULAR_SWB, isTd)
+                    .then(
+                        uc1Get(
+                            SI_RECEIVED,
+                            false,
+                            uc6Get(
+                                false,
+                                shipperGetShippingInstructionsRecordTDRef()
+                                    .then(uc7Get(uc8Get())))))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -348,10 +454,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc11Get(EblScenarioListBuilder... thenEither) {
-    return uc11CarrierVoidTransportDocument()
-        .then(
-            uc11iCarrierIssueAmendedTransportDocument()
-                .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither)));
+    return uc11CarrierVoidTDandIssueAmendedTransportDocument()
+        .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither));
   }
 
   private static EblScenarioListBuilder uc12Get(EblScenarioListBuilder... thenEither) {
@@ -443,6 +547,18 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 useBothRef));
   }
 
+  private static EblScenarioListBuilder shipperGetShippingInstructionsErrorScenario() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new ShipperGetShippingInstructionsErrorAction(
+                shipperPartyName,
+                carrierPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(EBL_API, ERROR_RESPONSE_SCHEMA_NAME)));
+  }
+
   private static EblScenarioListBuilder shipperGetTransportDocument(
       TransportDocumentStatus expectedTdStatus) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
@@ -456,6 +572,18 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 expectedTdStatus,
                 resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME)));
   }
+
+  private static EblScenarioListBuilder shipperGetTransportDocumentErrorScenario() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new ShipperGetTransportDocumentErrorAction(
+                shipperPartyName,
+                carrierPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(EBL_API, ERROR_RESPONSE_SCHEMA_NAME)));
+    }
 
   private static EblScenarioListBuilder uc1ShipperSubmitShippingInstructions() {
     String carrierPartyName = threadLocalCarrierPartyName.get();
@@ -618,25 +746,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           true));
   }
 
-  private static EblScenarioListBuilder uc11CarrierVoidTransportDocument() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-            previousAction ->
-                new UC11v_Carrier_VoidTransportDocumentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (EblAction) previousAction,
-                    resolveMessageSchemaValidator(
-                        EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-    }
-
-  private static EblScenarioListBuilder uc11iCarrierIssueAmendedTransportDocument() {
+  private static EblScenarioListBuilder uc11CarrierVoidTDandIssueAmendedTransportDocument() {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
         previousAction ->
-            new UC11i_Carrier_IssueAmendedTransportDocumentAction(
+            new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
                 carrierPartyName,
                 shipperPartyName,
                 (EblAction) previousAction,

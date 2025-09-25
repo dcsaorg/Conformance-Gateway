@@ -36,6 +36,7 @@ import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.adoption.AdoptionStandard;
 import org.dcsa.conformance.standards.an.AnStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.bookingandebl.BookingAndEblStandard;
 import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
@@ -59,6 +60,7 @@ public class ConformanceSandbox {
     EblStandard.INSTANCE,
     EblIssuanceStandard.INSTANCE,
     EblSurrenderStandard.INSTANCE,
+    BookingAndEblStandard.INSTANCE,
     JitStandard.INSTANCE,
     OvsStandard.INSTANCE,
     PintStandard.INSTANCE,
@@ -363,7 +365,8 @@ public class ConformanceSandbox {
             sandboxId,
             partyName,
             "getting operator log for party " + partyName,
-            party -> party.getOperatorLog().forEach(operatorLogNode::add))
+            party ->
+                party.getOperatorLog().forEach(entry -> operatorLogNode.add(entry.message())))
         .run();
     return operatorLogNode;
   }

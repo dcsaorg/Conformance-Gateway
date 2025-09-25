@@ -26,6 +26,8 @@ class ManualScenarioTest extends ManualTestBase {
     return Stream.of(
         Arguments.of("Adoption", false),
         Arguments.of("Adoption", true),
+        Arguments.of("AN", false),
+        Arguments.of("AN", true),
         Arguments.of("Booking", false),
         Arguments.of("Booking", true),
         Arguments.of("CS", false),
@@ -43,7 +45,9 @@ class ManualScenarioTest extends ManualTestBase {
         Arguments.of("eBL Issuance", false),
         Arguments.of("eBL Issuance", true),
         Arguments.of("eBL Surrender", false),
-        Arguments.of("eBL Surrender", true));
+        Arguments.of("eBL Surrender", true),
+        Arguments.of("Booking + eBL", false),
+        Arguments.of("Booking + eBL", true));
   }
 
   @ParameterizedTest(name = "Standard: {0} - 2nd run: {1}")

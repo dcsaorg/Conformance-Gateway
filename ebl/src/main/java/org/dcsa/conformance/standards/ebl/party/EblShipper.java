@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.ebl.party;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +24,10 @@ import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 @Slf4j
 public class EblShipper extends ConformanceParty {
 
+  public static final Set<String> EBL_ENDPOINT_PATTERNS =
+      Set.of(
+          ".*/v3/shipping-instructions-notifications$", ".*/v3/transport-document-notifications$");
+
   public EblShipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -42,22 +45,22 @@ public class EblShipper extends ConformanceParty {
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+  public void exportPartyJsonState(ObjectNode targetObjectNode) {
     // no state to export
   }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+  public void importPartyJsonState(ObjectNode sourceObjectNode) {
     // no state to import
   }
 
   @Override
-  protected void doReset() {
+  public void doReset() {
     // no state to reset
   }
 
   @Override
-  protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
+  public Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(UC1_Shipper_SubmitShippingInstructionsAction.class, this::sendShippingInstructionsRequest),
       Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
@@ -65,7 +68,9 @@ public class EblShipper extends ConformanceParty {
       Map.entry(AUC_Shipper_SendOutOfOrderSIMessageAction.class, this::sendOutOfOrderMessage),
       Map.entry(UC3ShipperSubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
       Map.entry(UC5_Shipper_CancelUpdateToShippingInstructionsAction.class, this::cancelUpdateToShippingInstructions),
-      Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument)
+      Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument),
+      Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument),
+      Map.entry(ShipperGetShippingInstructionsErrorAction.class, this::getShippingInstructionsRequest)
     );
   }
 
@@ -184,9 +189,15 @@ public class EblShipper extends ConformanceParty {
     log.info("Shipper.getShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String documentReference = actionPrompt.get("documentReference").asText();
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
+    boolean errorScenario = actionPrompt.path(ShipperGetShippingInstructionsErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
+
     Map<String, List<String>> queryParams = requestAmendment
       ? Map.of("updatedContent", List.of("true"))
       : Collections.emptyMap();
+
+    if (errorScenario) {
+      documentReference = "NON-EXISTING-SI";
+    }
 
     syncCounterpartGet("/v3/shipping-instructions/" + URLEncoder.encode(documentReference, StandardCharsets.UTF_8), queryParams);
 
@@ -196,6 +207,11 @@ public class EblShipper extends ConformanceParty {
   private void getTransportDocument(JsonNode actionPrompt) {
     log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("tdr").asText();
+    boolean errorScenario = actionPrompt.path(ShipperGetTransportDocumentErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
+
+    if (errorScenario) {
+      tdr = "NON-EXISTING-TD";
+    }
 
     syncCounterpartGet("/v3/transport-documents/" + URLEncoder.encode(tdr, StandardCharsets.UTF_8), Collections.emptyMap());
 

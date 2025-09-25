@@ -6,6 +6,7 @@ import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 
 public class BookingStandard extends AbstractStandard {
+
   public static final BookingStandard INSTANCE = new BookingStandard();
 
   private BookingStandard() {

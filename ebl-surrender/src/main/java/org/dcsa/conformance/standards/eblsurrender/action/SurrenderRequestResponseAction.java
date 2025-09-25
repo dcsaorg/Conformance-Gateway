@@ -1,6 +1,6 @@
 package org.dcsa.conformance.standards.eblsurrender.action;
 
-import static org.dcsa.conformance.standards.eblsurrender.SurrenderChecks.surrenderRequestChecks;
+import static org.dcsa.conformance.standards.eblsurrender.checks.SurrenderChecks.surrenderRequestChecks;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -18,7 +18,7 @@ import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Slf4j
-class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
+public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
 
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 
@@ -29,14 +29,14 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
 
   private static final String BOOKING_API = "api";
   private static final String BOOKING_NOTIFICATIONS_API = "api";
-  private static final String CREATE_BOOKING_SCHEMA_NAME = "CreateBooking";
-  private static final String GET_BOOKING_SCHEMA_NAME = "Booking";
-  private static final String UPDATE_BOOKING_SCHEMA_NAME = "UpdateBooking";
-  private static final String BOOKING_202_RESPONSE_SCHEMA = "CreateBookingResponse";
+  public static final String CREATE_BOOKING_SCHEMA_NAME = "CreateBooking";
+  public static final String GET_BOOKING_SCHEMA_NAME = "Booking";
+  public static final String UPDATE_BOOKING_SCHEMA_NAME = "UpdateBooking";
+  public static final String BOOKING_202_RESPONSE_SCHEMA = "CreateBookingResponse";
   private static final String CANCEL_SCHEMA_NAME = "CancelBookingRequest";
-  private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
+  public static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
-  private BookingScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
+  private   BookingScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
     super(actionBuilder);
   }
 
@@ -203,6 +203,87 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                         uc11ShipperCancelBooking()
                                             .then(shipperGetBooking(CANCELLED)))))),
             Map.entry(
+                "Routing Reference",
+                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.ROUTING_REFERENCE)
+                    .then(
+                        uc1ShipperSubmitBookingRequest()
+                            .then(
+                                shipperGetBooking(RECEIVED)
+                                    .thenEither(
+                                        uc3ShipperSubmitUpdatedBookingRequest()
+                                            .then(
+                                                shipperGetBooking(UPDATE_RECEIVED)
+                                                    .then(
+                                                        uc5CarrierConfirmBookingRequest()
+                                                            .then(
+                                                                shipperGetBooking(CONFIRMED)
+                                                                    .then(
+                                                                        uc12CarrierConfirmBookingCompleted()
+                                                                            .then(
+                                                                                shipperGetBooking(
+                                                                                    COMPLETED)))))),
+                                        uc5CarrierConfirmBookingRequest()
+                                            .then(
+                                                shipperGetBooking(CONFIRMED)
+                                                    .then(
+                                                        uc12CarrierConfirmBookingCompleted()
+                                                            .then(
+                                                                shipperGetBooking(COMPLETED)))))))),
+            Map.entry(
+                "Store Door at Origin",
+                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.STORE_DOOR_AT_ORIGIN)
+                    .then(
+                        uc1ShipperSubmitBookingRequest()
+                            .then(
+                                shipperGetBooking(RECEIVED)
+                                    .thenEither(
+                                        uc3ShipperSubmitUpdatedBookingRequest()
+                                            .then(
+                                                shipperGetBooking(UPDATE_RECEIVED)
+                                                    .then(
+                                                        uc5CarrierConfirmBookingRequest()
+                                                            .then(
+                                                                shipperGetBooking(CONFIRMED)
+                                                                    .then(
+                                                                        uc12CarrierConfirmBookingCompleted()
+                                                                            .then(
+                                                                                shipperGetBooking(
+                                                                                    COMPLETED)))))),
+                                        uc5CarrierConfirmBookingRequest()
+                                            .then(
+                                                shipperGetBooking(CONFIRMED)
+                                                    .then(
+                                                        uc12CarrierConfirmBookingCompleted()
+                                                            .then(
+                                                                shipperGetBooking(COMPLETED)))))))),
+            Map.entry(
+                "Store Door at Destination",
+                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.STORE_DOOR_AT_DESTINATION)
+                    .then(
+                        uc1ShipperSubmitBookingRequest()
+                            .then(
+                                shipperGetBooking(RECEIVED)
+                                    .thenEither(
+                                        uc3ShipperSubmitUpdatedBookingRequest()
+                                            .then(
+                                                shipperGetBooking(UPDATE_RECEIVED)
+                                                    .then(
+                                                        uc5CarrierConfirmBookingRequest()
+                                                            .then(
+                                                                shipperGetBooking(CONFIRMED)
+                                                                    .then(
+                                                                        uc12CarrierConfirmBookingCompleted()
+                                                                            .then(
+                                                                                shipperGetBooking(
+                                                                                    COMPLETED)))))),
+                                        uc5CarrierConfirmBookingRequest()
+                                            .then(
+                                                shipperGetBooking(CONFIRMED)
+                                                    .then(
+                                                        uc12CarrierConfirmBookingCompleted()
+                                                            .then(
+                                                                shipperGetBooking(COMPLETED)))))))),
+            Map.entry(
                 "Dangerous goods",
                 carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.DG)
                     .then(
@@ -232,6 +313,33 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
             Map.entry(
                 "Reefer containers",
                 carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.REEFER)
+                    .then(
+                        uc1ShipperSubmitBookingRequest()
+                            .then(
+                                shipperGetBooking(RECEIVED)
+                                    .thenEither(
+                                        uc3ShipperSubmitUpdatedBookingRequest()
+                                            .then(
+                                                shipperGetBooking(UPDATE_RECEIVED)
+                                                    .then(
+                                                        uc5CarrierConfirmBookingRequest()
+                                                            .then(
+                                                                shipperGetBooking(CONFIRMED)
+                                                                    .then(
+                                                                        uc12CarrierConfirmBookingCompleted()
+                                                                            .then(
+                                                                                shipperGetBooking(
+                                                                                    COMPLETED)))))),
+                                        uc5CarrierConfirmBookingRequest()
+                                            .then(
+                                                shipperGetBooking(CONFIRMED)
+                                                    .then(
+                                                        uc12CarrierConfirmBookingCompleted()
+                                                            .then(
+                                                                shipperGetBooking(COMPLETED)))))))),
+            Map.entry(
+                "Non Reefer Containers",
+                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.NON_OPERATING_REEFER)
                     .then(
                         uc1ShipperSubmitBookingRequest()
                             .then(
@@ -527,7 +635,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                     BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
-  private interface CarrierNotificationUseCase {
+  public interface CarrierNotificationUseCase {
     BookingAction newInstance(
         String carrierPartyName,
         String shipperPartyName,

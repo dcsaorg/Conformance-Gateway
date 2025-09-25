@@ -13,6 +13,7 @@ import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.util.ErrorFormatter;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.checks.EblInputPayloadValidations;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 
@@ -22,20 +23,46 @@ public class CarrierSupplyPayloadAction extends EblAction {
   private static final String SCENARIO_TYPE = "scenarioType";
   private static final String INPUT = "input";
 
-  private JsonNode carrierPayload;
   private ScenarioType scenarioType;
+  private JsonNode carrierPayload;
   private final String standardVersion;
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean isTd;
 
   public CarrierSupplyPayloadAction(
       String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion, JsonSchemaValidator requestSchemaValidator, boolean isTd) {
-    super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1);
+    super(
+        carrierPartyName,
+        null,
+        null,
+        "SupplyCSP [%s]"
+            .formatted(isTd ? scenarioType.getTDScenarioTypeName() : scenarioType.name()),
+        -1);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
-    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+  }
+
+  public CarrierSupplyPayloadAction(
+      String carrierPartyName,
+      BookingAndEblAction previousAction,
+      @NonNull ScenarioType scenarioType,
+      String standardVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isTd) {
+    super(
+        carrierPartyName,
+        null,
+        previousAction,
+        "SupplyCSP [%s]".formatted(scenarioType.name()),
+        -1);
+    this.scenarioType = scenarioType;
+    this.standardVersion = standardVersion;
+    this.requestSchemaValidator = requestSchemaValidator;
+    this.isTd = isTd;
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
   @Override
@@ -100,7 +127,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
         EblInputPayloadValidations.validateEblSchema(inputNode, requestSchemaValidator);
 
     Set<String> contentChecksErrors =
-        EblInputPayloadValidations.validateEblContent(inputNode, getDspSupplier(), isTd);
+        EblInputPayloadValidations.validateEblContent(inputNode, scenarioType, isTd);
 
     Set<String> allErrors =
         Stream.of(schemaChecksErrors, contentChecksErrors)

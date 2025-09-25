@@ -40,9 +40,10 @@ A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
   @ArraySchema(maxItems = 50)
   protected List<ShippingMark> shippingMarks;
 
-  @Schema()
-  private PickupInformation pickupInformation;
+  @Schema() private PickupInformation pickupInformation;
 
-  @Schema()
-  private ReturnInformation returnInformation;
+  @Schema() private ReturnInformation returnInformation;
+
+  @Schema(description = "A list of `Charges`")
+  private List<Charge> charges;
 }

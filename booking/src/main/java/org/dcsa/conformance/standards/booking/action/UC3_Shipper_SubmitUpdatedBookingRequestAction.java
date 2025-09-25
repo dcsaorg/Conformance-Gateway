@@ -13,6 +13,7 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 @Getter
 @Slf4j
 public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChangingBookingAction {
+
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
@@ -43,6 +44,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
+    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
 
@@ -58,6 +60,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
         String cbrr = dsp.carrierBookingRequestReference();
+        String cbr = dsp.carrierBookingReference();
         return Stream.concat(
             Stream.of(
                 new JsonSchemaCheck(
@@ -68,7 +71,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
                 BookingChecks.requestContentChecks(
                     getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())),
             Stream.concat(
-                createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr),
+                createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
                 getNotificationChecks(
                     expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)));
       }

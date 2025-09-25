@@ -12,7 +12,7 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
     example = "FULLY_PAID",
     description =
 """
-Payment status of the freight charges.
+Payment status of the collect freight charges.
 """)
 @AllArgsConstructor
 public enum FreightPaymentStatus implements EnumBase {

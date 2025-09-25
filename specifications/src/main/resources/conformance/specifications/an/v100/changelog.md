@@ -1,5 +1,89 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20250926-beta
+
+Refined attribute descriptions. (SD-2458)
+
+Adjusted query parameter examples. (SD-2479)
+
+Added in type `Seal` for attribute `source` option `PHY` (Phytosanitary). (SD-2488)
+
+
+## Snapshot v1.0.0-20250912-beta
+
+Added `Reference` type code `VBN` for V-Bond Number. (SD-2435)
+
+Updated the document party code list providers to match the list from version 3.0.1 of the Bill of Lading standard. (SD-2335)
+
+Renamed in object `Charge` property `chargePartnerCode` to `invoicePayerCode`. (SD-2437)
+
+Added the missing `API-Version` header parameter. (SD-2450)
+
+Fixed the type of the `limit` pagination parameter. (SD-2451)
+
+Fixed a typo in the GET endpoint description. (SD-2452)
+
+Fixed a typo in the FeedbackElement propertyPath example. (SD-2453)
+
+Added in object `ArrivalNoticeNotification` to the property `transportDocumentReference` the missing `maxLength`. (SD-2454)
+
+Renamed in object `PaymentRemittance` property `swiftCode` to `SWIFTCode`. (SD-2455)
+
+Updated in object `IdentifyingCode` for property `codeListProvider` the list of values. (SD-2456)
+
+Updated in object `Location` for property `facilityTypeCode` the list of values, adding `Border` and `Waypoint` for consistency with TNT 3.0.0. (SD-2459)
+
+Updated multiple property example values for consistency and correctness. (SD-2461)
+
+Added the missing maxLength to all String properties. (SD-2462)
+
+
+## Snapshot v1.0.0-20250829-beta
+
+Aligned the description of the `API-Version` header with the latest API DNI Guidelines. (SD-2410)
+
+Updated in object `FreeTime` property `lastFreeDate` to include classifier and added property `lastFreeDateTime`. (SD-2413)
+
+Added to object `Transport` property `receivedForShipmentDate`. (SD-2414)
+
+Added to object `Transport` property `borderCrossingLocation`. (SD-2419)
+
+Updated `Reference` description and type codes. (SD-2420)
+
+
+## Snapshot v1.0.0-20250815-alpha
+
+Restructured the `Transport` object to contain an array of `Leg`s, each with its own `VesselVoyage`. (SD-2352)
+
+Added classifiers (planned / estimated / actual) to `Transport` and `Leg` dates. (SD-2361, SD-2381)
+
+Added a new `ReleaseInformation` object to the root `ArrivalNotice` object. (SD-2364)
+
+Added `Charges` also within the `UtilizedTransportEquipment` and `CargoItem`. (SD-2354)
+
+Added to `Charges` the properties `chargeCode`, `paymentLocation`, `chargePartnerCode` and `paymentCurrency`. (SD-2355, SD-2376)
+
+Added property `lastFreeDate` to object `FreeTime`. (SD-2353)
+
+Added to `Location` the property `locationTypeCode`. (SD-2363)
+
+Renamed `locationTypeCode` to `facilityTypeCode`. (SD-2932)
+
+Clarified that `freightPaymentStatus` refers only to collect freight charges. (SD-2375)
+
+Clarified the semantics of the `carrierRateOfExchange` within the `Charge` object. (SD-2382)
+
+Simplified the information model to use a single `Volume` and a single `Weight` type. (SD-2388)
+
+Updated the description and maxLength of the `additionalInformation` attribute. (SD-2391)
+
+Renamed `portOfDischargeArrivalDate` and `placeOfDeliveryArrivalDate` in notification and query parameters. (SD-2390)
+
+Renamed to use uppercase acronyms `IMOPackagingCode`, `IMOClass`, `FIRMSCode`, `ITDate` and `ITNumber`. (SD-2393)
+
+Clarified that all dates are local dates. (SD-2394)
+
+
 ## Snapshot v1.0.0-20250801-alpha
 
 Clarified that the ordering of `documentParties` is undefined except for parties of type `NI` for which it defines which one is the third, fourth, etc. notify party. (SD-2317)

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -28,7 +28,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   private final String standardsVersion;
   private final ShippingInstructionsStatus shippingInstructionsStatus;
   private final ShippingInstructionsStatus updatedShippingInstructionsStatus;
-  private final Supplier<DynamicScenarioParameters> dspSupplier;
+  private final Supplier<EblDynamicScenarioParameters> dspSupplier;
   private final List<JsonContentCheck> extraChecks;
 
   public CarrierSiNotificationPayloadRequestConformanceCheck(
@@ -36,7 +36,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
       String standardsVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
-      Supplier<DynamicScenarioParameters> dspSupplier,
+      Supplier<EblDynamicScenarioParameters> dspSupplier,
       JsonContentCheck... extraChecks) {
     super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
     this.standardsVersion = standardsVersion;
@@ -53,7 +53,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
                 ROOT_LABEL,
                 DATA_PATH,
                 () ->
-                    EBLChecks.getSiNotificationChecks(
+                    EblChecks.getSiNotificationChecks(
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
                         extraChecks)),
@@ -61,7 +61,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
                 SHIPPING_INSTRUCTIONS_LABEL,
                 SHIPPING_INSTRUCTIONS_PATH,
                 () ->
-                    EBLChecks.getSiPayloadChecks(
+                    EblChecks.getSiPayloadChecks(
                         standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
@@ -72,7 +72,7 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
                 UPDATED_SHIPPING_INSTRUCTIONS_PATH,
                 updatedShippingInstructionsStatus != null,
                 () ->
-                    EBLChecks.getSiPayloadChecks(
+                    EblChecks.getSiPayloadChecks(
                         standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,

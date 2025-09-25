@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 
 @UtilityClass
 public class EblInputPayloadValidations {
@@ -20,11 +18,11 @@ public class EblInputPayloadValidations {
   }
 
   public static Set<String> validateEblContent(
-      JsonNode eblNode, Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
-    List<JsonContentCheck> contentChecks = new ArrayList<>(EBLChecks.STATIC_SI_CHECKS);
-    contentChecks.add(EBLChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
-    contentChecks.add(EBLChecks.VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    contentChecks.addAll(EBLChecks.generateScenarioRelatedChecks(dspSupplier, isTD));
+          JsonNode eblNode, ScenarioType scenarioType, boolean isTD) {
+    List<JsonContentCheck> contentChecks = new ArrayList<>(EblChecks.STATIC_SI_CHECKS);
+    contentChecks.add(EblChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
+    contentChecks.add(EblChecks.VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
+    contentChecks.addAll(EblChecks.generateScenarioRelatedChecks(scenarioType, isTD));
     return contentChecks.stream()
         .flatMap(check -> check.validate(eblNode).stream())
         .collect(Collectors.toSet());

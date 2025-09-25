@@ -237,9 +237,9 @@ public class ANChecks {
           issues.addAll(validateTransportETA().validate(body));
           issues.addAll(validatePortOfDischargePresence().validate(body));
           issues.addAll(validatePortOfDischargeLocation().validate(body));
-          issues.addAll(validateVesselVoyagesArray().validate(body));
+          issues.addAll(validateVesselVoyage().validate(body));
           issues.addAll(validateVesselVoyageField("vesselName").validate(body));
-          issues.addAll(validateVesselVoyageField("carrierVoyageNumber").validate(body));
+          issues.addAll(validateVesselVoyageField("carrierImportVoyageNumber").validate(body));
           return issues;
         });
   }
@@ -249,11 +249,11 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of transport ETA fields",
         mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
         (node, contextPath) -> {
-          if (!node.hasNonNull("etaAtPortOfDischargeDate")
-              && !node.hasNonNull("etaAtPlaceOfDeliveryDate")) {
+          if (!node.hasNonNull("portOfDischargeArrivalDate")
+              && !node.hasNonNull("placeOfDeliveryArrivalDate")) {
             return Set.of(
                 contextPath
-                    + ": must functionally include either 'etaAtPortOfDischargeDate' or 'etaAtPlaceOfDeliveryDate'");
+                    + ": must functionally include either 'portOfDischargeArrivalDate' or 'placeOfDeliveryArrivalDate'");
           }
           return Set.of();
         });
@@ -291,14 +291,14 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck validateVesselVoyagesArray() {
+  private static JsonContentCheck validateVesselVoyage() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"vesselVoyages\" array",
-        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
+        mav -> mav.submitAllMatching("arrivalNotices.*.transport.legs.*"),
         (node, contextPath) -> {
-          var voyages = node.get("vesselVoyages");
-          if (voyages == null || !voyages.isArray() || voyages.isEmpty()) {
-            return Set.of(contextPath + ".vesselVoyages must be functionally a non-empty array");
+          var voyage = node.get("vesselVoyage");
+          if (voyage == null || voyage.isEmpty()) {
+            return Set.of(contextPath + ".vesselVoyage must be functionally present");
           }
           return Set.of();
         });
@@ -307,7 +307,7 @@ public class ANChecks {
   private static JsonContentCheck validateVesselVoyageField(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of \"" + field + "\" in vesselVoyages",
-        mav -> mav.submitAllMatching("arrivalNotices.*.transport.vesselVoyages.*"),
+        mav -> mav.submitAllMatching("arrivalNotices.*.transport.legs.*.vesselVoyage"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");
@@ -348,12 +348,31 @@ public class ANChecks {
               }
             }
           }
-          issues.addAll(validateFreeTimeAttribute("typeCode").validate(body));
-          issues.addAll(validateFreeTimeAttribute("isoEquipmentCode").validate(body));
+          issues.addAll(validateFreeTimeArrayAttribute("typeCodes").validate(body));
+          issues.addAll(validateFreeTimeArrayAttribute("ISOEquipmentCodes").validate(body));
+          issues.addAll(validateFreeTimeArrayAttribute("equipmentReferences").validate(body));
           issues.addAll(validateFreeTimeAttribute("duration").validate(body));
           issues.addAll(validateFreeTimeAttribute("timeUnit").validate(body));
 
           return issues;
+        });
+  }
+
+  private static JsonContentCheck validateFreeTimeArrayAttribute(String attributeName) {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The publisher has demonstrated the correct use of the \"freeTime\" \""
+            + attributeName
+            + "\" attribute",
+        mav -> mav.submitAllMatching("arrivalNotices.*.freeTimes.*"),
+        (node, contextPath) -> {
+          var arrayNode = node.get(attributeName);
+          if (arrayNode == null || !arrayNode.isArray() || arrayNode.isEmpty()) {
+            return Set.of(
+                String.format(
+                    "%s.%s must be functionally present and be a non-empty array",
+                    contextPath, attributeName));
+          }
+          return Set.of();
         });
   }
 
@@ -549,11 +568,11 @@ public class ANChecks {
           var issues = new LinkedHashSet<String>();
 
           if (!op.hasNonNull("packageCode")
-              && !op.hasNonNull("imoPackagingCode")
+              && !op.hasNonNull("IMOPackagingCode")
               && !op.hasNonNull("description")) {
             issues.add(
                 contextPath
-                    + " must contain at least one of 'packageCode', 'imoPackagingCode', or 'description'");
+                    + " must contain at least one of 'packageCode', 'IMOPackagingCode', or 'description'");
           }
 
           if (!op.hasNonNull("numberOfPackages")) {

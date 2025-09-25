@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.checks.EblChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -65,8 +65,8 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       throw new IllegalStateException("Missing document reference for use-case 3");
     }
     return super.asJsonNode()
-      .put("documentReference", documentReference)
-      .put("amendedContent", requestAmendedStatus);
+        .put("documentReference", documentReference)
+        .put("amendedContent", requestAmendedStatus);
   }
 
   @Override
@@ -92,7 +92,8 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
     super.doHandleExchange(exchange);
     if (recordTDR) {
       var dsp = getDspSupplier().get();
-      var tdr = exchange.getResponse().message().body().getJsonBody().path("transportDocumentReference");
+      var tdr =
+          exchange.getResponse().message().body().getJsonBody().path("transportDocumentReference");
       if (!tdr.isMissingNode()) {
         getDspConsumer().accept(dsp.withTransportDocumentReference(tdr.asText()));
       }
@@ -135,13 +136,13 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            EBLChecks.siResponseContentChecks(
+            EblChecks.siResponseContentChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
-                getDspSupplier(),
                 expectedSiStatus,
                 expectedAmendedSiStatus,
-                requestAmendedStatus));
+                requestAmendedStatus,
+                getDspSupplier()));
       }
     };
   }

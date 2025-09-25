@@ -3,9 +3,10 @@ package org.dcsa.conformance.specifications.standards.an.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.an.v100.types.EquipmentReference;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDate;
-import org.dcsa.conformance.specifications.standards.an.v100.types.FormattedDateTime;
+import org.dcsa.conformance.specifications.standards.core.v100.types.EquipmentReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
+import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 
 @Data
 @Schema(
@@ -36,11 +37,12 @@ public class ArrivalNoticeNotification {
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
-      example = "TDR1234",
+      example = "HHL71800000",
       description =
 """
 The reference of the transport document for which this arrival notice was created
-""")
+""",
+      maxLength = 20)
   private String transportDocumentReference;
 
   @Schema(
@@ -60,22 +62,14 @@ The location where the cargo is discharged from the last sea-going vessel
   @Schema(
       description =
 """
-The expected date of arrival of the vessel at the port of discharge
-""")
-  private FormattedDate etaAtPortOfDischargeDate;
-
-  @Schema(
-      description =
-"""
 The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
 responsibility of the shipping line ceases
 """)
   private Location placeOfDelivery;
 
-  @Schema(
-      description =
-"""
-The expected date of arrival of the shipment at place of delivery
-""")
-  private FormattedDate etaAtPlaceOfDeliveryDate;
+  @Schema(description = "The date of arrival of the vessel at the Port of Discharge.")
+  private ClassifiedDate portOfDischargeArrivalDate;
+
+  @Schema(description = "The date of arrival of the shipment at Place of Delivery.")
+  private ClassifiedDate placeOfDeliveryArrivalDate;
 }

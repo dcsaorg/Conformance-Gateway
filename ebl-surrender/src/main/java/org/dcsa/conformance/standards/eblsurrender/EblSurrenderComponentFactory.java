@@ -64,7 +64,7 @@ class EblSurrenderComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
+  public Map<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
     return EblSurrenderScenarioListBuilder.createModuleScenarioListBuilders(
@@ -109,6 +109,12 @@ class EblSurrenderComponentFactory extends AbstractComponentFactory {
       throw new IllegalArgumentException(
           "No schema for " + apiProviderRole + " (forRequest=" + forRequest + ")");
     }
+    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
+  }
+
+  public JsonSchemaValidator getMessageSchemaValidator(String schemaName) {
+    String schemaFilePath =
+            "/standards/eblsurrender/schemas/EBL_SUR_v%s.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 }

@@ -33,18 +33,6 @@ Platform Interoperability) scenario.
 - **HTTP 4xx**: Document rejected due to validation errors (for corrupted/unrelated documents)
 - **Signed response payload**: May include completion confirmation for some scenarios
 
-**When this action is used:**
-
-- After an initial transfer that resulted in `missingAdditionalDocumentChecksums` in the response
-- To fulfill the receiving platform's request for additional supporting documents
-- To test document validation and error handling capabilities
-
-**Technical requirements:**
-
-- Use the exact envelope reference from the initial transfer
-- Handle binary document content appropriately
-- Apply the correct document manipulation based on the transmission type code
-- Update your sending state when documents are successfully transferred
 
 This tests your platform's ability to handle additional document transfers and the receiving platform's document
 validation capabilities according to PINT interoperability standards.

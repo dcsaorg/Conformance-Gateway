@@ -23,13 +23,6 @@ in a PINT (Platform Interoperability) scenario.
 - HTTP 201 Created status
 - Response may include `missingAdditionalDocumentChecksums` if additional documents are required
 
-**Technical requirements:**
-
-- Use proper cryptographic signing with your configured X.509 certificates
-- Generate SHA-256 checksums for document validation
-- Follow PINT envelope structure specifications
-- Handle potential missing document scenarios appropriately
-
 This tests your platform's ability to properly package, sign, and transmit eBL documents according to PINT
 interoperability standards.
 

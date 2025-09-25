@@ -16,24 +16,12 @@ signatures in a PINT (Platform Interoperability) scenario.
 - `envelopeTransferChain`: Transfer chain with the latest entry re-signed
 - `issuanceManifestSignedContent`: The same signed issuance manifest (if present)
 
-**When this action is used:**
-
-- After a transfer attempt that failed due to signature validation issues
-- To test signature renewal and re-signing capabilities
-- When the transfer data was correct but signatures may have been compromised or expired
-
 **Expected response:**
 
 - Variable HTTP status code based on the scenario being tested
 - Response may include updated `missingAdditionalDocumentChecksums` if additional documents are still required
 - The receiving platform should validate the fresh signatures appropriately
 
-**Technical requirements:**
-
-- Generate new cryptographic signatures using your platform's X.509 certificates
-- Maintain identical transaction data while updating signatures
-- Follow PINT signature specifications and validation requirements
-- Ensure signature timestamps and validity are current
 
 This tests your platform's ability to re-sign transfer data and the receiving platform's ability to validate renewed
 signatures according to PINT interoperability standards.

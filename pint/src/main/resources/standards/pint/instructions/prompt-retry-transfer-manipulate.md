@@ -18,24 +18,12 @@ entry and then re-signing it in a PINT (Platform Interoperability) scenario.
 - `envelopeTransferChain`: Transfer chain with the latest entry manipulated and re-signed
 - `issuanceManifestSignedContent`: The same signed issuance manifest (if present)
 
-**When this action is used:**
-
-- To test error detection capabilities for modified transfer data
-- To validate that receiving platforms can detect transaction tampering
-- To test the robustness of transfer validation mechanisms
-
 **Expected response:**
 
 - Variable HTTP status code based on the scenario being tested
 - May result in validation errors if the manipulation is detected
 - Response may include updated `missingAdditionalDocumentChecksums` or error messages
 - The receiving platform should validate the modified data appropriately
-
-**Technical requirements:**
-
-- Modify transaction content in the transfer chain entry
-- Generate new cryptographic signatures for the modified data
-- Follow PINT transaction manipulation and validation requirements
 
 This tests your platform's ability to modify and re-sign transfer data and the receiving platform's ability to validate
 potentially tampered transfers according to PINT interoperability standards.

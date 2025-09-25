@@ -24,12 +24,5 @@ PINT (Platform Interoperability) scenario.
 - **Signed response payload** confirming the transfer completion
 - The receiving platform validates and accepts the transfer immediately
 
-**Technical requirements:**
-
-- Use proper cryptographic signing with your configured X.509 certificates
-- Generate SHA-256 checksums for document validation
-- Follow PINT envelope structure specifications
-- The receiving platform must return a properly signed completion response
-
 This tests your platforms' ability to perform a complete eBL transfer and closure in a single atomic operation according
 to PINT interoperability standards.

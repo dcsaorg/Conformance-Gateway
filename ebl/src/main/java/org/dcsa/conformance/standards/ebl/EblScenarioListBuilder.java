@@ -130,9 +130,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     return Stream.of(
             Map.entry(
                 "Supported shipment types scenarios",
-                noAction()
-                    .thenEither(
-                        Arrays.stream(ScenarioType.values())
+                noAction().thenEither(buildScenarioForType(ScenarioType.REGULAR_STRAIGHT_BL, isTd)))
+            /* Arrays.stream(ScenarioType.values())
                             .filter(
                                 scenarioType ->
                                     scenarioType != ScenarioType.REGULAR_SWB_AMF
@@ -152,7 +151,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                     true,
                                     ScenarioType.REGULAR_STRAIGHT_BL,
                                     uc8Get(uc12Get(uc13Get())))),
-                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get())))))))))
+                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get())))))))))*/
             /*            Map.entry(
             "Carrier error response conformance",
             carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)

@@ -20,7 +20,7 @@ PINT (Platform Interoperability) scenario.
 
 **Expected response:**
 
-- Variable HTTP status code based on the scenario being tested
+- 200 HTTP status code
 - **Signed response payload** confirming the transfer completion
 - The receiving platform validates and accepts the transfer immediately
 

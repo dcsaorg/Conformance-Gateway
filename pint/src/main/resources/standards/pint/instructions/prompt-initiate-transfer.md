@@ -4,7 +4,7 @@ in a PINT (Platform Interoperability) scenario.
 **What your sending platform should do:**
 
 1. **Prepare the transport document:** Load and prepare the transport document with the configured
-   transportDocumentReference
+   `transportDocumentReference`
 2. **Generate transfer chain:** Create the envelope transfer chain entries with proper digital signatures
 3. **Create manifests:** Generate both the issuance manifest and envelope manifest with cryptographic checksums
 4. **Sign the payload:** Apply digital signatures using your platform's signing certificates

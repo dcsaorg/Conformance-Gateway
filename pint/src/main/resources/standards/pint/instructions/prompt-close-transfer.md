@@ -26,17 +26,5 @@ Interoperability) scenario.
 - **Signed response payload** confirming the transfer completion
 - The receiving platform should finalize and close the transfer
 
-**When this action is used:**
-
-- After successfully initiating a transfer with `PintInitiateTransferAction`
-- After sending any required additional documents
-- As the final step to formally complete the eBL transfer process
-
-**Technical requirements:**
-
-- Use the correct envelope reference from the previous transfer initiation
-- Follow PINT endpoint specifications for the finish-transfer operation
-- Handle the signed response appropriately
-
 This tests your platform's ability to properly complete and finalize eBL transfers according to PINT interoperability
 standards.

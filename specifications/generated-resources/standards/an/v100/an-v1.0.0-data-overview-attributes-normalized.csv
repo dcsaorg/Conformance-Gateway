@@ -65,13 +65,13 @@ ArrivalNotice,freightPaymentStatus,string,,maxLength=50,,FULLY_PAID,"Payment sta
 ArrivalNotice,isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 ArrivalNotice,issueDateTime,"string(date-time)",yes,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",
-ArrivalNotice,pickupInformation,PickupInformation,,,,,"Pickup information",
+ArrivalNotice,pickupInformation,PickupInformation,,,,,"Consolidates the information required to pick up the container.",
 ArrivalNotice,references,"Reference list",,,,,"References used by the customer or carrier to identify or track the shipment.",
-ArrivalNotice,releaseInformation,ReleaseInformation,,,,,"Release information",
-ArrivalNotice,returnInformation,ReturnInformation,,,,,"Return information",
+ArrivalNotice,releaseInformation,ReleaseInformation,,,,,"Compiles the information relevant to shipment release.",
+ArrivalNotice,returnInformation,ReturnInformation,,,,,"Groups the information regarding empty-equipment return.",
 ArrivalNotice,serviceContractReference,string,,maxLength=30,,HHL51800000,"Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.",
 ArrivalNotice,termsAndConditions,string,,maxLength=50000,,,"Carrier terms and conditions for the Arrival Notice.",
-ArrivalNotice,transport,Transport,,,,,"Transport info",
+ArrivalNotice,transport,Transport,,,,,"Transport details relevant to the arrival notice.",
 ArrivalNotice,"transportDocumentReference",string,yes,maxLength=20,,HHL71800000,"A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.",
 ArrivalNotice,"transportDocumentTypeCode",string,,maxLength=10,,SWB,"Specifies the type of the transport document
 - `BOL` (Bill of Lading)
@@ -219,7 +219,7 @@ maxLength=35",,,"A list of the `ShippingMarks` applicable to this `consignmentIt
 Item description:
 The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.
 ",
-CustomsClearance,customsClearancePoint,Location,,,,,"Location information",
+CustomsClearance,customsClearancePoint,Location,,,,,"The location where customs clearance occurs.",
 CustomsClearance,"customsImportDeclarationProcedure",string,,maxLength=1000,,,"Instructions on the administrative processes for submitting import customs declarations to the local agency.",
 CustomsClearance,"immediateTransportationEntry","ImmediateTransportationEntry",,,,,"An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
 that allows imported cargo to be moved from the first port of arrival in the U.S.
@@ -410,7 +410,6 @@ IdentifyingCode,codeListProvider,string,,maxLength=100,,W3C,"A list of codes ide
 - `CARX` (CargoX)
 - `IDT` (ICE Digital Trade)
 - `BOLE` (Bolero)
-- `EDOX` (EdoxOnline)
 - `IQAX` (IQAX)
 - `SECR` (Secro)
 - `TRGO` (TradeGO)
@@ -568,13 +567,14 @@ ReleaseInformation,isFreightReleased,boolean,,,,false,"Indicates whether the shi
 and all required freight payments have been received by the carrier.",
 ReleaseInformation,isOBLReceived,boolean,,,,false,"Indicates that the Original Bill of Lading (OBL) has been surrendered to the carrier.",
 ReleaseInformation,isReleasedByEmail,boolean,,,,false,"Indicates whether the shipment has been released via email.",
-ReturnInformation,returnInstructions,string,,maxLength=5000,,"Please place the container...","Return instructions",
+ReturnInformation,returnInstructions,string,,maxLength=5000,,"Please place the container...","Instructions for returning the empty equipment.",
 ReturnInformation,returnLocation,Location,,,,,"The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.",
 ReturnInformation,turnInReference,string,,maxLength=50,,HLCSTD45,"Code or reference required when returning equipment to the depot.",
 Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 Seal,source,string,,maxLength=10,,CUS,"The source of the seal, namely who has affixed the seal.
 - `CAR` (Carrier)
 - `SHI` (Shipper)
+- `PHY` (Phytosanitary)
 - `VET` (Veterinary)
 - `CUS` (Customs)",
 TaxLegalReference,countryCode,string,,maxLength=2,,IN,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
@@ -605,9 +605,9 @@ For merchant haulage, this is when the last container is physically handed over 
 "UtilizedTransportEquipment",equipment,Equipment,,,,,"The container or transport equipment used.",
 "UtilizedTransportEquipment",isNonOperatingReefer,boolean,,,,false,"If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.",
 "UtilizedTransportEquipment",isShipperOwned,boolean,,,,true,"Indicates whether the container is shipper owned (SOC).",
-"UtilizedTransportEquipment",pickupInformation,PickupInformation,,,,,"Pickup information",
+"UtilizedTransportEquipment",pickupInformation,PickupInformation,,,,,"Consolidates the information required to pick up the container.",
 "UtilizedTransportEquipment",references,"Reference list",,,,,"A list of `References`",
-"UtilizedTransportEquipment",returnInformation,ReturnInformation,,,,,"Return information",
+"UtilizedTransportEquipment",returnInformation,ReturnInformation,,,,,"Groups the information regarding empty-equipment return.",
 "UtilizedTransportEquipment",seals,"Seal list",,,,,"A list of `Seals`",
 "UtilizedTransportEquipment",shippingMarks,"string list",,"maxItems=50
 maxLength=35",,,"A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`

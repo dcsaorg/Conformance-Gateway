@@ -18,7 +18,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   public static final String ACTION_TITLE = "UC6";
   private final JsonSchemaValidator notificationSchemaValidator;
   private final boolean skipSI;
-  private final ScenarioType scenarioType;
+  private ScenarioType scenarioType;
 
   public UC6_Carrier_PublishDraftTransportDocumentAction(
       String carrierPartyName,
@@ -37,8 +37,19 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     this.skipSI = skipSI;
     this.scenarioType = type;
     if (previousAction == null) {
-      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
+      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
     }
+  }
+
+  public UC6_Carrier_PublishDraftTransportDocumentAction(
+      String carrierPartyName,
+      String shipperPartyName,
+      EblAction previousAction,
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean skipSI) {
+    super(carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204);
+    this.notificationSchemaValidator = notificationSchemaValidator;
+    this.skipSI = skipSI;
   }
 
   @Override
@@ -107,7 +118,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     var dr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
     return super.asJsonNode()
         .put("documentReference", dr)
-        .put("scenarioType", scenarioType.name())
+        .put("scenarioType", getDspSupplier().get().scenarioType())
         .put("skipSI", skipSI);
   }
 

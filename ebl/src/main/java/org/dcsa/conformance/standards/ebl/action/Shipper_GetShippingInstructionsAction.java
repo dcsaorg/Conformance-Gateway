@@ -65,8 +65,8 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       throw new IllegalStateException("Missing document reference for use-case 3");
     }
     return super.asJsonNode()
-      .put("documentReference", documentReference)
-      .put("amendedContent", requestAmendedStatus);
+        .put("documentReference", documentReference)
+        .put("amendedContent", requestAmendedStatus);
   }
 
   @Override
@@ -92,7 +92,8 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
     super.doHandleExchange(exchange);
     if (recordTDR) {
       var dsp = getDspSupplier().get();
-      var tdr = exchange.getResponse().message().body().getJsonBody().path("transportDocumentReference");
+      var tdr =
+          exchange.getResponse().message().body().getJsonBody().path("transportDocumentReference");
       if (!tdr.isMissingNode()) {
         getDspConsumer().accept(dsp.withTransportDocumentReference(tdr.asText()));
       }
@@ -138,10 +139,10 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
             EblChecks.siResponseContentChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
-                getDspSupplier(),
                 expectedSiStatus,
                 expectedAmendedSiStatus,
-                requestAmendedStatus));
+                requestAmendedStatus,
+                getDspSupplier()));
       }
     };
   }

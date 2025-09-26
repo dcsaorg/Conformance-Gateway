@@ -12,7 +12,8 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
     description = "Code used to denote the specific IoT event that has occurred")
 @AllArgsConstructor
 public enum IotEventCode implements EnumBase {
-  DRO("Door opened");
+  DRO("Door opened"),
+  LOC("Location update");
 
   private final String valueDescription;
 }

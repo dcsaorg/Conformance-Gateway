@@ -102,4 +102,12 @@ public abstract class IssuanceAction extends ConformanceAction {
 
 
   protected abstract Supplier<String> getTdrSupplier();
+
+  public static PlatformScenarioParametersAction latestPlatformScenarioParametersAction(
+          IssuanceAction previousAction) {
+    return previousAction
+            instanceof PlatformScenarioParametersAction platformScenarioParametersAction
+            ? platformScenarioParametersAction
+            : latestPlatformScenarioParametersAction(previousAction.getPreviousIssuanceAction());
+  }
 }

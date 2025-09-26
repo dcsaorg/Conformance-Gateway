@@ -12,8 +12,9 @@ import org.dcsa.conformance.specifications.standards.dt.v100.types.SegregationGr
 
 @Schema(
     description =
-        org.dcsa.conformance.specifications.standards.dt.v100.model.DangerousGoods
-            .CLASS_SCHEMA_DESCRIPTION)
+"""
+Specification for Dangerous Goods. Provide one of UNNumber or NANumber. Based on IMDG Code Amendment 41-22.
+""")
 @Getter
 @Setter
 @RequiredArgsConstructor

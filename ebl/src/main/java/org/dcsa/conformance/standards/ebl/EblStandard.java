@@ -6,6 +6,7 @@ import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 
 public class EblStandard extends AbstractStandard {
+
   public static final EblStandard INSTANCE = new EblStandard();
 
   private EblStandard() {

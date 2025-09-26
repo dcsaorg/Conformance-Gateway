@@ -52,6 +52,7 @@ public class BookingCarrier extends ConformanceParty {
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
 
+  public static final Set<String> BOOKING_ENDPOINT_PATTERNS = Set.of(".*/v2/bookings(?:/[^/]+)?$");
 
   public BookingCarrier(
       String apiVersion,
@@ -70,25 +71,25 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+  public void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(cbrrToCbr));
     targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(cbrToCbrr));
   }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+  public void importPartyJsonState(ObjectNode sourceObjectNode) {
     StateManagementUtil.restoreIntoMap(cbrrToCbr, sourceObjectNode.get("cbrrToCbr"));
     StateManagementUtil.restoreIntoMap(cbrToCbrr, sourceObjectNode.get("cbrToCbrr"));
   }
 
   @Override
-  protected void doReset() {
+  public void doReset() {
     cbrrToCbr.clear();
     cbrToCbrr.clear();
   }
 
   @Override
-  protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
+  public Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(CarrierSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(
@@ -339,7 +340,7 @@ public class BookingCarrier extends ConformanceParty {
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put(MESSAGE, message)));
   }
 
-  private ConformanceResponse return404(ConformanceRequest request) {
+  public ConformanceResponse return404(ConformanceRequest request) {
     return return404(request, "Returning 404 since the request did not match any known URL");
   }
 

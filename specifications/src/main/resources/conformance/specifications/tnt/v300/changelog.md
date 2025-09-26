@@ -1,5 +1,28 @@
 # Track and Trace v3.0.0 Changelog
 
+## Snapshot v3.0.0-20250926-design
+
+Added to type `Event` attribute `shipmentLocationType` of type `ShipmentLocationTypeCode`. (SD-2144)
+
+Replaced in type `EquipmentDetails` attribute `isTransshipmentMove` with a new `movementType` with values `IMPORT`, `EXPORT`, `TRANSSHIPMENT`. (SD-2475)
+
+Added `EventRouting` including originating, destination and forwarding parties. (SD-2145)
+
+Added to type `Event` attribute `isRetracted`. (SD-2477)
+
+Added to type `Event` attributes `documentReferenceReplacements` and `shipmentReferenceReplacements` to support split / combine and related use cases. (SD-302)
+
+Added `DocumentTypeCode` value `AMF` for an "Advance Manifest Filing" of any subtype. (SD-305)
+
+Added `DocumentTypeCode` value `PFD` for "Proof of Delivery". (SD-2460)
+
+Added `IotEventCode` value `LOC` for "Location update". (SD-2480)
+
+Updated in type `Event` the attribute `eventID` removing the `uuid` format constraint. (SD-2478)
+
+Added the missing `API-Version` header in the requests of the `POST` endpoint. (SD-2490)
+
+
 ## Snapshot v3.0.0-20250912-design
 
 Initial Track and Trace v3.0.0 design stage snapshot. (SD-2436)

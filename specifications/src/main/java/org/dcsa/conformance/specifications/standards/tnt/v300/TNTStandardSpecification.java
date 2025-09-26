@@ -40,15 +40,19 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEvent
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReferenceReplacement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventClassification;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventRouting;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotDetails;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.Party;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReferenceReplacement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
@@ -80,7 +84,8 @@ public class TNTStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata("Track and Trace", "3.0.0-20250912-design", "", "", 4);
+    return new LegendMetadata(
+        "Track and Trace", "3.0.0-20250926-design", "TNT", "3.0.0-20250912-design", 4);
   }
 
   @Override
@@ -90,9 +95,11 @@ public class TNTStandardSpecification extends StandardSpecification {
         Address.class,
         ClassifiedDateTime.class,
         DocumentReference.class,
+        DocumentReferenceReplacement.class,
         EquipmentDetails.class,
         Event.class,
         EventClassification.class,
+        EventRouting.class,
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
@@ -100,6 +107,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         GetEventsResponse.class,
         IotDetails.class,
         Location.class,
+        Party.class,
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,
@@ -109,6 +117,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         ServiceCodeOrReference.class,
         ShipmentDetails.class,
         ShipmentReference.class,
+        ShipmentReferenceReplacement.class,
         TransportCall.class,
         TransportDetails.class,
         TruckTransport.class,
@@ -135,20 +144,24 @@ public class TNTStandardSpecification extends StandardSpecification {
             Collectors.toMap(
                 Map.Entry::getKey,
                 entry ->
-                    System.currentTimeMillis() > 0 // TODO remove for the second snapshot
-                        ? List.of()
-                        : DataOverviewSheet.importFromString(
-                            SpecificationToolkit.readRemoteFile(
-                                "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/TBD/specifications/generated-resources/standards/ct/v300/ct-v3.0.0-data-overview-%s.csv"
-                                    .formatted(entry.getValue())))));
+                    DataOverviewSheet.importFromString(
+                        SpecificationToolkit.readRemoteFile(
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/4f01c4530e2cfbccc8abd9e21b45baee122ef94c/specifications/generated-resources/standards/tnt/v300/tnt-v3.0.0-data-overview-%s.csv"
+                                .formatted(entry.getValue())))));
   }
 
   @Override
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
-        Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
+        Map.entry(
+            AttributesHierarchicalSheet.class,
+            Map.ofEntries(
+                Map.entry("Event / relatedDocumentReferences", "Event / documentReferences"))),
+        Map.entry(
+            AttributesNormalizedSheet.class,
+            Map.ofEntries(
+                Map.entry("Event,relatedDocumentReferences", "Event,documentReferences"))),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
   }
@@ -212,6 +225,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         .description(readResourceFile("openapi-post-events-description.md"))
         .operationId("post-events")
         .tags(Collections.singletonList(TAG_EVENT_SUBSCRIBERS))
+        .parameters(List.of(getApiVersionHeaderParameter()))
         .requestBody(
             new RequestBody()
                 .description("List of events")

@@ -19,7 +19,6 @@ A list of codes identifying a party. Possible values are:
 - `CARX` (CargoX)
 - `IDT` (ICE Digital Trade)
 - `BOLE` (Bolero)
-- `EDOX` (EdoxOnline)
 - `IQAX` (IQAX)
 - `SECR` (Secro)
 - `TRGO` (TradeGO)

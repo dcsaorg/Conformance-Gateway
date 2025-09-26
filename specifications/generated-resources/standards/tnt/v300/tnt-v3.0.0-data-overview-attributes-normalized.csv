@@ -32,29 +32,33 @@ ClassifiedDateTime,classifier,string,,maxLength=10,,EST,"Classifier denoting whe
 ClassifiedDateTime,value,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
 DocumentReference,reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a document
-- `CBR` - Carrier Booking Request
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
 - `BKG` - Booking
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
 - `DEI` - Delivery Instructions
 - `DEO` - Delivery Order
-- `TRO` - Transport Order
-- `CRO` - Container Release Order
-- `ARN` - Arrival Notice
-- `VGM` - Verified Gross Mass
-- `CAS` - Cargo Survey
-- `CUC` - Customs Clearance
 - `DGD` - Dangerous Goods Declaration
-- `OOG` - Out of Gauge
-- `CQU` - Contract Quotation
-- `INV` - Invoice
-- `HCE` - Health Certificate
-- `PCE` - Phytosanitary Certificate
-- `VCE` - Veterinary Certificate
 - `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
 - `ICE` - Inspection Certificate
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin",
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
+"DocumentReferenceReplacement",newReferences,"DocumentReference list",,,,,"References of the documents replacing those with the `oldReferences`.",
+"DocumentReferenceReplacement",oldReferences,"DocumentReference list",,,,,"References of the documents replaced by those with the `newReferences`.",
 EquipmentDetails,emptyIndicatorCode,string,,,,LADEN,"Code to denote whether the equipment is empty or laden.
 - `EMPTY` - Empty
 - `LADEN` - Laden",
@@ -69,20 +73,50 @@ from SMDG.",
 EquipmentDetails,ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
 The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
 following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
-EquipmentDetails,isTransshipmentMove,boolean,,,,,"Indicates whether this event is originated in relation to an ocean transshipment or inter terminal move.",
+EquipmentDetails,movementType,string,,,,EXPORT,"Code used to denote the type of movement
+- `IMPORT` - Import movement
+- `EXPORT` - Export movement
+- `TRANSSHIPMENT` - Transshipment movement",
 EquipmentDetails,seals,"Seal list",,,,,,
+Event,"documentReferenceReplacements","DocumentReferenceReplacement list",,,,,"List of document replacements related to this event",
+Event,documentReferences,"DocumentReference list",,,,,"List of documents related to this event",
 Event,equipmentDetails,EquipmentDetails,,,,,"Equipment-specific details",
-Event,eventClassification,EventClassification,yes,,,,"Type, subtype and classifier of an event",
+Event,eventClassification,EventClassification,,,,,"Type, subtype and classifier of an event",
 Event,eventDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the real-world event has occurred or will occur.",
-Event,eventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Unique ID of the event.
+Event,eventID,string,,maxLength=500,,"event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z","ID of the event, unique among all the events published by a T&T event publisher.
 
-An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.",
+An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
+
+Each event is uniquely identified within each T&T 3.x standard ecosystem of connected implementers
+by a composite key including:
+- `eventRouting.originatingParty.partyCode`
+- `eventRouting.originatingParty.codeListProvider`
+- `eventRouting.originatingParty.codeListName`
+- `eventID`",
 Event,eventLocation,Location,,,,,"The location of the event.",
+Event,eventRouting,EventRouting,,,,,"Routing of an event from the originating party, via forwarding parties, to the destination party.",
 Event,eventUpdatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
 Event,iotDetails,IotDetails,,,,,"IoT-specific details",
+Event,isRetracted,boolean,,,,,"Flag indicating that the event is retracted.
+
+The data in this and all previously transmitted events with the same `eventID` must be discarded or ignored.
+
+If this flag is set, any event data other than the `eventID` is irrelevant (if present).",
 Event,reeferDetails,ReeferDetails,,,,,"Reefer-specific details",
-Event,"relatedDocumentReferences","DocumentReference list",,,,,"List of documents related to this event",
 Event,shipmentDetails,ShipmentDetails,,,,,"Shipment-specific details",
+Event,shipmentLocationType,string,,,,PRE,"Code used to denote the type of a shipment location
+- `PRE` - Place of Receipt
+- `POL` - Port of Loading
+- `POD` - Port of Discharge
+- `PDE` - Place of Delivery
+- `PCF` - Pre-carriage From
+- `OIR` - Onward Inland Routing
+- `ORI` - Origin of goods
+- `IEL` - Container intermediate export stop-off location
+- `PTP` - Prohibited transshipment port
+- `RTP` - Requested transshipment port
+- `FCD` - Full container drop-off location",
+Event,"shipmentReferenceReplacements","ShipmentReferenceReplacement list",,,,,"List of shipment reference replacements related to this event",
 Event,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 Event,transportDetails,TransportDetails,,,,,"Transport-specific details",
 EventClassification,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
@@ -101,7 +135,7 @@ EventClassification,eventClassifierCode,string,,maxLength=10,,EST,"Classifier de
 - `PLN` - Planned
 - `EST` - Estimated
 - `ACT` - Actual",
-EventClassification,eventTypeCode,string,yes,,,EQUIPMENT,"Code used to denote the type of an event
+EventClassification,eventTypeCode,string,,,,EQUIPMENT,"Code used to denote the type of an event
 - `SHIPMENT` - Shipment event
 - `TRANSPORT` - Transport event
 - `EQUIPMENT` - Equipment event
@@ -131,6 +165,9 @@ EventClassification,shipmentEventTypeCode,string,,,,APPR,"Code used to denote th
 EventClassification,transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
 - `ARRI` - Arrived
 - `DEPA` - Departed",
+EventRouting,destinationParty,Party,,,,,"The final party intended as destination of the event.",
+EventRouting,forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
+EventRouting,originatingParty,Party,,,,,"The initial party with which the event originated.",
 Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
 Facility,facilityCodeListProvider,string,,maxLength=10,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
@@ -152,7 +189,8 @@ Lower severity feedback elements may also be included.",
 GetEventsResponse,events,"Event list",,,,,"The list of events matching the filter specified by the request query parameters",
 GetEventsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
 IotDetails,iotEventCode,string,,,,DRO,"Code used to denote the specific IoT event that has occurred
-- `DRO` - Door opened",
+- `DRO` - Door opened
+- `LOC` - Location update",
 Location,address,Address,,,,,"Location address",
 Location,facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
 Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
@@ -174,6 +212,40 @@ Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specify
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+Party,codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+Party,codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+Party,partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+Party,partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
 PostEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
 
 At least one feedback element of severity `ERROR` is expected.
@@ -229,6 +301,8 @@ ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a refer
 - `DUE` - Declaração Única de Exportação
 - `CER` - Canadian Export Reporting System
 - `AES` - Automated Export System",
+"ShipmentReferenceReplacement",newReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replacing those with the `oldReferences`.",
+"ShipmentReferenceReplacement",oldReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replaced by those with the `newReferences`.",
 TransportCall,"exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
 TransportCall,"importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
 TransportCall,modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA

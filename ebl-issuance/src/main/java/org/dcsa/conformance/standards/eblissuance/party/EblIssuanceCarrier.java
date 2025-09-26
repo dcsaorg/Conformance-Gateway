@@ -29,6 +29,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
+import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestErrorResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 
@@ -108,7 +109,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(IssuanceRequestResponseAction.class, this::sendIssuanceRequest),
-        Map.entry(CarrierScenarioParametersAction.class, this::supplyScenarioParameters));
+        Map.entry(CarrierScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(IssuanceRequestErrorResponseAction.class, this::sendIssuanceRequest));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -168,6 +170,15 @@ public class EblIssuanceCarrier extends ConformanceParty {
                     Map.entry(
                         "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER",
                         Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListName(), ""))));
+
+    boolean errorScenario =
+        actionPrompt
+            .path(IssuanceRequestErrorResponseAction.SEND_NO_ISSUING_PARTY)
+            .asBoolean(false);
+    if (errorScenario) {
+      ((ObjectNode) jsonRequestBody.path("document").path("documentParties"))
+          .remove("issuingParty");
+    }
 
     if (eblType.isToOrder()) {
       var td = (ObjectNode) jsonRequestBody.path("document");

@@ -1,153 +1,61 @@
 package org.dcsa.conformance.specifications.standards.tnt.v300;
 
-import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 
 public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
 
-  private final Parameter transportDocumentReferences =
-      new Parameter()
-          .in("query")
-          .name("transportDocumentReferences")
-          .schema(new ArraySchema().items(new StringSchema()))
-          .explode(Boolean.FALSE)
-          .description(
-              "Reference(s) of the transport document(s) for which to return the associated events")
-          .example("TDR0123456,TDR1234567");
+  private final Parameter carrierBookingReference =
+      createStringQueryParameter(
+          "carrierBookingReference",
+          "HHL71800000",
+          "Reference of the transport document for which to return the associated events");
 
-  private final Parameter equipmentReferences =
-      new Parameter()
-          .in("query")
-          .name("equipmentReferences")
-          .schema(new ArraySchema().items(new StringSchema()))
-          .explode(Boolean.FALSE)
-          .description("Reference(s) of the equipment for which to return the associated events")
-          .example("APZU4812090,APZU4812091");
+  private final Parameter transportDocumentReference =
+      createStringQueryParameter(
+          "transportDocumentReference",
+          "HHL71800000",
+          "Reference of the transport document for which to return the associated events");
 
-  private final Parameter vesselIMONumber =
-      new Parameter()
-          .in("query")
-          .name("vesselIMONumber")
-          .description("IMO number of the vessel for which to retrieve available events")
-          .example("12345678")
-          .schema(new Schema<String>().type("string"));
+  private final Parameter equipmentReference =
+      createStringQueryParameter(
+          "equipmentReference",
+          "APZU4812090",
+          "Reference of the equipment for which to return the associated events");
 
-  private final Parameter vesselName =
-      new Parameter()
-          .in("query")
-          .name("vesselName")
-          .description("Name of the vessel for which to retrieve available events")
-          .example("King of the Seas")
-          .schema(new Schema<String>().type("string"));
+  private final Parameter eventUpdatedDateTimeMin =
+      createDateTimeQueryParameter(
+          "eventUpdatedDateTimeMin",
+          "Retrieve events with an `eventUpdatedDateTime` at or after this timestamp");
 
-  private final Parameter carrierImportVoyageNumber =
-      new Parameter()
-          .in("query")
-          .name("carrierImportVoyageNumber")
-          .description(
-              "The identifier of an import voyage. The carrier-specific identifier of the import Voyage.")
-          .example("1234N")
-          .schema(new Schema<String>().type("string"));
-
-  private final Parameter universalImportVoyageReference =
-      new Parameter()
-          .in("query")
-          .name("universalImportVoyageReference")
-          .description(
-              "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.")
-          .example("2301W")
-          .schema(new Schema<String>().type("string"));
-
-  private final Parameter carrierExportVoyageNumber =
-      new Parameter()
-          .in("query")
-          .name("carrierExportVoyageNumber")
-          .description(
-              "The identifier of an export voyage. The carrier-specific identifier of the export Voyage.")
-          .example("1234N")
-          .schema(new Schema<String>().type("string"));
-
-  private final Parameter universalExportVoyageReference =
-      new Parameter()
-          .in("query")
-          .name("universalExportVoyageReference")
-          .description(
-              "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.")
-          .example("2301W")
-          .schema(new Schema<String>().type("string"));
-
-  private final Parameter carrierServiceCode =
-      new Parameter()
-          .in("query")
-          .name("carrierServiceCode")
-          .description(
-              "The carrier specific code of the service for which the schedule details are published.")
-          .example("FE1")
-          .schema(new Schema<String>().type("string"));
-
-  private final Parameter universalServiceReference =
-      new Parameter()
-          .in("query")
-          .name("universalServiceReference")
-          .description(
-              "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.")
-          .example("SR12345A")
-          .schema(new Schema<String>().type("string"));
-
-  private final Parameter eventDateTimeMin =
-      new Parameter()
-          .in("query")
-          .name("eventDateTimeMin")
-          .description("Retrieve events occurring at or after this timestamp")
-          .example("2025-01-23T01:23:45Z")
-          .schema(new Schema<String>().type("string").format("date-time"));
-
-  private final Parameter eventDateTimeMax =
-      new Parameter()
-          .in("query")
-          .name("eventDateTimeMax")
-          .description("Retrieve events occurring at or before this timestamp")
-          .example("2025-01-23T01:23:45Z")
-          .schema(new Schema<String>().type("string").format("date-time"));
+  private final Parameter eventUpdatedDateTimeMax =
+      createDateTimeQueryParameter(
+          "eventUpdatedDateTimeMax",
+          "Retrieve events with an `eventUpdatedDateTime` at or before this timestamp");
 
   private final Parameter limit =
-      new Parameter()
-          .in("query")
-          .name("limit")
-          .description("Maximum number of events to include in each page of the response.")
-          .example(10)
-          .schema(new Schema<Integer>().type("integer").format("int32").minimum(new BigDecimal(1)));
+      createIntegerQueryParameter(
+          "limit", 10, "Maximum number of events to include in each page of the response.");
 
   private final Parameter cursor =
-      new Parameter()
-          .in("query")
-          .name("cursor")
-          .description(
-              "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.")
-          .example("ExampleNextPageCursor")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "cursor",
+          "ExampleNextPageCursor",
+          "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.");
 
   @Override
   public List<Parameter> getQueryParameters() {
     return List.of(
-        transportDocumentReferences,
-        equipmentReferences,
-        vesselIMONumber,
-        vesselName,
-        carrierExportVoyageNumber,
-        universalExportVoyageReference,
-        carrierImportVoyageNumber,
-        universalImportVoyageReference,
-        carrierServiceCode,
-        universalServiceReference,
-        eventDateTimeMin,
-        eventDateTimeMax,
+        carrierBookingReference,
+        transportDocumentReference,
+        equipmentReference,
+        eventUpdatedDateTimeMin,
+        eventUpdatedDateTimeMax,
         limit,
         cursor);
   }
@@ -157,8 +65,55 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
     return Map.ofEntries(
         Map.entry(
             Boolean.TRUE,
-            List.of(List.of(transportDocumentReferences), List.of(equipmentReferences))),
-        Map.entry(
-            Boolean.FALSE, List.of(List.of(transportDocumentReferences, equipmentReferences))));
+            allCombinationsOf(
+                List.of(
+                    List.of(carrierBookingReference),
+                    List.of(carrierBookingReference, equipmentReference),
+                    List.of(transportDocumentReference),
+                    List.of(transportDocumentReference, equipmentReference)),
+                List.of(
+                    List.of(eventUpdatedDateTimeMin),
+                    List.of(eventUpdatedDateTimeMax),
+                    List.of(eventUpdatedDateTimeMin, eventUpdatedDateTimeMax)))),
+        Map.entry(Boolean.FALSE, List.of()));
+  }
+
+  private static List<List<Parameter>> allCombinationsOf(
+      List<List<Parameter>> leftListList, List<List<Parameter>> rightListList) {
+    return leftListList.stream()
+        .flatMap(
+            leftList ->
+                rightListList.stream()
+                    .map(
+                        rightList -> Stream.concat(leftList.stream(), rightList.stream()).toList()))
+        .toList();
+  }
+
+  private static Parameter createStringQueryParameter(
+      String name, String example, String description) {
+    return new Parameter()
+        .in("query")
+        .name(name)
+        .example(example)
+        .description(description)
+        .schema(new Schema<String>().type("string"));
+  }
+
+  private Parameter createDateTimeQueryParameter(String name, String description) {
+    return new Parameter()
+        .in("query")
+        .name(name)
+        .description(description)
+        .example("2025-01-23T01:23:45Z")
+        .schema(new Schema<String>().type("string").format("date-time"));
+  }
+
+  private Parameter createIntegerQueryParameter(String name, int example, String description) {
+    return new Parameter()
+        .in("query")
+        .name(name)
+        .description(description)
+        .example(example)
+        .schema(new Schema<Integer>().type("integer").format("int32"));
   }
 }

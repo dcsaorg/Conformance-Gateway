@@ -45,7 +45,9 @@ class ManualScenarioTest extends ManualTestBase {
         Arguments.of("eBL Issuance", false),
         Arguments.of("eBL Issuance", true),
         Arguments.of("eBL Surrender", false),
-        Arguments.of("eBL Surrender", true));
+        Arguments.of("eBL Surrender", true),
+        Arguments.of("Booking + eBL", false),
+        Arguments.of("Booking + eBL", true));
   }
 
   @ParameterizedTest(name = "Standard: {0} - 2nd run: {1}")

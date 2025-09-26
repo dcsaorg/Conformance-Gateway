@@ -20,7 +20,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
 @Tag("WebUI")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = ConformanceApplication.class)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
+    classes = ConformanceApplication.class)
 class SeleniumTest extends SeleniumTestBase {
 
   @Test
@@ -38,9 +40,9 @@ class SeleniumTest extends SeleniumTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "Adoption", // Takes 0:29 minutes
-        "AN",
-        "Booking", // Takes 11:52 minutes
+        "Adoption", // 0:29 minutes
+        "AN", // 0:36 minutes
+        "Booking", // 11:52 minutes
         "CS", // 11:05 minutes
         "Ebl", // 37:09 minutes
         "eBL Issuance", // 6:03 minutes
@@ -48,7 +50,8 @@ class SeleniumTest extends SeleniumTestBase {
         "JIT", // 1:14 minutes
         "OVS", // 3:34 minutes
         "PINT", // 6:10 minutes
-        "TnT" // 6:20 minutes
+        "TnT", // 6:20 minutes
+        "Booking + eBL" // 10:40 minutes
       })
   void testStandardWithAllVersions(String standardName) {
     app.setSimulatedLambdaDelay(lambdaDelay);
@@ -88,9 +91,9 @@ class SeleniumTest extends SeleniumTestBase {
             .orElseThrow(),
         EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
         EblRole.CARRIER.getConfigName());
-//    } catch (Exception e) {
-//      waitForAsyncCalls(5 * 60_000);
-//    }
+    //    } catch (Exception e) {
+    //      waitForAsyncCalls(5 * 60_000);
+    //    }
   }
 
   @Test

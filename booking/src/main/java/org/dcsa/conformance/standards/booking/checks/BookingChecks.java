@@ -18,21 +18,19 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.databind.node.MissingNode;
-import com.fasterxml.jackson.databind.node.NullNode;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.*;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 
 @UtilityClass
 public class BookingChecks {
 
   private static final Set<BookingState> CONFIRMED_BOOKING_STATES = Set.of(
     BookingState.CONFIRMED,
-    BookingState.PENDING_AMENDMENT,
-    BookingState.COMPLETED,
-    BookingState.DECLINED
+    BookingState.PENDING_AMENDMENT
   );
 
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
@@ -45,7 +43,7 @@ public class BookingChecks {
   public static ActionCheck requestContentChecks(
       UUID matched,
       String standardVersion,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     checks.addAll(generateScenarioRelatedChecks(dspSupplier));
     return JsonAttribute.contentChecks(
@@ -459,21 +457,25 @@ public class BookingChecks {
             return issues;
           });
 
-  private static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS = JsonAttribute.customValidator(
-    "check confirmed booking fields availability",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      var bookingStatus = body.path("bookingStatus").asText("");
-      if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
-        if (body.path("confirmedEquipments").isEmpty()) {
-          issues.add("confirmedEquipments for confirmed booking is not present");
-        }
-        if (body.path("transportPlan").isEmpty()) {
-          issues.add("transportPlan for confirmed booking is not present");
-        }
-      }
-      return issues;
-    });
+  static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS =
+      JsonAttribute.customValidator(
+          "check confirmed booking fields availability",
+          body -> {
+            var issues = new LinkedHashSet<String>();
+            var bookingStatus = body.path("bookingStatus").asText("");
+            if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
+              if (body.path("confirmedEquipments").isEmpty()) {
+                issues.add("confirmedEquipments for confirmed booking is not present");
+              }
+              if (body.path("transportPlan").isEmpty()) {
+                issues.add("transportPlan for confirmed booking is not present");
+              }
+              if (body.path("shipmentCutOffTimes").isEmpty()) {
+                issues.add("shipmentCutOffTimes for confirmed booking is not present");
+              }
+            }
+            return issues;
+          });
 
   static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_CONDITIONS =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -504,7 +506,7 @@ public class BookingChecks {
           });
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
-      Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> checks = new ArrayList<>();
 
     checks.add(
@@ -576,7 +578,7 @@ public class BookingChecks {
             "[Scenario] Validate the containers reefer settings",
             mav -> mav.submitAllMatching("requestedEquipments.*"),
             (nodeToValidate, contextPath) -> {
-              var scenario = dspSupplier.get().scenarioType();
+              var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
               var issues = new LinkedHashSet<String>();
               switch (scenario) {
                 case REEFER -> reeferContainerChecks(contextPath, nodeToValidate, issues);
@@ -591,7 +593,7 @@ public class BookingChecks {
       "[Scenario] Whether the cargo should be DG",
       mav-> mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").submitPath(),
       (nodeToValidate, contextPath) -> {
-        var scenario = dspSupplier.get().scenarioType();
+        var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
         if (scenario == ScenarioType.DG) {
           if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
             return Set.of("The scenario requires '%s' to contain dangerous goods".formatted(contextPath));
@@ -770,7 +772,7 @@ public class BookingChecks {
   public static ActionCheck responseContentChecks(
       UUID matched,
       String standardVersion,
-      Supplier<DynamicScenarioParameters> dspSupplier,
+      Supplier<BookingDynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
       BookingCancellationState expectedCancelledBookingStatus,
@@ -788,7 +790,7 @@ public class BookingChecks {
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(
-      Supplier<DynamicScenarioParameters> dspSupplier,
+      Supplier<BookingDynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
       BookingCancellationState expectedCancelledBookingStatus,
@@ -864,7 +866,7 @@ public class BookingChecks {
     return checks;
   }
 
-  public static JsonContentCheck cbrrOrCbr(Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static JsonContentCheck cbrrOrCbr(Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
         "Validate Carrier Booking Request Reference and Carrier Booking Reference",
         body -> {

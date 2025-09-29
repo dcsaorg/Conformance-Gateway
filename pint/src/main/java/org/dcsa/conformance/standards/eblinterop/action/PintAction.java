@@ -4,13 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
@@ -53,6 +57,19 @@ public abstract class PintAction extends ConformanceAction {
     }
   }
 
+  protected String getMarkdownHumanReadablePrompt(String... fileNames) {
+    return getMarkdownHumanReadablePrompt(Map.of(), fileNames);
+  }
+
+  protected String getMarkdownHumanReadablePrompt(
+      Map<String, String> replacements, String... fileNames) {
+    return Arrays.stream(fileNames)
+        .map(
+            fileName ->
+                IOToolkit.templateFileToText(
+                    "/standards/pint/instructions/" + fileName, replacements))
+        .collect(Collectors.joining());
+  }
 
   public SignatureVerifier resolveSignatureVerifierSenderSignatures() {
     var pem = getSsp().sendersX509SigningCertificateInPEMFormat();

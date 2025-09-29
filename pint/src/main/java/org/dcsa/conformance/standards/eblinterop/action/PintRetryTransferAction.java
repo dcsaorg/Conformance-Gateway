@@ -59,7 +59,7 @@ public class PintRetryTransferAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Retry transfer-transaction request");
+    return getMarkdownHumanReadablePrompt("prompt-retry-transfer-no-change.md");
   }
 
   @Override

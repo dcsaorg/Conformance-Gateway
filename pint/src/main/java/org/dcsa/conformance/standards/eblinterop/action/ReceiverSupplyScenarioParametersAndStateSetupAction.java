@@ -50,7 +50,7 @@ public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAct
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Setup the system for transfer and provide the following details for the sender.");
+    return getMarkdownHumanReadablePrompt("prompt-receiver-supply-scenario-parameters.md");
   }
 
   @Override

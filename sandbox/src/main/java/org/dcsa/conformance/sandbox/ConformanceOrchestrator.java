@@ -468,11 +468,18 @@ public class ConformanceOrchestrator implements StatefulEntity {
             .orElseThrow();
     scenarioNode.set("conformanceSubReport", scenarioSubReport.toJsonReport());
 
+    CounterpartConfiguration counterpartConfiguration =
+        sandboxConfiguration.getExternalPartyCounterpartConfiguration();
+
     scenarioNode.put("isSkippable", false);
     if (nextAction != null
-        && nextAction.skippableForRoles().contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
+        && nextAction.skippableForRoles().contains(counterpartConfiguration.getRole())) {
       scenarioNode.put("isSkippable", true);
     }
+
+    boolean hasAction =
+        counterpartConfiguration != null && !counterpartConfiguration.getUrl().isBlank();
+    scenarioNode.put("needsAction", hasAction);
 
     return scenarioNode;
   }

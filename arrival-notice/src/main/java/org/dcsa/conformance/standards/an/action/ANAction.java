@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
@@ -33,17 +32,11 @@ public class ANAction extends ConformanceAction {
     return dsp::get;
   }
 
-  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
-    return dsp::set;
-  }
-
   @Override
   public void reset() {
     super.reset();
     if (previousAction != null) {
       this.dsp.set(null);
-    } else {
-      this.dsp.set(new DynamicScenarioParameters(null));
     }
   }
 

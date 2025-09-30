@@ -84,7 +84,6 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     if (!tdr.isMissingNode()) {
       dsp = dsp.withTransportDocumentReference(tdr.asText());
     }
-    // Make sure to use the updated dsp variable that contains the new TDR
     getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
   }
 

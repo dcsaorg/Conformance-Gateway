@@ -20,6 +20,8 @@ Added `IotEventCode` value `LOC` for "Location update". (SD-2480)
 
 Updated in type `Event` the attribute `eventID` removing the `uuid` format constraint. (SD-2478)
 
+Added the missing `API-Version` header in the requests of the `POST` endpoint. (SD-2490)
+
 
 ## Snapshot v3.0.0-20250912-design
 

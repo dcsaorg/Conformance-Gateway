@@ -8,6 +8,8 @@ Adjusted query parameter examples. (SD-2479)
 
 Added in type `Seal` for attribute `source` option `PHY` (Phytosanitary). (SD-2488)
 
+Added the missing `API-Version` header in the requests of the `POST` endpoints. (SD-2490)
+
 
 ## Snapshot v1.0.0-20250912-beta
 

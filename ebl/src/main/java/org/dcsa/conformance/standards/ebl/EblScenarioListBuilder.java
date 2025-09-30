@@ -699,7 +699,6 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             new UC6_Carrier_PublishDraftTransportDocumentAction(
                 carrierPartyName,
                 shipperPartyName,
-                (EblAction) previousAction,
                 type,
                 resolveMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),

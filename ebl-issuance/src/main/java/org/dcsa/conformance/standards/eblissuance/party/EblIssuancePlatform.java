@@ -5,6 +5,8 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
@@ -16,6 +18,7 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -134,16 +137,10 @@ public class EblIssuancePlatform extends ConformanceParty {
       addOperatorLogEntry(
           "Rejecting issuance request for eBL with transportDocumentReference '%s' (invalid)"
               .formatted(tdr));
-      return request.createResponse(
-          400,
-          Map.of(API_VERSION, List.of(apiVersion)),
-          new ConformanceMessageBody(
-              OBJECT_MAPPER
-                  .createObjectNode()
-                  .put(
-                      "message",
-                      "Rejecting issuance request for document '%s' because the issuing party is missing or the TDR could not be resolved"
-                          .formatted(tdr))));
+      return return400(
+          request,
+          "Rejecting issuance request for document '%s' because the issuing party is missing or the TDR could not be resolved"
+              .formatted(tdr));
     }
     if (state == null
         || state == EblIssuanceState.ISSUED && !knownChecksums.containsKey(checksum)) {
@@ -203,5 +200,26 @@ public class EblIssuancePlatform extends ConformanceParty {
         "Handling issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
             .formatted(tdr, eblStatesByTdr.get(tdr)));
     return response;
+  }
+
+  private ConformanceResponse return400(ConformanceRequest request, String message) {
+    ObjectNode response =
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/eblissuance/messages/eblissuance-v3.0.0-error-message.json",
+                Map.of(
+                    "HTTP_METHOD_PLACEHOLDER",
+                    request.method(),
+                    "REQUEST_URI_PLACEHOLDER",
+                    request.url(),
+                    "REFERENCE_PLACEHOLDER",
+                    UUID.randomUUID().toString(),
+                    "ERROR_DATE_TIME_PLACEHOLDER",
+                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
+                    "ERROR_MESSAGE_PLACEHOLDER",
+                    message));
+
+    return request.createResponse(
+        400, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 }

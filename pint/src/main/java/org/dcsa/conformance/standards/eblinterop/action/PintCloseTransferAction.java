@@ -39,7 +39,7 @@ public class PintCloseTransferAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Finish the transfer-transaction");
+    return getMarkdownHumanReadablePrompt("prompt-close-transfer.md");
   }
 
   @Override

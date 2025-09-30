@@ -180,6 +180,14 @@ paths:
 
         The subscription mechanism and the management of subscriber profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
       operationId: "post-events"
+      parameters:
+      - name: "API-Version"
+        in: "header"
+        description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
+        required: false
+        schema:
+          type: "string"
+        example: "3.0.0"
       requestBody:
         description: "List of events"
         content:
@@ -828,7 +836,6 @@ components:
             - `CRED` (Credore)
             - `DCSA` (Digital Container Shipping Association)
             - `DNB` (Dun and Bradstreet)
-            - `EDOX` (EdoxOnline)
             - `ESSD` (EssDOCS)
             - `ETEU` (eTEU)
             - `ETIT` (e-title)

@@ -225,6 +225,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         .description(readResourceFile("openapi-post-events-description.md"))
         .operationId("post-events")
         .tags(Collections.singletonList(TAG_EVENT_SUBSCRIBERS))
+        .parameters(List.of(getApiVersionHeaderParameter()))
         .requestBody(
             new RequestBody()
                 .description("List of events")

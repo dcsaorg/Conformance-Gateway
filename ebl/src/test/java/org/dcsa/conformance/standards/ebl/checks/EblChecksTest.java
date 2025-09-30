@@ -5,8 +5,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EblChecks.COUNTRY_CODE_C
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES;
-import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.EBL_AT_MOST_ONE_ORIGINAL_TOTAL;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.FEEDBACKS_PRESENCE;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER;
@@ -26,14 +25,10 @@ import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_PARTY_FU
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_REQUESTED_CARRIER_CLAUSES;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.function.Supplier;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.junit.jupiter.api.Test;
 
@@ -175,6 +170,7 @@ class EblChecksTest {
     ObjectNode filing = advanceManifestFilings.addObject();
     filing.put("manifestTypeCode", "ENS");
     filing.put("advanceManifestFilingsHouseBLPerformedBy", "CARRIER");
+    rootNode.put("isHouseBillOfLadingsIssued", false);
     assertFalse(BUYER_AND_SELLER_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
 
     documentParties.putObject("buyer");
@@ -357,14 +353,13 @@ class EblChecksTest {
   }
 
   @Test
-  void testEBLSCannotHaveOriginalsWithCharges() {
+  void testSWBsCannotHaveOriginalsWithCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "SWB");
-    rootNode.put("numberOfOriginalsWithCharges", 0);
     assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);
@@ -379,14 +374,13 @@ class EblChecksTest {
   }
 
   @Test
-  void testEBLSCannotHaveOriginalsWithoutCharges() {
+  void testSWBsCannotHaveOriginalsWithoutCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "SWB");
-    rootNode.put("numberOfOriginalsWithoutCharges", 0);
     assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);
@@ -401,95 +395,32 @@ class EblChecksTest {
   }
 
   @Test
-  void testEBLSCannotHaveMoreThanOneOriginalsWithoutCharges() {
+  void testEBLSCannotHaveMoreThanOneOriginalsWithandWithoutCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 1);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 2);
-    assertFalse(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 1);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithoutCharges", 2);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "SWB");
-    rootNode.put("numberOfOriginalsWithoutCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode).isEmpty());
-  }
-
-  @Test
-  void testEBLSCannotHaveMoreThanOneOriginalsWithCharges() {
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    rootNode.put("numberOfOriginalsWithoutCharges", 0);
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 1);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    rootNode.put("numberOfOriginalsWithoutCharges", 0);
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithCharges", 2);
-    assertFalse(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
-    rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 1);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    rootNode.put("numberOfOriginalsWithoutCharges", 1);
+    assertFalse(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfOriginalsWithCharges", 2);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
-
-    rootNode.put("isElectronic", true);
-    rootNode.put("transportDocumentTypeCode", "SWB");
-    rootNode.put("numberOfOriginalsWithCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
   }
 
   @Test
@@ -574,106 +505,76 @@ class EblChecksTest {
 
   @Test
   void testUtilizedTransportEquipmentsScenarioSizeCheckOneEquipmentValid() {
-    Supplier<DynamicScenarioParameters> dspSupplier =
-        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_1U);
-
     ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
     utilizedTransportEquipments.addObject();
 
     assertTrue(
-        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_1U)
             .validate(rootNode, "")
             .isEmpty());
   }
 
   @Test
   void testUtilizedTransportEquipmentsScenarioSizeCheckOneEquipmentsTooFew() {
-    Supplier<DynamicScenarioParameters> dspSupplier =
-        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_1U);
-
     assertFalse(
-        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_1U)
             .validate(rootNode, "")
             .isEmpty());
   }
 
   @Test
   void testUtilizedTransportEquipmentsScenarioSizeCheckOneEquipmentTooMany() {
-    Supplier<DynamicScenarioParameters> dspSupplier =
-        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_1U);
-
     ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
     utilizedTransportEquipments.addObject();
     utilizedTransportEquipments.addObject();
 
     assertFalse(
-        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_1U)
             .validate(rootNode, "")
             .isEmpty());
   }
 
   @Test
   void testUtilizedTransportEquipmentsScenarioSizeCheckTwoEquipmentsValid() {
-    Supplier<DynamicScenarioParameters> dspSupplier =
-        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_2U);
-
     ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
     utilizedTransportEquipments.addObject();
     utilizedTransportEquipments.addObject();
 
     assertTrue(
-        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_2U)
             .validate(rootNode, "")
             .isEmpty());
   }
 
   @Test
   void testUtilizedTransportEquipmentsScenarioSizeCheckTwoEquipmentsTooFew() {
-    Supplier<DynamicScenarioParameters> dspSupplier =
-        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_2U);
-
     ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
     utilizedTransportEquipments.addObject();
 
     assertFalse(
-        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_2U)
             .validate(rootNode, "")
             .isEmpty());
   }
 
   @Test
   void testUtilizedTransportEquipmentsScenarioSizeCheckTwoEquipmentsTooMany() {
-    Supplier<DynamicScenarioParameters> dspSupplier =
-        getDynamicScenarioParametersSupplier(ScenarioType.REGULAR_2C_2U);
-
     ArrayNode utilizedTransportEquipments = rootNode.putArray("utilizedTransportEquipments");
     utilizedTransportEquipments.addObject();
     utilizedTransportEquipments.addObject();
     utilizedTransportEquipments.addObject();
 
     assertFalse(
-        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplier)
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_2U)
             .validate(rootNode, "")
             .isEmpty());
   }
 
   @Test
   void testUtilizedTransportEquipmentsScenarioSizeCheckNoConstraint() {
-    Supplier<DynamicScenarioParameters> dspSupplierOther =
-        getDynamicScenarioParametersSupplier(ScenarioType.ACTIVE_REEFER);
-
     assertTrue(
-        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(dspSupplierOther)
+        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.ACTIVE_REEFER)
             .validate(rootNode, "")
             .isEmpty());
-  }
-
-  private static Supplier<DynamicScenarioParameters> getDynamicScenarioParametersSupplier(
-      ScenarioType regular2c1u) {
-    return () -> {
-      DynamicScenarioParameters dsp = mock(DynamicScenarioParameters.class);
-      when(dsp.scenarioType()).thenReturn(regular2c1u);
-      return dsp;
-    };
   }
 }

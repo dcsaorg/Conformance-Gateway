@@ -477,9 +477,9 @@ public class ConformanceOrchestrator implements StatefulEntity {
       scenarioNode.put("isSkippable", true);
     }
 
-    boolean hasAction =
+    boolean needsAction =
         counterpartConfiguration != null && !counterpartConfiguration.getUrl().isBlank();
-    scenarioNode.put("needsAction", hasAction);
+    scenarioNode.put("needsAction", needsAction);
 
     return scenarioNode;
   }

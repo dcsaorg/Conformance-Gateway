@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 class JITStandardSpecificationTest {
   @Test
-  void testCTStandardSpecification() {
+  void testJITStandardSpecification() {
     JITStandardSpecification jitStandardSpecification = new JITStandardSpecification();
     jitStandardSpecification.generateArtifacts();
 

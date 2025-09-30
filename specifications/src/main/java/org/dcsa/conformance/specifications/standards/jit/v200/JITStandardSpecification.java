@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,6 +55,50 @@ public class JITStandardSpecification extends StandardSpecification {
   private static final String REQUEST_RECEIVING_PARTY_HEADER = "Request-Receiving-Party";
   private static final String RESPONSE_SENDING_PARTY_HEADER = "Response-Sending-Party";
   private static final String RESPONSE_RECEIVING_PARTY_HEADER = "Response-Receiving-Party";
+  public static final String REQUEST_SENDING_PARTY_HEADER_DESCRIPTION =
+      """
+    When communicating through an optional system that acts as an application level Port Call communication proxy,
+    forwarding API calls between Port Call service providers and Port Call service consumers,
+    the API client sets this request header to identify itself to the Port Call proxy and to the API server
+    as the original sending party of the API request.
+
+    The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+    to the parties connecting through the Port Call proxy are out of scope.
+    """;
+  public static final String REQUEST_RECEIVING_PARTY_HEADER_DESCRIPTION =
+      """
+    When communicating through an optional system that acts as an application level Port Call communication proxy,
+    forwarding API calls between Port Call service providers and Port Call service consumers,
+    the API client sets this request header to identify to the Port Call proxy the target receiving party of the API request.
+
+    The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+    to the parties connecting through the Port Call proxy are out of scope.
+    """;
+  public static final String RESPONSE_SENDING_PARTY_HEADER_DESCRIPTION =
+      """
+    When communicating through an optional system that acts as an application level Port Call communication proxy,
+    forwarding API calls between Port Call service providers and Port Call service consumers,
+    the API server sets this response header to identify itself to the Port Call proxy and to the API client
+    as the original sending party of the API response.
+
+    The value of this response header must be the same as the value of the request header `Request-Receiving-Party`.
+
+    The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+    to the parties connecting through the Port Call proxy are out of scope.
+    """;
+  public static final String RESPONSE_RECEIVING_PARTY_HEADER_DESCRIPTION =
+      """
+    When communicating through an optional system that acts as an application level Port Call communication proxy,
+    forwarding API calls between Port Call service providers and Port Call service consumers,
+    the API server sets this response header to identify to the Port Call proxy the target receiving party of the API response.
+
+    The value of this response header must be the same as the value of the request header `Request-Sending-Party`.
+
+    The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+    to the parties connecting through the Port Call proxy are out of scope.
+    """;
+  public static final String REQUEST_SENDING_PARTY_HEADER_EXAMPLE = "Carrier-123";
+  public static final String REQUEST_RECEIVING_PARTY_HEADER_EXAMPLE = "Terminal-456";
 
   private final GetEventsEndpoint getEventsEndpoint;
 
@@ -159,30 +204,17 @@ public class JITStandardSpecification extends StandardSpecification {
         Map.entry(
             REQUEST_SENDING_PARTY_HEADER,
             new Header()
-                .description(
-"""
-When communicating through an optional system that acts as an application level Port Call communication proxy,
-forwarding API calls between Port Call service providers and Port Call service consumers,
-the API client sets this request header to identify itself to the Port Call proxy and to the API server
-as the original sending party of the API request.
-
-The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
-to the parties connecting through the Port Call proxy are out of scope.
-""")
-                .schema(new Schema<>().type("string").example("Carrier-123"))),
+                .description(REQUEST_SENDING_PARTY_HEADER_DESCRIPTION)
+                .schema(
+                    new Schema<>().type("string").example(REQUEST_SENDING_PARTY_HEADER_EXAMPLE))),
         Map.entry(
             REQUEST_RECEIVING_PARTY_HEADER,
             new Header()
-                .description(
-"""
-When communicating through an optional system that acts as an application level Port Call communication proxy,
-forwarding API calls between Port Call service providers and Port Call service consumers,
-the API client sets this request header to identify to the Port Call proxy the target receiving party of the API request.
-
-The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
-to the parties connecting through the Port Call proxy are out of scope.
-""")
-                .schema(new Schema<>().type("string").example("Terminal-456"))));
+                .description(REQUEST_RECEIVING_PARTY_HEADER_DESCRIPTION)
+                .schema(
+                    new Schema<>()
+                        .type("string")
+                        .example(REQUEST_RECEIVING_PARTY_HEADER_EXAMPLE))));
   }
 
   private Stream<Map.Entry<String, Header>> getResponseCustomHeaders() {
@@ -190,33 +222,12 @@ to the parties connecting through the Port Call proxy are out of scope.
         Map.entry(
             RESPONSE_SENDING_PARTY_HEADER,
             new Header()
-                .description(
-"""
-When communicating through an optional system that acts as an application level Port Call communication proxy,
-forwarding API calls between Port Call service providers and Port Call service consumers,
-the API server sets this response header to identify itself to the Port Call proxy and to the API client
-as the original sending party of the API response.
-
-The value of this response header must be the same as the value of the request header `Request-Receiving-Party`.
-
-The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
-to the parties connecting through the Port Call proxy are out of scope.
-""")
+                .description(RESPONSE_SENDING_PARTY_HEADER_DESCRIPTION)
                 .schema(new Schema<>().type("string").example("Terminal-456"))),
         Map.entry(
             RESPONSE_RECEIVING_PARTY_HEADER,
             new Header()
-                .description(
-"""
-When communicating through an optional system that acts as an application level Port Call communication proxy,
-forwarding API calls between Port Call service providers and Port Call service consumers,
-the API server sets this response header to identify to the Port Call proxy the target receiving party of the API response.
-
-The value of this response header must be the same as the value of the request header `Request-Sending-Party`.
-
-The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
-to the parties connecting through the Port Call proxy are out of scope.
-""")
+                .description(RESPONSE_RECEIVING_PARTY_HEADER_DESCRIPTION)
                 .schema(new Schema<>().type("string").example("Carrier-123"))));
   }
 
@@ -249,23 +260,11 @@ to the parties connecting through the Port Call proxy are out of scope.
                     new ApiResponse()
                         .description("List of events matching the query parameters")
                         .headers(
-                            Stream.of(
-                                    API_VERSION_HEADER,
-                                    NEXT_PAGE_CURSOR_HEADER,
-                                    RESPONSE_SENDING_PARTY_HEADER,
-                                    RESPONSE_RECEIVING_PARTY_HEADER)
-                                .map(
-                                    headerName ->
-                                        Map.entry(
-                                            headerName,
-                                            new Header()
-                                                .$ref(COMPONENTS_HEADERS_REF_PATH + headerName)))
-                                .collect(
-                                    Collectors.toMap(
-                                        Map.Entry::getKey,
-                                        Map.Entry::getValue,
-                                        (a, b) -> b,
-                                        LinkedHashMap::new)))
+                            createRefHeadersMap(
+                                API_VERSION_HEADER,
+                                NEXT_PAGE_CURSOR_HEADER,
+                                RESPONSE_SENDING_PARTY_HEADER,
+                                RESPONSE_RECEIVING_PARTY_HEADER))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -285,6 +284,17 @@ to the parties connecting through the Port Call proxy are out of scope.
         .description(readResourceFile("openapi-post-events-description.md"))
         .operationId("post-events")
         .tags(Collections.singletonList(TAG_EVENT_SUBSCRIBERS))
+        .parameters(
+            List.of(
+                getApiVersionHeaderParameter(),
+                createHeaderParameter(
+                    REQUEST_SENDING_PARTY_HEADER,
+                    REQUEST_SENDING_PARTY_HEADER_EXAMPLE,
+                    REQUEST_SENDING_PARTY_HEADER_DESCRIPTION),
+                createHeaderParameter(
+                    REQUEST_RECEIVING_PARTY_HEADER,
+                    REQUEST_RECEIVING_PARTY_HEADER_EXAMPLE,
+                    REQUEST_RECEIVING_PARTY_HEADER_DESCRIPTION)))
         .requestBody(
             new RequestBody()
                 .description("List of events")
@@ -306,11 +316,10 @@ to the parties connecting through the Port Call proxy are out of scope.
                     new ApiResponse()
                         .description("Events response")
                         .headers(
-                            new LinkedHashMap<>(
-                                Map.ofEntries(
-                                    Map.entry(
-                                        API_VERSION_HEADER,
-                                        new Header().$ref(API_VERSION_HEADER_REF)))))
+                            createRefHeadersMap(
+                                API_VERSION_HEADER,
+                                RESPONSE_SENDING_PARTY_HEADER,
+                                RESPONSE_RECEIVING_PARTY_HEADER))
                         .content(
                             new Content()
                                 .addMediaType(
@@ -341,5 +350,15 @@ to the parties connecting through the Port Call proxy are out of scope.
                                 .$ref(
                                     SpecificationToolkit.getComponentSchema$ref(
                                         errorMessageClass)))));
+  }
+
+  protected Parameter createHeaderParameter(String name, String example, String description) {
+    return new Parameter()
+        .in("header")
+        .name(name)
+        .description(description)
+        .required(false)
+        .schema(new Schema<String>().type("string"))
+        .example(example);
   }
 }

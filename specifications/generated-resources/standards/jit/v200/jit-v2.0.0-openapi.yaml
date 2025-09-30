@@ -16,7 +16,7 @@ info:
 
     The event publisher implements the `GET /events` endpoint, which can be called by authorized API consumers to retrieve relevant available events.
 
-    The event subscribers implement the `POST /events` endpoint, which can be called by event publishers call to send relevant events as they become available.
+    The event subscribers implement the `POST /events` endpoint, which can be called by event publishers to send relevant events as they become available.
 
     The registration of event subscribers with event publishers is out of scope.
 
@@ -308,6 +308,41 @@ paths:
 
         The subscription mechanism and the management of subscriber profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
       operationId: "post-events"
+      parameters:
+      - name: "API-Version"
+        in: "header"
+        description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
+        required: false
+        schema:
+          type: "string"
+        example: "2.0.0"
+      - name: "Request-Sending-Party"
+        in: "header"
+        description: |
+          When communicating through an optional system that acts as an application level Port Call communication proxy,
+          forwarding API calls between Port Call service providers and Port Call service consumers,
+          the API client sets this request header to identify itself to the Port Call proxy and to the API server
+          as the original sending party of the API request.
+
+          The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+          to the parties connecting through the Port Call proxy are out of scope.
+        required: false
+        schema:
+          type: "string"
+        example: "Carrier-123"
+      - name: "Request-Receiving-Party"
+        in: "header"
+        description: |
+          When communicating through an optional system that acts as an application level Port Call communication proxy,
+          forwarding API calls between Port Call service providers and Port Call service consumers,
+          the API client sets this request header to identify to the Port Call proxy the target receiving party of the API request.
+
+          The assignment of party identifiers by the Port Call proxy and the distribution of identifiers
+          to the parties connecting through the Port Call proxy are out of scope.
+        required: false
+        schema:
+          type: "string"
+        example: "Terminal-456"
       requestBody:
         description: "List of events"
         content:
@@ -321,6 +356,10 @@ paths:
           headers:
             API-Version:
               $ref: "#/components/headers/API-Version"
+            Response-Sending-Party:
+              $ref: "#/components/headers/Response-Sending-Party"
+            Response-Receiving-Party:
+              $ref: "#/components/headers/Response-Receiving-Party"
           content:
             application/json:
               schema:
@@ -436,6 +475,17 @@ components:
     Event:
       type: "object"
       properties:
+        eventID:
+          type: "string"
+          description: "Universal unique identifier of the event"
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        eventUpdatedDateTime:
+          maxLength: 30
+          type: "string"
+          description: "The date and time when the technical event was last updated."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
         isFYI:
           type: "boolean"
           description: |
@@ -453,12 +503,21 @@ components:
           description: "Port call service information"
           allOf:
           - $ref: "#/components/schemas/PortCallService"
+        vessel:
+          description: "Vessel information relevant for a port call service"
+          allOf:
+          - $ref: "#/components/schemas/Vessel"
         timestamp:
           description: |
             Date and time (and related metadata) of a port call service,
             exchanged between the service provider and service consumer as part of the "ERP" pattern.
           allOf:
           - $ref: "#/components/schemas/Timestamp"
+        movesForecasts:
+          type: "array"
+          description: "The moves forecasts of a port call service with `portCallServiceTypeCode='MOVES'`"
+          items:
+            $ref: "#/components/schemas/MovesForecast"
       description: |
         Generic event used to exchange timestamps, move forecasts and related port call service information
         between service providers and service consumers.
@@ -673,10 +732,6 @@ components:
 
             More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: "NLAMS"
-        vessel:
-          description: "Vessel information relevant for a port call service"
-          allOf:
-          - $ref: "#/components/schemas/Vessel"
         isOmitted:
           type: "boolean"
           description: "Flag indicating whether the port call is omitted by the carrier."
@@ -851,11 +906,6 @@ components:
           description: "The location at which the port call service is provided"
           allOf:
           - $ref: "#/components/schemas/Location"
-        movesForecasts:
-          type: "array"
-          description: "The moves forecasts of a port call service with `portCallServiceTypeCode='MOVES'`"
-          items:
-            $ref: "#/components/schemas/MovesForecast"
         isCanceled:
           type: "boolean"
           description: "Flag indicating that this port call service is canceled by the service provider."

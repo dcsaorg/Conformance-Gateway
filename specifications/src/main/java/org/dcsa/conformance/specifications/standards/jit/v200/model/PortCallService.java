@@ -1,7 +1,6 @@
 package org.dcsa.conformance.specifications.standards.jit.v200.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
@@ -184,11 +183,6 @@ The `ANCH` facility type is relevant for port call services with the following `
 
   @Schema(description = "The location at which the port call service is provided")
   private Location serviceLocation;
-
-  @Schema(
-      description =
-          "The moves forecasts of a port call service with `portCallServiceTypeCode='MOVES'`")
-  private List<MovesForecast> movesForecasts;
 
   @Schema(
       example = "false",

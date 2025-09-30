@@ -25,8 +25,6 @@ The reference is provided by the port to uniquely identify a port call.
   @Schema(name = "UNLocationCode")
   private UNLocationCode unLocationCode;
 
-  @Schema() private Vessel vessel;
-
   @Schema(
       example = "false",
       description = "Flag indicating whether the port call is omitted by the carrier.")

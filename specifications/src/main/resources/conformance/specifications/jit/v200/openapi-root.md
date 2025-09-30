@@ -11,7 +11,7 @@ Port Call events are used by port call service providers and consumers to exchan
 
 The event publisher implements the `GET /events` endpoint, which can be called by authorized API consumers to retrieve relevant available events.
 
-The event subscribers implement the `POST /events` endpoint, which can be called by event publishers call to send relevant events as they become available.
+The event subscribers implement the `POST /events` endpoint, which can be called by event publishers to send relevant events as they become available.
 
 The registration of event subscribers with event publishers is out of scope.
 

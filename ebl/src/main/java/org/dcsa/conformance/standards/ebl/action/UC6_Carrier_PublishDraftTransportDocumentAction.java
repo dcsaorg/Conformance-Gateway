@@ -23,13 +23,18 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   public UC6_Carrier_PublishDraftTransportDocumentAction(
       String carrierPartyName,
       String shipperPartyName,
-      ScenarioType type,
+      EblAction previousAction,
+      ScenarioType scenarioType,
       JsonSchemaValidator notificationSchemaValidator,
       boolean skipSI) {
-    super(carrierPartyName, shipperPartyName, null, "UC6 [%s]".formatted(type.name()), 204);
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        "UC6 [%s]".formatted(scenarioType.name()),
+        204);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
-    this.scenarioType = type;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 

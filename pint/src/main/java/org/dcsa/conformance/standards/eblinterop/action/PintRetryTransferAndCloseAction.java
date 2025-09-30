@@ -64,9 +64,9 @@ public class PintRetryTransferAndCloseAction extends PintAction {
   @Override
   public String getHumanReadablePrompt() {
     return switch (retryType) {
-      case NO_CHANGE -> "Retry transfer-transaction request";
-      case RESIGN -> "Retry the transfer-transaction request with the latest transaction entry resigned";
-      case MANIPULATE -> "Retry the transfer-transaction request after manipulating (and resigning) the latest transaction";
+      case NO_CHANGE -> getMarkdownHumanReadablePrompt("prompt-retry-transfer-no-change.md");
+      case RESIGN -> getMarkdownHumanReadablePrompt("prompt-retry-transfer-resign.md");
+      case MANIPULATE -> getMarkdownHumanReadablePrompt("prompt-retry-transfer-manipulate.md");
     };
   }
 

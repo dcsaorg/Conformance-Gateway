@@ -148,6 +148,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                     .then(
                         uc6Get(
                             true,
+                            ScenarioType.REGULAR_STRAIGHT_BL,
                             oobAmendment(
                                 uc6Get(
                                     true,

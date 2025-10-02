@@ -1,17 +1,17 @@
 package org.dcsa.conformance.manual;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.springboot.ConformanceApplication;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @SpringBootTest(
@@ -61,60 +61,60 @@ class ManualScenarioWithoutNotificationsTest extends ManualTestBase {
                                             secondRun))));
   }
 
-  private void runManualTests(
-      String standardName,
-      String standardVersion,
-      String suiteName,
-      String roleName,
-      boolean secondRun) {
-    SandboxConfig sandbox1;
-    SandboxConfig sandbox2;
-    if (!secondRun) {
-      sandbox1 =
-          createSandbox(
-              new Sandbox(
-                  standardName,
-                  standardVersion,
-                  suiteName,
-                  roleName,
-                  true,
-                  getSandboxName(standardName, standardVersion, suiteName, roleName, 0)));
-      sandbox2 =
-          createSandbox(
-              new Sandbox(
-                  standardName,
-                  standardVersion,
-                  suiteName,
-                  roleName,
-                  false,
-                  getSandboxName(standardName, standardVersion, suiteName, roleName, 1)));
-      updateSandboxConfigBeforeStarting(sandbox1, sandbox2, true);
-      updateSandboxConfigBeforeStarting(sandbox2, sandbox1);
-    } else {
-      sandbox1 =
-          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 0));
-      sandbox2 =
-          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 1));
-      log.info("Run for the 2nd time, and verify it still works.");
-      log.info(
-          "Using sandboxes: {} v{}, suite: {}, role: {}",
-          standardName,
-          standardVersion,
-          suiteName,
-          roleName);
-      resetSandbox(
-          sandbox2); // Make sure the sandbox does not keep an optional state from the first run
+  @Override
+  void updateTestedPartySandboxConfigBeforeStarting(
+      SandboxConfig sandbox1, SandboxConfig sandbox2) {
+    JsonNode node =
+        mapper
+            .createObjectNode()
+            .put("operation", "updateSandboxConfig")
+            .put("sandboxId", sandbox1.sandboxId())
+            .put("sandboxName", sandbox1.sandboxName())
+            .put("externalPartyUrl", "")
+            .put("externalPartyAuthHeaderName", sandbox2.sandboxAuthHeaderName())
+            .put("externalPartyAuthHeaderValue", sandbox2.sandboxAuthHeaderValue());
+    assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
+
+    getSandbox(sandbox1);
+  }
+
+  @Override
+  void updateCounterPartySandboxConfigBeforeStarting(
+      SandboxConfig sandbox1, SandboxConfig sandbox2) {
+    super.updateTestedPartySandboxConfigBeforeStarting(sandbox2, sandbox1);
+  }
+
+  @Override
+  protected void validateSubReport(String scenarioName, SubReport subReport) {
+    // Only fail if there are error messages OR non-notification NO_TRAFFIC reports
+    boolean hasErrors = !subReport.errorMessages().isEmpty();
+    boolean hasNonNotificationNoTraffic = hasNonNotificationNoTrafficReports(subReport);
+
+    if (hasErrors || hasNonNotificationNoTraffic) {
+      StringBuilder messageBuilder = new StringBuilder();
+      buildErrorMessage(subReport, messageBuilder);
+
+      String errorDetails = hasErrors ? "Error messages found" : "";
+      if (hasNonNotificationNoTraffic) {
+        errorDetails += (hasErrors ? " | " : "") + "Non-notification NO_TRAFFIC reports found";
+      }
+
+      String errorMessage =
+          "Scenario '"
+              + scenarioName
+              + "' failed validation. "
+              + errorDetails
+              + ". Details: "
+              + messageBuilder;
+      log.error(errorMessage);
+      fail(errorMessage);
     }
+  }
 
-    List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
-    assertFalse(sandbox1Digests.isEmpty(), "No scenarios found!");
-
-    List<ScenarioDigest> sandbox2Digests = getScenarioDigests(sandbox2.sandboxId());
-    assertTrue(sandbox2Digests.isEmpty(), "Scenarios found!");
-    getAllSandboxes();
-
-    // Run all tests for all scenarios
-    runAllTests(sandbox1Digests, sandbox1, sandbox2);
-    log.info("Done with {} as role: {}", standardName, roleName);
+  private boolean hasNonNotificationNoTrafficReports(SubReport subReport) {
+    if (subReport.status().equals("NO_TRAFFIC") && !subReport.title().contains("[Notification]")) {
+      return true;
+    }
+    return subReport.subReports().stream().anyMatch(this::hasNonNotificationNoTrafficReports);
   }
 }

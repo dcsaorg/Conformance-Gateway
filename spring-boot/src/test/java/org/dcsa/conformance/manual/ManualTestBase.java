@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
+
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.EndpointUriOverrideConfiguration;
@@ -33,17 +35,74 @@ import org.springframework.beans.factory.annotation.Autowired;
 /** Base class which contains all API call methods and wiring needed to perform a manual test */
 @Slf4j
 public abstract class ManualTestBase {
-  private static final String USER_ID = "unit-test";
+  protected static final String USER_ID = "unit-test";
 
   protected final ObjectMapper mapper = OBJECT_MAPPER;
   protected long lambdaDelay = 0L;
 
   @Autowired protected ConformanceApplication app;
-  private ConformanceWebuiHandler webuiHandler;
+  protected ConformanceWebuiHandler webuiHandler;
 
   @BeforeEach
   public void setUp() {
     webuiHandler = app.getWebuiHandler();
+  }
+
+  protected void runManualTests(
+      String standardName,
+      String standardVersion,
+      String suiteName,
+      String roleName,
+      boolean secondRun) {
+    SandboxConfig sandbox1;
+    SandboxConfig sandbox2;
+    if (!secondRun) {
+      sandbox1 =
+          createSandbox(
+              new Sandbox(
+                  standardName,
+                  standardVersion,
+                  suiteName,
+                  roleName,
+                  true,
+                  getSandboxName(standardName, standardVersion, suiteName, roleName, 0)));
+      sandbox2 =
+          createSandbox(
+              new Sandbox(
+                  standardName,
+                  standardVersion,
+                  suiteName,
+                  roleName,
+                  false,
+                  getSandboxName(standardName, standardVersion, suiteName, roleName, 1)));
+      updateTestedPartySandboxConfigBeforeStarting(sandbox1, sandbox2);
+      updateCounterPartySandboxConfigBeforeStarting(sandbox1, sandbox2);
+    } else {
+      sandbox1 =
+          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 0));
+      sandbox2 =
+          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 1));
+      log.info("Run for the 2nd time, and verify it still works.");
+      log.info(
+          "Using sandboxes: {} v{}, suite: {}, role: {}",
+          standardName,
+          standardVersion,
+          suiteName,
+          roleName);
+      resetSandbox(
+          sandbox2); // Make sure the sandbox does not keep an optional state from the first run
+    }
+
+    List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
+    assertFalse(sandbox1Digests.isEmpty(), "No scenarios found!");
+
+    List<ScenarioDigest> sandbox2Digests = getScenarioDigests(sandbox2.sandboxId());
+    assertTrue(sandbox2Digests.isEmpty(), "Scenarios found!");
+    getAllSandboxes();
+
+    // Run all tests for all scenarios
+    runAllTests(sandbox1Digests, sandbox1, sandbox2);
+    log.info("Done with {} as role: {}", standardName, roleName);
   }
 
   protected List<Standard> getAvailableStandards() {
@@ -187,7 +246,7 @@ public abstract class ManualTestBase {
     if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 4);
   }
 
-  void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
+  protected void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
     waitForCleanSandboxStatus(sandbox1);
     log.info("Validating scenario '{}'.", scenarioName);
     JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
@@ -197,6 +256,15 @@ public abstract class ManualTestBase {
     SubReport subReport = mapper.convertValue(conformanceSubReport, SubReport.class);
     String message = "Found in scenarioId: " + scenarioId + " having '" + subReport.title + "'.";
     assertFalse(jsonNode.get("isRunning").asBoolean(), message);
+
+    validateSubReport(scenarioName, subReport);
+
+    assertTrue(
+        subReport.errorMessages.isEmpty(),
+        "Should be empty, but found: '" + subReport.errorMessages + "'.\n" + message);
+  }
+
+  protected void validateSubReport(String scenarioName, SubReport subReport) {
     if (!subReport.status.equals("CONFORMANT")) {
       StringBuilder messageBuilder = new StringBuilder();
       buildErrorMessage(subReport, messageBuilder);
@@ -207,15 +275,9 @@ public abstract class ManualTestBase {
       // waitForAsyncCalls(10 * 60 * 1000L);
       fail(errorMessage);
     }
-    assertTrue(
-        subReport.errorMessages.isEmpty(),
-        "Should be empty, but found: '"
-            + subReport.errorMessages
-            + "'.\n"
-            + message);
   }
 
-  private void buildErrorMessage(SubReport subReport, StringBuilder messageBuilder) {
+  protected void buildErrorMessage(SubReport subReport, StringBuilder messageBuilder) {
     if (subReport.status.equals("CONFORMANT")) {
       return;
     }
@@ -270,12 +332,8 @@ public abstract class ManualTestBase {
           "Sandbox status did not reach the expected state on time: " + sandboxStatus);
   }
 
-  void updateSandboxConfigBeforeStarting(SandboxConfig sandbox1, SandboxConfig sandbox2) {
-    updateSandboxConfigBeforeStarting(sandbox1, sandbox2, false);
-  }
-
-  void updateSandboxConfigBeforeStarting(
-      SandboxConfig sandbox1, SandboxConfig sandbox2, boolean noNotifications) {
+  void updateTestedPartySandboxConfigBeforeStarting(
+      SandboxConfig sandbox1, SandboxConfig sandbox2) {
     // Update Sandbox Config 1, with details from Sandbox Config 2
     JsonNode node =
         mapper
@@ -283,13 +341,18 @@ public abstract class ManualTestBase {
             .put("operation", "updateSandboxConfig")
             .put("sandboxId", sandbox1.sandboxId)
             .put("sandboxName", sandbox1.sandboxName)
-            .put("externalPartyUrl", noNotifications ? "" : sandbox2.sandboxUrl)
+            .put("externalPartyUrl", sandbox2.sandboxUrl)
             .put("externalPartyAuthHeaderName", sandbox2.sandboxAuthHeaderName)
             .put("externalPartyAuthHeaderValue", sandbox2.sandboxAuthHeaderValue);
     assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
 
     // Validate Sandbox 1 details
     getSandbox(sandbox1);
+  }
+
+  void updateCounterPartySandboxConfigBeforeStarting(
+      SandboxConfig sandbox1, SandboxConfig sandbox2) {
+    updateTestedPartySandboxConfigBeforeStarting(sandbox2, sandbox1);
   }
 
   SandboxItem getSandbox(SandboxConfig sandbox) {

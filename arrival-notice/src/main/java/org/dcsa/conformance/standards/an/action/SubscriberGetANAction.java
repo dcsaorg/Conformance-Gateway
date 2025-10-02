@@ -74,7 +74,7 @@ public class SubscriberGetANAction extends ANAction {
     for (String ref : references) {
       arrayNode.add(ref);
     }
-    jsonNode.set("dsp", arrayNode);
+    jsonNode.set("references", arrayNode);
     return jsonNode;
   }
 }

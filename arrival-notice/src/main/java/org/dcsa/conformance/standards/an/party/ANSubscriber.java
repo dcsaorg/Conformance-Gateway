@@ -60,9 +60,9 @@ public class ANSubscriber extends ConformanceParty {
   }
 
   private void getArrivalNotices(JsonNode actionPrompt) {
-    ArrayNode dspArray = (ArrayNode) actionPrompt.required("dsp");
+    ArrayNode tdrs = (ArrayNode) actionPrompt.required("references");
     List<String> references = new ArrayList<>();
-    for (JsonNode node : dspArray) {
+    for (JsonNode node : tdrs) {
       references.add(node.asText());
     }
     syncCounterpartGet("/arrival-notices", Map.of("transportDocumentReferences", references));

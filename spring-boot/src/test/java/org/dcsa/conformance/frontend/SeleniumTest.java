@@ -76,7 +76,7 @@ class SeleniumTest extends SeleniumTestBase {
                                 .forEach(
                                     role ->
                                         createSandboxesAndRunGroups(
-                                            requestedStandard, version.number(), suite, role))));
+                                            requestedStandard, version.number(), suite, role.name()))));
     log.info("Finished with standard: {}, time taken: {}", standardName, stopWatch);
   }
 

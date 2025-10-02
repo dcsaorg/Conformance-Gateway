@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = ConformanceApplication.class)
-class ManualScenarioTest extends ManualTestBase {
+class ManualScenarioWithNotificationsTest extends ManualTestBase {
 
   @SuppressWarnings("unused")
   private static Stream<Arguments> testStandards() {
@@ -75,7 +75,7 @@ class ManualScenarioTest extends ManualTestBase {
                                 .forEach(
                                     role ->
                                         runManualTests(
-                                            standard1.name(), version.number(), suite, role, secondRun))));
+                                            standard1.name(), version.number(), suite, role.name(), secondRun))));
   }
 
   @Test

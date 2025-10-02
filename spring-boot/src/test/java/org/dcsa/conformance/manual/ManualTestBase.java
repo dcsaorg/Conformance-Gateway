@@ -271,6 +271,11 @@ public abstract class ManualTestBase {
   }
 
   void updateSandboxConfigBeforeStarting(SandboxConfig sandbox1, SandboxConfig sandbox2) {
+    updateSandboxConfigBeforeStarting(sandbox1, sandbox2, false);
+  }
+
+  void updateSandboxConfigBeforeStarting(
+      SandboxConfig sandbox1, SandboxConfig sandbox2, boolean noNotifications) {
     // Update Sandbox Config 1, with details from Sandbox Config 2
     JsonNode node =
         mapper
@@ -278,7 +283,7 @@ public abstract class ManualTestBase {
             .put("operation", "updateSandboxConfig")
             .put("sandboxId", sandbox1.sandboxId)
             .put("sandboxName", sandbox1.sandboxName)
-            .put("externalPartyUrl", sandbox2.sandboxUrl)
+            .put("externalPartyUrl", noNotifications ? "" : sandbox2.sandboxUrl)
             .put("externalPartyAuthHeaderName", sandbox2.sandboxAuthHeaderName)
             .put("externalPartyAuthHeaderValue", sandbox2.sandboxAuthHeaderValue);
     assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
@@ -535,5 +540,7 @@ public abstract class ManualTestBase {
 
   public record Standard(String name, List<StandardVersion> versions) {}
 
-  protected record StandardVersion(String number, List<String> suites, List<String> roles) {}
+  protected record StandardVersion(String number, List<String> suites, List<Role> roles) {}
+
+  protected record Role(String name, boolean noNotifications) {}
 }

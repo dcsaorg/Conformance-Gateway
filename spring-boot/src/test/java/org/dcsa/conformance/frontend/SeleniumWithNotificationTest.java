@@ -23,9 +23,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
     classes = ConformanceApplication.class)
-class SeleniumTest extends SeleniumTestBase {
+class SeleniumWithNotificationTest extends SeleniumTestBase {
 
-  public SeleniumTest() {
+  public SeleniumWithNotificationTest() {
     super("Conformant");
   }
 

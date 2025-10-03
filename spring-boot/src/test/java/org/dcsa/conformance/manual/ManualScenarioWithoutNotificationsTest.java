@@ -62,6 +62,18 @@ class ManualScenarioWithoutNotificationsTest extends ManualTestBase {
   }
 
   @Override
+  protected String getSandboxName(String standardName, String version, String suiteName, String roleName, int sandboxType) {
+    String sandboxName;
+    if (sandboxType == 0) {
+      sandboxName = "%s v%s, %s, %s - Testing: orchestrator (without notifications)".formatted(standardName, version, suiteName, roleName);
+    } else {
+      sandboxName = "%s v%s, %s, %s - Testing: synthetic %s as tested party (without notifications)"
+              .formatted(standardName, version, suiteName, roleName, roleName);
+    }
+    return sandboxName;
+  }
+
+  @Override
   void updateTestedPartySandboxConfigBeforeStarting(
       SandboxConfig sandbox1, SandboxConfig sandbox2) {
     JsonNode node =

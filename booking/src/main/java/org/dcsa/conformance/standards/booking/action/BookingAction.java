@@ -184,6 +184,7 @@ public abstract class BookingAction extends BookingAndEblAction {
                 BookingRole::isCarrier,
                 getMatchedNotificationExchangeUuid(),
                 "/v2/booking-notifications"),
+            //TODO: do not add check when not expecting a notification
             new ResponseStatusCheck(
                 titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(

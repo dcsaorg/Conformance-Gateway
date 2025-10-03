@@ -40,10 +40,15 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   protected static FluentWait<WebDriver> wait;
   private static boolean alreadyLoggedIn = false;
 
+  protected String conformantStatus;
   protected String baseUrl = "http://localhost:4200";
   protected String loginEmail = "selenium-test@dcsa.org";
   protected String loginPassword = "selenium-test-fake-password";
   protected boolean stopAfterFirstScenarioGroup = false;
+
+  public SeleniumTestBase(String conformantStatus) {
+    this.conformantStatus = conformantStatus;
+  }
 
   @BeforeAll
   public static void setUpOnce() {
@@ -268,13 +273,13 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   // If there are no more actions, the scenario is finished and should be conformant.
-  private static boolean hasNoMoreActionsDisplayed(String name) {
+  private boolean hasNoMoreActionsDisplayed(String name) {
     if (driver.findElements(By.id("nextActions")).isEmpty()
       && driver.findElements(By.cssSelector("app-text-waiting")).isEmpty()) {
       String titleValue =
         driver.findElement(By.className("conformanceStatus")).getDomProperty("title");
       assertEquals(
-          "Conformant",
+              conformantStatus,
           titleValue,
           "Scenario is not conformant: '" + titleValue + "', while running: " + name);
       log.debug("Scenario is Conformant.");
@@ -328,7 +333,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     // Starts in the 1st tab
     switchToTab(0);
     if (sandbox2.sandboxUrl() != null) {
-      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(sandbox2.sandboxUrl());
+      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(getTestedPartyApiUrl(sandbox2));
       driver.findElement(By.name("externalPartyAuthHeaderNameTextField")).sendKeys(sandbox2.sandboxAuthHeaderName());
       driver.findElement(By.name("externalPartyAuthHeaderValueTextField")).sendKeys(sandbox2.sandboxAuthHeaderValue());
       driver.findElement(By.cssSelector("[testId='updateSandboxButton']")).click();
@@ -337,6 +342,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     }
     waitForUIReadiness();
     assertTrue(driver.findElement(By.className("pageTitle")).getText().startsWith("Sandbox: "));
+  }
+
+  protected String getTestedPartyApiUrl(SandboxConfig sandbox2) {
+    return sandbox2.sandboxUrl();
   }
 
   protected void loginUser() {

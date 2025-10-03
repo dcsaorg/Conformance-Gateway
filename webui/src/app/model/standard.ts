@@ -6,5 +6,10 @@ export interface Standard {
 export interface StandardVersion {
     number: string,
     suites: string[],
-    roles: string[],
+    roles: Role[],
+}
+
+export interface Role {
+    name: string,
+    noNotifications: boolean
 }

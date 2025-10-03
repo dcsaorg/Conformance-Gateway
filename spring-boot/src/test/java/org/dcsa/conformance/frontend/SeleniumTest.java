@@ -25,6 +25,10 @@ import org.springframework.boot.test.context.SpringBootTest;
     classes = ConformanceApplication.class)
 class SeleniumTest extends SeleniumTestBase {
 
+  public SeleniumTest() {
+    super("Conformant");
+  }
+
   @Test
   void testLoginAndCreateSandboxStart() {
     loginUser();

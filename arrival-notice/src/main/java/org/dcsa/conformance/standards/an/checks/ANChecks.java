@@ -38,7 +38,7 @@ public class ANChecks {
         checks);
   }
 
-  private static List<JsonContentCheck> validateBasicFields() {
+  public static List<JsonContentCheck> validateBasicFields() {
     return List.of(
         validateBasicFieldWithLabel("carrierCode"),
         validateBasicFieldWithLabel("carrierCodeListProvider"),
@@ -58,12 +58,12 @@ public class ANChecks {
         });
   }
 
-  private static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
+  public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
       JsonAttribute.customValidator(
           "Every response received during a conformance test must not be empty",
           body -> body.isEmpty() ? Set.of("The response body must not be empty") : Set.of());
 
-  private static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
+  public static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
     switch (scenarioType) {
       case "FREE_TIME" -> checks.add(validateFreeTimeObjectStructure(scenarioType));
@@ -99,7 +99,7 @@ public class ANChecks {
         checks);
   }
 
-  private static List<JsonContentCheck> validateTransportDocumentReferences(
+  public static List<JsonContentCheck> validateTransportDocumentReferences(
       Supplier<DynamicScenarioParameters> dsp) {
     return List.of(
         JsonAttribute.customValidator(
@@ -150,7 +150,7 @@ public class ANChecks {
             }));
   }
 
-  private static JsonContentCheck validateCarrierContactInformation() {
+  public static JsonContentCheck validateCarrierContactInformation() {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the \"carrierContactInformation\" object",
         body -> {
@@ -187,7 +187,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck validateDocumentParties() {
+  public static JsonContentCheck validateDocumentParties() {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the \"documentParties\" object",
         body -> {
@@ -229,7 +229,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck validateTransport() {
+  public static JsonContentCheck validateTransport() {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the \"transport\" object",
         body -> {
@@ -331,7 +331,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck validateFreeTimeObjectStructure(String scenarioType) {
+  public static JsonContentCheck validateFreeTimeObjectStructure(String scenarioType) {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the \"freeTime\" object",
         body -> {
@@ -391,7 +391,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck validateChargesStructure() {
+  public static JsonContentCheck validateChargesStructure() {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the \"charges\" object",
         body -> {
@@ -406,8 +406,7 @@ public class ANChecks {
         });
   }
 
-
-  private static JsonContentCheck validateUtilizedTransportEquipments() {
+  public static JsonContentCheck validateUtilizedTransportEquipments() {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the \"utilizedTransportEquipments\" object",
         body -> {
@@ -485,7 +484,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck validateConsignmentItems() {
+  public static JsonContentCheck validateConsignmentItems() {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the \"consignmentItem\" object",
         body -> {

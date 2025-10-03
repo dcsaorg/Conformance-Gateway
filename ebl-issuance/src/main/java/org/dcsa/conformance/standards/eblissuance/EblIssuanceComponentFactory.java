@@ -67,7 +67,7 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
+  public Map<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
     return EblIssuanceScenarioListBuilder.createModuleScenarioListBuilders(
@@ -110,6 +110,12 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
     if (issuanceManifest) {
       schemaName = "IssuanceManifest";
     }
+    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
+  }
+
+  public JsonSchemaValidator getMessageSchemaValidator(String schemaName) {
+    String schemaFilePath =
+        "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 }

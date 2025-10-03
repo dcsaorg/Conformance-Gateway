@@ -36,7 +36,7 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
-    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
   @Override

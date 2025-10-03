@@ -42,15 +42,15 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String EBL_API = "api";
 
   private static final String EBL_NOTIFICATIONS_API = "api";
-  private static final String GET_EBL_SCHEMA_NAME = "ShippingInstructions";
-  private static final String GET_TD_SCHEMA_NAME = "TransportDocument";
-  private static final String POST_EBL_SCHEMA_NAME = "CreateShippingInstructions";
+  public static final String GET_EBL_SCHEMA_NAME = "ShippingInstructions";
+  public static final String GET_TD_SCHEMA_NAME = "TransportDocument";
+  public static final String POST_EBL_SCHEMA_NAME = "CreateShippingInstructions";
   private static final String PUT_EBL_SCHEMA_NAME = "UpdateShippingInstructions";
   private static final String PATCH_SI_SCHEMA_NAME = "CancelShippingInstructionsUpdate";
-  private static final String PATCH_TD_SCHEMA_NAME = "ApproveTransportDocument";
-  private static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "CreateShippingInstructionsResponse";
-  private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
-  private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
+  public static final String PATCH_TD_SCHEMA_NAME = "ApproveTransportDocument";
+  public static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "CreateShippingInstructionsResponse";
+  public static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
+  public static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
   private static final String ERROR_RESPONSE_SCHEMA_NAME = "ErrorResponse";
 
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE = new ConcurrentHashMap<>();

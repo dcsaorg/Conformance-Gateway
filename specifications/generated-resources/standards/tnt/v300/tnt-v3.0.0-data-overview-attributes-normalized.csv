@@ -224,7 +224,6 @@ Party,codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a lis
 - `CRED` (Credore)
 - `DCSA` (Digital Container Shipping Association)
 - `DNB` (Dun and Bradstreet)
-- `EDOX` (EdoxOnline)
 - `ESSD` (EssDOCS)
 - `ETEU` (eTEU)
 - `ETIT` (e-title)

@@ -27,7 +27,6 @@ Code of the provider of a list of codes identifying a party, including but not l
 - `CRED` (Credore)
 - `DCSA` (Digital Container Shipping Association)
 - `DNB` (Dun and Bradstreet)
-- `EDOX` (EdoxOnline)
 - `ESSD` (EssDOCS)
 - `ETEU` (eTEU)
 - `ETIT` (e-title)

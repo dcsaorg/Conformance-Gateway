@@ -279,6 +279,7 @@ public class ANStandardSpecification extends StandardSpecification {
         .description(readResourceFile("openapi-post-ans-description.md"))
         .operationId("post-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
+        .parameters(List.of(getApiVersionHeaderParameter()))
         .requestBody(
             new RequestBody()
                 .description("List of arrival notices")
@@ -324,6 +325,7 @@ public class ANStandardSpecification extends StandardSpecification {
         .description(readResourceFile("openapi-post-anns-description.md"))
         .operationId("post-arrival-notice-notifications")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
+        .parameters(List.of(getApiVersionHeaderParameter()))
         .requestBody(
             new RequestBody()
                 .description("List of arrival notice lightweight notifications")

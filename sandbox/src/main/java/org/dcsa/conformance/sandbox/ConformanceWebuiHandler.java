@@ -28,6 +28,7 @@ import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 @Slf4j
 public class ConformanceWebuiHandler {
   private static final String SANDBOX_ID = "sandboxId";
+  private static final String SKIP_ACTION = "skip";
 
   private final ConformanceAccessChecker accessChecker;
   private final String environmentBaseUrl;
@@ -602,9 +603,10 @@ public class ConformanceWebuiHandler {
 
   private JsonNode _completeCurrentAction(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    boolean skipAction = requestNode.get(SKIP_ACTION).asBoolean();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.completeCurrentAction(
-        persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+        persistenceProvider, deferredSandboxTaskConsumer, sandboxId, skipAction);
   }
 
   private JsonNode _getCurrentActionExchanges(String userId, JsonNode requestNode) {

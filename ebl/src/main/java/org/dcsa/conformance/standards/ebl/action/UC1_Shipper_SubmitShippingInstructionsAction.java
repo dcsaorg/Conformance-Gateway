@@ -11,6 +11,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EblChecks;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -43,11 +44,9 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   }
 
   private String getScenarioType() {
-    return switch (getDSP().scenarioType()) {
-      case REGULAR_2C_1U ->
-          "with 2 Commodities, 1 Utilized transport equipment";
-      case REGULAR_2C_2U ->
-          "with  2 Commodities, 2 Utilized transport equipments";
+    return switch (ScenarioType.valueOf(getDspSupplier().get().scenarioType())) {
+      case REGULAR_2C_1U -> "with 2 Commodities, 1 Utilized transport equipment";
+      case REGULAR_2C_2U -> "with  2 Commodities, 2 Utilized transport equipments";
       case REGULAR_NO_COMMODITY_SUBREFERENCE -> "with No Commodity Subreference";
       case REGULAR_SWB_SOC_AND_REFERENCES -> "for Regular SWB and with SOC References";
       case REGULAR_SWB_AMF -> "for Regular SWB with Advance Manifest Filing";
@@ -66,7 +65,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
-    return jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
+    return jsonNode;
   }
 
   @Override
@@ -109,7 +108,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 EblChecks.siRequestContentChecks(
                     getMatchedExchangeUuid(),
                     expectedApiVersion,
-                    getDspSupplier()));
+                    ScenarioType.valueOf(getDspSupplier().get().scenarioType())));
         return Stream.concat(
             primaryExchangeChecks,
             getSINotificationChecks(
@@ -117,7 +116,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 expectedApiVersion,
                 notificationSchemaValidator,
                 ShippingInstructionsStatus.SI_RECEIVED,
-                EblChecks.SIR_REQUIRED_IN_NOTIFICATION));
+                EblChecks.SIR_OR_TDR_REQUIRED_IN_NOTIFICATION));
       }
     };
   }

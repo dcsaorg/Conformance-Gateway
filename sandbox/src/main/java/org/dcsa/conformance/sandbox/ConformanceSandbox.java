@@ -593,15 +593,18 @@ public class ConformanceSandbox {
   public static JsonNode completeCurrentAction(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,
-      String sandboxId) {
+      String sandboxId,
+      boolean skipAction) {
     new OrchestratorTask(
             persistenceProvider,
             conformanceWebRequest ->
                 ConformanceSandbox._asyncSendOutboundWebRequest(
                     deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
-            "completing current action in sandbox %s".formatted(sandboxId),
-            ConformanceOrchestrator::completeCurrentAction)
+            skipAction
+                ? "skipping current action in sandbox %s".formatted(sandboxId)
+                : "completing current action in sandbox %s".formatted(sandboxId),
+            conformanceOrchestrator -> conformanceOrchestrator.completeCurrentAction(skipAction))
         .run();
     return OBJECT_MAPPER.createObjectNode();
   }

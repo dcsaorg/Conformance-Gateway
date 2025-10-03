@@ -9,7 +9,8 @@ export interface ScenarioStatus {
     confirmationRequired: boolean,
     inputRequired: boolean,
     conformanceSubReport: ScenarioConformanceReport,
-    isSkippable: boolean
+    isSkippable: boolean,
+    needsAction: boolean,
 }
 
 export interface ScenarioConformanceReport {

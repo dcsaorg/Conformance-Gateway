@@ -3,7 +3,9 @@ package org.dcsa.conformance.standards.an.party;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +60,12 @@ public class ANSubscriber extends ConformanceParty {
   }
 
   private void getArrivalNotices(JsonNode actionPrompt) {
-    JsonNode dsp = actionPrompt.required("dsp");
-    List<String> references = dsp.findValuesAsText("transportDocumentReferences");
+    ArrayNode tdrs = (ArrayNode) actionPrompt.required("references");
+    List<String> references = new ArrayList<>();
+    for (JsonNode node : tdrs) {
+      references.add(node.asText());
+    }
     syncCounterpartGet("/arrival-notices", Map.of("transportDocumentReferences", references));
+    addOperatorLogEntry("Sent a GET Arrival Notices request");
   }
 }

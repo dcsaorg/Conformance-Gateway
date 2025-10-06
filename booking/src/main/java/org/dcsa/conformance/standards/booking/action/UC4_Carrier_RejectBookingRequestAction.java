@@ -17,8 +17,9 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC4", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC4", 204, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
@@ -47,19 +48,19 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(),
-                BookingState.REJECTED,
-                getDspSupplier()),
+                    getMatchedExchangeUuid(), BookingState.REJECTED, getDspSupplier())
+                .setApplicable(isWithNotifications()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
+                    BookingRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    expectedApiVersion)
+                .setApplicable(isWithNotifications()),
             new JsonSchemaCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

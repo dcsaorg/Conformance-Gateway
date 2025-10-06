@@ -79,7 +79,8 @@ public class ANComponentFactory extends AbstractComponentFactory {
   @Override
   protected Map<String, ANScenarioListBuilder> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
 
     return ANScenarioListBuilder.createModuleScenarioListBuilders(
       this,

@@ -1,7 +1,6 @@
 package org.dcsa.conformance.manual;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
@@ -94,39 +93,5 @@ class ManualScenarioWithoutNotificationsTest extends ManualTestBase {
   void updateCounterPartySandboxConfigBeforeStarting(
       SandboxConfig sandbox1, SandboxConfig sandbox2) {
     super.updateTestedPartySandboxConfigBeforeStarting(sandbox2, sandbox1);
-  }
-
-  @Override
-  protected void validateSubReport(String scenarioName, SubReport subReport) {
-    // Only fail if there are error messages OR non-notification NO_TRAFFIC reports
-    boolean hasErrors = !subReport.errorMessages().isEmpty();
-    boolean hasNonNotificationNoTraffic = hasNonNotificationNoTrafficReports(subReport);
-
-    if (hasErrors || hasNonNotificationNoTraffic) {
-      StringBuilder messageBuilder = new StringBuilder();
-      buildErrorMessage(subReport, messageBuilder);
-
-      String errorDetails = hasErrors ? "Error messages found" : "";
-      if (hasNonNotificationNoTraffic) {
-        errorDetails += (hasErrors ? " | " : "") + "Non-notification NO_TRAFFIC reports found";
-      }
-
-      String errorMessage =
-          "Scenario '"
-              + scenarioName
-              + "' failed validation. "
-              + errorDetails
-              + ". Details: "
-              + messageBuilder;
-      log.error(errorMessage);
-      fail(errorMessage);
-    }
-  }
-
-  private boolean hasNonNotificationNoTrafficReports(SubReport subReport) {
-    if (subReport.status().equals("NO_TRAFFIC") && !subReport.title().contains("[Notification]")) {
-      return true;
-    }
-    return subReport.subReports().stream().anyMatch(this::hasNonNotificationNoTrafficReports);
   }
 }

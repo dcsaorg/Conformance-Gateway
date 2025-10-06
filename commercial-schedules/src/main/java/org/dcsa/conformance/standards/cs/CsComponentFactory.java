@@ -66,7 +66,8 @@ public class CsComponentFactory extends AbstractComponentFactory {
 
   public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
     PartyConfiguration[] partyConfigurations,
-    CounterpartConfiguration[] counterpartConfigurations) {
+    CounterpartConfiguration[] counterpartConfigurations,
+    boolean isWithNotifications) {
     return CsScenarioListBuilder.createModuleScenarioListBuilders(
       this,
       _findPartyOrCounterpartName(

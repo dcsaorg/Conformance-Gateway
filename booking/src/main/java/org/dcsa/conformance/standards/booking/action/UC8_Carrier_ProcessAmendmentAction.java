@@ -24,13 +24,15 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
       BookingState expectedBookingStatus,
       BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator requestSchemaValidator,
-      boolean acceptAmendment) {
+      boolean acceptAmendment,
+      boolean isWithNotifications) {
     super(
         carrierPartyName,
         shipperPartyName,
         previousAction,
         "UC8%s [%s]".formatted(acceptAmendment ? "a" : "b", acceptAmendment ? "A" : "D"),
-        204);
+        204,
+        isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.acceptAmendment = acceptAmendment;
     this.expectedBookingStatus = expectedBookingStatus;
@@ -63,7 +65,8 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
-                BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
+                    BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
+                .setApplicable(isWithNotifications()),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
                 expectedBookingStatus,
@@ -75,10 +78,11 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
+                    BookingRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    expectedApiVersion)
+                .setApplicable(isWithNotifications()),
             new JsonSchemaCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

@@ -15,11 +15,7 @@ import java.util.List;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
     classes = ConformanceApplication.class)
-public class SeleniumWithoutNotificationsTest extends SeleniumTestBase {
-
-  public SeleniumWithoutNotificationsTest() {
-    super("Partially conformant");
-  }
+class SeleniumWithoutNotificationsTest extends SeleniumTestBase {
 
   @ParameterizedTest
   @ValueSource(

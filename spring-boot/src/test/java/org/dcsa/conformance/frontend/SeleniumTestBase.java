@@ -40,15 +40,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   protected static FluentWait<WebDriver> wait;
   private static boolean alreadyLoggedIn = false;
 
-  protected String conformantStatus;
   protected String baseUrl = "http://localhost:4200";
   protected String loginEmail = "selenium-test@dcsa.org";
   protected String loginPassword = "selenium-test-fake-password";
   protected boolean stopAfterFirstScenarioGroup = false;
-
-  public SeleniumTestBase(String conformantStatus) {
-    this.conformantStatus = conformantStatus;
-  }
 
   @BeforeAll
   public static void setUpOnce() {
@@ -56,7 +51,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     options.addArguments("--no-sandbox");
     options.addArguments("--disable-dev-shm-usage");
     options.addArguments("--disable-search-engine-choice-screen");
-    options.addArguments("--headless");
+   // options.addArguments("--headless");
 
     driver = new ChromeDriver(options);
     driver.manage().timeouts().implicitlyWait(Duration.ofMillis(WAIT_BEFORE_TIMEOUT_IN_MILLIS));
@@ -279,7 +274,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       String titleValue =
         driver.findElement(By.className("conformanceStatus")).getDomProperty("title");
       assertEquals(
-              conformantStatus,
+          "Conformant",
           titleValue,
           "Scenario is not conformant: '" + titleValue + "', while running: " + name);
       log.debug("Scenario is Conformant.");

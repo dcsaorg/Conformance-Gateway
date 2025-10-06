@@ -19,8 +19,9 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
       String shipperPartyName,
       BookingAction previousAction,
       BookingState expectedAmendedBookingStatus,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC10", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC10", 204, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
   }
@@ -49,7 +50,8 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
-                BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
+                    BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
+                .setApplicable(isWithNotifications()),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
                 BookingState.DECLINED,
@@ -61,10 +63,11 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
+                    BookingRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    expectedApiVersion)
+                .setApplicable(isWithNotifications()),
             new JsonSchemaCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

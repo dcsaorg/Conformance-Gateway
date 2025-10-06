@@ -5,11 +5,13 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
+@Getter
 @Slf4j
 public abstract class ActionCheck extends ConformanceCheck {
   private final Predicate<String> isRelevantForRoleName;
@@ -71,4 +73,9 @@ public abstract class ActionCheck extends ConformanceCheck {
 
   protected abstract Set<String> checkConformance(
       Function<UUID, ConformanceExchange> getExchangeByUuid);
+
+  public ActionCheck setApplicable(boolean applicable) {
+    isApplicable = applicable;
+    return this;
+  }
 }

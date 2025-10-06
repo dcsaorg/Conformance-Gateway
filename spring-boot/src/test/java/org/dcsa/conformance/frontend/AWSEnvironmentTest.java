@@ -17,10 +17,6 @@ class AWSEnvironmentTest extends SeleniumTestBase {
   private static final String ENV_LOGIN_EMAIL = "TEST_LOGIN_EMAIL";
   private static final String ENV_LOGIN_PASSWORD = "TEST_LOGIN_PASSWORD";
 
-  public AWSEnvironmentTest() {
-    super("Conformant");
-  }
-
   @Override
   @BeforeEach
   public void setUp() {

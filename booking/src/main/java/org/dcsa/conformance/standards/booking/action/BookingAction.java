@@ -11,6 +11,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -21,18 +23,22 @@ import org.dcsa.conformance.standards.booking.party.*;
 import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
+@Getter
 public abstract class BookingAction extends BookingAndEblAction {
 
   protected final int expectedStatus;
+  private final boolean isWithNotifications;
 
   protected BookingAction(
       String sourcePartyName,
       String targetPartyName,
       BookingAndEblAction previousAction,
       String actionTitle,
-      int expectedStatus) {
+      int expectedStatus,
+      boolean isWithNotifications) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
+    this.isWithNotifications = isWithNotifications;
   }
 
   @Override
@@ -184,9 +190,10 @@ public abstract class BookingAction extends BookingAndEblAction {
                 BookingRole::isCarrier,
                 getMatchedNotificationExchangeUuid(),
                 "/v2/booking-notifications"),
-            //TODO: do not add check when not expecting a notification
+            // TODO: do not add check when not expecting a notification
             new ResponseStatusCheck(
-                titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204),
+                    titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204)
+                .setApplicable(isWithNotifications),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedNotificationExchangeUuid(),
                 bookingState,
@@ -200,11 +207,12 @@ public abstract class BookingAction extends BookingAndEblAction {
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             ApiHeaderCheck.createNotificationCheck(
-                titlePrefix,
-                BookingRole::isShipper,
-                getMatchedNotificationExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
+                    titlePrefix,
+                    BookingRole::isShipper,
+                    getMatchedNotificationExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    expectedApiVersion)
+                .setApplicable(isWithNotifications),
             new JsonSchemaCheck(
                 titlePrefix,
                 BookingRole::isCarrier,

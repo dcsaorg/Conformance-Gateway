@@ -38,6 +38,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
+  private static final ThreadLocal<Boolean> threadLocalIsWithNotifications = new ThreadLocal<>();
 
   private static final String EBL_API = "api";
 
@@ -56,10 +57,15 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
   public static LinkedHashMap<String, EblScenarioListBuilder> createModuleScenarioListBuilders(
-      EblComponentFactory componentFactory, String standardVersion, String carrierPartyName, String shipperPartyName) {
+      EblComponentFactory componentFactory,
+      boolean isWithNotifications,
+      String standardVersion,
+      String carrierPartyName,
+      String shipperPartyName) {
     STANDARD_VERSION.set(standardVersion);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
+    threadLocalIsWithNotifications.set(isWithNotifications);
 
     if (SCENARIO_SUITE_CONFORMANCE_SI_ONLY.equals(componentFactory.getScenarioSuite())) {
       return createConformanceSiOnlyScenarios(false);

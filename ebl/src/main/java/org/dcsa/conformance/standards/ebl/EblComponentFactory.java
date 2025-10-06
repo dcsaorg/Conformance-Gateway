@@ -66,9 +66,11 @@ class EblComponentFactory extends AbstractComponentFactory {
 
   public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     return EblScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        isWithNotifications,
         this.standardVersion,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, EblRole::isCarrier),

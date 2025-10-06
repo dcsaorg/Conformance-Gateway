@@ -68,9 +68,11 @@ class BookingComponentFactory extends AbstractComponentFactory {
   @Override
   public Map<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     return BookingScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        isWithNotifications,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, BookingRole::isCarrier),
         _findPartyOrCounterpartName(

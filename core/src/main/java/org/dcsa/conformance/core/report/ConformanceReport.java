@@ -51,7 +51,10 @@ public class ConformanceReport {
             .reduce(ConformanceStatusReducer::reduce)
             .orElse(
                 ConformanceStatus.forExchangeCounts(
-                    conformantExchangeCount, nonConformantExchangeCount));
+                    conformantExchangeCount,
+                    nonConformantExchangeCount,
+                    conformanceCheck.isApplicable()));
+
     conformanceCheck.computedStatusConsumer().accept(this.conformanceStatus);
   }
 

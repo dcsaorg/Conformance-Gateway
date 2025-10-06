@@ -23,7 +23,11 @@ public class ConformanceStatusReducer {
                     || status == ConformanceStatus.NOT_RELEVANT)) {
       return ConformanceStatus.CONFORMANT;
     }
-    if (statuses.stream().allMatch(ConformanceStatus.NO_TRAFFIC::equals)) {
+    if (statuses.stream()
+        .allMatch(
+            status ->
+                status == ConformanceStatus.NO_TRAFFIC
+                    || status == ConformanceStatus.NOT_RELEVANT)) {
       return ConformanceStatus.NO_TRAFFIC;
     }
     return ConformanceStatus.PARTIALLY_CONFORMANT;

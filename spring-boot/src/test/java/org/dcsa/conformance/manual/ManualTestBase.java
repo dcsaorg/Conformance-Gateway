@@ -246,7 +246,7 @@ public abstract class ManualTestBase {
     if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 4);
   }
 
-  protected void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
+  private void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
     waitForCleanSandboxStatus(sandbox1);
     log.info("Validating scenario '{}'.", scenarioName);
     JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
@@ -257,14 +257,6 @@ public abstract class ManualTestBase {
     String message = "Found in scenarioId: " + scenarioId + " having '" + subReport.title + "'.";
     assertFalse(jsonNode.get("isRunning").asBoolean(), message);
 
-    validateSubReport(scenarioName, subReport);
-
-    assertTrue(
-        subReport.errorMessages.isEmpty(),
-        "Should be empty, but found: '" + subReport.errorMessages + "'.\n" + message);
-  }
-
-  protected void validateSubReport(String scenarioName, SubReport subReport) {
     if (!subReport.status.equals("CONFORMANT")) {
       StringBuilder messageBuilder = new StringBuilder();
       buildErrorMessage(subReport, messageBuilder);
@@ -275,6 +267,10 @@ public abstract class ManualTestBase {
       // waitForAsyncCalls(10 * 60 * 1000L);
       fail(errorMessage);
     }
+
+    assertTrue(
+        subReport.errorMessages.isEmpty(),
+        "Should be empty, but found: '" + subReport.errorMessages + "'.\n" + message);
   }
 
   protected void buildErrorMessage(SubReport subReport, StringBuilder messageBuilder) {

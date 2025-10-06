@@ -16,7 +16,11 @@ public class ConformanceStatusReducer {
     if (statuses.contains(ConformanceStatus.PARTIALLY_CONFORMANT)) {
       return ConformanceStatus.PARTIALLY_CONFORMANT;
     }
-    if (statuses.stream().allMatch(ConformanceStatus.CONFORMANT::equals)) {
+    if (statuses.stream()
+        .allMatch(
+            status ->
+                status == ConformanceStatus.CONFORMANT
+                    || status == ConformanceStatus.NOT_RELEVANT)) {
       return ConformanceStatus.CONFORMANT;
     }
     if (statuses.stream().allMatch(ConformanceStatus.NO_TRAFFIC::equals)) {

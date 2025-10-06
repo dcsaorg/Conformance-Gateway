@@ -4,7 +4,8 @@ public enum ConformanceStatus {
   NO_TRAFFIC,
   NON_CONFORMANT,
   PARTIALLY_CONFORMANT,
-  CONFORMANT;
+  CONFORMANT,
+  NOT_RELEVANT;
 
   public static ConformanceStatus forExchangeCounts(
       int conformantExchangeCount, int nonConformantExchangeCount) {

@@ -187,6 +187,7 @@ public class ConformanceReport {
       case CONFORMANT -> "✅";
       case PARTIALLY_CONFORMANT -> "✔️";
       case NON_CONFORMANT -> "🚫";
+      case NOT_RELEVANT -> "➖";
       default -> "❔";
     };
   }
@@ -196,6 +197,7 @@ public class ConformanceReport {
       case CONFORMANT -> "CONFORMANT";
       case PARTIALLY_CONFORMANT -> "PARTIALLY CONFORMANT";
       case NON_CONFORMANT -> "NON-CONFORMANT";
+      case NOT_RELEVANT -> "NOT RELEVANT";
       default -> "NO TRAFFIC";
     };
   }

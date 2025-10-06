@@ -1,65 +1,31 @@
 {
   "arrivalNoticeNotifications": [
     {
-      "issueDateTime": "2025-01-23T01:23:45Z",
-      "typeLabel": "English, consignee, USD",
-      "versionLabel": "Warning",
-      "transportDocumentReference": "HHL71800000",
+      "issueDateTime": "2024-03-04T00:00:00Z",
+      "transportDocumentReference": "HLCUSGS250302123",
       "equipmentReferences": [
-        "APZU4812090"
+        "HLCU1234567"
       ],
       "portOfDischarge": {
-        "locationName": "Port of Amsterdam",
-        "facilityTypeCode": "RAMP",
+        "locationName": "PSA Pasir Panjang Terminal",
         "address": {
-          "street": "Ruijggoordweg",
-          "streetNumber": "100",
+          "street": "Harbour Drive, PSA Horizons",
+          "streetNumber": "1",
           "floor": "N/A",
-          "postCode": "1047 HM",
-          "POBox": "123",
-          "city": "Amsterdam",
-          "stateRegion": "North Holland",
-          "countryCode": "NL"
+          "postCode": "117352",
+          "POBox": "N/A",
+          "city": "Singapore",
+          "stateRegion": "Central Singapore",
+          "countryCode": "SG"
         },
-        "UNLocationCode": "NLAMS",
+        "UNLocationCode": "SGSIN",
         "facility": {
-          "facilityCode": "ADT",
+          "facilityCode": "PSAPPT",
           "facilityCodeListProvider": "SMDG"
-        },
-        "geoCoordinate": {
-          "latitude": "48.85855",
-          "longitude": "2.294492036"
-        }
-      },
-      "placeOfDelivery": {
-        "locationName": "Port of Amsterdam",
-        "facilityTypeCode": "RAMP",
-        "address": {
-          "street": "Ruijggoordweg",
-          "streetNumber": "100",
-          "floor": "N/A",
-          "postCode": "1047 HM",
-          "POBox": "123",
-          "city": "Amsterdam",
-          "stateRegion": "North Holland",
-          "countryCode": "NL"
-        },
-        "UNLocationCode": "NLAMS",
-        "facility": {
-          "facilityCode": "ADT",
-          "facilityCodeListProvider": "SMDG"
-        },
-        "geoCoordinate": {
-          "latitude": "48.85855",
-          "longitude": "2.294492036"
         }
       },
       "portOfDischargeArrivalDate": {
-        "value": "2025-01-23",
-        "classifier": "EST"
-      },
-      "placeOfDeliveryArrivalDate": {
-        "value": "2025-01-23",
+        "value": "2024-03-12",
         "classifier": "EST"
       }
     }

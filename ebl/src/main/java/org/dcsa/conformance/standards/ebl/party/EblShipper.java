@@ -15,18 +15,18 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.*;
-import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 
 @Slf4j
 public class EblShipper extends ConformanceParty {
 
-  private static final String CONSIGNMENT_ITEMS = "consignmentItems";
+  public static final Set<String> EBL_ENDPOINT_PATTERNS =
+      Set.of(
+          ".*/v3/shipping-instructions-notifications$", ".*/v3/transport-document-notifications$");
 
   public EblShipper(
       String apiVersion,
@@ -45,22 +45,22 @@ public class EblShipper extends ConformanceParty {
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+  public void exportPartyJsonState(ObjectNode targetObjectNode) {
     // no state to export
   }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+  public void importPartyJsonState(ObjectNode sourceObjectNode) {
     // no state to import
   }
 
   @Override
-  protected void doReset() {
+  public void doReset() {
     // no state to reset
   }
 
   @Override
-  protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
+  public Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(UC1_Shipper_SubmitShippingInstructionsAction.class, this::sendShippingInstructionsRequest),
       Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
@@ -68,141 +68,28 @@ public class EblShipper extends ConformanceParty {
       Map.entry(AUC_Shipper_SendOutOfOrderSIMessageAction.class, this::sendOutOfOrderMessage),
       Map.entry(UC3ShipperSubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
       Map.entry(UC5_Shipper_CancelUpdateToShippingInstructionsAction.class, this::cancelUpdateToShippingInstructions),
-      Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument)
+      Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument),
+      Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument),
+      Map.entry(ShipperGetShippingInstructionsErrorAction.class, this::getShippingInstructionsRequest)
     );
-  }
-
-  static ObjectNode siFromScenarioType(ScenarioType scenarioType, CarrierScenarioParameters carrierScenarioParameters, String apiVersion) {
-
-    var jsonRequestBody =
-        (ObjectNode)
-            JsonToolkit.templateFileToJsonNode(
-                "/standards/ebl/messages/" + scenarioType.shipperTemplate(apiVersion),
-                Map.ofEntries(
-                    Map.entry(
-                        "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-                        carrierScenarioParameters.carrierBookingReference()),
-                    Map.entry(
-                        "COMMODITY_SUBREFERENCE_PLACEHOLDER",
-                        Objects.requireNonNullElse(
-                            carrierScenarioParameters.commoditySubReference(), "")),
-                    Map.entry(
-                        "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
-                        Objects.requireNonNullElse(
-                            carrierScenarioParameters.commoditySubReference2(), "")),
-                    Map.entry(
-                        "EQUIPMENT_REFERENCE_PLACEHOLDER",
-                        carrierScenarioParameters.equipmentReference()),
-                    Map.entry(
-                        "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
-                        Objects.requireNonNullElse(
-                            carrierScenarioParameters.equipmentReference2(), "")),
-                    Map.entry(
-                        "INVOICE_PAYABLE_AT_UNLOCATION_CODE",
-                        carrierScenarioParameters.invoicePayableAtUNLocationCode()),
-                    Map.entry(
-                        "CONSIGNMENT_ITEM_HS_CODE",
-                        carrierScenarioParameters.consignmentItemHSCode()),
-                    Map.entry(
-                        "CONSIGNMENT_ITEM_2_HS_CODE",
-                        Objects.requireNonNullElse(
-                            carrierScenarioParameters.consignmentItem2HSCode(), "")),
-                    Map.entry(
-                        "DESCRIPTION_OF_GOODS_PLACEHOLDER",
-                        carrierScenarioParameters.descriptionOfGoods()),
-                    Map.entry(
-                        "DESCRIPTION_OF_GOODS_2_PLACEHOLDER",
-                        Objects.requireNonNullElse(
-                            carrierScenarioParameters.descriptionOfGoods2(), "")),
-                    Map.entry(
-                        "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
-                        Objects.requireNonNullElse(
-                            carrierScenarioParameters.outerPackagingDescription(), "")),
-                    Map.entry(
-                        "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
-                        scenarioType.transportDocumentTypeCode())));
-
-    removeEmptyFields(jsonRequestBody, scenarioType, carrierScenarioParameters);
-    // Cannot substitute this because it is a boolean
-    if (!scenarioType.isToOrder()) {
-      // Cannot substitute this because it is a full element
-      var parties = (ObjectNode) jsonRequestBody.path("documentParties");
-      parties
-          .putObject("consignee")
-          .put("partyName", "DCSA CTK Consignee")
-          .putArray("identifyingCodes")
-          .addObject()
-          .put("codeListProvider", "W3C")
-          .put("partyCode", "MSK")
-          .put("codeListName", "DID")
-          .putArray("partyContactDetails")
-          .addObject()
-          .put("name", "DCSA another test person")
-          .put("email", "no-reply@dcsa-consignee.example.org");
-    }
-    if (scenarioType.transportDocumentTypeCode().equals("BOL")) {
-      JsonNode documentParties = jsonRequestBody.path("documentParties");
-      if (!documentParties.isMissingNode() && !documentParties.path("issueTo").isMissingNode()) {
-        var issueToParty = (ObjectNode) documentParties.path("issueTo");
-        issueToParty.put("sendToPlatform", "CARX");
-      }
-    }
-    return jsonRequestBody;
-  }
-
-  private static void removeEmptyFields(
-      ObjectNode jsonRequestBody,
-      ScenarioType scenarioType,
-      CarrierScenarioParameters carrierScenarioParameters) {
-
-    if (carrierScenarioParameters.commoditySubReference() == null
-        || carrierScenarioParameters.commoditySubReference().isEmpty()) {
-      ((ObjectNode) jsonRequestBody.withArray(CONSIGNMENT_ITEMS).get(0))
-          .remove("commoditySubReference");
-    }
-    if ((scenarioType.equals(ScenarioType.REGULAR_2C_2U_2E)
-            || scenarioType.equals(ScenarioType.REGULAR_2C_2U_1E))
-        && (carrierScenarioParameters.commoditySubReference2() == null
-            || carrierScenarioParameters.commoditySubReference2().isEmpty())) {
-      ((ObjectNode) jsonRequestBody.withArray(CONSIGNMENT_ITEMS).get(1))
-          .remove("commoditySubReference");
-    }
-
-    if (carrierScenarioParameters.outerPackagingDescription() == null
-        || carrierScenarioParameters.outerPackagingDescription().isEmpty()
-            && scenarioType.equals(ScenarioType.DG)) {
-      jsonRequestBody
-          .withArray(CONSIGNMENT_ITEMS)
-          .forEach(
-              consignmentItem ->
-                  consignmentItem
-                      .withArray("cargoItems")
-                      .forEach(cargoItem -> ((ObjectNode) cargoItem).remove("outerPackaging")));
-    }
   }
 
   private void sendShippingInstructionsRequest(JsonNode actionPrompt) {
     log.info("Shipper.sendShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
-    CarrierScenarioParameters carrierScenarioParameters =
-      CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    var jsonRequestBody = siFromScenarioType(
-      scenarioType,
-      carrierScenarioParameters,
-      apiVersion
-    );
-    ConformanceResponse conformanceResponse = syncCounterpartPost("/v3/shipping-instructions", jsonRequestBody);
+    JsonNode siPayload = actionPrompt.get(CarrierSupplyPayloadAction.CARRIER_PAYLOAD);
+
+    ConformanceResponse conformanceResponse = syncCounterpartPost("/v3/shipping-instructions", siPayload);
 
     JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
     String shippingInstructionsReference = jsonBody.path("shippingInstructionsReference").asText();
-    ObjectNode updatedShippingInstructions = jsonRequestBody
+    ObjectNode updatedShippingInstructions = ((ObjectNode) siPayload)
         .put("shippingInstructionsReference", shippingInstructionsReference);
     persistentMap.save(shippingInstructionsReference, updatedShippingInstructions);
 
     addOperatorLogEntry(
         "Sent a shipping instructions request with the parameters: %s"
-            .formatted(carrierScenarioParameters.toJson()));
+            .formatted(siPayload));
   }
 
   private void sendUpdatedShippingInstructionsRequest(JsonNode actionPrompt) {
@@ -302,9 +189,15 @@ public class EblShipper extends ConformanceParty {
     log.info("Shipper.getShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String documentReference = actionPrompt.get("documentReference").asText();
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
+    boolean errorScenario = actionPrompt.path(ShipperGetShippingInstructionsErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
+
     Map<String, List<String>> queryParams = requestAmendment
       ? Map.of("updatedContent", List.of("true"))
       : Collections.emptyMap();
+
+    if (errorScenario) {
+      documentReference = "NON-EXISTING-SI";
+    }
 
     syncCounterpartGet("/v3/shipping-instructions/" + URLEncoder.encode(documentReference, StandardCharsets.UTF_8), queryParams);
 
@@ -314,6 +207,11 @@ public class EblShipper extends ConformanceParty {
   private void getTransportDocument(JsonNode actionPrompt) {
     log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("tdr").asText();
+    boolean errorScenario = actionPrompt.path(ShipperGetTransportDocumentErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
+
+    if (errorScenario) {
+      tdr = "NON-EXISTING-TD";
+    }
 
     syncCounterpartGet("/v3/transport-documents/" + URLEncoder.encode(tdr, StandardCharsets.UTF_8), Collections.emptyMap());
 

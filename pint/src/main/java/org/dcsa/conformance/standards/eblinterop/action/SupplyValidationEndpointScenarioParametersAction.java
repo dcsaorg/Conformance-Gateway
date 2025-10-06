@@ -29,8 +29,7 @@ public class SupplyValidationEndpointScenarioParametersAction extends PintAction
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     setDsp(getDsp().withReceiverValidation(partyInput.path("input")));
   }
 
@@ -49,7 +48,7 @@ public class SupplyValidationEndpointScenarioParametersAction extends PintAction
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Provide parameters for the receiver validation endpoint");
+    return getMarkdownHumanReadablePrompt("prompt-supply-validation-endpoint-scenario-parameters.md");
   }
 
 }

@@ -1,21 +1,20 @@
 package org.dcsa.conformance.core.scenario;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.report.ConformanceStatus;
-import org.dcsa.conformance.core.state.StatefulEntity;
-
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.report.ConformanceStatus;
+import org.dcsa.conformance.core.state.StatefulEntity;
 
 @Slf4j
 public class ConformanceScenario implements StatefulEntity {
@@ -59,17 +58,21 @@ public class ConformanceScenario implements StatefulEntity {
 
   @Override
   public void importJsonState(JsonNode jsonState) {
-    if (!jsonState.has("id")) return;
-    id = UUID.fromString(jsonState.get("id").asText());
+    try {
+      if (!jsonState.has("id")) return;
+      id = UUID.fromString(jsonState.get("id").asText());
 
-    int nextActionsSize = jsonState.get("nextActionsSize").asInt();
-    while (nextActions.size() > nextActionsSize) {
-      nextActions.removeFirst();
-    }
+      int nextActionsSize = jsonState.get("nextActionsSize").asInt();
+      while (nextActions.size() > nextActionsSize) {
+        nextActions.removeFirst();
+      }
 
-    ArrayNode allActionsNode = (ArrayNode) jsonState.get("allActions");
-    for (int index = 0; index < allActions.size(); ++index) {
-      allActions.get(index).importJsonState(allActionsNode.get(index));
+      ArrayNode allActionsNode = (ArrayNode) jsonState.get("allActions");
+      for (int index = 0; index < allActions.size(); ++index) {
+        allActions.get(index).importJsonState(allActionsNode.get(index));
+      }
+    } catch (Exception e) {
+      log.warn("Failed to load scenario state: {}", e, e);
     }
   }
 
@@ -92,13 +95,6 @@ public class ConformanceScenario implements StatefulEntity {
     return nextActions.stream()
         .map(ConformanceAction::getActionTitle)
         .collect(Collectors.joining(" - "));
-  }
-
-  public String getReportTitleDescription() {
-    return nextActions.stream()
-            .skip(1)
-            .map(ConformanceAction::getActionTitle)
-            .collect(Collectors.joining(" - "));
   }
 
   public Stream<ConformanceAction> allActionsStream() {

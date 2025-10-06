@@ -1,12 +1,11 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.checks.EblChecks;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
@@ -46,7 +45,7 @@ public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends State
           expectedApiVersion,
           requestSchemaValidator,
           ShippingInstructionsStatus.SI_PENDING_UPDATE,
-          EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier())
+          EblChecks.sirInNotificationMustMatchDSP(getDspSupplier())
         );
       }
     };

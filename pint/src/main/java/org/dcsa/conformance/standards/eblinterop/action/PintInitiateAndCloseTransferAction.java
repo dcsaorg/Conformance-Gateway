@@ -57,7 +57,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Send transfer-transaction request");
+    return getMarkdownHumanReadablePrompt("prompt-initiate-and-close-transfer.md");
   }
 
   @Override

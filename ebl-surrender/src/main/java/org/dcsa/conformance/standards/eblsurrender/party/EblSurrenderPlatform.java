@@ -20,9 +20,12 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseErrorAction;
 
 @Slf4j
 public class EblSurrenderPlatform extends ConformanceParty {
+
+  public static final String INVALID_TDR = UUID.randomUUID().toString();
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
   private final Map<String, String> tdrsBySrr = new HashMap<>();
 
@@ -64,7 +67,9 @@ public class EblSurrenderPlatform extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(SurrenderRequestResponseAction.class, this::requestSurrender));
+    return Map.ofEntries(
+        Map.entry(SurrenderRequestResponseAction.class, this::requestSurrender),
+        Map.entry(SurrenderRequestResponseErrorAction.class, this::requestSurrender));
   }
 
   private void requestSurrender(JsonNode actionPrompt) {
@@ -105,7 +110,18 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry("ISSUE_TO_PARTY", ssp.issueToParty().toString()),
                 Map.entry("SURRENDEREE_PARTY", ssp.surrendereeParty().toString()),
                 Map.entry("CARRIER_PARTY", ssp.carrierParty().toString()),
-                Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString())));
+                Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString()),
+                Map.entry(
+                    "SURRENDER_ACTION_CODE_PLACEHOLDER",
+                    forAmendment ? "SURRENDER_FOR_AMENDMENT" : "SURRENDER_FOR_DELIVERY")));
+
+    boolean errorScenario =
+        actionPrompt
+            .path(SurrenderRequestResponseErrorAction.SEND_NO_TRANSPORT_DOCUMENT_REFERENCE)
+            .asBoolean(false);
+    if (errorScenario) {
+      ((ObjectNode) jsonRequestBody).put("transportDocumentReference", INVALID_TDR);
+    }
 
     syncCounterpartPost(
         "/v%s/ebl-surrender-requests".formatted(apiVersion.charAt(0)), jsonRequestBody);
@@ -161,9 +177,6 @@ public class EblSurrenderPlatform extends ConformanceParty {
                           "Rejecting '%s' for document '%s' because it is in state '%s'"
                               .formatted(action, tdr, eblStatesById.get(tdr)))));
     }
-    /*addOperatorLogEntry(
-    "Handling surrender response with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-        .formatted(action, srr, tdr, eblStatesById.get(tdr)));*/
 
     addOperatorLogEntry(
         "Handling notification with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"

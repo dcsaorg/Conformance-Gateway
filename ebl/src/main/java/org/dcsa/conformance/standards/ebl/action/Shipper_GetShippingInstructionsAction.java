@@ -6,13 +6,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
 import java.util.Set;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.checks.EblChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -27,18 +28,13 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
   private final JsonSchemaValidator responseSchemaValidator;
   private final boolean requestAmendedStatus;
   private final boolean recordTDR;
-  private final boolean useTDRef;
+  private final boolean useBothRef;
 
-  private static String name(boolean requestAmendedStatus, boolean useTDRef) {
-    var flag =
-        (requestAmendedStatus ? FLAG_REQUEST_AMENDMENT : FLAG_NONE)
-      | (useTDRef ? FLAG_USE_TD_REF : FLAG_NONE)
-      ;
+  private static String name(boolean requestAmendedStatus) {
+    var flag = (requestAmendedStatus ? FLAG_REQUEST_AMENDMENT : FLAG_NONE);
     return switch (flag) {
       case FLAG_NONE -> "GET SI";
-      case FLAG_NONE|FLAG_USE_TD_REF -> "GET SI (TDR)";
-      case FLAG_REQUEST_AMENDMENT|FLAG_NONE -> "GET aSI";
-      case FLAG_REQUEST_AMENDMENT|FLAG_USE_TD_REF -> "GET aSI (TDR)";
+      case FLAG_REQUEST_AMENDMENT -> "GET aSI";
       default -> throw new AssertionError("Missing case for 0x" + Integer.toHexString(flag));
     };
   }
@@ -52,30 +48,31 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       JsonSchemaValidator responseSchemaValidator,
       boolean requestAmendedStatus,
       boolean recordTDR,
-      boolean useTDRef) {
-    super(shipperPartyName, carrierPartyName, previousAction, name(requestAmendedStatus, useTDRef), 200);
+      boolean useBothRef) {
+    super(shipperPartyName, carrierPartyName, previousAction, name(requestAmendedStatus), 200);
     this.expectedSiStatus = expectedSiStatus;
     this.expectedAmendedSiStatus = expectedAmendedSiStatus;
-    this.useTDRef = useTDRef;
+    this.useBothRef = useBothRef;
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestAmendedStatus = requestAmendedStatus;
     this.recordTDR = recordTDR;
 
-    if (useTDRef && recordTDR) {
-      throw new IllegalArgumentException("Cannot use recordTDR with useTDRef");
+    if (useBothRef && recordTDR) {
+      throw new IllegalArgumentException("Cannot use recordTDR with useBothRef");
     }
   }
 
   @Override
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
-    var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+    var documentReference =
+        this.useBothRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
     if (documentReference == null) {
       throw new IllegalStateException("Missing document reference for use-case 3");
     }
     return super.asJsonNode()
-      .put("documentReference", documentReference)
-      .put("amendedContent", requestAmendedStatus);
+        .put("documentReference", documentReference)
+        .put("amendedContent", requestAmendedStatus);
   }
 
   @Override
@@ -85,24 +82,33 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
         Map.ofEntries(
             Map.entry(
                 "REFERENCE",
-                this.useTDRef
-                    ? dsp.transportDocumentReference()
-                    : dsp.shippingInstructionsReference()),
+                this.useBothRef
+                    ? String.format(
+                        "either the TD reference (%s) or the SI reference (%s)",
+                        dsp.transportDocumentReference(), dsp.shippingInstructionsReference())
+                    : "document reference  " + dsp.shippingInstructionsReference()),
             Map.entry(
                 "ORIGINAL_OR_AMENDED_PLACEHOLDER", requestAmendedStatus ? "AMENDED" : "ORIGINAL"));
     return getMarkdownHumanReadablePrompt(
         replacementsMap, "prompt-shipper-get.md", "prompt-shipper-refresh-complete.md");
   }
 
+  @Override
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     if (recordTDR) {
       var dsp = getDspSupplier().get();
-      var tdr = exchange.getResponse().message().body().getJsonBody().path("transportDocumentReference");
+      var tdr =
+          exchange.getResponse().message().body().getJsonBody().path("transportDocumentReference");
       if (!tdr.isMissingNode()) {
         getDspConsumer().accept(dsp.withTransportDocumentReference(tdr.asText()));
       }
     }
+  }
+
+  @Override
+  public Set<String> skippableForRoles() {
+    return Set.of(EblRole.SHIPPER.getConfigName());
   }
 
   @Override
@@ -111,13 +117,15 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        var documentReference =
-            useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+
         return Stream.of(
             new UrlPathCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
-                "/v3/shipping-instructions/" + documentReference),
+                buildFullUris(
+                    "/v3/shipping-instructions/",
+                    dsp.shippingInstructionsReference(),
+                    dsp.transportDocumentReference())),
             new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,
@@ -138,11 +146,10 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
             EBLChecks.siResponseContentChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
-                getCspSupplier(),
-                getDspSupplier(),
                 expectedSiStatus,
                 expectedAmendedSiStatus,
-                requestAmendedStatus));
+                requestAmendedStatus,
+              getDspSupplier()));
       }
     };
   }
@@ -200,4 +207,5 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       }
     };
   }
+
 }

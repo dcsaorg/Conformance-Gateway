@@ -63,8 +63,7 @@ public class SupplyScenarioParametersAction extends CsAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Use the following format to provide the values of the specified query parameters"
-        + " for which your party can successfully process a GET request:";
+    return getMarkdownHumanReadablePrompt(null, "prompt-publisher-ssp.md");
   }
 
   @Override
@@ -86,8 +85,7 @@ public class SupplyScenarioParametersAction extends CsAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
   }
 

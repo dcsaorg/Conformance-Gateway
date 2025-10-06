@@ -21,7 +21,7 @@ class SupplyScenarioParametersActionTest {
   })
   void testHandlePartyInput(String date, String interval) {
     JsonNode inputNode = OBJECT_MAPPER.createObjectNode().set("input", OBJECT_MAPPER.createObjectNode().put("date", date).put("interval", interval));
-    action.handlePartyInput(inputNode);
+    action.doHandlePartyInput(inputNode);
     String output = action.getSuppliedScenarioParameters().toJson().toString();
     assertTrue(output.contains("\"interval\":\"%s\"".formatted(interval)));
     assertTrue(output.contains("\"date\":\"%s\"".formatted(date)));
@@ -38,6 +38,6 @@ class SupplyScenarioParametersActionTest {
   })
   void testHandlePartyInputWrongDataShouldThrowException(String date, String interval) {
     JsonNode inputNode = OBJECT_MAPPER.createObjectNode().set("input", OBJECT_MAPPER.createObjectNode().put("date", date).put("interval", interval));
-    assertThrows(UserFacingException.class, () -> action.handlePartyInput(inputNode));
+    assertThrows(UserFacingException.class, () -> action.doHandlePartyInput(inputNode));
   }
 }

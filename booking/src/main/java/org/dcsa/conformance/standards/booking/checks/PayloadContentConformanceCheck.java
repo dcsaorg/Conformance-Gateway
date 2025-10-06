@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -20,12 +19,17 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
 
   protected static final String UNSET_MARKER = "<unset>";
 
-  protected PayloadContentConformanceCheck(String title, Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType) {
-    super(title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
+  protected PayloadContentConformanceCheck(
+      String title,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType) {
+    super("[Notification]", title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
   }
 
   @Override
-  public final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected final Set<String> checkConformance(
+      Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
     return Collections.emptySet();
   }
@@ -33,20 +37,17 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   @Override
   protected abstract Stream<? extends ConformanceCheck> createSubChecks();
 
-
-  protected Function<JsonNode, Set<String>> at(String path, Function<JsonNode, Set<String>> subCheck) {
+  protected Function<JsonNode, Set<String>> at(
+      String path, Function<JsonNode, Set<String>> subCheck) {
     // Eagerly compile to the pointer to weed out syntax errors early.
     var pointer = JsonPointer.compile(path);
     return payload -> subCheck.apply(payload.at(pointer));
   }
 
-  protected void addSubCheck(String subtitle, Function<JsonNode, Set<String>> subCheck, Consumer<ConformanceCheck> addCheck) {
-    addCheck.accept(createSubCheck(subtitle, subCheck));
-  }
-
-  protected ConformanceCheck createSubCheck(String subtitle, Function<JsonNode, Set<String>> subCheck) {
+  protected ConformanceCheck createSubCheck(
+      String prefix, String subtitle, Function<JsonNode, Set<String>> subCheck) {
     return new ActionCheck(
-        subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
+        prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
       @Override
       protected Set<String> checkConformance(
           Function<UUID, ConformanceExchange> getExchangeByUuid) {
@@ -60,15 +61,5 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
         return subCheck.apply(payload);
       }
     };
-  }
-
-  protected boolean isNonEmptyNode(JsonNode field) {
-    if (field == null || field.isMissingNode()) {
-      return false;
-    }
-    if (field.isTextual()) {
-      return !field.asText().isBlank();
-    }
-    return !field.isEmpty() || field.isValueNode();
   }
 }

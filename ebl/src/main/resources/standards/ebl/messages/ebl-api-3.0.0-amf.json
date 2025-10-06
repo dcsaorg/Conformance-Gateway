@@ -1,36 +1,38 @@
 {
-  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+  "transportDocumentTypeCode": "SWB",
   "isElectronic": true,
   "isToOrder": false,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+    "UNLocationCode": "SGSIN"
   },
   "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
-      "name": "DCSA test person",
-      "email": "no-reply@dcsa.example.org"
+      "name": "DCSA Test Person",
+      "email": "no-reply@dcsa.org"
     }
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
-      "HSCodes": [
-        "CONSIGNMENT_ITEM_HS_CODE"
+      "carrierBookingReference": "BOOK1234567890123456789012345",
+      "descriptionOfGoods": [
+        "Pharmaceutical Supplies"
       ],
-      "commoditySubReference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "HSCodes": [
+        "30049099"
+      ],
+      "commoditySubReference": "PHARMA-001",
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "equipmentReference": "MSCU1234567",
           "cargoGrossWeight": {
             "value": 12000,
             "unit": "KGM"
           },
           "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "description": "Boxes",
             "numberOfPackages": 400
           }
         }
@@ -49,13 +51,15 @@
     {
       "type": "CTN",
       "countryCode": "SN",
-      "values": ["12345"]
+      "values": [
+        "12345"
+      ]
     }
   ],
   "utilizedTransportEquipments": [
     {
       "isShipperOwned": false,
-      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "equipmentReference": "MSCU1234567",
       "seals": [
         {
           "number": "NSL13386"
@@ -69,8 +73,8 @@
       "reference": "SI-REF-1234",
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ],
       "address": {
@@ -81,19 +85,40 @@
     },
     "issueTo": {
       "partyName": "DCSA CTK",
-      "identifyingCodes" : [
+      "identifyingCodes": [
         {
           "codeListProvider": "W3C",
-          "codeListName": "LCL",
-          "partyCode": "MSC"
+          "codeListName": "DID",
+          "partyCode": "123456789abcdefghi"
         }
       ],
       "partyContactDetails": [
         {
-          "name": "DCSA test person",
-          "email": "no-reply@dcsa.example.org"
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
         }
       ]
+    },
+    "consignee": {
+      "partyName": "Global Pharma Distribution",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
+        }
+      ],
+      "partyContactDetails": [
+        {
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
+        }
+      ],
+      "address": {
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
+      }
     }
   }
 }

@@ -219,31 +219,36 @@ public class CarrierShippingInstructions {
     initialFieldValue("transports", (o, a, v) -> initializeTransports(o, o.putObject(a), v))
   };
 
-  private static final Map<String, BiConsumer<ObjectNode, ScenarioType>> CONSIGNMENT_ITEMS_HANDLER = Map.ofEntries(
-    Map.entry("3.0.0",  (transportDocument, scenarioType) -> {
-      for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
-        if (consignmentItemNode instanceof ObjectNode consignmentItem) {
-          consignmentItem.remove("commoditySubReference");
-        }
-        for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
-          if (!scenarioType.hasDG() || !cargoItemNode.isObject()) {
-            continue;
-          }
-          var outerPackaging = ((ObjectNode)cargoItemNode).putObject("outerPackaging");
-          outerPackaging.put("description", "Jerrican, steel")
-            .put("woodDeclaration", "Not Applicable")
-            .put("imoPackagingCode", "3A1")
-            .put("numberOfPackages", 400);
-          var dg = outerPackaging.putArray("dangerousGoods").addObject();
-          dg.put("UNNumber", "3082")
-            .put("properShippingName", "Environmentally hazardous substance, liquid, N.O.S")
-            .put("imoClass", "9")
-            .put("packingGroup", 3)
-            .put("EMSNumber", "F-A S-F");
-        }
-      }
-    })
-  );
+  private static final Map<String, BiConsumer<ObjectNode, ScenarioType>> CONSIGNMENT_ITEMS_HANDLER =
+      Map.ofEntries(
+          Map.entry(
+              "3.0.0",
+              (transportDocument, scenarioType) -> {
+                for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
+                  if (consignmentItemNode instanceof ObjectNode consignmentItem) {
+                    consignmentItem.remove("commoditySubReference");
+                  }
+                  for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
+                    if (!scenarioType.hasDG() || !cargoItemNode.isObject()) {
+                      continue;
+                    }
+                    var outerPackaging = ((ObjectNode) cargoItemNode).putObject("outerPackaging");
+                    outerPackaging
+                        .put("description", "Jerrican, steel")
+                        .put("woodDeclaration", "Not Applicable")
+                        .put("imoPackagingCode", "3A1")
+                        .put("numberOfPackages", 400);
+                    var dg = outerPackaging.putArray("dangerousGoods").addObject();
+                    dg.put("UNNumber", "3082")
+                        .put(
+                            "properShippingName",
+                            "Environmentally hazardous substance, liquid, N.O.S")
+                        .put("imoClass", "9")
+                        .put("packingGroup", 3)
+                        .put("EMSNumber", "F-A S-F");
+                  }
+                }
+              }));
 
   private static void initializeTransports(ObjectNode td, ObjectNode transportsNode, String standardsVersion) {
     var carrierCode = td.required("carrierCode").asText("<MISSING>");
@@ -380,7 +385,6 @@ public class CarrierShippingInstructions {
 
   public void declineUpdatedShippingInstructions(String documentReference) {
     checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
-    clearUpdatedShippingInstructions();
     mutateShippingInstructionsAndUpdate(siData -> siData.remove(FEEDBACKS));
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_DECLINED);
   }
@@ -451,7 +455,10 @@ public class CarrierShippingInstructions {
   }
 
   public void issueTransportDocument(String documentReference) {
-    checkState(documentReference, getTransportDocumentState(), s -> s == TD_DRAFT || s == TD_APPROVED);
+    checkState(
+        documentReference,
+        getTransportDocumentState(),
+        s -> s == TD_DRAFT || s == TD_APPROVED || s == TD_ISSUED);
     updateTDForIssuance();
   }
 

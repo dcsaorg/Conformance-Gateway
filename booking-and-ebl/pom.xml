@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.dcsa.conformance</groupId>
+        <artifactId>Conformance-Gateway</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>booking-and-ebl</artifactId>
+    <name>dcsa-conformance-booking-and-ebl</name>
+    <description>DCSA Conformance Booking and eBL</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.dcsa.conformance</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.dcsa.conformance</groupId>
+            <artifactId>booking</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.dcsa.conformance</groupId>
+            <artifactId>ebl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- Test scoped dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

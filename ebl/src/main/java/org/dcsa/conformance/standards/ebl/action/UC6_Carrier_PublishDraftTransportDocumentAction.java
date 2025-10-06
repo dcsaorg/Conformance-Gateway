@@ -50,13 +50,12 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     super.doHandleExchange(exchange);
 
     var dsp = getDspSupplier().get();
-    if (skipSI) {
       var tdr = exchange.getRequest().message().body().getJsonBody().path("data").path("transportDocumentReference");
       if (!tdr.isMissingNode()) {
         dsp = dsp.withTransportDocumentReference(tdr.asText());
       }
-    }
     getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
+    getCarrierPayloadConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }
 
   @Override
@@ -65,8 +64,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) throws UserFacingException {
     getDspConsumer()
         .accept(
             getDspSupplier()
@@ -90,9 +88,9 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     var dr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
     var node = super.asJsonNode()
       .put("documentReference", dr)
-      .put("scenarioType", dsp.scenarioType().name())
+      .put("scenarioType", getDspSupplier().get().scenarioType())
       .put("skipSI", skipSI);
-    node.set("csp", getCspSupplier().get().toJson());
+    node.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
     return node;
   }
 

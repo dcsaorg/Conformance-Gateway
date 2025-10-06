@@ -60,6 +60,12 @@
                               ></textarea>
                           </mat-form-field>
                       </div>
+                    <div class="paragraph" *ngIf="submitAttempted && inlineErrorMessage">
+                      <mat-card style="background-color: #fdecea; color: #b00020; padding: 1em;">
+                          <mat-icon>error</mat-icon>
+                          <pre style="margin: 0; white-space: pre-wrap;">{{ inlineErrorMessage }}</pre>
+                      </mat-card>
+                    </div>
                       <div class="paragraph">
                           <button
                           id="submitActionButton"
@@ -74,9 +80,23 @@
 
               <div *ngIf="!scenarioStatus.inputRequired">
                   <div *ngIf="!scenarioStatus.promptText">
-                    <div class="paragraph">Verify that your application has handled correctly the action performed by the other party.</div>
-                    <div class="paragraph">If needed, press "Refresh status" to refresh the scenario status and conformance checks.</div>
-                    <div class="paragraph">When done, press "Action completed" to mark this scenario action completed.</div>
+                      <div *ngIf="scenarioStatus.needsAction; else noActionInstructions">
+                          <div class="paragraph">Verify that your application has handled correctly the action performed
+                              by the other party.
+                          </div>
+                          <div class="paragraph">If needed, press "Refresh status" to refresh the scenario status and
+                              conformance checks.
+                          </div>
+                          <div class="paragraph">When done, press "Action completed" to mark this scenario action
+                              completed.
+                          </div>
+                      </div>
+                      <ng-template #noActionInstructions>
+                          <div class="paragraph">There is currently no action required from your side.</div>
+                          <div class="paragraph">To proceed, press "Action completed" to mark this scenario action
+                              completed.
+                          </div>
+                      </ng-template>
                   </div>
 
                   <div class="paragraph">
@@ -86,6 +106,15 @@
                       color="primary"
                       (click)="loadScenarioStatus()"
                       >Refresh status</button>
+                      &nbsp;
+                      <button
+                        *ngIf="scenarioStatus.isSkippable"
+                        id="skipCurrentActionButton"
+                        mat-raised-button
+                        class="green-button"
+                        (click)="skipCurrentAction()"
+                      >Skip action
+                      </button>
                       &nbsp;
                       <button
                         id="completeCurrentActionButton"
@@ -108,7 +137,7 @@
           <div class="pageSubtitle">Conformance status</div>
           <app-report
           *ngIf="scenario && scenarioStatus?.conformanceSubReport"
-          [folded]="false"
+          [unfoldedLevels]="1"
           [report]="scenarioStatus.conformanceSubReport"
           ></app-report>
       </div>

@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
-
 import org.dcsa.conformance.core.state.SortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -98,5 +98,44 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
                 item -> JsonToolkit.stringToJsonNode(item.get("value").s()),
                 (existing, replacement) -> existing,
                 LinkedHashMap::new));
+  }
+
+  @Override
+  public TreeMap<String, TreeMap<String, JsonNode>> scan(
+      String partitionKeyPrefix, String sortKeyPrefix) {
+    TreeMap<String, TreeMap<String, JsonNode>> itemsBySortKeyByPartitionKey = new TreeMap<>();
+    Map<String, AttributeValue> lastEvaluatedKey = Collections.emptyMap();
+    do {
+      ScanRequest.Builder scanRequestBuilder =
+          ScanRequest.builder()
+              .tableName(tableName)
+              .filterExpression("begins_with(#pk, :pkp) AND begins_with(#sk, :skp)")
+              .expressionAttributeNames(
+                  Map.ofEntries(Map.entry("#pk", "PK"), Map.entry("#sk", "SK")))
+              .expressionAttributeValues(
+                  Map.ofEntries(
+                      Map.entry(":pkp", AttributeValue.fromS(partitionKeyPrefix)),
+                      Map.entry(":skp", AttributeValue.fromS(sortKeyPrefix))))
+              .consistentRead(true);
+      if (!lastEvaluatedKey.isEmpty()) {
+        scanRequestBuilder.exclusiveStartKey(lastEvaluatedKey);
+      }
+      ScanResponse scanResponse = dynamoDbClient.scan(scanRequestBuilder.build());
+      scanResponse
+          .items()
+          .forEach(
+              item ->
+                  itemsBySortKeyByPartitionKey
+                      .computeIfAbsent(item.get("PK").s(), ignoredPK -> new TreeMap<>())
+                      .put(
+                          item.get("SK").s(),
+                          item.containsKey("value")
+                              ? JsonToolkit.stringToJsonNode(item.get("value").s())
+                              : JsonToolkit.OBJECT_MAPPER.createObjectNode()));
+
+      lastEvaluatedKey = scanResponse.lastEvaluatedKey();
+    } while (!lastEvaluatedKey.isEmpty());
+
+    return itemsBySortKeyByPartitionKey;
   }
 }

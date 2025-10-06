@@ -1,0 +1,160 @@
+{
+  "transportDocumentTypeCode": "SWB",
+  "isElectronic": true,
+  "isToOrder": false,
+  "freightPaymentTermCode": "PRE",
+  "isShippedOnBoardType": true,
+  "invoicePayableAt": {
+    "UNLocationCode": "NLRTM"
+  },
+  "isCargoDeliveredInICS2Zone": false,
+  "partyContactDetails": [
+    {
+      "name": "DCSA Test Person",
+      "email": "no-reply@dcsa.org"
+    }
+  ],
+  "consignmentItems": [
+    {
+      "carrierBookingReference": "BOOKREF1234567890123456789012345",
+      "descriptionOfGoods": [
+        "Automotive Parts"
+      ],
+      "HSCodes": [
+        "87089900"
+      ],
+      "commoditySubReference": "AUTO-1234",
+      "cargoItems": [
+        {
+          "equipmentReference": "ABCU1234567",
+          "cargoGrossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          },
+          "outerPackaging": {
+            "description": "Cardboard Boxes",
+            "numberOfPackages": 100
+          }
+        },
+        {
+          "equipmentReference": "XYZU9876543",
+          "cargoGrossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          },
+          "outerPackaging": {
+            "description": "Pallets",
+            "numberOfPackages": 4
+          }
+        }
+      ]
+    },
+    {
+      "carrierBookingReference": "BOOKREF1234567890123456789012345",
+      "descriptionOfGoods": [
+        "Electronic Components"
+      ],
+      "HSCodes": [
+        "85423100"
+      ],
+      "commoditySubReference": "ELEC-5678",
+      "cargoItems": [
+        {
+          "equipmentReference": "ABCU1234567",
+          "cargoGrossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          },
+          "outerPackaging": {
+            "description": "Cartoons",
+            "numberOfPackages": 100
+          }
+        },
+        {
+          "equipmentReference": "XYZU9876543",
+          "cargoGrossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          },
+          "outerPackaging": {
+            "description": "Cartoons",
+            "numberOfPackages": 200
+          }
+        }
+      ]
+    }
+  ],
+  "utilizedTransportEquipments": [
+    {
+      "isShipperOwned": false,
+      "equipmentReference": "ABCU1234567",
+      "seals": [
+        {
+          "number": "NSL13386"
+        }
+      ]
+    },
+    {
+      "isShipperOwned": false,
+      "equipmentReference": "XYZU9876543",
+      "seals": [
+        {
+          "number": "NSL13387"
+        }
+      ]
+    }
+  ],
+  "documentParties": {
+    "shipper": {
+      "partyName": "DCSA CTK",
+      "partyContactDetails": [
+        {
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
+        }
+      ],
+      "address": {
+        "street": "Ruijggoordweg",
+        "city": "Amsterdam",
+        "countryCode": "NL"
+      }
+    },
+    "issueTo": {
+      "partyName": "DCSA CTK",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "ZZZ",
+          "codeListName": "Carrier Code",
+          "partyCode": "Customer1234"
+        }
+      ],
+      "partyContactDetails": [
+        {
+          "name": "DCSA Test Person",
+          "email": "no-reply@dcsa.org"
+        }
+      ]
+    },
+    "consignee": {
+      "partyName": "Tech Solutions GmbH",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "GLEIF",
+          "codeListName": "LEI",
+          "partyCode": "111100T8BM49ADCSAO64"
+        }
+      ],
+      "partyContactDetails": [
+        {
+          "name": "Consignee Contact",
+          "email": "final@dcsa.org"
+        }
+      ],
+      "address": {
+        "street": "Consignee Street 1",
+        "city": "Singapore",
+        "countryCode": "SG"
+      }
+    }
+  }
+}

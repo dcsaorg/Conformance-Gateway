@@ -41,12 +41,12 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
         previousAction,
         "Request() Response(%s)"
             .formatted(
-                _latestPlatformScenarioParametersAction(previousAction)
+                    latestPlatformScenarioParametersAction(previousAction)
                     .getResponseCode()
                     .standardCode),
         204);
     this.issuanceResponseCode =
-        _latestPlatformScenarioParametersAction(previousAction).getResponseCode();
+            latestPlatformScenarioParametersAction(previousAction).getResponseCode();
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.requestSchemaValidator = requestSchemaValidator;
     this.issuanceManifestSchemaValidator = issuanceManifestSchemaValidator;
@@ -62,14 +62,6 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
     if (this.transportDocumentReference != null) {
       this.transportDocumentReference.set(null);
     }
-  }
-
-  private static PlatformScenarioParametersAction _latestPlatformScenarioParametersAction(
-      IssuanceAction previousAction) {
-    return previousAction
-            instanceof PlatformScenarioParametersAction platformScenarioParametersAction
-        ? platformScenarioParametersAction
-        : _latestPlatformScenarioParametersAction(previousAction.getPreviousIssuanceAction());
   }
 
   @Override

@@ -1,13 +1,13 @@
 package org.dcsa.conformance.standards.ebl.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SI_ARRAY_ORDER_DEFINITIONS;
-import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenarioType;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SI_ARRAY_ORDER_DEFINITIONS;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.Builder;
@@ -22,6 +22,7 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -34,12 +35,14 @@ import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 public class EblCarrier extends ConformanceParty {
   private static final String DOCUMENT_REFERENCE = "documentReference";
   private static final String MESSAGE = "message";
-  private static final String DKAAR = "DKAAR";
   private static final String ACTION_ID = "actionId";
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
-  private static final String FIBREBOARD_BOXES = "Fibreboard boxes";
+  public static final String SCENARIO_TYPE = "scenarioType";
 
   private final Map<String, String> tdrToSir = new HashMap<>();
+
+  public static final Set<String> EBL_ENDPOINT_PATTERNS =
+      Set.of(".*/v3/shipping-instructions(?:/[^/]+)?$", ".*/v3/transport-documents(?:/[^/]+)?$");
 
   public EblCarrier(
       String apiVersion,
@@ -58,151 +61,70 @@ public class EblCarrier extends ConformanceParty {
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+  public void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set("tdrToSir", StateManagementUtil.storeMap(tdrToSir));
   }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+  public void importPartyJsonState(ObjectNode sourceObjectNode) {
     StateManagementUtil.restoreIntoMap(tdrToSir, sourceObjectNode.get("tdrToSir"));
   }
 
   @Override
-  protected void doReset() {
+  public void doReset() {
     tdrToSir.clear();
   }
 
   @Override
-  protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
+  public Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-      Map.entry(UC2_Carrier_RequestUpdateToShippingInstructionsAction.class, this::requestUpdateToShippingInstructions),
-      Map.entry(UC4_Carrier_ProcessUpdateToShippingInstructionsAction.class, this::processUpdatedShippingInstructions),
-      Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument),
-      Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument),
-      Map.entry(UC9_Carrier_AwaitSurrenderRequestForAmendmentAction.class, this::notifyOfSurrenderForAmendment),
-      Map.entry(UC10_Carrier_ProcessSurrenderRequestForAmendmentAction.class, this::processSurrenderRequestForAmendment),
-      Map.entry(UC11v_Carrier_VoidTransportDocumentAction.class, this::voidTransportDocument),
-      Map.entry(UC11i_Carrier_IssueAmendedTransportDocumentAction.class, this::issueAmendedTransportDocument),
-      Map.entry(UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class, this::notifyOfSurrenderForDelivery),
-      Map.entry(UC13_Carrier_ProcessSurrenderRequestForDeliveryAction.class, this::processSurrenderRequestForDelivery),
-      Map.entry(UC14_Carrier_ConfirmShippingInstructionsCompleteAction.class, this::confirmShippingInstructionsComplete),
-      Map.entry(UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction.class, this::processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction)
-    );
+        Map.entry(CarrierSupplyPayloadAction.class, this::supplyScenarioParameters),
+        Map.entry(
+            UC2_Carrier_RequestUpdateToShippingInstructionsAction.class,
+            this::requestUpdateToShippingInstructions),
+        Map.entry(
+            UC4_Carrier_ProcessUpdateToShippingInstructionsAction.class,
+            this::processUpdatedShippingInstructions),
+        Map.entry(
+            UC6_Carrier_PublishDraftTransportDocumentAction.class,
+            this::publishDraftTransportDocument),
+        Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument),
+        Map.entry(
+            UC9_Carrier_AwaitSurrenderRequestForAmendmentAction.class,
+            this::notifyOfSurrenderForAmendment),
+        Map.entry(
+            UC10_Carrier_ProcessSurrenderRequestForAmendmentAction.class,
+            this::processSurrenderRequestForAmendment),
+        Map.entry(
+            UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction.class,
+            this::voidTransportDocumentAndIssueAmendedTransportDocument),
+        Map.entry(
+            UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class,
+            this::notifyOfSurrenderForDelivery),
+        Map.entry(
+            UC13_Carrier_ProcessSurrenderRequestForDeliveryAction.class,
+            this::processSurrenderRequestForDelivery),
+        Map.entry(
+            UC14_Carrier_ConfirmShippingInstructionsCompleteAction.class,
+            this::confirmShippingInstructionsComplete),
+        Map.entry(
+            UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction
+                .class,
+            this::processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    CarrierScenarioParameters carrierScenarioParameters =
-        switch (scenarioType) {
-          case REGULAR_SWB,
-              REGULAR_STRAIGHT_BL,
-              REGULAR_SWB_AMF,
-              REGULAR_CLAD,
-              REGULAR_NEGOTIABLE_BL ->
-              new CarrierScenarioParameters(
-                  "CBR_123_" + scenarioType.name(),
-                  "Some Commodity Subreference 123",
-                  null,
-                  // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "NARU3472484",
-                  null,
-                  DKAAR,
-                  "640510",
-                  null,
-                  "Shoes - black, 400 boxes",
-                  null,
-                  FIBREBOARD_BOXES);
-          case REGULAR_NO_COMMODITY_SUBREFERENCE ->
-              new CarrierScenarioParameters(
-                  "CBR_123_NO_SUBREF",
-                  null,
-                  null,
-                  // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "NARU3472484",
-                  null,
-                  DKAAR,
-                  "640510",
-                  null,
-                  "Shoes - black, 400 boxes",
-                  null,
-                  FIBREBOARD_BOXES);
-          case ACTIVE_REEFER ->
-              new CarrierScenarioParameters(
-                  "CBR_123_REEFER",
-                  "Some reefer Commodity Subreference 123",
-                  null,
-                  // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "KKFU6671914",
-                  null,
-                  DKAAR,
-                  "04052090",
-                  null,
-                  "Dairy products",
-                  null,
-                  "Bottles");
-          case NON_OPERATING_REEFER ->
-              new CarrierScenarioParameters(
-                  "CBR_123_NON_OPERATING_REEFER",
-                  "Some reefer Commodity Subreference 123",
-                  null,
-                  // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "KKFU6671914",
-                  null,
-                  DKAAR,
-                  "220299",
-                  null,
-                  "Non alcoholic beverages",
-                  null,
-                  "Bottles");
-          case DG ->
-              new CarrierScenarioParameters(
-                  "RTM1234567",
-                  "Some DG Commodity Subreference 123",
-                  null,
-                  // A "22GP" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "HLXU1234567",
-                  null,
-                  DKAAR,
-                  "293499",
-                  null,
-                  "Environmentally hazardous substance",
-                  null,
-                  null);
-          case REGULAR_2C_2U_1E, REGULAR_2C_2U_2E ->
-              new CarrierScenarioParameters(
-                  "RG-2C-2U-2E",
-                  "Commodity Subreference 123",
-                  "Commodity Subreference 456",
-                  // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-                  "MSKU3963442",
-                  "MSKU7895860",
-                  DKAAR,
-                  "691110",
-                  "732391",
-                  "Tableware and kitchenware",
-                  "Kitchen pots and pans",
-                  FIBREBOARD_BOXES);
-          case REGULAR_SWB_SOC_AND_REFERENCES ->
-              new CarrierScenarioParameters(
-                  "RG-SOC-REFERENCES",
-                  "Commodity Subreference 123",
-                  null,
-                  "ABCU7341935",
-                  null,
-                  DKAAR,
-                  "691110",
-                  null,
-                  "Tableware and kitchenware",
-                  null,
-                  FIBREBOARD_BOXES);
-        };
-    var json = carrierScenarioParameters.toJson();
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.required(ACTION_ID).asText(), json);
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required(SCENARIO_TYPE).asText());
+    ObjectNode eblPayload = (ObjectNode) getEblPayload(scenarioType);
+    asyncOrchestratorPostPartyInput(actionPrompt.required(ACTION_ID).asText(), eblPayload);
     addOperatorLogEntry(
-      "Prompt answer for supplyScenarioParameters: %s".formatted(json.toString()));
+        "Prompt answer for supplyScenarioParameters: %s".formatted(eblPayload.toString()));
+  }
+
+  private JsonNode getEblPayload(ScenarioType scenarioType) {
+    return JsonToolkit.templateFileToJsonNode(
+        "/standards/ebl/messages/" + scenarioType.eblPayload(apiVersion), Map.of());
   }
 
   private void requestUpdateToShippingInstructions(JsonNode actionPrompt) {
@@ -262,18 +184,15 @@ public class EblCarrier extends ConformanceParty {
   private void publishDraftTransportDocument(JsonNode actionPrompt) {
     log.info("Carrier.publishDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required(SCENARIO_TYPE).asText());
     var skipSI = actionPrompt.required("skipSI").asBoolean(false);
     String documentReference;
     CarrierShippingInstructions si;
     if (skipSI) {
-      var csp = CarrierScenarioParameters.fromJson(actionPrompt.required("csp"));
-      var jsonRequestBody = siFromScenarioType(
-        scenarioType,
-        csp,
-        apiVersion
-      );
-      si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(jsonRequestBody, apiVersion);
+      var jsonRequestBody = actionPrompt.get(CarrierSupplyPayloadAction.CARRIER_PAYLOAD);
+      si =
+          CarrierShippingInstructions.initializeFromShippingInstructionsRequest(
+              (ObjectNode) jsonRequestBody, apiVersion);
       documentReference = si.getShippingInstructionsReference();
     } else {
       documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
@@ -349,36 +268,30 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Processed surrender request for delivery of transport document with reference '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Processed surrender request for amendment of transport document with reference '%s'"
+            .formatted(documentReference));
   }
 
-  private void voidTransportDocument(JsonNode actionPrompt) {
-    log.info("Carrier.voidTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+  private void voidTransportDocumentAndIssueAmendedTransportDocument(JsonNode actionPrompt) {
+    log.info(
+        "Carrier.voidTransportDocumentAndIssueAmendedTransportDocument(%s)"
+            .formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required(SCENARIO_TYPE).asText());
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
     si.voidTransportDocument(documentReference);
-    si.save(persistentMap);
-    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
-
-    addOperatorLogEntry("Voided transport document '%s'".formatted(documentReference));
-  }
-
-  private void issueAmendedTransportDocument(JsonNode actionPrompt) {
-    log.info("Carrier.issueAmendedTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
-
-    var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
-
-    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
     si.issueAmendedTransportDocument(documentReference, scenarioType);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Issued amended transport document '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Voided original transport document and Issued amended transport document '%s'"
+            .formatted(documentReference));
   }
 
   private void processSurrenderRequestForDelivery(JsonNode actionPrompt) {
@@ -416,14 +329,19 @@ public class EblCarrier extends ConformanceParty {
 
   private void generateAndEmitNotificationFromShippingInstructions(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {
     var notification =
-      ShippingInstructionsNotification.builder()
-        .apiVersion(apiVersion)
-        .shippingInstructions(shippingInstructions.getShippingInstructions())
-        .feedbacks(shippingInstructions.getfeedbacks() != null ? shippingInstructions.getfeedbacks() : OBJECT_MAPPER.createArrayNode())
-        .includeShippingInstructionsReference(includeShippingInstructionsReference)
-        .subscriptionReference(shippingInstructions.getSubscriptionReference())
-        .build()
-        .asJsonNode();
+        ShippingInstructionsNotification.builder()
+            .apiVersion(apiVersion)
+            .shippingInstructions(shippingInstructions.getShippingInstructions())
+            .updatedShippingInstructions(
+                shippingInstructions.getUpdatedShippingInstructions().orElse(null))
+            .feedbacks(
+                shippingInstructions.getfeedbacks() != null
+                    ? shippingInstructions.getfeedbacks()
+                    : OBJECT_MAPPER.createArrayNode())
+            .includeShippingInstructionsReference(includeShippingInstructionsReference)
+            .subscriptionReference(shippingInstructions.getSubscriptionReference())
+            .build()
+            .asJsonNode();
     asyncCounterpartNotification(
         actionPrompt.required(ACTION_ID).asText(),
         "/v3/shipping-instructions-notifications",
@@ -468,14 +386,26 @@ public class EblCarrier extends ConformanceParty {
   private ConformanceResponse return404(ConformanceRequest request) {
     return return404(request, "Returning 404 since the request did not match any known URL");
   }
+
   private ConformanceResponse return404(ConformanceRequest request, String message) {
+    ObjectNode response =
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/ebl/messages/ebl-api-3.0.0-error-message.json",
+                Map.of(
+                    "HTTP_METHOD_PLACEHOLDER",
+                    request.method(),
+                    "REQUEST_URI_PLACEHOLDER",
+                    request.url(),
+                    "REFERENCE_PLACEHOLDER",
+                    UUID.randomUUID().toString(),
+                    "ERROR_DATE_TIME_PLACEHOLDER",
+                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
+                    "ERROR_MESSAGE_PLACEHOLDER",
+                    message));
+
     return request.createResponse(
-      404,
-      Map.of(API_VERSION, List.of(apiVersion)),
-      new ConformanceMessageBody(
-        OBJECT_MAPPER
-          .createObjectNode()
-          .put(MESSAGE, message)));
+        404, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
@@ -535,14 +465,14 @@ public class EblCarrier extends ConformanceParty {
           .formatted(documentReference, si.getShippingInstructionsState().wireName()));
       return response;
     }
-    return return404(request);
+    return return404(request, "The Shipping Instructions does not exist");
   }
 
   private ConformanceResponse handleGetTransportDocument(ConformanceRequest request, String documentReference) {
     // bookingReference can either be a CBR or CBRR.
     var sir = tdrToSir.get(documentReference);
     if (sir == null) {
-      return return404(request);
+      return return404(request, "The Transport Document does not exist");
     }
     var persistedSi = persistentMap.load(sir);
     if (persistedSi == null) {
@@ -580,6 +510,7 @@ public class EblCarrier extends ConformanceParty {
         ShippingInstructionsNotification.builder()
             .apiVersion(apiVersion)
             .shippingInstructions(siData)
+            .updatedShippingInstructions(si.getUpdatedShippingInstructions().orElse(null))
             .subscriptionReference(si.getSubscriptionReference())
             .build()
             .asJsonNode());
@@ -691,6 +622,7 @@ public class EblCarrier extends ConformanceParty {
         ShippingInstructionsNotification.builder()
             .apiVersion(apiVersion)
             .shippingInstructions(si.getShippingInstructions())
+            .updatedShippingInstructions(si.getUpdatedShippingInstructions().orElse(null))
             .subscriptionReference(si.getSubscriptionReference())
             .build()
             .asJsonNode());
@@ -725,6 +657,7 @@ public class EblCarrier extends ConformanceParty {
         ShippingInstructionsNotification.builder()
             .apiVersion(apiVersion)
             .shippingInstructions(si.getShippingInstructions())
+            .updatedShippingInstructions(si.getUpdatedShippingInstructions().orElse(null))
             .subscriptionReference(si.getSubscriptionReference())
             .build()
             .asJsonNode());
@@ -856,7 +789,7 @@ public class EblCarrier extends ConformanceParty {
       } else {
         setDocumentProvidedField(data, "transportDocumentStatus", transportDocumentStatus);
       }
-      if(feedbacks != null && feedbacks.size() > 0) {
+      if (feedbacks != null && !feedbacks.isEmpty()) {
         data.set("feedbacks", feedbacks);
       }
       notification.set("data", data);
@@ -901,13 +834,23 @@ public class EblCarrier extends ConformanceParty {
     protected boolean isSINotification() {
       return false;
     }
+
+    @Override
+    public ObjectNode asJsonNode() {
+      var notification = super.asJsonNode();
+      var data = (ObjectNode) notification.get("data");
+
+      data.set("transportDocument", transportDocument);
+
+      return notification;
+    }
   }
 
   @SuperBuilder
   private static class ShippingInstructionsNotification extends DocumentNotification {
 
-
     private JsonNode shippingInstructions;
+    private JsonNode updatedShippingInstructions;
 
     @Override
     protected JsonNode referenceDocument() {
@@ -922,6 +865,19 @@ public class EblCarrier extends ConformanceParty {
     @Override
     protected boolean isSINotification() {
       return true;
+    }
+
+    @Override
+    public ObjectNode asJsonNode() {
+      var notification = super.asJsonNode();
+      var data = (ObjectNode) notification.get("data");
+
+      data.set("shippingInstructions", shippingInstructions);
+      if (updatedShippingInstructions != null && !updatedShippingInstructions.isEmpty()) {
+        data.set("updatedShippingInstructions", updatedShippingInstructions);
+      }
+
+      return notification;
     }
   }
 }

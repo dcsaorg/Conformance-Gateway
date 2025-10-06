@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.ebl.action;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,23 +13,23 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
-import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
+import org.dcsa.conformance.standards.ebl.checks.CarrierSiNotificationPayloadRequestConformanceCheck;
+import org.dcsa.conformance.standards.ebl.checks.CarrierTdNotificationPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.ebl.party.*;
 
-public abstract class EblAction extends ConformanceAction {
+public abstract class EblAction extends BookingAndEblAction {
+
   protected final Set<Integer> expectedStatus;
-  private final OverwritingReference<DynamicScenarioParameters> dspReference;
 
   protected EblAction(
       String sourcePartyName,
       String targetPartyName,
-      EblAction previousAction,
+      BookingAndEblAction previousAction,
       String actionTitle,
       int expectedStatus) {
     this(sourcePartyName, targetPartyName, previousAction, actionTitle, Set.of(expectedStatus));
@@ -39,41 +38,26 @@ public abstract class EblAction extends ConformanceAction {
   protected EblAction(
     String sourcePartyName,
     String targetPartyName,
-    EblAction previousAction,
+    BookingAndEblAction previousAction,
     String actionTitle,
     Set<Integer> expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
-    this.dspReference =
-        previousAction == null
-            ? new OverwritingReference<>(
-                null,
-                new DynamicScenarioParameters(
-                    ScenarioType.REGULAR_SWB,
-                    null,
-                    null,
-                    null,
-                    null,
-                    false,
-                    false,
-                    OBJECT_MAPPER.createObjectNode(),
-                    OBJECT_MAPPER.createObjectNode()))
-            : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
   @Override
   public void reset() {
     super.reset();
     if (previousAction != null) {
-      this.dspReference.set(null);
+      getEblDspReference().set(null);
     }
   }
 
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (dspReference.hasCurrentValue()) {
-      jsonState.set("currentDsp", dspReference.get().toJson());
+    if (getEblDspReference().hasCurrentValue()) {
+      jsonState.set("currentDsp", getEblDspReference().get().toJson());
     }
     return jsonState;
   }
@@ -83,11 +67,11 @@ public abstract class EblAction extends ConformanceAction {
     super.importJsonState(jsonState);
     JsonNode dspNode = jsonState.get("currentDsp");
     if (dspNode != null) {
-      dspReference.set(DynamicScenarioParameters.fromJson(dspNode));
+      getEblDspReference().set(EblDynamicScenarioParameters.fromJson(dspNode));
     }
   }
 
-  protected DynamicScenarioParameters getDSP() {
+  protected EblDynamicScenarioParameters getDSP() {
     return getDspSupplier().get();
   }
 
@@ -106,24 +90,24 @@ public abstract class EblAction extends ConformanceAction {
     return (EblAction) previousAction;
   }
 
-  protected Consumer<CarrierScenarioParameters> getCspConsumer() {
-    return getPreviousEblAction().getCspConsumer();
+  protected Consumer<JsonNode> getCarrierPayloadConsumer() {
+    return getPreviousEblAction().getCarrierPayloadConsumer();
   }
 
-  protected Supplier<CarrierScenarioParameters> getCspSupplier() {
-    return getPreviousEblAction().getCspSupplier();
+  protected Supplier<JsonNode> getCarrierPayloadSupplier() {
+    return getPreviousEblAction().getCarrierPayloadSupplier();
   }
 
-  protected Supplier<DynamicScenarioParameters> getDspSupplier() {
-    return dspReference::get;
+  protected Supplier<EblDynamicScenarioParameters> getDspSupplier() {
+    return getEblDspReference()::get;
   }
 
-  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
-    return dspReference::set;
+  protected Consumer<EblDynamicScenarioParameters> getDspConsumer() {
+    return getEblDspReference()::set;
   }
 
   protected void updateDSPFromSIResponsePayload(ConformanceExchange exchange) {
-    DynamicScenarioParameters dsp = dspReference.get();
+    EblDynamicScenarioParameters dsp = getEblDspReference().get();
 
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
     var newShippingInstructionsReference =
@@ -145,12 +129,12 @@ public abstract class EblAction extends ConformanceAction {
     updatedDsp = updatedDsp.withShippingInstructions(null).withUpdatedShippingInstructions(null);
 
     if (!dsp.equals(updatedDsp)) {
-      dspReference.set(updatedDsp);
+      getEblDspReference().set(updatedDsp);
     }
   }
 
-  private <T> DynamicScenarioParameters updateIfNotNull(
-      DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+  private <T> EblDynamicScenarioParameters updateIfNotNull(
+          EblDynamicScenarioParameters dsp, T value, Function<T, EblDynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }
@@ -158,43 +142,61 @@ public abstract class EblAction extends ConformanceAction {
   }
 
   protected Stream<ActionCheck> getSINotificationChecks(
-    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, ShippingInstructionsStatus expectedStatus, JsonContentCheck ... extraChecks) {
-    return getSINotificationChecks(notificationExchangeUuid, expectedApiVersion, notificationSchemaValidator, expectedStatus, null, extraChecks);
+      UUID notificationExchangeUuid,
+      String expectedApiVersion,
+      JsonSchemaValidator notificationSchemaValidator,
+      ShippingInstructionsStatus expectedStatus,
+      JsonContentCheck... extraChecks) {
+    return getSINotificationChecks(
+        notificationExchangeUuid,
+        expectedApiVersion,
+        notificationSchemaValidator,
+        expectedStatus,
+        null,
+        extraChecks);
   }
 
   protected Stream<ActionCheck> getSINotificationChecks(
-    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, ShippingInstructionsStatus expectedStatus, ShippingInstructionsStatus expectedUpdatedStatus, JsonContentCheck ... extraChecks) {
+      UUID notificationExchangeUuid,
+      String expectedApiVersion,
+      JsonSchemaValidator notificationSchemaValidator,
+      ShippingInstructionsStatus expectedStatus,
+      ShippingInstructionsStatus expectedUpdatedStatus,
+      JsonContentCheck... extraChecks) {
     String titlePrefix = "[Notification]";
     return Stream.of(
-            new HttpMethodCheck(
-                titlePrefix, EblRole::isCarrier, notificationExchangeUuid, "POST"),
-            new UrlPathCheck(
-                titlePrefix,
-                EblRole::isCarrier,
-                notificationExchangeUuid,
-                "/v3/shipping-instructions-notifications"),
-            new ResponseStatusCheck(
-                titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
-            ApiHeaderCheck.createNotificationCheck(
-                titlePrefix,
-                EblRole::isCarrier,
-                notificationExchangeUuid,
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            ApiHeaderCheck.createNotificationCheck(
-                titlePrefix,
-                EblRole::isShipper,
-                notificationExchangeUuid,
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-                titlePrefix,
-                EblRole::isCarrier,
-                notificationExchangeUuid,
-                HttpMessageType.REQUEST,
-                notificationSchemaValidator),
-          EBLChecks.siNotificationContentChecks(notificationExchangeUuid, expectedApiVersion, expectedStatus, expectedUpdatedStatus, extraChecks)
-      );
+        new HttpMethodCheck(titlePrefix, EblRole::isCarrier, notificationExchangeUuid, "POST"),
+        new UrlPathCheck(
+            titlePrefix,
+            EblRole::isCarrier,
+            notificationExchangeUuid,
+            "/v3/shipping-instructions-notifications"),
+        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
+        ApiHeaderCheck.createNotificationCheck(
+            titlePrefix,
+            EblRole::isCarrier,
+            notificationExchangeUuid,
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+        ApiHeaderCheck.createNotificationCheck(
+            titlePrefix,
+            EblRole::isShipper,
+            notificationExchangeUuid,
+            HttpMessageType.RESPONSE,
+            expectedApiVersion),
+        new JsonSchemaCheck(
+            titlePrefix,
+            EblRole::isCarrier,
+            notificationExchangeUuid,
+            HttpMessageType.REQUEST,
+            notificationSchemaValidator),
+        new CarrierSiNotificationPayloadRequestConformanceCheck(
+            notificationExchangeUuid,
+            expectedApiVersion,
+            expectedStatus,
+            expectedUpdatedStatus,
+            getDspSupplier(),
+            extraChecks));
   }
 
   protected Stream<ActionCheck> getTDNotificationChecks(
@@ -210,39 +212,36 @@ public abstract class EblAction extends ConformanceAction {
   protected Stream<ActionCheck> getTDNotificationChecks(
     UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, TransportDocumentStatus transportDocumentStatus, boolean tdrIsKnown) {
     String titlePrefix = "[Notification]";
-    var tdrCheck = tdrIsKnown
-      ? EBLChecks.tdrInNotificationMustMatchDSP(getDspSupplier())
-      : EBLChecks.TDR_REQUIRED_IN_NOTIFICATION;
-
     return Stream.of(
-      new HttpMethodCheck(
-        titlePrefix, EblRole::isCarrier, notificationExchangeUuid, "POST"),
-      new UrlPathCheck(
-        titlePrefix,
-        EblRole::isCarrier,
-        notificationExchangeUuid,
-        "/v3/transport-document-notifications"),
-      new ResponseStatusCheck(
-        titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
-      ApiHeaderCheck.createNotificationCheck(
-        titlePrefix,
-        EblRole::isCarrier,
-        notificationExchangeUuid,
-        HttpMessageType.REQUEST,
-        expectedApiVersion),
-      ApiHeaderCheck.createNotificationCheck(
-        titlePrefix,
-        EblRole::isShipper,
-        notificationExchangeUuid,
-        HttpMessageType.RESPONSE,
-        expectedApiVersion),
-      new JsonSchemaCheck(
-        titlePrefix,
-        EblRole::isCarrier,
-        notificationExchangeUuid,
-        HttpMessageType.REQUEST,
-        notificationSchemaValidator),
-        EBLChecks.tdNotificationContentChecks(notificationExchangeUuid, expectedApiVersion, transportDocumentStatus, tdrCheck)
-     );
+        new HttpMethodCheck(titlePrefix, EblRole::isCarrier, notificationExchangeUuid, "POST"),
+        new UrlPathCheck(
+            titlePrefix,
+            EblRole::isCarrier,
+            notificationExchangeUuid,
+            "/v3/transport-document-notifications"),
+        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
+        ApiHeaderCheck.createNotificationCheck(
+            titlePrefix,
+            EblRole::isCarrier,
+            notificationExchangeUuid,
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+        ApiHeaderCheck.createNotificationCheck(
+            titlePrefix,
+            EblRole::isShipper,
+            notificationExchangeUuid,
+            HttpMessageType.RESPONSE,
+            expectedApiVersion),
+        new JsonSchemaCheck(
+            titlePrefix,
+            EblRole::isCarrier,
+            notificationExchangeUuid,
+            HttpMessageType.REQUEST,
+            notificationSchemaValidator),
+        new CarrierTdNotificationPayloadRequestConformanceCheck(
+            notificationExchangeUuid,
+            transportDocumentStatus,
+            tdrIsKnown,
+            getDspSupplier()));
   }
 }

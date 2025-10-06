@@ -4,11 +4,19 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.UserFacingException;
@@ -226,7 +234,40 @@ public abstract class ConformanceAction implements StatefulEntity {
     return null;
   }
 
-  public void handlePartyInput(JsonNode partyInput) throws UserFacingException {}
+  public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
+    JsonNode jsonForHumanReadablePrompt = getJsonForHumanReadablePrompt();
+    if (jsonForHumanReadablePrompt != null) {
+      Set<String> expectedAttributes =
+          StreamSupport.stream(
+                  Spliterators.spliteratorUnknownSize(
+                      jsonForHumanReadablePrompt.fieldNames(), Spliterator.ORDERED),
+                  false)
+              .collect(Collectors.toSet());
+      if (!expectedAttributes.isEmpty()) { // because "empty" means "any input is allowed"
+        Set<String> providedAttributes =
+            StreamSupport.stream(
+                    Spliterators.spliteratorUnknownSize(
+                        partyInput.get("input").fieldNames(), Spliterator.ORDERED),
+                    false)
+                .collect(Collectors.toSet());
+        Set<String> missingAttributes = new HashSet<>(expectedAttributes);
+        missingAttributes.removeAll(providedAttributes);
+        if (!missingAttributes.isEmpty()) {
+          throw new UserFacingException(
+            "The input must contain: %s".formatted(String.join(", ", missingAttributes)));
+        }
+        Set<String> unexpectedAttributes = new HashSet<>(providedAttributes);
+        unexpectedAttributes.removeAll(expectedAttributes);
+        if (!unexpectedAttributes.isEmpty()) {
+          throw new UserFacingException(
+            "The input may not contain: %s".formatted(String.join(", ", unexpectedAttributes)));
+        }
+      }
+    }
+    doHandlePartyInput(partyInput);
+  }
+
+  protected void doHandlePartyInput(JsonNode partyInput) throws UserFacingException {}
 
   public ObjectNode asJsonNode() {
     return OBJECT_MAPPER
@@ -236,12 +277,27 @@ public abstract class ConformanceAction implements StatefulEntity {
         .put("actionPath", actionPath);
   }
 
+  public Set<String> skippableForRoles(){
+    return Collections.emptySet();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ConformanceAction that = (ConformanceAction) o;
     return Objects.equals(id, that.id);
+  }
+
+  public String[] buildFullUris(String uri, String... uriReference) {
+    if (uriReference == null || uriReference.length == 0) {
+      return new String[] {uri};
+    }
+    return Arrays.stream(uriReference)
+      .filter(Objects::nonNull)
+      .filter(Predicate.not(String::isBlank))
+      .map(ref -> uri + ref)
+      .toArray(String[]::new);
   }
 
   @Override

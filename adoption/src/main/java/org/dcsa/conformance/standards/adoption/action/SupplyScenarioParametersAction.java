@@ -95,8 +95,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     try {
       JsonNode input = partyInput.get("input");
 

@@ -162,13 +162,24 @@ public abstract class ManualTestBase {
     waitForCleanSandboxStatus(otherSandbox);
   }
 
+  void resetParty(SandboxConfig sandbox) {
+    ObjectNode node =
+        mapper
+            .createObjectNode()
+            .put("operation", "resetParty")
+            .put("sandboxId", sandbox.sandboxId);
+    waitForAsyncCalls(150L);
+    assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
+  }
+
   void completeAction(SandboxConfig sandbox) {
     log.debug("Completing current action.");
     ObjectNode node =
         mapper
             .createObjectNode()
             .put("operation", "completeCurrentAction")
-            .put("sandboxId", sandbox.sandboxId);
+            .put("sandboxId", sandbox.sandboxId)
+            .put("skip", false);
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
     waitForCleanSandboxStatus(sandbox);
@@ -189,11 +200,12 @@ public abstract class ManualTestBase {
     if (!subReport.status.equals("CONFORMANT")) {
       StringBuilder messageBuilder = new StringBuilder();
       buildErrorMessage(subReport, messageBuilder);
-      log.error("Scenario '{}' is not conformant. Details: {}", scenarioName, messageBuilder);
+      String errorMessage = "Scenario '" + scenarioName + "' is not conformant. Details: " + messageBuilder;
+      log.error(errorMessage);
 
       // Note: developers can uncomment the next line, if they like to use the WebUI, at this point
       // waitForAsyncCalls(10 * 60 * 1000L);
-      fail();
+      fail(errorMessage);
     }
     assertTrue(
         subReport.errorMessages.isEmpty(),
@@ -378,6 +390,7 @@ public abstract class ManualTestBase {
   void runScenario(
     SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
     log.debug("Starting scenario '{}'.", scenarioName);
+    resetParty(sandbox2);
     startOrStopScenario(sandbox1, scenarioId);
     notifyAction(sandbox2, sandbox1);
 
@@ -426,8 +439,9 @@ public abstract class ManualTestBase {
         continue;
       }
       if (scenarioStatusJsonNode.has("jsonForPromptText")) {
-        log.error("While running '{}', found an unexpected jsonForPromptText, while no input is required, got text: {}", scenarioName, scenarioStatusJsonNode.get("jsonForPromptText"));
-        fail();
+        String errorMessage = "While running '" + scenarioName + "', found an unexpected jsonForPromptText, while no input is required, got text: " + scenarioStatusJsonNode.get("jsonForPromptText");
+        log.error(errorMessage);
+        fail(errorMessage);
       }
       if (hasPromptText && !scenarioStatusJsonNode.get("promptText").textValue().isEmpty()) {
         notifyAction(sandbox2, sandbox1);

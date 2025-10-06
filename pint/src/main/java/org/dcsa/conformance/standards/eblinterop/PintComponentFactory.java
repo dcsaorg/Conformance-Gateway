@@ -15,10 +15,12 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 import org.dcsa.conformance.standards.eblinterop.party.PintSendingPlatform;
 
 class PintComponentFactory extends AbstractComponentFactory {
+
   PintComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
     super(standardName, standardVersion, scenarioSuite, "SendingPlatform", "ReceivingPlatform");
   }
 
+  @Override
   public List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
@@ -44,8 +46,7 @@ class PintComponentFactory extends AbstractComponentFactory {
               counterpartConfigurationsByRoleName.get(PintRole.RECEIVING_PLATFORM.getConfigName()),
               persistentMap,
               asyncWebClient,
-              orchestratorAuthHeader
-          ));
+              orchestratorAuthHeader));
     }
 
     PartyConfiguration receivingPlatformConfiguration =
@@ -58,14 +59,14 @@ class PintComponentFactory extends AbstractComponentFactory {
               counterpartConfigurationsByRoleName.get(PintRole.SENDING_PLATFORM.getConfigName()),
               persistentMap,
               asyncWebClient,
-              orchestratorAuthHeader
-          ));
+              orchestratorAuthHeader));
     }
 
     return parties;
   }
 
-  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
+  @Override
+  public Map<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
     return PintScenarioListBuilder.createModuleScenarioListBuilders(
@@ -83,6 +84,7 @@ class PintComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toCollection(TreeSet::new));
   }
 
+  @Override
   public Set<String> getReportRoleNames(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {

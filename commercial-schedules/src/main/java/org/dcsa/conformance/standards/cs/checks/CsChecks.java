@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ public class CsChecks {
       Supplier<DynamicScenarioParameters> dspSupplier,
       boolean checkPagination) {
     var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.add(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP);
     checks.add(VALIDATE_CUTOFF_TIME_CODE);
     if (checkPagination && dspSupplier != null) {
@@ -109,6 +111,11 @@ public class CsChecks {
             return issues;
           });
 
+  static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
+      JsonAttribute.customValidator(
+          "Every response received during a conformance test must not be empty",
+          body -> body.isEmpty() ? Set.of("The response body must not be empty") : Set.of());
+
   private static JsonContentCheck paginationCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
         "Check the response is paginated correctly",
@@ -129,6 +136,7 @@ public class CsChecks {
       Supplier<DynamicScenarioParameters> dspSupplier,
       boolean checkPagination) {
     var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.add(VALIDATE_CUTOFF_TIME_CODE_PS);
     if (checkPagination && dspSupplier != null) {
       checks.add(paginationCheck(dspSupplier));
@@ -147,18 +155,16 @@ public class CsChecks {
       Supplier<DynamicScenarioParameters> dspSupplier,
       boolean checkPagination) {
     var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     if (checkPagination && dspSupplier != null) {
       checks = new ArrayList<>();
       checks.add(paginationCheck(dspSupplier));
-
     }
-    return checks.isEmpty()
-        ? null
-        : JsonAttribute.contentChecks(
-            CsRole::isPublisher,
-            matchedExchangeUuid,
-            HttpMessageType.RESPONSE,
-            expectedApiVersion,
-            checks);
+    return JsonAttribute.contentChecks(
+        CsRole::isPublisher,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion,
+        checks);
   }
 }

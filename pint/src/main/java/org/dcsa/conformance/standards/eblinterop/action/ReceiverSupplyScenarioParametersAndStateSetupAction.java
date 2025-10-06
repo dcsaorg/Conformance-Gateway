@@ -42,8 +42,7 @@ public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAct
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     var rsp = ReceiverScenarioParameters.fromJson(partyInput.path("input"));
     rsp.validate();
     this.setRsp(rsp);
@@ -51,7 +50,7 @@ public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAct
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Setup the system for transfer and provide the following details for the sender.");
+    return getMarkdownHumanReadablePrompt("prompt-receiver-supply-scenario-parameters.md");
   }
 
   @Override

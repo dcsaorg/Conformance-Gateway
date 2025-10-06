@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.cs.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -40,10 +42,20 @@ public class CsGetRoutingsAction extends CsAction {
   @Override
   public String getHumanReadablePrompt() {
     return previousAction instanceof CsGetRoutingsAction
-        ? "Send a GET point to point routings request to fetch the second results page, using the cursor retrieved from the headers of the response of the first GET request."
-        : "Send a GET point to point routings request with the following parameters: "
-            + sspSupplier.get().toJson().toPrettyString();
+        ? getMarkdownHumanReadablePrompt(
+            Map.of("API_PLACEHOLDER", "point to point"),
+            "prompt-subscriber-get-secondpage.md",
+            "prompt-subscriber-refresh-complete.md")
+        : getMarkdownHumanReadablePrompt(
+            Map.of(
+                "API_PLACEHOLDER",
+                "point to point",
+                "PARAMETERS_PLACEHOLDER",
+                sspSupplier.get().toJson().toPrettyString()),
+            "prompt-subscriber-get.md",
+            "prompt-subscriber-refresh-complete.md");
   }
+
 
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {

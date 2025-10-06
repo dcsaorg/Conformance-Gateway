@@ -13,6 +13,7 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 @Getter
 @Slf4j
 public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChangingBookingAction {
+
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
@@ -43,6 +44,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
+    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
 
@@ -56,22 +58,22 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var cbrr = getDspSupplier().get().carrierBookingRequestReference();
+        var dsp = getDspSupplier().get();
+        String cbrr = dsp.carrierBookingRequestReference();
+        String cbr = dsp.carrierBookingReference();
         return Stream.concat(
-          Stream.of(
-          new JsonSchemaCheck(
-            BookingRole::isShipper,
-            getMatchedExchangeUuid(),
-            HttpMessageType.REQUEST,
-            requestSchemaValidator),
-            BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier())),
-          Stream.concat(
-            createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/%s".formatted(cbrr)),
-            getNotificationChecks(
-                expectedApiVersion,
-                notificationSchemaValidator,
-                expectedBookingState,
-                null)));
+            Stream.of(
+                new JsonSchemaCheck(
+                    BookingRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    requestSchemaValidator),
+                BookingChecks.requestContentChecks(
+                    getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())),
+            Stream.concat(
+                createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
+                getNotificationChecks(
+                    expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)));
       }
     };
   }

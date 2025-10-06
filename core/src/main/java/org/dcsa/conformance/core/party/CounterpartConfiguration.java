@@ -22,7 +22,13 @@ public class CounterpartConfiguration {
   private HttpHeaderConfiguration[] externalPartyAdditionalHeaders;
   private EndpointUriOverrideConfiguration[] endpointUriOverrideConfigurations;
 
-  public static void validateUrl(String url, boolean allowHttpLocalhost) throws UserFacingException {
+  public static void validateUrl(String url, boolean allowHttpLocalhost, boolean allowEmptyUrl) throws UserFacingException {
+    if (url.isEmpty()) {
+      if (allowEmptyUrl) {
+        return;
+      }
+      throw new UserFacingException("The application base URL must not be empty: connecting to your application is not optional for this standard and role.");
+    }
     try {
       new URI(url);
     } catch (URISyntaxException e) {

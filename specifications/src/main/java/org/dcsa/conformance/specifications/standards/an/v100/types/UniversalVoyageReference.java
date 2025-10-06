@@ -1,0 +1,16 @@
+package org.dcsa.conformance.specifications.standards.an.v100.types;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(
+    type = "string",
+    maxLength = 5,
+    example = "2301W",
+    description =
+"""
+A global unique voyage reference for a voyage, as per DCSA standard, agreed by VSA partners for the voyage.
+ * last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (North, East, West, South or Roundtrip).
+""")
+public class UniversalVoyageReference {}

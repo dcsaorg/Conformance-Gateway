@@ -302,7 +302,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
     }
   }
 
-  public void completeCurrentAction() {
+  public void completeCurrentAction(boolean skipAction) {
     log.info("ConformanceOrchestrator.completeCurrentAction()");
 
     if (currentScenarioId == null) {
@@ -318,10 +318,22 @@ public class ConformanceOrchestrator implements StatefulEntity {
               .formatted(currentScenario.toString()));
       return;
     }
-    if (nextAction.isMissingMatchedExchange()) {
+
+    if (!skipAction && nextAction.isMissingMatchedExchange()) {
       throw new UserFacingException(
           "A required API exchange was not yet detected for action '%s'"
               .formatted(nextAction.getActionTitle()));
+    }
+
+    if (skipAction
+        && !nextAction
+            .skippableForRoles()
+            .contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
+      throw new UserFacingException(
+          "Action '%s' cannot be skipped for role '%s'"
+              .formatted(
+                  nextAction.getActionTitle(),
+                  sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole()));
     }
 
     currentScenario.popNextAction();
@@ -401,6 +413,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
     return conformanceCheck;
   }
 
+  public JsonNode createFullReport() {
+    return new ConformanceReport(
+            _createScenarioConformanceCheck(), _getManualCounterpart().getRole())
+        .toJsonReport();
+  }
+
   public ObjectNode getScenarioDigest(String scenarioId) {
     ConformanceScenario scenario = _getScenario(UUID.fromString(scenarioId));
     return OBJECT_MAPPER
@@ -450,6 +468,19 @@ public class ConformanceOrchestrator implements StatefulEntity {
             .orElseThrow();
     scenarioNode.set("conformanceSubReport", scenarioSubReport.toJsonReport());
 
+    CounterpartConfiguration counterpartConfiguration =
+        sandboxConfiguration.getExternalPartyCounterpartConfiguration();
+
+    scenarioNode.put("isSkippable", false);
+    if (nextAction != null
+        && nextAction.skippableForRoles().contains(counterpartConfiguration.getRole())) {
+      scenarioNode.put("isSkippable", true);
+    }
+
+    boolean needsAction =
+        counterpartConfiguration != null && !counterpartConfiguration.getUrl().isBlank();
+    scenarioNode.put("needsAction", needsAction);
+
     return scenarioNode;
   }
 
@@ -459,9 +490,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
       if (currentScenarioId.equals(scenarioUuid)) {
         // stop
         ConformanceScenario currentScenario = _getCurrentScenario();
-        currentScenario.reset();
         _saveInactiveScenario(currentScenario);
-        latestRunIdsByScenarioId.remove(currentScenarioId);
         currentScenarioId = null;
       } else {
         throw new IllegalStateException("Another scenario is currently running");

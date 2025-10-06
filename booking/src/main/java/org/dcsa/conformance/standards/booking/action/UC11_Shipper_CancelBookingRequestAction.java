@@ -1,14 +1,13 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-
-import java.util.stream.Stream;
 
 @Getter
 @Slf4j
@@ -48,6 +47,7 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
+    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
 
@@ -58,19 +58,18 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
         String cbrr = dsp.carrierBookingRequestReference();
+        String cbr = dsp.carrierBookingReference();
         return Stream.concat(
-          Stream.concat(createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/%s".formatted(cbrr)),
-            Stream.of(
-              new JsonSchemaCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator))),
-          getNotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator,
-            expectedBookingStatus,
-            null));
+            Stream.concat(
+                createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
+                Stream.of(
+                    new JsonSchemaCheck(
+                        BookingRole::isShipper,
+                        getMatchedExchangeUuid(),
+                        HttpMessageType.REQUEST,
+                        requestSchemaValidator))),
+            getNotificationChecks(
+                expectedApiVersion, notificationSchemaValidator, expectedBookingStatus, null));
       }
     };
   }

@@ -1,0 +1,157 @@
+{
+
+  "arrivalNotices": [
+    {
+      "issueDateTime": "2025-03-04T00:00:00Z",
+      "carrierCode": "HDMU",
+      "carrierCodeListProvider": "NMFTA",
+      "carrierContactInformation": [
+        {
+          "name": "Carrier USA Imports",
+          "phone": "+1-844-468-6607",
+          "email": "carrier@example.com"
+        }
+      ],
+      "deliveryTypeAtDestination": "CY",
+      "transportDocumentReference": "SAM43512554",
+      "documentParties": [
+        {
+          "partyFunction": "OS",
+          "partyName": "Shipper",
+          "address": {
+            "street": "Marunouchi 2-Chome",
+            "streetNumber": "3-1",
+            "floor": "1",
+            "postCode": "100-0005",
+            "POBox": "N/A",
+            "city": "Chiyoda-Ku",
+            "stateRegion": "Tokyo",
+            "countryCode": "JP"
+          },
+          "partyContactDetails": [
+            {
+              "name": "Hiroshi Tanaka",
+              "phone": "+81-3-1234-5678",
+              "email": "shipper@example.com"
+            }
+          ]
+        },
+        {
+          "partyFunction": "CN",
+          "partyName": "Consignee",
+          "address": {
+            "street": "South Alameda Street",
+            "streetNumber": "1234",
+            "floor": "N/A",
+            "postCode": "90021",
+            "POBox": "N/A",
+            "city": "Los Angeles",
+            "stateRegion": "CA",
+            "countryCode": "US"
+          },
+          "partyContactDetails": [
+            {
+              "name": "Michael Johnson",
+              "phone": "+1-213-555-7890",
+              "email": "consignee@example.com"
+            }
+          ]
+        }
+      ],
+      "transport": {
+        "portOfLoading": {
+          "UNLocationCode": "JPTYO",
+          "locationName": "AOMI CONTAINER TERMINAL BERTH",
+          "address": {
+            "street": "Aomi 3-chome",
+            "streetNumber": "4-4",
+            "floor": "N/A",
+            "postCode": "135-0064",
+            "POBox": "N/A",
+            "city": "Koto-Ku",
+            "stateRegion": "Tokyo",
+            "countryCode": "JP"
+          },
+          "facility": {
+            "facilityCode": "AOO",
+            "facilityCodeListProvider": "SMDG"
+          }
+        },
+        "portOfDischarge": {
+          "UNLocationCode": "USLAX",
+          "locationName": "YUSEN CONTAINER TERMINAL (Port of Los Angeles)",
+          "address": {
+            "street": "New Dock Street (Berths 212–215), Terminal Island",
+            "streetNumber": "701",
+            "floor": "N/A",
+            "postCode": "90731",
+            "POBox": "N/A",
+            "city": "Los Angeles",
+            "stateRegion": "CA",
+            "countryCode": "US"
+          },
+          "facility": {
+            "facilityCode": "YUSEN",
+            "facilityCodeListProvider": "SMDG"
+          }
+        },
+        "portOfDischargeArrivalDate": {
+          "value": "2025-03-10",
+          "classifier": "EST"
+        },
+        "legs": [
+          {
+            "vesselVoyage": {
+              "vesselName": "NYK OCEANUS",
+              "carrierImportVoyageNumber": "0071E"
+            }
+          }
+        ]
+      },
+      "utilizedTransportEquipments": [
+        {
+          "equipment": {
+            "equipmentReference": "HMMU5443121",
+            "ISOEquipmentCode": "42G1"
+          },
+          "seals": [
+            {
+              "number": "CMT01453"
+            }
+          ]
+        }
+      ],
+      "consignmentItems": [
+        {
+          "descriptionOfGoods": [
+            "AUTOMOTIVE SPARE PARTS"
+          ],
+          "cargoItems": [
+            {
+              "equipmentReference": "HMMU5443121",
+              "cargoGrossWeight": {
+                "value": 21150.0,
+                "unit": "KGM"
+              },
+              "outerPackaging": {
+                "packageCode": "PK",
+                "description": "packages",
+                "numberOfPackages": 500
+              }
+            }
+          ]
+        }
+      ],
+      "charges": [
+        {
+          "chargeName": "Terminal Handling Service - Destination",
+          "currencyAmount": 355.00,
+          "currencyCode": "USD",
+          "paymentTermCode": "COL",
+          "unitPrice": 355.00,
+          "quantity": 1
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,8 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
@@ -16,6 +18,7 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -28,6 +31,8 @@ public class EblIssuancePlatform extends ConformanceParty {
   private final Map<String, EblIssuanceState> eblStatesByTdr = new HashMap<>();
   private final Map<String, String> tdr2PendingChecksum = new HashMap<>();
   private final Map<String, Boolean> knownChecksums = new HashMap<>();
+
+  private String scenarioResponseCode = "";
 
   public EblIssuancePlatform(
       String apiVersion,
@@ -60,6 +65,8 @@ public class EblIssuancePlatform extends ConformanceParty {
     targetObjectNode.set("tdr2PendingChecksum", StateManagementUtil.storeMap(tdr2PendingChecksum));
     targetObjectNode.set(
         "knownChecksums", StateManagementUtil.storeMap(knownChecksums, String::valueOf));
+    targetObjectNode.set(
+        "responseCode", OBJECT_MAPPER.createObjectNode().put("code", scenarioResponseCode));
   }
 
   @Override
@@ -75,6 +82,7 @@ public class EblIssuancePlatform extends ConformanceParty {
         tdr2PendingChecksum, sourceObjectNode.path("tdr2PendingChecksum"));
     StateManagementUtil.restoreIntoMap(
         knownChecksums, sourceObjectNode.path("knownChecksums"), Boolean::valueOf);
+    scenarioResponseCode = sourceObjectNode.path("responseCode").path("code").asText("");
   }
 
   @Override
@@ -82,6 +90,7 @@ public class EblIssuancePlatform extends ConformanceParty {
     eblStatesByTdr.clear();
     tdr2PendingChecksum.clear();
     knownChecksums.clear();
+    scenarioResponseCode = "";
   }
 
   @Override
@@ -94,11 +103,11 @@ public class EblIssuancePlatform extends ConformanceParty {
     log.info(
         "EblIssuancePlatform.supplyScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
+    scenarioResponseCode = actionPrompt.required("responseCode").asText();
 
     SuppliedScenarioParameters suppliedScenarioParameters =
         new SuppliedScenarioParameters(
-            IssuanceResponseCode.forStandardCode(actionPrompt.required("responseCode").asText())
-                .sendToPlatform,
+            IssuanceResponseCode.forStandardCode(scenarioResponseCode).sendToPlatform,
             "DCSA issue to party",
             "1234-issue-to",
             "DCSA",
@@ -120,14 +129,6 @@ public class EblIssuancePlatform extends ConformanceParty {
 
     var tdr = jsonRequest.path("document").path("transportDocumentReference").asText(null);
 
-    String value = jsonRequest.path("issueTo").path("sendToPlatform").asText();
-    String irc =
-        switch (value) {
-          case "DCSA" -> "ISSU";
-          case "DCSB" -> "BREQ";
-          case "DCSR" -> "REFU";
-          default -> "";
-        };
     var checksum = Checksums.sha256CanonicalJson(jsonRequest.path("document"));
     var state = eblStatesByTdr.get(tdr);
 
@@ -136,16 +137,10 @@ public class EblIssuancePlatform extends ConformanceParty {
       addOperatorLogEntry(
           "Rejecting issuance request for eBL with transportDocumentReference '%s' (invalid)"
               .formatted(tdr));
-      return request.createResponse(
-          400,
-          Map.of(API_VERSION, List.of(apiVersion)),
-          new ConformanceMessageBody(
-              OBJECT_MAPPER
-                  .createObjectNode()
-                  .put(
-                      "message",
-                      "Rejecting issuance request for document '%s' because the issuing party is missing or the TDR could not be resolved"
-                          .formatted(tdr))));
+      return return400(
+          request,
+          "Rejecting issuance request for document '%s' because the issuing party is missing or the TDR could not be resolved"
+              .formatted(tdr));
     }
     if (state == null
         || state == EblIssuanceState.ISSUED && !knownChecksums.containsKey(checksum)) {
@@ -175,23 +170,56 @@ public class EblIssuancePlatform extends ConformanceParty {
               new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
     }
 
+    if (scenarioResponseCode.isEmpty()) {
+      String value = jsonRequest.path("issueTo").path("sendToPlatform").asText();
+      scenarioResponseCode =
+          switch (value) {
+            case "DCSA" -> "ISSU";
+            case "DCSB" -> "BREQ";
+            case "DCSR" -> "REFU";
+            default -> "ISSU";
+          };
+    }
+
     var platformResponse =
         OBJECT_MAPPER
             .createObjectNode()
             .put("transportDocumentReference", tdr)
-            .put("issuanceResponseCode", irc);
-    if (irc.equals("BREQ")) {
+            .put("issuanceResponseCode", scenarioResponseCode);
+    if (scenarioResponseCode.equals("BREQ") || scenarioResponseCode.equals("REFU")) {
       platformResponse
           .putArray("errors")
           .addObject()
           .put("reason", "Rejected as required by the conformance scenario")
           .put("errorCode", "DCSA-123");
     }
+
     asyncCounterpartNotification(null, "/v3/ebl-issuance-responses", platformResponse);
 
     addOperatorLogEntry(
         "Handling issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
             .formatted(tdr, eblStatesByTdr.get(tdr)));
     return response;
+  }
+
+  private ConformanceResponse return400(ConformanceRequest request, String message) {
+    ObjectNode response =
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/eblissuance/messages/eblissuance-v3.0.0-error-message.json",
+                Map.of(
+                    "HTTP_METHOD_PLACEHOLDER",
+                    request.method(),
+                    "REQUEST_URI_PLACEHOLDER",
+                    request.url(),
+                    "REFERENCE_PLACEHOLDER",
+                    UUID.randomUUID().toString(),
+                    "ERROR_DATE_TIME_PLACEHOLDER",
+                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
+                    "ERROR_MESSAGE_PLACEHOLDER",
+                    message));
+
+    return request.createResponse(
+        400, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 }

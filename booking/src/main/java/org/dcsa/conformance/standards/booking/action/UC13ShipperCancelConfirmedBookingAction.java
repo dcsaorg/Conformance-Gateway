@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -47,11 +46,6 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
   }
 
   @Override
-  public JsonNode getJsonForHumanReadablePrompt() {
-    return getCspSupplier().get().toJson();
-  }
-
-  @Override
   protected boolean expectsNotificationExchange() {
     return true;
   }
@@ -59,6 +53,7 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
+    jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
     jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
@@ -69,21 +64,25 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
+        String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
         return Stream.concat(
-          Stream.concat(createPrimarySubChecks("PATCH",expectedApiVersion,"/v2/bookings/%s".formatted(cbr)),
-            Stream.of(
-              new JsonSchemaCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator))),
-          expectedBookingStatus != null ?  getNotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator,
-            expectedBookingStatus,
-            expectedAmendedBookingStatus,
-            expectedBookingCancellationStatus): Stream.empty());
+            Stream.concat(
+                createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
+                Stream.of(
+                    new JsonSchemaCheck(
+                        BookingRole::isShipper,
+                        getMatchedExchangeUuid(),
+                        HttpMessageType.REQUEST,
+                        requestSchemaValidator))),
+            expectedBookingStatus != null
+                ? getNotificationChecks(
+                    expectedApiVersion,
+                    notificationSchemaValidator,
+                    expectedBookingStatus,
+                    expectedAmendedBookingStatus,
+                    expectedBookingCancellationStatus)
+                : Stream.empty());
       }
     };
   }

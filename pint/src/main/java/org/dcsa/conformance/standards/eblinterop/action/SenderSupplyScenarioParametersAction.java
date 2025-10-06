@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.party.PintSendingPlatform;
 
+import java.util.Map;
+
 @Getter
 @Slf4j
 public class SenderSupplyScenarioParametersAction extends PintAction {
@@ -32,8 +34,7 @@ public class SenderSupplyScenarioParametersAction extends PintAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     var ssp = SenderScenarioParameters.fromJson(partyInput.path("input"));
     ssp.validate();
     this.setSsp(ssp);
@@ -47,7 +48,8 @@ public class SenderSupplyScenarioParametersAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Please provide these scenario details. Additional documents required: %d".formatted(documentCount));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("DOCUMENT_COUNT", String.valueOf(documentCount)),
+        "prompt-sender-supply-scenario-parameters.md");
   }
-
 }

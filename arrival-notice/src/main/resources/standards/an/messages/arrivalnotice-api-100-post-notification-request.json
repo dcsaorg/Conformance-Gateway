@@ -1,0 +1,33 @@
+{
+  "arrivalNoticeNotifications": [
+    {
+      "issueDateTime": "2024-03-04T00:00:00Z",
+      "transportDocumentReference": "HLCUSGS250302123",
+      "equipmentReferences": [
+        "HLCU1234567"
+      ],
+      "portOfDischarge": {
+        "locationName": "PSA Pasir Panjang Terminal",
+        "address": {
+          "street": "Harbour Drive, PSA Horizons",
+          "streetNumber": "1",
+          "floor": "N/A",
+          "postCode": "117352",
+          "POBox": "N/A",
+          "city": "Singapore",
+          "stateRegion": "Central Singapore",
+          "countryCode": "SG"
+        },
+        "UNLocationCode": "SGSIN",
+        "facility": {
+          "facilityCode": "PSAPPT",
+          "facilityCodeListProvider": "SMDG"
+        }
+      },
+      "portOfDischargeArrivalDate": {
+        "value": "2024-03-12",
+        "classifier": "EST"
+      }
+    }
+  ]
+}

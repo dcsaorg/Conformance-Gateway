@@ -12,7 +12,10 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -31,7 +34,9 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.adoption.AdoptionStandard;
+import org.dcsa.conformance.standards.an.AnStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.bookingandebl.BookingAndEblStandard;
 import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
@@ -45,14 +50,17 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 public class ConformanceSandbox {
   protected static final String SANDBOX = "sandbox#";
   protected static final String SESSION = "session#";
+  public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
     AdoptionStandard.INSTANCE,
+    AnStandard.INSTANCE,
     BookingStandard.INSTANCE,
     CsStandard.INSTANCE,
     EblStandard.INSTANCE,
     EblIssuanceStandard.INSTANCE,
     EblSurrenderStandard.INSTANCE,
+    BookingAndEblStandard.INSTANCE,
     JitStandard.INSTANCE,
     OvsStandard.INSTANCE,
     PintStandard.INSTANCE,
@@ -262,6 +270,9 @@ public class ConformanceSandbox {
     String sandboxId = remainingUri.substring(0, endOfSandboxId);
     remainingUri = remainingUri.substring(endOfSandboxId);
 
+    if (remainingUri.contains("dev/null")) {
+      return new ConformanceWebResponse(204, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
+    }
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (!sandboxConfiguration.getAuthHeaderName().isBlank()) {
@@ -294,7 +305,6 @@ public class ConformanceSandbox {
       String partyName =
           URLDecoder.decode(remainingUri.substring(0, endOfPartyName), StandardCharsets.UTF_8);
       remainingUri = remainingUri.substring(endOfPartyName);
-
       if (remainingUri.equals("/api/conformance/notification")) {
         return _handlePartyNotification(
             persistenceProvider, deferredSandboxTaskConsumer, sandboxId, partyName);
@@ -355,7 +365,8 @@ public class ConformanceSandbox {
             sandboxId,
             partyName,
             "getting operator log for party " + partyName,
-            party -> party.getOperatorLog().forEach(operatorLogNode::add))
+            party ->
+                party.getOperatorLog().forEach(entry -> operatorLogNode.add(entry.message())))
         .run();
     return operatorLogNode;
   }
@@ -385,8 +396,6 @@ public class ConformanceSandbox {
       String sandboxId) {
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
-    if (sandboxConfiguration.getOrchestrator().isActive()) return;
-
     String partyName = sandboxConfiguration.getParties()[0].getName();
     new PartyTask(
             persistenceProvider,
@@ -396,6 +405,83 @@ public class ConformanceSandbox {
             "resetting party " + partyName,
             ConformanceParty::reset)
         .run();
+  }
+
+  public static void createReport(
+      ConformancePersistenceProvider persistenceProvider,
+      String environmentId,
+      SandboxConfiguration sandboxConfiguration,
+      String reportTitle) {
+    AtomicReference<JsonNode> resultReference = new AtomicReference<>();
+    String sandboxId = sandboxConfiguration.getId();
+    new OrchestratorTask(
+            persistenceProvider,
+            null,
+            sandboxId,
+            "creating for sandbox %s a full report".formatted(sandboxId),
+            orchestrator -> resultReference.set(orchestrator.createFullReport()))
+        .run();
+
+    // PK=environment#UUID
+    // SK=report#digest#<sandboxUUID>#<reportUTC>
+    // value={...title...standard...}
+    Instant reportInstant = Instant.now();
+    String reportIsoTimestamp = reportInstant.toString();
+    String reportDateTime = reportInstant.atZone(ZoneOffset.UTC).format(DATE_TIME_FORMATTER);
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue(
+            "environment#" + environmentId,
+            "report#digest#%s#%s".formatted(sandboxId, reportIsoTimestamp),
+            OBJECT_MAPPER
+                .createObjectNode()
+                .put("isoTimestamp", reportIsoTimestamp)
+                .put("dateTime", reportDateTime)
+                .put("title", reportTitle)
+                .put("standardName", sandboxConfiguration.getStandard().getName())
+                .put("standardVersion", sandboxConfiguration.getStandard().getVersion())
+                .put("scenarioSuite", sandboxConfiguration.getScenarioSuite())
+                .put(
+                    "testedPartyRole",
+                    sandboxConfiguration.getSandboxPartyCounterpartConfiguration().getRole()));
+
+    // PK=environment#UUID
+    // SK=report#content#<sandboxUUID>#<reportUTC>
+    // value={...report content...}
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue(
+            "environment#" + environmentId,
+            "report#content#%s#%s".formatted(sandboxId, reportIsoTimestamp),
+            resultReference.get());
+  }
+
+  public static JsonNode getReportContent(
+      ConformancePersistenceProvider persistenceProvider,
+      String environmentId,
+      String sandboxId,
+      String reportIsoTimestamp) {
+    return persistenceProvider
+        .getNonLockingMap()
+        .getItemValue(
+            "environment#" + environmentId,
+            "report#content#%s#%s".formatted(sandboxId, reportIsoTimestamp));
+  }
+
+  public static JsonNode getReportDigests(
+    ConformancePersistenceProvider persistenceProvider, String environmentId, String sandboxId) {
+    // PK=environment#UUID
+    // SK=report#digest#<sandboxUUID>#<reportUTC>
+    // value={...title...standard...}
+    return persistenceProvider
+        .getNonLockingMap()
+        .getPartitionValuesBySortKey(
+            "environment#" + environmentId, "report#digest#%s#".formatted(sandboxId))
+        .sequencedEntrySet()
+        .reversed()
+        .stream()
+        .map(sortKeyAndValue -> (ObjectNode) sortKeyAndValue.getValue())
+        .collect(OBJECT_MAPPER::createArrayNode, ArrayNode::add, ArrayNode::addAll);
   }
 
   public static ObjectNode getScenarioDigest(
@@ -507,15 +593,18 @@ public class ConformanceSandbox {
   public static JsonNode completeCurrentAction(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,
-      String sandboxId) {
+      String sandboxId,
+      boolean skipAction) {
     new OrchestratorTask(
             persistenceProvider,
             conformanceWebRequest ->
                 ConformanceSandbox._asyncSendOutboundWebRequest(
                     deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
-            "completing current action in sandbox %s".formatted(sandboxId),
-            ConformanceOrchestrator::completeCurrentAction)
+            skipAction
+                ? "skipping current action in sandbox %s".formatted(sandboxId)
+                : "completing current action in sandbox %s".formatted(sandboxId),
+            conformanceOrchestrator -> conformanceOrchestrator.completeCurrentAction(skipAction))
         .run();
     return OBJECT_MAPPER.createObjectNode();
   }
@@ -919,5 +1008,94 @@ public class ConformanceSandbox {
                 new UnsupportedOperationException(
                     "Unsupported standard: %s".formatted(standardConfiguration)))
         .createComponentFactory(standardConfiguration.getVersion(), scenarioSuite);
+  }
+
+  public static JsonNode executeAdminTask(
+      ConformancePersistenceProvider persistenceProvider,
+      JsonNode jsonInput) {
+    String operation = jsonInput.path("operation").asText();
+    if ("createReportInAllSandboxes".equals(operation)) {
+      String reportTitle = jsonInput.get("reportTitle").asText(); // throw NPE if missing
+      return createReportInAllSandboxes(persistenceProvider, reportTitle);
+    }
+    throw new UnsupportedOperationException("Unsupported operation '%s'".formatted(operation));
+  }
+
+  private static JsonNode createReportInAllSandboxes(
+      ConformancePersistenceProvider persistenceProvider, String reportTitle) {
+    ArrayNode environmentResults = OBJECT_MAPPER.createArrayNode();
+    TreeMap<String, TreeSet<String>> sandboxIdsByEnvironmentId =
+        getSandboxIdsByEnvironmentId(persistenceProvider);
+    int environmentCount = sandboxIdsByEnvironmentId.size();
+    AtomicInteger atomicEnvironmentIndex = new AtomicInteger();
+    sandboxIdsByEnvironmentId.forEach(
+        (environmentId, sandboxIds) -> {
+          ArrayNode sandboxResults = OBJECT_MAPPER.createArrayNode();
+          int environmentIndex = atomicEnvironmentIndex.incrementAndGet();
+          int sandboxCount = sandboxIds.size();
+          AtomicInteger atomicSandboxIndex = new AtomicInteger();
+          sandboxIds.forEach(
+              sandboxId -> {
+                log.info(
+                    "In environment {} of {} with id {} creating report for sandbox {} of {} with id {}",
+                    environmentIndex,
+                    environmentCount,
+                    environmentId,
+                    atomicSandboxIndex.incrementAndGet(),
+                    sandboxCount,
+                    sandboxId);
+                String sandboxResultString;
+                if (sandboxId.contains("#deleted")) {
+                  sandboxResultString = "Skipped (deleted sandbox)";
+                } else {
+                  try {
+                    SandboxConfiguration sandboxConfiguration =
+                        loadSandboxConfiguration(persistenceProvider, sandboxId);
+                    if (sandboxConfiguration.getSandboxPartyCounterpartConfiguration() == null) {
+                      sandboxResultString = "Skipped (no counterpart configuration)";
+                    } else if (!sandboxConfiguration.getOrchestrator().isActive()) {
+                      sandboxResultString = "Skipped (internal sandbox)";
+                    } else {
+                      createReport(
+                          persistenceProvider, environmentId, sandboxConfiguration, reportTitle);
+                      sandboxResultString = "DONE";
+                    }
+                  } catch (Exception e) {
+                    log.warn("Sandbox report creation failed: {}", e, e);
+                    sandboxResultString = "Failed: " + e;
+                  }
+                }
+                sandboxResults.add(
+                    OBJECT_MAPPER
+                        .createObjectNode()
+                        .put("sandboxId", sandboxId)
+                        .put("result", sandboxResultString));
+              });
+          ObjectNode environmentResult =
+              OBJECT_MAPPER.createObjectNode().put("environmentId", environmentId);
+          environmentResult.set("sandboxResults", sandboxResults);
+          environmentResults.add(environmentResult);
+        });
+    return environmentResults;
+  }
+
+  private static TreeMap<String, TreeSet<String>> getSandboxIdsByEnvironmentId(
+    ConformancePersistenceProvider persistenceProvider) {
+    TreeMap<String, TreeSet<String>> sandboxIdsByEnvironmentId = new TreeMap<>();
+    String partitionKeyPrefix = "environment#";
+    String sortKeyPrefix = "sandbox#";
+    persistenceProvider
+        .getNonLockingMap()
+        .scan(partitionKeyPrefix, sortKeyPrefix)
+        .forEach(
+            (partitionKey, valuesBySortKey) -> {
+              TreeSet<String> sandboxIds = new TreeSet<>();
+              sandboxIdsByEnvironmentId.put(
+                  partitionKey.substring(partitionKeyPrefix.length()), sandboxIds);
+              valuesBySortKey
+                  .keySet()
+                  .forEach(sortKey -> sandboxIds.add(sortKey.substring(sortKeyPrefix.length())));
+            });
+    return sandboxIdsByEnvironmentId;
   }
 }

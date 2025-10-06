@@ -15,7 +15,7 @@ import org.dcsa.conformance.standards.eblissuance.party.DynamicScenarioParameter
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
 public abstract class IssuanceAction extends ConformanceAction {
-  private final OverwritingReference<DynamicScenarioParameters> dspReference;
+  private OverwritingReference<DynamicScenarioParameters> dspReference;
   protected final int expectedStatus;
 
   protected IssuanceAction(
@@ -26,12 +26,22 @@ public abstract class IssuanceAction extends ConformanceAction {
       int expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
+    this.initializeDsp();
+  }
+
+  private void initializeDsp() {
     if (previousAction == null) {
       this.dspReference =
-          new OverwritingReference<>(null, new DynamicScenarioParameters(EblType.STRAIGHT_EBL));
+        new OverwritingReference<>(null, new DynamicScenarioParameters(EblType.STRAIGHT_EBL));
     } else {
-      this.dspReference = new OverwritingReference<>(previousAction.dspReference, null);
+      this.dspReference = new OverwritingReference<>(getPreviousIssuanceAction().dspReference, null);
     }
+  }
+
+  @Override
+  public void reset() {
+    super.reset();
+    this.initializeDsp();
   }
 
   protected IssuanceAction getPreviousIssuanceAction() {
@@ -92,4 +102,12 @@ public abstract class IssuanceAction extends ConformanceAction {
 
 
   protected abstract Supplier<String> getTdrSupplier();
+
+  public static PlatformScenarioParametersAction latestPlatformScenarioParametersAction(
+          IssuanceAction previousAction) {
+    return previousAction
+            instanceof PlatformScenarioParametersAction platformScenarioParametersAction
+            ? platformScenarioParametersAction
+            : latestPlatformScenarioParametersAction(previousAction.getPreviousIssuanceAction());
+  }
 }

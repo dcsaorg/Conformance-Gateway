@@ -2,29 +2,24 @@ package org.dcsa.conformance.standards.booking.checks;
 
 public enum ScenarioType {
   REGULAR,
-  REGULAR_2RE1C,
-  REGULAR_2RE2C,
-  REGULAR_CHO_DEST,
-  REGULAR_CHO_ORIG,
-  REGULAR_NON_OPERATING_REEFER,
-  REGULAR_SHIPPER_OWNED,
+  ROUTING_REFERENCE,
+  STORE_DOOR_AT_ORIGIN,
+  STORE_DOOR_AT_DESTINATION,
+  NON_OPERATING_REEFER,
   REEFER,
-  REEFER_TEMP_CHANGE,
   DG;
 
-  public String bookingTemplate(String version) {
-    String suffix = switch (this) {
-      case REGULAR_2RE1C -> "regular-2re1c";
-      case REGULAR_2RE2C -> "regular-2re2c";
-      case REGULAR_CHO_DEST -> "regular-cho-dest";
-      case REGULAR_CHO_ORIG -> "regular-cho-orig";
-      case REGULAR_NON_OPERATING_REEFER -> "regular-non-operating-reefer";
-      case REGULAR_SHIPPER_OWNED -> "regular-shipper-owned";
-      case REEFER_TEMP_CHANGE -> "reefer-temp-change";
-      case REEFER -> "reefer";
-      case REGULAR -> "regular";
-      case DG -> "dg";
-    };
+  public String bookingPayload(String version) {
+    String suffix =
+        switch (this) {
+          case REEFER -> "reefer";
+          case NON_OPERATING_REEFER -> "non-operating-reefer";
+          case DG -> "dg";
+          case ROUTING_REFERENCE -> "routing-reference";
+          case STORE_DOOR_AT_ORIGIN -> "store-door-at-origin";
+          case STORE_DOOR_AT_DESTINATION -> "store-door-at-destination";
+          default -> "regular";
+        };
     return "booking-api-" + version.toLowerCase() + "-" + suffix + ".json";
   }
 }

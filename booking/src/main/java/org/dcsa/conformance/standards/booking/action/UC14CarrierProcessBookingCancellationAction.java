@@ -25,7 +25,12 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
       BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator requestSchemaValidator,
       boolean isCancellationConfirmed) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC14", 204);
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        getFormattedActionTitle(isCancellationConfirmed),
+        204);
     this.requestSchemaValidator = requestSchemaValidator;
     this.isCancellationConfirmed = isCancellationConfirmed;
     this.expectedBookingStatus = expectedBookingStatus;
@@ -53,18 +58,21 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var cancelledStatus = isCancellationConfirmed ?
-          BookingCancellationState.CANCELLATION_CONFIRMED : BookingCancellationState.CANCELLATION_DECLINED;
+        var cancelledStatus =
+            isCancellationConfirmed
+                ? BookingCancellationState.CANCELLATION_CONFIRMED
+                : BookingCancellationState.CANCELLATION_DECLINED;
         return Stream.of(
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-              getMatchedExchangeUuid(),
-              expectedBookingStatus,
-              expectedAmendedBookingStatus,
-              cancelledStatus),
+                getMatchedExchangeUuid(),
+                expectedBookingStatus,
+                expectedAmendedBookingStatus,
+                cancelledStatus,
+                getDspSupplier()),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
@@ -79,9 +87,13 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator)
-          );
+                requestSchemaValidator));
       }
     };
+  }
+
+  private static String getFormattedActionTitle(boolean isCancellationConfirmed) {
+    return "UC14%s [%s]"
+        .formatted(isCancellationConfirmed ? "a" : "b", isCancellationConfirmed ? "A" : "D");
   }
 }

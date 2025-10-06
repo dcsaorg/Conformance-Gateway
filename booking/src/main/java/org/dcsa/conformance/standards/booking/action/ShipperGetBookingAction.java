@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.booking.action;
 
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -55,18 +57,23 @@ public class ShipperGetBookingAction extends BookingAction {
   }
 
   @Override
+  public Set<String> skippableForRoles() {
+    return Set.of(BookingRole.SHIPPER.getConfigName());
+  }
+
+  @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        String reference =
-            dsp.carrierBookingReference() != null
-                ? dsp.carrierBookingReference()
-                : dsp.carrierBookingRequestReference();
+        String cbrr = dsp.carrierBookingRequestReference();
+        String cbr = dsp.carrierBookingReference();
         return Stream.of(
             new UrlPathCheck(
-                BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/" + reference),
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                buildFullUris("/v2/bookings/", cbrr, cbr)),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
@@ -92,7 +99,6 @@ public class ShipperGetBookingAction extends BookingAction {
             BookingChecks.responseContentChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
-                getCspSupplier(),
                 getDspSupplier(),
                 expectedBookingStatus,
                 expectedAmendedBookingStatus,
@@ -101,6 +107,4 @@ public class ShipperGetBookingAction extends BookingAction {
       }
     };
   }
-
-
 }

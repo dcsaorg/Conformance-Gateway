@@ -28,8 +28,9 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202);
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean isWithNotifications) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;

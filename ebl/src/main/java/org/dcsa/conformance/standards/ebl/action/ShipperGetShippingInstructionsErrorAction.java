@@ -29,7 +29,8 @@ public class ShipperGetShippingInstructionsErrorAction extends EblAction {
         carrierPartyName,
         previousAction,
         "GET (Non existing shipping instructions)",
-        RESPONSE_CODE);
+        RESPONSE_CODE,
+        true);
     this.responseSchemaValidator = responseSchemaValidator;
   }
 

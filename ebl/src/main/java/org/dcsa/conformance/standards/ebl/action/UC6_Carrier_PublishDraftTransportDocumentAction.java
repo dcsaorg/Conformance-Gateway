@@ -23,8 +23,9 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator notificationSchemaValidator,
-      boolean skipSI) {
-    super(carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204);
+      boolean skipSI,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204, isWithNotifications);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
   }

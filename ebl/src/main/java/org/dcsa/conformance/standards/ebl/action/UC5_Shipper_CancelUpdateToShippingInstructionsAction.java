@@ -27,8 +27,9 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
       ShippingInstructionsStatus expectedSIStatus,
       boolean useTDRef,
       JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, useTDRef ? "UC5 [TDR]" : "UC5", 202);
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean isWithNotifications) {
+    super(shipperPartyName, carrierPartyName, previousAction, useTDRef ? "UC5 [TDR]" : "UC5", 202, isWithNotifications);
     this.expectedSIStatus = expectedSIStatus;
     this.useTDRef = useTDRef;
     this.requestSchemaValidator = requestSchemaValidator;

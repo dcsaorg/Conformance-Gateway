@@ -12,6 +12,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -22,17 +24,20 @@ import org.dcsa.conformance.standards.ebl.checks.CarrierSiNotificationPayloadReq
 import org.dcsa.conformance.standards.ebl.checks.CarrierTdNotificationPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.ebl.party.*;
 
+@Getter
 public abstract class EblAction extends BookingAndEblAction {
 
   protected final Set<Integer> expectedStatus;
+  private final boolean isWithNotifications;
 
   protected EblAction(
       String sourcePartyName,
       String targetPartyName,
       BookingAndEblAction previousAction,
       String actionTitle,
-      int expectedStatus) {
-    this(sourcePartyName, targetPartyName, previousAction, actionTitle, Set.of(expectedStatus));
+      int expectedStatus,
+      boolean isWithNotifications) {
+    this(sourcePartyName, targetPartyName, previousAction, actionTitle, Set.of(expectedStatus), isWithNotifications);
   }
 
   protected EblAction(
@@ -40,9 +45,11 @@ public abstract class EblAction extends BookingAndEblAction {
     String targetPartyName,
     BookingAndEblAction previousAction,
     String actionTitle,
-    Set<Integer> expectedStatus) {
+    Set<Integer> expectedStatus,
+    boolean isWithNotifications) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
+    this.isWithNotifications = isWithNotifications;
   }
 
   @Override
@@ -171,7 +178,8 @@ public abstract class EblAction extends BookingAndEblAction {
             EblRole::isCarrier,
             notificationExchangeUuid,
             "/v3/shipping-instructions-notifications"),
-        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
+        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204)
+            .setApplicable(isWithNotifications),
         ApiHeaderCheck.createNotificationCheck(
             titlePrefix,
             EblRole::isCarrier,
@@ -179,11 +187,12 @@ public abstract class EblAction extends BookingAndEblAction {
             HttpMessageType.REQUEST,
             expectedApiVersion),
         ApiHeaderCheck.createNotificationCheck(
-            titlePrefix,
-            EblRole::isShipper,
-            notificationExchangeUuid,
-            HttpMessageType.RESPONSE,
-            expectedApiVersion),
+                titlePrefix,
+                EblRole::isShipper,
+                notificationExchangeUuid,
+                HttpMessageType.RESPONSE,
+                expectedApiVersion)
+            .setApplicable(isWithNotifications),
         new JsonSchemaCheck(
             titlePrefix,
             EblRole::isCarrier,
@@ -219,7 +228,8 @@ public abstract class EblAction extends BookingAndEblAction {
             EblRole::isCarrier,
             notificationExchangeUuid,
             "/v3/transport-document-notifications"),
-        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
+        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204)
+            .setApplicable(isWithNotifications),
         ApiHeaderCheck.createNotificationCheck(
             titlePrefix,
             EblRole::isCarrier,
@@ -227,11 +237,12 @@ public abstract class EblAction extends BookingAndEblAction {
             HttpMessageType.REQUEST,
             expectedApiVersion),
         ApiHeaderCheck.createNotificationCheck(
-            titlePrefix,
-            EblRole::isShipper,
-            notificationExchangeUuid,
-            HttpMessageType.RESPONSE,
-            expectedApiVersion),
+                titlePrefix,
+                EblRole::isShipper,
+                notificationExchangeUuid,
+                HttpMessageType.RESPONSE,
+                expectedApiVersion)
+            .setApplicable(isWithNotifications),
         new JsonSchemaCheck(
             titlePrefix,
             EblRole::isCarrier,

@@ -15,8 +15,9 @@ public class UC14_Carrier_ConfirmShippingInstructionsCompleteAction extends Stat
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC14", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC14", 204, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 

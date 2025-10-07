@@ -37,7 +37,8 @@ public class CarrierSupplyPayloadAction extends EblAction {
         null,
         "SupplyCSP [%s]"
             .formatted(isTd ? scenarioType.getTDScenarioTypeName() : scenarioType.name()),
-        -1);
+        -1,
+        true);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
@@ -57,7 +58,8 @@ public class CarrierSupplyPayloadAction extends EblAction {
         null,
         previousAction,
         "SupplyCSP [%s]".formatted(scenarioType.name()),
-        -1);
+        -1,
+        true);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;

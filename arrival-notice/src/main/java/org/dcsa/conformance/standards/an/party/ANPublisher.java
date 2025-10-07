@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -54,6 +56,7 @@ public class ANPublisher extends ConformanceParty {
     String filePath = getAnPayloadFilepath(scenarioType);
     JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath, Map.ofEntries());
     syncCounterpartPost("/arrival-notices", jsonRequestBody);
+    addOperatorLogEntry("Sent Arrival Notices ");
   }
 
   private String getAnPayloadFilepath(ScenarioType scenarioType) {
@@ -69,16 +72,26 @@ public class ANPublisher extends ConformanceParty {
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
             Map.ofEntries());
     syncCounterpartPost("/arrival-notice-notifications", jsonRequestBody);
+    addOperatorLogEntry("Sent Arrival Notice Notifications");
   }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
+    Optional<String> tdr =
+        request.queryParams().get("transportDocumentReferences").stream().findFirst();
+
+    String transportDocumentReference =
+        tdr.orElseThrow(
+            () ->
+                new NoSuchElementException(
+                    "No transportDocumentReferences present in the query param"));
 
     JsonNode jsonResponseBody =
         JsonToolkit.templateFileToJsonNode(
             "/standards/an/messages/arrivalnotice-api-%s-get-response.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
-            Map.ofEntries());
+            Map.of("TRANSPORT_DOCUMENT_REFERENCE", transportDocumentReference));
+
     return request.createResponse(
         200,
         Map.of(API_VERSION, List.of(apiVersion)),

@@ -178,7 +178,8 @@ public abstract class ManualTestBase {
         mapper
             .createObjectNode()
             .put("operation", "completeCurrentAction")
-            .put("sandboxId", sandbox.sandboxId);
+            .put("sandboxId", sandbox.sandboxId)
+            .put("skip", false);
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
     waitForCleanSandboxStatus(sandbox);

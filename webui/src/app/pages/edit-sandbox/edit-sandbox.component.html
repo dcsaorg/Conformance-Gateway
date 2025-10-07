@@ -237,28 +237,28 @@
 
     <br/>
     <br/>
-    <div>
-      <button
-        testId="updateSandboxButton"
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="cannotUpdate()"
-      >
-        <mat-icon>done</mat-icon>
-        Update
-      </button>
-      &nbsp;
-      <button
-        testId="cancelUpdateSandboxButton"
-        mat-raised-button
-        type="button"
-        (click)="onCancel()"
-      >
-        <mat-icon>not_interested</mat-icon>
-        Cancel
-      </button>
-    </div>
+      <div>
+          <button
+                  testId="updateSandboxButton"
+                  mat-raised-button
+                  color="primary"
+                  type="submit"
+                  [disabled]="cannotUpdate()"
+          >
+              <mat-icon>done</mat-icon>
+              Apply changes
+          </button>
+          &nbsp;
+          <button
+                  testId="cancelUpdateSandboxButton"
+                  mat-raised-button
+                  type="button"
+                  (click)="onCancel()"
+          >
+              <mat-icon>not_interested</mat-icon>
+              Close without changing
+          </button>
+      </div>
     <br/>
   </form>
 </div>

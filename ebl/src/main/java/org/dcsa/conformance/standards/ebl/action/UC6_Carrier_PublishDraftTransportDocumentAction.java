@@ -35,6 +35,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
         204);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
+    this.scenarioType = scenarioType;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
@@ -47,6 +48,14 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     super(carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
+  }
+
+  @Override
+  public void reset() {
+    super.reset();
+    if (scenarioType != null) {
+      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+    }
   }
 
   @Override

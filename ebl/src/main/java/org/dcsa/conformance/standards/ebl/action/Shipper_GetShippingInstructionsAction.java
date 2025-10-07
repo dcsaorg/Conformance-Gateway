@@ -1,11 +1,11 @@
 package org.dcsa.conformance.standards.ebl.action;
 
-import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SI_NORMALIZER;
+
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SI_NORMALIZER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
-import java.util.Set;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -143,13 +143,13 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
             responseContentChecks(expectedApiVersion),
-            EBLChecks.siResponseContentChecks(
+            EblChecks.siResponseContentChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
                 expectedSiStatus,
                 expectedAmendedSiStatus,
                 requestAmendedStatus,
-              getDspSupplier()));
+                getDspSupplier()));
       }
     };
   }

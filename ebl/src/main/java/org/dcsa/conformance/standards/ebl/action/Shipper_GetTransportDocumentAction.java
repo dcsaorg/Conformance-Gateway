@@ -10,9 +10,10 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.checks.EblChecks;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.party.*;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 
 public class Shipper_GetTransportDocumentAction extends EblAction {
 
@@ -49,7 +50,6 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDspSupplier().get();
-    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
     getDspConsumer().accept(dsp);
   }
 
@@ -102,12 +102,8 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                     .performCheckConformance(getExchangeByUuid);
               }
             },
-            EBLChecks.tdPlusScenarioContentChecks(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                expectedTdStatus,
-                getCspSupplier(),
-                getDspSupplier()));
+            EblChecks.tdPlusScenarioContentChecks(
+                getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getDspSupplier()));
       }
     };
   }
@@ -115,7 +111,7 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
   private static ActionCheck checkTDChanged(
       UUID matched,
       String standardsVersion,
-      DynamicScenarioParameters dsp,
+      EblDynamicScenarioParameters dsp,
       ConformanceExchange previousExchange) {
     JsonNode previousTransportDocument =
         previousExchange == null

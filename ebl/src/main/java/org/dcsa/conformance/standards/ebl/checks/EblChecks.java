@@ -170,11 +170,12 @@ public class EblChecks {
                 rootNode, "requestedCarrierClauses", ArrayOrderHandler.toStringSortableArray());
           };
 
-    private static final BiConsumer<JsonNode, JsonNode> SI_NORMALIZER = (leftNode, rhsNode) -> {
+  public static final BiConsumer<JsonNode, JsonNode> SI_NORMALIZER =
+      (leftNode, rhsNode) -> {
         for (var node : List.of(leftNode, rhsNode)) {
-            SI_ARRAY_ORDER_DEFINITIONS.accept(node, ArrayOrderHelper::restoreArrayOrder);
+          SI_ARRAY_ORDER_DEFINITIONS.accept(node, ArrayOrderHelper::restoreArrayOrder);
         }
-    };
+      };
 
     private static final JsonRebaseableContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE = JsonAttribute.ifThen(
     "Validate transportDocumentTypeCode vs. isToOrder",

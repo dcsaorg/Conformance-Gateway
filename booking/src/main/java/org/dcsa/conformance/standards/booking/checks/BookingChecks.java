@@ -7,17 +7,17 @@ import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATI
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import com.fasterxml.jackson.databind.node.MissingNode;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
@@ -891,7 +891,6 @@ public class BookingChecks {
         });
   }
 
-    private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {
   public ActionCheck responseContentChecksNew(
       String expectedApiVersion,
       boolean requestAmendedContent,

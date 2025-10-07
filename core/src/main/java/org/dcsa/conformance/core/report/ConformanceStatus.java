@@ -12,8 +12,22 @@ public enum ConformanceStatus {
     if (!isRelevant) {
       return NOT_RELEVANT;
     }
-    return conformantExchangeCount == 0
-        ? (nonConformantExchangeCount == 0 ? NO_TRAFFIC : NON_CONFORMANT)
-        : (nonConformantExchangeCount == 0 ? CONFORMANT : PARTIALLY_CONFORMANT);
+
+    boolean hasConformantExchanges = conformantExchangeCount > 0;
+    boolean hasNonConformantExchanges = nonConformantExchangeCount > 0;
+
+    if (!hasConformantExchanges && !hasNonConformantExchanges) {
+      return NO_TRAFFIC;
+    }
+
+    if (hasConformantExchanges && !hasNonConformantExchanges) {
+      return CONFORMANT;
+    }
+
+    if (!hasConformantExchanges) {
+      return NON_CONFORMANT;
+    }
+
+    return PARTIALLY_CONFORMANT;
   }
 }

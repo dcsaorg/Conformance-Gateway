@@ -191,7 +191,7 @@ class ConformanceStatusReducerTest {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
             ConformanceStatus.NOT_RELEVANT, ConformanceStatus.NO_TRAFFIC);
-    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
+    assertEquals(ConformanceStatus.NO_TRAFFIC, result);
   }
 
   @Test
@@ -199,6 +199,6 @@ class ConformanceStatusReducerTest {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
             ConformanceStatus.NO_TRAFFIC, ConformanceStatus.NOT_RELEVANT);
-    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
+    assertEquals(ConformanceStatus.NO_TRAFFIC, result);
   }
 }

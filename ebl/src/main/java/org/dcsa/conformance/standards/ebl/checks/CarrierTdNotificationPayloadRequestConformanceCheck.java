@@ -10,9 +10,9 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 
 public class CarrierTdNotificationPayloadRequestConformanceCheck
     extends PayloadContentConformanceCheck {
@@ -54,7 +54,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
             buildChecks(
                 TRANSPORT_DOCUMENT_LABEL,
                 TRANSPORT_DOCUMENT_PATH,
-                () -> EblChecks.getTdPayloadChecks(transportDocumentStatus, dspSupplier,tdrIsKnown)))
+                () -> EblChecks.getTdPayloadChecks(transportDocumentStatus, dspSupplier)))
         .flatMap(Function.identity());
   }
 

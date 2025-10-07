@@ -1256,26 +1256,14 @@ public class EblChecks {
   public static List<JsonContentCheck> getTdPayloadChecks(
       TransportDocumentStatus transportDocumentStatus,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
-    return getTdPayloadChecks(transportDocumentStatus, dspSupplier, true);
-  }
 
-  public static List<JsonContentCheck> getTdPayloadChecks(
-      TransportDocumentStatus transportDocumentStatus,
-      Supplier<EblDynamicScenarioParameters> dspSupplier,
-      boolean tdrIsKnown) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
 
-    // Create appropriate DSP supplier based on tdrIsKnown
-    Supplier<String> tdrSupplier =
-        tdrIsKnown ? () -> dspSupplier.get().transportDocumentReference() : null;
-
-    // Use the tdrSupplier (which can be null) but keep the main dspSupplier for other validations
     genericTdContentChecks(
         jsonContentChecks,
-        tdrSupplier, // Only this is null when tdrIsKnown=false
+        () -> dspSupplier.get().transportDocumentReference(),
         transportDocumentStatus);
 
-    // All other validations that need scenario information can still use the dspSupplier
     jsonContentChecks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
             "[Scenario] Validate the containers reefer settings",

@@ -133,13 +133,12 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
 
-        boolean tdrIsKnown = previousAction != null;
         return getTDNotificationChecks(
             getMatchedExchangeUuid(),
             expectedApiVersion,
             notificationSchemaValidator,
             TransportDocumentStatus.TD_DRAFT,
-            tdrIsKnown);
+            false);
       }
     };
   }

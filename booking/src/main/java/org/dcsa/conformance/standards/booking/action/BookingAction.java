@@ -190,10 +190,9 @@ public abstract class BookingAction extends BookingAndEblAction {
                 BookingRole::isCarrier,
                 getMatchedNotificationExchangeUuid(),
                 "/v2/booking-notifications"),
-            // TODO: do not add check when not expecting a notification
             new ResponseStatusCheck(
                     titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204)
-                .setApplicable(isWithNotifications),
+                .withApplicability(isWithNotifications),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedNotificationExchangeUuid(),
                 bookingState,
@@ -212,7 +211,7 @@ public abstract class BookingAction extends BookingAndEblAction {
                     getMatchedNotificationExchangeUuid(),
                     HttpMessageType.RESPONSE,
                     expectedApiVersion)
-                .setApplicable(isWithNotifications),
+                .withApplicability(isWithNotifications),
             new JsonSchemaCheck(
                 titlePrefix,
                 BookingRole::isCarrier,
@@ -265,5 +264,57 @@ public abstract class BookingAction extends BookingAndEblAction {
                     JsonPointer.compile("/data/bookingCancellationStatus"),
                     bookingCancellationState.name()))
         .filter(Objects::nonNull);
+  }
+
+
+  protected Stream<ActionCheck> getSimpleNotificationChecks(
+      String expectedApiVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      BookingState bookingState) {
+    return getSimpleNotificationChecks(expectedApiVersion, requestSchemaValidator, bookingState, null, null);
+  }
+
+  protected Stream<ActionCheck> getSimpleNotificationChecks(
+      String expectedApiVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      BookingState bookingState,
+      BookingState amendedBookingState) {
+    return getSimpleNotificationChecks(expectedApiVersion, requestSchemaValidator, bookingState, amendedBookingState, null);
+  }
+
+  protected Stream<ActionCheck> getSimpleNotificationChecks(
+      String expectedApiVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      BookingState bookingState,
+      BookingState amendedBookingState,
+      BookingCancellationState cancellationState) {
+    return Stream.of(
+        new HttpMethodCheck(BookingRole::isCarrier, getMatchedExchangeUuid(), "POST"),
+        new UrlPathCheck(
+            BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
+        new ResponseStatusCheck(BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
+            .withApplicability(isWithNotifications()),
+        new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
+            getMatchedExchangeUuid(),
+            bookingState,
+            amendedBookingState,
+            cancellationState,
+            getDspSupplier()),
+        ApiHeaderCheck.createNotificationCheck(
+            BookingRole::isCarrier,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+        ApiHeaderCheck.createNotificationCheck(
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion)
+            .withApplicability(isWithNotifications()),
+        new JsonSchemaCheck(
+            BookingRole::isCarrier,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            requestSchemaValidator));
   }
 }

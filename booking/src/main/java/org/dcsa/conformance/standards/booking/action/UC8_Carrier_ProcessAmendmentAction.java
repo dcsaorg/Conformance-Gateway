@@ -61,33 +61,11 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
-            new UrlPathCheck(
-                BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-            new ResponseStatusCheck(
-                    BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
-                .setApplicable(isWithNotifications()),
-            new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(),
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                getDspSupplier()),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            ApiHeaderCheck.createNotificationCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    expectedApiVersion)
-                .setApplicable(isWithNotifications()),
-            new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+        return getSimpleNotificationChecks(
+            expectedApiVersion,
+            requestSchemaValidator,
+            expectedBookingStatus,
+            expectedAmendedBookingStatus);
       }
     };
   }

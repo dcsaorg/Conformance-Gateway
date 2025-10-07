@@ -64,34 +64,12 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
             isCancellationConfirmed
                 ? BookingCancellationState.CANCELLATION_CONFIRMED
                 : BookingCancellationState.CANCELLATION_DECLINED;
-        return Stream.of(
-            new UrlPathCheck(
-                BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-            new ResponseStatusCheck(
-                    BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
-                .setApplicable(isWithNotifications()),
-            new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(),
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                cancelledStatus,
-                getDspSupplier()),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            ApiHeaderCheck.createNotificationCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    expectedApiVersion)
-                .setApplicable(isWithNotifications()),
-            new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+        return getSimpleNotificationChecks(
+            expectedApiVersion,
+            requestSchemaValidator,
+            expectedBookingStatus,
+            expectedAmendedBookingStatus,
+            cancelledStatus);
       }
     };
   }

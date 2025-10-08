@@ -376,15 +376,24 @@ public abstract class ManualTestBase {
     return sandboxName;
   }
 
-
   void runAllTests(
-    List<ScenarioDigest> sandbox1Digests, SandboxConfig sandbox1, SandboxConfig sandbox2) {
+      List<ScenarioDigest> sandbox1Digests, SandboxConfig sandbox1, SandboxConfig sandbox2) {
     sandbox1Digests.forEach(
-      scenarioDigest ->
-        scenarioDigest
-          .scenarios()
-          .forEach(
-            scenario -> runScenario(sandbox1, sandbox2, scenario.id(), scenario.name())));
+        scenarioDigest ->
+            scenarioDigest
+                .scenarios()
+                .forEach(
+                    scenario -> {
+                      try {
+                        runScenario(sandbox1, sandbox2, scenario.id(), scenario.name());
+                      } catch (Exception e) {
+                        log.error(
+                            "Failed to run scenario id='{}' name='{}'",
+                            scenario.id(),
+                            scenario.name());
+                        throw e;
+                      }
+                    }));
   }
 
   void runScenario(

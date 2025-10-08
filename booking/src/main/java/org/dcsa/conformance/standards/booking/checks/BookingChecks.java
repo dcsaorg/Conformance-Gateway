@@ -28,7 +28,7 @@ import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParamet
 @UtilityClass
 public class BookingChecks {
 
-  private static final Set<BookingState> CONFIRMED_BOOKING_STATES = Set.of(
+    private static final Set<BookingState> CONFIRMED_BOOKING_STATES = Set.of(
     BookingState.CONFIRMED,
     BookingState.PENDING_AMENDMENT
   );
@@ -39,8 +39,10 @@ public class BookingChecks {
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
+    public static final String DANGEROUS_GOODS = "dangerousGoods";
+    public static final String COMMODITIES = "commodities";
 
-  public static ActionCheck requestContentChecks(
+    public static ActionCheck requestContentChecks(
       UUID matched,
       String standardVersion,
       Supplier<BookingDynamicScenarioParameters> dspSupplier) {
@@ -61,11 +63,13 @@ public class BookingChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_TYPE_CODES)
   );
 
-  private static final JsonContentCheck CHECK_EXPECTED_ARRIVAL_POD = JsonAttribute.customValidator(
+    public static final String EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE = "expectedArrivalAtPlaceOfDeliveryStartDate";
+    public static final String EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE = "expectedArrivalAtPlaceOfDeliveryEndDate";
+    private static final JsonContentCheck CHECK_EXPECTED_ARRIVAL_POD = JsonAttribute.customValidator(
     "Check expected arrival dates are valid",
     body -> {
-      String providedArrivalStartDate = body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
-      String providedArrivalEndDate = body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
+      String providedArrivalStartDate = body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE).asText("");
+      String providedArrivalEndDate = body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE).asText("");
       var invalidDates = new LinkedHashSet<String>();
       if (!providedArrivalStartDate.isEmpty() && !providedArrivalEndDate.isEmpty()) {
         LocalDate arrivalStartDate = LocalDate.parse(providedArrivalStartDate);
@@ -83,29 +87,33 @@ public class BookingChecks {
     }
   );
 
-  private static final Predicate<JsonNode> IS_ISO_EQUIPMENT_CONTAINER_REEFER = uteNode -> {
-    var isoEquipmentNode = uteNode.path("ISOEquipmentCode");
+    public static final String ISO_EQUIPMENT_CODE = "ISOEquipmentCode";
+    private static final Predicate<JsonNode> IS_ISO_EQUIPMENT_CONTAINER_REEFER = uteNode -> {
+    var isoEquipmentNode = uteNode.path(ISO_EQUIPMENT_CODE);
     return isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""));
   };
   private static final Predicate<JsonNode> HAS_ISO_EQUIPMENT_CODE = reqEquipNode -> {
-    var isoEquipmentNode = reqEquipNode.path("ISOEquipmentCode");
+    var isoEquipmentNode = reqEquipNode.path(ISO_EQUIPMENT_CODE);
     return isoEquipmentNode.isTextual();
   };
-  private static final Predicate<JsonNode> IS_ACTIVE_REEFER_SETTINGS_REQUIRED = reqEquipNode -> {
-    var norNode = reqEquipNode.path("isNonOperatingReefer");
+    public static final String IS_NON_OPERATING_REEFER = "isNonOperatingReefer";
+    private static final Predicate<JsonNode> IS_ACTIVE_REEFER_SETTINGS_REQUIRED = reqEquipNode -> {
+    var norNode = reqEquipNode.path(IS_NON_OPERATING_REEFER);
     if (HAS_ISO_EQUIPMENT_CODE.test(reqEquipNode) && IS_ISO_EQUIPMENT_CONTAINER_REEFER.test(reqEquipNode)) {
       return !norNode.isMissingNode() && !norNode.asBoolean(false);
     }
     return false;
   };
 
-  private static final Consumer<MultiAttributeValidator> ALL_REQ_EQUIP = mav -> mav.submitAllMatching("requestedEquipments.*");
-  private static final JsonContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
+    public static final String REQUESTED_EQUIPMENTS = "requestedEquipments.*";
+    private static final Consumer<MultiAttributeValidator> ALL_REQ_EQUIP = mav -> mav.submitAllMatching(REQUESTED_EQUIPMENTS);
+    public static final String ACTIVE_REEFER_SETTINGS = "activeReeferSettings";
+    private static final JsonContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
     "All requested Equipments where 'isNonOperatingReefer' is 'false' must have 'activeReeferSettings'",
     ALL_REQ_EQUIP,
     JsonAttribute.ifMatchedThen(
       IS_ACTIVE_REEFER_SETTINGS_REQUIRED,
-      JsonAttribute.path("activeReeferSettings", JsonAttribute.matchedMustBePresent())
+      JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBePresent())
     )
   );
 
@@ -114,15 +122,16 @@ public class BookingChecks {
     ALL_REQ_EQUIP,
     JsonAttribute.ifMatchedThen(
       IS_ISO_EQUIPMENT_CONTAINER_REEFER,
-      JsonAttribute.path("isNonOperatingReefer", JsonAttribute.matchedMustBePresent())
+      JsonAttribute.path(IS_NON_OPERATING_REEFER, JsonAttribute.matchedMustBePresent())
     )
   );
 
-  private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE =
+    public static final String ROUTING_REFERENCE = "routingReference";
+    private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE =
       JsonAttribute.customValidator(
           "Conditional Universal Service Reference",
           body -> {
-            var routingReference = body.path("routingReference").asText("");
+            var routingReference = body.path(ROUTING_REFERENCE).asText("");
             var universalExportVoyageReference = body.path("universalExportVoyageReference");
             var universalImportVoyageReference = body.path("universalImportVoyageReference");
             var universalServiceReference = body.path("universalServiceReference");
@@ -163,7 +172,7 @@ public class BookingChecks {
   );
 
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
-    return mav -> consumer.accept(mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").all());
+    return mav -> consumer.accept(mav.path("requestedEquipments").all().path(COMMODITIES).all().path("outerPackaging").path(DANGEROUS_GOODS).all());
   }
 
   static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_PRESENCE = JsonAttribute.ifThenElse(
@@ -201,7 +210,7 @@ public class BookingChecks {
             StreamSupport.stream(body.path("requestedEquipments").spliterator(), false)
                 .flatMap(
                     equipment ->
-                        StreamSupport.stream(equipment.path("commodities").spliterator(), false))
+                        StreamSupport.stream(equipment.path(COMMODITIES).spliterator(), false))
                 .map(commodity -> commodity.path("commoditySubReference").asText(""))
                 .filter(subRef -> !subRef.isBlank())
                 .forEach(subRef -> subReferenceCount.merge(subRef, 1, Integer::sum));
@@ -221,11 +230,13 @@ public class BookingChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.CUTOFF_DATE_TIME_CODES)
   );
 
-  private static final JsonContentCheck VALIDATE_SHIPMENT_CUTOFF_TIME_CODE = JsonAttribute.customValidator(
+    public static final String SHIPMENT_CUT_OFF_TIMES = "shipmentCutOffTimes";
+    public static final String RECEIPT_TYPE_AT_ORIGIN = "receiptTypeAtOrigin";
+    private static final JsonContentCheck VALIDATE_SHIPMENT_CUTOFF_TIME_CODE = JsonAttribute.customValidator(
     "Validate shipment cutOff Date time code",
     body -> {
-      var shipmentCutOffTimes = body.path("shipmentCutOffTimes");
-      var receiptTypeAtOrigin = body.path("receiptTypeAtOrigin").asText("");
+      var shipmentCutOffTimes = body.path(SHIPMENT_CUT_OFF_TIMES);
+      var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
       var issues = new LinkedHashSet<String>();
       var cutOffDateTimeCodes = StreamSupport.stream(shipmentCutOffTimes.spliterator(), false)
         .map(p -> p.path("cutOffDateTimeCode"))
@@ -246,7 +257,7 @@ public class BookingChecks {
     ALL_AMF,
     JsonAttribute.unique("countryCode", "manifestTypeCode")
   );
-  private static final Consumer<MultiAttributeValidator> ALL_SHIPMENT_CUTOFF_TIMES = mav -> mav.submitAllMatching("shipmentCutOffTimes");
+  private static final Consumer<MultiAttributeValidator> ALL_SHIPMENT_CUTOFF_TIMES = mav -> mav.submitAllMatching(SHIPMENT_CUT_OFF_TIMES);
 
   private static final JsonContentCheck SHIPMENT_CUTOFF_TIMES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "in 'shipmentCutOfftimes' cutOff date time code must be unique",
@@ -258,8 +269,8 @@ public class BookingChecks {
     "Validate shipmentLocations",
     body -> {
       var issues = new LinkedHashSet<String>();
-      var routingReference = body.path("routingReference").asText("");
-      var receiptTypeAtOrigin = body.path("receiptTypeAtOrigin").asText("");
+      var routingReference = body.path(ROUTING_REFERENCE).asText("");
+      var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
       var deliveryTypeAtDestination = body.path("deliveryTypeAtDestination").asText("");
       var polNode = getShipmentLocationTypeCode(body,"POL");
       var preNode = getShipmentLocationTypeCode(body,"PRE");
@@ -298,18 +309,19 @@ public class BookingChecks {
       return issues;
     });
 
-  private static final JsonContentCheck VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS =
+    public static final String VESSEL = "vessel";
+    private static final JsonContentCheck VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS =
       JsonAttribute.customValidator(
           "Validate shipper's minimum request fields",
           body -> {
             var issues = new LinkedHashSet<String>();
 
-            var routingReference = body.path("routingReference").asText("");
+            var routingReference = body.path(ROUTING_REFERENCE).asText("");
             if (!routingReference.isBlank()) {
               return routingReferenceRequestFieldsChecks(body);
             }
 
-            var vesselName = body.path("vessel").path("name").asText("");
+            var vesselName = body.path(VESSEL).path("name").asText("");
             var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber").asText("");
             var carrierServiceCode = body.path("carrierServiceCode").asText("");
             var carrierServiceName = body.path("carrierServiceName").asText("");
@@ -323,9 +335,9 @@ public class BookingChecks {
             var podNode = getShipmentLocationTypeCode(body, "POD");
 
             var providedArrivalStartDate =
-                body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
+                body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE).asText("");
             var providedArrivalEndDate =
-                body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
+                body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE).asText("");
 
             if (pdeNode.isMissingNode() && podNode.isMissingNode()) {
               issues.add("Port of Discharge value must be provided (PDE or POD)");
@@ -367,8 +379,8 @@ public class BookingChecks {
   private static Set<String> routingReferenceRequestFieldsChecks(JsonNode body) {
     var issues = new LinkedHashSet<String>();
 
-    var vesselName = body.path("vessel").path("name").asText("");
-    var vesselIMONumber = body.path("vessel").path("vesselIMONumber").asText("");
+    var vesselName = body.path(VESSEL).path("name").asText("");
+    var vesselIMONumber = body.path(VESSEL).path("vesselIMONumber").asText("");
     var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber").asText("");
     var carrierServiceCode = body.path("carrierServiceCode").asText("");
     var carrierServiceName = body.path("carrierServiceName").asText("");
@@ -382,8 +394,8 @@ public class BookingChecks {
     var podNode = getShipmentLocationTypeCode(body, "POD");
 
     var providedArrivalStartDate =
-        body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
-    var providedArrivalEndDate = body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
+        body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE).asText("");
+    var providedArrivalEndDate = body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE).asText("");
 
     if (!vesselName.isBlank()) {
       issues.add("vessel.name must not be provided when routingReference is provided.");
@@ -470,7 +482,7 @@ public class BookingChecks {
               if (body.path("transportPlan").isEmpty()) {
                 issues.add("transportPlan for confirmed booking is not present");
               }
-              if (body.path("shipmentCutOffTimes").isEmpty()) {
+              if (body.path(SHIPMENT_CUT_OFF_TIMES).isEmpty()) {
                 issues.add("shipmentCutOffTimes for confirmed booking is not present");
               }
             }
@@ -480,12 +492,12 @@ public class BookingChecks {
   static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_CONDITIONS =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Check Cargo Gross Weight conditions",
-          mav -> mav.submitAllMatching("requestedEquipments.*"),
+          mav -> mav.submitAllMatching(REQUESTED_EQUIPMENTS),
           (nodeToValidate, contextPath) -> {
             var issues = new LinkedHashSet<String>();
             var cargoGrossWeight = nodeToValidate.path("cargoGrossWeight");
             if (cargoGrossWeight.isMissingNode() || cargoGrossWeight.isNull()) {
-              var commodities = nodeToValidate.path("commodities");
+              var commodities = nodeToValidate.path(COMMODITIES);
               if (!(commodities.isMissingNode() || commodities.isNull()) && commodities.isArray()) {
                 AtomicInteger commodityCounter = new AtomicInteger(0);
                 StreamSupport.stream(commodities.spliterator(), false)
@@ -515,8 +527,8 @@ public class BookingChecks {
             body -> {
               var issues = new LinkedHashSet<String>();
 
-              var scenario = dspSupplier.get().scenarioType();
-              var routingReference = body.path("routingReference").asText("");
+              var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
+              var routingReference = body.path(ROUTING_REFERENCE).asText("");
               if (ScenarioType.ROUTING_REFERENCE.equals(scenario)
                   && routingReference.isBlank()) {
                 issues.add("The scenario requires the booking to have a routingReference");
@@ -530,11 +542,11 @@ public class BookingChecks {
             "[Scenario] Verify store door scenario requirements",
             body -> {
               var issues = new LinkedHashSet<String>();
-              var scenario = dspSupplier.get().scenarioType();
+              var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
 
               if (ScenarioType.STORE_DOOR_AT_ORIGIN.equals(scenario)) {
                 issues.addAll(validateStoreDoorCommonRequirements(body));
-                var receiptTypeAtOrigin = body.path("receiptTypeAtOrigin").asText("");
+                var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
                 if (!"SD".equals(receiptTypeAtOrigin)) {
                   issues.add("The scenario requires the receiptTypeAtOrigin to be 'SD'");
                 }
@@ -576,7 +588,7 @@ public class BookingChecks {
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
             "[Scenario] Validate the containers reefer settings",
-            mav -> mav.submitAllMatching("requestedEquipments.*"),
+            mav -> mav.submitAllMatching(REQUESTED_EQUIPMENTS),
             (nodeToValidate, contextPath) -> {
               var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
               var issues = new LinkedHashSet<String>();
@@ -591,7 +603,7 @@ public class BookingChecks {
 
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Whether the cargo should be DG",
-      mav-> mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").submitPath(),
+      mav-> mav.path("requestedEquipments").all().path(COMMODITIES).all().path("outerPackaging").path(DANGEROUS_GOODS).submitPath(),
       (nodeToValidate, contextPath) -> {
         var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
         if (scenario == ScenarioType.DG) {
@@ -627,8 +639,8 @@ public class BookingChecks {
 
   private static void defaultContainerChecks(
       String contextPath, JsonNode nodeToValidate, Set<String> issues) {
-    var activeReeferNode = nodeToValidate.path("activeReeferSettings");
-    var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
+    var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
+    var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
     if (!activeReeferNode.isMissingNode()) {
       issues.add("The scenario requires '%s' to NOT have an active reefer".formatted(contextPath));
     }
@@ -640,9 +652,9 @@ public class BookingChecks {
 
   private static void nonOperatingReeferContainerChecks(
       String contextPath, JsonNode nodeToValidate, Set<String> issues) {
-    var activeReeferNode = nodeToValidate.path("activeReeferSettings");
-    var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
-    var isoEquipmentNode = nodeToValidate.path("ISOEquipmentCode");
+    var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
+    var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
+    var isoEquipmentNode = nodeToValidate.path(ISO_EQUIPMENT_CODE);
 
     if (!nonOperatingReeferNode.asBoolean(false)) {
       issues.add(
@@ -660,7 +672,7 @@ public class BookingChecks {
 
   private static void reeferContainerChecks(
       String contextPath, JsonNode nodeToValidate, Set<String> issues) {
-    var activeReeferNode = nodeToValidate.path("activeReeferSettings");
+    var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
     if (!activeReeferNode.isObject()) {
       issues.add("The scenario requires '%s' to have an active reefer".formatted(contextPath));
     }
@@ -678,7 +690,7 @@ public class BookingChecks {
           mav -> mav.submitAllMatching("feedbacks.*.code"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
-  public static final List<JsonContentCheck> STATIC_BOOKING_CHECKS =
+  protected static final List<JsonContentCheck> STATIC_BOOKING_CHECKS =
       Arrays.asList(
           JsonAttribute.mustBeDatasetKeywordIfPresent(
               JsonPointer.compile("/cargoMovementTypeAtOrigin"),
@@ -708,7 +720,7 @@ public class BookingChecks {
               "DangerousGoods implies packagingCode or imoPackagingCode",
               mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
               (nodeToValidate, contextPath) -> {
-                var dg = nodeToValidate.path("dangerousGoods");
+                var dg = nodeToValidate.path(DANGEROUS_GOODS);
                 if (!dg.isArray() || dg.isEmpty()) {
                   return Set.of();
                 }
@@ -724,7 +736,7 @@ public class BookingChecks {
               "DangerousGoods implies numberOfPackages",
               mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
               (nodeToValidate, contextPath) -> {
-                var dg = nodeToValidate.path("dangerousGoods");
+                var dg = nodeToValidate.path(DANGEROUS_GOODS);
                 if (!dg.isArray() || dg.isEmpty()) {
                   return Set.of();
                 }

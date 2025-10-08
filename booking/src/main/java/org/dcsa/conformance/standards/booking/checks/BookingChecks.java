@@ -99,6 +99,16 @@ public class BookingChecks {
   private static final String CHARGES = "charges";
   private static final String CURRENCY_AMOUNT = "currencyAmount";
 
+  private static final String S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED =
+      "'%s' must not be provided when '%s' is provided.";
+  private static final String S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT =
+      "'%s' for confirmed booking is not present";
+
+  private static final String S_S_S = "%s.*.%s.*.%s";
+  private static final String S_S = "%s.*.%s";
+  private static final String THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT =
+      "The scenario requires '%s.%s' to be absent";
+
   public static ActionCheck requestContentChecks(
       UUID matched,
       String standardVersion,
@@ -198,18 +208,18 @@ public class BookingChecks {
               var issues = new LinkedHashSet<String>();
               if (JsonAttribute.isJsonNodePresent(universalExportVoyageReference)) {
                 issues.add(
-                    "The %s must NOT be present when routingReference is provided"
-                        .formatted(UNIVERSAL_EXPORT_VOYAGE_REFERENCE));
+                    S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+                        UNIVERSAL_EXPORT_VOYAGE_REFERENCE, ROUTING_REFERENCE));
               }
               if (JsonAttribute.isJsonNodePresent(universalImportVoyageReference)) {
                 issues.add(
-                    "The %s must NOT be present when routingReference is provided"
-                        .formatted(UNIVERSAL_IMPORT_VOYAGE_REFERENCE));
+                    S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+                        UNIVERSAL_IMPORT_VOYAGE_REFERENCE, ROUTING_REFERENCE));
               }
               if (JsonAttribute.isJsonNodePresent(universalServiceReference)) {
                 issues.add(
-                    "The %s must NOT be present when routingReference is provided"
-                        .formatted(UNIVERSAL_SERVICE_REFERENCE1));
+                    S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+                        UNIVERSAL_SERVICE_REFERENCE1, ROUTING_REFERENCE));
               }
               return issues;
             }
@@ -231,10 +241,10 @@ public class BookingChecks {
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate reference type field",
           mav -> {
-            mav.submitAllMatching("%s.*.%s.*.%s".formatted(REQUESTED_EQUIPMENTS, REFERENCES, TYPE));
+            mav.submitAllMatching(S_S_S.formatted(REQUESTED_EQUIPMENTS, REFERENCES, TYPE));
             mav.submitAllMatching(
                 "%s.*.%s.*.%s.*.%s".formatted(REQUESTED_EQUIPMENTS, COMMODITIES, REFERENCES, TYPE));
-            mav.submitAllMatching("%s.*.%s".formatted(REFERENCES, TYPE));
+            mav.submitAllMatching(S_S.formatted(REFERENCES, TYPE));
           },
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.REFERENCE_TYPES));
 
@@ -309,8 +319,7 @@ public class BookingChecks {
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate allowed shipment cutoff codes",
           mav ->
-              mav.submitAllMatching(
-                  "%s.*.%s".formatted(SHIPMENT_CUT_OFF_TIMES, CUT_OFF_DATE_TIME_CODE)),
+              mav.submitAllMatching(S_S.formatted(SHIPMENT_CUT_OFF_TIMES, CUT_OFF_DATE_TIME_CODE)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
               BookingDataSets.CUTOFF_DATE_TIME_CODES));
 
@@ -514,38 +523,38 @@ public class BookingChecks {
     }
     if (!carrierServiceName.isBlank()) {
       issues.add(
-          "'%s' must not be provided when '%s' is provided."
-              .formatted(CARRIER_SERVICE_NAME, ROUTING_REFERENCE));
+          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+              CARRIER_SERVICE_NAME, ROUTING_REFERENCE));
     }
     if (!carrierServiceCode.isBlank()) {
       issues.add(
-          "'%s' must not be provided when '%s' is provided."
-              .formatted(CARRIER_SERVICE_CODE, ROUTING_REFERENCE));
+          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+              CARRIER_SERVICE_CODE, ROUTING_REFERENCE));
     }
     if (!carrierExportVoyageNumber.isBlank()) {
       issues.add(
-          "'%s' must not be provided when '%s' is provided."
-              .formatted(CARRIER_EXPORT_VOYAGE_NUMBER, ROUTING_REFERENCE));
+          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+              CARRIER_EXPORT_VOYAGE_NUMBER, ROUTING_REFERENCE));
     }
     if (!expectedDepartureDate.isBlank()) {
       issues.add(
-          "'%s' must not be provided when '%s' is provided."
-              .formatted(EXPECTED_DEPARTURE_DATE, ROUTING_REFERENCE));
+          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+              EXPECTED_DEPARTURE_DATE, ROUTING_REFERENCE));
     }
     if (!expectedDepartureFromPlaceOfReceiptDate.isBlank()) {
       issues.add(
-          "'%s' must not be provided when '%s' is provided."
-              .formatted(EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE, ROUTING_REFERENCE));
+          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+              EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE, ROUTING_REFERENCE));
     }
     if (!providedArrivalStartDate.isBlank()) {
       issues.add(
-          "'%s' must not be provided when '%s' is provided."
-              .formatted(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE, ROUTING_REFERENCE));
+          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+              EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE, ROUTING_REFERENCE));
     }
     if (!providedArrivalEndDate.isBlank()) {
       issues.add(
-          "'%s' must not be provided when '%s' is provided."
-              .formatted(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE, ROUTING_REFERENCE));
+          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+              EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE, ROUTING_REFERENCE));
     }
     if (!preNode.isMissingNode()) {
       issues.add(
@@ -603,15 +612,14 @@ public class BookingChecks {
             var bookingStatus = body.path(BOOKING_STATUS).asText("");
             if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
               if (body.path(CONFIRMED_EQUIPMENTS).isEmpty()) {
-                issues.add(
-                    "'%s' for confirmed booking is not present".formatted(CONFIRMED_EQUIPMENTS));
+                issues.add(S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(CONFIRMED_EQUIPMENTS));
               }
               if (body.path(TRANSPORT_PLAN).isEmpty()) {
-                issues.add("'%s' for confirmed booking is not present".formatted(TRANSPORT_PLAN));
+                issues.add(S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(TRANSPORT_PLAN));
               }
               if (body.path(SHIPMENT_CUT_OFF_TIMES).isEmpty()) {
                 issues.add(
-                    "'%s' for confirmed booking is not present".formatted(SHIPMENT_CUT_OFF_TIMES));
+                    S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(SHIPMENT_CUT_OFF_TIMES));
               }
             }
             return issues;
@@ -796,13 +804,11 @@ public class BookingChecks {
     var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
     if (!activeReeferNode.isMissingNode()) {
       issues.add(
-          "The scenario requires '%s.%s' to be absent"
-              .formatted(contextPath, ACTIVE_REEFER_SETTINGS));
+          THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT.formatted(contextPath, ACTIVE_REEFER_SETTINGS));
     }
     if (!nonOperatingReeferNode.isMissingNode()) {
       issues.add(
-          "The scenario requires '%s.%s' to be absent"
-              .formatted(contextPath, IS_NON_OPERATING_REEFER));
+          THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT.formatted(contextPath, IS_NON_OPERATING_REEFER));
     }
   }
 
@@ -819,8 +825,7 @@ public class BookingChecks {
     }
     if (!activeReeferNode.isMissingNode()) {
       issues.add(
-          "The scenario requires '%s.%s' to be absent"
-              .formatted(contextPath, ACTIVE_REEFER_SETTINGS));
+          THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT.formatted(contextPath, ACTIVE_REEFER_SETTINGS));
     }
     if (!isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""))) {
       issues.add(
@@ -842,13 +847,13 @@ public class BookingChecks {
   static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate that '%s.*.%s' is valid".formatted(FEEDBACKS, SEVERITY),
-          mav -> mav.submitAllMatching("%s.*.%s".formatted(FEEDBACKS, SEVERITY)),
+          mav -> mav.submitAllMatching(S_S.formatted(FEEDBACKS, SEVERITY)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
 
   static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate that '%s.*.%s' is valid".formatted(FEEDBACKS, CODE),
-          mav -> mav.submitAllMatching("%s.*.%s".formatted(FEEDBACKS, CODE)),
+          mav -> mav.submitAllMatching(S_S.formatted(FEEDBACKS, CODE)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
   static final List<JsonContentCheck> STATIC_BOOKING_CHECKS =
@@ -882,7 +887,7 @@ public class BookingChecks {
               "DangerousGoods implies '%s' or '%s'".formatted(PACKAGE_CODE, IMO_PACKAGING_CODE),
               mav ->
                   mav.submitAllMatching(
-                      "%s.*.%s.*.%s".formatted(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING)),
+                      S_S_S.formatted(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING)),
               (nodeToValidate, contextPath) -> {
                 var dg = nodeToValidate.path(DANGEROUS_GOODS);
                 if (!dg.isArray() || dg.isEmpty()) {
@@ -900,7 +905,7 @@ public class BookingChecks {
               "DangerousGoods implies '%s'".formatted(NUMBER_OF_PACKAGES),
               mav ->
                   mav.submitAllMatching(
-                      "%s.*.%s.*.%s".formatted(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING)),
+                      S_S_S.formatted(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING)),
               (nodeToValidate, contextPath) -> {
                 var dg = nodeToValidate.path(DANGEROUS_GOODS);
                 if (!dg.isArray() || dg.isEmpty()) {
@@ -929,7 +934,7 @@ public class BookingChecks {
           JsonAttribute.allIndividualMatchesMustBeValid(
               "The '%s.*.%s' must not exceed more than 2 decimal points"
                   .formatted(CHARGES, CURRENCY_AMOUNT),
-              mav -> mav.submitAllMatching("%s.*.%s".formatted(CHARGES, CURRENCY_AMOUNT)),
+              mav -> mav.submitAllMatching(S_S.formatted(CHARGES, CURRENCY_AMOUNT)),
               (nodeToValidate, contextPath) -> {
                 var currencyAmount = nodeToValidate.asDouble();
                 if (BigDecimal.valueOf(currencyAmount).scale() > 2) {

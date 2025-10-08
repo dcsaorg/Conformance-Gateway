@@ -51,7 +51,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     options.addArguments("--no-sandbox");
     options.addArguments("--disable-dev-shm-usage");
     options.addArguments("--disable-search-engine-choice-screen");
-   // options.addArguments("--headless");
+    options.addArguments("--headless");
 
     driver = new ChromeDriver(options);
     driver.manage().timeouts().implicitlyWait(Duration.ofMillis(WAIT_BEFORE_TIMEOUT_IN_MILLIS));

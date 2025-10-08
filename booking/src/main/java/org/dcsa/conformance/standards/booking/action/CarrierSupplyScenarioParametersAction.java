@@ -32,7 +32,7 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
       @NonNull ScenarioType scenarioType,
       String standardVersion,
       JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1);
+    super(carrierPartyName, null, null, "SupplyCSP [%s]".formatted(scenarioType.name()), -1, true);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;

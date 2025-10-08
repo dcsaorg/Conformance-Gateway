@@ -15,8 +15,8 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 @Getter
 public abstract class ConformanceCheck {
   protected final String title;
-
   private List<ConformanceCheck> _subChecks;
+  protected boolean isApplicable = true;
 
   private final List<ConformanceResult> results = new ArrayList<>();
 

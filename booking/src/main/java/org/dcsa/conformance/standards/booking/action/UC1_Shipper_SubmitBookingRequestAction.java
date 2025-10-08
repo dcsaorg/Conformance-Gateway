@@ -28,8 +28,9 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202);
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean isWithNotifications) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -82,7 +83,10 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
             Stream.concat(
                 createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
                 getNotificationChecks(
-                    expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)));
+                    expectedApiVersion,
+                    notificationSchemaValidator,
+                    BookingState.RECEIVED,
+                    null)));
       }
     };
   }

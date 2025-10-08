@@ -15,10 +15,12 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingShipper;
 
 class BookingComponentFactory extends AbstractComponentFactory {
+
   BookingComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
     super(standardName, standardVersion, scenarioSuite, "Carrier", "Shipper");
   }
 
+  @Override
   public List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
@@ -66,9 +68,11 @@ class BookingComponentFactory extends AbstractComponentFactory {
   @Override
   public Map<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     return BookingScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        isWithNotifications,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, BookingRole::isCarrier),
         _findPartyOrCounterpartName(
@@ -82,6 +86,7 @@ class BookingComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toCollection(TreeSet::new));
   }
 
+  @Override
   public Set<String> getReportRoleNames(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {

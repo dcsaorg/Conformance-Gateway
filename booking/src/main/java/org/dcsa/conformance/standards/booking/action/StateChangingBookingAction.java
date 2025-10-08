@@ -14,8 +14,8 @@ import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 public abstract class StateChangingBookingAction extends BookingAction {
 
   protected StateChangingBookingAction(String sourcePartyName, String targetPartyName, BookingAndEblAction previousAction,
-                                    String actionTitle, int expectedStatus) {
-    super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus);
+                                    String actionTitle, int expectedStatus, boolean isWithNotifications) {
+    super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus, isWithNotifications);
   }
 
   @Override

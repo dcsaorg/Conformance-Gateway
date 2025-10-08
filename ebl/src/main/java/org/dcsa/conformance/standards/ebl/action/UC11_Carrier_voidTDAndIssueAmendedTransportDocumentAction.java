@@ -17,8 +17,15 @@ public class UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction extends S
       String carrierPartyName,
       String shipperPartyName,
       BookingAndEblAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC11(void and reissue)", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        "UC11(void and reissue)",
+        204,
+        isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 

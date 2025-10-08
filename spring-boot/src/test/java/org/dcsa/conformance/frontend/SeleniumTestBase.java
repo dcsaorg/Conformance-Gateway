@@ -268,7 +268,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   // If there are no more actions, the scenario is finished and should be conformant.
-  private static boolean hasNoMoreActionsDisplayed(String name) {
+  private boolean hasNoMoreActionsDisplayed(String name) {
     if (driver.findElements(By.id("nextActions")).isEmpty()
       && driver.findElements(By.cssSelector("app-text-waiting")).isEmpty()) {
       String titleValue =
@@ -328,7 +328,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     // Starts in the 1st tab
     switchToTab(0);
     if (sandbox2.sandboxUrl() != null) {
-      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(sandbox2.sandboxUrl());
+      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(getTestedPartyApiUrl(sandbox2));
       driver.findElement(By.name("externalPartyAuthHeaderNameTextField")).sendKeys(sandbox2.sandboxAuthHeaderName());
       driver.findElement(By.name("externalPartyAuthHeaderValueTextField")).sendKeys(sandbox2.sandboxAuthHeaderValue());
       driver.findElement(By.cssSelector("[testId='updateSandboxButton']")).click();
@@ -337,6 +337,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     }
     waitForUIReadiness();
     assertTrue(driver.findElement(By.className("pageTitle")).getText().startsWith("Sandbox: "));
+  }
+
+  protected String getTestedPartyApiUrl(SandboxConfig sandbox2) {
+    return sandbox2.sandboxUrl();
   }
 
   protected void loginUser() {

@@ -1,5 +1,6 @@
 package org.dcsa.conformance.frontend;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.dcsa.conformance.springboot.ConformanceApplication;
@@ -7,8 +8,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
 
 @Slf4j
 @Tag("WebUI")
@@ -22,7 +21,7 @@ class SeleniumWithoutNotificationsTest extends SeleniumTestBase {
       strings = {
         "Booking", // 11:52 minutes
         "Ebl", // 37:09 minutes
-        "Booking + eBL" // 10:40 minutes
+        "Booking + eBL", // 10:40 minutes
       })
   void testStandardWithAllVersions(String standardName) {
     app.setSimulatedLambdaDelay(lambdaDelay);

@@ -566,6 +566,15 @@ components:
           description: "References used by the customer or carrier to identify or track the shipment."
           items:
             $ref: "#/components/schemas/Reference"
+        houseBillOfLadingReferences:
+          type: "array"
+          description: "List of House Bill of Lading references"
+          items:
+            maxLength: 20
+            type: "string"
+            description: |
+              Unique number allocated by the Ocean Transport Intermediary (OTI) to the House Bill of Lading.
+            example: "HBOL001"
         transportDocumentReference:
           maxLength: 20
           type: "string"

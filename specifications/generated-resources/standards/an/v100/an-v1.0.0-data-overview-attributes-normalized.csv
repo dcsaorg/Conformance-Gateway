@@ -62,6 +62,10 @@ ArrivalNotice,freightPaymentStatus,string,,maxLength=50,,FULLY_PAID,"Payment sta
 - `PARTIALLY_PAID` - Partially Paid
 - `FULLY_PAID` - Fully Paid
 - `OVERPAID` - Overpaid",
+ArrivalNotice,"houseBillOfLadingReferences","string list",,maxLength=20,,,"List of House Bill of Lading references
+Item description:
+Unique number allocated by the Ocean Transport Intermediary (OTI) to the House Bill of Lading.
+",
 ArrivalNotice,isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 ArrivalNotice,issueDateTime,"string(date-time)",yes,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 ArrivalNotice,paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",

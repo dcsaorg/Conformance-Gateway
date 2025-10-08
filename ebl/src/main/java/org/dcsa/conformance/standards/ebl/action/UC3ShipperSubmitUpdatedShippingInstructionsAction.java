@@ -27,8 +27,9 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
       ShippingInstructionsStatus expectedSiStatus,
       boolean useBothRef,
       JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 202);
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean isWithNotifications) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 202, isWithNotifications);
     this.useBothRef = useBothRef;
     this.expectedSiStatus = expectedSiStatus;
     this.requestSchemaValidator = requestSchemaValidator;

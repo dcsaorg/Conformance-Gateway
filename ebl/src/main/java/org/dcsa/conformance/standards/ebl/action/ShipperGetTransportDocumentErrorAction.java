@@ -29,7 +29,8 @@ public class ShipperGetTransportDocumentErrorAction extends EblAction {
         carrierPartyName,
         previousAction,
         "GET (Non existing transport document)",
-        RESPONSE_CODE);
+        RESPONSE_CODE,
+        true);
     this.responseSchemaValidator = responseSchemaValidator;
   }
 

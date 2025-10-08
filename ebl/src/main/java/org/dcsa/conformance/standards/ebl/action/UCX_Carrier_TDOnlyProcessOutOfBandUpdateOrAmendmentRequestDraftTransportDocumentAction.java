@@ -11,7 +11,7 @@ public class UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTran
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction) {
-    super(carrierPartyName, shipperPartyName, previousAction, "TD Change (Out of Band)", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, "TD Change (Out of Band)", 204, true);
   }
 
   @Override

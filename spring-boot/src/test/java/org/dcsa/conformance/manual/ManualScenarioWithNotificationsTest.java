@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = ConformanceApplication.class)
-class ManualScenarioTest extends ManualTestBase {
+class ManualScenarioWithNotificationsTest extends ManualTestBase {
 
   @SuppressWarnings("unused")
   private static Stream<Arguments> testStandards() {
@@ -75,7 +75,7 @@ class ManualScenarioTest extends ManualTestBase {
                                 .forEach(
                                     role ->
                                         runManualTests(
-                                            standard1.name(), version.number(), suite, role, secondRun))));
+                                            standard1.name(), version.number(), suite, role.name(), secondRun))));
   }
 
   @Test
@@ -89,52 +89,5 @@ class ManualScenarioTest extends ManualTestBase {
         EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
         EblRole.CARRIER.getConfigName(),
         false);
-  }
-
-  private void runManualTests(
-      String standardName, String standardVersion, String suiteName, String roleName, boolean secondRun) {
-    SandboxConfig sandbox1;
-    SandboxConfig sandbox2;
-    if (!secondRun) {
-      sandbox1 =
-          createSandbox(
-              new Sandbox(
-                  standardName,
-                  standardVersion,
-                  suiteName,
-                  roleName,
-                  true,
-                  getSandboxName(standardName, standardVersion, suiteName, roleName, 0)));
-      sandbox2 =
-          createSandbox(
-              new Sandbox(
-                  standardName,
-                  standardVersion,
-                  suiteName,
-                  roleName,
-                  false,
-                  getSandboxName(standardName, standardVersion, suiteName, roleName, 1)));
-      updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
-      updateSandboxConfigBeforeStarting(sandbox2, sandbox1);
-    } else {
-      sandbox1 =
-          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 0));
-      sandbox2 =
-          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 1));
-      log.info("Run for the 2nd time, and verify it still works.");
-      log.info("Using sandboxes: {} v{}, suite: {}, role: {}", standardName, standardVersion, suiteName, roleName);
-      resetSandbox(sandbox2); // Make sure the sandbox does not keep an optional state from the first run
-    }
-
-    List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
-    assertFalse(sandbox1Digests.isEmpty(), "No scenarios found!");
-
-    List<ScenarioDigest> sandbox2Digests = getScenarioDigests(sandbox2.sandboxId());
-    assertTrue(sandbox2Digests.isEmpty(), "Scenarios found!");
-    getAllSandboxes();
-
-    // Run all tests for all scenarios
-    runAllTests(sandbox1Digests, sandbox1, sandbox2);
-    log.info("Done with {} as role: {}", standardName, roleName);
   }
 }

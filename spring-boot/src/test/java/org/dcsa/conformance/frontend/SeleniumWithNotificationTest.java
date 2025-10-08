@@ -23,7 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
     classes = ConformanceApplication.class)
-class SeleniumTest extends SeleniumTestBase {
+class SeleniumWithNotificationTest extends SeleniumTestBase {
 
   @Test
   void testLoginAndCreateSandboxStart() {
@@ -77,7 +77,10 @@ class SeleniumTest extends SeleniumTestBase {
                                     role -> {
                                       try {
                                         createSandboxesAndRunGroups(
-                                            requestedStandard, version.number(), suite, role);
+                                            requestedStandard,
+                                            version.number(),
+                                            suite,
+                                            role.name());
                                       } catch (Exception e) {
                                         log.error(
                                             "Exception in standard '{}', version '{}', suite '{}', role '{}'",

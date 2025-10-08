@@ -18,8 +18,15 @@ public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends State
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
-      boolean acceptDeliveryRequest) {
-    super(carrierPartyName, shipperPartyName, previousAction, acceptDeliveryRequest ? "UC13a" : "UC13r", 204);
+      boolean acceptDeliveryRequest,
+      boolean isWithNotifications) {
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        acceptDeliveryRequest ? "UC13a" : "UC13r",
+        204,
+        isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.acceptDeliveryRequest = acceptDeliveryRequest;
   }

@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -71,4 +70,9 @@ public abstract class ActionCheck extends ConformanceCheck {
 
   protected abstract Set<String> checkConformance(
       Function<UUID, ConformanceExchange> getExchangeByUuid);
+
+  public ActionCheck withApplicability(boolean isApplicable) {
+    this.isApplicable = isApplicable;
+    return this;
+  }
 }

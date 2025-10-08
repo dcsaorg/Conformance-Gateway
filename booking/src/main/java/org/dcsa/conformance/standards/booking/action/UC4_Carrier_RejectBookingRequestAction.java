@@ -17,8 +17,9 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC4", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC4", 204, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
@@ -41,30 +42,10 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
-            new UrlPathCheck(
-                BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-            new ResponseStatusCheck(
-                BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
-            new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(),
-                BookingState.REJECTED,
-                getDspSupplier()),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+        return getSimpleNotificationChecks(
+            expectedApiVersion,
+            requestSchemaValidator,
+            BookingState.REJECTED);
       }
     };
   }

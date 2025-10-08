@@ -24,13 +24,15 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
       BookingState expectedBookingStatus,
       BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator requestSchemaValidator,
-      boolean isCancellationConfirmed) {
+      boolean isCancellationConfirmed,
+      boolean isWithNotifications) {
     super(
         carrierPartyName,
         shipperPartyName,
         previousAction,
         getFormattedActionTitle(isCancellationConfirmed),
-        204);
+        204,
+        isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.isCancellationConfirmed = isCancellationConfirmed;
     this.expectedBookingStatus = expectedBookingStatus;
@@ -62,32 +64,12 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
             isCancellationConfirmed
                 ? BookingCancellationState.CANCELLATION_CONFIRMED
                 : BookingCancellationState.CANCELLATION_DECLINED;
-        return Stream.of(
-            new UrlPathCheck(
-                BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-            new ResponseStatusCheck(
-                BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
-            new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(),
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                cancelledStatus,
-                getDspSupplier()),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+        return getSimpleNotificationChecks(
+            expectedApiVersion,
+            requestSchemaValidator,
+            expectedBookingStatus,
+            expectedAmendedBookingStatus,
+            cancelledStatus);
       }
     };
   }

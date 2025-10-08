@@ -16,8 +16,9 @@ public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends State
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC2", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC2", 204, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 

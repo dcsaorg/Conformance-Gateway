@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.booking.action;
 
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
@@ -9,20 +8,20 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 
 public class ShipperGetBookingErrorScenarioAction extends BookingAction {
 
-
   private final JsonSchemaValidator responseSchemaValidator;
+
   public ShipperGetBookingErrorScenarioAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      JsonSchemaValidator responseSchemaValidator
-) {
+      JsonSchemaValidator responseSchemaValidator) {
     super(
         shipperPartyName,
         carrierPartyName,
         previousAction,
-         "GET (Non existing booking)",
-        404);
+        "GET (Non existing booking)",
+        404,
+        true);
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
@@ -31,7 +30,7 @@ public class ShipperGetBookingErrorScenarioAction extends BookingAction {
     return super.asJsonNode()
         .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
         .put("cbr", getDspSupplier().get().carrierBookingReference())
-      .put("invalidBookingReference", true);
+        .put("invalidBookingReference", true);
   }
 
   @Override

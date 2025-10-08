@@ -74,9 +74,24 @@ class SeleniumWithNotificationTest extends SeleniumTestBase {
                             version
                                 .roles()
                                 .forEach(
-                                    role ->
+                                    role -> {
+                                      try {
                                         createSandboxesAndRunGroups(
-                                            requestedStandard, version.number(), suite, role.name()))));
+                                            requestedStandard,
+                                            version.number(),
+                                            suite,
+                                            role.name());
+                                      } catch (Exception e) {
+                                        log.error(
+                                            "Exception in standard '{}', version '{}', suite '{}', role '{}'",
+                                            requestedStandard.name(),
+                                            version.number(),
+                                            suite,
+                                            role,
+                                            e);
+                                        throw e;
+                                      }
+                                    })));
     log.info("Finished with standard: {}, time taken: {}", standardName, stopWatch);
   }
 

@@ -24,6 +24,7 @@ class SeleniumWithoutNotificationsTest extends SeleniumTestBase {
         "Booking + eBL", // 10:40 minutes
       })
   void testStandardWithAllVersions(String standardName) {
+    loginUser();
     app.setSimulatedLambdaDelay(lambdaDelay);
     StopWatch stopWatch = StopWatch.createStarted();
     getAllSandboxes();

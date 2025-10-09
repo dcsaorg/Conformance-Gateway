@@ -19,12 +19,11 @@ class SeleniumWithoutNotificationsTest extends SeleniumTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "Booking", // 11:52 minutes
-        "Ebl", // 37:09 minutes
-        "Booking + eBL", // 10:40 minutes
+        "Ebl",
+        "Booking",
+        "Booking + eBL",
       })
   void testStandardWithAllVersions(String standardName) {
-    loginUser();
     app.setSimulatedLambdaDelay(lambdaDelay);
     StopWatch stopWatch = StopWatch.createStarted();
     getAllSandboxes();

@@ -67,6 +67,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     if (driver != null) {
       driver.quit();
     }
+    alreadyLoggedIn = false;
   }
 
   protected void createSandboxesAndRunGroups(Standard standard, String version, String suiteName, String role) {

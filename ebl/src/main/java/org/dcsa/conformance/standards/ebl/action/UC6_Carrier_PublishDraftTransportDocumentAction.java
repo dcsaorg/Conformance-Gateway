@@ -10,6 +10,7 @@ import lombok.Getter;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
@@ -17,6 +18,28 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   public static final String ACTION_TITLE = "UC6";
   private final JsonSchemaValidator notificationSchemaValidator;
   private final boolean skipSI;
+  private ScenarioType scenarioType;
+
+  public UC6_Carrier_PublishDraftTransportDocumentAction(
+      String carrierPartyName,
+      String shipperPartyName,
+      EblAction previousAction,
+      ScenarioType scenarioType,
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean skipSI,
+      boolean isWithNotifications) {
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        "UC6 [%s]".formatted(scenarioType.name()),
+        204,
+        isWithNotifications);
+    this.notificationSchemaValidator = notificationSchemaValidator;
+    this.skipSI = skipSI;
+    this.scenarioType = scenarioType;
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+  }
 
   public UC6_Carrier_PublishDraftTransportDocumentAction(
       String carrierPartyName,
@@ -25,9 +48,18 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       JsonSchemaValidator notificationSchemaValidator,
       boolean skipSI,
       boolean isWithNotifications) {
-    super(carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204, isWithNotifications);
+    super(
+        carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204, isWithNotifications);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
+  }
+
+  @Override
+  public void reset() {
+    super.reset();
+    if (scenarioType != null) {
+      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+    }
   }
 
   @Override
@@ -51,12 +83,18 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     super.doHandleExchange(exchange);
 
     var dsp = getDspSupplier().get();
-      var tdr = exchange.getRequest().message().body().getJsonBody().path("data").path("transportDocumentReference");
-      if (!tdr.isMissingNode()) {
-        dsp = dsp.withTransportDocumentReference(tdr.asText());
-      }
+    var tdr =
+        exchange
+            .getRequest()
+            .message()
+            .body()
+            .getJsonBody()
+            .path("data")
+            .path("transportDocumentReference");
+    if (!tdr.isMissingNode()) {
+      dsp = dsp.withTransportDocumentReference(tdr.asText());
+    }
     getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
-    getCarrierPayloadConsumer().accept(OBJECT_MAPPER.createObjectNode());
   }
 
   @Override
@@ -87,12 +125,10 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
     var dr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
-    var node = super.asJsonNode()
-      .put("documentReference", dr)
-      .put("scenarioType", getDspSupplier().get().scenarioType())
-      .put("skipSI", skipSI);
-    node.set(CarrierSupplyPayloadAction.CARRIER_PAYLOAD, getCarrierPayloadSupplier().get());
-    return node;
+    return super.asJsonNode()
+        .put("documentReference", dr)
+        .put("scenarioType", getDspSupplier().get().scenarioType())
+        .put("skipSI", skipSI);
   }
 
   @Override
@@ -100,13 +136,15 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+
         return getTDNotificationChecks(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-          notificationSchemaValidator,
-                TransportDocumentStatus.TD_DRAFT,
-                false);
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            notificationSchemaValidator,
+            TransportDocumentStatus.TD_DRAFT,
+            false);
       }
     };
   }
+
 }

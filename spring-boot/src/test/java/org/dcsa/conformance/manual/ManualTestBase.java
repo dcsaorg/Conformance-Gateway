@@ -482,7 +482,7 @@ public abstract class ManualTestBase {
         JsonNode jsonForPrompt = scenarioStatusJsonNode.get("jsonForPromptText");
         if (standardName.equals(EblStandard.INSTANCE.getName())) {
           if (testedPartyRole.equals(EblRole.CARRIER.getConfigName())
-              && currentAction.equals(
+              && currentAction.startsWith(
                   UC6_Carrier_PublishDraftTransportDocumentAction.ACTION_TITLE)) {
             jsonForPrompt = fetchTransportDocument(sandbox2, sandbox1);
           }

@@ -189,7 +189,8 @@ public class EblCarrier extends ConformanceParty {
     String documentReference;
     CarrierShippingInstructions si;
     if (skipSI) {
-      var jsonRequestBody = actionPrompt.get(CarrierSupplyPayloadAction.CARRIER_PAYLOAD);
+      var jsonRequestBody =
+          getEblPayload(ScenarioType.valueOf(actionPrompt.required(SCENARIO_TYPE).asText()));
       si =
           CarrierShippingInstructions.initializeFromShippingInstructionsRequest(
               (ObjectNode) jsonRequestBody, apiVersion);

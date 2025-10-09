@@ -369,7 +369,6 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
   SandboxConfig createSandbox(Standard standard, String version, String suiteName, String roleName, int sandboxType) {
     loginUser();
-    log.info("Creating Sandbox: {}, {}, {}, {}, type: {}", standard.name(), version, suiteName, roleName, sandboxType);
     driver.get(baseUrl + "/create-sandbox");
     assertEquals(baseUrl + "/create-sandbox", driver.getCurrentUrl());
     waitForUIReadiness();
@@ -388,6 +387,8 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     String sandboxName = getSandboxName(standard.name(), version, suiteName, roleName, sandboxType);
     driver.findElement(By.id("mat-input-0")).sendKeys(sandboxName);
     driver.findElement(By.id("createSandboxButton")).click();
+
+    log.info("Creating Sandbox: {}", sandboxName);
 
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[testId='sandboxNameInput']")));
     boolean noSandboxUrlInput = driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();
@@ -428,8 +429,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       .findFirst()
       .orElseThrow(() -> new RuntimeException("Option '" + itemToUse + "' not found in " + selectBoxName));
 
-    // Wait for the option to be clickable before clicking
-    wait.until(ExpectedConditions.elementToBeClickable(targetOption)).click();
+    // Use JavaScript click to avoid ElementClickInterceptedException
+    wait.until(ExpectedConditions.elementToBeClickable(targetOption));
+    JavascriptExecutor js = (JavascriptExecutor) driver;
+    js.executeScript("arguments[0].click();", targetOption);
   }
 
   private void openNewTab(){

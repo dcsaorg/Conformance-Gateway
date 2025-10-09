@@ -26,6 +26,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
+  private static final ThreadLocal<Boolean> threadLocalIsWithNotifications = new ThreadLocal<>();
 
   private static final String BOOKING_API = "api";
   private static final String BOOKING_NOTIFICATIONS_API = "api";
@@ -36,15 +37,19 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final String CANCEL_SCHEMA_NAME = "CancelBookingRequest";
   public static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
-  private   BookingScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
+  private BookingScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
     super(actionBuilder);
   }
 
   public static Map<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
-      BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
+      BookingComponentFactory componentFactory,
+      boolean isWithNotifications,
+      String carrierPartyName,
+      String shipperPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
+    threadLocalIsWithNotifications.set(isWithNotifications);
 
     if (SCENARIO_SUITE_CONFORMANCE.equals(componentFactory.getScenarioSuite())) {
       return createConformanceScenarios(carrierPartyName);
@@ -258,7 +263,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                                                                 shipperGetBooking(COMPLETED)))))))),
             Map.entry(
                 "Store Door at Destination",
-                carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.STORE_DOOR_AT_DESTINATION)
+                carrierSupplyScenarioParameters(
+                        carrierPartyName, ScenarioType.STORE_DOOR_AT_DESTINATION)
                     .then(
                         uc1ShipperSubmitBookingRequest()
                             .then(
@@ -433,6 +439,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingScenarioListBuilder(
         previousAction ->
             new UC1_Shipper_SubmitBookingRequestAction(
@@ -443,7 +450,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc2CarrierRequestUpdateToBookingRequest() {
@@ -454,6 +462,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingScenarioListBuilder(
         previousAction ->
             new UC3_Shipper_SubmitUpdatedBookingRequestAction(
@@ -465,7 +474,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc4CarrierRejectBookingRequest() {
@@ -485,6 +495,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingScenarioListBuilder(
         previousAction ->
             new UC7_Shipper_SubmitBookingAmendment(
@@ -497,12 +508,17 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc8aCarrierApproveBookingAmendment() {
     return carrierStateChange(
-        (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
+        (carrierPartyName,
+            shipperPartyName,
+            previousAction,
+            requestSchemaValidator,
+            isWithNotifications) ->
             new UC8_Carrier_ProcessAmendmentAction(
                 carrierPartyName,
                 shipperPartyName,
@@ -510,12 +526,17 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 BookingState.CONFIRMED,
                 BookingState.AMENDMENT_CONFIRMED,
                 requestSchemaValidator,
-                true));
+                true,
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc8bCarrierDeclineBookingAmendment() {
     return carrierStateChange(
-        (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
+        (carrierPartyName,
+            shipperPartyName,
+            previousAction,
+            requestSchemaValidator,
+            isWithNotifications) ->
             new UC8_Carrier_ProcessAmendmentAction(
                 carrierPartyName,
                 shipperPartyName,
@@ -523,13 +544,15 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 BookingState.CONFIRMED,
                 BookingState.AMENDMENT_DECLINED,
                 requestSchemaValidator,
-                false));
+                false,
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc9ShipperCancelBookingAmendment() {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingScenarioListBuilder(
         previousAction ->
             new UC9_Shipper_CancelBookingAmendment(
@@ -542,20 +565,31 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc10CarrierDeclineBooking() {
     return carrierStateChange(
-        (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
+        (carrierPartyName,
+            shipperPartyName,
+            previousAction,
+            requestSchemaValidator,
+            isWithNotifications) ->
             new UC10_Carrier_DeclineBookingAction(
-                carrierPartyName, shipperPartyName, previousAction, null, requestSchemaValidator));
+                carrierPartyName,
+                shipperPartyName,
+                previousAction,
+                null,
+                requestSchemaValidator,
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc11ShipperCancelBooking() {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingScenarioListBuilder(
         previousAction ->
             new UC11_Shipper_CancelBookingRequestAction(
@@ -567,7 +601,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc12CarrierConfirmBookingCompleted() {
@@ -578,6 +613,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingScenarioListBuilder(
         previousAction ->
             new UC13ShipperCancelConfirmedBookingAction(
@@ -591,12 +627,17 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc14aCarrierBookingCancellationConfirmed() {
     return carrierStateChange(
-        (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
+        (carrierPartyName,
+            shipperPartyName,
+            previousAction,
+            requestSchemaValidator,
+            isWithNotifications) ->
             new UC14CarrierProcessBookingCancellationAction(
                 carrierPartyName,
                 shipperPartyName,
@@ -604,12 +645,17 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 BookingState.CANCELLED,
                 null,
                 requestSchemaValidator,
-                true));
+                true,
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder uc14bCarrierBookingCancellationDeclined() {
     return carrierStateChange(
-        (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
+        (carrierPartyName,
+            shipperPartyName,
+            previousAction,
+            requestSchemaValidator,
+            isWithNotifications) ->
             new UC14CarrierProcessBookingCancellationAction(
                 carrierPartyName,
                 shipperPartyName,
@@ -617,7 +663,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 BookingState.CONFIRMED,
                 null,
                 requestSchemaValidator,
-                false));
+                false,
+                isWithNotifications));
   }
 
   private static BookingScenarioListBuilder carrierStateChange(
@@ -625,6 +672,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingScenarioListBuilder(
         previousAction ->
             constructor.newInstance(
@@ -632,7 +680,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 shipperPartyName,
                 (BookingAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   public interface CarrierNotificationUseCase {
@@ -640,6 +689,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
         String carrierPartyName,
         String shipperPartyName,
         BookingAction previousAction,
-        JsonSchemaValidator requestSchemaValidator);
+        JsonSchemaValidator requestSchemaValidator,
+        boolean isWithNotifications);
   }
 }

@@ -24,13 +24,15 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
       BookingState expectedBookingStatus,
       BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator requestSchemaValidator,
-      boolean acceptAmendment) {
+      boolean acceptAmendment,
+      boolean isWithNotifications) {
     super(
         carrierPartyName,
         shipperPartyName,
         previousAction,
         "UC8%s [%s]".formatted(acceptAmendment ? "a" : "b", acceptAmendment ? "A" : "D"),
-        204);
+        204,
+        isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.acceptAmendment = acceptAmendment;
     this.expectedBookingStatus = expectedBookingStatus;
@@ -59,31 +61,11 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
-            new UrlPathCheck(
-                BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-            new ResponseStatusCheck(
-                BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
-            new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(),
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                getDspSupplier()),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+        return getSimpleNotificationChecks(
+            expectedApiVersion,
+            requestSchemaValidator,
+            expectedBookingStatus,
+            expectedAmendedBookingStatus);
       }
     };
   }

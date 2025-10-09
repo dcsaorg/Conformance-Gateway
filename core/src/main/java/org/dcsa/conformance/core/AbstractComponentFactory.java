@@ -65,14 +65,16 @@ public abstract class AbstractComponentFactory {
   protected abstract <T extends ScenarioListBuilder<T>>
       Map<String, T> createModuleScenarioListBuilders(
           PartyConfiguration[] partyConfigurations,
-          CounterpartConfiguration[] counterpartConfigurations);
+          CounterpartConfiguration[] counterpartConfigurations,
+          boolean isWithNotifications);
 
   public <T extends ScenarioListBuilder<T>> void generateConformanceScenarios(
       Map<String, List<ConformanceScenario>> scenariosByModuleName,
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     Map<String, T> moduleScenarioListBuilders =
-        this.createModuleScenarioListBuilders(partyConfigurations, counterpartConfigurations);
+        this.createModuleScenarioListBuilders(partyConfigurations, counterpartConfigurations, isWithNotifications);
     AtomicInteger nextModuleIndex = new AtomicInteger();
     moduleScenarioListBuilders.forEach(
         (moduleName, scenarioListBuilder) -> {

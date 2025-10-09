@@ -443,7 +443,12 @@ public class ConformanceWebuiHandler {
     standard
         .createComponentFactory(standardVersion, scenarioSuites.first())
         .getRoleNames()
-        .forEach(rolesNode::add);
+        .forEach(
+            role ->
+                rolesNode
+                    .addObject()
+                    .put("name", role)
+                    .put("noNotifications", standard.isExternalPartyEmptyUrlAllowed(role)));
   }
 
   private JsonNode _getAllSandboxes(String userId) {

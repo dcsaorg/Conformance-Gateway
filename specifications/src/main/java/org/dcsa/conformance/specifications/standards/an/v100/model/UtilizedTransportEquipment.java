@@ -13,8 +13,9 @@ import org.dcsa.conformance.specifications.standards.dt.v100.types.ShippingMark;
 
 @Schema(
     description =
-        org.dcsa.conformance.specifications.standards.dt.v100.model.UtilizedTransportEquipment
-            .CLASS_SCHEMA_DESCRIPTION)
+"""
+Specifies the container (equipment) information, possible ActiveReeferSettings, seals, references, and other related details.
+""")
 @Getter
 @Setter
 @RequiredArgsConstructor

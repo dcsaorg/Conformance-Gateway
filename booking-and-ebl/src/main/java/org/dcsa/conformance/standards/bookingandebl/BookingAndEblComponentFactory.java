@@ -77,9 +77,11 @@ public class BookingAndEblComponentFactory extends AbstractComponentFactory {
   @Override
   protected Map<String, BookingAndEblScenarioListBuilder> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     return BookingAndEblScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        isWithNotifications,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, BookingAndEblRole::isCarrier),
         _findPartyOrCounterpartName(

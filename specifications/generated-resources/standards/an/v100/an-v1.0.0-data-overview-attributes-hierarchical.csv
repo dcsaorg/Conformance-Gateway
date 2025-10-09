@@ -577,6 +577,10 @@ Code used to denote the type of free time.
 - `PARTIALLY_PAID` - Partially Paid
 - `FULLY_PAID` - Fully Paid
 - `OVERPAID` - Overpaid",
+"ArrivalNotice / houseBillOfLadingReferences","houseBillOfLadingReferences","string list",,maxLength=20,,,"List of House Bill of Lading references
+Item description:
+Unique number allocated by the Ocean Transport Intermediary (OTI) to the House Bill of Lading.
+",
 "ArrivalNotice / isElectronic",isElectronic,boolean,,,,true,"An indicator whether the transport document is electronically transferred.",
 "ArrivalNotice / issueDateTime",issueDateTime,"string(date-time)",yes,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the Arrival Notice was issued.",
 "ArrivalNotice / paymentRemittance",paymentRemittance,PaymentRemittance,,,,,"Bank account information provided by the carrier for customers to make payments of the outstanding charges",

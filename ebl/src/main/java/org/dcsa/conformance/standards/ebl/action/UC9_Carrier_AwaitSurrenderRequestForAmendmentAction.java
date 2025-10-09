@@ -17,8 +17,9 @@ public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends StateCh
       String carrierPartyName,
       String shipperPartyName,
       BookingAndEblAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC9", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC9", 204, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 

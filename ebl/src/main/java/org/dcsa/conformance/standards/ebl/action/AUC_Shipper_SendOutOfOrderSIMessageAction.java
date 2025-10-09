@@ -24,7 +24,13 @@ public class AUC_Shipper_SendOutOfOrderSIMessageAction extends StateChangingSIAc
       OutOfOrderMessageType outOfOrderMessageType,
       boolean useTDRef,
       JsonSchemaValidator requestSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "AUC-OOOM [%s]".formatted(outOfOrderMessageType.getUC()), 409);
+    super(
+        shipperPartyName,
+        carrierPartyName,
+        previousAction,
+        "AUC-OOOM [%s]".formatted(outOfOrderMessageType.getUC()),
+        409,
+        true);
     if (!useTDRef && outOfOrderMessageType.isTDRequest()) {
       throw new IllegalArgumentException("useTDRef must be true for " + outOfOrderMessageType.name());
     }

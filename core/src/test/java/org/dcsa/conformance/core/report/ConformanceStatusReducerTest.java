@@ -129,4 +129,76 @@ class ConformanceStatusReducerTest {
         ConformanceStatusReducer.reduce(ConformanceStatus.NO_TRAFFIC, ConformanceStatus.NO_TRAFFIC);
     assertEquals(ConformanceStatus.NO_TRAFFIC, result);
   }
+
+  @Test
+  void reduce_notRelevantAndNonConformant_returnsNonConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduce(
+            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.NON_CONFORMANT);
+    assertEquals(ConformanceStatus.NON_CONFORMANT, result);
+  }
+
+  @Test
+  void reduce_nonConformantAndNotRelevant_returnsNonConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduce(
+            ConformanceStatus.NON_CONFORMANT, ConformanceStatus.NOT_RELEVANT);
+    assertEquals(ConformanceStatus.NON_CONFORMANT, result);
+  }
+
+  @Test
+  void reduce_notRelevantAndPartiallyConformant_returnsPartiallyConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduce(
+            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.PARTIALLY_CONFORMANT);
+    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
+  }
+
+  @Test
+  void reduce_partiallyConformantAndNotRelevant_returnsPartiallyConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduce(
+            ConformanceStatus.PARTIALLY_CONFORMANT, ConformanceStatus.NOT_RELEVANT);
+    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
+  }
+
+  @Test
+  void reduce_notRelevantAndConformant_returnsConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduce(
+            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.CONFORMANT);
+    assertEquals(ConformanceStatus.CONFORMANT, result);
+  }
+
+  @Test
+  void reduce_conformantAndNotRelevant_returnsConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduce(
+            ConformanceStatus.CONFORMANT, ConformanceStatus.NOT_RELEVANT);
+    assertEquals(ConformanceStatus.CONFORMANT, result);
+  }
+
+  @Test
+  void reduce_notRelevantAndNotRelevant_returnsConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduce(
+            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.NOT_RELEVANT);
+    assertEquals(ConformanceStatus.CONFORMANT, result);
+  }
+
+  @Test
+  void reduce_notRelevantAndNoTraffic_returnsPartiallyConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduce(
+            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.NO_TRAFFIC);
+    assertEquals(ConformanceStatus.NO_TRAFFIC, result);
+  }
+
+  @Test
+  void reduce_noTrafficAndNotRelevant_returnsPartiallyConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduce(
+            ConformanceStatus.NO_TRAFFIC, ConformanceStatus.NOT_RELEVANT);
+    assertEquals(ConformanceStatus.NO_TRAFFIC, result);
+  }
 }

@@ -19,8 +19,15 @@ public class UC10_Carrier_ProcessSurrenderRequestForAmendmentAction extends Stat
       String shipperPartyName,
       BookingAndEblAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
-      boolean acceptAmendmentRequest) {
-    super(carrierPartyName, shipperPartyName, previousAction, acceptAmendmentRequest ? "UC10a" : "UC10r", 204);
+      boolean acceptAmendmentRequest,
+      boolean isWithNotifications) {
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        acceptAmendmentRequest ? "UC10a" : "UC10r",
+        204,
+        isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.acceptAmendmentRequest = acceptAmendmentRequest;
   }

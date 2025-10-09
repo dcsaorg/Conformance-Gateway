@@ -26,13 +26,15 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       EblAction previousAction,
       ScenarioType scenarioType,
       JsonSchemaValidator notificationSchemaValidator,
-      boolean skipSI) {
+      boolean skipSI,
+      boolean isWithNotifications) {
     super(
         carrierPartyName,
         shipperPartyName,
         previousAction,
         "UC6 [%s]".formatted(scenarioType.name()),
-        204);
+        204,
+        isWithNotifications);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
     this.scenarioType = scenarioType;
@@ -44,8 +46,10 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator notificationSchemaValidator,
-      boolean skipSI) {
-    super(carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204);
+      boolean skipSI,
+      boolean isWithNotifications) {
+    super(
+        carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204, isWithNotifications);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
   }

@@ -24,8 +24,9 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC7", Set.of(200, 202));
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean isWithNotifications) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC7", Set.of(200, 202), isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
   }

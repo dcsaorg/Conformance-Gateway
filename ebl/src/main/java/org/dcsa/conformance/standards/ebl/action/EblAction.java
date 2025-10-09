@@ -12,17 +12,16 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
-import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.checks.CarrierSiNotificationPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.ebl.checks.CarrierTdNotificationPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.ebl.party.*;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 
 @Getter
 public abstract class EblAction extends BookingAndEblAction {
@@ -59,7 +58,7 @@ public abstract class EblAction extends BookingAndEblAction {
       getEblDspReference().set(null);
     } else {
       getEblDspReference()
-          .set(new EblDynamicScenarioParameters(null, null, null, null, null, false));
+          .set(new EblDynamicScenarioParameters(null, null, null, null, null, false,false));
     }
   }
 

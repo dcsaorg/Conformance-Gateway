@@ -13,9 +13,9 @@ import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.util.ErrorFormatter;
-import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.checks.EblInputPayloadValidations;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 public class CarrierSupplyPayloadAction extends EblAction {
 
@@ -71,6 +71,9 @@ public class CarrierSupplyPayloadAction extends EblAction {
   public void reset() {
     super.reset();
     carrierPayload = null;
+    if (scenarioType != null) {
+      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+    }
   }
 
   @Override

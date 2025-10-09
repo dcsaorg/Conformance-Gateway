@@ -117,7 +117,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   private void _loadAllInactiveScenarios() {
     _scenariosById.values().stream()
-        .filter(scenario -> scenario.getId() != currentScenarioId)
+        .filter(scenario -> !scenario.getId().equals(currentScenarioId))
         .forEach(this::_loadInactiveScenario);
   }
 

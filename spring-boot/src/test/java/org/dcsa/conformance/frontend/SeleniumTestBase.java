@@ -385,10 +385,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     typeOptions.get(sandboxType).click();
 
     String sandboxName = getSandboxName(standard.name(), version, suiteName, roleName, sandboxType);
+    log.info("Creating Sandbox: {}", sandboxName);
+
     driver.findElement(By.id("mat-input-0")).sendKeys(sandboxName);
     driver.findElement(By.id("createSandboxButton")).click();
-
-    log.info("Creating Sandbox: {}", sandboxName);
 
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[testId='sandboxNameInput']")));
     boolean noSandboxUrlInput = driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();

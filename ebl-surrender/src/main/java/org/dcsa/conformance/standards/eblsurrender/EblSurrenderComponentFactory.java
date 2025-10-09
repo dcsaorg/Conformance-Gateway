@@ -66,7 +66,8 @@ class EblSurrenderComponentFactory extends AbstractComponentFactory {
 
   public Map<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     return EblSurrenderScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(

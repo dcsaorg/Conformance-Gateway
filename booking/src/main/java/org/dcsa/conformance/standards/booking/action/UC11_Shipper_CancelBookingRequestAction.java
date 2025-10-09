@@ -24,8 +24,9 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
       BookingState expectedBookingStatus,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC11", 202);
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean isWithNotifications) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC11", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -69,7 +70,10 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
                         HttpMessageType.REQUEST,
                         requestSchemaValidator))),
             getNotificationChecks(
-                expectedApiVersion, notificationSchemaValidator, expectedBookingStatus, null));
+                expectedApiVersion,
+                notificationSchemaValidator,
+                expectedBookingStatus,
+                null));
       }
     };
   }

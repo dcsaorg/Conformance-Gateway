@@ -21,7 +21,6 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
 
   private static final int FLAG_NONE = 0;
   private static final int FLAG_REQUEST_AMENDMENT = 1;
-  private static final int FLAG_USE_TD_REF = 2;
 
   private final ShippingInstructionsStatus expectedSiStatus;
   private final ShippingInstructionsStatus expectedAmendedSiStatus;
@@ -49,7 +48,8 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       boolean requestAmendedStatus,
       boolean recordTDR,
       boolean useBothRef) {
-    super(shipperPartyName, carrierPartyName, previousAction, name(requestAmendedStatus), 200);
+    super(
+        shipperPartyName, carrierPartyName, previousAction, name(requestAmendedStatus), 200, true);
     this.expectedSiStatus = expectedSiStatus;
     this.expectedAmendedSiStatus = expectedAmendedSiStatus;
     this.useBothRef = useBothRef;

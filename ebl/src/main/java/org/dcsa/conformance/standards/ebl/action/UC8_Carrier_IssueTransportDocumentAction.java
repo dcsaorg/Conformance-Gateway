@@ -17,8 +17,9 @@ public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAct
       String carrierPartyName,
       String shipperPartyName,
       BookingAndEblAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC8", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC8", 204, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 

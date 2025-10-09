@@ -20,8 +20,9 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
       EblAction previousAction,
       ShippingInstructionsStatus expectedSIStatus,
       JsonSchemaValidator requestSchemaValidator,
-      boolean acceptChanges) {
-    super(carrierPartyName, shipperPartyName, previousAction, acceptChanges ? "UC4a" : "UC4d", 204);
+      boolean acceptChanges,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, acceptChanges ? "UC4a" : "UC4d", 204, isWithNotifications);
     this.expectedSIStatus = expectedSIStatus;
     this.requestSchemaValidator = requestSchemaValidator;
     this.acceptChanges = acceptChanges;

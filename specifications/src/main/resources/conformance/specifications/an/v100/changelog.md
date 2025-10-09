@@ -2,6 +2,13 @@
 
 ## Snapshot v1.0.0-20250926-beta
 
+Added to type `ArrivalNotice` property `houseBillOfLadingReferences`. (SD-2508)
+
+Updated the description of `UtilizedTransportEquipment`. (SD-2510)
+
+
+## Snapshot v1.0.0-20250926-beta
+
 Refined attribute descriptions. (SD-2458)
 
 Adjusted query parameter examples. (SD-2479)

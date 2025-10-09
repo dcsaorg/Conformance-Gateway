@@ -443,7 +443,12 @@ public class ConformanceWebuiHandler {
     standard
         .createComponentFactory(standardVersion, scenarioSuites.first())
         .getRoleNames()
-        .forEach(rolesNode::add);
+        .forEach(
+            role ->
+                rolesNode
+                    .addObject()
+                    .put("name", role)
+                    .put("noNotifications", standard.isExternalPartyEmptyUrlAllowed(role)));
   }
 
   private JsonNode _getAllSandboxes(String userId) {
@@ -592,12 +597,12 @@ public class ConformanceWebuiHandler {
   private JsonNode _startOrStopScenario(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    ConformanceSandbox.resetParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     ConformanceSandbox.startOrStopScenario(
         persistenceProvider,
         deferredSandboxTaskConsumer,
         sandboxId,
         requestNode.get("scenarioId").asText());
-    ConformanceSandbox.resetParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     return OBJECT_MAPPER.createObjectNode();
   }
 

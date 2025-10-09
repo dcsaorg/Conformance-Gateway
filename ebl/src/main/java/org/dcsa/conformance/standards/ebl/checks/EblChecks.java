@@ -418,24 +418,21 @@ public class EblChecks {
     )
   );
 
-  private static final JsonRebaseableContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
-    "All utilizedTransportEquipments where 'isNonOperatingReefer' is 'false' must have 'activeReeferSettings'",
-    ALL_UTE,
-    JsonAttribute.ifMatchedThen(
-      JsonAttribute.isFalse(IS_NON_OPERATING_REEFER),
-      JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBePresent())
-    )
-  );
+  private static final JsonRebaseableContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "All utilizedTransportEquipments where 'isNonOperatingReefers' is 'false' must have 'activeReeferSettings'",
+          ALL_UTE,
+          JsonAttribute.ifMatchedThen(
+              JsonAttribute.isFalse(IS_NON_OPERATING_REEFER),
+              JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBePresent())));
 
-  private static final JsonRebaseableContentCheck NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
-    "All utilizedTransportEquipments where 'isNonOperatingReefer' is 'true' cannot have 'activeReeferSettings'",
-    ALL_UTE,
-    JsonAttribute.ifMatchedThen(
-      JsonAttribute.isTrue(IS_NON_OPERATING_REEFER),
-      JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBeAbsent())
-    )
-  );
-
+  private static final JsonRebaseableContentCheck NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "All utilizedTransportEquipments where 'isNonOperatingReefER' is 'true' cannot have 'activeReeferSettings'",
+          ALL_UTE,
+          JsonAttribute.ifMatchedThen(
+              JsonAttribute.isTrue(IS_NON_OPERATING_REEFER),
+              JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBeAbsent())));
 
   private static final JsonRebaseableContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in '*.customsReferences' must be unique",
@@ -1275,11 +1272,14 @@ public class EblChecks {
   public static List<JsonContentCheck> getTdPayloadChecks(
       TransportDocumentStatus transportDocumentStatus,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
+
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
+
     genericTdContentChecks(
         jsonContentChecks,
         () -> dspSupplier.get().transportDocumentReference(),
         transportDocumentStatus);
+
     jsonContentChecks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
             "[Scenario] Validate the containers reefer settings",

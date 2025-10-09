@@ -29,8 +29,9 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
       BookingCancellationState expectedBookingCancellationStatus,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC13", 202);
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean isWithNotifications) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC13", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;

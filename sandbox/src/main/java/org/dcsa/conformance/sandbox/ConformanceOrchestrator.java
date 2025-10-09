@@ -52,11 +52,14 @@ public class ConformanceOrchestrator implements StatefulEntity {
     this.persistentMap = persistentMap;
     this.asyncWebClient = asyncWebClient;
 
+    CounterpartConfiguration externalPartyCounterpartConfiguration =
+        sandboxConfiguration.getExternalPartyCounterpartConfiguration();
     componentFactory.generateConformanceScenarios(
-      this.scenariosByModuleName,
-      sandboxConfiguration.getParties(),
-      sandboxConfiguration.getCounterparts()
-    );
+        this.scenariosByModuleName,
+        sandboxConfiguration.getParties(),
+        sandboxConfiguration.getCounterparts(),
+        externalPartyCounterpartConfiguration == null
+            || !externalPartyCounterpartConfiguration.getUrl().isBlank());
     for (var scenarios : this.scenariosByModuleName.values()) {
       for (var scenario : scenarios) {
         _scenariosById.put(scenario.getId(), scenario);
@@ -114,7 +117,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   private void _loadAllInactiveScenarios() {
     _scenariosById.values().stream()
-        .filter(scenario -> scenario.getId() != currentScenarioId)
+        .filter(scenario -> !scenario.getId().equals(currentScenarioId))
         .forEach(this::_loadInactiveScenario);
   }
 

@@ -19,8 +19,9 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
       String shipperPartyName,
       BookingAction previousAction,
       BookingState expectedAmendedBookingStatus,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC10", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC10", 204, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
   }
@@ -45,31 +46,11 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
-            new UrlPathCheck(
-                BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-            new ResponseStatusCheck(
-                BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
-            new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(),
-                BookingState.DECLINED,
-                expectedAmendedBookingStatus,
-                getDspSupplier()),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            ApiHeaderCheck.createNotificationCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+        return getSimpleNotificationChecks(
+            expectedApiVersion,
+            requestSchemaValidator,
+            BookingState.DECLINED,
+            expectedAmendedBookingStatus);
       }
     };
   }

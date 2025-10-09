@@ -17,8 +17,9 @@ public class UC12_Carrier_AwaitSurrenderRequestForDeliveryAction extends StateCh
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC12", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isWithNotifications) {
+    super(carrierPartyName, shipperPartyName, previousAction, "UC12", 204, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 

@@ -67,7 +67,8 @@ class TntComponentFactory extends AbstractComponentFactory {
 
   public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     return TntScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(

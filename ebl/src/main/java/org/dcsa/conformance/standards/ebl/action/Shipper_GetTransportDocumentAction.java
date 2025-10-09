@@ -26,7 +26,7 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
       EblAction previousAction,
       TransportDocumentStatus expectedTdStatus,
       JsonSchemaValidator responseSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "GET TD", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "GET TD", 200, true);
     this.expectedTdStatus = expectedTdStatus;
     this.responseSchemaValidator = responseSchemaValidator;
   }

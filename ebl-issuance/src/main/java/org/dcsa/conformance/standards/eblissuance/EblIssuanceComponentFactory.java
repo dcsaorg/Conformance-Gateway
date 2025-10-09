@@ -69,7 +69,8 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
 
   public Map<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     return EblIssuanceScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(

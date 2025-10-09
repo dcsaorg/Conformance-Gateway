@@ -409,16 +409,25 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   private static void selectAndPickOption(String selectBoxName, String itemToUse) {
-    driver.findElement(By.id(selectBoxName)).click();
+    // Click to open the dropdown
+    wait.until(ExpectedConditions.elementToBeClickable(By.id(selectBoxName))).click();
+
+    // Wait for the panel to be visible
+    wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(selectBoxName + "-panel")));
+
+    // Re-find the options AFTER the panel is visible to avoid stale elements
     List<WebElement> selectBoxOptions = driver.findElement(By.id(selectBoxName + "-panel"))
       .findElements(By.tagName("mat-option"));
-    assertFalse(selectBoxOptions.isEmpty());
-    wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(selectBoxName + "-panel")));
-    selectBoxOptions.stream()
+    assertFalse(selectBoxOptions.isEmpty(), "No options found for " + selectBoxName);
+
+    // Find the matching option
+    WebElement targetOption = selectBoxOptions.stream()
       .filter(option -> option.getText().equals(itemToUse))
       .findFirst()
-      .orElseThrow()
-      .click();
+      .orElseThrow(() -> new RuntimeException("Option '" + itemToUse + "' not found in " + selectBoxName));
+
+    // Wait for the option to be clickable before clicking
+    wait.until(ExpectedConditions.elementToBeClickable(targetOption)).click();
   }
 
   private void openNewTab(){

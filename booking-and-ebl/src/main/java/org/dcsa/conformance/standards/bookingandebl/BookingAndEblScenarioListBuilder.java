@@ -55,6 +55,7 @@ public class BookingAndEblScenarioListBuilder
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
+  private static final ThreadLocal<Boolean> threadLocalIsWithNotifications = new ThreadLocal<>();
 
   private BookingAndEblScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
     super(actionBuilder);
@@ -62,11 +63,13 @@ public class BookingAndEblScenarioListBuilder
 
   public static Map<String, BookingAndEblScenarioListBuilder> createModuleScenarioListBuilders(
       BookingAndEblComponentFactory componentFactory,
+      boolean isWithNotifications,
       String carrierPartyName,
       String shipperPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
+    threadLocalIsWithNotifications.set(isWithNotifications);
 
     if (SCENARIO_SUITE_CONFORMANCE.equals(componentFactory.getScenarioSuite())) {
       return createConformanceScenarios(carrierPartyName);
@@ -211,6 +214,7 @@ public class BookingAndEblScenarioListBuilder
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC1_Shipper_SubmitBookingRequestAction(
@@ -222,7 +226,8 @@ public class BookingAndEblScenarioListBuilder
                 componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
                 componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder uc5CarrierConfirmBookingRequest() {
@@ -233,6 +238,7 @@ public class BookingAndEblScenarioListBuilder
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC7_Shipper_SubmitBookingAmendment(
@@ -246,12 +252,17 @@ public class BookingAndEblScenarioListBuilder
                 componentFactory.getBookingMessageSchemaValidator(
                     BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
                 componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder uc8aCarrierApproveBookingAmendment() {
     return carrierStateChange(
-        (carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator) ->
+        (carrierPartyName,
+            shipperPartyName,
+            previousAction,
+            requestSchemaValidator,
+            isWithNotifications) ->
             new UC8_Carrier_ProcessAmendmentAction(
                 carrierPartyName,
                 shipperPartyName,
@@ -259,7 +270,8 @@ public class BookingAndEblScenarioListBuilder
                 BookingState.CONFIRMED,
                 BookingState.AMENDMENT_CONFIRMED,
                 requestSchemaValidator,
-                true));
+                true,
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder uc1BookingGet(
@@ -342,6 +354,7 @@ public class BookingAndEblScenarioListBuilder
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC1_Shipper_SubmitShippingInstructionsAction(
@@ -353,13 +366,15 @@ public class BookingAndEblScenarioListBuilder
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
                 componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+                    EblScenarioListBuilder.EBL_SI_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder uc6CarrierPublishDraftTransportDocument() {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC6_Carrier_PublishDraftTransportDocumentAction(
@@ -368,13 +383,15 @@ public class BookingAndEblScenarioListBuilder
                 (EblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                false));
+                false,
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder uc7ShipperApproveDraftTransportDocument() {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC7_Shipper_ApproveDraftTransportDocumentAction(
@@ -384,13 +401,15 @@ public class BookingAndEblScenarioListBuilder
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.PATCH_TD_SCHEMA_NAME),
                 componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder uc8CarrierIssueTransportDocument() {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC8_Carrier_IssueTransportDocumentAction(
@@ -398,13 +417,15 @@ public class BookingAndEblScenarioListBuilder
                 shipperPartyName,
                 (BookingAndEblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder uc9CarrierAwaitSurrenderRequestForAmendment() {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
@@ -412,13 +433,15 @@ public class BookingAndEblScenarioListBuilder
                 shipperPartyName,
                 (BookingAndEblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder uc10aCarrierAcceptSurrenderRequestForAmendment() {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC10_Carrier_ProcessSurrenderRequestForAmendmentAction(
@@ -427,7 +450,8 @@ public class BookingAndEblScenarioListBuilder
                 (BookingAndEblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                true));
+                true,
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder
@@ -435,6 +459,7 @@ public class BookingAndEblScenarioListBuilder
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
@@ -442,7 +467,8 @@ public class BookingAndEblScenarioListBuilder
                 shipperPartyName,
                 (BookingAndEblAction) previousAction,
                 componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder carrierStateChange(
@@ -450,6 +476,7 @@ public class BookingAndEblScenarioListBuilder
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             constructor.newInstance(
@@ -457,7 +484,8 @@ public class BookingAndEblScenarioListBuilder
                 shipperPartyName,
                 (BookingAction) previousAction,
                 componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME)));
+                    BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
   }
 
   private static BookingAndEblScenarioListBuilder uc1SIGet(

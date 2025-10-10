@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.booking.action;
 
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -33,7 +32,8 @@ public class ShipperGetBookingAction extends BookingAction {
         carrierPartyName,
         previousAction,
         requestAmendedStatus ? "GET (amended content)" : "GET",
-        200);
+        200,
+        true);
     this.expectedBookingStatus = expectedBookingStatus;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
     this.expectedCancelledBookingStatus = expectedCancelledBookingStatus;

@@ -52,11 +52,14 @@ public class ConformanceOrchestrator implements StatefulEntity {
     this.persistentMap = persistentMap;
     this.asyncWebClient = asyncWebClient;
 
+    CounterpartConfiguration externalPartyCounterpartConfiguration =
+        sandboxConfiguration.getExternalPartyCounterpartConfiguration();
     componentFactory.generateConformanceScenarios(
-      this.scenariosByModuleName,
-      sandboxConfiguration.getParties(),
-      sandboxConfiguration.getCounterparts()
-    );
+        this.scenariosByModuleName,
+        sandboxConfiguration.getParties(),
+        sandboxConfiguration.getCounterparts(),
+        externalPartyCounterpartConfiguration == null
+            || !externalPartyCounterpartConfiguration.getUrl().isBlank());
     for (var scenarios : this.scenariosByModuleName.values()) {
       for (var scenario : scenarios) {
         _scenariosById.put(scenario.getId(), scenario);
@@ -114,7 +117,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   private void _loadAllInactiveScenarios() {
     _scenariosById.values().stream()
-        .filter(scenario -> scenario.getId() != currentScenarioId)
+        .filter(scenario -> !scenario.getId().equals(currentScenarioId))
         .forEach(this::_loadInactiveScenario);
   }
 
@@ -302,7 +305,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
     }
   }
 
-  public void completeCurrentAction() {
+  public void completeCurrentAction(boolean skipAction) {
     log.info("ConformanceOrchestrator.completeCurrentAction()");
 
     if (currentScenarioId == null) {
@@ -318,11 +321,22 @@ public class ConformanceOrchestrator implements StatefulEntity {
               .formatted(currentScenario.toString()));
       return;
     }
-    if (nextAction.isMissingMatchedExchange()
-        && !nextAction.skippableForRoles().contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
+
+    if (!skipAction && nextAction.isMissingMatchedExchange()) {
       throw new UserFacingException(
           "A required API exchange was not yet detected for action '%s'"
               .formatted(nextAction.getActionTitle()));
+    }
+
+    if (skipAction
+        && !nextAction
+            .skippableForRoles()
+            .contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
+      throw new UserFacingException(
+          "Action '%s' cannot be skipped for role '%s'"
+              .formatted(
+                  nextAction.getActionTitle(),
+                  sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole()));
     }
 
     currentScenario.popNextAction();
@@ -457,11 +471,18 @@ public class ConformanceOrchestrator implements StatefulEntity {
             .orElseThrow();
     scenarioNode.set("conformanceSubReport", scenarioSubReport.toJsonReport());
 
+    CounterpartConfiguration counterpartConfiguration =
+        sandboxConfiguration.getExternalPartyCounterpartConfiguration();
+
     scenarioNode.put("isSkippable", false);
     if (nextAction != null
-        && nextAction.skippableForRoles().contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
+        && nextAction.skippableForRoles().contains(counterpartConfiguration.getRole())) {
       scenarioNode.put("isSkippable", true);
     }
+
+    boolean needsAction =
+        counterpartConfiguration != null && !counterpartConfiguration.getUrl().isBlank();
+    scenarioNode.put("needsAction", needsAction);
 
     return scenarioNode;
   }

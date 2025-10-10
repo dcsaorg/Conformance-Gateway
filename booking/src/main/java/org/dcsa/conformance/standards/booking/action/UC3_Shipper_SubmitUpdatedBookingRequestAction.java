@@ -26,8 +26,9 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
       BookingState expectedBookingState,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 202);
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean isWithNotifications) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -73,7 +74,10 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
             Stream.concat(
                 createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
                 getNotificationChecks(
-                    expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)));
+                    expectedApiVersion,
+                    notificationSchemaValidator,
+                    expectedBookingState,
+                    null)));
       }
     };
   }

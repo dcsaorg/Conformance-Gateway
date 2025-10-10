@@ -68,7 +68,8 @@ class PintComponentFactory extends AbstractComponentFactory {
   @Override
   public Map<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     return PintScenarioListBuilder.createModuleScenarioListBuilders(
         this.standardVersion,
         _findPartyOrCounterpartName(

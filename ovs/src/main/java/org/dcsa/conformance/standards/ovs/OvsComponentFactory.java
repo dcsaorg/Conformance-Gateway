@@ -66,7 +66,8 @@ class OvsComponentFactory extends AbstractComponentFactory {
 
   public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+      CounterpartConfiguration[] counterpartConfigurations,
+      boolean isWithNotifications) {
     return OvsScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(

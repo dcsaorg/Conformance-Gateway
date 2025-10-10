@@ -92,7 +92,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       + "You cannot go back to a previous action without restarting the scenario.")
     ) {
       this.performingAction = "Marking current action as completed...";
-      const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id);
+      const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, false);
       if (response?.error) {
         await MessageDialog.open(
           this.dialog,
@@ -106,7 +106,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
 
   async skipCurrentAction() {
         this.performingAction = "Marking current action as skipped...";
-        const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id);
+        const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, true);
         if (response?.error) {
           await MessageDialog.open(
             this.dialog,

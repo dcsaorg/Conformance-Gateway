@@ -116,7 +116,7 @@ public class ANStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20250926-beta", "AN", "1.0.0-20250912-beta", 4);
+        "Arrival Notice", "1.0.0-20251010-beta", "AN", "1.0.0-20250926-beta", 4);
   }
 
   @Override
@@ -206,7 +206,7 @@ public class ANStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/375eee09878a8a481884257ded71b2f35edc65bf/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/e83485c750798f3e086b5b393dd1effdf56d5185/specifications/generated-resources/standards/an/v100/an-v1.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 

@@ -67,6 +67,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     if (driver != null) {
       driver.quit();
     }
+    alreadyLoggedIn = false;
   }
 
   protected void createSandboxesAndRunGroups(Standard standard, String version, String suiteName, String role) {
@@ -182,7 +183,8 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
     if (standardName.equals(EblStandard.INSTANCE.getName())) {
       if (testedPartyRole.equals(EblRole.CARRIER.getConfigName())
-          && currentAction.equals(UC6_Carrier_PublishDraftTransportDocumentAction.ACTION_TITLE)) {
+          && currentAction.startsWith(
+              UC6_Carrier_PublishDraftTransportDocumentAction.ACTION_TITLE)) {
         jsonForPrompt = fetchTransportDocument(jsonForPrompt);
       }
     } else if (standardName.equals(PintStandard.INSTANCE.getName())) {
@@ -268,7 +270,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   // If there are no more actions, the scenario is finished and should be conformant.
-  private static boolean hasNoMoreActionsDisplayed(String name) {
+  private boolean hasNoMoreActionsDisplayed(String name) {
     if (driver.findElements(By.id("nextActions")).isEmpty()
       && driver.findElements(By.cssSelector("app-text-waiting")).isEmpty()) {
       String titleValue =
@@ -328,7 +330,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     // Starts in the 1st tab
     switchToTab(0);
     if (sandbox2.sandboxUrl() != null) {
-      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(sandbox2.sandboxUrl());
+      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(getTestedPartyApiUrl(sandbox2));
       driver.findElement(By.name("externalPartyAuthHeaderNameTextField")).sendKeys(sandbox2.sandboxAuthHeaderName());
       driver.findElement(By.name("externalPartyAuthHeaderValueTextField")).sendKeys(sandbox2.sandboxAuthHeaderValue());
       driver.findElement(By.cssSelector("[testId='updateSandboxButton']")).click();
@@ -337,6 +339,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     }
     waitForUIReadiness();
     assertTrue(driver.findElement(By.className("pageTitle")).getText().startsWith("Sandbox: "));
+  }
+
+  protected String getTestedPartyApiUrl(SandboxConfig sandbox2) {
+    return sandbox2.sandboxUrl();
   }
 
   protected void loginUser() {
@@ -363,7 +369,6 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
   SandboxConfig createSandbox(Standard standard, String version, String suiteName, String roleName, int sandboxType) {
     loginUser();
-    log.info("Creating Sandbox: {}, {}, {}, {}, type: {}", standard.name(), version, suiteName, roleName, sandboxType);
     driver.get(baseUrl + "/create-sandbox");
     assertEquals(baseUrl + "/create-sandbox", driver.getCurrentUrl());
     waitForUIReadiness();
@@ -380,6 +385,8 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     typeOptions.get(sandboxType).click();
 
     String sandboxName = getSandboxName(standard.name(), version, suiteName, roleName, sandboxType);
+    log.info("Creating Sandbox: {}", sandboxName);
+
     driver.findElement(By.id("mat-input-0")).sendKeys(sandboxName);
     driver.findElement(By.id("createSandboxButton")).click();
 
@@ -405,16 +412,27 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   private static void selectAndPickOption(String selectBoxName, String itemToUse) {
-    driver.findElement(By.id(selectBoxName)).click();
+    // Click to open the dropdown
+    wait.until(ExpectedConditions.elementToBeClickable(By.id(selectBoxName))).click();
+
+    // Wait for the panel to be visible
+    wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(selectBoxName + "-panel")));
+
+    // Re-find the options AFTER the panel is visible to avoid stale elements
     List<WebElement> selectBoxOptions = driver.findElement(By.id(selectBoxName + "-panel"))
       .findElements(By.tagName("mat-option"));
-    assertFalse(selectBoxOptions.isEmpty());
-    wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(selectBoxName + "-panel")));
-    selectBoxOptions.stream()
+    assertFalse(selectBoxOptions.isEmpty(), "No options found for " + selectBoxName);
+
+    // Find the matching option
+    WebElement targetOption = selectBoxOptions.stream()
       .filter(option -> option.getText().equals(itemToUse))
       .findFirst()
-      .orElseThrow()
-      .click();
+      .orElseThrow(() -> new RuntimeException("Option '" + itemToUse + "' not found in " + selectBoxName));
+
+    // Use JavaScript click to avoid ElementClickInterceptedException
+    wait.until(ExpectedConditions.elementToBeClickable(targetOption));
+    JavascriptExecutor js = (JavascriptExecutor) driver;
+    js.executeScript("arguments[0].click();", targetOption);
   }
 
   private void openNewTab(){

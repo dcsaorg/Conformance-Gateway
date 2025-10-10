@@ -7,12 +7,24 @@ import java.util.Set;
 
 public abstract class StateChangingSIAction extends EblAction {
 
-  protected StateChangingSIAction(String sourcePartyName, String targetPartyName, BookingAndEblAction previousAction, String actionTitle, int expectedStatus) {
-    super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus);
+  protected StateChangingSIAction(
+      String sourcePartyName,
+      String targetPartyName,
+      BookingAndEblAction previousAction,
+      String actionTitle,
+      int expectedStatus,
+      boolean isWithNotifications) {
+    super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus, isWithNotifications);
   }
 
-  protected StateChangingSIAction(String sourcePartyName, String targetPartyName, EblAction previousAction, String actionTitle, Set<Integer> expectedStatus) {
-    super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus);
+  protected StateChangingSIAction(
+      String sourcePartyName,
+      String targetPartyName,
+      EblAction previousAction,
+      String actionTitle,
+      Set<Integer> expectedStatus,
+      boolean isWithNotifications) {
+    super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus, isWithNotifications);
   }
 
   @Override

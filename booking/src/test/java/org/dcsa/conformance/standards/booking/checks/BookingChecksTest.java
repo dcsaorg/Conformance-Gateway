@@ -86,7 +86,7 @@ class BookingChecksTest {
     assertEquals(1, errors.size());
     assertTrue(
         errors.contains(
-            "The 'requestedEquipments[0]' must have cargo gross weight at commodities position 0"));
+            "The 'requestedEquipments[0]' must have 'cargoGrossWeight' at 'commodities' position 0"));
   }
 
   @Test
@@ -104,7 +104,7 @@ class BookingChecksTest {
     assertEquals(1, errors.size());
     assertTrue(
         errors.contains(
-            "The 'requestedEquipments[0]' must have cargo gross weight at commodities position 0"));
+            "The 'requestedEquipments[0]' must have 'cargoGrossWeight' at 'commodities' position 0"));
   }
 
   @Test
@@ -799,7 +799,7 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
+    assertTrue(errors.contains("'confirmedEquipments' for confirmed booking is not present"));
   }
 
   @Test
@@ -815,7 +815,7 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("transportPlan for confirmed booking is not present"));
+    assertTrue(errors.contains("'transportPlan' for confirmed booking is not present"));
   }
 
   @Test
@@ -830,7 +830,7 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+    assertTrue(errors.contains("'shipmentCutOffTimes' for confirmed booking is not present"));
   }
 
   @Test
@@ -840,9 +840,9 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(3, errors.size());
-    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
-    assertTrue(errors.contains("transportPlan for confirmed booking is not present"));
-    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+    assertTrue(errors.contains("'confirmedEquipments' for confirmed booking is not present"));
+    assertTrue(errors.contains("'transportPlan' for confirmed booking is not present"));
+    assertTrue(errors.contains("'shipmentCutOffTimes' for confirmed booking is not present"));
   }
 
   @Test
@@ -852,9 +852,9 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(3, errors.size());
-    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
-    assertTrue(errors.contains("transportPlan for confirmed booking is not present"));
-    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+    assertTrue(errors.contains("'confirmedEquipments' for confirmed booking is not present"));
+    assertTrue(errors.contains("'transportPlan' for confirmed booking is not present"));
+    assertTrue(errors.contains("'shipmentCutOffTimes' for confirmed booking is not present"));
   }
 
   @Test
@@ -870,7 +870,7 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
+    assertTrue(errors.contains("'confirmedEquipments' for confirmed booking is not present"));
   }
 
   @Test
@@ -886,7 +886,7 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+    assertTrue(errors.contains("'shipmentCutOffTimes' for confirmed booking is not present"));
   }
 
   @Test
@@ -899,8 +899,8 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(2, errors.size());
-    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
-    assertTrue(errors.contains("transportPlan for confirmed booking is not present"));
+    assertTrue(errors.contains("'confirmedEquipments' for confirmed booking is not present"));
+    assertTrue(errors.contains("'transportPlan' for confirmed booking is not present"));
   }
 
   @Test
@@ -912,8 +912,8 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(2, errors.size());
-    assertTrue(errors.contains("confirmedEquipments for confirmed booking is not present"));
-    assertTrue(errors.contains("shipmentCutOffTimes for confirmed booking is not present"));
+    assertTrue(errors.contains("'confirmedEquipments' for confirmed booking is not present"));
+    assertTrue(errors.contains("'shipmentCutOffTimes' for confirmed booking is not present"));
   }
 
   @Test

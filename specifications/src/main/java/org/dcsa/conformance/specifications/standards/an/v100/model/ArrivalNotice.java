@@ -6,6 +6,7 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.an.v100.types.CarrierClause;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreightPaymentStatus;
+import org.dcsa.conformance.specifications.standards.core.v100.types.HouseBillOfLadingReference;
 
 @Schema(description = "Full content of an Arrival Notice document.")
 @Data
@@ -110,6 +111,9 @@ e.g. additional required documents to prepare and present for shipment release -
   @Schema(
       description = "References used by the customer or carrier to identify or track the shipment.")
   private List<Reference> references;
+
+  @Schema(description = "List of House Bill of Lading references")
+  private List<HouseBillOfLadingReference> houseBillOfLadingReferences;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,

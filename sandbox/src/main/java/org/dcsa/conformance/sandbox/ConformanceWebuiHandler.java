@@ -28,6 +28,7 @@ import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 @Slf4j
 public class ConformanceWebuiHandler {
   private static final String SANDBOX_ID = "sandboxId";
+  private static final String SKIP_ACTION = "skip";
 
   private final ConformanceAccessChecker accessChecker;
   private final String environmentBaseUrl;
@@ -442,7 +443,12 @@ public class ConformanceWebuiHandler {
     standard
         .createComponentFactory(standardVersion, scenarioSuites.first())
         .getRoleNames()
-        .forEach(rolesNode::add);
+        .forEach(
+            role ->
+                rolesNode
+                    .addObject()
+                    .put("name", role)
+                    .put("noNotifications", standard.isExternalPartyEmptyUrlAllowed(role)));
   }
 
   private JsonNode _getAllSandboxes(String userId) {
@@ -591,20 +597,21 @@ public class ConformanceWebuiHandler {
   private JsonNode _startOrStopScenario(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    ConformanceSandbox.resetParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     ConformanceSandbox.startOrStopScenario(
         persistenceProvider,
         deferredSandboxTaskConsumer,
         sandboxId,
         requestNode.get("scenarioId").asText());
-    ConformanceSandbox.resetParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     return OBJECT_MAPPER.createObjectNode();
   }
 
   private JsonNode _completeCurrentAction(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    boolean skipAction = requestNode.get(SKIP_ACTION).asBoolean();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.completeCurrentAction(
-        persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+        persistenceProvider, deferredSandboxTaskConsumer, sandboxId, skipAction);
   }
 
   private JsonNode _getCurrentActionExchanges(String userId, JsonNode requestNode) {

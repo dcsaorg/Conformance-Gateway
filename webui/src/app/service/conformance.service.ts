@@ -123,10 +123,11 @@ export class ConformanceService {
     });
   }
 
-  async completeCurrentAction(sandboxId: string): Promise<any> {
+  async completeCurrentAction(sandboxId: string, skip: boolean): Promise<any> {
     return await this.apiService.call({
       operation: "completeCurrentAction",
       sandboxId,
+      skip
     });
   }
 

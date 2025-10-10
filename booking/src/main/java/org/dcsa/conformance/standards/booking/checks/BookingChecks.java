@@ -661,58 +661,64 @@ public class BookingChecks {
       Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> checks = new ArrayList<>();
 
+    var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
+    boolean isScenarioRoutingReference = ScenarioType.ROUTING_REFERENCE.equals(scenario);
+    boolean isScenarioStoreDoorAtOrigin = ScenarioType.STORE_DOOR_AT_ORIGIN.equals(scenario);
+    boolean isScenarioStoreDoorAtDestination =
+        ScenarioType.STORE_DOOR_AT_DESTINATION.equals(scenario);
+    boolean isScenarioReefer = ScenarioType.REEFER.equals(scenario);
+    boolean isScenarioNonOperatingReefer = ScenarioType.NON_OPERATING_REEFER.equals(scenario);
+    boolean isScenarioDG = ScenarioType.DG.equals(scenario);
+
     checks.add(
         JsonAttribute.customValidator(
             "[Scenario] Verify that a '%s' is present".formatted(ROUTING_REFERENCE),
+            isScenarioRoutingReference,
             body -> {
               var issues = new LinkedHashSet<String>();
-
-              var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
               var routingReference = body.path(ROUTING_REFERENCE).asText("");
-              if (ScenarioType.ROUTING_REFERENCE.equals(scenario) && routingReference.isBlank()) {
+              if (routingReference.isBlank()) {
                 issues.add(
                     "The scenario requires the booking to have a '%s'"
                         .formatted(ROUTING_REFERENCE));
               }
-
               return issues;
             }));
 
     checks.add(
         JsonAttribute.customValidator(
-            "[Scenario] Verify store door scenario requirements",
+            "[Scenario] Store door at origin scenario requirements",
+            isScenarioStoreDoorAtOrigin,
             body -> {
-              var issues = new LinkedHashSet<String>();
-              var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
-
-              if (ScenarioType.STORE_DOOR_AT_ORIGIN.equals(scenario)) {
-                issues.addAll(validateStoreDoorCommonRequirements(body));
-                var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
-                if (!"SD".equals(receiptTypeAtOrigin)) {
-                  issues.add(
-                      "The scenario requires the '%s' to be 'SD'"
-                          .formatted(RECEIPT_TYPE_AT_ORIGIN));
-                }
-                var preNode = getShipmentLocationTypeCode(body, "PRE");
-                if (preNode.isMissingNode()) {
-                  issues.add("The scenario requires Port of Load value to be 'PRE'");
-                }
+              var issues = new LinkedHashSet<>(validateStoreDoorCommonRequirements(body));
+              var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
+              if (!"SD".equals(receiptTypeAtOrigin)) {
+                issues.add(
+                    "The scenario requires the '%s' to be 'SD'".formatted(RECEIPT_TYPE_AT_ORIGIN));
               }
-
-              if (ScenarioType.STORE_DOOR_AT_DESTINATION.equals(scenario)) {
-                issues.addAll(validateStoreDoorCommonRequirements(body));
-                var deliveryTypeAtDestination = body.path(DELIVERY_TYPE_AT_DESTINATION).asText("");
-                if (!"SD".equals(deliveryTypeAtDestination)) {
-                  issues.add(
-                      "The scenario requires the '%s' to be 'SD'"
-                          .formatted(DELIVERY_TYPE_AT_DESTINATION));
-                }
-                var pdeNode = getShipmentLocationTypeCode(body, "PDE");
-                if (pdeNode.isMissingNode()) {
-                  issues.add("The scenario requires Port of Discharge value to be 'PDE'");
-                }
+              var preNode = getShipmentLocationTypeCode(body, "PRE");
+              if (preNode.isMissingNode()) {
+                issues.add("The scenario requires Port of Load value to be 'PRE'");
               }
+              return issues;
+            }));
 
+    checks.add(
+        JsonAttribute.customValidator(
+            "[Scenario] Store door at destination scenario requirements",
+            isScenarioStoreDoorAtDestination,
+            body -> {
+              var issues = new LinkedHashSet<>(validateStoreDoorCommonRequirements(body));
+              var deliveryTypeAtDestination = body.path(DELIVERY_TYPE_AT_DESTINATION).asText("");
+              if (!"SD".equals(deliveryTypeAtDestination)) {
+                issues.add(
+                    "The scenario requires the '%s' to be 'SD'"
+                        .formatted(DELIVERY_TYPE_AT_DESTINATION));
+              }
+              var pdeNode = getShipmentLocationTypeCode(body, "PDE");
+              if (pdeNode.isMissingNode()) {
+                issues.add("The scenario requires Port of Discharge value to be 'PDE'");
+              }
               return issues;
             }));
 
@@ -734,23 +740,41 @@ public class BookingChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "[Scenario] Validate the containers reefer settings",
+            "[Scenario] Reefer scenario container validation",
+            isScenarioReefer,
             mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS)),
             (nodeToValidate, contextPath) -> {
-              var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
               var issues = new LinkedHashSet<String>();
-              switch (scenario) {
-                case REEFER -> reeferContainerChecks(contextPath, nodeToValidate, issues);
-                case NON_OPERATING_REEFER ->
-                    nonOperatingReeferContainerChecks(contextPath, nodeToValidate, issues);
-                default -> defaultContainerChecks(contextPath, nodeToValidate, issues);
-              }
+              reeferContainerChecks(contextPath, nodeToValidate, issues);
               return issues;
             }));
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "[Scenario] Whether the cargo should be DG",
+            "[Scenario] Non-operating reefer scenario container validation",
+            isScenarioNonOperatingReefer,
+            mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS)),
+            (nodeToValidate, contextPath) -> {
+              var issues = new LinkedHashSet<String>();
+              nonOperatingReeferContainerChecks(contextPath, nodeToValidate, issues);
+              return issues;
+            }));
+
+    checks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "[Scenario] Default container scenario validation",
+            !isScenarioReefer && !isScenarioNonOperatingReefer,
+            mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS)),
+            (nodeToValidate, contextPath) -> {
+              var issues = new LinkedHashSet<String>();
+              defaultContainerChecks(contextPath, nodeToValidate, issues);
+              return issues;
+            }));
+
+    checks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "[Scenario] DG scenario requires dangerous goods to be present",
+            isScenarioDG,
             mav ->
                 mav.path(REQUESTED_EQUIPMENTS)
                     .all()
@@ -760,19 +784,30 @@ public class BookingChecks {
                     .path(DANGEROUS_GOODS)
                     .submitPath(),
             (nodeToValidate, contextPath) -> {
-              var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
-              if (scenario == ScenarioType.DG) {
-                if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
-                  return Set.of(
-                      "The scenario requires '%s' to contain dangerous goods"
-                          .formatted(contextPath));
-                }
-              } else {
-                if (!nodeToValidate.isMissingNode() || !nodeToValidate.isEmpty()) {
-                  return Set.of(
-                      "The scenario requires '%s' to NOT contain any dangerous goods"
-                          .formatted(contextPath));
-                }
+              if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
+                return Set.of(
+                    "The scenario requires '%s' to contain dangerous goods".formatted(contextPath));
+              }
+              return Set.of();
+            }));
+
+    checks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "[Scenario] Non-DG scenarios require dangerous goods to be absent",
+            !isScenarioDG,
+            mav ->
+                mav.path(REQUESTED_EQUIPMENTS)
+                    .all()
+                    .path(COMMODITIES)
+                    .all()
+                    .path(OUTER_PACKAGING)
+                    .path(DANGEROUS_GOODS)
+                    .submitPath(),
+            (nodeToValidate, contextPath) -> {
+              if (!nodeToValidate.isMissingNode() && !nodeToValidate.isEmpty()) {
+                return Set.of(
+                    "The scenario requires '%s' to NOT contain any dangerous goods"
+                        .formatted(contextPath));
               }
               return Set.of();
             }));

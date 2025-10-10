@@ -17,6 +17,8 @@ public class LostAttributeCheck implements JsonRebaseableContentCheck {
 
   @Getter
   private final String description;
+  @Getter
+  private final boolean isApplicable = true;
   private final Supplier<JsonNode> baseNode;
   private final BiConsumer<JsonNode, JsonNode> normalizer;
 

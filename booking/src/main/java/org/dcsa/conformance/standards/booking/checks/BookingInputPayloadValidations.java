@@ -27,6 +27,7 @@ public class BookingInputPayloadValidations {
     List<JsonContentCheck> contentChecks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     contentChecks.addAll(generateScenarioRelatedChecks(dspSupplier));
     return contentChecks.stream()
+        .filter(JsonContentCheck::isApplicable)
         .flatMap(check -> check.validate(bookingNode).stream())
         .collect(Collectors.toSet());
   }

@@ -9,14 +9,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
+import lombok.Setter;
 import org.dcsa.conformance.core.report.ConformanceStatus;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
+@Setter
 @Getter
 public abstract class ConformanceCheck {
   protected final String title;
   private List<ConformanceCheck> _subChecks;
-  protected boolean isApplicable = true;
+  private boolean isApplicable = true;
 
   private final List<ConformanceResult> results = new ArrayList<>();
 

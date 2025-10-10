@@ -11,6 +11,7 @@ public interface JsonContentCheckRebaser {
     JsonContentMatchedValidation m = offset(jsonRebaseableContentCheck::validate);
     return new JsonAttribute.JsonRebaseableCheckImpl(
       jsonRebaseableContentCheck.description(),
+            true,
       m::validate
     );
   }

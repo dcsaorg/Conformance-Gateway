@@ -43,9 +43,18 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   }
 
   protected ConformanceCheck createSubCheck(
-      String prefix, String subtitle, Function<JsonNode, Set<String>> subCheck) {
+      String prefix,
+      String subtitle,
+      boolean isApplicable,
+      Function<JsonNode, Set<String>> subCheck) {
     return new ActionCheck(
         prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
+
+      @Override
+      public boolean isApplicable() {
+        return isApplicable;
+      }
+
       @Override
       protected Set<String> checkConformance(
           Function<UUID, ConformanceExchange> getExchangeByUuid) {
@@ -59,5 +68,10 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
         return subCheck.apply(payload);
       }
     };
+  }
+
+  protected ConformanceCheck createSubCheck(
+      String prefix, String subtitle, Function<JsonNode, Set<String>> subCheck) {
+    return createSubCheck(prefix, subtitle, true, subCheck);
   }
 }

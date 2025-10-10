@@ -22,7 +22,7 @@ public class ConformanceReport {
   private final ConformanceStatus conformanceStatus;
   private int conformantExchangeCount;
   private int nonConformantExchangeCount;
-  private final Set<String> errorMessages = new LinkedHashSet<>();
+  private Set<String> errorMessages = new LinkedHashSet<>();
   private final List<ConformanceReport> subReports;
 
   public ConformanceReport(ConformanceCheck conformanceCheck, String roleName) {
@@ -54,6 +54,10 @@ public class ConformanceReport {
                     conformantExchangeCount,
                     nonConformantExchangeCount,
                     conformanceCheck.isApplicable()));
+
+    if (this.conformanceStatus.equals(ConformanceStatus.NOT_RELEVANT)) {
+      this.errorMessages = Set.of();
+    }
 
     conformanceCheck.computedStatusConsumer().accept(this.conformanceStatus);
   }

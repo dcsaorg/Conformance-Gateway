@@ -103,6 +103,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                 createSubCheck(
                     prefix,
                     jsonContentCheck.description(),
+                    jsonContentCheck.isApplicable(),
                     at(
                         jsonPath,
                         jsonNode -> {

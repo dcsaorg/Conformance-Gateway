@@ -61,6 +61,7 @@ class JsonAttributeBasedCheck extends ActionCheck {
       super(validator.description(), isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
       this.standardsVersion = standardsVersion;
       this.validator = validator;
+      this.setApplicable(validator.isApplicable());
     }
 
     @Override

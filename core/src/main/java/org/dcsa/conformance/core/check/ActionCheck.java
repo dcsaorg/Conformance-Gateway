@@ -72,7 +72,7 @@ public abstract class ActionCheck extends ConformanceCheck {
       Function<UUID, ConformanceExchange> getExchangeByUuid);
 
   public ActionCheck withApplicability(boolean isApplicable) {
-    this.isApplicable = isApplicable;
+    this.setApplicable(isApplicable);
     return this;
   }
 }

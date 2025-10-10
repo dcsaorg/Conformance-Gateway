@@ -240,11 +240,31 @@ public class JsonAttribute {
   ) {
     return new JsonRebaseableCheckImpl(
         name,
+        true,
         (body, contextPath) -> {
           var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
           scanner.accept(v);
           return v.getValidationIssues();
         });
+  }
+
+  public static JsonRebaseableContentCheck allIndividualMatchesMustBeValid(
+          @NonNull
+          String name,
+          boolean isApplicable,
+          @NonNull
+          Consumer<MultiAttributeValidator> scanner,
+          @NonNull
+          JsonContentMatchedValidation subvalidation
+  ) {
+    return new JsonRebaseableCheckImpl(
+            name,
+            isApplicable,
+            (body, contextPath) -> {
+              var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
+              scanner.accept(v);
+              return v.getValidationIssues();
+            });
   }
 
   public static JsonContentMatchedValidation unique(
@@ -354,6 +374,7 @@ public class JsonAttribute {
   ) {
     return new JsonRebaseableCheckImpl(
         jsonCheckName(jsonPointer),
+            true,
         (body, contextPath) -> {
           var node = body.at(jsonPointer);
           if (node.isMissingNode() || node.isNull()) {
@@ -375,6 +396,7 @@ public class JsonAttribute {
     );
     return new JsonRebaseableCheckImpl(
         "%s: Must equal '%s'".formatted(jsonCheckName(jsonPointer), expectedValue),
+            true,
         (body, contextPath) -> {
           var node = body.at(jsonPointer);
           var actualValue = node.asText(null);
@@ -397,6 +419,7 @@ public class JsonAttribute {
     boolean expectedValue) {
     return new JsonRebaseableCheckImpl(
       title,
+            true,
       (body, contextPath) -> {
         var node = body.at(jsonPointer);
         if (!node.isBoolean() || node.asBoolean() != expectedValue) {
@@ -435,6 +458,7 @@ public class JsonAttribute {
     }
     return new JsonRebaseableCheckImpl(
       name + context,
+            true,
       (body, contextPath) -> {
           var node = body.at(jsonPointer);
           var actualValue = node.asText(null);
@@ -467,6 +491,7 @@ public class JsonAttribute {
     }
     return new JsonRebaseableCheckImpl(
       name + context,
+            true,
       (body, contextPath) -> {
         var node = body.path(path);
         var actualValue = node.asText(null);
@@ -625,6 +650,7 @@ public class JsonAttribute {
     );
     return new JsonRebaseableCheckImpl(
       name,
+            true,
       (body, contextPath) -> {
         var present = Arrays.stream(ptrs)
           .filter(p -> isJsonNodePresent(body.at(p)))
@@ -655,6 +681,7 @@ public class JsonAttribute {
     );
     return new JsonRebaseableCheckImpl(
       name,
+            true,
       (body, contextPath) -> {
         var present = Arrays.stream(ptrs)
           .anyMatch(p -> isJsonNodePresent(body.at(p)));
@@ -683,6 +710,7 @@ public class JsonAttribute {
     );
     return new JsonRebaseableCheckImpl(
       name,
+            true,
       (body, contextPath) -> {
         var allPresent = Arrays.stream(ptrs)
           .allMatch(p -> isJsonNodePresent(body.at(p)));
@@ -741,6 +769,7 @@ public class JsonAttribute {
     );
     return new JsonRebaseableCheckImpl(
         name,
+            true,
         (body, contextPath) -> {
           var firstPtr = ptrs[0];
           var firstNode = body.at(firstPtr);
@@ -797,6 +826,7 @@ public class JsonAttribute {
   ) {
     return new JsonRebaseableCheckImpl(
         name,
+            true,
         (body, contextPath) -> {
           if (when.test(body)) {
             return then.apply(body, contextPath);
@@ -855,11 +885,18 @@ public class JsonAttribute {
     return JsonContentCheckImpl.of(description, validator);
   }
 
+  public static JsonContentCheck customValidator(
+      @NonNull String description,
+      boolean isApplicable,
+      @NonNull Function<JsonNode, Set<String>> validator) {
+    return JsonContentCheckImpl.of(description, isApplicable, validator);
+  }
+
   public static JsonRebaseableContentCheck customValidator(
     @NonNull String description,
     @NonNull JsonContentMatchedValidation validator
   ) {
-    return new JsonRebaseableCheckImpl(description, validator::validate);
+    return new JsonRebaseableCheckImpl(description,true, validator::validate);
   }
 
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
@@ -924,6 +961,7 @@ public class JsonAttribute {
 
   record JsonRebaseableCheckImpl(
     String description,
+    boolean isApplicable,
     BiFunction<JsonNode, String, Set<String>> impl
   ) implements JsonRebaseableContentCheck {
     @Override
@@ -938,6 +976,7 @@ public class JsonAttribute {
     public static JsonRebaseableContentCheck of(String description, JsonPointer jsonPointer, BiFunction<JsonNode, String, Set<String>> validator) {
       return new JsonRebaseableCheckImpl(
         description,
+              true,
         (refNode, context) -> {
           var node = refNode.at(jsonPointer);
           var path = renderJsonPointer(jsonPointer, context);
@@ -950,6 +989,7 @@ public class JsonAttribute {
   record JsonContentCheckImpl(
     @NonNull
     String description,
+    boolean isApplicable,
     @NonNull
     Function<JsonNode, Set<String>> impl
   ) implements JsonContentCheck {
@@ -959,8 +999,12 @@ public class JsonAttribute {
     }
 
     private static JsonContentCheck of(String description, Function<JsonNode, Set<String>> impl) {
-      return new JsonContentCheckImpl(description, impl);
+      return new JsonContentCheckImpl(description, true, impl);
     }
 
+    private static JsonContentCheck of(
+        String description, boolean isApplicable, Function<JsonNode, Set<String>> impl) {
+      return new JsonContentCheckImpl(description, isApplicable, impl);
+    }
   }
 }

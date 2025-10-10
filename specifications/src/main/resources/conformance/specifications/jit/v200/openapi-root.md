@@ -5,7 +5,7 @@ This is the OpenAPI specification of the **DCSA Port Call (JIT)** standard.
 This API allows the transfer of structured Port Call events from a publisher to a subscriber.
 
 Port Call events are used by port call service providers and consumers to exchange information about the service, including:
-- estimated, requested and planned service timestamps as part of the "ERP" pattern defined by the [IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf);
+- estimated, requested and planned service timestamps as part of the "ERP" pattern [defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf);
 - actual service timestamps;
 - container move counts (loads, discharges and restows).
 
@@ -19,4 +19,4 @@ The authentication and authorization in both directions between event publishers
 
 ### Work in progress ⚠️
 
-The DCSA Port Call (JIT) standard, including this API, is currently being designed and is **not** ready for general adoption yet.
+The DCSA Port Call (JIT) standard, including this API, is currently in beta validation and is **not** ready for general adoption yet.

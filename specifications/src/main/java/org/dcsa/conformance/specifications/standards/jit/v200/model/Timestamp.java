@@ -27,7 +27,8 @@ public class Timestamp {
       example = "EST",
       description =
 """
-Code identifying the type of this timestamp:
+Code identifying the type of this timestamp
+[as defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
 - `ACT` (Actual)
 - `EST` (Estimated)
 - `PLN` (Planned)

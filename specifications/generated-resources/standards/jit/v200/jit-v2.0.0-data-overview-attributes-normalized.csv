@@ -257,7 +257,8 @@ This corresponds to the property `transportCallReference` from the DCSA Operatio
 TerminalCall,"universalExportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the export voyage.",
 TerminalCall,"universalImportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the import voyage.",
 TerminalCall,"universalServiceReference",string,,maxLength=8,,SR12345A,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",
-Timestamp,classifierCode,string,,maxLength=3,,EST,"Code identifying the type of this timestamp:
+Timestamp,classifierCode,string,,maxLength=3,,EST,"Code identifying the type of this timestamp
+[as defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
 - `ACT` (Actual)
 - `EST` (Estimated)
 - `PLN` (Planned)

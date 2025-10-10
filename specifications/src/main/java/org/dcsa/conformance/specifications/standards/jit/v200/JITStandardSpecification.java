@@ -121,7 +121,7 @@ public class JITStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata("Port Call (JIT)", "2.0.0-20250926-design", "", "", 4);
+    return new LegendMetadata("Port Call (JIT)", "2.0.0-20251010-design", "", "", 4);
   }
 
   @Override

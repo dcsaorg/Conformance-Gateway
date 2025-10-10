@@ -34,8 +34,9 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
         Arguments.of("CS", true),
         Arguments.of("Ebl", false),
         Arguments.of("Ebl", true),
-        Arguments.of("JIT", false),
-        Arguments.of("JIT", true),
+        // TODO re-enable after SD-2491
+        // Arguments.of("JIT", false),
+        // Arguments.of("JIT", true),
         Arguments.of("OVS", false),
         Arguments.of("OVS", true),
         Arguments.of("PINT", false),

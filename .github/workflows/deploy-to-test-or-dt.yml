@@ -34,6 +34,23 @@ jobs:
         run: |
           echo "sha: $COMMIT_SHA"
 
+      - name: Set environment-specific secrets
+        id: set-secrets
+        run: |
+          if [ "${{ env.AWS_ENVIRONMENT }}" = "dt" ]; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.DT_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DT_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_EMAIL=${{ secrets.DT_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_PASSWORD=${{ secrets.DT_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_WEB_URL=${{ secrets.DT_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
+          else
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.TEST_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_EMAIL=${{ secrets.TEST_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_PASSWORD=${{ secrets.TEST_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_WEB_URL=${{ secrets.TEST_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
+          fi
+
       - name: Set up Java JDK
         uses: actions/setup-java@v4
         with:
@@ -67,8 +84,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
 
       - name: Diff Conformance-Gateway Stack of ${{ env.AWS_ENVIRONMENT }}
         run: |
@@ -80,10 +97,10 @@ jobs:
           cd cdk/
           cdk deploy ${{ env.AWS_ENVIRONMENT }}ConformanceStack --require-approval never
 
-#      - name: Verify a scenario in AWS Test environment
-#        env:
-#          TEST_LOGIN_EMAIL: ${{ secrets.AWS_TEST_LOGIN_EMAIL }} # User account details to log in the Web UI.
-#          TEST_LOGIN_PASSWORD: ${{ secrets.AWS_TEST_LOGIN_PASSWORD }}
-#          TEST_BASE_URL: ${{ secrets.AWS_TEST_WEB_URL }}
-#        run: |
-#          ./mvnw -B test -Pintegration
+      - name: Verify a scenario in AWS ${{ env.AWS_ENVIRONMENT }} environment
+        env:
+          TEST_LOGIN_EMAIL: ${{ env.CONFORMANCE_USER_EMAIL }}
+          TEST_LOGIN_PASSWORD: ${{ env.CONFORMANCE_USER_PASSWORD }}
+          TEST_BASE_URL: ${{ env.CONFORMANCE_WEB_URL }}
+        run: |
+          ./mvnw -B test -Pintegration

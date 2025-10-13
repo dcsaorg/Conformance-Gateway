@@ -19,9 +19,9 @@ class SeleniumWithoutNotificationsTest extends SeleniumTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "Booking", // 11:52 minutes
-        "Ebl", // 37:09 minutes
-        "Booking + eBL", // 10:40 minutes
+        "Ebl",
+        "Booking",
+        "Booking + eBL",
       })
   void testStandardWithAllVersions(String standardName) {
     app.setSimulatedLambdaDelay(lambdaDelay);
@@ -51,6 +51,22 @@ class SeleniumWithoutNotificationsTest extends SeleniumTestBase {
                                             suite,
                                             role.name()))));
     log.info("Finished with standard: {}, time taken: {}", standardName, stopWatch);
+  }
+
+  @Override
+  protected String getSandboxName(
+      String standardName, String version, String suiteName, String roleName, int sandboxType) {
+    String sandboxName;
+    if (sandboxType == 0) {
+      sandboxName =
+          "%s v%s, %s, %s - Testing: orchestrator (without notifications)"
+              .formatted(standardName, version, suiteName, roleName);
+    } else {
+      sandboxName =
+          "%s v%s, %s, %s - Testing: synthetic %s as tested party (without notifications)"
+              .formatted(standardName, version, suiteName, roleName, roleName);
+    }
+    return sandboxName;
   }
 
   @Override

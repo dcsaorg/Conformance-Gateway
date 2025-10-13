@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 class TNTStandardSpecificationTest {
   @Test
-  void testCTStandardSpecification() {
+  void testTNTStandardSpecification() {
     TNTStandardSpecification tntStandardSpecification = new TNTStandardSpecification();
     tntStandardSpecification.generateArtifacts();
 

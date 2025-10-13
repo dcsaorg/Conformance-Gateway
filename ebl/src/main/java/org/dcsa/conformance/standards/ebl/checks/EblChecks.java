@@ -246,7 +246,7 @@ public class EblChecks {
           "Cannot have more than one original in total when isElectronic",
           IS_AN_EBL,
           JsonAttribute.customValidator(
-              "Sum of numberOfOriginalsWithoutCharges and numberOfOriginalsWithCharges must be at most 1 for Electronic original Bills of Ladings.",
+              "Sum of 'numberOfOriginalsWithoutCharges' and 'numberOfOriginalsWithCharges' must be at most 1 for Electronic original Bills of Ladings.",
               (node, contextPath) -> {
                 int withoutCharges = node.path("numberOfOriginalsWithoutCharges").asInt(0);
                 int withCharges = node.path("numberOfOriginalsWithCharges").asInt(0);
@@ -254,7 +254,7 @@ public class EblChecks {
 
                 if (total > 1) {
                   return Set.of(
-                      "The sum of numberOfOriginalsWithoutCharges (%d) and numberOfOriginalsWithCharges (%d) cannot exceed 1 for Electronic original Bills of Ladings, but was %d at %s"
+                      "The sum of 'numberOfOriginalsWithoutCharges' (%d) and 'numberOfOriginalsWithCharges' (%d) cannot exceed 1 for Electronic original Bills of Ladings, but was %d at '%s'"
                           .formatted(withoutCharges, withCharges, total, contextPath));
                 }
                 return Set.of();
@@ -329,7 +329,7 @@ public class EblChecks {
 
   private static final JsonRebaseableContentCheck NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS =
       JsonAttribute.ifThen(
-          "The 'documentParties.notifyParties' attribute is mandatory when `isToOrder` is true",
+          "The 'documentParties.notifyParties' attribute is mandatory when 'isToOrder' is true",
           JsonAttribute.isTrue(IS_TO_ORDER),
           JsonAttribute.at(
               JsonPointer.compile("/documentParties/notifyParties"),
@@ -363,7 +363,7 @@ public class EblChecks {
 
   private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_UNIQUE =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "Each combination of `countryCode`and `type`can be used at most once.",
+          "Each combination of 'countryCode'and 'type'can be used at most once.",
           mav -> {
             mav.submitAllMatching("issuingParty.taxLegalReferences");
             mav.submitAllMatching("documentParties.*.party.taxLegalReferences");
@@ -380,7 +380,7 @@ public class EblChecks {
 
   private static final JsonRebaseableContentCheck EBL_DISPLAYED_ADDRESS_LIMIT =
       JsonAttribute.ifThen(
-          "Validate displayed address length for EBLs.A maximum of 6 lines can be provided for electronic Bills of Lading.",
+          "Validate displayed address length for EBLs. A maximum of 6 lines can be provided for electronic Bills of Lading.",
           td -> td.path("isElectronic").asBoolean(true),
           JsonAttribute.allIndividualMatchesMustBeValid(
               "(not used)", DISPLAYED_ADDRESS_MAV_CONSUMER, JsonAttribute.matchedMaxLength(6)));
@@ -766,7 +766,7 @@ public class EblChecks {
 
   static final JsonRebaseableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
       JsonAttribute.ifThenElse(
-          "'sendToPlatform' is mandatory when 'isElectronic' is true and `transportDocumentTypeCode` is 'BOL'",
+          "'sendToPlatform' is mandatory when 'isElectronic' is true and 'transportDocumentTypeCode' is 'BOL'",
           JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
           JsonAttribute.ifThenElse(
               "'transportDocumentTypeCode' is BOL",

@@ -42,6 +42,11 @@ class JsonAttributeTest {
         }
 
         @Override
+        public boolean isApplicable() {
+          return true;
+        }
+
+        @Override
         public Set<String> validate(JsonNode body) {
           return Collections.emptySet();
         }

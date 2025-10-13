@@ -1039,13 +1039,12 @@ public class BookingChecks {
 
     checks.addAll(RESPONSE_ONLY_CHECKS);
 
-    /*
-    FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
-        checks.add(JsonAttribute.lostAttributeCheck(
-          "Validate that shipper provided data was not altered",
-          delayedValue(dspSupplier, dsp -> requestAmendedContent ? dsp.updatedBooking() : dsp.booking())
-        ));
-        */
+    /*    FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
+    checks.add(JsonAttribute.lostAttributeCheck(
+      "Validate that shipper provided data was not altered",
+      delayedValue(dspSupplier, dsp -> requestAmendedContent ? dsp.updatedBooking() : dsp.booking())
+    ));*/
+
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);
       checks.add(

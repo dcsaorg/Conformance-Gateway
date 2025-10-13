@@ -594,8 +594,8 @@ public class JsonAttribute {
       // We rely on schema validation (or mustBePresent) for required check.
       if (!node.isMissingNode() && !dataset.contains(text)) {
         return Set.of(
-          "The attribute '%s' had value '%s' which was not a valid keyword here."
-            .formatted(context, renderValue(node)));
+            "The attribute '%s' has the value '%s', which is unknown and must match one of the values in the approved dataset."
+                .formatted(context, renderValue(node)));
       }
       return Collections.emptySet();
     };

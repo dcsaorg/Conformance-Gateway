@@ -134,6 +134,13 @@ public abstract class EblAction extends BookingAndEblAction {
         updateIfNotNull(
             updatedDsp, newTransportDocumentReference, updatedDsp::withTransportDocumentReference);
 
+    var isCarriersAgentAtDestinationRequired =
+        responseJsonNode.path("isCarriersAgentAtDestinationRequired").asBoolean(false);
+
+    updatedDsp =
+        updateIfNotNull(
+            updatedDsp, isCarriersAgentAtDestinationRequired, updatedDsp::withCADInlcudedInSI);
+
     // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
     updatedDsp = updatedDsp.withShippingInstructions(null).withUpdatedShippingInstructions(null);
 

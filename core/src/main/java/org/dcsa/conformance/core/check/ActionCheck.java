@@ -71,12 +71,6 @@ public abstract class ActionCheck extends ConformanceCheck {
   protected abstract Set<String> checkConformance(
       Function<UUID, ConformanceExchange> getExchangeByUuid);
 
-  // Public wrapper method for checkConformance for some cases.
-  public Set<String> performCheckConformance(
-      Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    return checkConformance(getExchangeByUuid);
-  }
-
   public ActionCheck withApplicability(boolean isApplicable) {
     this.isApplicable = isApplicable;
     return this;

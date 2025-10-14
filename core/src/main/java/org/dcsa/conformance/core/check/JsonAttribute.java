@@ -112,6 +112,20 @@ public class JsonAttribute {
     );
   }
 
+  public static ActionCheck contentChecks(
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType,
+      String standardsVersion,
+      JsonComplexContentCheck validator) {
+    return new ComplexValidatorCheck(
+        isRelevantForRoleName,
+        matchedExchangeUuid,
+        httpMessageType,
+        standardsVersion,
+        validator);
+  }
+
   public static Predicate<JsonNode> isTrue(
     @NonNull
     JsonPointer jsonPointer
@@ -899,6 +913,11 @@ public class JsonAttribute {
     return new JsonRebaseableCheckImpl(description,true, validator::validate);
   }
 
+  public static JsonComplexContentCheck customComplexValidator(
+      @NonNull String description, @NonNull Function<JsonNode, Set<ConformanceError>> validator) {
+    return JsonComplexContentCheckImpl.of(description, validator);
+  }
+
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
     return refNode -> refNode.at(jsonPointer);
   }
@@ -1005,6 +1024,26 @@ public class JsonAttribute {
     private static JsonContentCheck of(
         String description, boolean isApplicable, Function<JsonNode, Set<String>> impl) {
       return new JsonContentCheckImpl(description, isApplicable, impl);
+    }
+  }
+
+  record JsonComplexContentCheckImpl(
+      @NonNull String description, @NonNull Function<JsonNode, Set<ConformanceError>> impl)
+      implements JsonComplexContentCheck {
+
+    @Override
+    public Set<ConformanceError> validateWithRelevance(JsonNode body) {
+      return impl.apply(body);
+    }
+
+    private static JsonComplexContentCheck of(
+        String description, Function<JsonNode, Set<ConformanceError>> impl) {
+      return new JsonComplexContentCheckImpl(description, impl);
+    }
+
+    @Override
+    public Set<String> validate(JsonNode body) {
+      throw new UnsupportedOperationException();
     }
   }
 }

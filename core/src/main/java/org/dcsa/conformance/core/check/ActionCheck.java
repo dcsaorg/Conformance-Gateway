@@ -1,5 +1,6 @@
 package org.dcsa.conformance.core.check;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -42,9 +43,13 @@ public abstract class ActionCheck extends ConformanceCheck {
 
   @Override
   protected final void doCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    Set<String> conformanceErrors;
+    Set<String> conformanceErrors = null;
+    Set<ConformanceError> conformanceErrorsWithRelevance = null;
     try {
-      conformanceErrors = checkConformance(getExchangeByUuid);
+      conformanceErrorsWithRelevance = checkConformanceAndRelevance(getExchangeByUuid);
+      if (conformanceErrorsWithRelevance == null) {
+        conformanceErrors = checkConformance(getExchangeByUuid);
+      }
     } catch (Exception e) {
       var message = "Failed to perform ActionCheck '%s'".formatted(title);
       if (e instanceof UserFacingException) {
@@ -53,16 +58,25 @@ public abstract class ActionCheck extends ConformanceCheck {
       log.warn(message, e);
       conformanceErrors = Set.of(message);
     }
+
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange != null) {
-      switch (httpMessageType) {
-        case REQUEST -> {
-          if (isRelevantForRole(exchange.getRequest().message().sourcePartyRole()))
+      if (Objects.requireNonNull(httpMessageType) == HttpMessageType.REQUEST) {
+        if (isRelevantForRole(exchange.getRequest().message().sourcePartyRole())) {
+          if (conformanceErrorsWithRelevance != null) {
+            this.addResult(
+                ConformanceResult.forSourcePartyWithRelevance(conformanceErrorsWithRelevance));
+          } else {
             this.addResult(ConformanceResult.forSourceParty(conformanceErrors));
+          }
         }
-        case RESPONSE -> {
-          if (isRelevantForRole(exchange.getRequest().message().targetPartyRole()))
-            this.addResult(ConformanceResult.forTargetParty(conformanceErrors));
+      } else if (httpMessageType == HttpMessageType.RESPONSE
+          && isRelevantForRole(exchange.getRequest().message().targetPartyRole())) {
+        if (conformanceErrorsWithRelevance != null) {
+          this.addResult(
+              ConformanceResult.forTargetPartyWithRelevance(conformanceErrorsWithRelevance));
+        } else {
+          this.addResult(ConformanceResult.forTargetParty(conformanceErrors));
         }
       }
     }
@@ -70,6 +84,11 @@ public abstract class ActionCheck extends ConformanceCheck {
 
   protected abstract Set<String> checkConformance(
       Function<UUID, ConformanceExchange> getExchangeByUuid);
+
+  protected Set<ConformanceError> checkConformanceAndRelevance(
+      Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    return null;
+  }
 
   public ActionCheck withApplicability(boolean isApplicable) {
     this.setApplicable(isApplicable);

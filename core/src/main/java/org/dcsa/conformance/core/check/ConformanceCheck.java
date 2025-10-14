@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -66,5 +67,12 @@ public abstract class ConformanceCheck {
 
   public Consumer<ConformanceStatus> computedStatusConsumer() {
     return ignoredStatus -> {};
+  }
+
+  public boolean isApplicable() {
+    if (results.stream().allMatch(Predicate.not(ConformanceResult::isApplicable))) {
+      return false;
+    }
+    return isApplicable;
   }
 }

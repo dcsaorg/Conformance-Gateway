@@ -7,6 +7,7 @@ import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATI
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
@@ -16,8 +17,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import com.fasterxml.jackson.databind.node.MissingNode;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
@@ -109,6 +108,16 @@ public class BookingChecks {
   private static final String THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT =
       "The scenario requires '%s.%s' to be absent";
 
+  public static List<ActionCheck> conditionalChecks(UUID matched, String standardVersion) {
+    List<ActionCheck> checks = new ArrayList<>();
+
+    checks.add(
+        JsonAttribute.contentChecks(
+            BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER_NEW));
+
+    return checks;
+  }
+
   public static ActionCheck requestContentChecks(
       UUID matched,
       String standardVersion,
@@ -186,6 +195,36 @@ public class BookingChecks {
           JsonAttribute.ifMatchedThen(
               IS_ACTIVE_REEFER_SETTINGS_REQUIRED,
               JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBePresent())));
+
+  static final JsonComplexContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER_NEW =
+      JsonAttribute.customComplexValidator(
+              "All requested Equipments where '%s' is 'false' must have '%s'".formatted(IS_NON_OPERATING_REEFER, ACTIVE_REEFER_SETTINGS),
+          body -> {
+            var requestedEquipments = body.path(REQUESTED_EQUIPMENTS);
+            var errors = new HashSet<ConformanceError>();
+            var index = new AtomicInteger(0);
+
+            StreamSupport.stream(requestedEquipments.spliterator(), false)
+                .forEach(
+                    reqEquipNode -> {
+                      if (IS_ACTIVE_REEFER_SETTINGS_REQUIRED.test(reqEquipNode)) {
+                        if (reqEquipNode.path(ACTIVE_REEFER_SETTINGS).isMissingNode()) {
+                          errors.add(
+                              new ConformanceError(
+                                  "The attribute '%s[%d].%s' should have been present but was absent"
+                                      .formatted(
+                                          REQUESTED_EQUIPMENTS,
+                                          index.getAndIncrement(),
+                                          ACTIVE_REEFER_SETTINGS),
+                                  ConformanceErrorSeverity.ERROR));
+                        }
+                      } else {
+                        errors.add(new ConformanceError("", ConformanceErrorSeverity.IRRELEVANT));
+                      }
+                    });
+
+            return errors;
+          });
 
   private static final JsonContentCheck ISO_EQUIPMENT_CODE_AND_NOR_CHECK =
       JsonAttribute.allIndividualMatchesMustBeValid(

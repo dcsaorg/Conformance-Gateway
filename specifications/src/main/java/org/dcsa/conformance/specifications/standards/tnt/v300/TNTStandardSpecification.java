@@ -198,8 +198,8 @@ public class TNTStandardSpecification extends StandardSpecification {
                                         API_VERSION_HEADER,
                                         new Header().$ref(API_VERSION_HEADER_REF)),
                                     Map.entry(
-                                        "Next-Page-Cursor",
-                                        new Header().$ref("#/components/headers/Next-Page-Cursor")))
+                                        NEXT_PAGE_CURSOR_HEADER,
+                                        new Header().$ref(NEXT_PAGE_CURSOR_HEADER_REF)))
                                 .collect(
                                     Collectors.toMap(
                                         Map.Entry::getKey,

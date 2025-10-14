@@ -10,10 +10,13 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -28,8 +31,13 @@ import org.dcsa.conformance.specifications.dataoverview.LegendMetadata;
 @Slf4j
 public abstract class StandardSpecification {
 
+  public static final String COMPONENTS_HEADERS_REF_PATH = "#/components/headers/";
   public static final String API_VERSION_HEADER = "API-Version";
-  public static final String API_VERSION_HEADER_REF = "#/components/headers/" + API_VERSION_HEADER;
+  public static final String API_VERSION_HEADER_REF =
+      COMPONENTS_HEADERS_REF_PATH + API_VERSION_HEADER;
+  public static final String NEXT_PAGE_CURSOR_HEADER = "Next-Page-Cursor";
+  public static final String NEXT_PAGE_CURSOR_HEADER_REF =
+      COMPONENTS_HEADERS_REF_PATH + NEXT_PAGE_CURSOR_HEADER;
 
   private static final String API_VERSION_DESCRIPTION =
       "Every API request and response must contain the `API-Version` header,"
@@ -73,11 +81,17 @@ public abstract class StandardSpecification {
                 .description(API_VERSION_DESCRIPTION)
                 .schema(new Schema<>().type("string").example(standardVersion)))
         .addHeaders(
-            "Next-Page-Cursor",
+            NEXT_PAGE_CURSOR_HEADER,
             new Header()
                 .description(
                     "A cursor value pointing to the next page of results in a paginated GET response.")
                 .schema(new Schema<>().type("string").example("ExampleNextPageCursor")));
+    getCustomHeaders()
+        .forEach(
+            nameAndHeader ->
+                openAPI
+                    .getComponents()
+                    .addHeaders(nameAndHeader.getKey(), nameAndHeader.getValue()));
 
     constraintsByClassAndField = new HashMap<>();
     modelClassesStream()
@@ -136,6 +150,10 @@ public abstract class StandardSpecification {
 
   protected abstract boolean swapOldAndNewInDataOverview();
 
+  protected Stream<Map.Entry<String, Header>> getCustomHeaders() {
+    return Stream.of();
+  }
+
   protected String readResourceFile(String fileName) {
     return SpecificationToolkit.readResourceFile(
         "conformance/specifications/%s/v%s/%s"
@@ -183,5 +201,15 @@ public abstract class StandardSpecification {
         .required(false)
         .schema(new Schema<String>().type("string"))
         .example(standardVersion);
+  }
+
+  protected LinkedHashMap<String, Header> createRefHeadersMap(String... headerNames) {
+    return Arrays.stream(headerNames)
+        .map(
+            headerName ->
+                Map.entry(headerName, new Header().$ref(COMPONENTS_HEADERS_REF_PATH + headerName)))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, LinkedHashMap::new));
   }
 }

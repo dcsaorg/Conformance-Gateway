@@ -79,7 +79,7 @@ import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTimeU
 import org.dcsa.conformance.specifications.standards.an.v100.types.FreeTimeTypeCode;
 import org.dcsa.conformance.specifications.standards.core.v100.types.IsoEquipmentCode;
 import org.dcsa.conformance.specifications.standards.core.v100.types.ModeOfTransportCode;
-import org.dcsa.conformance.specifications.standards.an.v100.types.UniversalVoyageReference;
+import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.core.v100.types.VesselIMONumber;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Volume;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Weight;
@@ -252,8 +252,8 @@ public class ANStandardSpecification extends StandardSpecification {
                                         API_VERSION_HEADER,
                                         new Header().$ref(API_VERSION_HEADER_REF)),
                                     Map.entry(
-                                        "Next-Page-Cursor",
-                                        new Header().$ref("#/components/headers/Next-Page-Cursor")))
+                                        NEXT_PAGE_CURSOR_HEADER,
+                                        new Header().$ref(NEXT_PAGE_CURSOR_HEADER_REF)))
                                 .collect(
                                     Collectors.toMap(
                                         Map.Entry::getKey,

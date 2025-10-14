@@ -1,6 +1,6 @@
 # Arrival Notice v1.0.0 Changelog
 
-## Snapshot v1.0.0-20250926-beta
+## Snapshot v1.0.0-20251010-beta
 
 Added to type `ArrivalNotice` property `houseBillOfLadingReferences`. (SD-2508)
 

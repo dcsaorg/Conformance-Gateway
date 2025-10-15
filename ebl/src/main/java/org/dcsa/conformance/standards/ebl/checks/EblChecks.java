@@ -972,7 +972,8 @@ public class EblChecks {
           JsonAttribute.ifThen(
               "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
               ignored -> {
-                return dsp.isCladInSI() || scenarioType.isCarriersAgentAtDestinationRequired();
+                boolean isCladInSI = dsp != null && dsp.isCladInSI();
+                return isCladInSI || scenarioType.isCarriersAgentAtDestinationRequired();
               },
               JsonAttribute.path(
                   DOCUMENT_PARTIES,

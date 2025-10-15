@@ -108,14 +108,21 @@ public class BookingChecks {
   private static final String THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT =
       "The scenario requires '%s.%s' to be absent";
 
+  public static List<JsonComplexContentCheck> conditionalContentChecks() {
+    return List.of(NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER);
+  }
+
   public static ActionCheck requestContentChecks(
       UUID matched,
       String standardVersion,
       Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     checks.addAll(generateScenarioRelatedChecks(dspSupplier));
+
+    var conditionalChecks = conditionalContentChecks();
+
     return JsonAttribute.contentChecks(
-        BookingRole::isShipper, matched, HttpMessageType.REQUEST, standardVersion, checks);
+        BookingRole::isShipper, matched, HttpMessageType.REQUEST, standardVersion, checks, conditionalChecks);
   }
 
   private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION =
@@ -177,16 +184,7 @@ public class BookingChecks {
   private static final Consumer<MultiAttributeValidator> ALL_REQ_EQUIP =
       mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS));
 
-  private static final JsonContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
-      JsonAttribute.allIndividualMatchesMustBeValid(
-          "All requested Equipments where '%s' is 'false' must have '%s'"
-              .formatted(IS_NON_OPERATING_REEFER, ACTIVE_REEFER_SETTINGS),
-          ALL_REQ_EQUIP,
-          JsonAttribute.ifMatchedThen(
-              IS_ACTIVE_REEFER_SETTINGS_REQUIRED,
-              JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBePresent())));
-
-  static final JsonComplexContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER_NEW =
+  static final JsonComplexContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
       JsonAttribute.customComplexValidator(
               "All requested Equipments where '%s' is 'false' must have '%s'".formatted(IS_NON_OPERATING_REEFER, ACTIVE_REEFER_SETTINGS),
           body -> {
@@ -920,9 +918,6 @@ public class BookingChecks {
           mav -> mav.submitAllMatching(S_S.formatted(FEEDBACKS, CODE)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
-  static final List<JsonComplexContentCheck> COMPLEX_STATIC_BOOKING_CHECKS =
-      Arrays.asList(NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER_NEW);
-
   static final List<JsonContentCheck> STATIC_BOOKING_CHECKS =
       Arrays.asList(
           JsonAttribute.mustBeDatasetKeywordIfPresent(
@@ -932,7 +927,6 @@ public class BookingChecks {
               JsonPointer.compile("/%s".formatted(CARGO_MOVEMENT_TYPE_AT_DESTINATION)),
               BookingDataSets.CARGO_MOVEMENT_TYPE),
           CHECK_EXPECTED_ARRIVAL_POD,
-          NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
           ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
           REFERENCE_TYPE_VALIDATION,
           IS_EXPORT_DECLARATION_REFERENCE_PRESENCE,
@@ -1037,10 +1031,10 @@ public class BookingChecks {
             expectedCancelledBookingStatus,
             requestAmendedContent);
 
-    var complexChecks = COMPLEX_STATIC_BOOKING_CHECKS;
+    var conditionalChecks = conditionalContentChecks();
 
     return JsonAttribute.contentChecks(
-        BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks, complexChecks);
+        BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks, conditionalChecks);
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(

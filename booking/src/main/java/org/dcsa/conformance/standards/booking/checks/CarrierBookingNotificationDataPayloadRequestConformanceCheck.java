@@ -3,12 +3,17 @@ package org.dcsa.conformance.standards.booking.checks;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import lombok.NonNull;
 import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.ConformanceError;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
-import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 
 public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
     extends AbstractCarrierPayloadConformanceCheck {
@@ -22,24 +27,6 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   private static final String AMENDED_BOOKING_PREFIX = "[Amended Booking]";
 
   private final Supplier<BookingDynamicScenarioParameters> dspSupplier;
-
-  public CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-      UUID matchedExchangeUuid,
-      BookingState bookingStatus,
-      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
-    super(matchedExchangeUuid, HttpMessageType.REQUEST, bookingStatus);
-    this.dspSupplier = dspSupplier;
-  }
-
-  public CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-      UUID matchedExchangeUuid,
-      BookingState bookingStatus,
-      BookingState expectedAmendedBookingStatus,
-      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
-    super(
-        matchedExchangeUuid, HttpMessageType.REQUEST, bookingStatus, expectedAmendedBookingStatus);
-    this.dspSupplier = dspSupplier;
-  }
 
   public CarrierBookingNotificationDataPayloadRequestConformanceCheck(
       UUID matchedExchangeUuid,
@@ -91,26 +78,38 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   }
 
   private Stream<ConformanceCheck> createFullNotificationChecksAt(String jsonPath, String prefix) {
-    return BookingChecks.fullPayloadChecks(
-            dspSupplier,
-            expectedBookingStatus,
-            expectedAmendedBookingStatus,
-            expectedBookingCancellationStatus,
-            amendedContent)
-        .stream()
-        .map(
-            jsonContentCheck ->
-                createSubCheck(
-                    prefix,
-                    jsonContentCheck.description(),
-                    jsonContentCheck.isApplicable(),
-                    at(
-                        jsonPath,
-                        jsonNode -> {
-                          if (jsonNode.isMissingNode() || jsonNode.isEmpty()) {
-                            return Set.of();
-                          }
-                          return jsonContentCheck.validate(jsonNode);
-                        })));
+
+    Stream<ConformanceCheck> fullPayloadChecks =
+        BookingChecks.fullPayloadChecks(
+                dspSupplier,
+                expectedBookingStatus,
+                expectedAmendedBookingStatus,
+                expectedBookingCancellationStatus,
+                amendedContent)
+            .stream()
+            .map(
+                jsonContentCheck ->
+                    createSubCheck(
+                        prefix,
+                        jsonContentCheck.description(),
+                        jsonContentCheck.isApplicable(),
+                        at(
+                            jsonPath,
+                            jsonNode -> {
+                              if (jsonNode.isMissingNode() || jsonNode.isEmpty()) {
+                                return Set.of();
+                              }
+                              return jsonContentCheck.validate(jsonNode);
+                            })));
+
+    Stream<ConformanceCheck> conditionalChecks =
+        BookingChecks.conditionalContentChecks().stream()
+            .map(
+                check ->
+                    createConditionalSubCheck(
+                        prefix, check.description(), conditionalAt(jsonPath, check::validate)))
+            .filter(Objects::nonNull);
+
+    return Stream.concat(conditionalChecks, fullPayloadChecks);
   }
 }

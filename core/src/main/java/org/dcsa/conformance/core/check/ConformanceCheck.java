@@ -70,7 +70,7 @@ public abstract class ConformanceCheck {
   }
 
   public boolean isApplicable() {
-    if (results.stream().allMatch(Predicate.not(ConformanceResult::isApplicable))) {
+    if (!results.isEmpty() && results.stream().allMatch(Predicate.not(ConformanceResult::isApplicable))) {
       return false;
     }
     return isApplicable;

@@ -38,6 +38,6 @@ public class ComplexValidatorCheck extends ActionCheck {
     if (exchange == null) return Collections.emptySet();
     JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
     return VersionedKeywordDataset.withVersion(
-        standardsVersion, () -> this.validator.validateWithRelevance(jsonBody));
+        standardsVersion, () -> this.validator.validate(jsonBody));
   }
 }

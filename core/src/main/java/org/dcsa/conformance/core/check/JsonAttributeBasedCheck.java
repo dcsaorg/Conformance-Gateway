@@ -8,16 +8,37 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
 import lombok.NonNull;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-
 
 class JsonAttributeBasedCheck extends ActionCheck {
 
   private final String standardsVersion;
   private final List<JsonContentCheck> validators;
+  private final List<JsonComplexContentCheck> complexValidators;
+
+  JsonAttributeBasedCheck(
+          String titlePrefix,
+          String title,
+          Predicate<String> isRelevantForRoleName,
+          UUID matchedExchangeUuid,
+          HttpMessageType httpMessageType,
+          String standardsVersion,
+          @NonNull
+          List<@NonNull JsonContentCheck> validators,
+          List<@NonNull JsonComplexContentCheck> complexValidators) {
+    super(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
+    if (validators.isEmpty()) {
+      throw new IllegalArgumentException("Must have at least one subcheck (validators must be non-empty)");
+    }
+    this.standardsVersion = standardsVersion;
+    if (this.standardsVersion == null) {
+      throw new IllegalArgumentException();
+    }
+    this.validators = validators;
+    this.complexValidators = complexValidators;
+  }
 
   JsonAttributeBasedCheck(
     String titlePrefix,
@@ -37,6 +58,7 @@ class JsonAttributeBasedCheck extends ActionCheck {
       throw new IllegalArgumentException();
     }
     this.validators = validators;
+    this.complexValidators = List.of();
   }
 
   @Override
@@ -47,10 +69,30 @@ class JsonAttributeBasedCheck extends ActionCheck {
 
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
-    return this.validators.stream()
-      .map(validator -> new SingleValidatorCheck(this::isRelevantForRole, matchedExchangeUuid, httpMessageType, standardsVersion, validator));
-  }
+    Stream<ComplexValidatorCheck> complexValidatorChecks =
+        this.complexValidators.stream()
+            .map(
+                complexValidator ->
+                    new ComplexValidatorCheck(
+                        this::isRelevantForRole,
+                        matchedExchangeUuid,
+                        httpMessageType,
+                        standardsVersion,
+                        complexValidator));
 
+    Stream<SingleValidatorCheck> singleValidatorChecks =
+        this.validators.stream()
+            .map(
+                validator ->
+                    new SingleValidatorCheck(
+                        this::isRelevantForRole,
+                        matchedExchangeUuid,
+                        httpMessageType,
+                        standardsVersion,
+                        validator));
+
+    return Stream.concat(complexValidatorChecks, singleValidatorChecks);
+  }
 
   private static class SingleValidatorCheck extends ActionCheck {
 

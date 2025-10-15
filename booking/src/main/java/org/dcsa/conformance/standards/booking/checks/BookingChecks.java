@@ -108,16 +108,6 @@ public class BookingChecks {
   private static final String THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT =
       "The scenario requires '%s.%s' to be absent";
 
-  public static List<ActionCheck> conditionalChecks(UUID matched, String standardVersion) {
-    List<ActionCheck> checks = new ArrayList<>();
-
-    checks.add(
-        JsonAttribute.contentChecks(
-            BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER_NEW));
-
-    return checks;
-  }
-
   public static ActionCheck requestContentChecks(
       UUID matched,
       String standardVersion,
@@ -930,6 +920,9 @@ public class BookingChecks {
           mav -> mav.submitAllMatching(S_S.formatted(FEEDBACKS, CODE)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
+  static final List<JsonComplexContentCheck> COMPLEX_STATIC_BOOKING_CHECKS =
+      Arrays.asList(NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER_NEW);
+
   static final List<JsonContentCheck> STATIC_BOOKING_CHECKS =
       Arrays.asList(
           JsonAttribute.mustBeDatasetKeywordIfPresent(
@@ -1044,8 +1037,10 @@ public class BookingChecks {
             expectedCancelledBookingStatus,
             requestAmendedContent);
 
+    var complexChecks = COMPLEX_STATIC_BOOKING_CHECKS;
+
     return JsonAttribute.contentChecks(
-        BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
+        BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks, complexChecks);
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(

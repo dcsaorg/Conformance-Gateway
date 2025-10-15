@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.core.check.JsonContentValidation;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 

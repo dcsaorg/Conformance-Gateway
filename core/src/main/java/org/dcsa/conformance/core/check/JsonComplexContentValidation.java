@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Set;
 
-public interface JsonComplexContentValidation extends JsonContentValidation{
+public interface JsonComplexContentValidation{
 
-    Set<ConformanceError> validateWithRelevance(JsonNode body);
+    Set<ConformanceError> validate(JsonNode body);
 }

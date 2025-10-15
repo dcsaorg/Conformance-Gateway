@@ -69,38 +69,36 @@ public class ShipperGetBookingAction extends BookingAction {
         var dsp = getDspSupplier().get();
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
-        return Stream.concat(
-            Stream.of(
-                new UrlPathCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    buildFullUris("/v2/bookings/", cbrr, cbr)),
-                new ResponseStatusCheck(
-                    BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
-                new ApiHeaderCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    expectedApiVersion),
-                new ApiHeaderCheck(
-                    BookingRole::isCarrier,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    expectedApiVersion),
-                new JsonSchemaCheck(
-                    BookingRole::isCarrier,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    responseSchemaValidator),
-                BookingChecks.responseContentChecks(
-                    getMatchedExchangeUuid(),
-                    expectedApiVersion,
-                    getDspSupplier(),
-                    expectedBookingStatus,
-                    expectedAmendedBookingStatus,
-                    expectedCancelledBookingStatus,
-                    requestAmendedContent)),
-            BookingChecks.conditionalChecks(getMatchedExchangeUuid(), expectedApiVersion).stream());
+        return Stream.of(
+            new UrlPathCheck(
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                buildFullUris("/v2/bookings/", cbrr, cbr)),
+            new ResponseStatusCheck(
+                BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+            new ApiHeaderCheck(
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            new JsonSchemaCheck(
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            BookingChecks.responseContentChecks(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                getDspSupplier(),
+                expectedBookingStatus,
+                expectedAmendedBookingStatus,
+                expectedCancelledBookingStatus,
+                requestAmendedContent));
       }
     };
   }

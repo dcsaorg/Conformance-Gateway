@@ -46,6 +46,17 @@ public class JsonAttribute {
   }
 
   public static ActionCheck contentChecks(
+          Predicate<String> isRelevantForRoleName,
+          UUID matchedExchangeUuid,
+          HttpMessageType httpMessageType,
+          String standardsVersion,
+          List<JsonContentCheck> checks,
+          List<JsonComplexContentCheck> complexChecks
+  ) {
+    return contentChecks("", null, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, checks, complexChecks);
+  }
+
+  public static ActionCheck contentChecks(
     String titlePrefix,
     String title,
     Predicate<String> isRelevantForRoleName,
@@ -66,6 +77,32 @@ public class JsonAttribute {
       httpMessageType,
       standardsVersion,
       checks
+    );
+  }
+
+  public static ActionCheck contentChecks(
+          String titlePrefix,
+          String title,
+          Predicate<String> isRelevantForRoleName,
+          UUID matchedExchangeUuid,
+          HttpMessageType httpMessageType,
+          String standardsVersion,
+          List<JsonContentCheck> checks,
+          List<JsonComplexContentCheck> complexChecks
+  ) {
+    if (title == null) {
+      title = "The HTTP %s has valid content (conditional validation rules)"
+              .formatted(httpMessageType.name().toLowerCase());
+    }
+    return new JsonAttributeBasedCheck(
+            titlePrefix,
+            title,
+            isRelevantForRoleName,
+            matchedExchangeUuid,
+            httpMessageType,
+            standardsVersion,
+            checks,
+            complexChecks
     );
   }
 
@@ -110,20 +147,6 @@ public class JsonAttribute {
       rebaser,
       checks
     );
-  }
-
-  public static ActionCheck contentChecks(
-      Predicate<String> isRelevantForRoleName,
-      UUID matchedExchangeUuid,
-      HttpMessageType httpMessageType,
-      String standardsVersion,
-      JsonComplexContentCheck validator) {
-    return new ComplexValidatorCheck(
-        isRelevantForRoleName,
-        matchedExchangeUuid,
-        httpMessageType,
-        standardsVersion,
-        validator);
   }
 
   public static Predicate<JsonNode> isTrue(
@@ -1032,18 +1055,13 @@ public class JsonAttribute {
       implements JsonComplexContentCheck {
 
     @Override
-    public Set<ConformanceError> validateWithRelevance(JsonNode body) {
+    public Set<ConformanceError> validate(JsonNode body) {
       return impl.apply(body);
     }
 
     private static JsonComplexContentCheck of(
         String description, Function<JsonNode, Set<ConformanceError>> impl) {
       return new JsonComplexContentCheckImpl(description, impl);
-    }
-
-    @Override
-    public Set<String> validate(JsonNode body) {
-      throw new UnsupportedOperationException();
     }
   }
 }

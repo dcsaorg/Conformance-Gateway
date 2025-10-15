@@ -1,32 +1,28 @@
 package org.dcsa.conformance.core.check;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 
 import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.mockito.Mockito;
-
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import static org.mockito.ArgumentMatchers.any;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 
 class JsonAttributeTest {
 
@@ -528,7 +524,7 @@ class JsonAttributeTest {
     assertFalse(result.isEmpty());
     assertTrue(
         result.contains(
-            "The attribute 'test' had value 'invalidKeyword' which was not a valid keyword here."));
+            "The attribute 'test' has the value 'invalidKeyword', which is unknown and must match one of the values in the approved dataset."));
   }
 
   @Test

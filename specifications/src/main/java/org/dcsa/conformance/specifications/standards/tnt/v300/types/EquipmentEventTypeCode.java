@@ -12,17 +12,23 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
     description = "Code used to denote the type of an equipment event")
 @AllArgsConstructor
 public enum EquipmentEventTypeCode implements EnumBase {
-  LOAD("Loaded"),
+  AVDO("Available for Drop-off"),
+  AVPU("Available for Pick-up"),
+  CROS("Crossed"),
+  CUSI("Customs Selected for Inspection"),
+  CUSR("Customs Released"),
+  CUSS("Customs Selected for Scan"),
   DISC("Discharged"),
+  DROP("Drop-off"),
   GTIN("Gated in"),
   GTOT("Gated out"),
-  STUF("Stuffed"),
-  STRP("Stripped"),
-  PICK("Pick-up"),
-  DROP("Drop-off"),
   INSP("Inspected"),
+  LOAD("Loaded"),
+  PICK("Pick-up"),
+  RMVD("Removed"),
   RSEA("Resealed"),
-  RMVD("Removed");
+  STRP("Stripped"),
+  STUF("Stuffed");
 
   private final String valueDescription;
 }

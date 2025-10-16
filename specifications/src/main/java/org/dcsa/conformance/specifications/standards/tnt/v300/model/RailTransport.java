@@ -11,23 +11,21 @@ public class RailTransport {
       maxLength = 50,
       description =
 """
-A railcar is a type of railway vehicle that is designed to transport freight or passengers on a railway track.
-They are also known as rail vehicles, railcars, or rolling stock.
-Railcars can be powered by an on-board locomotive or they can be pulled by a separate locomotive.
+Reference of the rail car on which the equipment is transported.
 """)
-  private String railCar;
+  private String railCarReference;
 
   @Schema(
-    maxLength = 50,
-    description =
+      maxLength = 50,
+      description =
 """
-A rail service number is a unique identifying number assigned to a specific rail service or train.
+Reference of the rail service on which the equipment is transported.
 """)
-  private String railService;
+  private String railServiceReference;
 
   @Schema(
-    maxLength = 100,
-    description =
+      maxLength = 100,
+      description =
 """
 Unique identifying number or code that is assigned to a specific departure of a rail.
 (Also known as a departure reference number.)

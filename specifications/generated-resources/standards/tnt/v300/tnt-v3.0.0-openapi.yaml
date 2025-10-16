@@ -504,17 +504,17 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of a shipment location
-            - `PRE` - Place of Receipt
-            - `POL` - Port of Loading
-            - `POD` - Port of Discharge
-            - `PDE` - Place of Delivery
-            - `PCF` - Pre-carriage From
+            - `FCD` - Full container drop-off location
+            - `IEL` - Container intermediate export stop-off location
             - `OIR` - Onward Inland Routing
             - `ORI` - Origin of goods
-            - `IEL` - Container intermediate export stop-off location
+            - `PCF` - Pre-carriage From
+            - `PDE` - Place of Delivery
+            - `POD` - Port of Discharge
+            - `POL` - Port of Loading
+            - `PRE` - Place of Receipt
             - `PTP` - Prohibited transshipment port
             - `RTP` - Requested transshipment port
-            - `FCD` - Full container drop-off location
           example: "PRE"
         documentReferences:
           type: "array"
@@ -947,18 +947,16 @@ components:
     RailTransport:
       type: "object"
       properties:
-        railCar:
+        railCarReference:
           maxLength: 50
           type: "string"
           description: |
-            A railcar is a type of railway vehicle that is designed to transport freight or passengers on a railway track.
-            They are also known as rail vehicles, railcars, or rolling stock.
-            Railcars can be powered by an on-board locomotive or they can be pulled by a separate locomotive.
-        railService:
+            Reference of the rail car on which the equipment is transported.
+        railServiceReference:
           maxLength: 50
           type: "string"
           description: |
-            A rail service number is a unique identifying number assigned to a specific rail service or train.
+            Reference of the rail service on which the equipment is transported.
         departureID:
           maxLength: 100
           type: "string"
@@ -1045,20 +1043,20 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of a reference
-            - `FF` - Freight Forwarder’s Reference
-            - `SI` - Shipper’s Reference
-            - `PO` - Purchase Order Reference
-            - `CR` - Customer’s Reference
             - `AAO` - Consignee’s Reference
-            - `ECR` - Empty container release reference
-            - `CSI` - Customer shipment ID
-            - `BPR` - Booking party reference number
-            - `BID` - Booking Request ID
-            - `EQ` - Equipment Reference
-            - `RUC` - Registro Único del Contribuyente
-            - `DUE` - Declaração Única de Exportação
-            - `CER` - Canadian Export Reporting System
             - `AES` - Automated Export System
+            - `BID` - Booking Request ID
+            - `BPR` - Booking party reference number
+            - `CER` - Canadian Export Reporting System
+            - `CR` - Customer’s Reference
+            - `CSI` - Customer shipment ID
+            - `DUE` - Declaração Única de Exportação
+            - `ECR` - Empty container release reference
+            - `EQ` - Equipment Reference
+            - `FF` - Freight Forwarder’s Reference
+            - `PO` - Purchase Order Reference
+            - `RUC` - Registro Único del Contribuyente
+            - `SI` - Shipper’s Reference
           example: "FF"
         reference:
           maxLength: 100
@@ -1171,19 +1169,34 @@ components:
     TruckTransport:
       type: "object"
       properties:
+        tractorDetails:
+          description: |
+            The license plate and VIN of the tractor of the truck used to transport the equipment.
+          allOf:
+          - $ref: "#/components/schemas/VehicleDetails"
+        trailerDetails:
+          description: |
+            The license plate and VIN of the trailer of the truck on which the equipment is transported,
+            if the trailer is separate from the truck trailer and has its own details.
+          allOf:
+          - $ref: "#/components/schemas/VehicleDetails"
+      description: "Truck transport information"
+    VehicleDetails:
+      type: "object"
+      properties:
         licensePlate:
           maxLength: 15
           type: "string"
           description: |
             A license plate is a tag that is attached to a vehicle and displays a unique number or code assigned to the vehicle.
             The format, design, and issuing authority for license plates vary by country, state, and province.
-        chassisLicensePlate:
+        vehicleIdentificationNumber:
           maxLength: 15
           type: "string"
           description: |
             A chassis number is a unique identifying number or code assigned to the chassis of a vehicle.
-            It may also be referred to as a "vehicle identification number" (VIN) or "frame number".
-      description: "Truck transport information"
+            It may also be referred to as a "vehicle identification number" (VIN), "chassis number" or "frame number".
+      description: "Details of a vehicle, typically of the tractor or of each trailer of a truck"
     VesselTransport:
       type: "object"
       properties:

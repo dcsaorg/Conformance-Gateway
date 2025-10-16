@@ -56,6 +56,7 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentRefe
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.VehicleDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
 
 public class TNTStandardSpecification extends StandardSpecification {
@@ -121,6 +122,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         TransportCall.class,
         TransportDetails.class,
         TruckTransport.class,
+        VehicleDetails.class,
         VesselTransport.class,
         VoyageNumberOrReference.class);
   }

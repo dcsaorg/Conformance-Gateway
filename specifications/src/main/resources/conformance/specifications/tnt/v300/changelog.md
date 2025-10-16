@@ -10,6 +10,8 @@ Fixed the description of `ShipmentEventTypeCode` value `ISSU`. (SD-2515)
 
 Aligned the actor names with the use cases and user stories. (SD-2531)
 
+Updated rail and truck attributes. (SD-263)
+
 
 ## Snapshot v3.0.0-20250926-design
 

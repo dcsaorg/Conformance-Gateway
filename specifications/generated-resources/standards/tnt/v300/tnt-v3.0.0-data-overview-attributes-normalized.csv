@@ -120,17 +120,23 @@ Event,"shipmentReferenceReplacements","ShipmentReferenceReplacement list",,,,,"L
 Event,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 Event,transportDetails,TransportDetails,,,,,"Transport-specific details",
 EventClassification,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
-- `LOAD` - Loaded
+- `AVDO` - Available for Drop-off
+- `AVPU` - Available for Pick-up
+- `CROS` - Crossed
+- `CUSI` - Customs Selected for Inspection
+- `CUSR` - Customs Released
+- `CUSS` - Customs Selected for Scan
 - `DISC` - Discharged
+- `DROP` - Drop-off
 - `GTIN` - Gated in
 - `GTOT` - Gated out
-- `STUF` - Stuffed
-- `STRP` - Stripped
-- `PICK` - Pick-up
-- `DROP` - Drop-off
 - `INSP` - Inspected
+- `LOAD` - Loaded
+- `PICK` - Pick-up
+- `RMVD` - Removed
 - `RSEA` - Resealed
-- `RMVD` - Removed",
+- `STRP` - Stripped
+- `STUF` - Stuffed",
 EventClassification,eventClassifierCode,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated

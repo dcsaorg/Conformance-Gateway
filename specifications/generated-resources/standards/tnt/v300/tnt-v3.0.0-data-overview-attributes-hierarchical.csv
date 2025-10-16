@@ -118,17 +118,23 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `WIR` (Wire)",
 "Event / eventClassification",eventClassification,EventClassification,,,,,"Type, subtype and classifier of an event",
 "Event / eventClassification / equipmentEventTypeCode",equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
-- `LOAD` - Loaded
+- `AVDO` - Available for Drop-off
+- `AVPU` - Available for Pick-up
+- `CROS` - Crossed
+- `CUSI` - Customs Selected for Inspection
+- `CUSR` - Customs Released
+- `CUSS` - Customs Selected for Scan
 - `DISC` - Discharged
+- `DROP` - Drop-off
 - `GTIN` - Gated in
 - `GTOT` - Gated out
-- `STUF` - Stuffed
-- `STRP` - Stripped
-- `PICK` - Pick-up
-- `DROP` - Drop-off
 - `INSP` - Inspected
+- `LOAD` - Loaded
+- `PICK` - Pick-up
+- `RMVD` - Removed
 - `RSEA` - Resealed
-- `RMVD` - Removed",
+- `STRP` - Stripped
+- `STUF` - Stuffed",
 "Event / eventClassification / eventClassifierCode",eventClassifierCode,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated

@@ -633,17 +633,23 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of an equipment event
-            - `LOAD` - Loaded
+            - `AVDO` - Available for Drop-off
+            - `AVPU` - Available for Pick-up
+            - `CROS` - Crossed
+            - `CUSI` - Customs Selected for Inspection
+            - `CUSR` - Customs Released
+            - `CUSS` - Customs Selected for Scan
             - `DISC` - Discharged
+            - `DROP` - Drop-off
             - `GTIN` - Gated in
             - `GTOT` - Gated out
-            - `STUF` - Stuffed
-            - `STRP` - Stripped
-            - `PICK` - Pick-up
-            - `DROP` - Drop-off
             - `INSP` - Inspected
-            - `RSEA` - Resealed
+            - `LOAD` - Loaded
+            - `PICK` - Pick-up
             - `RMVD` - Removed
+            - `RSEA` - Resealed
+            - `STRP` - Stripped
+            - `STUF` - Stuffed
           example: "LOAD"
         iotEventTypeCode:
           type: "string"

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.standards.tnt.v300.model;
+package org.dcsa.conformance.specifications.standards.vgm.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.Party;
 Routing of an event from the originating party, via forwarding parties, to the destination party.
 """)
 @Data
-public class EventRouting {
+public class VGMRouting {
 
   @Schema(
       description =

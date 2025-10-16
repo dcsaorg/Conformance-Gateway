@@ -1,0 +1,123 @@
+Object,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
+Address,city,string,,maxLength=35,,Amsterdam,"The name of the city.",
+Address,countryCode,string,,maxLength=2,,NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)",
+Address,floor,string,,maxLength=50,,N/A,"The floor of the street number.",
+Address,POBox,string,,maxLength=20,,123,"A numbered box at a post office where a person or business can have mail or parcels delivered.",
+Address,postCode,string,,maxLength=10,,"1047 HM","The post code of the address.",
+Address,stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
+Address,street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
+Address,streetNumber,string,,maxLength=50,,100,"The number of the street.",
+ClassifiedDateTime,classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
+- `PLN` - Planned
+- `EST` - Estimated
+- `ACT` - Actual",
+ClassifiedDateTime,value,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
+Facility,facilityCodeListProvider,string,,maxLength=10,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
+- `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
+- `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
+FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed to a user of the VGM publishing organization",
+FeedbackElement,propertyPath,string,,maxLength=1000,,"$.VGMs[2].location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
+about which the feedback is provided (if applicable)",
+FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity of a `FeedbackElement`
+
+- `ERROR` - Error that fully or partially prevents the correct processing of the request
+- `WARN` - Warning about the request being processed in a potentially unexpected way
+- `INFO` - Informational message about how the request is processed",
+GeoCoordinate,latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+GeoCoordinate,longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+GetVGMsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why the request could not be processed.
+
+At least one feedback element of severity `ERROR` is expected.
+Lower severity feedback elements may also be included.",
+GetVGMsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
+GetVGMsResponse,VGMs,"VGM list",,,,,"The list of VGMs matching the filter specified by the request query parameters",
+Location,address,Address,,,,,"Location address",
+Location,facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
+Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
+
+- `BORD` - Border
+- `CLOC` - Customer location
+- `COFS` - Container freight station
+- `OFFD` - Off-dock storage
+- `DEPO` - Depot
+- `INTE` - Inland terminal
+- `POTE` - Port terminal
+- `RAMP` - Ramp
+- `WAYP` - Waypoint",
+Location,geoCoordinate,GeoCoordinate,,,,,"An object used to express a location using `latitude` and `longitude`.",
+Location,locationName,string,,maxLength=100,,"Port of Amsterdam","The name of the location.",
+Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specifying where the place is located. The pattern used must be
+
+- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+
+More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+Party,codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+Party,codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+Party,partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+Party,partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
+PostVGMsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
+
+At least one feedback element of severity `ERROR` is expected.
+Lower severity feedback elements may also be included.
+
+When sent in response to a request that contains an array of VGMs,
+the order of the `feedbackElements` is not related to the list of request VGMs.
+Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.",
+PostVGMsRequest,VGMs,"VGM list",,,,,"List of VGMs.",
+PostVGMsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
+
+There can be zero, one or more feedback elements per event in the request.
+The order of `feedbackElements` is not related to the order of VGMs in the request.
+Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.",
+VGM,isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
+
+The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+
+If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).",
+VGM,updatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the VGM was last updated.",
+VGM,VGMID,string,,maxLength=500,,"VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z","ID of the VGM, unique among all the VGMs published by a VGM Producer.
+
+A VGM overrides any other VGM that has the same `vgmID` and an earlier `updatedDateTime`.
+
+Each VGM is uniquely identified within each VGM 1.x standard ecosystem of connected implementers
+by a composite key including:
+- `VGMRouting.originatingParty.partyCode`
+- `VGMRouting.originatingParty.codeListProvider`
+- `VGMRouting.originatingParty.codeListName`
+- `VGMID`",
+VGM,VGMRouting,VGMRouting,,,,,"Routing of an event from the originating party, via forwarding parties, to the destination party.",
+VGMRouting,destinationParty,Party,,,,,"The final party intended as destination of the event.",
+VGMRouting,forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
+VGMRouting,originatingParty,Party,,,,,"The initial party with which the event originated.",

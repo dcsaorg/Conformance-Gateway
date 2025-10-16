@@ -1,0 +1,124 @@
+Path,Attribute,Type,Required,Size,Pattern,Example,Description,Constraints
+VGM,,,,,,,,
+"VGM / isRetracted",isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
+
+The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+
+If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).",
+"VGM / updatedDateTime",updatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the VGM was last updated.",
+"VGM / VGMID",VGMID,string,,maxLength=500,,"VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z","ID of the VGM, unique among all the VGMs published by a VGM Producer.
+
+A VGM overrides any other VGM that has the same `vgmID` and an earlier `updatedDateTime`.
+
+Each VGM is uniquely identified within each VGM 1.x standard ecosystem of connected implementers
+by a composite key including:
+- `VGMRouting.originatingParty.partyCode`
+- `VGMRouting.originatingParty.codeListProvider`
+- `VGMRouting.originatingParty.codeListName`
+- `VGMID`",
+"VGM / VGMRouting",VGMRouting,VGMRouting,,,,,"Routing of an event from the originating party, via forwarding parties, to the destination party.",
+"VGM / VGMRouting / destinationParty",destinationParty,Party,,,,,"The final party intended as destination of the event.",
+"VGM / VGMRouting / destinationParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+"VGM / VGMRouting / destinationParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+"VGM / VGMRouting / destinationParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+"VGM / VGMRouting / destinationParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
+"VGM / VGMRouting / forwardingParties",forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
+"VGM / VGMRouting / forwardingParties / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+"VGM / VGMRouting / forwardingParties / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+"VGM / VGMRouting / forwardingParties / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+"VGM / VGMRouting / forwardingParties / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",
+"VGM / VGMRouting / originatingParty",originatingParty,Party,,,,,"The initial party with which the event originated.",
+"VGM / VGMRouting / originatingParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
+- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
+- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
+- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
+"VGM / VGMRouting / originatingParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
+- `BOLE` (Bolero)
+- `BRIT` (BRITC eBL)
+- `CARX` (CargoX)
+- `COVA` (Covantis)
+- `CRED` (Credore)
+- `DCSA` (Digital Container Shipping Association)
+- `DNB` (Dun and Bradstreet)
+- `ESSD` (EssDOCS)
+- `ETEU` (eTEU)
+- `ETIT` (e-title)
+- `FMC` (Federal Maritime Commission)
+- `GLEIF` (Global Legal Entity Identifier Foundation)
+- `GSBN` (Global Shipping Business Network)
+- `IDT` (ICE Digital Trade)
+- `IQAX` (IQAX)
+- `KTNE` (KTNET)
+- `NMFTA` (National Motor Freight Traffic Association)
+- `SECR` (Secro)
+- `SMDG` (Ship Message Design Group)
+- `TRAC` (Enigio trace:original)
+- `TRGO` (TradeGO)
+- `W3C` (World Wide Web Consortium)
+- `WAVE` (Wave)
+- `WISE` (WiseTech)
+- `ZZZ` (Mutually defined)",
+"VGM / VGMRouting / originatingParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
+"VGM / VGMRouting / originatingParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
+[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+or a subsequent revision.",

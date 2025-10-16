@@ -153,7 +153,7 @@ EventClassification,shipmentEventTypeCode,string,,,,APPR,"Code used to denote th
 - `PENU` - Pending Update
 - `REJE` - Rejected
 - `APPR` - Approved
-- `ISSU` - Arrived
+- `ISSU` - Issued
 - `SURR` - Surrendered
 - `SUBM` - Submitted
 - `VOID` - Void

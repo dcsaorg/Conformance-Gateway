@@ -18,7 +18,7 @@ public enum ShipmentEventTypeCode implements EnumBase {
   PENU("Pending Update"),
   REJE("Rejected"),
   APPR("Approved"),
-  ISSU("Arrived"),
+  ISSU("Issued"),
   SURR("Surrendered"),
   SUBM("Submitted"),
   VOID("Void"),

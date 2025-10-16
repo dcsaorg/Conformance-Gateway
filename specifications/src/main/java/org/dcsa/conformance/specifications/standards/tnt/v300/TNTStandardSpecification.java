@@ -85,7 +85,7 @@ public class TNTStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Track and Trace", "3.0.0-20250926-design", "TNT", "3.0.0-20250912-design", 4);
+        "Track and Trace", "3.0.0-20251024-design", "TNT", "3.0.0-20250926-design", 4);
   }
 
   @Override
@@ -146,7 +146,7 @@ public class TNTStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/4f01c4530e2cfbccc8abd9e21b45baee122ef94c/specifications/generated-resources/standards/tnt/v300/tnt-v3.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/e83485c750798f3e086b5b393dd1effdf56d5185/specifications/generated-resources/standards/tnt/v300/tnt-v3.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 
@@ -154,14 +154,8 @@ public class TNTStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(
-            AttributesHierarchicalSheet.class,
-            Map.ofEntries(
-                Map.entry("Event / relatedDocumentReferences", "Event / documentReferences"))),
-        Map.entry(
-            AttributesNormalizedSheet.class,
-            Map.ofEntries(
-                Map.entry("Event,relatedDocumentReferences", "Event,documentReferences"))),
+        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
+        Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
   }

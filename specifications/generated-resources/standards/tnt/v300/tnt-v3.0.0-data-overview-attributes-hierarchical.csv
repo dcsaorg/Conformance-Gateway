@@ -151,7 +151,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `PENU` - Pending Update
 - `REJE` - Rejected
 - `APPR` - Approved
-- `ISSU` - Arrived
+- `ISSU` - Issued
 - `SURR` - Surrendered
 - `SUBM` - Submitted
 - `VOID` - Void

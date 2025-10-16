@@ -21,6 +21,7 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.booking.party.*;
 import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 
@@ -108,6 +109,10 @@ public class BookingChecks {
   private static final String THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT =
       "The scenario requires '%s.%s' to be absent";
 
+  private static final String IRRELEVANT_CHECK_FOR_ELEMENT_IN_POSITION =
+      "Irrelevant check for element in the position %d";
+  private static final String IRRELEVANT_CHECK = "Irrelevant check";
+
   public static List<JsonComplexContentCheck> conditionalContentChecks() {
     return List.of(NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER);
   }
@@ -122,7 +127,12 @@ public class BookingChecks {
     var conditionalChecks = conditionalContentChecks();
 
     return JsonAttribute.contentChecks(
-        BookingRole::isShipper, matched, HttpMessageType.REQUEST, standardVersion, checks, conditionalChecks);
+        BookingRole::isShipper,
+        matched,
+        HttpMessageType.REQUEST,
+        standardVersion,
+        checks,
+        conditionalChecks);
   }
 
   private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION =
@@ -186,17 +196,18 @@ public class BookingChecks {
 
   static final JsonComplexContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
       JsonAttribute.customComplexValidator(
-              "All requested Equipments where '%s' is 'false' must have '%s'".formatted(IS_NON_OPERATING_REEFER, ACTIVE_REEFER_SETTINGS),
+          "All requested Equipments where '%s' is 'false' must have '%s'"
+              .formatted(IS_NON_OPERATING_REEFER, ACTIVE_REEFER_SETTINGS),
           body -> {
             var requestedEquipments = body.path(REQUESTED_EQUIPMENTS);
-            var errors = new HashSet<ConformanceError>();
+            var errors = new LinkedHashSet<ConformanceError>();
             var index = new AtomicInteger(0);
 
             StreamSupport.stream(requestedEquipments.spliterator(), false)
                 .forEach(
                     reqEquipNode -> {
                       if (IS_ACTIVE_REEFER_SETTINGS_REQUIRED.test(reqEquipNode)) {
-                        if (reqEquipNode.path(ACTIVE_REEFER_SETTINGS).isMissingNode()) {
+                        if (JsonUtil.isMissingOrEmpty(reqEquipNode.path(ACTIVE_REEFER_SETTINGS))) {
                           errors.add(
                               new ConformanceError(
                                   "The attribute '%s[%d].%s' should have been present but was absent"
@@ -207,7 +218,11 @@ public class BookingChecks {
                                   ConformanceErrorSeverity.ERROR));
                         }
                       } else {
-                        errors.add(new ConformanceError("", ConformanceErrorSeverity.IRRELEVANT));
+                        errors.add(
+                            new ConformanceError(
+                                IRRELEVANT_CHECK_FOR_ELEMENT_IN_POSITION.formatted(
+                                    index.getAndIncrement()),
+                                ConformanceErrorSeverity.IRRELEVANT));
                       }
                     });
 
@@ -1034,7 +1049,12 @@ public class BookingChecks {
     var conditionalChecks = conditionalContentChecks();
 
     return JsonAttribute.contentChecks(
-        BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks, conditionalChecks);
+        BookingRole::isCarrier,
+        matched,
+        HttpMessageType.RESPONSE,
+        standardVersion,
+        checks,
+        conditionalChecks);
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(

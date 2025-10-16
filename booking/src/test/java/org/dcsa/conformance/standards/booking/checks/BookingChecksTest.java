@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.booking.checks;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.dcsa.conformance.standards.booking.checks.BookingChecks.FEEDBACKS_PRESENCE;
 import static org.dcsa.conformance.standards.booking.checks.BookingChecks.IS_EXPORT_DECLARATION_REFERENCE_PRESENCE;
+import static org.dcsa.conformance.standards.booking.checks.BookingChecks.NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,11 +14,14 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.dcsa.conformance.core.check.ConformanceError;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class BookingChecksTest {
@@ -923,5 +927,237 @@ class BookingChecksTest {
     Assertions.assertThrows(
         IllegalArgumentException.class,
         () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+  }
+
+  @Nested
+  class NorPlusIsoCodeImpliesActiveReeferTests {
+
+    @Test
+    void noRequestedEquipments_shouldBeValid() {
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+
+      assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void emptyRequestedEquipments_shouldBeValid() {
+      booking.set("requestedEquipments", OBJECT_MAPPER.createArrayNode());
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void noIsoEquipmentCode_shouldBeIrrelevant() {
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+    }
+
+    @Test
+    void nonReeferContainer_shouldBeIrrelevant() {
+      requestedEquipment.put("ISOEquipmentCode", "22G1");
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+    }
+
+    @Test
+    void reeferWithNorTrueAndActiveReefer_shouldBeIrrelevant() {
+      requestedEquipment.put("ISOEquipmentCode", "22R1");
+      requestedEquipment.put("isNonOperatingReefer", true);
+      requestedEquipment.set("activeReeferSettings", OBJECT_MAPPER.createObjectNode());
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+    }
+
+    @Test
+    void reeferWithNorTrueAndNoActiveReefer_shouldBeIrrelevant() {
+      requestedEquipment.put("ISOEquipmentCode", "22R1");
+      requestedEquipment.put("isNonOperatingReefer", true);
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+    }
+
+    @Test
+    void reeferWithMissingNorAndActiveReefer_shouldBeIrrelevant() {
+      requestedEquipment.put("ISOEquipmentCode", "22R1");
+      requestedEquipment.set("activeReeferSettings", OBJECT_MAPPER.createObjectNode());
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+    }
+
+    @Test
+    void reeferWithNorFalseAndEmptyActiveReefer_shouldBeInvalid() {
+      requestedEquipment.put("ISOEquipmentCode", "22R1");
+      requestedEquipment.put("isNonOperatingReefer", false);
+      requestedEquipment.set("activeReeferSettings", OBJECT_MAPPER.createObjectNode());
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertTrue(
+          errors
+              .iterator()
+              .next()
+              .message()
+              .equals(
+                  "The attribute 'requestedEquipments[0].activeReeferSettings' should have been present but was absent"));
+    }
+
+    @Test
+    void reeferWithNorTrueAndActiveReefer_shouldBeValid() {
+      requestedEquipment.put("ISOEquipmentCode", "22R1");
+      requestedEquipment.put("isNonOperatingReefer", false);
+      requestedEquipment.set(
+          "activeReeferSettings", OBJECT_MAPPER.createObjectNode().put("someSetting", "value"));
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void reeferWithNorTrueAndActiveReefer_shouldBeValidWithOneIrrelevant() {
+      // Equipment 1: Non-reefer (Irrelevant)
+      ObjectNode equipment1 = OBJECT_MAPPER.createObjectNode();
+      equipment1.put("ISOEquipmentCode", "22G1");
+
+      // Equipment 2: Reefer with NOR=true (Valid)
+      ObjectNode equipment2 = OBJECT_MAPPER.createObjectNode();
+      equipment2.put("ISOEquipmentCode", "22R1");
+      equipment2.put("isNonOperatingReefer", false);
+      equipment2.set(
+          "activeReeferSettings", OBJECT_MAPPER.createObjectNode().put("someSetting", "value"));
+
+      requestedEquipments.add(equipment1);
+      requestedEquipments.add(equipment2);
+
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+
+      assertEquals(1, errors.size());
+
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+    }
+
+    @Test
+    void reeferWithNorFalseAndNoActiveReefer_shouldBeInvalid() {
+      requestedEquipment.put("ISOEquipmentCode", "22R1");
+      requestedEquipment.put("isNonOperatingReefer", false);
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertTrue(
+          errors
+              .iterator()
+              .next()
+              .message()
+              .equals(
+                  "The attribute 'requestedEquipments[0].activeReeferSettings' should have been present but was absent"));
+    }
+
+    @Test
+    void reeferWithMissingNorAndNoActiveReefer_shouldBeIrrelevant() {
+      requestedEquipment.put("ISOEquipmentCode", "22R1");
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+    }
+
+    @Test
+    void reeferWithHTypeCodeAndNorFalse_shouldBeInvalid() {
+      requestedEquipment.put("ISOEquipmentCode", "22H1");
+      requestedEquipment.put("isNonOperatingReefer", false);
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertTrue(
+          errors
+              .iterator()
+              .next()
+              .message()
+              .equals(
+                  "The attribute 'requestedEquipments[0].activeReeferSettings' should have been present but was absent"));
+    }
+
+    @Test
+    void multipleEquipmentsMixed_shouldHaveOneInvalidOneValidAndTwoIrrelevant() {
+      // Equipment 1: Non-reefer (Irrelevant)
+      ObjectNode equipment1 = OBJECT_MAPPER.createObjectNode();
+      equipment1.put("ISOEquipmentCode", "22G1"); // General purpose
+
+      // Equipment 2: Reefer with NOR=true ()
+      ObjectNode equipment2 = OBJECT_MAPPER.createObjectNode();
+      equipment2.put("ISOEquipmentCode", "22R1"); // Reefer
+      equipment2.put("isNonOperatingReefer", true);
+
+      // Equipment 3: Reefer with NOR=false and missing activeReeferSettings (Invalid)
+      ObjectNode equipment3 = OBJECT_MAPPER.createObjectNode();
+      equipment3.put("ISOEquipmentCode", "22R1"); // Reefer
+      equipment3.put("isNonOperatingReefer", false);
+
+      ObjectNode equipment4 = OBJECT_MAPPER.createObjectNode();
+      equipment4.put("ISOEquipmentCode", "22R1");
+      equipment4.put("isNonOperatingReefer", false);
+      equipment4.set(
+              "activeReeferSettings", OBJECT_MAPPER.createObjectNode().put("someSetting", "value"));
+
+      ArrayNode equipments = OBJECT_MAPPER.createArrayNode();
+      equipments.add(equipment1);
+      equipments.add(equipment2);
+      equipments.add(equipment3);
+      equipments.add(equipment4);
+      booking.set("requestedEquipments", equipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+
+      assertEquals(3, errors.size());
+
+      var errorIterator = errors.iterator();
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errorIterator.next().severity());
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errorIterator.next().severity());
+      assertEquals(ConformanceErrorSeverity.ERROR, errorIterator.next().severity());
+    }
+
+    @Test
+    void emptyIsoEquipmentCode_shouldBeIrrelevant() {
+      requestedEquipment.put("ISOEquipmentCode", "");
+      requestedEquipment.put("isNonOperatingReefer", false);
+      requestedEquipments.add(requestedEquipment);
+      booking.set("requestedEquipments", requestedEquipments);
+
+      Set<ConformanceError> errors = NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking);
+      assertEquals(1, errors.size());
+      assertTrue(ConformanceErrorSeverity.IRRELEVANT.equals(errors.iterator().next().severity()));
+    }
   }
 }

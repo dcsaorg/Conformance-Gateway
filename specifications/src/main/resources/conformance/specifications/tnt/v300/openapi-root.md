@@ -2,15 +2,15 @@
 
 This is the OpenAPI specification of the **DCSA Track and Trace** standard.
 
-This API allows the transfer of structured track and trace events from a publisher to a subscriber.
+This API allows the transfer of structured track and trace Events from an  Event Producer to an Event Consumer.
 
-The event publisher implements the `GET /events` endpoint, which can be called by authorized API consumers to retrieve relevant available events.
+Each Event Producer implements the `GET /events` endpoint, which can be called by the authorized Event Consumers to retrieve relevant available Events.
 
-The event subscribers implement the `POST /events` endpoint, which can be called by event publishers call to send relevant events as they become available.
+Each Event Consumer implements the `POST /events` endpoint, which can be called by Event Producers call to send relevant Events as they become available.
 
-The registration of event subscribers with event publishers is out of scope.
+The registration of Event Consumers with Event Producers is out of scope.
 
-The authentication and authorization in both directions between event publishers and subscribers is out of scope.
+The authentication and authorization in both directions between Event Producers and Event Consumers is out of scope.
 
 ### Work in progress ⚠️
 

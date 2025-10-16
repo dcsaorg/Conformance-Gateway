@@ -1,3 +1,3 @@
-Used by an event publisher to send events to a registered subscriber.
+Used by an Event Producer to send T&T Events to a registered Event Consumer.
 
-The subscription mechanism and the management of subscriber profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
+The subscription mechanism and the management of Event Consumer profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.

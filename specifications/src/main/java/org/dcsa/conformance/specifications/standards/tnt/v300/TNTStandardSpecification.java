@@ -60,8 +60,8 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransp
 
 public class TNTStandardSpecification extends StandardSpecification {
 
-  public static final String TAG_EVENT_PUBLISHERS = "Event Publisher Endpoints";
-  public static final String TAG_EVENT_SUBSCRIBERS = "Event Subscriber Endpoints";
+  public static final String TAG_EVENT_PRODUCERS = "Event Producer Endpoints";
+  public static final String TAG_EVENT_CONSUMERS = "Event Consumer Endpoints";
 
   private final GetEventsEndpoint getEventsEndpoint;
 
@@ -70,12 +70,12 @@ public class TNTStandardSpecification extends StandardSpecification {
 
     openAPI.addTagsItem(
         new Tag()
-            .name(TAG_EVENT_PUBLISHERS)
-            .description("Endpoints implemented by the adopters who publish events"));
+            .name(TAG_EVENT_PRODUCERS)
+            .description("Endpoints implemented by the Event Producers"));
     openAPI.addTagsItem(
         new Tag()
-            .name(TAG_EVENT_SUBSCRIBERS)
-            .description("Endpoints implemented by the adopters who receive events"));
+            .name(TAG_EVENT_CONSUMERS)
+            .description("Endpoints implemented by the Event Consumers"));
 
     openAPI.path("/events", new PathItem().get(operationEventsGet()).post(operationEventsPost()));
 
@@ -174,7 +174,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         .summary("Retrieves a list of events")
         .description(readResourceFile("openapi-get-events-description.md"))
         .operationId("get-events")
-        .tags(Collections.singletonList(TAG_EVENT_PUBLISHERS))
+        .tags(Collections.singletonList(TAG_EVENT_PRODUCERS))
         .parameters(
             Stream.concat(
                     new GetEventsEndpoint().getQueryParameters().stream(),
@@ -218,7 +218,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         .summary("Sends a list of events")
         .description(readResourceFile("openapi-post-events-description.md"))
         .operationId("post-events")
-        .tags(Collections.singletonList(TAG_EVENT_SUBSCRIBERS))
+        .tags(Collections.singletonList(TAG_EVENT_CONSUMERS))
         .parameters(List.of(getApiVersionHeaderParameter()))
         .requestBody(
             new RequestBody()

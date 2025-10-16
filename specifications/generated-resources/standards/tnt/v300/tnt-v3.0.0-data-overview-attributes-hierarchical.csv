@@ -189,7 +189,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `ARRI` - Arrived
 - `DEPA` - Departed",
 "Event / eventDateTime",eventDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the real-world event has occurred or will occur.",
-"Event / eventID",eventID,string,,maxLength=500,,"event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z","ID of the event, unique among all the events published by a T&T event publisher.
+"Event / eventID",eventID,string,,maxLength=500,,"event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z","ID of the event, unique among all the events published by a T&T Event Producer.
 
 An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
 

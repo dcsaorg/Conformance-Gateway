@@ -2,6 +2,8 @@
 
 ## Snapshot v3.0.0-20251024-design
 
+Added more `ShipmentEventTypeCode` values. (SD-290)
+
 Fixed the description of `ShipmentEventTypeCode` value `ISSU`. (SD-2515)
 
 

@@ -960,7 +960,7 @@ public class EblChecks {
   }
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
-      ScenarioType scenarioType, boolean isTD, EblDynamicScenarioParameters dsp) {
+      ScenarioType scenarioType, boolean isTD, boolean isCladInSI) {
     List<JsonContentCheck> checks = new ArrayList<>();
     checks.add(
         JsonAttribute.mustEqual(
@@ -970,9 +970,8 @@ public class EblChecks {
     if (isTD) {
       checks.add(
           JsonAttribute.ifThen(
-              "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
+              "[Scenario] Verify that the transportDocument contains 'carriersAgentAtDestination'",
               ignored -> {
-                boolean isCladInSI = dsp != null && dsp.isCladInSI();
                 return isCladInSI || scenarioType.isCarriersAgentAtDestinationRequired();
               },
               JsonAttribute.path(
@@ -1083,7 +1082,7 @@ public class EblChecks {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
     checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     checks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    checks.addAll(generateScenarioRelatedChecks(scenarioType, false, null));
+    checks.addAll(generateScenarioRelatedChecks(scenarioType, false, false));
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
       matched,
@@ -1138,7 +1137,7 @@ public class EblChecks {
 
     checks.addAll(
         generateScenarioRelatedChecks(
-            ScenarioType.valueOf(dspSupplier.get().scenarioType()), false, null));
+            ScenarioType.valueOf(dspSupplier.get().scenarioType()), false, false));
     return checks;
   }
 
@@ -1324,7 +1323,9 @@ public class EblChecks {
             }));
     jsonContentChecks.addAll(
         generateScenarioRelatedChecks(
-            ScenarioType.valueOf(dspSupplier.get().scenarioType()), true, dspSupplier.get()));
+            ScenarioType.valueOf(dspSupplier.get().scenarioType()),
+            true,
+            dspSupplier.get().isCladInSI()));
     return jsonContentChecks;
   }
 

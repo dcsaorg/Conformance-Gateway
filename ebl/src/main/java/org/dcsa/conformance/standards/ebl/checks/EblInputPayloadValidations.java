@@ -23,7 +23,8 @@ public class EblInputPayloadValidations {
     List<JsonContentCheck> contentChecks = new ArrayList<>(EblChecks.STATIC_SI_CHECKS);
     contentChecks.add(EblChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     contentChecks.add(EblChecks.VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    contentChecks.addAll(EblChecks.generateScenarioRelatedChecks(scenarioType, isTD, dsp));
+    contentChecks.addAll(
+        EblChecks.generateScenarioRelatedChecks(scenarioType, isTD, dsp.isCladInSI()));
     return contentChecks.stream()
         .flatMap(check -> check.validate(eblNode).stream())
         .collect(Collectors.toSet());

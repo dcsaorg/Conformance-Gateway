@@ -109,14 +109,6 @@ public class BookingChecks {
   private static final String THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT =
       "The scenario requires '%s.%s' to be absent";
 
-  private static final String IRRELEVANT_CHECK_FOR_ELEMENT_IN_POSITION =
-      "Irrelevant check for element in the position %d";
-  private static final String IRRELEVANT_CHECK = "Irrelevant check";
-
-  public static List<JsonComplexContentCheck> conditionalContentChecks() {
-    return List.of(NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER);
-  }
-
   public static ActionCheck requestContentChecks(
       UUID matched,
       String standardVersion,
@@ -124,15 +116,8 @@ public class BookingChecks {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     checks.addAll(generateScenarioRelatedChecks(dspSupplier));
 
-    var conditionalChecks = conditionalContentChecks();
-
     return JsonAttribute.contentChecks(
-        BookingRole::isShipper,
-        matched,
-        HttpMessageType.REQUEST,
-        standardVersion,
-        checks,
-        conditionalChecks);
+        BookingRole::isShipper, matched, HttpMessageType.REQUEST, standardVersion, checks);
   }
 
   private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION =
@@ -164,9 +149,10 @@ public class BookingChecks {
                 invalidDates.add(arrivalEndDate.toString());
               }
             }
-            return invalidDates.stream()
-                .map("The expected arrival dates '%s' are not valid"::formatted)
-                .collect(Collectors.toSet());
+            return ConformanceCheckResult.simple(
+                invalidDates.stream()
+                    .map("The expected arrival dates '%s' are not valid"::formatted)
+                    .collect(Collectors.toSet()));
           });
 
   private static final Predicate<JsonNode> IS_ISO_EQUIPMENT_CONTAINER_REEFER =
@@ -194,8 +180,8 @@ public class BookingChecks {
   private static final Consumer<MultiAttributeValidator> ALL_REQ_EQUIP =
       mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS));
 
-  static final JsonComplexContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
-      JsonAttribute.customComplexValidator(
+  static final JsonContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
+      JsonAttribute.customValidator(
           "All requested Equipments where '%s' is 'false' must have '%s'"
               .formatted(IS_NON_OPERATING_REEFER, ACTIVE_REEFER_SETTINGS),
           body -> {
@@ -221,7 +207,7 @@ public class BookingChecks {
                       }
                     });
 
-            return errors;
+            return ConformanceCheckResult.withRelevance(errors);
           });
 
   private static final JsonContentCheck ISO_EQUIPMENT_CODE_AND_NOR_CHECK =
@@ -258,20 +244,21 @@ public class BookingChecks {
                     S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
                         UNIVERSAL_SERVICE_REFERENCE1, ROUTING_REFERENCE));
               }
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }
             if ((JsonAttribute.isJsonNodePresent(universalExportVoyageReference)
                     || JsonAttribute.isJsonNodePresent(universalImportVoyageReference))
                 && JsonAttribute.isJsonNodeAbsent(universalServiceReference)) {
-              return Set.of(
-                  "The %s must be present as either %s or %s are present"
-                      .formatted(
-                          UNIVERSAL_SERVICE_REFERENCE1,
-                          UNIVERSAL_EXPORT_VOYAGE_REFERENCE,
-                          UNIVERSAL_IMPORT_VOYAGE_REFERENCE));
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "The %s must be present as either %s or %s are present"
+                          .formatted(
+                              UNIVERSAL_SERVICE_REFERENCE1,
+                              UNIVERSAL_EXPORT_VOYAGE_REFERENCE,
+                              UNIVERSAL_IMPORT_VOYAGE_REFERENCE)));
             }
 
-            return Set.of();
+            return ConformanceCheckResult.simple(Set.of());
           });
 
   private static final JsonContentCheck REFERENCE_TYPE_VALIDATION =
@@ -320,13 +307,14 @@ public class BookingChecks {
                 .forEach(
                     partyFunction -> partyFunctionCounts.merge(partyFunction, 1, Integer::sum));
 
-            return partyFunctionCounts.entrySet().stream()
-                .filter(entry -> entry.getValue() > 1 && !"NI".equals(entry.getKey()))
-                .map(
-                    entry ->
-                        "Party function '%s' cannot be repeated. Found %d occurrences."
-                            .formatted(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+            return ConformanceCheckResult.simple(
+                partyFunctionCounts.entrySet().stream()
+                    .filter(entry -> entry.getValue() > 1 && !"NI".equals(entry.getKey()))
+                    .map(
+                        entry ->
+                            "Party function '%s' cannot be repeated. Found %d occurrences."
+                                .formatted(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
           });
 
   static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE =
@@ -343,13 +331,15 @@ public class BookingChecks {
                 .filter(subRef -> !subRef.isBlank())
                 .forEach(subRef -> subReferenceCount.merge(subRef, 1, Integer::sum));
 
-            return subReferenceCount.entrySet().stream()
-                .filter(entry -> entry.getValue() > 1)
-                .map(
-                    entry ->
-                        "%s '%s' is not unique across the booking. Found %d occurrences."
-                            .formatted(COMMODITY_SUB_REFERENCE, entry.getKey(), entry.getValue()))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+            return ConformanceCheckResult.simple(
+                subReferenceCount.entrySet().stream()
+                    .filter(entry -> entry.getValue() > 1)
+                    .map(
+                        entry ->
+                            "%s '%s' is not unique across the booking. Found %d occurrences."
+                                .formatted(
+                                    COMMODITY_SUB_REFERENCE, entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
           });
 
   private static final JsonContentCheck VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE =
@@ -378,7 +368,7 @@ public class BookingChecks {
                   "'%s' 'LCL' must be present when '%s' is 'CFS'"
                       .formatted(CUT_OFF_DATE_TIME_CODE, RECEIPT_TYPE_AT_ORIGIN));
             }
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
 
   private static final Consumer<MultiAttributeValidator> ALL_AMF =
@@ -454,7 +444,7 @@ public class BookingChecks {
                         });
               }
             }
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
 
   private static final JsonContentCheck VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS =
@@ -465,7 +455,7 @@ public class BookingChecks {
 
             var routingReference = body.path(ROUTING_REFERENCE).asText("");
             if (!routingReference.isBlank()) {
-              return routingReferenceRequestFieldsChecks(body);
+              return ConformanceCheckResult.simple(routingReferenceRequestFieldsChecks(body));
             }
 
             var vesselName = body.path(VESSEL).path(NAME).asText("");
@@ -523,7 +513,7 @@ public class BookingChecks {
                       + "%s + %s.".formatted(CARRIER_EXPORT_VOYAGE_NUMBER, CARRIER_SERVICE_CODE));
             }
 
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
 
   private static Set<String> routingReferenceRequestFieldsChecks(JsonNode body) {
@@ -625,15 +615,15 @@ public class BookingChecks {
         .orElse(MissingNode.getInstance());
   }
 
-  static final JsonComplexContentCheck FEEDBACKS_PRESENCE =
-      JsonAttribute.customComplexValidator(
+  static final JsonContentCheck FEEDBACKS_PRESENCE =
+      JsonAttribute.customValidator(
           "Feedbacks must be present for the selected Booking Status",
           body -> {
             var bookingStatus = body.path(BOOKING_STATUS).asText("");
             var issues = new LinkedHashSet<ConformanceError>();
             if (BookingState.PENDING_UPDATE.name().equals(bookingStatus)
                 || BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)) {
-              if (body.path(FEEDBACKS).isMissingNode() || body.path(FEEDBACKS).isEmpty()) {
+              if (JsonUtil.isMissingOrEmpty(body.path(FEEDBACKS))) {
                 issues.add(
                     ConformanceError.error(
                         "'%s' is missing in the '%s' '%s'"
@@ -642,7 +632,7 @@ public class BookingChecks {
             } else {
               issues.add(ConformanceError.irrelevant());
             }
-            return issues;
+            return ConformanceCheckResult.withRelevance(issues);
           });
 
   static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS =
@@ -663,7 +653,7 @@ public class BookingChecks {
                     S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(SHIPMENT_CUT_OFF_TIMES));
               }
             }
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
 
   static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_CONDITIONS =
@@ -695,7 +685,7 @@ public class BookingChecks {
                         });
               }
             }
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
@@ -723,7 +713,7 @@ public class BookingChecks {
                     "The scenario requires the booking to have a '%s'"
                         .formatted(ROUTING_REFERENCE));
               }
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
 
     checks.add(
@@ -741,7 +731,7 @@ public class BookingChecks {
               if (preNode.isMissingNode()) {
                 issues.add("The scenario requires Port of Load value to be 'PRE'");
               }
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
 
     checks.add(
@@ -760,7 +750,7 @@ public class BookingChecks {
               if (pdeNode.isMissingNode()) {
                 issues.add("The scenario requires Port of Discharge value to be 'PDE'");
               }
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
 
     checks.add(
@@ -771,12 +761,13 @@ public class BookingChecks {
               var contractQuotationReference = body.path(CONTRACT_QUOTATION_REFERENCE).asText("");
               var serviceContractReference = body.path(SERVICE_CONTRACT_REFERENCE).asText("");
               if (!contractQuotationReference.isEmpty() && !serviceContractReference.isEmpty()) {
-                return Set.of(
-                    "The scenario requires either of '%s'/'%s'"
-                            .formatted(CONTRACT_QUOTATION_REFERENCE, SERVICE_CONTRACT_REFERENCE)
-                        + " to be present, but not both");
+                return ConformanceCheckResult.simple(
+                    Set.of(
+                        "The scenario requires either of '%s'/'%s'"
+                                .formatted(CONTRACT_QUOTATION_REFERENCE, SERVICE_CONTRACT_REFERENCE)
+                            + " to be present, but not both"));
               }
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }));
 
     checks.add(
@@ -787,7 +778,7 @@ public class BookingChecks {
             (nodeToValidate, contextPath) -> {
               var issues = new LinkedHashSet<String>();
               reeferContainerChecks(contextPath, nodeToValidate, issues);
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
 
     checks.add(
@@ -798,7 +789,7 @@ public class BookingChecks {
             (nodeToValidate, contextPath) -> {
               var issues = new LinkedHashSet<String>();
               nonOperatingReeferContainerChecks(contextPath, nodeToValidate, issues);
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
 
     checks.add(
@@ -809,7 +800,7 @@ public class BookingChecks {
             (nodeToValidate, contextPath) -> {
               var issues = new LinkedHashSet<String>();
               defaultContainerChecks(contextPath, nodeToValidate, issues);
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
 
     checks.add(
@@ -826,10 +817,12 @@ public class BookingChecks {
                     .submitPath(),
             (nodeToValidate, contextPath) -> {
               if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
-                return Set.of(
-                    "The scenario requires '%s' to contain dangerous goods".formatted(contextPath));
+                return ConformanceCheckResult.simple(
+                    Set.of(
+                        "The scenario requires '%s' to contain dangerous goods"
+                            .formatted(contextPath)));
               }
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }));
 
     checks.add(
@@ -846,11 +839,12 @@ public class BookingChecks {
                     .submitPath(),
             (nodeToValidate, contextPath) -> {
               if (!nodeToValidate.isMissingNode() && !nodeToValidate.isEmpty()) {
-                return Set.of(
-                    "The scenario requires '%s' to NOT contain any dangerous goods"
-                        .formatted(contextPath));
+                return ConformanceCheckResult.simple(
+                    Set.of(
+                        "The scenario requires '%s' to NOT contain any dangerous goods"
+                            .formatted(contextPath)));
               }
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }));
 
     return checks;
@@ -941,6 +935,7 @@ public class BookingChecks {
               JsonPointer.compile("/%s".formatted(CARGO_MOVEMENT_TYPE_AT_DESTINATION)),
               BookingDataSets.CARGO_MOVEMENT_TYPE),
           CHECK_EXPECTED_ARRIVAL_POD,
+          NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
           ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
           REFERENCE_TYPE_VALIDATION,
           IS_EXPORT_DECLARATION_REFERENCE_PRESENCE,
@@ -966,15 +961,16 @@ public class BookingChecks {
               (nodeToValidate, contextPath) -> {
                 var dg = nodeToValidate.path(DANGEROUS_GOODS);
                 if (!dg.isArray() || dg.isEmpty()) {
-                  return Set.of();
+                  return ConformanceCheckResult.simple(Set.of());
                 }
                 if (nodeToValidate.path(PACKAGE_CODE).isMissingNode()
                     && nodeToValidate.path(IMO_PACKAGING_CODE).isMissingNode()) {
-                  return Set.of(
-                      "The '%s' object did not have a '%s' nor an '%s', which is required due to dangerousGoods"
-                          .formatted(contextPath, PACKAGE_CODE, IMO_PACKAGING_CODE));
+                  return ConformanceCheckResult.simple(
+                      Set.of(
+                          "The '%s' object did not have a '%s' nor an '%s', which is required due to dangerousGoods"
+                              .formatted(contextPath, PACKAGE_CODE, IMO_PACKAGING_CODE)));
                 }
-                return Set.of();
+                return ConformanceCheckResult.simple(Set.of());
               }),
           JsonAttribute.allIndividualMatchesMustBeValid(
               "DangerousGoods implies '%s'".formatted(NUMBER_OF_PACKAGES),
@@ -984,14 +980,15 @@ public class BookingChecks {
               (nodeToValidate, contextPath) -> {
                 var dg = nodeToValidate.path(DANGEROUS_GOODS);
                 if (!dg.isArray() || dg.isEmpty()) {
-                  return Set.of();
+                  return ConformanceCheckResult.simple(Set.of());
                 }
                 if (nodeToValidate.path(NUMBER_OF_PACKAGES).isMissingNode()) {
-                  return Set.of(
-                      "The '%s' object did not have a '%s', which is required due to dangerousGoods"
-                          .formatted(contextPath, NUMBER_OF_PACKAGES));
+                  return ConformanceCheckResult.simple(
+                      Set.of(
+                          "The '%s' object did not have a '%s', which is required due to dangerousGoods"
+                              .formatted(contextPath, NUMBER_OF_PACKAGES)));
                 }
-                return Set.of();
+                return ConformanceCheckResult.simple(Set.of());
               }),
           JsonAttribute.allIndividualMatchesMustBeValid(
               "The '%s' values must be from dataset".formatted(SEGREGATION_GROUPS),
@@ -1013,10 +1010,12 @@ public class BookingChecks {
               (nodeToValidate, contextPath) -> {
                 var currencyAmount = nodeToValidate.asDouble();
                 if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
-                  return Set.of(
-                      "%s must have at most 2 decimal point of precision".formatted(contextPath));
+                  return ConformanceCheckResult.simple(
+                      Set.of(
+                          "%s must have at most 2 decimal point of precision"
+                              .formatted(contextPath)));
                 }
-                return Set.of();
+                return ConformanceCheckResult.simple(Set.of());
               }));
 
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS =
@@ -1045,15 +1044,8 @@ public class BookingChecks {
             expectedCancelledBookingStatus,
             requestAmendedContent);
 
-    var conditionalChecks = conditionalContentChecks();
-
     return JsonAttribute.contentChecks(
-        BookingRole::isCarrier,
-        matched,
-        HttpMessageType.RESPONSE,
-        standardVersion,
-        checks,
-        conditionalChecks);
+        BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(
@@ -1079,15 +1071,16 @@ public class BookingChecks {
               if (!amendedBookingStatus.isEmpty()
                   && expectedAmendedBookingStatus != null
                   && !expectedAmendedBookingStatus.name().equals(amendedBookingStatus)) {
-                return Set.of(
-                    "The expected '%s' %s is not equal to response '%s' %s"
-                        .formatted(
-                            ATTR_AMENDED_BOOKING_STATUS,
-                            expectedAmendedBookingStatus.name(),
-                            ATTR_AMENDED_BOOKING_STATUS,
-                            amendedBookingStatus));
+                return ConformanceCheckResult.simple(
+                    Set.of(
+                        "The expected '%s' %s is not equal to response '%s' %s"
+                            .formatted(
+                                ATTR_AMENDED_BOOKING_STATUS,
+                                expectedAmendedBookingStatus.name(),
+                                ATTR_AMENDED_BOOKING_STATUS,
+                                amendedBookingStatus)));
               }
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }));
 
     checks.add(
@@ -1099,15 +1092,16 @@ public class BookingChecks {
               if (!bookingCancellationStatus.isEmpty()
                   && expectedCancelledBookingStatus != null
                   && !expectedCancelledBookingStatus.name().equals(bookingCancellationStatus)) {
-                return Set.of(
-                    "The expected '%s' %s is not equal to response '%s' %s"
-                        .formatted(
-                            ATTR_BOOKING_CANCELLATION_STATUS,
-                            expectedCancelledBookingStatus.name(),
-                            ATTR_BOOKING_CANCELLATION_STATUS,
-                            bookingCancellationStatus));
+                return ConformanceCheckResult.simple(
+                    Set.of(
+                        "The expected '%s' %s is not equal to response '%s' %s"
+                            .formatted(
+                                ATTR_BOOKING_CANCELLATION_STATUS,
+                                expectedCancelledBookingStatus.name(),
+                                ATTR_BOOKING_CANCELLATION_STATUS,
+                                bookingCancellationStatus)));
               }
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }));
 
     checks.addAll(STATIC_BOOKING_CHECKS);
@@ -1131,11 +1125,12 @@ public class BookingChecks {
               (nodeToValidate, contextPath) -> {
                 var commoditySubReference = nodeToValidate.path(COMMODITY_SUB_REFERENCE);
                 if (commoditySubReference.isMissingNode() || commoditySubReference.isNull()) {
-                  return Set.of(
-                      "The '%s' at %s is not present for confirmed booking"
-                          .formatted(COMMODITY_SUB_REFERENCE, contextPath));
+                  return ConformanceCheckResult.simple(
+                      Set.of(
+                          "The '%s' at %s is not present for confirmed booking"
+                              .formatted(COMMODITY_SUB_REFERENCE, contextPath)));
                 }
-                return Set.of();
+                return ConformanceCheckResult.simple(Set.of());
               }));
     }
 
@@ -1153,15 +1148,16 @@ public class BookingChecks {
           String expectedCbrr = dspSupplier.get().carrierBookingRequestReference();
           String expectedCbr = dspSupplier.get().carrierBookingReference();
           if (!cbrr.equals(expectedCbrr) && !cbr.equals(expectedCbr)) {
-            return Set.of(
-                "Either '%s' must equal %s or '%s' must equal %s."
-                    .formatted(
-                        CARRIER_BOOKING_REQUEST_REFERENCE,
-                        expectedCbrr,
-                        CARRIER_BOOKING_REFERENCE,
-                        expectedCbr));
+            return ConformanceCheckResult.simple(
+                Set.of(
+                    "Either '%s' must equal %s or '%s' must equal %s."
+                        .formatted(
+                            CARRIER_BOOKING_REQUEST_REFERENCE,
+                            expectedCbrr,
+                            CARRIER_BOOKING_REFERENCE,
+                            expectedCbr)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 

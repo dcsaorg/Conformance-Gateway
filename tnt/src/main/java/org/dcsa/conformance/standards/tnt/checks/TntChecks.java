@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -37,9 +38,9 @@ public class TntChecks {
         JsonAttribute.customValidator(
             "Every response received during a conformance test must contain events",
             body ->
-                TntSchemaConformanceCheck.findEventNodes(body).isEmpty()
+                    ConformanceCheckResult.simple(TntSchemaConformanceCheck.findEventNodes(body).isEmpty()
                     ? Set.of("No events found in response")
-                    : Set.of()));
+                    : Set.of())));
 
     checks.add(
         JsonAttribute.customValidator(
@@ -56,7 +57,7 @@ public class TntChecks {
                           validationErrors.add("Duplicate eventId: '%s'".formatted(eventId));
                         }
                       });
-              return validationErrors;
+              return ConformanceCheckResult.simple(validationErrors);
             }));
 
     checks.add(
@@ -77,7 +78,7 @@ public class TntChecks {
                                         "Event #%d: %s"
                                             .formatted(eventIndex.get(), validationError)));
                       });
-              return validationErrors;
+              return ConformanceCheckResult.simple(validationErrors);
             }));
 
     checks.add(
@@ -96,7 +97,7 @@ public class TntChecks {
                                           .getQueryParamName()))
                       .toList();
               if (eventCreatedDateTimeParams.isEmpty()) {
-                return Set.of();
+                return ConformanceCheckResult.simple(Set.of());
               }
               Set<String> validationErrors = new LinkedHashSet<>();
               AtomicInteger eventIndex = new AtomicInteger(-1);
@@ -123,7 +124,7 @@ public class TntChecks {
                               }
                             });
                       });
-              return validationErrors;
+              return ConformanceCheckResult.simple(validationErrors);
             }));
 
     checks.add(
@@ -131,16 +132,16 @@ public class TntChecks {
             "The number of events must not exceed the 'limit' query parameter",
             body -> {
               String limitQueryParameter = sspSupplier.get().getMap().get(TntFilterParameter.LIMIT);
-              if (limitQueryParameter == null) return Set.of();
+              if (limitQueryParameter == null) return ConformanceCheckResult.simple(Set.of());
 
               int maxEventCount = Integer.parseInt(limitQueryParameter);
               int eventCount = TntSchemaConformanceCheck.findEventNodes(body).size();
               if (eventCount > maxEventCount) {
-                return Set.of(
+                return ConformanceCheckResult.simple(Set.of(
                     "The number of events (%d) exceeds the value of the 'limit' query parameter (%d)"
-                        .formatted(eventCount, maxEventCount));
+                        .formatted(eventCount, maxEventCount)));
               }
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }));
 
     return JsonAttribute.contentChecks(

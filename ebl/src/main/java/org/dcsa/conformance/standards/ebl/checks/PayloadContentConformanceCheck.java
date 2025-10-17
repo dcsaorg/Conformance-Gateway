@@ -45,7 +45,7 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   protected abstract Stream<? extends ConformanceCheck> createSubChecks();
 
   protected ConformanceCheck createSubCheck(
-      String prefix, String subtitle, Function<JsonNode, Set<String>> subCheck) {
+      String prefix, String subtitle, Function<JsonNode, ConformanceCheckResult> subCheck) {
     return new ActionCheck(
         prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
       @Override
@@ -58,13 +58,13 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
                 ? exchange.getResponse().message()
                 : exchange.getRequest().message();
         var payload = conformanceMessage.body().getJsonBody();
-        return ConformanceCheckResult.simple(subCheck.apply(payload));
+        return subCheck.apply(payload);
       }
     };
   }
 
-  protected Function<JsonNode, Set<String>> at(
-      String path, Function<JsonNode, Set<String>> subCheck) {
+  protected Function<JsonNode, ConformanceCheckResult> at(
+      String path, Function<JsonNode, ConformanceCheckResult> subCheck) {
     var pointer = JsonPointer.compile(path);
     return payload -> subCheck.apply(payload.at(pointer));
   }
@@ -82,7 +82,7 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
             path,
             jsonNode -> {
               if (jsonNode.isMissingNode() || jsonNode.isEmpty()) {
-                return Set.of();
+                return ConformanceCheckResult.simple(Set.of());
               }
               return check.validate(jsonNode);
             }));

@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -51,17 +52,17 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
-            return Set.of(
-                contextPath + "." + field + " must be functionally present in the payload");
+            return ConformanceCheckResult.simple(Set.of(
+                contextPath + "." + field + " must be functionally present in the payload"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
   public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
       JsonAttribute.customValidator(
           "Every response received during a conformance test must not be empty",
-          body -> body.isEmpty() ? Set.of("The response body must not be empty") : Set.of());
+          body -> ConformanceCheckResult.simple(body.isEmpty() ? Set.of("The response body must not be empty") : Set.of()));
 
   public static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
@@ -110,7 +111,7 @@ public class ANChecks {
 
               if (arrivalNotices == null || !arrivalNotices.isArray()) {
                 issues.add("Missing or invalid 'arrivalNotices' array in payload.");
-                return issues;
+                return ConformanceCheckResult.simple(issues);
               }
 
               Set<String> expectedTDRs = new HashSet<>(dsp.get().transportDocumentReferences());
@@ -146,7 +147,7 @@ public class ANChecks {
                         missingTdr));
               }
 
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
   }
 
@@ -155,9 +156,9 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"carrierContactInformation\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(validateCarrierContactField("name").validate(body));
-          issues.addAll(validateCarrierContactEmailOrPhone().validate(body));
-          return issues;
+          issues.addAll(validateCarrierContactField("name").validate(body).getErrorMessages());
+          issues.addAll(validateCarrierContactEmailOrPhone().validate(body).getErrorMessages());
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -169,9 +170,9 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -181,9 +182,9 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull("email") && !node.hasNonNull("phone")) {
-            return Set.of(contextPath + " must functionally include either 'email' or 'phone'");
+            return ConformanceCheckResult.simple(Set.of(contextPath + " must functionally include either 'email' or 'phone'"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -192,11 +193,11 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"documentParties\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(validateDocumentPartyField("partyFunction").validate(body));
-          issues.addAll(validateDocumentPartyField("partyName").validate(body));
-          issues.addAll(validateDocumentPartyField("partyContactDetails").validate(body));
-          issues.addAll(validateDocumentPartyAddress().validate(body));
-          return issues;
+          issues.addAll(validateDocumentPartyField("partyFunction").validate(body).getErrorMessages());
+          issues.addAll(validateDocumentPartyField("partyName").validate(body).getErrorMessages());
+          issues.addAll(validateDocumentPartyField("partyContactDetails").validate(body).getErrorMessages());
+          issues.addAll(validateDocumentPartyAddress().validate(body).getErrorMessages());
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -208,9 +209,9 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally  present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally  present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -221,11 +222,11 @@ public class ANChecks {
         (node, contextPath) -> {
           var address = node.get("address");
           if (address == null || !address.isObject() || address.isEmpty()) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 contextPath
-                    + ".address must be functionally present and contain at least one field");
+                    + ".address must be functionally present and contain at least one field"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -234,13 +235,13 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"transport\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(validateTransportETA().validate(body));
-          issues.addAll(validatePortOfDischargePresence().validate(body));
-          issues.addAll(validatePortOfDischargeLocation().validate(body));
-          issues.addAll(validateVesselVoyage().validate(body));
-          issues.addAll(validateVesselVoyageField("vesselName").validate(body));
-          issues.addAll(validateVesselVoyageField("carrierImportVoyageNumber").validate(body));
-          return issues;
+          issues.addAll(validateTransportETA().validate(body).getErrorMessages());
+          issues.addAll(validatePortOfDischargePresence().validate(body).getErrorMessages());
+          issues.addAll(validatePortOfDischargeLocation().validate(body).getErrorMessages());
+          issues.addAll(validateVesselVoyage().validate(body).getErrorMessages());
+          issues.addAll(validateVesselVoyageField("vesselName").validate(body).getErrorMessages());
+          issues.addAll(validateVesselVoyageField("carrierImportVoyageNumber").validate(body).getErrorMessages());
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -251,11 +252,11 @@ public class ANChecks {
         (node, contextPath) -> {
           if (!node.hasNonNull("portOfDischargeArrivalDate")
               && !node.hasNonNull("placeOfDeliveryArrivalDate")) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 contextPath
-                    + ": must functionally include either 'portOfDischargeArrivalDate' or 'placeOfDeliveryArrivalDate'");
+                    + ": must functionally include either 'portOfDischargeArrivalDate' or 'placeOfDeliveryArrivalDate'"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -266,9 +267,9 @@ public class ANChecks {
         (node, contextPath) -> {
           var pod = node.get("portOfDischarge");
           if (pod == null) {
-            return Set.of(contextPath + ".portOfDischarge must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".portOfDischarge must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -282,12 +283,12 @@ public class ANChecks {
             if (!pod.hasNonNull("address")
                 && !pod.hasNonNull("UNLocationCode")
                 && !pod.hasNonNull("facility")) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   contextPath
-                      + ".portOfDischarge must functionally contain at least one of 'address', 'UNLocationCode', or 'facility'");
+                      + ".portOfDischarge must functionally contain at least one of 'address', 'UNLocationCode', or 'facility'"));
             }
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -298,9 +299,9 @@ public class ANChecks {
         (node, contextPath) -> {
           var voyage = node.get("vesselVoyage");
           if (voyage == null || voyage.isEmpty()) {
-            return Set.of(contextPath + ".vesselVoyage must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".vesselVoyage must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -310,9 +311,9 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.transport.legs.*.vesselVoyage"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -324,10 +325,10 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.freeTimes.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(attributeName)) {
-            return Set.of(
-                String.format("%s.%s must be functionally present", contextPath, attributeName));
+            return ConformanceCheckResult.simple(Set.of(
+                String.format("%s.%s must be functionally present", contextPath, attributeName)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -348,13 +349,13 @@ public class ANChecks {
               }
             }
           }
-          issues.addAll(validateFreeTimeArrayAttribute("typeCodes").validate(body));
-          issues.addAll(validateFreeTimeArrayAttribute("ISOEquipmentCodes").validate(body));
-          issues.addAll(validateFreeTimeArrayAttribute("equipmentReferences").validate(body));
-          issues.addAll(validateFreeTimeAttribute("duration").validate(body));
-          issues.addAll(validateFreeTimeAttribute("timeUnit").validate(body));
+          issues.addAll(validateFreeTimeArrayAttribute("typeCodes").validate(body).getErrorMessages());
+          issues.addAll(validateFreeTimeArrayAttribute("ISOEquipmentCodes").validate(body).getErrorMessages());
+          issues.addAll(validateFreeTimeArrayAttribute("equipmentReferences").validate(body).getErrorMessages());
+          issues.addAll(validateFreeTimeAttribute("duration").validate(body).getErrorMessages());
+          issues.addAll(validateFreeTimeAttribute("timeUnit").validate(body).getErrorMessages());
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -367,12 +368,12 @@ public class ANChecks {
         (node, contextPath) -> {
           var arrayNode = node.get(attributeName);
           if (arrayNode == null || !arrayNode.isArray() || arrayNode.isEmpty()) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 String.format(
                     "%s.%s must be functionally present and be a non-empty array",
-                    contextPath, attributeName));
+                    contextPath, attributeName)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -384,10 +385,10 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.charges.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(attributeName)) {
-            return Set.of(
-                String.format("%s.%s must be functionally present", contextPath, attributeName));
+            return ConformanceCheckResult.simple(Set.of(
+                String.format("%s.%s must be functionally present", contextPath, attributeName)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -396,13 +397,13 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"charges\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(validateChargeAttribute("chargeName").validate(body));
-          issues.addAll(validateChargeAttribute("currencyAmount").validate(body));
-          issues.addAll(validateChargeAttribute("currencyCode").validate(body));
-          issues.addAll(validateChargeAttribute("paymentTermCode").validate(body));
-          issues.addAll(validateChargeAttribute("unitPrice").validate(body));
-          issues.addAll(validateChargeAttribute("quantity").validate(body));
-          return issues;
+          issues.addAll(validateChargeAttribute("chargeName").validate(body).getErrorMessages());
+          issues.addAll(validateChargeAttribute("currencyAmount").validate(body).getErrorMessages());
+          issues.addAll(validateChargeAttribute("currencyCode").validate(body).getErrorMessages());
+          issues.addAll(validateChargeAttribute("paymentTermCode").validate(body).getErrorMessages());
+          issues.addAll(validateChargeAttribute("unitPrice").validate(body).getErrorMessages());
+          issues.addAll(validateChargeAttribute("quantity").validate(body).getErrorMessages());
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -412,13 +413,13 @@ public class ANChecks {
         body -> {
           var issues = new LinkedHashSet<String>();
 
-          issues.addAll(validateUTEEquipmentPresence().validate(body));
-          issues.addAll(validateUTEEquipmentField("equipmentReference").validate(body));
-          issues.addAll(validateUTEEquipmentField("ISOEquipmentCode").validate(body));
-          issues.addAll(validateUTESealsPresence().validate(body));
-          issues.addAll(validateUTESealNumber().validate(body));
+          issues.addAll(validateUTEEquipmentPresence().validate(body).getErrorMessages());
+          issues.addAll(validateUTEEquipmentField("equipmentReference").validate(body).getErrorMessages());
+          issues.addAll(validateUTEEquipmentField("ISOEquipmentCode").validate(body).getErrorMessages());
+          issues.addAll(validateUTESealsPresence().validate(body).getErrorMessages());
+          issues.addAll(validateUTESealNumber().validate(body).getErrorMessages());
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -430,9 +431,9 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*.equipment"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -442,9 +443,9 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*"),
         (ute, contextPath) -> {
           if (ute.get("equipment") == null || ute.get("equipment").isNull()) {
-            return Set.of(contextPath + ".equipment must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".equipment must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -468,7 +469,7 @@ public class ANChecks {
             }
           }
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -478,9 +479,9 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*.seals.*"),
         (seal, contextPath) -> {
           if (!seal.hasNonNull("number")) {
-            return Set.of(contextPath + ".number must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".number must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -490,14 +491,14 @@ public class ANChecks {
         body -> {
           var issues = new LinkedHashSet<String>();
 
-          issues.addAll(validateConsignmentItemsDescriptionOfGoods().validate(body));
-          issues.addAll(validateCargoItemPresence().validate(body));
-          issues.addAll(validateCargoItemField("equipmentReference").validate(body));
-          issues.addAll(validateCargoItemField("cargoGrossWeight").validate(body));
-          issues.addAll(validateOuterPackagingStructure().validate(body));
-          issues.addAll(validateOuterPackagingFields().validate(body));
+          issues.addAll(validateConsignmentItemsDescriptionOfGoods().validate(body).getErrorMessages());
+          issues.addAll(validateCargoItemPresence().validate(body).getErrorMessages());
+          issues.addAll(validateCargoItemField("equipmentReference").validate(body).getErrorMessages());
+          issues.addAll(validateCargoItemField("cargoGrossWeight").validate(body).getErrorMessages());
+          issues.addAll(validateOuterPackagingStructure().validate(body).getErrorMessages());
+          issues.addAll(validateOuterPackagingFields().validate(body).getErrorMessages());
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -508,11 +509,11 @@ public class ANChecks {
         (ci, contextPath) -> {
           var node = ci.get("descriptionOfGoods");
           if (node == null || !node.isArray() || node.isEmpty()) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 contextPath
-                    + ".descriptionOfGoods must functionally be a non-empty array of strings");
+                    + ".descriptionOfGoods must functionally be a non-empty array of strings"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -523,9 +524,9 @@ public class ANChecks {
         (ci, contextPath) -> {
           var items = ci.get("cargoItems");
           if (items == null || !items.isArray() || items.isEmpty()) {
-            return Set.of(contextPath + ".cargoItems must functionally be a non-empty array");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".cargoItems must functionally be a non-empty array"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -537,9 +538,9 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*.cargoItems.*"),
         (item, contextPath) -> {
           if (!item.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -550,9 +551,9 @@ public class ANChecks {
         (item, contextPath) -> {
           var op = item.get("outerPackaging");
           if (op == null || !op.isObject() || op.isEmpty()) {
-            return Set.of(contextPath + ".outerPackaging must functionally be a non-empty object");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".outerPackaging must functionally be a non-empty object"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -577,7 +578,7 @@ public class ANChecks {
             issues.add(contextPath + ".numberOfPackages must be functionally present");
           }
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 

@@ -21,7 +21,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
   private final JsonContentMatchedValidation validation;
 
   @Getter
-  private final Set<String> validationIssues = new HashSet<>();
+  private final Set<ConformanceCheckResult> validationIssues = new HashSet<>();
 
   @Override
   public AttributePathBuilder at(JsonPointer pointer) {
@@ -85,7 +85,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     private void validateAll(List<Match> matches) {
       matches.stream().map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
         .filter(s -> !s.isEmpty())
-        .forEach(validationIssues::addAll);
+        .forEach(validationIssues::add);
     }
   }
 

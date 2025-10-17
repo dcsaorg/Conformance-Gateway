@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -60,7 +61,7 @@ public class CsChecks {
                         }
                       });
             }
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
 
   static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP =
@@ -82,7 +83,7 @@ public class CsChecks {
                     "cutOffDateTimeCode 'LCO' must not be present when receiptTypeAtOrigin is not CFS");
               }
             }
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
   static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE_PS =
       JsonAttribute.customValidator(
@@ -108,13 +109,13 @@ public class CsChecks {
                                     }
                                   }));
             }
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
 
   static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
       JsonAttribute.customValidator(
           "Every response received during a conformance test must not be empty",
-          body -> body.isEmpty() ? Set.of("The response body must not be empty") : Set.of());
+          body -> ConformanceCheckResult.simple(body.isEmpty() ? Set.of("The response body must not be empty") : Set.of()));
 
   private static JsonContentCheck paginationCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
@@ -126,7 +127,7 @@ public class CsChecks {
           if (Objects.equals(firstPageHash, secondPageHash)) {
             issues.add("The second page must be different from the first page");
           }
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 

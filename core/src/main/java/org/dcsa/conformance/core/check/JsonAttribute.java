@@ -10,7 +10,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public class JsonAttribute {
 
-  private static final BiFunction<JsonNode, String, Set<String>> EMPTY_VALIDATOR = (ignoredA, ignoredB) -> Set.of();
+  private static final BiFunction<JsonNode, String, ConformanceCheckResult> EMPTY_VALIDATOR = (ignoredA, ignoredB) -> ConformanceCheckResult.simple(Set.of());
   public static final String VALUE_WARNING = "The value of '%s' was '%s' instead of '%s'";
 
   public static ActionCheck contentChecks(
@@ -46,17 +46,6 @@ public class JsonAttribute {
   }
 
   public static ActionCheck contentChecks(
-          Predicate<String> isRelevantForRoleName,
-          UUID matchedExchangeUuid,
-          HttpMessageType httpMessageType,
-          String standardsVersion,
-          List<JsonContentCheck> checks,
-          List<JsonComplexContentCheck> complexChecks
-  ) {
-    return contentChecks("", null, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, checks, complexChecks);
-  }
-
-  public static ActionCheck contentChecks(
     String titlePrefix,
     String title,
     Predicate<String> isRelevantForRoleName,
@@ -77,32 +66,6 @@ public class JsonAttribute {
       httpMessageType,
       standardsVersion,
       checks
-    );
-  }
-
-  public static ActionCheck contentChecks(
-          String titlePrefix,
-          String title,
-          Predicate<String> isRelevantForRoleName,
-          UUID matchedExchangeUuid,
-          HttpMessageType httpMessageType,
-          String standardsVersion,
-          List<JsonContentCheck> checks,
-          List<JsonComplexContentCheck> complexChecks
-  ) {
-    if (title == null) {
-      title = "The HTTP %s has valid content (conditional validation rules)"
-              .formatted(httpMessageType.name().toLowerCase());
-    }
-    return new JsonAttributeBasedCheck(
-            titlePrefix,
-            title,
-            isRelevantForRoleName,
-            matchedExchangeUuid,
-            httpMessageType,
-            standardsVersion,
-            checks,
-            complexChecks
     );
   }
 
@@ -258,13 +221,13 @@ public class JsonAttribute {
       var impliedField = nodeToValidate.path(impliedFieldName);
 
       if (sourceField.isMissingNode() || !impliedField.isMissingNode()) {
-        return Set.of();
+        return ConformanceCheckResult.simple(Set.of());
       }
 
-      return Set.of("The field '%s' being present makes '%s' mandatory".formatted(
+      return ConformanceCheckResult.simple(Set.of("The field '%s' being present makes '%s' mandatory".formatted(
         concatContextPath(contextPath, sourceFieldName),
         concatContextPath(contextPath, impliedFieldName)
-      ));
+      )));
     };
   }
   public static JsonRebaseableContentCheck allIndividualMatchesMustBeValid(
@@ -281,7 +244,13 @@ public class JsonAttribute {
         (body, contextPath) -> {
           var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
           scanner.accept(v);
-          return v.getValidationIssues();
+          return ConformanceCheckResult.simple(
+              v.getValidationIssues().stream()
+                  .map(
+                      conformanceCheckResult ->
+                          (ConformanceCheckResult.SimpleErrors) conformanceCheckResult)
+                  .flatMap(simpleErrors -> simpleErrors.errors().stream())
+                  .collect(Collectors.toSet()));
         });
   }
 
@@ -295,13 +264,19 @@ public class JsonAttribute {
           JsonContentMatchedValidation subvalidation
   ) {
     return new JsonRebaseableCheckImpl(
-            name,
-            isRelevant,
-            (body, contextPath) -> {
-              var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
-              scanner.accept(v);
-              return v.getValidationIssues();
-            });
+        name,
+        isRelevant,
+        (body, contextPath) -> {
+          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
+          scanner.accept(v);
+          return ConformanceCheckResult.simple(
+              v.getValidationIssues().stream()
+                  .map(
+                      conformanceCheckResult ->
+                          (ConformanceCheckResult.SimpleErrors) conformanceCheckResult)
+                  .flatMap(simpleErrors -> simpleErrors.errors().stream())
+                  .collect(Collectors.toSet()));
+        });
   }
 
   public static JsonContentMatchedValidation unique(
@@ -346,9 +321,9 @@ public class JsonAttribute {
           duplicates.add(key);
         }
       }
-      return duplicates.stream()
+      return ConformanceCheckResult.simple(duplicates.stream()
         .map(dup -> "The %s '%s' must be unique but was used more than once in '%s'".formatted(keyDescription, dup, contextPath))
-        .collect(Collectors.toSet());
+        .collect(Collectors.toSet()));
     };
   }
 
@@ -377,31 +352,31 @@ public class JsonAttribute {
   public static JsonContentMatchedValidation matchedMustBeNonEmpty() {
     return (node, contextPath) -> {
         if (node.isMissingNode() || node.isNull() || node.isEmpty()) {
-          return Set.of(
+          return ConformanceCheckResult.simple(Set.of(
             "The value of '%s' must present and non-empty"
-              .formatted(contextPath));
+              .formatted(contextPath)));
         }
-        return Collections.emptySet();
+        return ConformanceCheckResult.simple(Collections.emptySet());
       };
   }
 
   public static JsonContentMatchedValidation matchedMustBeNotNull() {
     return (node, contextPath) -> {
       if (node.isMissingNode() || node.isNull()) {
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
           "The value of '%s' must present and not null"
-            .formatted(contextPath));
+            .formatted(contextPath)));
       }
-      return Set.of();
+      return ConformanceCheckResult.simple(Set.of());
     };
   }
 
   public static JsonContentMatchedValidation matchedMustBeNull() {
     return (node, contextPath) -> {
       if (node.isMissingNode() || node.isNull()) {
-        return Set.of();
+        return ConformanceCheckResult.simple(Set.of());
       }
-      return Set.of("The value of '%s' must not be present".formatted(contextPath));
+      return ConformanceCheckResult.simple(Set.of("The value of '%s' must not be present".formatted(contextPath)));
     };
   }
 
@@ -415,11 +390,11 @@ public class JsonAttribute {
         (body, contextPath) -> {
           var node = body.at(jsonPointer);
           if (node.isMissingNode() || node.isNull()) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 "The value of '%s' must present and not null because %s"
-                    .formatted(renderJsonPointer(jsonPointer, contextPath), reason));
+                    .formatted(renderJsonPointer(jsonPointer, contextPath), reason)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -438,14 +413,14 @@ public class JsonAttribute {
           var node = body.at(jsonPointer);
           var actualValue = node.asText(null);
           if (!Objects.equals(expectedValue, actualValue)) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 VALUE_WARNING
                     .formatted(
                         renderJsonPointer(jsonPointer, contextPath),
                         renderValue(node),
-                        renderValue(expectedValue)));
+                        renderValue(expectedValue))));
           }
-          return Collections.emptySet();
+          return ConformanceCheckResult.simple(Collections.emptySet());
         });
   }
 
@@ -460,14 +435,14 @@ public class JsonAttribute {
       (body, contextPath) -> {
         var node = body.at(jsonPointer);
         if (!node.isBoolean() || node.asBoolean() != expectedValue) {
-          return Set.of(
+          return ConformanceCheckResult.simple(Set.of(
             VALUE_WARNING
               .formatted(
                 renderJsonPointer(jsonPointer, contextPath),
                 renderValue(node),
-                expectedValue));
+                expectedValue)));
         }
-        return Collections.emptySet();
+        return ConformanceCheckResult.simple(Collections.emptySet());
       });
   }
 
@@ -506,11 +481,11 @@ public class JsonAttribute {
               + " scenario property was not properly recorded at this stage.");
           }
           if (!Objects.equals(expectedValue, actualValue)) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
               VALUE_WARNING
-                .formatted(renderJsonPointer(jsonPointer, contextPath), renderValue(node), renderValue(expectedValue)));
+                .formatted(renderJsonPointer(jsonPointer, contextPath), renderValue(node), renderValue(expectedValue))));
           }
-          return Collections.emptySet();
+          return ConformanceCheckResult.simple(Collections.emptySet());
         }
       );
   }
@@ -540,11 +515,11 @@ public class JsonAttribute {
             + " scenario property was not properly recorded at this stage.");
         }
         if (!Objects.equals(expectedValue, actualValue)) {
-          return Set.of(
+          return ConformanceCheckResult.simple(Set.of(
             VALUE_WARNING
-              .formatted(nodePath, renderValue(node), renderValue(expectedValue)));
+              .formatted(nodePath, renderValue(node), renderValue(expectedValue))));
         }
-        return Collections.emptySet();
+        return ConformanceCheckResult.simple(Collections.emptySet());
       }
     );
   }
@@ -552,11 +527,11 @@ public class JsonAttribute {
   public static JsonContentMatchedValidation matchedMustBePresent() {
     return (node, context) -> {
         if (node.isMissingNode()) {
-          return Set.of(
+          return ConformanceCheckResult.simple(Set.of(
             "The attribute '%s' should have been present but was absent"
-              .formatted(context));
+              .formatted(context)));
         }
-        return Collections.emptySet();
+        return ConformanceCheckResult.simple(Collections.emptySet());
       };
   }
 
@@ -570,11 +545,11 @@ public class JsonAttribute {
           + " scenario property was not properly recorded at this stage.");
       }
       if (!Objects.equals(expectedValue, actualValue)) {
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
           VALUE_WARNING
-            .formatted(contextPath, renderValue(nodeToValidate), renderValue(expectedValue)));
+            .formatted(contextPath, renderValue(nodeToValidate), renderValue(expectedValue))));
       }
-      return Collections.emptySet();
+      return ConformanceCheckResult.simple(Collections.emptySet());
     };
   }
 
@@ -582,11 +557,11 @@ public class JsonAttribute {
     return (nodeToValidate, contextPath) -> {
       var actualValue = nodeToValidate.asBoolean(false);
       if (!actualValue) {
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
           "The value of '%s' was '%s' instead of 'true'"
-            .formatted(contextPath, renderValue(nodeToValidate)));
+            .formatted(contextPath, renderValue(nodeToValidate))));
       }
-      return Collections.emptySet();
+      return ConformanceCheckResult.simple(Collections.emptySet());
     };
   }
 
@@ -597,33 +572,33 @@ public class JsonAttribute {
   public static JsonContentMatchedValidation matchedMaximum(int limit) {
     return (node, context) -> {
       if (node.asInt(0) > limit) {
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
           "The attribute '%s' was %s. However, it should have been at most %d"
-            .formatted(context, renderValue(node), limit));
+            .formatted(context, renderValue(node), limit)));
       }
-      return Collections.emptySet();
+      return ConformanceCheckResult.simple(Collections.emptySet());
     };
   }
 
   public static JsonContentMatchedValidation matchedMustBeAbsent() {
     return (node, context) -> {
         if (!node.isMissingNode()) {
-          return Set.of(
+          return ConformanceCheckResult.simple(Set.of(
             "The attribute '%s' should have been absent but was present and had value '%s'"
-              .formatted(context, renderValue(node)));
+              .formatted(context, renderValue(node))));
         }
-        return Collections.emptySet();
+        return ConformanceCheckResult.simple(Collections.emptySet());
       };
   }
 
   public static JsonContentMatchedValidation matchedMaxLength(int length) {
     return (node, context) -> {
       if (node.isArray() && node.size() > length) {
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
           "The array '%s' had %d elements, which is longer than the limit of %d"
-            .formatted(context, node.size(), length));
+            .formatted(context, node.size(), length)));
       }
-      return Collections.emptySet();
+      return ConformanceCheckResult.simple(Collections.emptySet());
     };
   }
 
@@ -640,11 +615,23 @@ public class JsonAttribute {
       throw new IllegalArgumentException("At least two checks must be given");
     }
     return (node, context) -> {
-      var r = new HashSet<String>();
+      var r = new HashSet<ConformanceCheckResult>();
       for (var check : subchecks) {
-        r.addAll(check.validate(node, context));
+        r.add(check.validate(node, context));
       }
-      return r;
+      return r.stream().reduce(
+        ConformanceCheckResult.simple(Set.of()),
+        (a, b) -> {
+          var errors = new HashSet<String>();
+          if (a instanceof ConformanceCheckResult.SimpleErrors(Set<String> errors1)) {
+            errors.addAll(errors1);
+          }
+          if (b instanceof ConformanceCheckResult.SimpleErrors(Set<String> errors1)) {
+            errors.addAll(errors1);
+          }
+          return ConformanceCheckResult.simple(errors);
+        }
+      );
     };
   }
 
@@ -655,11 +642,11 @@ public class JsonAttribute {
       var text = node.asText();
       // We rely on schema validation (or mustBePresent) for required check.
       if (!node.isMissingNode() && !dataset.contains(text)) {
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
             "The attribute '%s' has the value '%s', which is unknown and must match one of the values in the approved dataset."
-                .formatted(context, renderValue(node)));
+                .formatted(context, renderValue(node))));
       }
-      return Collections.emptySet();
+      return ConformanceCheckResult.simple(Collections.emptySet());
     };
   }
 
@@ -693,15 +680,15 @@ public class JsonAttribute {
           .filter(p -> isJsonNodePresent(body.at(p)))
           .toList();
         if (present.size() < 2) {
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         }
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
           "At most one of the following can be present: %s".formatted(
             present.stream()
               .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
               .collect(Collectors.joining(", "
               ))
-        ));
+        )));
       });
   }
 
@@ -723,13 +710,13 @@ public class JsonAttribute {
         var present = Arrays.stream(ptrs)
           .anyMatch(p -> isJsonNodePresent(body.at(p)));
         if (present) {
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         }
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
           "At least one of the following must be present: %s".formatted(
             Arrays.stream(ptrs)
               .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
-              .collect(Collectors.joining(", "))
+              .collect(Collectors.joining(", ")))
           ));
       });
   }
@@ -752,13 +739,13 @@ public class JsonAttribute {
         var allPresent = Arrays.stream(ptrs)
           .allMatch(p -> isJsonNodePresent(body.at(p)));
         if (!allPresent) {
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         }
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
           "Either one of them can be present, but not both : %s".formatted(
             Arrays.stream(ptrs)
               .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
-              .collect(Collectors.joining(", "))
+              .collect(Collectors.joining(", ")))
           ));
       });
   }
@@ -770,7 +757,7 @@ public class JsonAttribute {
       var ptrs = new ArrayList<JsonPointer>();
       ptrSupplier.accept(body, ptrs);
       if (ptrs.isEmpty()) {
-        return Set.of();
+        return ConformanceCheckResult.simple(Set.of());
       }
       var present = ptrs
         .stream()
@@ -782,14 +769,14 @@ public class JsonAttribute {
           return !node.isMissingNode() && !node.isNull();
         });
       if (present) {
-        return Set.of();
+        return ConformanceCheckResult.simple(Set.of());
       }
-      return Set.of(
+      return ConformanceCheckResult.simple(Set.of(
         "At least one of the following must be present: %s".formatted(
           ptrs.stream()
             .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
             .collect(Collectors.joining(", "))
-        ));
+        )));
       };
   }
 
@@ -819,13 +806,13 @@ public class JsonAttribute {
           var conflictingPtr =
               Arrays.stream(ptrs).filter(p -> check.test(body.at(p))).findAny().orElse(null);
           if (conflictingPtr != null) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 "'%s' and '%s' must both be present or absent"
                     .formatted(
                         renderJsonPointer(firstPtr, contextPath),
-                        renderJsonPointer(conflictingPtr, contextPath)));
+                        renderJsonPointer(conflictingPtr, contextPath))));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -857,9 +844,9 @@ public class JsonAttribute {
     @NonNull
     Predicate<JsonNode> when,
     @NonNull
-    BiFunction<JsonNode, String, Set<String>> then,
+    BiFunction<JsonNode, String, ConformanceCheckResult> then,
     @NonNull
-    BiFunction<JsonNode, String, Set<String>> elseCheck
+    BiFunction<JsonNode, String, ConformanceCheckResult> elseCheck
   ) {
     return new JsonRebaseableCheckImpl(
         name,
@@ -895,7 +882,7 @@ public class JsonAttribute {
       if (when.test(body)) {
         return then.validate(body, context);
       }
-      return Set.of();
+      return ConformanceCheckResult.simple(Set.of());
     };
   }
 
@@ -917,7 +904,7 @@ public class JsonAttribute {
 
   public static JsonContentCheck customValidator(
     @NonNull String description,
-    @NonNull Function<JsonNode, Set<String>> validator
+    @NonNull Function<JsonNode, ConformanceCheckResult> validator
   ) {
     return JsonContentCheckImpl.of(description, validator);
   }
@@ -925,7 +912,7 @@ public class JsonAttribute {
   public static JsonContentCheck customValidator(
       @NonNull String description,
       boolean isRelevant,
-      @NonNull Function<JsonNode, Set<String>> validator) {
+      @NonNull Function<JsonNode, ConformanceCheckResult> validator) {
     return JsonContentCheckImpl.of(description, isRelevant, validator);
   }
 
@@ -934,11 +921,6 @@ public class JsonAttribute {
     @NonNull JsonContentMatchedValidation validator
   ) {
     return new JsonRebaseableCheckImpl(description,true, validator::validate);
-  }
-
-  public static JsonComplexContentCheck customComplexValidator(
-      @NonNull String description, @NonNull Function<JsonNode, Set<ConformanceError>> validator) {
-    return JsonComplexContentCheckImpl.of(description, validator);
   }
 
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
@@ -1004,18 +986,18 @@ public class JsonAttribute {
   record JsonRebaseableCheckImpl(
     String description,
     boolean isRelevant,
-    BiFunction<JsonNode, String, Set<String>> impl
+    BiFunction<JsonNode, String, ConformanceCheckResult> impl
   ) implements JsonRebaseableContentCheck {
     @Override
-    public Set<String> validate(JsonNode body, String contextPath) {
+    public ConformanceCheckResult validate(JsonNode body, String contextPath) {
       return impl.apply(body, contextPath);
     }
 
-    public static JsonRebaseableContentCheck of(JsonPointer jsonPointer, BiFunction<JsonNode, String, Set<String>> validator) {
+    public static JsonRebaseableContentCheck of(JsonPointer jsonPointer, BiFunction<JsonNode, String, ConformanceCheckResult> validator) {
       return of(jsonCheckName(jsonPointer), jsonPointer, validator);
     }
 
-    public static JsonRebaseableContentCheck of(String description, JsonPointer jsonPointer, BiFunction<JsonNode, String, Set<String>> validator) {
+    public static JsonRebaseableContentCheck of(String description, JsonPointer jsonPointer, BiFunction<JsonNode, String, ConformanceCheckResult> validator) {
       return new JsonRebaseableCheckImpl(
         description,
               true,
@@ -1033,35 +1015,20 @@ public class JsonAttribute {
     String description,
     boolean isRelevant,
     @NonNull
-    Function<JsonNode, Set<String>> impl
+    Function<JsonNode, ConformanceCheckResult> impl
   ) implements JsonContentCheck {
     @Override
-    public Set<String> validate(JsonNode body) {
+    public ConformanceCheckResult validate(JsonNode body) {
       return impl.apply(body);
     }
 
-    private static JsonContentCheck of(String description, Function<JsonNode, Set<String>> impl) {
+    private static JsonContentCheck of(String description, Function<JsonNode, ConformanceCheckResult> impl) {
       return new JsonContentCheckImpl(description, true, impl);
     }
 
     private static JsonContentCheck of(
-        String description, boolean isRelevant, Function<JsonNode, Set<String>> impl) {
+        String description, boolean isRelevant, Function<JsonNode, ConformanceCheckResult> impl) {
       return new JsonContentCheckImpl(description, isRelevant, impl);
-    }
-  }
-
-  record JsonComplexContentCheckImpl(
-      @NonNull String description, @NonNull Function<JsonNode, Set<ConformanceError>> impl)
-      implements JsonComplexContentCheck {
-
-    @Override
-    public Set<ConformanceError> validate(JsonNode body) {
-      return impl.apply(body);
-    }
-
-    private static JsonComplexContentCheck of(
-        String description, Function<JsonNode, Set<ConformanceError>> impl) {
-      return new JsonComplexContentCheckImpl(description, impl);
     }
   }
 }

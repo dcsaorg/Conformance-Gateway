@@ -15,82 +15,45 @@ class JsonAttributeBasedCheck extends ActionCheck {
 
   private final String standardsVersion;
   private final List<JsonContentCheck> validators;
-  private final List<JsonComplexContentCheck> complexValidators;
 
   JsonAttributeBasedCheck(
-          String titlePrefix,
-          String title,
-          Predicate<String> isRelevantForRoleName,
-          UUID matchedExchangeUuid,
-          HttpMessageType httpMessageType,
-          String standardsVersion,
-          @NonNull
-          List<@NonNull JsonContentCheck> validators,
-          List<@NonNull JsonComplexContentCheck> complexValidators) {
+      String titlePrefix,
+      String title,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType,
+      String standardsVersion,
+      @NonNull List<@NonNull JsonContentCheck> validators) {
     super(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
     if (validators.isEmpty()) {
-      throw new IllegalArgumentException("Must have at least one subcheck (validators must be non-empty)");
+      throw new IllegalArgumentException(
+          "Must have at least one subcheck (validators must be non-empty)");
     }
     this.standardsVersion = standardsVersion;
     if (this.standardsVersion == null) {
       throw new IllegalArgumentException();
     }
     this.validators = validators;
-    this.complexValidators = complexValidators;
-  }
-
-  JsonAttributeBasedCheck(
-    String titlePrefix,
-    String title,
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    String standardsVersion,
-    @NonNull
-    List<@NonNull JsonContentCheck> validators) {
-    super(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
-    if (validators.isEmpty()) {
-      throw new IllegalArgumentException("Must have at least one subcheck (validators must be non-empty)");
-    }
-    this.standardsVersion = standardsVersion;
-    if (this.standardsVersion == null) {
-      throw new IllegalArgumentException();
-    }
-    this.validators = validators;
-    this.complexValidators = List.of();
   }
 
   @Override
-  protected final ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected final ConformanceCheckResult performCheck(
+      Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
     return ConformanceCheckResult.simple(Collections.emptySet());
   }
 
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
-    Stream<ComplexValidatorCheck> complexValidatorChecks =
-        this.complexValidators.stream()
-            .map(
-                complexValidator ->
-                    new ComplexValidatorCheck(
-                        this::isRelevantForRole,
-                        matchedExchangeUuid,
-                        httpMessageType,
-                        standardsVersion,
-                        complexValidator));
-
-    Stream<SingleValidatorCheck> singleValidatorChecks =
-        this.validators.stream()
-            .map(
-                validator ->
-                    new SingleValidatorCheck(
-                        this::isRelevantForRole,
-                        matchedExchangeUuid,
-                        httpMessageType,
-                        standardsVersion,
-                        validator));
-
-    return Stream.concat(complexValidatorChecks, singleValidatorChecks);
+    return this.validators.stream()
+        .map(
+            validator ->
+                new SingleValidatorCheck(
+                    this::isRelevantForRole,
+                    matchedExchangeUuid,
+                    httpMessageType,
+                    standardsVersion,
+                    validator));
   }
 
   private static class SingleValidatorCheck extends ActionCheck {
@@ -98,7 +61,12 @@ class JsonAttributeBasedCheck extends ActionCheck {
     private final String standardsVersion;
     private final JsonContentCheck validator;
 
-    public SingleValidatorCheck(Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType, String standardsVersion, @NonNull JsonContentCheck validator) {
+    public SingleValidatorCheck(
+        Predicate<String> isRelevantForRoleName,
+        UUID matchedExchangeUuid,
+        HttpMessageType httpMessageType,
+        String standardsVersion,
+        @NonNull JsonContentCheck validator) {
       super(validator.description(), isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
       this.standardsVersion = standardsVersion;
       this.validator = validator;
@@ -106,11 +74,13 @@ class JsonAttributeBasedCheck extends ActionCheck {
     }
 
     @Override
-    protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    protected ConformanceCheckResult performCheck(
+        Function<UUID, ConformanceExchange> getExchangeByUuid) {
       ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
       if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
-      return ConformanceCheckResult.simple(VersionedKeywordDataset.withVersion(standardsVersion, () -> this.validator.validate(jsonBody)));
+      return VersionedKeywordDataset.withVersion(
+          standardsVersion, () -> this.validator.validate(jsonBody));
     }
   }
 }

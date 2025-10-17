@@ -24,7 +24,7 @@ public class EblInputPayloadValidations {
     contentChecks.add(EblChecks.VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
     contentChecks.addAll(EblChecks.generateScenarioRelatedChecks(scenarioType, isTD));
     return contentChecks.stream()
-        .flatMap(check -> check.validate(eblNode).stream())
+        .flatMap(check -> check.validate(eblNode).getErrorMessages().stream())
         .collect(Collectors.toSet());
   }
 }

@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -31,7 +32,7 @@ public class OvsChecks {
               validationError ->
                 validationErrors.add(
                   "CheckServiceSchedules failed: %s".formatted(validationError)));
-          return validationErrors;
+          return ConformanceCheckResult.simple(validationErrors);
         }));
 
     checks.add(
@@ -45,13 +46,13 @@ public class OvsChecks {
                 validationErrors.add(
                   "Schedule Param Value Validation failed: %s"
                     .formatted(validationError)));
-          return validationErrors;
+          return ConformanceCheckResult.simple(validationErrors);
         }));
 
     checks.add(
       JsonAttribute.customValidator(
         "Check transportCallReference is unique across each service schedules",
-        OvsChecks::validateUniqueTransportCallReference));
+              body -> ConformanceCheckResult.simple(validateUniqueTransportCallReference(body))));
 
     checks.add(
       JsonAttribute.customValidator(
@@ -65,12 +66,12 @@ public class OvsChecks {
           if (limitParam.isPresent()) {
             int expectedLimit = Integer.parseInt(limitParam.get().getValue().trim());
             if (body.size() > expectedLimit) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                 "The number of service schedules exceeds the limit parameter: "
-                  + expectedLimit);
+                  + expectedLimit));
             }
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         }));
     return checks;
   }

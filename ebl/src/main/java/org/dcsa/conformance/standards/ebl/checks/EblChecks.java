@@ -206,12 +206,12 @@ public class EblChecks {
           JsonNode numberOfCopiesNode = node.path(fieldName);
           if (IS_AN_EBL.test(node)) {
             if (numberOfCopiesNode.isMissingNode() || numberOfCopiesNode.asText().equals("0")) {
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }
             String path = concatContextPath(contextPath, fieldName);
-            return Set.of("%s at %s".formatted(errorMessage, path));
+            return ConformanceCheckResult.simple(Set.of("%s at %s".formatted(errorMessage, path)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -232,12 +232,12 @@ public class EblChecks {
           JsonNode numberOfOriginalsNode = node.path(fieldName);
           if (node.path("transportDocumentTypeCode").asText("").equals("SWB")) {
             if (numberOfOriginalsNode.isMissingNode()) {
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }
             String path = concatContextPath(contextPath, fieldName);
-            return Set.of("%s at %s".formatted(errorMessage, path));
+            return ConformanceCheckResult.simple(Set.of("%s at %s".formatted(errorMessage, path)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -253,11 +253,11 @@ public class EblChecks {
                 int total = withoutCharges + withCharges;
 
                 if (total > 1) {
-                  return Set.of(
+                  return ConformanceCheckResult.simple(Set.of(
                       "The sum of 'numberOfOriginalsWithoutCharges' (%d) and 'numberOfOriginalsWithCharges' (%d) cannot exceed 1 for Electronic original Bills of Ladings, but was %d at '%s'"
-                          .formatted(withoutCharges, withCharges, total, contextPath));
+                          .formatted(withoutCharges, withCharges, total, contextPath)));
                 }
-                return Set.of();
+                return ConformanceCheckResult.simple(Set.of());
               }));
 
   static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTY =
@@ -291,7 +291,7 @@ public class EblChecks {
                 default -> issues.addAll(validateDocumentPartyFields(childNode, field.getKey()));
               }
             }
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
 
   private static Set<String> validateDocumentPartyFields(JsonNode documentPartyNode, String partyName) {
@@ -488,7 +488,7 @@ public class EblChecks {
           issues.add("The '%s' party cannot be used when '%s' is false".formatted(documentPartiesPath, isToOrderPath));
         }
       }
-      return issues;
+      return ConformanceCheckResult.simple(issues);
     });
 
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
@@ -515,9 +515,9 @@ public class EblChecks {
         }
       }
       var path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
-      return missing.stream()
+      return ConformanceCheckResult.simple(missing.stream()
         .map(ref -> "The equipment reference '%s' was used in a cargoItem but was not present in '%s'".formatted(ref, path))
-        .collect(Collectors.toSet());
+        .collect(Collectors.toSet()));
     }
   );
 
@@ -527,9 +527,9 @@ public class EblChecks {
       var duplicates = new LinkedHashSet<String>();
       allEquipmentReferences(body, duplicates);
       var path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
-      return duplicates.stream()
+      return ConformanceCheckResult.simple(duplicates.stream()
         .map(ref -> "The equipment reference '%s' was used more than once in '%s'".formatted(ref, path))
-        .collect(Collectors.toSet());
+        .collect(Collectors.toSet()));
     }
   );
 
@@ -562,11 +562,11 @@ public class EblChecks {
           (node, contextPath) -> {
             boolean isToOrder = node.path(IS_TO_ORDER).asBoolean(false);
             if (isToOrder && node.path(DOCUMENT_PARTIES).path("notifyParty").isMissingNode()) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   "If isToOrder is true in any houseBillOfLading, notifyParty is required in documentParties of that houseBillOfLading at %s"
-                      .formatted(contextPath));
+                      .formatted(contextPath)));
             }
-            return Set.of();
+            return ConformanceCheckResult.simple(Set.of());
           });
 
   static final JsonRebaseableContentCheck VALID_HBL_METHOD_OF_PAYMENT =
@@ -587,16 +587,16 @@ public class EblChecks {
             boolean hasProvider = !node.path("carrierCodeListProvider").isMissingNode();
 
             if (hasCarrierCode && !hasProvider) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   "'carrierCodeListProvider' is required when 'carrierCode' is present at %s"
-                      .formatted(contextPath));
+                      .formatted(contextPath)));
             }
             if (!hasCarrierCode && hasProvider) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   "'carrierCode' is required when 'carrierCodeListProvider' is present at %s"
-                      .formatted(contextPath));
+                      .formatted(contextPath)));
             }
-            return Set.of();
+            return ConformanceCheckResult.simple(Set.of());
           });
 
   private static final JsonRebaseableContentCheck VALID_TYPE_OF_PERSON =
@@ -706,7 +706,7 @@ public class EblChecks {
             JsonNode routingOfConsignmentCountries = node.path(ROUTING_OF_CONSIGNMENT_COUNTRIES);
             if (routingOfConsignmentCountries.isMissingNode()
                 || !routingOfConsignmentCountries.isArray()) {
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }
             String placeOfAcceptanceCountry =
                 node.path("placeOfAcceptance").path(COUNTRY_CODE).asText(null);
@@ -721,11 +721,11 @@ public class EblChecks {
                         routingOfConsignmentCountries
                             .path(routingOfConsignmentCountries.size() - 1)
                             .asText()))) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   "The first country in routingOfConsignmentCountries should be placeOfAcceptance and the last country (if more than one) should be placeOfFinalDelivery at %s"
-                      .formatted(contextPath));
+                      .formatted(contextPath)));
             }
-            return Set.of();
+            return ConformanceCheckResult.simple(Set.of());
           });
 
   static final JsonRebaseableContentCheck BUYER_AND_SELLER_CONDITIONAL_CHECK =
@@ -734,11 +734,11 @@ public class EblChecks {
           (node, contextPath) -> {
             JsonNode houseBillOfLadings = node.path(HOUSE_BILL_OF_LADINGS);
             if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }
             JsonNode advanceManifestFilings = node.path(ADVANCE_MANIFEST_FILINGS);
             if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }
             boolean isHouseBlsIssued = node.path("isHouseBillOfLadingsIssued").asBoolean(true);
             int index = 0;
@@ -753,15 +753,15 @@ public class EblChecks {
                     String specificContextPath =
                         concatContextPath(
                             contextPath, "houseBillOfLadings[" + index + "].documentParties");
-                    return Set.of(
+                    return ConformanceCheckResult.simple(Set.of(
                         "Buyer and Seller is required in documentParties in houseBillOfLadings when isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER', manifestTypeCode is 'ENS' and and isHouseBillOfLadingsIssued is false at %s"
-                            .formatted(specificContextPath));
+                            .formatted(specificContextPath)));
                   }
                 }
               }
               index++;
             }
-            return Set.of();
+            return ConformanceCheckResult.simple(Set.of());
           });
 
   static final JsonRebaseableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
@@ -894,15 +894,15 @@ public class EblChecks {
               (nodeToValidate, contextPath) -> {
                 var dg = nodeToValidate.path("dangerousGoods");
                 if (!dg.isArray() || dg.isEmpty()) {
-                  return Set.of();
+                  return ConformanceCheckResult.simple(Set.of());
                 }
                 if (nodeToValidate.path("packageCode").isMissingNode()
                     && nodeToValidate.path("imoPackagingCode").isMissingNode()) {
-                  return Set.of(
+                  return ConformanceCheckResult.simple(Set.of(
                       "The '%s' object did not have a 'packageCode' nor an 'imoPackagingCode', which is required due to dangerousGoods"
-                          .formatted(contextPath));
+                          .formatted(contextPath)));
                 }
-                return Set.of();
+                return ConformanceCheckResult.simple(Set.of());
               }),
           JsonAttribute.allIndividualMatchesMustBeValid(
               "The 'inhalationZone' values must be from dataset",
@@ -1022,15 +1022,15 @@ public class EblChecks {
   private static JsonContentMatchedValidation scenarioCustomsReferencesCheck(ScenarioType scenarioType) {
     return (nodeToValidate,contextPath) -> {
       if (!scenarioType.isCustomsReferencesRequired()) {
-        return Set.of();
+        return ConformanceCheckResult.simple(Set.of());
       }
       var allReferencesParents = nodeToValidate.findParents(CUSTOMS_REFERENCES);
       for (var referencesParent : allReferencesParents) {
         if (isNonEmptyNode(referencesParent.path(CUSTOMS_REFERENCES))) {
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         }
       }
-      return Set.of("Expected 'customsReferences' to be used somewhere.");
+      return ConformanceCheckResult.simple(Set.of("Expected 'customsReferences' to be used somewhere."));
     };
   }
 
@@ -1168,7 +1168,7 @@ public class EblChecks {
                         .formatted(SI_PENDING_UPDATE.wireName()));
               }
             }
-            return issues;
+            return ConformanceCheckResult.simple(issues);
           });
 
   public static ActionCheck tdRefStatusChecks(UUID matched, String standardVersion, Supplier<EblDynamicScenarioParameters> dspSupplier, TransportDocumentStatus transportDocumentStatus) {
@@ -1292,7 +1292,7 @@ public class EblChecks {
                   }
                 }
               }
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
     jsonContentChecks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
@@ -1303,12 +1303,12 @@ public class EblChecks {
             (nodeToValidate, contextPath) -> {
               if (ScenarioType.valueOf(dspSupplier.get().scenarioType()) == ScenarioType.DG) {
                 if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
-                  return Set.of(
+                  return ConformanceCheckResult.simple(Set.of(
                       "The scenario requires '%s' to contain dangerous goods"
-                          .formatted(contextPath));
+                          .formatted(contextPath)));
                 }
               }
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }));
     jsonContentChecks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
@@ -1318,12 +1318,12 @@ public class EblChecks {
               var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
               if (scenario == ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES) {
                 if (!nodeToValidate.path("isShipperOwned").asBoolean(false)) {
-                  return Set.of(
+                  return ConformanceCheckResult.simple(Set.of(
                       "The scenario requires '%s.isShipperOwned' to be true"
-                          .formatted(contextPath));
+                          .formatted(contextPath)));
                 }
               }
-              return Set.of();
+              return ConformanceCheckResult.simple(Set.of());
             }));
     jsonContentChecks.addAll(generateScenarioRelatedChecks(ScenarioType.valueOf(dspSupplier.get().scenarioType()), true));
     return jsonContentChecks;
@@ -1344,12 +1344,12 @@ public class EblChecks {
 
       if (expectedSize != null && actualSize != expectedSize) {
         String path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
             "The scenario requires exactly %d 'utilizedTransportEquipments' but found %d at %s"
-                .formatted(expectedSize, actualSize, path));
+                .formatted(expectedSize, actualSize, path)));
       }
 
-      return Set.of();
+      return ConformanceCheckResult.simple(Set.of());
     };
   }
 
@@ -1368,12 +1368,12 @@ public class EblChecks {
 
       if (expectedSize != null && actualSize != expectedSize) {
         String path = concatContextPath(contextPath, CONSIGNMENT_ITEMS);
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
             "The scenario requires exactly %d 'consignemntItems' but found %d at %s"
-                .formatted(expectedSize, actualSize, path));
+                .formatted(expectedSize, actualSize, path)));
       }
 
-      return Set.of();
+      return ConformanceCheckResult.simple(Set.of());
     };
   }
 

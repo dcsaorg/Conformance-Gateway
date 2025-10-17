@@ -80,33 +80,20 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   }
 
   private Stream<ConformanceCheck> createFullNotificationChecksAt(String jsonPath, String prefix) {
-    Stream<ConformanceCheck> fullPayloadChecks =
-        BookingChecks.fullPayloadChecks(
-                dspSupplier,
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                expectedBookingCancellationStatus,
-                amendedContent)
-            .stream()
-            .map(
-                jsonContentCheck ->
-                    createSubCheck(
-                        prefix,
-                        jsonContentCheck.description(),
-                        jsonContentCheck.isRelevant(),
-                        jsonPath,
-                        at(jsonPath, jsonContentCheck::validate)));
-
-    Stream<ConformanceCheck> conditionalChecks =
-        BookingChecks.conditionalContentChecks().stream()
-            .map(
-                check ->
-                    createConditionalSubCheck(
-                        prefix,
-                        check.description(),
-                        jsonPath,
-                        conditionalAt(jsonPath, check::validate)));
-
-    return Stream.concat(conditionalChecks, fullPayloadChecks);
+    return BookingChecks.fullPayloadChecks(
+            dspSupplier,
+            expectedBookingStatus,
+            expectedAmendedBookingStatus,
+            expectedBookingCancellationStatus,
+            amendedContent)
+        .stream()
+        .map(
+            jsonContentCheck ->
+                createSubCheck(
+                    prefix,
+                    jsonContentCheck.description(),
+                    jsonContentCheck.isRelevant(),
+                    jsonPath,
+                    at(jsonPath, jsonContentCheck::validate)));
   }
 }

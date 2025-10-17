@@ -8,10 +8,10 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.Party;
 @Schema(
     description =
 """
-Routing of an event from the originating party, via forwarding parties, to the destination party.
+Technical routing of a VGM declaration from the originating party, via forwarding parties, to the destination party.
 """)
 @Data
-public class VGMRouting {
+public class RoutingDetails {
 
   @Schema(
       description =

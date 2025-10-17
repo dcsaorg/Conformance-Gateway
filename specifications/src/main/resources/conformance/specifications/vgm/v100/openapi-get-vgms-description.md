@@ -1,10 +1,10 @@
-Retrieves the list of VGMs matching the criteria provided as query parameters.
+Retrieves the list of VGM declarations matching the criteria provided as query parameters.
 
-If no VGMs match the criteria provided as query parameters, the response should not be an HTTP 404 error message, but a regular HTTP 200 response with an empty array in the message body.
+If no VGM declarations match the criteria provided as query parameters, the response should not be an HTTP 404 error message, but a regular HTTP 200 response with an empty array in the message body.
 
-The ordering of VGMs in the response message is unspecified.
+The ordering of VGM declarations in the response message is unspecified.
 
-The VGM Producer is expected to additionally filter the VGMs based on the authorization and registration profile of the authenticated VGM Consumer calling this endpoint. Authorization, registration and any such additional filtering are out of scope in this standard.
+The VGM Producer is expected to additionally filter the VGM declarations based on the authorization and registration profile of the authenticated VGM Consumer calling this endpoint. Authorization, registration and any such additional filtering are out of scope in this standard.
 
 ## VGM filtering
 
@@ -19,7 +19,7 @@ Every VGM Producer must support combining any of the query parameter filters abo
 * `vgmUpdatedDateTimeMax`
 * `vgmUpdatedDateTimeMin`, `vgmUpdatedDateTimeMax`
 
-Each VGM Producer can separately also decide to have default relative date ranges and only return VGMs having an `vgmUpdatedDateTime` within those ranges.
+Each VGM Producer can separately also decide to have default relative date ranges and only return VGM declarations having an `updatedDateTime` within those ranges.
 
 When receiving requests containing an unsupported query parameter, a VGM Producer can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 
@@ -35,15 +35,15 @@ If the VGM Producer does not provide pagination support, it can choose to either
 
 ### Enabling pagination
 
-The VGM Consumer can use the `limit` query parameter to specify a maximum number of VGMs that should be included in the response.
+The VGM Consumer can use the `limit` query parameter to specify a maximum number of VGM declarations that should be included in the response.
 
-The VGM Producer can separately choose (and document on their copy of the published API specification) its own limit to the number of VGMs that it would include in responses.
+The VGM Producer can separately choose (and document on their copy of the published API specification) its own limit to the number of VGM declarations that it would include in responses.
 
 The effective page size limit is the minimum between the `limit` query parameter (if specified) and the VGM Producer's own maximum page size configuration setting.
 
 ### Retrieving results pages
 
-If based on filtering the response would include more VGMs than this effective page size limit, the VGM Producer only adds VGMs to the response up to this effective page size limit, setting in the response the `Next-Page-Cursor` to a value that it can accept as the value of the `cursor` query parameter in a subsequent request and use it to return the next page of results.
+If based on filtering the response would include more VGM declarations than this effective page size limit, the VGM Producer only adds VGM declarations to the response up to this effective page size limit, setting in the response the `Next-Page-Cursor` to a value that it can accept as the value of the `cursor` query parameter in a subsequent request and use it to return the next page of results.
 
 The VGM Consumer reads the value of the `Next-Page-Cursor` response header and sets it as the value of the `cursor` query parameter in its next request.
 

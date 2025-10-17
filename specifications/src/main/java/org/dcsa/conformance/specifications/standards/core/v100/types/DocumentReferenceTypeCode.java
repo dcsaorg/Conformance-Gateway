@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.standards.tnt.v300.types;
+package org.dcsa.conformance.specifications.standards.core.v100.types;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -9,9 +9,9 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Schema(
     type = "string",
     example = "BKG",
-    description = "Code used to denote the type of a document")
+    description = "Code used to denote the type of a document reference")
 @AllArgsConstructor
-public enum DocumentTypeCode implements EnumBase {
+public enum DocumentReferenceTypeCode implements EnumBase {
   AMF("Advance Manifest Filing (of any subtype)"),
   ARN("Arrival Notice"),
   BKG("Booking"),

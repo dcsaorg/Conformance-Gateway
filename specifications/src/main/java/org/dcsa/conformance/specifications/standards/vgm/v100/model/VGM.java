@@ -2,45 +2,42 @@ package org.dcsa.conformance.specifications.standards.vgm.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Weight;
+import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.standards.vgm.v100.types.VGMMethodCode;
+import org.dcsa.conformance.specifications.standards.vgm.v100.types.VGMSourceCode;
 
 @Data
-@Schema(description = "Verified Gross Mass submission for one piece of equipment")
+@Schema(
+    description =
+"""
+Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6
+""")
 public class VGM {
 
-  @Schema(name = "VGMRouting")
-  private VGMRouting vgmRouting;
+  @Schema(description = "The gross mass (weight) of the transport equipment")
+  private Weight weight;
 
-  @Schema(
-      name = "VGMID",
-      maxLength = 500,
-      example = "VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z",
-      description =
-"""
-ID of the VGM, unique among all the VGMs published by a VGM Producer.
+  @Schema() private VGMMethodCode method;
 
-A VGM overrides any other VGM that has the same `vgmID` and an earlier `updatedDateTime`.
+  @Schema() private VGMSourceCode source;
 
-Each VGM is uniquely identified within each VGM 1.x standard ecosystem of connected implementers
-by a composite key including:
-- `VGMRouting.originatingParty.partyCode`
-- `VGMRouting.originatingParty.codeListProvider`
-- `VGMRouting.originatingParty.codeListName`
-- `VGMID`
-""")
-  private String vgmID;
+  @Schema(description = "Date when a gross mass (weight) of a packed container was obtained")
+  private FormattedDate date;
 
   @Schema(
       description =
-"""
-Flag indicating that the VGM is retracted.
+          "The location where the packed container was weighed to determine the Verified Gross Mass (VGM).")
+  private Location location;
 
-The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+  @Schema(
+      maxLength = 70,
+      example = "W42-23110812",
+      description =
+          "Reference number or identifier for the certificate issued by the weighing party (or a certified weighing facility).")
+  private String certificationReference;
 
-If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).
-""")
-  private Boolean isRetracted;
-
-  @Schema(description = "The date and time when the VGM was last updated.")
-  private FormattedDateTime updatedDateTime;
+  @Schema(description = "Date when the VGM certificate has been issued.")
+  private FormattedDate certificationDate;
 }

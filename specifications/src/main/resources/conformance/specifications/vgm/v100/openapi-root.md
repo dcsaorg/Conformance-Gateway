@@ -2,11 +2,11 @@
 
 This is the OpenAPI specification of the **DCSA Verified Gross Mass (VGM)** standard.
 
-This API allows the transfer of structured VGM data from a VGM Producer to a VGM Consumer.
+This API allows the transfer of structured VGM declarations from a VGM Producer to a VGM Consumer.
 
-Each VGM Producer implements the `GET /vgms` endpoint, which can be called by the authorized VGM Consumers to retrieve relevant available VGMs.
+Each VGM Producer implements the `GET /vgms` endpoint, which can be called by the authorized VGM Consumers to retrieve relevant available VGM declarations.
 
-Each VGM Consumer implements the `POST /vgms` endpoint, which can be called by VGM Producers call to send relevant VGMs as they become available.
+Each VGM Consumer implements the `POST /vgms` endpoint, which can be called by VGM Producers call to send relevant VGM declarations as they become available or are updated.
 
 The registration of VGM Consumers with VGM Producers is out of scope.
 

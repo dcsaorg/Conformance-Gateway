@@ -27,18 +27,29 @@ import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ContactDetails;
+import org.dcsa.conformance.specifications.standards.core.v100.model.DocumentReference;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Party;
+import org.dcsa.conformance.specifications.standards.core.v100.model.PartyDetails;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Seal;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ShipmentReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Weight;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.FeedbackElement;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMsError;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMsResponse;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMsError;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMsRequest;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMsResponse;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.EquipmentDetails;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.ShipmentDetails;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGM;
-import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMRouting;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMDeclaration;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.RoutingDetails;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.VesselVoyageDetails;
 
 public class VGMStandardSpecification extends StandardSpecification {
 
@@ -74,6 +85,9 @@ public class VGMStandardSpecification extends StandardSpecification {
     return Stream.of(
         Address.class,
         ClassifiedDateTime.class,
+        ContactDetails.class,
+        DocumentReference.class,
+        EquipmentDetails.class,
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
@@ -81,16 +95,24 @@ public class VGMStandardSpecification extends StandardSpecification {
         GetVGMsResponse.class,
         Location.class,
         Party.class,
+        PartyDetails.class,
         PostVGMsError.class,
         PostVGMsRequest.class,
         PostVGMsResponse.class,
+        RoutingDetails.class,
+        Seal.class,
+        ShipmentDetails.class,
+        ShipmentReference.class,
+        VesselVoyageDetails.class,
+        VoyageNumberOrReference.class,
         VGM.class,
-        VGMRouting.class);
+        VGMDeclaration.class,
+        Weight.class);
   }
 
   @Override
   protected List<String> getRootTypeNames() {
-    return List.of(VGM.class.getSimpleName());
+    return List.of(VGMDeclaration.class.getSimpleName());
   }
 
   @Override

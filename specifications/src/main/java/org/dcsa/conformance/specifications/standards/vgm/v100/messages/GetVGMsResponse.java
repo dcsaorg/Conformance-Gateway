@@ -3,7 +3,7 @@ package org.dcsa.conformance.specifications.standards.vgm.v100.messages;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGM;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMDeclaration;
 
 @Data
 @Schema(
@@ -14,12 +14,12 @@ API response to a `GET VGMs` request
 public class GetVGMsResponse {
 
   @Schema(
-      name = "VGMs",
+      name = "VGMDeclarations",
       description =
 """
-The list of VGMs matching the filter specified by the request query parameters
+The list of VGM declarations matching the filter specified by the request query parameters
 """)
-  private List<VGM> vgms;
+  private List<VGMDeclaration> vgmDeclarations;
 
   @Schema(
       description =

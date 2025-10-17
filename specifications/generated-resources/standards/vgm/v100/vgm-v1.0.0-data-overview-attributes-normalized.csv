@@ -12,6 +12,53 @@ ClassifiedDateTime,classifier,string,,maxLength=10,,EST,"Classifier denoting whe
 - `EST` - Estimated
 - `ACT` - Actual",
 ClassifiedDateTime,value,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
+ContactDetails,email,string,,maxLength=255,,jane.doe@example.com,"Contact email address",
+ContactDetails,name,string,,maxLength=255,,"Jane Doe","Contact name",
+ContactDetails,phone,string,,maxLength=30,,"+14155552671","Contact phone number, including an international phone number format
+as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
+DocumentReference,reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
+DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a document reference
+- `AMF` - Advance Manifest Filing (of any subtype)
+- `ARN` - Arrival Notice
+- `BKG` - Booking
+- `CAS` - Cargo Survey
+- `CBR` - Carrier Booking Request
+- `CEA` - Certificate of Analysis
+- `CEO` - Certificate of Origin
+- `CQU` - Contract Quotation
+- `CRO` - Container Release Order
+- `CUC` - Customs Clearance
+- `DEI` - Delivery Instructions
+- `DEO` - Delivery Order
+- `DGD` - Dangerous Goods Declaration
+- `FCE` - Fumigation Certificate
+- `HCE` - Health Certificate
+- `ICE` - Inspection Certificate
+- `INV` - Invoice
+- `OOG` - Out of Gauge
+- `PCE` - Phytosanitary Certificate
+- `PFD` - Proof of Delivery
+- `SHI` - Shipping Instruction
+- `TRD` - Transport Document
+- `TRO` - Transport Order
+- `VCE` - Veterinary Certificate
+- `VGM` - Verified Gross Mass",
+EquipmentDetails,cargoGrossWeight,Weight,,,,,"Gross weight of the cargo item including packaging being carried in the container.
+Excludes the tare weight of the container.",
+EquipmentDetails,equipmentReference,string,,maxLength=11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+
+According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+
+If a container does not comply with ISO 6346, it is suggested to follow
+[Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations)
+from SMDG.",
+EquipmentDetails,ISOEquipmentCode,string,,maxLength=4,,22GP,"Unique code identifying the equipment size and type used to transport commodities.
+The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP)
+following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
+EquipmentDetails,isShipperOwned,boolean,,,,,"Indicates whether the container is owned by the shipper (SOC)",
+EquipmentDetails,seals,"Seal list",,,,,,
+EquipmentDetails,tareWeight,Weight,,,,,"The tare weight of the container",
 Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
 Facility,facilityCodeListProvider,string,,maxLength=10,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
@@ -31,7 +78,7 @@ GetVGMsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indi
 At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.",
 GetVGMsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
-GetVGMsResponse,VGMs,"VGM list",,,,,"The list of VGMs matching the filter specified by the request query parameters",
+GetVGMsResponse,VGMDeclarations,"VGMDeclaration list",,,,,"The list of VGM declarations matching the filter specified by the request query parameters",
 Location,address,Address,,,,,"Location address",
 Location,facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
 Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
@@ -87,6 +134,9 @@ Party,partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per th
 Party,partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
+PartyDetails,address,Address,,,,,"An object for storing address-related information.",
+PartyDetails,contactDetails,ContactDetails,,,,,"The contact details of a person.",
+PartyDetails,party,Party,,,,,"Identification of a container shipping party",
 PostVGMsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
 
 At least one feedback element of severity `ERROR` is expected.
@@ -95,29 +145,92 @@ Lower severity feedback elements may also be included.
 When sent in response to a request that contains an array of VGMs,
 the order of the `feedbackElements` is not related to the list of request VGMs.
 Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.",
-PostVGMsRequest,VGMs,"VGM list",,,,,"List of VGMs.",
+PostVGMsRequest,VGMDeclarations,"VGMDeclaration list",,,,,"List of VGM declarations.",
 PostVGMsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
 
 There can be zero, one or more feedback elements per event in the request.
 The order of `feedbackElements` is not related to the order of VGMs in the request.
 Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.",
-VGM,isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
+RoutingDetails,destinationParty,Party,,,,,"The final party intended as destination of the event.",
+RoutingDetails,forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
+RoutingDetails,originatingParty,Party,,,,,"The initial party with which the event originated.",
+Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
+Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
+- `CAR` (Carrier)
+- `SHI` (Shipper)
+- `PHY` (Phytosanitary)
+- `VET` (Veterinary)
+- `CUS` (Customs)",
+Seal,type,string,,,,WIR,"The type of seal.
+- `KLP` (Keyless padlock)
+- `BLT` (Bolt)
+- `WIR` (Wire)",
+ShipmentDetails,carrierBookingReference,string,yes,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
+ShipmentDetails,documentReferences,"DocumentReference list",,,,,"Additional list of document references related to this event",
+ShipmentDetails,shipmentReferences,"ShipmentReference list",,,,,"Additional list of shipment references related to this event",
+ShipmentDetails,"transportDocumentReference",string,yes,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM was created",
+ShipmentReference,reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
+ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a shipment reference
+- `AAO` - Consignee’s Reference
+- `AES` - Automated Export System
+- `BID` - Booking Request ID
+- `BPR` - Booking party reference number
+- `CER` - Canadian Export Reporting System
+- `CR` - Customer’s Reference
+- `CSI` - Customer shipment ID
+- `DUE` - Declaração Única de Exportação
+- `ECR` - Empty container release reference
+- `EQ` - Equipment Reference
+- `FF` - Freight Forwarder’s Reference
+- `PO` - Purchase Order Reference
+- `RUC` - Registro Único del Contribuyente
+- `SI` - Shipper’s Reference",
+VesselVoyageDetails,carrierCode,string,,maxLength=4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
+[SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
+
+`carrierCodeListProvider` defines which list the `carrierCode` is based upon.",
+VesselVoyageDetails,carrierCodeListProvider,string,,maxLength=10,,NMFTA,"The code list provider for the `carrierCode`. Possible values are:
+- `SMDG` (Ship Message Design Group)
+- `NMFTA` (National Motor Freight Traffic Association)",
+VesselVoyageDetails,"exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
+VesselVoyageDetails,"importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
+VesselVoyageDetails,portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
+VesselVoyageDetails,portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
+VGM,certificationDate,"string(date)",,,,2025-01-23,"Date when the VGM certificate has been issued.",
+VGM,certificationReference,string,,maxLength=70,,W42-23110812,"Reference number or identifier for the certificate issued by the weighing party (or a certified weighing facility).",
+VGM,date,"string(date)",,,,2025-01-23,"Date when a gross mass (weight) of a packed container was obtained",
+VGM,location,Location,,,,,"The location where the packed container was weighed to determine the Verified Gross Mass (VGM).",
+VGM,method,string,,,,SM1,"Method used to determine the VGM
+- `SM1` - SOLAS verification method 1  (Scaled)
+- `SM2` - SOLAS verification method 2 (Calculated)",
+VGM,source,string,,,,SM1,"Code identifying the party submitting the VGM
+- `SHIPPER` - Shipper
+- `TERMINAL` - Terminal",
+VGM,weight,Weight,,,,,"The gross mass (weight) of the transport equipment",
+VGMDeclaration,authorizedParty,PartyDetails,,,,,"Party authorized to act on behalf of the `responsibleParty`.",
+VGMDeclaration,"authorizedPersonSignatory",string,,maxLength=255,,"Jane Doe","Authorized person signatory",
+VGMDeclaration,declarationDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the VGM declaration was last updated",
+VGMDeclaration,declarationReference,string,,maxLength=500,,"VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z","Reference of the VGM declaration",
+VGMDeclaration,equipmentDetails,EquipmentDetails,,,,,"VGM details specific to the equipment",
+VGMDeclaration,holdingParty,PartyDetails,,,,,"Information reference agency holding the VGM declaration.",
+VGMDeclaration,isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
 
 The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
 
 If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).",
-VGM,updatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the VGM was last updated.",
-VGM,VGMID,string,,maxLength=500,,"VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z","ID of the VGM, unique among all the VGMs published by a VGM Producer.
-
-A VGM overrides any other VGM that has the same `vgmID` and an earlier `updatedDateTime`.
-
-Each VGM is uniquely identified within each VGM 1.x standard ecosystem of connected implementers
-by a composite key including:
-- `VGMRouting.originatingParty.partyCode`
-- `VGMRouting.originatingParty.codeListProvider`
-- `VGMRouting.originatingParty.codeListName`
-- `VGMID`",
-VGM,VGMRouting,VGMRouting,,,,,"Routing of an event from the originating party, via forwarding parties, to the destination party.",
-VGMRouting,destinationParty,Party,,,,,"The final party intended as destination of the event.",
-VGMRouting,forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
-VGMRouting,originatingParty,Party,,,,,"The initial party with which the event originated.",
+VGMDeclaration,orderedByParty,PartyDetails,,,,,"Party that orders the weighing at the terminal or weighing station.",
+VGMDeclaration,responsibleParty,PartyDetails,,,,,"Party responsible for the VGM declaration.",
+VGMDeclaration,shipmentDetails,ShipmentDetails,,,,,"VGM details specific to the shipment",
+VGMDeclaration,submittingParty,PartyDetails,,,,,"Party that submits the VGM declaration.",
+VGMDeclaration,vesselVoyageDetails,VesselVoyageDetails,,,,,"VGM details specific to the vessel voyage",
+VGMDeclaration,VGM,VGM,,,,,"Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6",
+VGMDeclaration,VGMRouting,RoutingDetails,,,,,"Technical routing of a VGM declaration from the originating party, via forwarding parties, to the destination party.",
+VGMDeclaration,weighingParty,PartyDetails,,,,,"Legally accepted party designated to perform the weighing.",
+VoyageNumberOrReference,carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
+VoyageNumberOrReference,universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+Weight,unit,string,,maxLength=10,,KGM,"Measurement unit in which the weight `value` is expressed:
+- `KGM` (Kilograms)
+- `LBR` (Pounds)
+- `GRM` (Grams)
+- `ONZ` (Ounce)",
+Weight,value,number,,,,2.4,"Weight value expressed in the measurement `unit`",

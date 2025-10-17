@@ -1,7 +1,7 @@
 package org.dcsa.conformance.specifications;
 
 import org.dcsa.conformance.specifications.standards.vgm.v100.VGMStandardSpecification;
-import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGM;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMDeclaration;
 import org.junit.jupiter.api.Test;
 
 class VGMStandardSpecificationTest {
@@ -11,7 +11,7 @@ class VGMStandardSpecificationTest {
     vgmStandardSpecification.generateArtifacts();
 
     StandardSpecificationTestToolkit.verifyTypeExport(
-        VGM.class.getSimpleName(),
+        VGMDeclaration.class.getSimpleName(),
         "../specifications/generated-resources/standards/vgm/v100/vgm-v1.0.0-openapi.yaml",
         vgmStandardSpecification);
   }

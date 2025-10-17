@@ -38,7 +38,7 @@ public class BookingInputPayloadValidations {
     return Stream.concat(
             // Basic content check error messages
             contentChecks.stream()
-                .filter(JsonContentCheck::isApplicable)
+                .filter(JsonContentCheck::isRelevant)
                 .flatMap(check -> check.validate(bookingNode).stream()),
             // Conditional validation error messages
             conditionalChecks.stream()

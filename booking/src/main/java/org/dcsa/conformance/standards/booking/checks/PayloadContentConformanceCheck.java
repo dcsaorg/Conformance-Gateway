@@ -13,11 +13,11 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.core.util.JsonUtil;
 
 public abstract class PayloadContentConformanceCheck extends ActionCheck {
 
   protected static final String UNSET_MARKER = "<unset>";
-  private boolean hasBody = true;
 
   protected PayloadContentConformanceCheck(
       String title,
@@ -47,14 +47,15 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   protected ConformanceCheck createSubCheck(
       String prefix,
       String subtitle,
-      boolean isApplicable,
+      boolean isRelevant,
+      String path,
       Function<JsonNode, Set<String>> subCheck) {
     return new ActionCheck(
         prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
 
       @Override
-      public boolean isApplicable() {
-        return isApplicable;
+      public boolean isRelevant() {
+        return isRelevant;
       }
 
       @Override
@@ -67,14 +68,19 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
                 ? exchange.getResponse().message()
                 : exchange.getRequest().message();
         var payload = conformanceMessage.body().getJsonBody();
+        var pointer = JsonPointer.compile(path);
+        if (JsonUtil.isMissingOrEmpty(payload.at(pointer))) {
+          this.setApplicable(false);
+          return Set.of();
+        }
         return subCheck.apply(payload);
       }
     };
   }
 
   protected ConformanceCheck createSubCheck(
-      String prefix, String subtitle, Function<JsonNode, Set<String>> subCheck) {
-    return createSubCheck(prefix, subtitle, true, subCheck);
+      String prefix, String subtitle, String path, Function<JsonNode, Set<String>> subCheck) {
+    return createSubCheck(prefix, subtitle, true, path, subCheck);
   }
 
   protected Function<JsonNode, Set<ConformanceError>> conditionalAt(
@@ -87,7 +93,10 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   }
 
   protected ConformanceCheck createConditionalSubCheck(
-      String prefix, String subtitle, Function<JsonNode, Set<ConformanceError>> subCheck) {
+      String prefix,
+      String subtitle,
+      String path,
+      Function<JsonNode, Set<ConformanceError>> subCheck) {
     return new ActionCheck(
         prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
 
@@ -107,6 +116,11 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
                 ? exchange.getResponse().message()
                 : exchange.getRequest().message();
         var payload = conformanceMessage.body().getJsonBody();
+        var pointer = JsonPointer.compile(path);
+        if (JsonUtil.isMissingOrEmpty(payload.at(pointer))) {
+          this.setApplicable(false);
+          return Set.of();
+        }
         return subCheck.apply(payload);
       }
     };

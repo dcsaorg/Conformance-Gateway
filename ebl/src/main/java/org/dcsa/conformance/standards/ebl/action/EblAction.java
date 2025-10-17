@@ -182,7 +182,7 @@ public abstract class EblAction extends BookingAndEblAction {
             notificationExchangeUuid,
             "/v3/shipping-instructions-notifications"),
         new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204)
-            .withApplicability(isWithNotifications),
+            .withRelevance(isWithNotifications),
         ApiHeaderCheck.createNotificationCheck(
             titlePrefix,
             EblRole::isCarrier,
@@ -195,7 +195,7 @@ public abstract class EblAction extends BookingAndEblAction {
                 notificationExchangeUuid,
                 HttpMessageType.RESPONSE,
                 expectedApiVersion)
-            .withApplicability(isWithNotifications),
+            .withRelevance(isWithNotifications),
         new JsonSchemaCheck(
             titlePrefix,
             EblRole::isCarrier,
@@ -232,7 +232,7 @@ public abstract class EblAction extends BookingAndEblAction {
             notificationExchangeUuid,
             "/v3/transport-document-notifications"),
         new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204)
-            .withApplicability(isWithNotifications),
+            .withRelevance(isWithNotifications),
         ApiHeaderCheck.createNotificationCheck(
             titlePrefix,
             EblRole::isCarrier,
@@ -245,7 +245,7 @@ public abstract class EblAction extends BookingAndEblAction {
                 notificationExchangeUuid,
                 HttpMessageType.RESPONSE,
                 expectedApiVersion)
-            .withApplicability(isWithNotifications),
+            .withRelevance(isWithNotifications),
         new JsonSchemaCheck(
             titlePrefix,
             EblRole::isCarrier,

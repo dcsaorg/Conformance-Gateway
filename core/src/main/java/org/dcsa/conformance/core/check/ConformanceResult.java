@@ -2,26 +2,25 @@ package org.dcsa.conformance.core.check;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
 import lombok.Getter;
 
 @Getter
 public class ConformanceResult {
 
-  private final boolean isApplicable;
+  private final boolean isRelevant;
   private final boolean conformant;
   private final Set<String> errors;
 
   private ConformanceResult(boolean conformant, Set<String> errors) {
     this.conformant = conformant;
     this.errors = Collections.unmodifiableSet(errors);
-    this.isApplicable = true;
+    this.isRelevant = true;
   }
 
-  private ConformanceResult(boolean isApplicable, boolean conformant, Set<String> errors) {
+  private ConformanceResult(boolean isRelevant, boolean conformant, Set<String> errors) {
     this.conformant = conformant;
     this.errors = Collections.unmodifiableSet(errors);
-    this.isApplicable = isApplicable;
+    this.isRelevant = isRelevant;
   }
 
   public static ConformanceResult forSourceParty(Set<String> errors) {
@@ -33,7 +32,7 @@ public class ConformanceResult {
   }
 
   public static ConformanceResult forSourcePartyWithRelevance(Set<ConformanceError> errors) {
-    boolean isApplicable =
+    boolean isRelevant =
         errors.isEmpty()
             || errors.stream()
                 .anyMatch(
@@ -56,7 +55,7 @@ public class ConformanceResult {
             .map(ConformanceError::message)
             .collect(Collectors.toSet());
 
-    return new ConformanceResult(isApplicable, conformant, errorMessages);
+    return new ConformanceResult(isRelevant, conformant, errorMessages);
   }
 
   public static ConformanceResult forTargetPartyWithRelevance(Set<ConformanceError> errors) {

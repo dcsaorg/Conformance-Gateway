@@ -12,6 +12,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 @Slf4j
 public abstract class ActionCheck extends ConformanceCheck {
+
   private final Predicate<String> isRelevantForRoleName;
   protected final UUID matchedExchangeUuid;
   protected final HttpMessageType httpMessageType;
@@ -90,8 +91,8 @@ public abstract class ActionCheck extends ConformanceCheck {
     return null;
   }
 
-  public ActionCheck withApplicability(boolean isApplicable) {
-    this.setApplicable(isApplicable);
+  public ActionCheck withRelevance(boolean isRelevant) {
+    this.setRelevant(isRelevant);
     return this;
   }
 }

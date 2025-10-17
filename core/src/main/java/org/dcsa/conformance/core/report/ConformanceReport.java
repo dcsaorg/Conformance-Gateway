@@ -43,6 +43,7 @@ public class ConformanceReport {
         conformanceCheck
             .subChecksStream()
             .filter(check -> check.isRelevantForRole(roleName))
+            .filter(ConformanceCheck::isApplicable)
             .map(subCheck -> new ConformanceReport(subCheck, roleName))
             .toList();
     this.conformanceStatus =
@@ -53,9 +54,9 @@ public class ConformanceReport {
                 ConformanceStatus.forExchangeCounts(
                     conformantExchangeCount,
                     nonConformantExchangeCount,
-                    conformanceCheck.isApplicable()));
+                    conformanceCheck.isRelevant()));
 
-    if (this.conformanceStatus.equals(ConformanceStatus.NOT_RELEVANT)) {
+    if (this.conformanceStatus.equals(ConformanceStatus.IRRELEVANT)) {
       this.errorMessages = Set.of();
     }
 
@@ -194,7 +195,7 @@ public class ConformanceReport {
       case CONFORMANT -> "✅";
       case PARTIALLY_CONFORMANT -> "✔️";
       case NON_CONFORMANT -> "🚫";
-      case NOT_RELEVANT -> "➖";
+      case IRRELEVANT -> "➖";
       default -> "❔";
     };
   }
@@ -204,7 +205,7 @@ public class ConformanceReport {
       case CONFORMANT -> "CONFORMANT";
       case PARTIALLY_CONFORMANT -> "PARTIALLY CONFORMANT";
       case NON_CONFORMANT -> "NON-CONFORMANT";
-      case NOT_RELEVANT -> "NOT RELEVANT";
+      case IRRELEVANT -> "IRRELEVANT";
       default -> "NO TRAFFIC";
     };
   }

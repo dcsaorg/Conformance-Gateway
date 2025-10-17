@@ -22,7 +22,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forSourceParty(emptyErrors);
 
       // Then
-      assertTrue(result.isApplicable());
+      assertTrue(result.isRelevant());
       assertTrue(result.isConformant());
       assertTrue(result.getErrors().isEmpty());
     }
@@ -36,7 +36,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forSourceParty(errors);
 
       // Then
-      assertTrue(result.isApplicable());
+      assertTrue(result.isRelevant());
       assertFalse(result.isConformant());
       assertEquals(errors, result.getErrors());
     }
@@ -55,7 +55,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forTargetParty(emptyErrors);
 
       // Then
-      assertTrue(result.isApplicable());
+      assertTrue(result.isRelevant());
       assertTrue(result.isConformant());
       assertTrue(result.getErrors().isEmpty());
     }
@@ -69,7 +69,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forTargetParty(errors);
 
       // Then
-      assertTrue(result.isApplicable());
+      assertTrue(result.isRelevant());
       assertFalse(result.isConformant());
       assertEquals(errors, result.getErrors());
     }
@@ -88,7 +88,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(emptyErrors);
 
       // Then
-      assertTrue(result.isApplicable());
+      assertTrue(result.isRelevant());
       assertTrue(result.isConformant());
       assertTrue(result.getErrors().isEmpty());
     }
@@ -105,7 +105,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(irrelevantErrors);
 
       // Then
-      assertFalse(result.isApplicable());
+      assertFalse(result.isRelevant());
       assertTrue(result.isConformant()); // conformant because no real errors
       assertTrue(result.getErrors().isEmpty()); // irrelevant errors filtered out
     }
@@ -122,7 +122,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(realErrors);
 
       // Then
-      assertTrue(result.isApplicable());
+      assertTrue(result.isRelevant());
       assertFalse(result.isConformant());
       assertEquals(Set.of("Real Error 1", "Real Error 2"), result.getErrors());
     }
@@ -140,7 +140,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(mixedErrors);
 
       // Then
-      assertTrue(result.isApplicable()); // has real errors
+      assertTrue(result.isRelevant()); // has real errors
       assertFalse(result.isConformant()); // has real errors
       assertEquals(Set.of("Real Error", "Warning"), result.getErrors()); // only non-irrelevant
     }
@@ -157,7 +157,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(warningErrors);
 
       // Then
-      assertTrue(result.isApplicable());
+      assertTrue(result.isRelevant());
       assertFalse(result.isConformant());
       assertEquals(Set.of("Warning 1", "Warning 2"), result.getErrors());
     }
@@ -173,7 +173,7 @@ class ConformanceResultTest {
           ConformanceResult.forSourcePartyWithRelevance(singleIrrelevantError);
 
       // Then
-      assertFalse(result.isApplicable());
+      assertFalse(result.isRelevant());
       assertTrue(result.isConformant());
       assertTrue(result.getErrors().isEmpty());
     }
@@ -191,7 +191,7 @@ class ConformanceResultTest {
           ConformanceResult.forSourcePartyWithRelevance(errorsWithEmptyMessage);
 
       // Then
-      assertTrue(result.isApplicable());
+      assertTrue(result.isRelevant());
       assertFalse(result.isConformant());
       assertEquals(Set.of("", "Real Error"), result.getErrors());
     }
@@ -214,7 +214,7 @@ class ConformanceResultTest {
       ConformanceResult sourceResult = ConformanceResult.forSourcePartyWithRelevance(mixedErrors);
 
       // Then
-      assertEquals(sourceResult.isApplicable(), targetResult.isApplicable());
+      assertEquals(sourceResult.isRelevant(), targetResult.isRelevant());
       assertEquals(sourceResult.isConformant(), targetResult.isConformant());
       assertEquals(sourceResult.getErrors(), targetResult.getErrors());
     }
@@ -237,7 +237,7 @@ class ConformanceResultTest {
       ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(duplicateMessages);
 
       // Then
-      assertTrue(result.isApplicable());
+      assertTrue(result.isRelevant());
       assertFalse(result.isConformant());
       assertEquals(Set.of("Duplicate Error", "Unique Error"), result.getErrors());
     }

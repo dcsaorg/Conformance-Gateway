@@ -288,7 +288,7 @@ public class JsonAttribute {
   public static JsonRebaseableContentCheck allIndividualMatchesMustBeValid(
           @NonNull
           String name,
-          boolean isApplicable,
+          boolean isRelevant,
           @NonNull
           Consumer<MultiAttributeValidator> scanner,
           @NonNull
@@ -296,7 +296,7 @@ public class JsonAttribute {
   ) {
     return new JsonRebaseableCheckImpl(
             name,
-            isApplicable,
+            isRelevant,
             (body, contextPath) -> {
               var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
               scanner.accept(v);
@@ -924,9 +924,9 @@ public class JsonAttribute {
 
   public static JsonContentCheck customValidator(
       @NonNull String description,
-      boolean isApplicable,
+      boolean isRelevant,
       @NonNull Function<JsonNode, Set<String>> validator) {
-    return JsonContentCheckImpl.of(description, isApplicable, validator);
+    return JsonContentCheckImpl.of(description, isRelevant, validator);
   }
 
   public static JsonRebaseableContentCheck customValidator(
@@ -1003,7 +1003,7 @@ public class JsonAttribute {
 
   record JsonRebaseableCheckImpl(
     String description,
-    boolean isApplicable,
+    boolean isRelevant,
     BiFunction<JsonNode, String, Set<String>> impl
   ) implements JsonRebaseableContentCheck {
     @Override
@@ -1031,7 +1031,7 @@ public class JsonAttribute {
   record JsonContentCheckImpl(
     @NonNull
     String description,
-    boolean isApplicable,
+    boolean isRelevant,
     @NonNull
     Function<JsonNode, Set<String>> impl
   ) implements JsonContentCheck {
@@ -1045,8 +1045,8 @@ public class JsonAttribute {
     }
 
     private static JsonContentCheck of(
-        String description, boolean isApplicable, Function<JsonNode, Set<String>> impl) {
-      return new JsonContentCheckImpl(description, isApplicable, impl);
+        String description, boolean isRelevant, Function<JsonNode, Set<String>> impl) {
+      return new JsonContentCheckImpl(description, isRelevant, impl);
     }
   }
 

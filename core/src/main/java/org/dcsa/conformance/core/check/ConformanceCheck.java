@@ -17,21 +17,23 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 @Setter
 @Getter
 public abstract class ConformanceCheck {
-  protected final String title;
-  private List<ConformanceCheck> _subChecks;
-  private boolean isApplicable = true;
 
+  protected final String title;
+  private List<ConformanceCheck> subChecks;
   private final List<ConformanceResult> results = new ArrayList<>();
+
+  private boolean isRelevant = true;
+  private boolean isApplicable = true;
 
   protected ConformanceCheck(String title) {
     this.title = title;
   }
 
   private synchronized List<ConformanceCheck> getSubChecks() {
-    if (_subChecks == null) {
-      _subChecks = createSubChecks().filter(Objects::nonNull).collect(Collectors.toList());
+    if (subChecks== null) {
+      subChecks = createSubChecks().filter(Objects::nonNull).collect(Collectors.toList());
     }
-    return _subChecks;
+    return subChecks;
   }
 
   public final void check(Function<UUID, ConformanceExchange> getExchangeByUuid) {
@@ -69,10 +71,10 @@ public abstract class ConformanceCheck {
     return ignoredStatus -> {};
   }
 
-  public boolean isApplicable() {
-    if (!results.isEmpty() && results.stream().allMatch(Predicate.not(ConformanceResult::isApplicable))) {
+  public boolean isRelevant() {
+    if (!results.isEmpty() && results.stream().allMatch(Predicate.not(ConformanceResult::isRelevant))) {
       return false;
     }
-    return isApplicable;
+    return isRelevant;
   }
 }

@@ -38,7 +38,7 @@ class JsonAttributeTest {
         }
 
         @Override
-        public boolean isApplicable() {
+        public boolean isRelevant() {
           return true;
         }
 

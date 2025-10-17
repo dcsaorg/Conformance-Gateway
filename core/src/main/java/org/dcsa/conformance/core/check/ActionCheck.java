@@ -53,13 +53,13 @@ public abstract class ActionCheck extends ConformanceCheck {
     }
   }
 
+  protected abstract ConformanceCheckResult performCheck(
+      Function<UUID, ConformanceExchange> getExchangeByUuid);
+
   public ActionCheck withRelevance(boolean isRelevant) {
     this.setRelevant(isRelevant);
     return this;
   }
-
-  protected abstract ConformanceCheckResult performCheck(
-      Function<UUID, ConformanceExchange> getExchangeByUuid);
 
   private void addResult(
       Function<UUID, ConformanceExchange> getExchangeByUuid, ConformanceCheckResult result) {

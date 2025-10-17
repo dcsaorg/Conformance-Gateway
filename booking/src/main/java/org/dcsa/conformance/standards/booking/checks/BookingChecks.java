@@ -209,20 +209,15 @@ public class BookingChecks {
                       if (IS_ACTIVE_REEFER_SETTINGS_REQUIRED.test(reqEquipNode)) {
                         if (JsonUtil.isMissingOrEmpty(reqEquipNode.path(ACTIVE_REEFER_SETTINGS))) {
                           errors.add(
-                              new ConformanceError(
+                              ConformanceError.error(
                                   "The attribute '%s[%d].%s' should have been present but was absent"
                                       .formatted(
                                           REQUESTED_EQUIPMENTS,
                                           index.getAndIncrement(),
-                                          ACTIVE_REEFER_SETTINGS),
-                                  ConformanceErrorSeverity.ERROR));
+                                          ACTIVE_REEFER_SETTINGS)));
                         }
                       } else {
-                        errors.add(
-                            new ConformanceError(
-                                IRRELEVANT_CHECK_FOR_ELEMENT_IN_POSITION.formatted(
-                                    index.getAndIncrement()),
-                                ConformanceErrorSeverity.IRRELEVANT));
+                        errors.add(ConformanceError.irrelevant(index.getAndIncrement()));
                       }
                     });
 
@@ -630,18 +625,22 @@ public class BookingChecks {
         .orElse(MissingNode.getInstance());
   }
 
-  static final JsonContentCheck FEEDBACKS_PRESENCE =
-      JsonAttribute.customValidator(
+  static final JsonComplexContentCheck FEEDBACKS_PRESENCE =
+      JsonAttribute.customComplexValidator(
           "Feedbacks must be present for the selected Booking Status",
           body -> {
             var bookingStatus = body.path(BOOKING_STATUS).asText("");
-            var issues = new LinkedHashSet<String>();
-            if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
-                    || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)))
-                && (body.path(FEEDBACKS).isMissingNode() || body.path(FEEDBACKS).isEmpty())) {
-              issues.add(
-                  "'%s' is missing in the '%s' '%s'"
-                      .formatted(FEEDBACKS, BOOKING_STATUS, bookingStatus));
+            var issues = new LinkedHashSet<ConformanceError>();
+            if (BookingState.PENDING_UPDATE.name().equals(bookingStatus)
+                || BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)) {
+              if (body.path(FEEDBACKS).isMissingNode() || body.path(FEEDBACKS).isEmpty()) {
+                issues.add(
+                    ConformanceError.error(
+                        "'%s' is missing in the '%s' '%s'"
+                            .formatted(FEEDBACKS, BOOKING_STATUS, bookingStatus)));
+              }
+            } else {
+              issues.add(ConformanceError.irrelevant());
             }
             return issues;
           });

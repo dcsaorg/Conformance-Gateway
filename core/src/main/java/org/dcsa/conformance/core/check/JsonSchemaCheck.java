@@ -1,7 +1,6 @@
 package org.dcsa.conformance.core.check;
 
 import java.util.Collections;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;

@@ -13,7 +13,7 @@ VGM declaration for one piece of equipment, including the actual VGM and the rel
 """)
 public class VGMDeclaration {
 
-  @Schema(name = "VGMRouting")
+  @Schema()
   private RoutingDetails routingDetails;
 
   @Schema(

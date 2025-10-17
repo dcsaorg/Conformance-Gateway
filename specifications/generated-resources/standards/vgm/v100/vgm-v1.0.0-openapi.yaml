@@ -802,7 +802,7 @@ components:
     VGMDeclaration:
       type: "object"
       properties:
-        VGMRouting:
+        routingDetails:
           description: |
             Technical routing of a VGM declaration from the originating party, via forwarding parties, to the destination party.
           allOf:

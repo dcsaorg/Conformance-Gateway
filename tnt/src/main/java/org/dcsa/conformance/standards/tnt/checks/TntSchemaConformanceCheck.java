@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -59,9 +60,9 @@ public class TntSchemaConformanceCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Set.of();
+    if (exchange == null) return ConformanceCheckResult.simple(Set.of());
     JsonNode jsonResponse = exchange.getMessage(httpMessageType).body().getJsonBody();
     LinkedHashSet<String> validationErrors = new LinkedHashSet<>();
     if (!jsonResponse.isArray()) {
@@ -87,6 +88,6 @@ public class TntSchemaConformanceCheck extends ActionCheck {
         validationErrors.add("Event #%d: %s".formatted(eventIndex, validationError));
       }
     }
-    return validationErrors;
+    return ConformanceCheckResult.simple(validationErrors);
   }
 }

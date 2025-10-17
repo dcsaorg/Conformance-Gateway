@@ -15,7 +15,7 @@ public class NothingToCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    return Collections.emptySet();
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    return ConformanceCheckResult.simple(Collections.emptySet());
   }
 }

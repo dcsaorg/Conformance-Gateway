@@ -43,42 +43,42 @@ public abstract class ActionCheck extends ConformanceCheck {
 
   @Override
   protected final void doCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    Set<String> conformanceErrors = null;
-    Set<ConformanceError> conformanceErrorsWithRelevance = null;
     try {
-      conformanceErrorsWithRelevance = checkConformanceWithRelevance(getExchangeByUuid);
-      if (conformanceErrorsWithRelevance == null) {
-        conformanceErrors = checkConformance(getExchangeByUuid);
-      }
+      ConformanceCheckResult result = performCheck(getExchangeByUuid);
+      addResult(getExchangeByUuid, result);
     } catch (Exception e) {
-      var message = "Failed to perform ActionCheck '%s'".formatted(title);
-      if (e instanceof UserFacingException) {
-        message += ": %s".formatted(e.getMessage());
-      }
-      log.warn(message, e);
-      conformanceErrors = Set.of(message);
+      String errorMessage = buildErrorMessage(e);
+      log.warn(errorMessage, e);
+      addResult(getExchangeByUuid, ConformanceCheckResult.simple(Set.of(errorMessage)));
     }
-
-    ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange != null) {
-      if (conformanceErrorsWithRelevance != null) {
-        this.addResult(ConformanceResult.withErrorsAndRelevance(conformanceErrorsWithRelevance));
-      } else {
-        this.addResult(ConformanceResult.withErrors(conformanceErrors));
-      }
-    }
-  }
-
-  protected abstract Set<String> checkConformance(
-      Function<UUID, ConformanceExchange> getExchangeByUuid);
-
-  protected Set<ConformanceError> checkConformanceWithRelevance(
-      Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    return null;
   }
 
   public ActionCheck withRelevance(boolean isRelevant) {
     this.setRelevant(isRelevant);
     return this;
+  }
+
+  protected abstract ConformanceCheckResult performCheck(
+      Function<UUID, ConformanceExchange> getExchangeByUuid);
+
+  private void addResult(
+      Function<UUID, ConformanceExchange> getExchangeByUuid, ConformanceCheckResult result) {
+    ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
+    if (exchange == null) return;
+
+    switch (result) {
+      case ConformanceCheckResult.SimpleErrors(var errors) ->
+          this.addResult(ConformanceResult.withErrors(errors));
+      case ConformanceCheckResult.ErrorsWithRelevance(var errors) ->
+          this.addResult(ConformanceResult.withErrorsAndRelevance(errors));
+    }
+  }
+
+  private String buildErrorMessage(Exception e) {
+    String message = "Failed to perform ActionCheck '%s'".formatted(title);
+    if (e instanceof UserFacingException) {
+      message += ": %s".formatted(e.getMessage());
+    }
+    return message;
   }
 }

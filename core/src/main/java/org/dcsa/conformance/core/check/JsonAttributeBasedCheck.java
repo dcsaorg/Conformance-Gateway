@@ -3,7 +3,6 @@ package org.dcsa.conformance.core.check;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -62,9 +61,9 @@ class JsonAttributeBasedCheck extends ActionCheck {
   }
 
   @Override
-  protected final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected final ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
-    return Collections.emptySet();
+    return ConformanceCheckResult.simple(Collections.emptySet());
   }
 
   @Override
@@ -107,11 +106,11 @@ class JsonAttributeBasedCheck extends ActionCheck {
     }
 
     @Override
-    protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
       ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-      if (exchange == null) return Collections.emptySet();
+      if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
-      return VersionedKeywordDataset.withVersion(standardsVersion, () -> this.validator.validate(jsonBody));
+      return ConformanceCheckResult.simple(VersionedKeywordDataset.withVersion(standardsVersion, () -> this.validator.validate(jsonBody)));
     }
   }
 }

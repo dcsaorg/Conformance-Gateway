@@ -1,14 +1,12 @@
 package org.dcsa.conformance.core.check;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-
 import java.util.Collections;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public class ComplexValidatorCheck extends ActionCheck {
 
@@ -27,17 +25,13 @@ public class ComplexValidatorCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  protected Set<ConformanceError> checkConformanceWithRelevance(
+  protected ConformanceCheckResult performCheck(
       Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Collections.emptySet();
+    if (exchange == null) return ConformanceCheckResult.withRelevance(Collections.emptySet());
     JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
-    return VersionedKeywordDataset.withVersion(
-        standardsVersion, () -> this.validator.validate(jsonBody));
+    return ConformanceCheckResult.withRelevance(
+        VersionedKeywordDataset.withVersion(
+            standardsVersion, () -> this.validator.validate(jsonBody)));
   }
 }

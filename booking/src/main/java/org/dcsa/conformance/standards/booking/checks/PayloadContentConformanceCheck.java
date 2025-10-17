@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -28,10 +29,10 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   }
 
   @Override
-  protected final Set<String> checkConformance(
+  protected final ConformanceCheckResult performCheck(
       Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
-    return Collections.emptySet();
+    return ConformanceCheckResult.simple(Collections.emptySet());
   }
 
   @Override
@@ -59,10 +60,10 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
       }
 
       @Override
-      protected Set<String> checkConformance(
+      protected ConformanceCheckResult performCheck(
           Function<UUID, ConformanceExchange> getExchangeByUuid) {
         ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-        if (exchange == null) return Collections.emptySet();
+        if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
         var conformanceMessage =
             this.httpMessageType == HttpMessageType.RESPONSE
                 ? exchange.getResponse().message()
@@ -71,9 +72,9 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
         var pointer = JsonPointer.compile(path);
         if (JsonUtil.isMissingOrEmpty(payload.at(pointer))) {
           this.setApplicable(false);
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         }
-        return subCheck.apply(payload);
+        return ConformanceCheckResult.simple(subCheck.apply(payload));
       }
     };
   }
@@ -101,16 +102,10 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
         prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
 
       @Override
-      protected Set<String> checkConformance(
-          Function<UUID, ConformanceExchange> getExchangeByUuid) {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      protected Set<ConformanceError> checkConformanceWithRelevance(
+      protected ConformanceCheckResult performCheck(
           Function<UUID, ConformanceExchange> getExchangeByUuid) {
         ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-        if (exchange == null) return Collections.emptySet();
+        if (exchange == null) return ConformanceCheckResult.withRelevance(Collections.emptySet());
         var conformanceMessage =
             this.httpMessageType == HttpMessageType.RESPONSE
                 ? exchange.getResponse().message()
@@ -119,9 +114,9 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
         var pointer = JsonPointer.compile(path);
         if (JsonUtil.isMissingOrEmpty(payload.at(pointer))) {
           this.setApplicable(false);
-          return Set.of();
+          return ConformanceCheckResult.withRelevance(Set.of());
         }
-        return subCheck.apply(payload);
+        return ConformanceCheckResult.withRelevance(subCheck.apply(payload));
       }
     };
   }

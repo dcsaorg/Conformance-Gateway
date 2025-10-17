@@ -56,12 +56,13 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentRefe
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
+import org.dcsa.conformance.specifications.standards.tnt.v300.model.VehicleDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
 
 public class TNTStandardSpecification extends StandardSpecification {
 
-  public static final String TAG_EVENT_PUBLISHERS = "Event Publisher Endpoints";
-  public static final String TAG_EVENT_SUBSCRIBERS = "Event Subscriber Endpoints";
+  public static final String TAG_EVENT_PRODUCERS = "Event Producer Endpoints";
+  public static final String TAG_EVENT_CONSUMERS = "Event Consumer Endpoints";
 
   private final GetEventsEndpoint getEventsEndpoint;
 
@@ -70,12 +71,12 @@ public class TNTStandardSpecification extends StandardSpecification {
 
     openAPI.addTagsItem(
         new Tag()
-            .name(TAG_EVENT_PUBLISHERS)
-            .description("Endpoints implemented by the adopters who publish events"));
+            .name(TAG_EVENT_PRODUCERS)
+            .description("Endpoints implemented by the Event Producers"));
     openAPI.addTagsItem(
         new Tag()
-            .name(TAG_EVENT_SUBSCRIBERS)
-            .description("Endpoints implemented by the adopters who receive events"));
+            .name(TAG_EVENT_CONSUMERS)
+            .description("Endpoints implemented by the Event Consumers"));
 
     openAPI.path("/events", new PathItem().get(operationEventsGet()).post(operationEventsPost()));
 
@@ -85,7 +86,7 @@ public class TNTStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Track and Trace", "3.0.0-20250926-design", "TNT", "3.0.0-20250912-design", 4);
+        "Track and Trace", "3.0.0-20251024-design", "TNT", "3.0.0-20250926-design", 4);
   }
 
   @Override
@@ -121,6 +122,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         TransportCall.class,
         TransportDetails.class,
         TruckTransport.class,
+        VehicleDetails.class,
         VesselTransport.class,
         VoyageNumberOrReference.class);
   }
@@ -146,7 +148,7 @@ public class TNTStandardSpecification extends StandardSpecification {
                 entry ->
                     DataOverviewSheet.importFromString(
                         SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/4f01c4530e2cfbccc8abd9e21b45baee122ef94c/specifications/generated-resources/standards/tnt/v300/tnt-v3.0.0-data-overview-%s.csv"
+                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/e83485c750798f3e086b5b393dd1effdf56d5185/specifications/generated-resources/standards/tnt/v300/tnt-v3.0.0-data-overview-%s.csv"
                                 .formatted(entry.getValue())))));
   }
 
@@ -154,14 +156,8 @@ public class TNTStandardSpecification extends StandardSpecification {
   protected Map<Class<? extends DataOverviewSheet>, Map<String, String>>
       getChangedPrimaryKeyByOldPrimaryKeyBySheetClass() {
     return Map.ofEntries(
-        Map.entry(
-            AttributesHierarchicalSheet.class,
-            Map.ofEntries(
-                Map.entry("Event / relatedDocumentReferences", "Event / documentReferences"))),
-        Map.entry(
-            AttributesNormalizedSheet.class,
-            Map.ofEntries(
-                Map.entry("Event,relatedDocumentReferences", "Event,documentReferences"))),
+        Map.entry(AttributesHierarchicalSheet.class, Map.ofEntries()),
+        Map.entry(AttributesNormalizedSheet.class, Map.ofEntries()),
         Map.entry(QueryFiltersSheet.class, Map.ofEntries()),
         Map.entry(QueryParametersSheet.class, Map.ofEntries()));
   }
@@ -180,7 +176,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         .summary("Retrieves a list of events")
         .description(readResourceFile("openapi-get-events-description.md"))
         .operationId("get-events")
-        .tags(Collections.singletonList(TAG_EVENT_PUBLISHERS))
+        .tags(Collections.singletonList(TAG_EVENT_PRODUCERS))
         .parameters(
             Stream.concat(
                     new GetEventsEndpoint().getQueryParameters().stream(),
@@ -224,7 +220,7 @@ public class TNTStandardSpecification extends StandardSpecification {
         .summary("Sends a list of events")
         .description(readResourceFile("openapi-post-events-description.md"))
         .operationId("post-events")
-        .tags(Collections.singletonList(TAG_EVENT_SUBSCRIBERS))
+        .tags(Collections.singletonList(TAG_EVENT_CONSUMERS))
         .parameters(List.of(getApiVersionHeaderParameter()))
         .requestBody(
             new RequestBody()

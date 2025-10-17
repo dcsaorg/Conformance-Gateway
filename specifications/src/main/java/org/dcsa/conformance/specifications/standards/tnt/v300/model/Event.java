@@ -18,7 +18,7 @@ public class Event {
       example = "event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z",
       description =
 """
-ID of the event, unique among all the events published by a T&T event publisher.
+ID of the event, unique among all the events published by a T&T Event Producer.
 
 An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
 

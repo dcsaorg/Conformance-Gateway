@@ -83,7 +83,7 @@ Event,documentReferences,"DocumentReference list",,,,,"List of documents related
 Event,equipmentDetails,EquipmentDetails,,,,,"Equipment-specific details",
 Event,eventClassification,EventClassification,,,,,"Type, subtype and classifier of an event",
 Event,eventDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the real-world event has occurred or will occur.",
-Event,eventID,string,,maxLength=500,,"event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z","ID of the event, unique among all the events published by a T&T event publisher.
+Event,eventID,string,,maxLength=500,,"event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z","ID of the event, unique among all the events published by a T&T Event Producer.
 
 An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
 
@@ -105,32 +105,38 @@ If this flag is set, any event data other than the `eventID` is irrelevant (if p
 Event,reeferDetails,ReeferDetails,,,,,"Reefer-specific details",
 Event,shipmentDetails,ShipmentDetails,,,,,"Shipment-specific details",
 Event,shipmentLocationType,string,,,,PRE,"Code used to denote the type of a shipment location
-- `PRE` - Place of Receipt
-- `POL` - Port of Loading
-- `POD` - Port of Discharge
-- `PDE` - Place of Delivery
-- `PCF` - Pre-carriage From
+- `FCD` - Full container drop-off location
+- `IEL` - Container intermediate export stop-off location
 - `OIR` - Onward Inland Routing
 - `ORI` - Origin of goods
-- `IEL` - Container intermediate export stop-off location
+- `PCF` - Pre-carriage From
+- `PDE` - Place of Delivery
+- `POD` - Port of Discharge
+- `POL` - Port of Loading
+- `PRE` - Place of Receipt
 - `PTP` - Prohibited transshipment port
-- `RTP` - Requested transshipment port
-- `FCD` - Full container drop-off location",
+- `RTP` - Requested transshipment port",
 Event,"shipmentReferenceReplacements","ShipmentReferenceReplacement list",,,,,"List of shipment reference replacements related to this event",
 Event,shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 Event,transportDetails,TransportDetails,,,,,"Transport-specific details",
 EventClassification,equipmentEventTypeCode,string,,,,LOAD,"Code used to denote the type of an equipment event
-- `LOAD` - Loaded
+- `AVDO` - Available for Drop-off
+- `AVPU` - Available for Pick-up
+- `CROS` - Crossed
+- `CUSI` - Customs Selected for Inspection
+- `CUSR` - Customs Released
+- `CUSS` - Customs Selected for Scan
 - `DISC` - Discharged
+- `DROP` - Drop-off
 - `GTIN` - Gated in
 - `GTOT` - Gated out
-- `STUF` - Stuffed
-- `STRP` - Stripped
-- `PICK` - Pick-up
-- `DROP` - Drop-off
 - `INSP` - Inspected
+- `LOAD` - Loaded
+- `PICK` - Pick-up
+- `RMVD` - Removed
 - `RSEA` - Resealed
-- `RMVD` - Removed",
+- `STRP` - Stripped
+- `STUF` - Stuffed",
 EventClassification,eventClassifierCode,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
 - `PLN` - Planned
 - `EST` - Estimated
@@ -147,21 +153,40 @@ EventClassification,reeferEventTypeCode,string,,,,MEAS,"Code used to denote the 
 - `MEAS` - Measured
 - `ADJU` - Adjusted",
 EventClassification,shipmentEventTypeCode,string,,,,APPR,"Code used to denote the type of a shipment event
-- `RECE` - Received
-- `DRFT` - Drafted
-- `PENA` - Pending Approval
-- `PENU` - Pending Update
-- `REJE` - Rejected
+- `AMCF` - Amendment Confirmed
+- `AMCN` - Amendment Cancelled
+- `AMDC` - Amendment Declined
+- `AMPR` - Amendment In Progress
+- `AMRE` - Amendment Received
 - `APPR` - Approved
-- `ISSU` - Arrived
-- `SURR` - Surrendered
-- `SUBM` - Submitted
-- `VOID` - Void
-- `CONF` - Confirmed
-- `REQS` - Requested
+- `CACF` - Cancellation Confirmed
+- `CADC` - Cancellation Declined
+- `CARE` - Cancellation Received
 - `CMPL` - Completed
+- `CONF` - Confirmed
+- `DECL` - Declined
+- `DRFT` - Drafted
 - `HOLD` - On Hold
-- `RELS` - Released",
+- `ISSU` - Issued
+- `PENA` - Pending Approval
+- `PENM` - Pending Amendment
+- `PENU` - Pending Update
+- `PSAM` - Pending Surrender for Amendment
+- `PSDL` - Pending Surrender for Delivery
+- `RECE` - Received
+- `REJE` - Rejected
+- `RELS` - Released
+- `REQS` - Requested
+- `SUAM` - Surrendered for Amendment
+- `SUBM` - Submitted
+- `SUDL` - Surrendered for Delivery
+- `SURR` - Surrendered
+- `UPCF` - Update Confirmed
+- `UPCN` - Update Cancelled
+- `UPDC` - Update Declined
+- `UPDT` - Update In Progress
+- `UPRE` - Update Received
+- `VOID` - Voided",
 EventClassification,transportEventTypeCode,string,,,,ARRI,"Code used to denote the type of a transport event
 - `ARRI` - Arrived
 - `DEPA` - Departed",
@@ -262,10 +287,8 @@ The order of `feedbackElements` is not related to the order of events in the req
 Instead, the relevant request event is indicated by the `propertyPath` of each `FeedbackElement`.",
 RailTransport,departureID,string,,maxLength=100,,,"Unique identifying number or code that is assigned to a specific departure of a rail.
 (Also known as a departure reference number.)",
-RailTransport,railCar,string,,maxLength=50,,,"A railcar is a type of railway vehicle that is designed to transport freight or passengers on a railway track.
-They are also known as rail vehicles, railcars, or rolling stock.
-Railcars can be powered by an on-board locomotive or they can be pulled by a separate locomotive.",
-RailTransport,railService,string,,maxLength=50,,,"A rail service number is a unique identifying number assigned to a specific rail service or train.",
+RailTransport,railCarReference,string,,maxLength=50,,,"Reference of the rail car on which the equipment is transported.",
+RailTransport,railServiceReference,string,,maxLength=50,,,"Reference of the rail service on which the equipment is transported.",
 ReeferDetails,measuredParameters,ActiveReeferParameters,,,,,"Measured active reefer parameters",
 ReeferDetails,setpointParameters,ActiveReeferParameters,,,,,"Setpoint active reefer parameters",
 Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
@@ -287,20 +310,20 @@ It can vary per carrier.",
 ShipmentDetails,reason,string,,,,,"The reason this event was sent",
 ShipmentReference,reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
 ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a reference
-- `FF` - Freight Forwarder’s Reference
-- `SI` - Shipper’s Reference
-- `PO` - Purchase Order Reference
-- `CR` - Customer’s Reference
 - `AAO` - Consignee’s Reference
-- `ECR` - Empty container release reference
-- `CSI` - Customer shipment ID
-- `BPR` - Booking party reference number
+- `AES` - Automated Export System
 - `BID` - Booking Request ID
-- `EQ` - Equipment Reference
-- `RUC` - Registro Único del Contribuyente
-- `DUE` - Declaração Única de Exportação
+- `BPR` - Booking party reference number
 - `CER` - Canadian Export Reporting System
-- `AES` - Automated Export System",
+- `CR` - Customer’s Reference
+- `CSI` - Customer shipment ID
+- `DUE` - Declaração Única de Exportação
+- `ECR` - Empty container release reference
+- `EQ` - Equipment Reference
+- `FF` - Freight Forwarder’s Reference
+- `PO` - Purchase Order Reference
+- `RUC` - Registro Único del Contribuyente
+- `SI` - Shipper’s Reference",
 "ShipmentReferenceReplacement",newReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replacing those with the `oldReferences`.",
 "ShipmentReferenceReplacement",oldReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replaced by those with the `newReferences`.",
 TransportCall,"exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
@@ -328,10 +351,13 @@ and/or plans to mitigate schedule slippage.",
 TransportDetails,delayReasonCode,string,,,,,"Code identifying the reason for the delay, as defined by SMDG here:
 https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/",
 TransportDetails,transportCall,TransportCall,,,,,"Transport call information",
-TruckTransport,chassisLicensePlate,string,,maxLength=15,,,"A chassis number is a unique identifying number or code assigned to the chassis of a vehicle.
-It may also be referred to as a ""vehicle identification number"" (VIN) or ""frame number"".",
-TruckTransport,licensePlate,string,,maxLength=15,,,"A license plate is a tag that is attached to a vehicle and displays a unique number or code assigned to the vehicle.
+TruckTransport,tractorDetails,VehicleDetails,,,,,"The license plate and VIN of the tractor of the truck used to transport the equipment.",
+TruckTransport,trailerDetails,VehicleDetails,,,,,"The license plate and VIN of the trailer of the truck on which the equipment is transported,
+if the trailer is separate from the truck trailer and has its own details.",
+VehicleDetails,licensePlate,string,,maxLength=15,,,"A license plate is a tag that is attached to a vehicle and displays a unique number or code assigned to the vehicle.
 The format, design, and issuing authority for license plates vary by country, state, and province.",
+VehicleDetails,"vehicleIdentificationNumber",string,,maxLength=15,,,"A chassis number is a unique identifying number or code assigned to the chassis of a vehicle.
+It may also be referred to as a ""vehicle identification number"" (VIN), ""chassis number"" or ""frame number"".",
 VesselTransport,operatorCarrierCode,string,,maxLength=10,,MAEU,"The carrier who is in charge of the vessel operation based on `operatorCarrierCodeListProvider`",
 VesselTransport,"operatorCarrierCodeListProvider",string,,maxLength=10,,SMDG,"The code list provider used for the `operatorCarrierCode` (SMDG or NMFTA)",
 VesselTransport,vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 
-public class GetVGMsEndpoint implements QueryParametersFilterEndpoint {
+public class GetVGMDeclarationsEndpoint implements QueryParametersFilterEndpoint {
 
   private final Parameter carrierBookingReference =
       createStringQueryParameter(

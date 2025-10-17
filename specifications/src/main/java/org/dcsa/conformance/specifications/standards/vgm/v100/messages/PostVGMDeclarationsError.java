@@ -14,7 +14,7 @@ If some of the VGMs in the request were successfully processed,
 a regular `PostVGMsResponse` is expected to be used instead,
 with `feedbackElements` indicating which VGMs were not processed and why.
 """)
-public class PostVGMsError {
+public class PostVGMDeclarationsError {
 
   @Schema(
       description =

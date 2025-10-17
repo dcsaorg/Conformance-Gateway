@@ -10,7 +10,7 @@ import lombok.Data;
 """
 Error API response to a `GET VGMs` request
 """)
-public class GetVGMsError {
+public class GetVGMDeclarationsError {
 
   @Schema(
       description =

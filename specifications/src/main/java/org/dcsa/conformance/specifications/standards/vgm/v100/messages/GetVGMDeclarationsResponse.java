@@ -11,7 +11,7 @@ import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMDeclarati
 """
 API response to a `GET VGMs` request
 """)
-public class GetVGMsResponse {
+public class GetVGMDeclarationsResponse {
 
   @Schema(
       name = "VGMDeclarations",

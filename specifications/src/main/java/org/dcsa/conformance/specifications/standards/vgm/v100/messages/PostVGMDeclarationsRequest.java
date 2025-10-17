@@ -7,7 +7,7 @@ import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMDeclarati
 
 @Data
 @Schema(description = "API message containing a list of VGM declarations.")
-public class PostVGMsRequest {
+public class PostVGMDeclarationsRequest {
 
   @Schema(name = "VGMDeclarations", description = "List of VGM declarations.")
   private List<VGMDeclaration> vgmDeclarations;

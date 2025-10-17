@@ -73,12 +73,12 @@ FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity
 - `INFO` - Informational message about how the request is processed",
 GeoCoordinate,latitude,string,,maxLength=10,,48.85855,"Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
 GeoCoordinate,longitude,string,,maxLength=11,,2.294492036,"Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
-GetVGMsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why the request could not be processed.
+GetVGMDeclarationsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why the request could not be processed.
 
 At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.",
-GetVGMsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
-GetVGMsResponse,VGMDeclarations,"VGMDeclaration list",,,,,"The list of VGM declarations matching the filter specified by the request query parameters",
+"GetVGMDeclarationsResponse",feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed",
+"GetVGMDeclarationsResponse",VGMDeclarations,"VGMDeclaration list",,,,,"The list of VGM declarations matching the filter specified by the request query parameters",
 Location,address,Address,,,,,"Location address",
 Location,facility,Facility,,,,,"Facility identified by a code as defined by a code list provider.",
 Location,facilityTypeCode,string,,maxLength=10,,RAMP,"Code identifying a specific type of facility
@@ -137,7 +137,7 @@ or a subsequent revision.",
 PartyDetails,address,Address,,,,,"An object for storing address-related information.",
 PartyDetails,contactDetails,ContactDetails,,,,,"The contact details of a person.",
 PartyDetails,party,Party,,,,,"Identification of a container shipping party",
-PostVGMsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
+PostVGMDeclarationsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
 
 At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.
@@ -145,8 +145,8 @@ Lower severity feedback elements may also be included.
 When sent in response to a request that contains an array of VGMs,
 the order of the `feedbackElements` is not related to the list of request VGMs.
 Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.",
-PostVGMsRequest,VGMDeclarations,"VGMDeclaration list",,,,,"List of VGM declarations.",
-PostVGMsResponse,feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
+"PostVGMDeclarationsRequest",VGMDeclarations,"VGMDeclaration list",,,,,"List of VGM declarations.",
+"PostVGMDeclarationsResponse",feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
 
 There can be zero, one or more feedback elements per event in the request.
 The order of `feedbackElements` is not related to the order of VGMs in the request.

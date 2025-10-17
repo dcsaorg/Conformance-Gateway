@@ -9,9 +9,9 @@ info:
 
     This API allows the transfer of structured VGM declarations from a VGM Producer to a VGM Consumer.
 
-    Each VGM Producer implements the `GET /vgms` endpoint, which can be called by the authorized VGM Consumers to retrieve relevant available VGM declarations.
+    Each VGM Producer implements the `GET /vgm-declarations` endpoint, which can be called by the authorized VGM Consumers to retrieve relevant available VGM declarations.
 
-    Each VGM Consumer implements the `POST /vgms` endpoint, which can be called by VGM Producers call to send relevant VGM declarations as they become available or are updated.
+    Each VGM Consumer implements the `POST /vgm-declarations` endpoint, which can be called by VGM Producers call to send relevant VGM declarations as they become available or are updated.
 
     The registration of VGM Consumers with VGM Producers is out of scope.
 
@@ -34,11 +34,11 @@ tags:
 - name: "VGM Consumer Endpoints"
   description: "Endpoints implemented by the VGM Consumers"
 paths:
-  /vgms:
+  /vgm-declarations:
     get:
       tags:
       - "VGM Producer Endpoints"
-      summary: "Retrieves a list of VGMs"
+      summary: "Retrieves a list of VGM declarations"
       description: |
         Retrieves the list of VGM declarations matching the criteria provided as query parameters.
 
@@ -96,7 +96,7 @@ paths:
         The effect of attempting to use a cursor more than once (for example to "go back" to previous pages) is unspecified and may result in the rejection of the request by the VGM Producer with an HTTP 4xx response. (This is by design a backend-to-backend API, not intended for use directly from frontend applications and therefore not directly supporting a typical full set of web frontend pagination actions.)
 
         When responding with the last page of results, the VGM Producer no longer includes a `Next-Page-Cursor` response header. The last page of results may be empty, for example in the case of a stateless pagination implementation by the VGM Producer.
-      operationId: "get-vgms"
+      operationId: "get-vgm-declarations"
       parameters:
       - name: "carrierBookingReference"
         in: "query"
@@ -152,7 +152,7 @@ paths:
         example: "1.0.0"
       responses:
         "200":
-          description: "List of VGMs matching the query parameters"
+          description: "List of VGM declarations matching the query parameters"
           headers:
             API-Version:
               $ref: "#/components/headers/API-Version"
@@ -161,7 +161,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GetVGMsResponse"
+                $ref: "#/components/schemas/GetVGMDeclarationsResponse"
         default:
           description: "Error response"
           headers:
@@ -170,16 +170,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GetVGMsError"
+                $ref: "#/components/schemas/GetVGMDeclarationsError"
     post:
       tags:
       - "VGM Consumer Endpoints"
-      summary: "Sends a list of VGMs"
+      summary: "Sends a list of VGM declarations"
       description: |
         Used by a VGM Producer to send VGM declarations to a registered VGM Consumer.
 
         The subscription mechanism and the management of VGM Consumer profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
-      operationId: "post-vgms"
+      operationId: "post-vgm-declarations"
       parameters:
       - name: "API-Version"
         in: "header"
@@ -189,22 +189,22 @@ paths:
           type: "string"
         example: "1.0.0"
       requestBody:
-        description: "List of VGMs"
+        description: "List of VGM declarations"
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostVGMsRequest"
+              $ref: "#/components/schemas/PostVGMDeclarationsRequest"
         required: true
       responses:
         "200":
-          description: "VGMs response"
+          description: "VGM declarations response"
           headers:
             API-Version:
               $ref: "#/components/headers/API-Version"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PostVGMsResponse"
+                $ref: "#/components/schemas/PostVGMDeclarationsResponse"
         default:
           description: "Error response"
           headers:
@@ -213,7 +213,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PostVGMsError"
+                $ref: "#/components/schemas/PostVGMDeclarationsError"
 components:
   schemas:
     Address:
@@ -445,7 +445,7 @@ components:
             Geographic coordinate that specifies the east–west position of a point on the Earth's surface.
           example: "2.294492036"
       description: "An object used to express a location using `latitude` and `longitude`."
-    GetVGMsError:
+    GetVGMDeclarationsError:
       type: "object"
       properties:
         feedbackElements:
@@ -459,7 +459,7 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         Error API response to a `GET VGMs` request
-    GetVGMsResponse:
+    GetVGMDeclarationsResponse:
       type: "object"
       properties:
         VGMDeclarations:
@@ -599,7 +599,7 @@ components:
           allOf:
           - $ref: "#/components/schemas/ContactDetails"
       description: "Details of a party involved in the VGM declaration"
-    PostVGMsError:
+    PostVGMDeclarationsError:
       type: "object"
       properties:
         feedbackElements:
@@ -621,7 +621,7 @@ components:
         If some of the VGMs in the request were successfully processed,
         a regular `PostVGMsResponse` is expected to be used instead,
         with `feedbackElements` indicating which VGMs were not processed and why.
-    PostVGMsRequest:
+    PostVGMDeclarationsRequest:
       type: "object"
       properties:
         VGMDeclarations:
@@ -630,7 +630,7 @@ components:
           items:
             $ref: "#/components/schemas/VGMDeclaration"
       description: "API message containing a list of VGM declarations."
-    PostVGMsResponse:
+    PostVGMDeclarationsResponse:
       type: "object"
       properties:
         feedbackElements:

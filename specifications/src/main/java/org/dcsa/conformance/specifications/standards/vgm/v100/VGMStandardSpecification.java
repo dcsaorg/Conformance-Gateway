@@ -39,11 +39,11 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.ShipmentRef
 import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Weight;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.FeedbackElement;
-import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMsError;
-import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMsResponse;
-import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMsError;
-import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMsRequest;
-import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMsResponse;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMDeclarationsError;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMDeclarationsResponse;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMDeclarationsError;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMDeclarationsRequest;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMDeclarationsResponse;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.EquipmentDetails;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.ShipmentDetails;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGM;
@@ -56,7 +56,7 @@ public class VGMStandardSpecification extends StandardSpecification {
   public static final String TAG_VGM_PRODUCERS = "VGM Producer Endpoints";
   public static final String TAG_VGM_CONSUMERS = "VGM Consumer Endpoints";
 
-  private final GetVGMsEndpoint getVGMsEndpoint;
+  private final GetVGMDeclarationsEndpoint getVGMDeclarationsEndpoint;
 
   public VGMStandardSpecification() {
     super("Verified Gross Mass", "VGM", "1.0.0");
@@ -70,9 +70,11 @@ public class VGMStandardSpecification extends StandardSpecification {
             .name(TAG_VGM_CONSUMERS)
             .description("Endpoints implemented by the VGM Consumers"));
 
-    openAPI.path("/vgms", new PathItem().get(operationVGMsGet()).post(operationVGMsPost()));
+    openAPI.path(
+        "/vgm-declarations",
+        new PathItem().get(operationVGMDeclarationsGet()).post(operationVGMDeclarationsPost()));
 
-    getVGMsEndpoint = new GetVGMsEndpoint();
+    getVGMDeclarationsEndpoint = new GetVGMDeclarationsEndpoint();
   }
 
   @Override
@@ -91,14 +93,14 @@ public class VGMStandardSpecification extends StandardSpecification {
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
-        GetVGMsError.class,
-        GetVGMsResponse.class,
+        GetVGMDeclarationsError.class,
+        GetVGMDeclarationsResponse.class,
         Location.class,
         Party.class,
         PartyDetails.class,
-        PostVGMsError.class,
-        PostVGMsRequest.class,
-        PostVGMsResponse.class,
+        PostVGMDeclarationsError.class,
+        PostVGMDeclarationsRequest.class,
+        PostVGMDeclarationsResponse.class,
         RoutingDetails.class,
         Seal.class,
         ShipmentDetails.class,
@@ -149,7 +151,7 @@ public class VGMStandardSpecification extends StandardSpecification {
   }
 
   protected QueryParametersFilterEndpoint getQueryParametersFilterEndpoint() {
-    return getVGMsEndpoint;
+    return getVGMDeclarationsEndpoint;
   }
 
   @Override
@@ -157,15 +159,15 @@ public class VGMStandardSpecification extends StandardSpecification {
     return false;
   }
 
-  private Operation operationVGMsGet() {
+  private Operation operationVGMDeclarationsGet() {
     return new Operation()
-        .summary("Retrieves a list of VGMs")
-        .description(readResourceFile("openapi-get-vgms-description.md"))
-        .operationId("get-vgms")
+        .summary("Retrieves a list of VGM declarations")
+        .description(readResourceFile("openapi-get-vgm-declarations-description.md"))
+        .operationId("get-vgm-declarations")
         .tags(Collections.singletonList(TAG_VGM_PRODUCERS))
         .parameters(
             Stream.concat(
-                    new GetVGMsEndpoint().getQueryParameters().stream(),
+                    new GetVGMDeclarationsEndpoint().getQueryParameters().stream(),
                     Stream.of(getApiVersionHeaderParameter()))
                 .toList())
         .responses(
@@ -173,7 +175,7 @@ public class VGMStandardSpecification extends StandardSpecification {
                 .addApiResponse(
                     "200",
                     new ApiResponse()
-                        .description("List of VGMs matching the query parameters")
+                        .description("List of VGM declarations matching the query parameters")
                         .headers(
                             Stream.of(
                                     Map.entry(
@@ -197,20 +199,20 @@ public class VGMStandardSpecification extends StandardSpecification {
                                             new Schema<>()
                                                 .$ref(
                                                     SpecificationToolkit.getComponentSchema$ref(
-                                                        GetVGMsResponse.class))))))
-                .addApiResponse("default", createErrorResponse(GetVGMsError.class)));
+                                                        GetVGMDeclarationsResponse.class))))))
+                .addApiResponse("default", createErrorResponse(GetVGMDeclarationsError.class)));
   }
 
-  private Operation operationVGMsPost() {
+  private Operation operationVGMDeclarationsPost() {
     return new Operation()
-        .summary("Sends a list of VGMs")
-        .description(readResourceFile("openapi-post-vgms-description.md"))
-        .operationId("post-vgms")
+        .summary("Sends a list of VGM declarations")
+        .description(readResourceFile("openapi-post-vgm-declarations-description.md"))
+        .operationId("post-vgm-declarations")
         .tags(Collections.singletonList(TAG_VGM_CONSUMERS))
         .parameters(List.of(getApiVersionHeaderParameter()))
         .requestBody(
             new RequestBody()
-                .description("List of VGMs")
+                .description("List of VGM declarations")
                 .required(true)
                 .content(
                     new Content()
@@ -221,13 +223,13 @@ public class VGMStandardSpecification extends StandardSpecification {
                                     new Schema<>()
                                         .$ref(
                                             SpecificationToolkit.getComponentSchema$ref(
-                                                PostVGMsRequest.class))))))
+                                                PostVGMDeclarationsRequest.class))))))
         .responses(
             new ApiResponses()
                 .addApiResponse(
                     "200",
                     new ApiResponse()
-                        .description("VGMs response")
+                        .description("VGM declarations response")
                         .headers(
                             new LinkedHashMap<>(
                                 Map.ofEntries(
@@ -243,8 +245,8 @@ public class VGMStandardSpecification extends StandardSpecification {
                                             new Schema<>()
                                                 .$ref(
                                                     SpecificationToolkit.getComponentSchema$ref(
-                                                        PostVGMsResponse.class))))))
-                .addApiResponse("default", createErrorResponse(PostVGMsError.class)));
+                                                        PostVGMDeclarationsResponse.class))))))
+                .addApiResponse("default", createErrorResponse(PostVGMDeclarationsError.class)));
   }
 
   private ApiResponse createErrorResponse(Class<?> errorMessageClass) {

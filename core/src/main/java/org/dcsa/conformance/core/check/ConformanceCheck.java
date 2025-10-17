@@ -31,17 +31,24 @@ public abstract class ConformanceCheck {
 
   private synchronized List<ConformanceCheck> getSubChecks() {
     if (subChecks== null) {
-      subChecks = createSubChecks().filter(Objects::nonNull).collect(Collectors.toList());
+      subChecks =
+          createSubChecks()
+              .filter(Objects::nonNull)
+              .filter(ConformanceCheck::isApplicable)
+              .collect(Collectors.toList());
     }
-    return subChecks;
+    return subChecks.stream()
+        .filter(Objects::nonNull)
+        .filter(ConformanceCheck::isApplicable)
+        .toList();
   }
 
   public final void check(Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    List<ConformanceCheck> subChecks = getSubChecks();
-    if (subChecks.isEmpty()) {
+    List<ConformanceCheck> conformanceChecks = getSubChecks();
+    if (conformanceChecks.isEmpty()) {
       this.doCheck(getExchangeByUuid);
     } else {
-      subChecks.forEach(subCheck -> subCheck.check(getExchangeByUuid));
+      conformanceChecks.forEach(subCheck -> subCheck.check(getExchangeByUuid));
     }
   }
 

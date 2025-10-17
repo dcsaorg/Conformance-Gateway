@@ -36,11 +36,11 @@ class ConformanceCheckTest {
   void isRelevant_withAllResultsNotApplicable_shouldReturnFalse() {
     // Given
     ConformanceResult notApplicableResult1 =
-        ConformanceResult.forSourcePartyWithRelevance(
+        ConformanceResult.withErrorsAndRelevance(
             Set.of(
                 new ConformanceError("irrelevant error 1", ConformanceErrorSeverity.IRRELEVANT)));
     ConformanceResult notApplicableResult2 =
-        ConformanceResult.forSourcePartyWithRelevance(
+        ConformanceResult.withErrorsAndRelevance(
             Set.of(
                 new ConformanceError("irrelevant error 2", ConformanceErrorSeverity.IRRELEVANT)));
 
@@ -55,10 +55,10 @@ class ConformanceCheckTest {
   void isRelevant_withMixedResults_shouldReturnInstanceFieldValue() {
     // Given
     ConformanceResult notApplicableResult =
-        ConformanceResult.forSourcePartyWithRelevance(
+        ConformanceResult.withErrorsAndRelevance(
             Set.of(new ConformanceError("irrelevant error", ConformanceErrorSeverity.IRRELEVANT)));
     ConformanceResult applicableResult =
-        ConformanceResult.forSourcePartyWithRelevance(
+        ConformanceResult.withErrorsAndRelevance(
             Set.of(new ConformanceError("real error", ConformanceErrorSeverity.ERROR)));
 
     conformanceCheck.addResult(notApplicableResult);
@@ -73,7 +73,7 @@ class ConformanceCheckTest {
     // Given
     conformanceCheck.setRelevant(false);
     ConformanceResult applicableResult =
-        ConformanceResult.forSourcePartyWithRelevance(
+        ConformanceResult.withErrorsAndRelevance(
             Set.of(new ConformanceError("real error", ConformanceErrorSeverity.ERROR)));
 
     conformanceCheck.addResult(applicableResult);
@@ -86,10 +86,10 @@ class ConformanceCheckTest {
   void isRelevant_withOnlyApplicableResults_shouldReturnInstanceFieldValue() {
     // Given
     ConformanceResult applicableResult1 =
-        ConformanceResult.forSourcePartyWithRelevance(
+        ConformanceResult.withErrorsAndRelevance(
             Set.of(new ConformanceError("error 1", ConformanceErrorSeverity.ERROR)));
     ConformanceResult applicableResult2 =
-        ConformanceResult.forSourcePartyWithRelevance(
+        ConformanceResult.withErrorsAndRelevance(
             Set.of(new ConformanceError("error 2", ConformanceErrorSeverity.WARNING)));
 
     conformanceCheck.addResult(applicableResult1);
@@ -102,7 +102,7 @@ class ConformanceCheckTest {
   @Test
   void isRelevant_withEmptyErrorSets_shouldReturnInstanceFieldValue() {
     // Given
-    ConformanceResult emptyResult = ConformanceResult.forSourcePartyWithRelevance(Set.of());
+    ConformanceResult emptyResult = ConformanceResult.withErrorsAndRelevance(Set.of());
 
     conformanceCheck.addResult(emptyResult);
 

@@ -1,6 +1,5 @@
 package org.dcsa.conformance.core.check;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -47,7 +46,7 @@ public abstract class ActionCheck extends ConformanceCheck {
     Set<String> conformanceErrors = null;
     Set<ConformanceError> conformanceErrorsWithRelevance = null;
     try {
-      conformanceErrorsWithRelevance = checkConformanceAndRelevance(getExchangeByUuid);
+      conformanceErrorsWithRelevance = checkConformanceWithRelevance(getExchangeByUuid);
       if (conformanceErrorsWithRelevance == null) {
         conformanceErrors = checkConformance(getExchangeByUuid);
       }
@@ -62,23 +61,10 @@ public abstract class ActionCheck extends ConformanceCheck {
 
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange != null) {
-      if (Objects.requireNonNull(httpMessageType) == HttpMessageType.REQUEST) {
-        if (isRelevantForRole(exchange.getRequest().message().sourcePartyRole())) {
-          if (conformanceErrorsWithRelevance != null) {
-            this.addResult(
-                ConformanceResult.forSourcePartyWithRelevance(conformanceErrorsWithRelevance));
-          } else {
-            this.addResult(ConformanceResult.forSourceParty(conformanceErrors));
-          }
-        }
-      } else if (httpMessageType == HttpMessageType.RESPONSE
-          && isRelevantForRole(exchange.getRequest().message().targetPartyRole())) {
-        if (conformanceErrorsWithRelevance != null) {
-          this.addResult(
-              ConformanceResult.forTargetPartyWithRelevance(conformanceErrorsWithRelevance));
-        } else {
-          this.addResult(ConformanceResult.forTargetParty(conformanceErrors));
-        }
+      if (conformanceErrorsWithRelevance != null) {
+        this.addResult(ConformanceResult.withErrorsAndRelevance(conformanceErrorsWithRelevance));
+      } else {
+        this.addResult(ConformanceResult.withErrors(conformanceErrors));
       }
     }
   }
@@ -86,7 +72,7 @@ public abstract class ActionCheck extends ConformanceCheck {
   protected abstract Set<String> checkConformance(
       Function<UUID, ConformanceExchange> getExchangeByUuid);
 
-  protected Set<ConformanceError> checkConformanceAndRelevance(
+  protected Set<ConformanceError> checkConformanceWithRelevance(
       Function<UUID, ConformanceExchange> getExchangeByUuid) {
     return null;
   }

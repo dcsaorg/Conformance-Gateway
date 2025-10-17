@@ -43,7 +43,6 @@ public class ConformanceReport {
         conformanceCheck
             .subChecksStream()
             .filter(check -> check.isRelevantForRole(roleName))
-            .filter(ConformanceCheck::isApplicable)
             .map(subCheck -> new ConformanceReport(subCheck, roleName))
             .toList();
     this.conformanceStatus =

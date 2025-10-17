@@ -107,7 +107,7 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
       }
 
       @Override
-      protected Set<ConformanceError> checkConformanceAndRelevance(
+      protected Set<ConformanceError> checkConformanceWithRelevance(
           Function<UUID, ConformanceExchange> getExchangeByUuid) {
         ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
         if (exchange == null) return Collections.emptySet();

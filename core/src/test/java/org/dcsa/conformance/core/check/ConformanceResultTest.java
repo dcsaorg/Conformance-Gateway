@@ -19,7 +19,7 @@ class ConformanceResultTest {
       Set<String> emptyErrors = Set.of();
 
       // When
-      ConformanceResult result = ConformanceResult.forSourceParty(emptyErrors);
+      ConformanceResult result = ConformanceResult.withErrors(emptyErrors);
 
       // Then
       assertTrue(result.isRelevant());
@@ -33,40 +33,7 @@ class ConformanceResultTest {
       Set<String> errors = Set.of("Error 1", "Error 2");
 
       // When
-      ConformanceResult result = ConformanceResult.forSourceParty(errors);
-
-      // Then
-      assertTrue(result.isRelevant());
-      assertFalse(result.isConformant());
-      assertEquals(errors, result.getErrors());
-    }
-  }
-
-  @Nested
-  @DisplayName("forTargetParty method tests")
-  class ForTargetPartyTests {
-
-    @Test
-    void forTargetParty_withEmptyErrors_shouldBeConformant() {
-      // Given
-      Set<String> emptyErrors = Set.of();
-
-      // When
-      ConformanceResult result = ConformanceResult.forTargetParty(emptyErrors);
-
-      // Then
-      assertTrue(result.isRelevant());
-      assertTrue(result.isConformant());
-      assertTrue(result.getErrors().isEmpty());
-    }
-
-    @Test
-    void forTargetParty_withErrors_shouldNotBeConformant() {
-      // Given
-      Set<String> errors = Set.of("Target Error 1", "Target Error 2");
-
-      // When
-      ConformanceResult result = ConformanceResult.forTargetParty(errors);
+      ConformanceResult result = ConformanceResult.withErrors(errors);
 
       // Then
       assertTrue(result.isRelevant());
@@ -85,7 +52,7 @@ class ConformanceResultTest {
       Set<ConformanceError> emptyErrors = Set.of();
 
       // When
-      ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(emptyErrors);
+      ConformanceResult result = ConformanceResult.withErrorsAndRelevance(emptyErrors);
 
       // Then
       assertTrue(result.isRelevant());
@@ -102,7 +69,7 @@ class ConformanceResultTest {
               new ConformanceError("Irrelevant 2", ConformanceErrorSeverity.IRRELEVANT));
 
       // When
-      ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(irrelevantErrors);
+      ConformanceResult result = ConformanceResult.withErrorsAndRelevance(irrelevantErrors);
 
       // Then
       assertFalse(result.isRelevant());
@@ -119,7 +86,7 @@ class ConformanceResultTest {
               new ConformanceError("Real Error 2", ConformanceErrorSeverity.FATAL));
 
       // When
-      ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(realErrors);
+      ConformanceResult result = ConformanceResult.withErrorsAndRelevance(realErrors);
 
       // Then
       assertTrue(result.isRelevant());
@@ -137,7 +104,7 @@ class ConformanceResultTest {
               new ConformanceError("Warning", ConformanceErrorSeverity.WARNING));
 
       // When
-      ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(mixedErrors);
+      ConformanceResult result = ConformanceResult.withErrorsAndRelevance(mixedErrors);
 
       // Then
       assertTrue(result.isRelevant()); // has real errors
@@ -154,7 +121,7 @@ class ConformanceResultTest {
               new ConformanceError("Warning 2", ConformanceErrorSeverity.WARNING));
 
       // When
-      ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(warningErrors);
+      ConformanceResult result = ConformanceResult.withErrorsAndRelevance(warningErrors);
 
       // Then
       assertTrue(result.isRelevant());
@@ -170,7 +137,7 @@ class ConformanceResultTest {
 
       // When
       ConformanceResult result =
-          ConformanceResult.forSourcePartyWithRelevance(singleIrrelevantError);
+          ConformanceResult.withErrorsAndRelevance(singleIrrelevantError);
 
       // Then
       assertFalse(result.isRelevant());
@@ -188,35 +155,12 @@ class ConformanceResultTest {
 
       // When
       ConformanceResult result =
-          ConformanceResult.forSourcePartyWithRelevance(errorsWithEmptyMessage);
+          ConformanceResult.withErrorsAndRelevance(errorsWithEmptyMessage);
 
       // Then
       assertTrue(result.isRelevant());
       assertFalse(result.isConformant());
       assertEquals(Set.of("", "Real Error"), result.getErrors());
-    }
-  }
-
-  @Nested
-  @DisplayName("forTargetPartyWithRelevance method tests")
-  class ForTargetPartyWithRelevanceTests {
-
-    @Test
-    void forTargetPartyWithRelevance_shouldDelegateToSourcePartyMethod() {
-      // Given
-      Set<ConformanceError> mixedErrors =
-          Set.of(
-              new ConformanceError("Real Error", ConformanceErrorSeverity.ERROR),
-              new ConformanceError("Irrelevant Error", ConformanceErrorSeverity.IRRELEVANT));
-
-      // When
-      ConformanceResult targetResult = ConformanceResult.forTargetPartyWithRelevance(mixedErrors);
-      ConformanceResult sourceResult = ConformanceResult.forSourcePartyWithRelevance(mixedErrors);
-
-      // Then
-      assertEquals(sourceResult.isRelevant(), targetResult.isRelevant());
-      assertEquals(sourceResult.isConformant(), targetResult.isConformant());
-      assertEquals(sourceResult.getErrors(), targetResult.getErrors());
     }
   }
 
@@ -234,7 +178,7 @@ class ConformanceResultTest {
               new ConformanceError("Unique Error", ConformanceErrorSeverity.ERROR));
 
       // When
-      ConformanceResult result = ConformanceResult.forSourcePartyWithRelevance(duplicateMessages);
+      ConformanceResult result = ConformanceResult.withErrorsAndRelevance(duplicateMessages);
 
       // Then
       assertTrue(result.isRelevant());

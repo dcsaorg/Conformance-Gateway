@@ -80,10 +80,7 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of
-            // an earlier action
-            // checkTDChanged(getMatchedExchangeUuid(), expectedApiVersion, dsp), // see commit
-            // history
+
             EblChecks.tdPlusScenarioContentChecks(
                 getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getDspSupplier()));
       }

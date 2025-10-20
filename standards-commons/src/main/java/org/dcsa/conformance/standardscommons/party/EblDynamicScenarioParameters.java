@@ -13,7 +13,8 @@ public record EblDynamicScenarioParameters(
     String transportDocumentReference,
     JsonNode shippingInstructions,
     JsonNode updatedShippingInstructions,
-    boolean newTransportDocumentContent)
+    boolean newTransportDocumentContent,
+    boolean isCladInSI)
     implements ScenarioParameters {
 
   public static EblDynamicScenarioParameters fromJson(JsonNode jsonNode) {
@@ -23,6 +24,7 @@ public record EblDynamicScenarioParameters(
         jsonNode.path("transportDocumentReference").asText(null),
         jsonNode.path("shippingInstructions"),
         jsonNode.path("updatedShippingInstructions"),
-        jsonNode.path("newTransportDocumentContent").asBoolean(false));
+        jsonNode.path("newTransportDocumentContent").asBoolean(false),
+        jsonNode.path("isCladInSI").asBoolean(false));
   }
 }

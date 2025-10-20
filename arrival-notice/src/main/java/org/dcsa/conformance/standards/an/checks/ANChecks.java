@@ -218,8 +218,36 @@ public class ANChecks {
           issues.addAll(validateDocumentPartyField("partyFunction").validate(body));
           issues.addAll(validateDocumentPartyField("partyName").validate(body));
           issues.addAll(validateDocumentPartyField("partyContactDetails").validate(body));
+          issues.addAll(validatePartyContactName().validate(body));
+          issues.addAll(validatePartyContactEmailOrPhone().validate(body));
           issues.addAll(validateDocumentPartyAddress().validate(body));
           return issues;
+        });
+  }
+
+  public static JsonContentCheck validatePartyContactName() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The publisher has demonstrated the correct use of the \""
+            + "name"
+            + "\" attribute in \"carrierContactInformation\"",
+        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*.partyContactDetails.*"),
+        (node, contextPath) -> {
+          if (!node.hasNonNull("name")) {
+            return Set.of(contextPath + ". \"name\" must be functionally present");
+          }
+          return Set.of();
+        });
+  }
+
+  public static JsonContentCheck validatePartyContactEmailOrPhone() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The publisher has demonstrated the correct use of either the \"email\" or \"phone\" attribute in \"partyContactDetails\"",
+        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*.partyContactDetails.*"),
+        (node, contextPath) -> {
+          if (!node.hasNonNull("email") && !node.hasNonNull("phone")) {
+            return Set.of(contextPath + " must functionally include either 'email' or 'phone'");
+          }
+          return Set.of();
         });
   }
 
@@ -246,7 +274,7 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck validateDocumentPartyAddress() {
+  public static JsonContentCheck validateDocumentPartyAddress() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"address\" object in \"documentParties\"",
         mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
@@ -269,6 +297,9 @@ public class ANChecks {
           issues.addAll(validateTransportETA().validate(body));
           issues.addAll(validatePortOfDischargePresence().validate(body));
           issues.addAll(validatePortOfDischargeLocation().validate(body));
+          issues.addAll(validatePortOfDischargeFacilityFields("facilityCode").validate(body));
+          issues.addAll(
+              validatePortOfDischargeFacilityFields("facilityCodeListProvider").validate(body));
           issues.addAll(validateVesselVoyage().validate(body));
           issues.addAll(validateVesselVoyageField("vesselName").validate(body));
           issues.addAll(validateVesselVoyageField("carrierImportVoyageNumber").validate(body));
@@ -281,15 +312,24 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of transport ETA fields",
         mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
         (node, contextPath) -> {
-          if (!node.hasNonNull("portOfDischargeArrivalDate")
-              && !node.hasNonNull("placeOfDeliveryArrivalDate")) {
+          boolean hasPortOfDischargeValue =
+              node.hasNonNull("portOfDischargeArrivalDate")
+                  && node.path("portOfDischargeArrivalDate").hasNonNull("value");
+
+          boolean hasPlaceOfDeliveryValue =
+              node.hasNonNull("placeOfDeliveryArrivalDate")
+                  && node.path("placeOfDeliveryArrivalDate").hasNonNull("value");
+
+          if (!hasPortOfDischargeValue && !hasPlaceOfDeliveryValue) {
             return Set.of(
                 contextPath
-                    + ": must functionally include either 'portOfDischargeArrivalDate' or 'placeOfDeliveryArrivalDate'");
+                    + ": must functionally include either 'portOfDischargeArrivalDate.value' "
+                    + "or 'placeOfDeliveryArrivalDate.value'");
           }
           return Set.of();
         });
   }
+
 
   private static JsonContentCheck validatePortOfDischargePresence() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
@@ -311,12 +351,35 @@ public class ANChecks {
         (node, contextPath) -> {
           var pod = node.get("portOfDischarge");
           if (pod != null && pod.isObject()) {
+
+            if (pod.hasNonNull("address") && pod.get("address").isEmpty()) {
+              return Set.of(
+                  contextPath + ".portOfDischarge must functionally contain a non empty 'address'");
+            }
             if (!pod.hasNonNull("address")
                 && !pod.hasNonNull("UNLocationCode")
                 && !pod.hasNonNull("facility")) {
               return Set.of(
                   contextPath
                       + ".portOfDischarge must functionally contain at least one of 'address', 'UNLocationCode', or 'facility'");
+            }
+          }
+          return Set.of();
+        });
+  }
+
+  public static JsonContentCheck validatePortOfDischargeFacilityFields(String field) {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The publisher has demonstrated the correct use of facility location "
+            + field
+            + " in \"portOfDischarge\"",
+        mav -> mav.submitAllMatching("arrivalNotices.*.transport.portOfDischarge"),
+        (node, contextPath) -> {
+          var facility = node.get("facility");
+          if (facility != null && facility.isObject()) {
+
+            if (!facility.hasNonNull(field)) {
+              return Set.of(contextPath + ".facility must functionally contain " + field);
             }
           }
           return Set.of();
@@ -526,6 +589,8 @@ public class ANChecks {
           issues.addAll(validateCargoItemPresence().validate(body));
           issues.addAll(validateCargoItemField("equipmentReference").validate(body));
           issues.addAll(validateCargoItemField("cargoGrossWeight").validate(body));
+          issues.addAll(validateCargoGrossWeightField("value").validate(body));
+          issues.addAll(validateCargoGrossWeightField("unit").validate(body));
           issues.addAll(validateOuterPackagingStructure().validate(body));
           issues.addAll(validateOuterPackagingFields().validate(body));
 
@@ -567,6 +632,22 @@ public class ANChecks {
             + field
             + "\" attribute",
         mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*.cargoItems.*"),
+        (item, contextPath) -> {
+          if (!item.hasNonNull(field)) {
+            return Set.of(contextPath + "." + field + " must be functionally present");
+          }
+          return Set.of();
+        });
+  }
+
+  private static JsonContentCheck validateCargoGrossWeightField(String field) {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The publisher has demonstrated the correct use of the \"cargoGrossWeight."
+            + field
+            + "\" attribute",
+        mav ->
+            mav.submitAllMatching(
+                "arrivalNotices.*.consignmentItems.*.cargoItems.*.cargoGrossWeight"),
         (item, contextPath) -> {
           if (!item.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");

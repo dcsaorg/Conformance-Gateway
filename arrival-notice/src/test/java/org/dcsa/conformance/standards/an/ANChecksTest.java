@@ -81,7 +81,7 @@ class ANChecksTest {
     assertFalse(ANChecks.validateTransport().validate(body).isEmpty());
 
     ObjectNode transport = an.putObject("transport");
-    transport.put("portOfDischargeArrivalDate", "2025-10-01T10:00:00Z");
+    transport.putObject("portOfDischargeArrivalDate").put("value", "2025-10-01T10:00:00Z");
 
     ObjectNode pod = transport.putObject("portOfDischarge");
     pod.put("UNLocationCode", "NLRTM");
@@ -134,7 +134,9 @@ class ANChecksTest {
     ArrayNode cargoItems = ci.putArray("cargoItems");
     ObjectNode item = cargoItems.addObject();
     item.put("equipmentReference", "MSCU1234567");
-    item.put("cargoGrossWeight", 1234.5);
+    ObjectNode cgw = item.putObject("cargoGrossWeight");
+    cgw.put("value", 1234.5);
+    cgw.put("unit", "KGM");
 
     ObjectNode op = item.putObject("outerPackaging");
     op.put("packageCode", "CT");
@@ -199,5 +201,52 @@ class ANChecksTest {
     assertFalse(checks.isEmpty());
   }
 
+  @Test
+  void testValidatePartyContactDetailsName() {
+
+    ArrayNode documentParties = an.putArray("documentParties");
+    ObjectNode documentParty = documentParties.addObject();
+    ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
+    ObjectNode partyContactDetail = partyContactDetails.addObject();
+    assertFalse(ANChecks.validatePartyContactName().validate(body).isEmpty());
+    partyContactDetail.put("name", "Ops Desk");
+    assertTrue(ANChecks.validatePartyContactName().validate(body).isEmpty());
+
+  }
+
+  @Test
+  void testValidatePartyContactDetailsEmailOrPhone() {
+
+    ArrayNode documentParties = an.putArray("documentParties");
+    ObjectNode documentParty = documentParties.addObject();
+    ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
+    ObjectNode partyContactDetail = partyContactDetails.addObject();
+
+    assertFalse(ANChecks.validatePartyContactEmailOrPhone().validate(body).isEmpty());
+
+    partyContactDetail.put("email", "ops@example.com");
+    assertTrue(ANChecks.validatePartyContactEmailOrPhone().validate(body).isEmpty());
+  }
+
+  @Test
+  void testValidatePortOfDischargeFields() {
+
+    ObjectNode transport = an.putObject("transport");
+    ObjectNode pod = transport.putObject("portOfDischarge");
+    ObjectNode facility = pod.putObject("facility");
+
+    assertFalse(
+        ANChecks.validatePortOfDischargeFacilityFields("facilityCode").validate(body).isEmpty());
+
+    facility.put("facilityCode", "NLRTM");
+    assertTrue(
+        ANChecks.validatePortOfDischargeFacilityFields("facilityCode").validate(body).isEmpty());
+
+    facility.put("facilityCodeListProvider", "SMDG");
+    assertTrue(
+        ANChecks.validatePortOfDischargeFacilityFields("facilityCodeListProvider")
+            .validate(body)
+            .isEmpty());
+  }
 }
 

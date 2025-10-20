@@ -23,13 +23,15 @@ public class ANChecks {
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.addAll(validateBasicFields());
     checks.add(VALID_DELIVERY_TYPE_AT_DESTINATION);
+    checks.add(VALID_CARRIER_CODE_LIST_PROVIDER);
     checks.add(validateCarrierContactInformation());
     checks.add(validateDocumentParties());
     checks.add(VALID_PARTY_FUNCTION);
-
     checks.add(validateTransport());
+    checks.add(VALID_FACILITY_CODE_LIST_PROVIDER);
     checks.add(validateUtilizedTransportEquipments());
     checks.add(validateConsignmentItems());
+    checks.add(VALID_CARGO_GROSS_WEIGHT_UNIT);
     checks.addAll(getScenarioRelatedChecks(scenarioType));
 
     return JsonAttribute.contentChecks(
@@ -88,9 +90,16 @@ public class ANChecks {
 
   public static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
-    switch (scenarioType) {
-      case "FREE_TIME" -> checks.add(validateFreeTimeObjectStructure(scenarioType));
-      case "FREIGHTED" -> checks.add(validateChargesStructure());
+
+    if (scenarioType.equals(ScenarioType.FREE_TIME.name())) {
+      checks.add(validateFreeTimeObjectStructure(scenarioType));
+      checks.add(VALID_FREE_TIME_TYPE_CODE);
+      checks.add(VALID_FREE_TIME_TIME_UNIT);
+    }
+
+    if (scenarioType.equals(ScenarioType.FREIGHTED.name())) {
+      checks.add(validateChargesStructure());
+      checks.add(VALID_PAYMENT_TERM_CODE);
     }
     return checks;
   }
@@ -193,10 +202,13 @@ public class ANChecks {
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");
+          } else if (node.get(field).asText().isBlank()) {
+            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
           }
           return Set.of();
         });
   }
+
 
   private static JsonContentCheck validateCarrierContactEmailOrPhone() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
@@ -205,6 +217,12 @@ public class ANChecks {
         (node, contextPath) -> {
           if (!node.hasNonNull("email") && !node.hasNonNull("phone")) {
             return Set.of(contextPath + " must functionally include either 'email' or 'phone'");
+          }
+          if (node.hasNonNull("email") && node.get("email").asText().isBlank()) {
+            return Set.of(contextPath + ". \"email\" must not be empty or blank in the payload");
+          }
+          if (node.hasNonNull("phone") && node.get("phone").asText().isBlank()) {
+            return Set.of(contextPath + ". \"phone\" must not be empty or blank in the payload");
           }
           return Set.of();
         });
@@ -220,7 +238,9 @@ public class ANChecks {
           issues.addAll(validateDocumentPartyField("partyContactDetails").validate(body));
           issues.addAll(validatePartyContactName().validate(body));
           issues.addAll(validatePartyContactEmailOrPhone().validate(body));
-          issues.addAll(validateDocumentPartyAddress().validate(body));
+          issues.addAll(
+              validateAddress("documentParties", "arrivalNotices.*.documentParties.*")
+                  .validate(body));
           return issues;
         });
   }
@@ -234,7 +254,10 @@ public class ANChecks {
         (node, contextPath) -> {
           if (!node.hasNonNull("name")) {
             return Set.of(contextPath + ". \"name\" must be functionally present");
+          } else if (node.get("name").asText().isBlank()) {
+            return Set.of(contextPath + ". \"name\" must not be empty or blank in the payload");
           }
+
           return Set.of();
         });
   }
@@ -246,6 +269,12 @@ public class ANChecks {
         (node, contextPath) -> {
           if (!node.hasNonNull("email") && !node.hasNonNull("phone")) {
             return Set.of(contextPath + " must functionally include either 'email' or 'phone'");
+          }
+          if (node.hasNonNull("email") && node.get("email").asText().isBlank()) {
+            return Set.of(contextPath + ". \"email\" must not be empty or blank in the payload");
+          }
+          if (node.hasNonNull("phone") && node.get("phone").asText().isBlank()) {
+            return Set.of(contextPath + ". \"phone\" must not be empty or blank in the payload");
           }
           return Set.of();
         });
@@ -267,17 +296,17 @@ public class ANChecks {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally  present");
           }
-          if (node.get(field).asText().isBlank()) {
+          if (field.equals("partyName") && node.get(field).asText().isBlank()) {
             return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
           }
           return Set.of();
         });
   }
 
-  public static JsonContentCheck validateDocumentPartyAddress() {
+  public static JsonContentCheck validateAddress(String field, String path) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-        "The publisher has demonstrated the correct use of the \"address\" object in \"documentParties\"",
-        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
+        "The publisher has demonstrated the correct use of the \"address\" object in " + field,
+        mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           var address = node.get("address");
           if (address == null || !address.isObject() || address.isEmpty()) {
@@ -285,9 +314,37 @@ public class ANChecks {
                 contextPath
                     + ".address must be functionally present and contain at least one field");
           }
+
+          boolean hasNonEmpty =
+              ADDRESS_FIELDS.stream()
+                  .anyMatch(
+                      f -> {
+                        var fieldNode = address.get(f);
+                        return fieldNode != null
+                            && fieldNode.isTextual()
+                            && !fieldNode.asText().isBlank();
+                      });
+
+          if (!hasNonEmpty) {
+            return Set.of(
+                contextPath
+                    + ".address must contain at least one non-empty value among: "
+                    + String.join(", ", ADDRESS_FIELDS));
+          }
           return Set.of();
         });
   }
+
+  private static final List<String> ADDRESS_FIELDS =
+      List.of(
+          "street",
+          "streetNumber",
+          "floor",
+          "postCode",
+          "POBox",
+          "city",
+          "stateRegion",
+          "countryCode");
 
   public static JsonContentCheck validateTransport() {
     return JsonAttribute.customValidator(
@@ -297,6 +354,7 @@ public class ANChecks {
           issues.addAll(validateTransportETA().validate(body));
           issues.addAll(validatePortOfDischargePresence().validate(body));
           issues.addAll(validatePortOfDischargeLocation().validate(body));
+          issues.addAll(validatePODAdrress().validate(body));
           issues.addAll(validatePortOfDischargeFacilityFields("facilityCode").validate(body));
           issues.addAll(
               validatePortOfDischargeFacilityFields("facilityCodeListProvider").validate(body));
@@ -351,11 +409,6 @@ public class ANChecks {
         (node, contextPath) -> {
           var pod = node.get("portOfDischarge");
           if (pod != null && pod.isObject()) {
-
-            if (pod.hasNonNull("address") && pod.get("address").isEmpty()) {
-              return Set.of(
-                  contextPath + ".portOfDischarge must functionally contain a non empty 'address'");
-            }
             if (!pod.hasNonNull("address")
                 && !pod.hasNonNull("UNLocationCode")
                 && !pod.hasNonNull("facility")) {
@@ -363,6 +416,27 @@ public class ANChecks {
                   contextPath
                       + ".portOfDischarge must functionally contain at least one of 'address', 'UNLocationCode', or 'facility'");
             }
+            if (pod.hasNonNull("UNLocationCode") && pod.get("UNLocationCode").asText().isBlank()) {
+              return Set.of(
+                  contextPath
+                      + ".portOfDischarge.UNLocationCode must not be empty or blank in the payload");
+            }
+          }
+          return Set.of();
+        });
+  }
+
+  public static JsonContentCheck validatePODAdrress() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The publisher has demonstrated the correct use of location information in \"portOfDischarge\"",
+        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
+        (node, contextPath) -> {
+          var pod = node.get("portOfDischarge");
+          if (pod.hasNonNull("address") && pod.get("address").isEmpty()) {
+            return Set.of(
+                contextPath + ".portOfDischarge must functionally contain a non empty 'address'");
+          } else {
+            validateAddress("portOfDischarge", "arrivalNotices.*.transport.portOfDischarge");
           }
           return Set.of();
         });
@@ -380,11 +454,26 @@ public class ANChecks {
 
             if (!facility.hasNonNull(field)) {
               return Set.of(contextPath + ".facility must functionally contain " + field);
+            } else if (facility.get(field).asText().isBlank()) {
+              return Set.of(
+                  contextPath
+                      + ".facility."
+                      + field
+                      + " must not be empty or blank in the payload");
             }
           }
           return Set.of();
         });
   }
+
+  static final JsonRebaseableContentCheck VALID_FACILITY_CODE_LIST_PROVIDER =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'facilityCodeListProvider' is valid",
+          mav ->
+              mav.submitAllMatching(
+                  "arrivalNotices.*.transport.portOfDischarge.facility.facilityCodeListProvider"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              ANDatasets.FACILITY_CODE_LIST_PROVIDER));
 
   private static JsonContentCheck validateVesselVoyage() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
@@ -406,6 +495,8 @@ public class ANChecks {
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");
+          } else if (node.get(field).asText().isBlank()) {
+            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
           }
           return Set.of();
         });
@@ -453,6 +544,18 @@ public class ANChecks {
         });
   }
 
+  static final JsonRebaseableContentCheck VALID_FREE_TIME_TYPE_CODE =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'type codes' is valid",
+          mav -> mav.submitAllMatching("arrivalNotices.*.freeTimes.*.typeCodes.*"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(ANDatasets.FREE_TIME_TYPE_CODES));
+
+  static final JsonRebaseableContentCheck VALID_FREE_TIME_TIME_UNIT =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'time unit' is valid",
+          mav -> mav.submitAllMatching("arrivalNotices.*.freeTimes.*.timeUnit"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(ANDatasets.FREE_TIME_TIME_UNIT));
+
   private static JsonContentCheck validateFreeTimeArrayAttribute(String attributeName) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"freeTime\" \""
@@ -466,6 +569,19 @@ public class ANChecks {
                 String.format(
                     "%s.%s must be functionally present and be a non-empty array",
                     contextPath, attributeName));
+          }
+
+          boolean allEmpty = true;
+          for (var element : arrayNode) {
+            if (element != null && element.isTextual() && !element.asText().trim().isEmpty()) {
+              allEmpty = false;
+              break;
+            }
+          }
+          if (allEmpty) {
+            return Set.of(
+                String.format(
+                    "%s.%s must contain at least one non-empty value", contextPath, attributeName));
           }
           return Set.of();
         });
@@ -481,10 +597,20 @@ public class ANChecks {
           if (!node.hasNonNull(attributeName)) {
             return Set.of(
                 String.format("%s.%s must be functionally present", contextPath, attributeName));
+          } else if (node.get(attributeName).asText().isBlank()) {
+            return Set.of(
+                String.format(
+                    "%s.%s must not be empty or blank in the payload", contextPath, attributeName));
           }
           return Set.of();
         });
   }
+
+  static final JsonRebaseableContentCheck VALID_PAYMENT_TERM_CODE =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'paymentTermCode' is valid",
+          mav -> mav.submitAllMatching("arrivalNotices.*.charges.*.paymentTermCode"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(ANDatasets.PAYMENT_TERM_CODE));
 
   public static JsonContentCheck validateChargesStructure() {
     return JsonAttribute.customValidator(
@@ -526,6 +652,8 @@ public class ANChecks {
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");
+          } else if (node.get(field).asText().isBlank()) {
+            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
           }
           return Set.of();
         });
@@ -574,6 +702,9 @@ public class ANChecks {
         (seal, contextPath) -> {
           if (!seal.hasNonNull("number")) {
             return Set.of(contextPath + ".number must be functionally present");
+          } else if (seal.get("number").asText().isBlank())
+            return Set.of(contextPath + ".number must not be empty or blank in the payload");
+          {
           }
           return Set.of();
         });
@@ -598,6 +729,14 @@ public class ANChecks {
         });
   }
 
+  static final JsonRebaseableContentCheck VALID_CARGO_GROSS_WEIGHT_UNIT =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'cargoGrossWeight.unit' is valid",
+          mav ->
+              mav.submitAllMatching(
+                  "arrivalNotices.*.consignmentItems.*.cargoItems.*.cargoGrossWeight.unit"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(ANDatasets.CARGO_GROSS_WEIGHT_UNIT));
+
   private static JsonContentCheck validateConsignmentItemsDescriptionOfGoods() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"descriptionOfGoods\" field",
@@ -608,6 +747,19 @@ public class ANChecks {
             return Set.of(
                 contextPath
                     + ".descriptionOfGoods must functionally be a non-empty array of strings");
+          }
+          boolean allEmpty = true;
+          for (var item : node) {
+            if (item != null && item.isTextual() && !item.asText().trim().isEmpty()) {
+              allEmpty = false;
+              break;
+            }
+          }
+
+          if (allEmpty) {
+            return Set.of(
+                contextPath
+                    + ".descriptionOfGoods must contain at least one non-empty string value");
           }
           return Set.of();
         });
@@ -635,6 +787,8 @@ public class ANChecks {
         (item, contextPath) -> {
           if (!item.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally present");
+          } else if (!field.equals("cargoGrossWeight") && item.get(field).asText().isBlank()) {
+            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
           }
           return Set.of();
         });
@@ -686,6 +840,15 @@ public class ANChecks {
                     + " must contain at least one of 'packageCode', 'IMOPackagingCode', or 'description'");
           }
 
+          if (op.get("description") != null && op.get("description").asText().isBlank()) {
+            issues.add(contextPath + ".description must not be empty or blank in the payload");
+          }
+          if (op.get("packageCode") != null && op.get("packageCode").asText().isBlank()) {
+            issues.add(contextPath + ".packageCode must not be empty or blank in the payload");
+          }
+          if (op.get("IMOPackagingCode") != null && op.get("IMOPackagingCode").asText().isBlank()) {
+            issues.add(contextPath + ".IMOPackagingCode must not be empty or blank in the payload");
+          }
           if (!op.hasNonNull("numberOfPackages")) {
             issues.add(contextPath + ".numberOfPackages must be functionally present");
           }

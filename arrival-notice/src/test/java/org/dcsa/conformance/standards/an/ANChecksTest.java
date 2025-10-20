@@ -199,5 +199,53 @@ class ANChecksTest {
     assertFalse(checks.isEmpty());
   }
 
+  @Test
+  void testValidatePartyContactDetailsName() {
+
+    ArrayNode documentParties = an.putArray("documentParties");
+    ObjectNode documentParty = documentParties.addObject();
+    ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
+    ObjectNode partyContactDetail = partyContactDetails.addObject();
+    assertFalse(ANChecks.validatePartyContactName().validate(body).isEmpty());
+    partyContactDetail.put("name", "Ops Desk");
+    assertTrue(ANChecks.validatePartyContactName().validate(body).isEmpty());
+
+    assertTrue(ANChecks.validatePartyContactEmailOrPhone().validate(body).isEmpty());
+  }
+
+  @Test
+  void testValidatePartyContactDetailsEmailOrPhone() {
+
+    ArrayNode documentParties = an.putArray("documentParties");
+    ObjectNode documentParty = documentParties.addObject();
+    ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
+    ObjectNode partyContactDetail = partyContactDetails.addObject();
+
+    assertFalse(ANChecks.validatePartyContactEmailOrPhone().validate(body).isEmpty());
+
+    partyContactDetail.put("email", "ops@example.com");
+    assertTrue(ANChecks.validatePartyContactEmailOrPhone().validate(body).isEmpty());
+  }
+
+  @Test
+  void testValidatePortOfDischargeFields() {
+
+    ObjectNode transport = an.putObject("transport");
+    ObjectNode pod = transport.putObject("portOfDischarge");
+    ObjectNode facility = pod.putObject("facility");
+
+    assertFalse(
+        ANChecks.validatePortOfDischargeFacilityFields("facilitycode").validate(body).isEmpty());
+
+    facility.put("facilityCode", "NLRTM");
+    assertFalse(
+        ANChecks.validatePortOfDischargeFacilityFields("facilitycode").validate(body).isEmpty());
+
+    facility.put("facilityCodeListProvider", "SMDG");
+    assertTrue(
+        ANChecks.validatePortOfDischargeFacilityFields("facilityCodeListProvider")
+            .validate(body)
+            .isEmpty());
+  }
 }
 

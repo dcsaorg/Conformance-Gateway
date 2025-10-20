@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 
@@ -23,8 +26,23 @@ public class EblInputPayloadValidations {
     contentChecks.add(EblChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     contentChecks.add(EblChecks.VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
     contentChecks.addAll(EblChecks.generateScenarioRelatedChecks(scenarioType, isTD));
+
     return contentChecks.stream()
-        .flatMap(check -> check.validate(eblNode).getErrorMessages().stream())
+        .filter(JsonContentCheck::isRelevant)
+        .flatMap(
+            check -> {
+              ConformanceCheckResult result = check.validate(eblNode);
+              return switch (result) {
+                case ConformanceCheckResult.SimpleErrors(var errors) -> errors.stream();
+                case ConformanceCheckResult.ErrorsWithRelevance(var errors) ->
+                    errors.stream()
+                        .filter(
+                            conformanceError ->
+                                !ConformanceErrorSeverity.IRRELEVANT.equals(
+                                    conformanceError.severity()))
+                        .map(ConformanceError::message);
+              };
+            })
         .collect(Collectors.toSet());
   }
 }

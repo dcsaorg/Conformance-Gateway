@@ -269,7 +269,7 @@ class JsonAttributeTest {
   }
 
   @Test
-  void testAllIndividualMatchesMustBeValid() {
+  void testAllIndividualMatchesMustBeIrrelevant() {
     objectNode.put("test", "test");
     arrayNode.add(objectNode);
 
@@ -278,11 +278,14 @@ class JsonAttributeTest {
         multiAttributeValidator -> multiAttributeValidator.submitAllMatching("test.*");
     JsonContentMatchedValidation subvalidation = (a, b) -> ConformanceCheckResult.simple(Set.of());
 
-    assertTrue(
-        JsonAttribute.allIndividualMatchesMustBeValid(name, consumer, subvalidation)
-            .validate(arrayNode, "")
-            .getErrorMessages()
-            .isEmpty());
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                JsonAttribute.allIndividualMatchesMustBeValid(name, consumer, subvalidation)
+                    .validate(arrayNode, ""))
+            .errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
   }
 
   @Test

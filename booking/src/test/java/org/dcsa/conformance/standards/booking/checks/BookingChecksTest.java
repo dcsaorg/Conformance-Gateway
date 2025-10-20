@@ -14,12 +14,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Set;
 import java.util.function.Supplier;
-
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,12 +59,15 @@ class BookingChecksTest {
   }
 
   @Test
-  void testCargoGrossWeightMissingAtRequestedEquipmentNoCommodities_valid() {
-
+  void testCargoGrossWeightMissingAtRequestedEquipmentNoCommodities_irrelevant() {
     booking.set("requestedEquipments", requestedEquipments);
     JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_CONDITIONS;
-    Set<String> errors = check.validate(booking).getErrorMessages();
-    assertTrue(errors.isEmpty());
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
   }
 
   @Test

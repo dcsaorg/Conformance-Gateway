@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
+import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.an.party.ANRole;
 import org.dcsa.conformance.standards.an.party.DynamicScenarioParameters;
@@ -21,8 +22,11 @@ public class ANChecks {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.addAll(validateBasicFields());
+    checks.add(VALID_DELIVERY_TYPE_AT_DESTINATION);
     checks.add(validateCarrierContactInformation());
     checks.add(validateDocumentParties());
+    checks.add(VALID_PARTY_FUNCTION);
+
     checks.add(validateTransport());
     checks.add(validateUtilizedTransportEquipments());
     checks.add(validateConsignmentItems());
@@ -41,9 +45,24 @@ public class ANChecks {
   public static List<JsonContentCheck> validateBasicFields() {
     return List.of(
         validateBasicFieldWithLabel("carrierCode"),
+        validateBasicFieldWithLabel("transportDocumentReference"),
         validateBasicFieldWithLabel("carrierCodeListProvider"),
         validateBasicFieldWithLabel("deliveryTypeAtDestination"));
   }
+
+  static final JsonRebaseableContentCheck VALID_DELIVERY_TYPE_AT_DESTINATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'deliveryTypeAtDestination' is valid",
+          mav -> mav.submitAllMatching("arrivalNotices.*.deliveryTypeAtDestination"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              ANDatasets.DELIVERY_TYPE_AT_DESTINATION));
+
+  static final JsonRebaseableContentCheck VALID_CARRIER_CODE_LIST_PROVIDER =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'carrierCodeListProvider' is valid",
+          mav -> mav.submitAllMatching("arrivalNotices.*.carrierCodeListProvider"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              ANDatasets.CARRIER_CODE_LIST_PROVIDER));
 
   private static JsonContentCheck validateBasicFieldWithLabel(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
@@ -54,6 +73,10 @@ public class ANChecks {
             return Set.of(
                 contextPath + "." + field + " must be functionally present in the payload");
           }
+          if (node.get(field).asText().isBlank()) {
+            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
+          }
+
           return Set.of();
         });
   }
@@ -200,6 +223,12 @@ public class ANChecks {
         });
   }
 
+  static final JsonRebaseableContentCheck VALID_PARTY_FUNCTION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'partyFunction' is valid",
+          mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*.partyFunction"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(ANDatasets.PARTY_FUNCTION));
+
   private static JsonContentCheck validateDocumentPartyField(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \""
@@ -209,6 +238,9 @@ public class ANChecks {
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(contextPath + "." + field + " must be functionally  present");
+          }
+          if (node.get(field).asText().isBlank()) {
+            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
           }
           return Set.of();
         });

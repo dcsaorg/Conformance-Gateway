@@ -26,7 +26,10 @@ class JitChecksTest {
             PortCallServiceTypeCode.BERTH, PortCallServiceEventTypeCode.ARRI, null);
     assertTrue(JitChecks.IS_PORT_CALL_SERVICE.test(request));
     assertTrue(
-        JitChecks.checkPortCallService(PortCallServiceTypeCode.BERTH).validate(request).isEmpty());
+        JitChecks.checkPortCallService(PortCallServiceTypeCode.BERTH)
+            .validate(request)
+            .getErrorMessages()
+            .isEmpty());
 
     assertEquals(
         "The value of 'portCallServiceTypeCode' was 'BUNKERING' instead of 'BERTH'",
@@ -34,6 +37,7 @@ class JitChecksTest {
             .validate(
                 createPortCallServiceRequest(
                     PortCallServiceTypeCode.BUNKERING, PortCallServiceEventTypeCode.ARRI, null))
+            .getErrorMessages()
             .iterator()
             .next());
   }
@@ -44,20 +48,44 @@ class JitChecksTest {
         createPortCallServiceRequest(
             PortCallServiceTypeCode.BERTH, PortCallServiceEventTypeCode.ARRI, null);
     // Moves checks
-    assertTrue(JitChecks.checkPortCallServiceHasMoves(false).validate(nonMovesRequest).isEmpty());
-    assertFalse(JitChecks.checkPortCallServiceHasMoves(true).validate(nonMovesRequest).isEmpty());
+    assertTrue(
+        JitChecks.checkPortCallServiceHasMoves(false)
+            .validate(nonMovesRequest)
+            .getErrorMessages()
+            .isEmpty());
+    assertFalse(
+        JitChecks.checkPortCallServiceHasMoves(true)
+            .validate(nonMovesRequest)
+            .getErrorMessages()
+            .isEmpty());
 
     ObjectNode movesRequest =
         createPortCallServiceRequest(
             PortCallServiceTypeCode.MOVES, PortCallServiceEventTypeCode.ARRI, null);
-    assertFalse(JitChecks.checkPortCallServiceHasMoves(false).validate(movesRequest).isEmpty());
-    assertTrue(JitChecks.checkPortCallServiceHasMoves(true).validate(movesRequest).isEmpty());
+    assertFalse(
+        JitChecks.checkPortCallServiceHasMoves(false)
+            .validate(movesRequest)
+            .getErrorMessages()
+            .isEmpty());
+    assertTrue(
+        JitChecks.checkPortCallServiceHasMoves(true)
+            .validate(movesRequest)
+            .getErrorMessages()
+            .isEmpty());
 
-    assertTrue(JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).isEmpty());
+    assertTrue(
+        JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES
+            .validate(movesRequest)
+            .getErrorMessages()
+            .isEmpty());
 
     // Verify: Max only one `moves` object without a 'carrierCode'
     movesRequest.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
-    assertFalse(JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).isEmpty());
+    assertFalse(
+        JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES
+            .validate(movesRequest)
+            .getErrorMessages()
+            .isEmpty());
 
     // Verify: If there are multiple `moves` objects, a `carrierCode` MUST NOT be repeated.
     movesRequest
@@ -65,11 +93,19 @@ class JitChecksTest {
         .forEach(jsonNode -> ((ObjectNode) jsonNode).put("carrierCode", "NVOCC"));
     assertEquals(
         "Expected carrierCodes to be different in the given moves objects; found multiple are the same!",
-        JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).iterator().next());
+        JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES
+            .validate(movesRequest)
+            .getErrorMessages()
+            .iterator()
+            .next());
 
     // Verify 2 different carrierCodes are allowed
     ((ObjectNode) movesRequest.get("moves").get(0)).put("carrierCode", "ABCD");
-    assertTrue(JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).isEmpty());
+    assertTrue(
+        JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES
+            .validate(movesRequest)
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -78,10 +114,12 @@ class JitChecksTest {
     assertTrue(
         JitChecks.checkTimestampReplyTimestampIDisAbsent()
             .validate(createTimestamp().toJson())
+            .getErrorMessages()
             .isEmpty());
     assertFalse(
         JitChecks.checkTimestampReplyTimestampIDisAbsent()
             .validate(createTimestamp().toJson().put("replyToTimestampID", "something"))
+            .getErrorMessages()
             .isEmpty());
 
     // replyToTimestampID matches the previous timestamp
@@ -93,12 +131,14 @@ class JitChecksTest {
     assertTrue(
         JitChecks.checkTimestampIDsMatchesPreviousCall(dsp)
             .validate(createTimestamp().withReplyToTimestampID(previousTimestamp).toJson())
+            .getErrorMessages()
             .isEmpty());
 
     // Assert No previous timestamp
     assertTrue(
         JitChecks.checkTimestampIDsMatchesPreviousCall(new DynamicScenarioParameters())
             .validate(createTimestamp().toJson())
+            .getErrorMessages()
             .isEmpty());
 
     // Assert Non-matching replyToTimestampID
@@ -106,6 +146,7 @@ class JitChecksTest {
     assertFalse(
         JitChecks.checkTimestampIDsMatchesPreviousCall(dsp)
             .validate(createTimestamp().withReplyToTimestampID(previousTimestamp).toJson())
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -118,6 +159,7 @@ class JitChecksTest {
                     PortCallServiceTypeCode.BERTH,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
+            .getErrorMessages()
             .isEmpty());
 
     assertEquals(
@@ -126,6 +168,7 @@ class JitChecksTest {
             .validate(
                 createPortCallServiceRequest(
                     PortCallServiceTypeCode.SLUDGE, PortCallServiceEventTypeCode.DEPA, null))
+            .getErrorMessages()
             .iterator()
             .next());
   }
@@ -138,12 +181,14 @@ class JitChecksTest {
     assertTrue(
         JitChecks.checkPlannedMatchesRequestedTimestamp(dsp)
             .validate(createTimestamp().toJson())
+            .getErrorMessages()
             .isEmpty());
 
     assertEquals(
         "Expected matching timestamp: 'dateTime' but got Planned timestamp: 'somethingElse'",
         JitChecks.checkPlannedMatchesRequestedTimestamp(dsp)
             .validate(createTimestamp().withDateTime("somethingElse").toJson())
+            .getErrorMessages()
             .iterator()
             .next());
   }
@@ -159,6 +204,7 @@ class JitChecksTest {
                     PortCallServiceTypeCode.BERTH,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
+            .getErrorMessages()
             .isEmpty());
 
     assertEquals(
@@ -169,6 +215,7 @@ class JitChecksTest {
                     PortCallServiceTypeCode.SEA_PASSAGE,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
+            .getErrorMessages()
             .iterator()
             .next());
   }
@@ -184,6 +231,7 @@ class JitChecksTest {
                     PortCallServiceTypeCode.ALL_FAST,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
+            .getErrorMessages()
             .isEmpty());
 
     assertEquals(
@@ -194,6 +242,7 @@ class JitChecksTest {
                     PortCallServiceTypeCode.SLUDGE,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
+            .getErrorMessages()
             .iterator()
             .next());
   }
@@ -215,11 +264,13 @@ class JitChecksTest {
         JitChecks.checkCallIDMatchPreviousCallID(
                 new DynamicScenarioParameters()) // No previous data captured
             .validate(OBJECT_MAPPER.createObjectNode())
+            .getErrorMessages()
             .isEmpty());
     assertTrue(
         JitChecks.checkCallIDMatchPreviousCallID(dsp)
             .validate(
                 OBJECT_MAPPER.createObjectNode().put(JitChecks.PORT_CALL_ID, dsp.portCallID()))
+            .getErrorMessages()
             .isEmpty());
     assertTrue(
         JitChecks.checkCallIDMatchPreviousCallID(dsp)
@@ -227,6 +278,7 @@ class JitChecksTest {
                 OBJECT_MAPPER
                     .createObjectNode()
                     .put(JitChecks.PORT_CALL_SERVICE_ID, dsp.portCallServiceID()))
+            .getErrorMessages()
             .isEmpty());
     assertTrue(
         JitChecks.checkCallIDMatchPreviousCallID(dsp)
@@ -234,6 +286,7 @@ class JitChecksTest {
                 OBJECT_MAPPER
                     .createObjectNode()
                     .put(JitChecks.TERMINAL_CALL_ID, dsp.terminalCallID()))
+            .getErrorMessages()
             .isEmpty());
 
     // Non-matching IDs used
@@ -246,6 +299,7 @@ class JitChecksTest {
                     .put(JitChecks.TERMINAL_CALL_ID, "wrong-id")
                     .put(JitChecks.PORT_CALL_ID, "wrong-id")
                     .put(JitChecks.PORT_CALL_SERVICE_ID, "wrong-id"))
+            .getErrorMessages()
             .size());
   }
 
@@ -257,10 +311,16 @@ class JitChecksTest {
             .validate(
                 createPortCallServiceRequest(
                     PortCallServiceTypeCode.BERTH, PortCallServiceEventTypeCode.ARRI, null))
+            .getErrorMessages()
             .size());
 
-    assertFalse(JitChecks.IS_FYI_TRUE.validate(createTimestamp().toJson()).isEmpty());
-    assertTrue(JitChecks.IS_FYI_TRUE.validate(createTimestamp().withFYI(true).toJson()).isEmpty());
+    assertFalse(
+        JitChecks.IS_FYI_TRUE.validate(createTimestamp().toJson()).getErrorMessages().isEmpty());
+    assertTrue(
+        JitChecks.IS_FYI_TRUE
+            .validate(createTimestamp().withFYI(true).toJson())
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -272,6 +332,7 @@ class JitChecksTest {
     assertTrue(
         JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER
             .validate(request)
+            .getErrorMessages()
             .isEmpty());
 
     // Add one carrierCode without the listProvider.
@@ -282,13 +343,19 @@ class JitChecksTest {
         .forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCodeListProvider"));
     assertEquals(
         2,
-        JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER.validate(request).size());
+        JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER
+            .validate(request)
+            .getErrorMessages()
+            .size());
 
     // Remove the carrierCode occurrence and verify all is good
     request.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
     assertEquals(
         0,
-        JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER.validate(request).size());
+        JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER
+            .validate(request)
+            .getErrorMessages()
+            .size());
   }
 
   @Test
@@ -300,6 +367,7 @@ class JitChecksTest {
     assertTrue(
         JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE
             .validate(request)
+            .getErrorMessages()
             .isEmpty());
 
     // Remove the carrierCodeListProvider occurrence; add one carrierCodeListProvider and verify 2
@@ -308,7 +376,10 @@ class JitChecksTest {
     ((ObjectNode) request.get("moves").get(1)).put("carrierCodeListProvider", "NMFTA");
     assertEquals(
         2,
-        JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE.validate(request).size());
+        JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE
+            .validate(request)
+            .getErrorMessages()
+            .size());
 
     // Remove all carrierCode occurrences and verify all is good
     request
@@ -316,7 +387,10 @@ class JitChecksTest {
         .forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCodeListProvider"));
     assertEquals(
         0,
-        JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE.validate(request).size());
+        JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE
+            .validate(request)
+            .getErrorMessages()
+            .size());
   }
 
   @Test
@@ -325,6 +399,7 @@ class JitChecksTest {
     assertTrue(
         JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER
             .validate(portCall)
+            .getErrorMessages()
             .isEmpty());
 
     // Remove vesselIMONumber and verify still valid
@@ -332,6 +407,7 @@ class JitChecksTest {
     assertTrue(
         JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER
             .validate(portCall)
+            .getErrorMessages()
             .isEmpty());
 
     // Remove MMSINumber as well and verify invalid
@@ -339,6 +415,7 @@ class JitChecksTest {
     assertFalse(
         JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER
             .validate(portCall)
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -348,6 +425,7 @@ class JitChecksTest {
     assertTrue(
         JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT
             .validate(portCall)
+            .getErrorMessages()
             .isEmpty());
 
     // Remove lengthOverall and width and verify still valid
@@ -355,12 +433,14 @@ class JitChecksTest {
     assertTrue(
         JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT
             .validate(portCall)
+            .getErrorMessages()
             .isEmpty());
 
     ((ObjectNode) portCall.required("vessel")).remove("width");
     assertTrue(
         JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT
             .validate(portCall)
+            .getErrorMessages()
             .isEmpty());
 
     // Remove dimensionUnit and verify invalid
@@ -369,6 +449,7 @@ class JitChecksTest {
     assertFalse(
         JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT
             .validate(portCall)
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -376,22 +457,46 @@ class JitChecksTest {
   void testVesselStatus() {
     var vesselStatus = createVesselStatus();
     // Happy path
-    assertTrue(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+    assertTrue(
+        JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT
+            .validate(vesselStatus)
+            .getErrorMessages()
+            .isEmpty());
     vesselStatus.remove("draft");
-    assertTrue(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+    assertTrue(
+        JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT
+            .validate(vesselStatus)
+            .getErrorMessages()
+            .isEmpty());
     vesselStatus.remove("airDraft");
-    assertTrue(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+    assertTrue(
+        JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT
+            .validate(vesselStatus)
+            .getErrorMessages()
+            .isEmpty());
 
     // Remove dimensionUnit and verify invalid
     vesselStatus = createVesselStatus();
     vesselStatus.remove("dimensionUnit");
-    assertFalse(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+    assertFalse(
+        JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT
+            .validate(vesselStatus)
+            .getErrorMessages()
+            .isEmpty());
     vesselStatus.remove("draft");
-    assertFalse(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+    assertFalse(
+        JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT
+            .validate(vesselStatus)
+            .getErrorMessages()
+            .isEmpty());
 
     // Now all required fields are removed, should be good again.
     vesselStatus.remove("airDraft");
-    assertTrue(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+    assertTrue(
+        JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT
+            .validate(vesselStatus)
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -419,24 +524,28 @@ class JitChecksTest {
     assertFalse(
         JitChecks.TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION
             .validate(timestamp.toJson())
+            .getErrorMessages()
             .isEmpty());
     // validate it only works with REQ.
     timestamp = timestamp.withClassifierCode(JitClassifierCode.REQ);
     assertTrue(
         JitChecks.TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION
             .validate(timestamp.toJson())
+            .getErrorMessages()
             .isEmpty());
 
     // validate it only works with UNLocationCode (being filled).
     assertTrue(
         JitChecks.TIMESTAMP_VALIDATE_PORT_CALL_SERVICE_LOCATION
             .validate(timestamp.toJson())
+            .getErrorMessages()
             .isEmpty());
     timestamp =
         timestamp.withPortCallServiceLocation(new PortCallServiceLocationTimestamp("name", null));
     assertFalse(
         JitChecks.TIMESTAMP_VALIDATE_PORT_CALL_SERVICE_LOCATION
             .validate(timestamp.toJson())
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -446,14 +555,22 @@ class JitChecksTest {
     ArrayNode body = OBJECT_MAPPER.createArrayNode().add(timestamp).add(timestamp);
     assertEquals(
         "Expected 1 result(s), but got 2 result(s).",
-        JitChecks.checkExpectedResultCount(1, false).validate(body).iterator().next());
-    assertTrue(JitChecks.checkExpectedResultCount(2, false).validate(body).isEmpty());
+        JitChecks.checkExpectedResultCount(1, false)
+            .validate(body)
+            .getErrorMessages()
+            .iterator()
+            .next());
+    assertTrue(
+        JitChecks.checkExpectedResultCount(2, false).validate(body).getErrorMessages().isEmpty());
 
     // Assert that moreResultsAllowed is respected
     body.add(timestamp).add(timestamp);
-    assertTrue(JitChecks.checkExpectedResultCount(2, true).validate(body).isEmpty());
-    assertTrue(JitChecks.checkExpectedResultCount(4, true).validate(body).isEmpty());
-    assertFalse(JitChecks.checkExpectedResultCount(5, true).validate(body).isEmpty());
+    assertTrue(
+        JitChecks.checkExpectedResultCount(2, true).validate(body).getErrorMessages().isEmpty());
+    assertTrue(
+        JitChecks.checkExpectedResultCount(4, true).validate(body).getErrorMessages().isEmpty());
+    assertFalse(
+        JitChecks.checkExpectedResultCount(5, true).validate(body).getErrorMessages().isEmpty());
   }
 
   private ObjectNode createPortCall() {

@@ -7,18 +7,11 @@ public sealed interface ConformanceCheckResult {
 
   Set<String> getErrorMessages();
 
-  boolean isEmpty();
-
   record SimpleErrors(Set<String> errors) implements ConformanceCheckResult {
 
     @Override
     public Set<String> getErrorMessages() {
       return errors;
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return errors.isEmpty();
     }
   }
 
@@ -32,11 +25,6 @@ public sealed interface ConformanceCheckResult {
                   !ConformanceErrorSeverity.IRRELEVANT.equals(conformanceError.severity()))
           .map(ConformanceError::message)
           .collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return errors.isEmpty();
     }
   }
 

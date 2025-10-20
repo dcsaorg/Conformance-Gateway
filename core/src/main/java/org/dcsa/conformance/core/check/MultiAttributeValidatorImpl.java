@@ -84,7 +84,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
 
     private void validateAll(List<Match> matches) {
       matches.stream().map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
-        .filter(s -> !s.isEmpty())
+        .filter(s -> !s.getErrorMessages().isEmpty())
         .forEach(validationIssues::add);
     }
   }

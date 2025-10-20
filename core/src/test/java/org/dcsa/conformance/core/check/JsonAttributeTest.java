@@ -43,8 +43,8 @@ class JsonAttributeTest {
         }
 
         @Override
-        public Set<String> validate(JsonNode body) {
-          return Collections.emptySet();
+        public ConformanceCheckResult validate(JsonNode body) {
+          return ConformanceCheckResult.simple(Collections.emptySet());
         }
       };
 
@@ -120,10 +120,12 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.mustBePresent(JsonPointer.compile("/test"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
     assertFalse(
         JsonAttribute.mustBePresent(JsonPointer.compile("/nonexistent"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -137,6 +139,7 @@ class JsonAttributeTest {
                 JsonAttribute.isNotNull(JsonPointer.compile("/test")),
                 JsonAttribute.mustBePresent(JsonPointer.compile("/test2")))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
 
     assertFalse(
@@ -145,6 +148,7 @@ class JsonAttributeTest {
                 JsonAttribute.isNotNull(JsonPointer.compile("/test")),
                 JsonAttribute.mustBePresent(JsonPointer.compile("/test3")))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
 
     // Test when initial condition is false
@@ -154,6 +158,7 @@ class JsonAttributeTest {
                 JsonAttribute.isNotNull(JsonPointer.compile("/test3")),
                 JsonAttribute.mustBePresent(JsonPointer.compile("/test2")))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -181,10 +186,12 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.mustBeNotNull(JsonPointer.compile("/test"), reason)
             .validate(objectNode)
+            .getErrorMessages()
             .isEmpty());
     assertFalse(
         JsonAttribute.mustBeNotNull(JsonPointer.compile("/test1"), reason)
             .validate(objectNode)
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -195,21 +202,25 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.mustEqual(JsonPointer.compile("/test"), "test")
             .validate(objectNode)
+            .getErrorMessages()
             .isEmpty());
     assertFalse(
         JsonAttribute.mustEqual(JsonPointer.compile("/test"), "test1")
             .validate(objectNode)
+            .getErrorMessages()
             .isEmpty());
     Supplier<String> supplier = () -> "test";
 
     assertTrue(
         JsonAttribute.mustEqual(JsonPointer.compile("/test"), supplier)
             .validate(objectNode)
+            .getErrorMessages()
             .isEmpty());
     supplier = () -> "test1";
     assertFalse(
         JsonAttribute.mustEqual(JsonPointer.compile("/test"), supplier)
             .validate(objectNode)
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -220,10 +231,12 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.path("test", JsonAttribute.matchedMustBePresent())
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
     assertFalse(
         JsonAttribute.path("testFalse", JsonAttribute.matchedMustBePresent())
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -246,10 +259,12 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.presenceImpliesOtherField("test", "test1")
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
     assertFalse(
         JsonAttribute.presenceImpliesOtherField("test", "test3")
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -261,11 +276,12 @@ class JsonAttributeTest {
     String name = "test";
     Consumer<MultiAttributeValidator> consumer =
         multiAttributeValidator -> multiAttributeValidator.submitAllMatching("test.*");
-    JsonContentMatchedValidation subvalidation = (a, b) -> Set.of();
+    JsonContentMatchedValidation subvalidation = (a, b) -> ConformanceCheckResult.simple(Set.of());
 
     assertTrue(
         JsonAttribute.allIndividualMatchesMustBeValid(name, consumer, subvalidation)
             .validate(arrayNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -276,7 +292,11 @@ class JsonAttributeTest {
     arrayNode.add(objectNode);
 
     Function<JsonNode, String> keyFunction = jsonNode -> jsonNode.path("test").asText(null);
-    assertFalse(JsonAttribute.unique("test", keyFunction).validate(arrayNode, "").isEmpty());
+    assertFalse(
+        JsonAttribute.unique("test", keyFunction)
+            .validate(arrayNode, "")
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -286,6 +306,7 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.path("test", JsonAttribute.matchedMustEqual(() -> "test"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -296,6 +317,7 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.at(JsonPointer.compile("/test"), JsonAttribute.matchedMustEqual(() -> "test"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -309,14 +331,24 @@ class JsonAttributeTest {
     objectNode.put("test", "test");
     arrayNode.add(objectNode);
 
-    assertTrue(JsonAttribute.matchedMustBeNonEmpty().validate(objectNode, "").isEmpty());
-    assertTrue(JsonAttribute.matchedMustBeNonEmpty().validate(arrayNode, "").isEmpty());
+    assertTrue(
+        JsonAttribute.matchedMustBeNonEmpty()
+            .validate(objectNode, "")
+            .getErrorMessages()
+            .isEmpty());
+    assertTrue(
+        JsonAttribute.matchedMustBeNonEmpty().validate(arrayNode, "").getErrorMessages().isEmpty());
 
     objectNode.removeAll();
-    assertFalse(JsonAttribute.matchedMustBeNonEmpty().validate(objectNode, "").isEmpty());
+    assertFalse(
+        JsonAttribute.matchedMustBeNonEmpty()
+            .validate(objectNode, "")
+            .getErrorMessages()
+            .isEmpty());
 
     arrayNode.removeAll();
-    assertFalse(JsonAttribute.matchedMustBeNonEmpty().validate(arrayNode, "").isEmpty());
+    assertFalse(
+        JsonAttribute.matchedMustBeNonEmpty().validate(arrayNode, "").getErrorMessages().isEmpty());
   }
 
   @Test
@@ -324,9 +356,13 @@ class JsonAttributeTest {
     objectNode.put("test", "test");
     objectNode.putNull("test1");
 
-    assertTrue(JsonAttribute.matchedMustBeNotNull().validate(objectNode, "").isEmpty());
+    assertTrue(
+        JsonAttribute.matchedMustBeNotNull().validate(objectNode, "").getErrorMessages().isEmpty());
     assertFalse(
-        JsonAttribute.matchedMustBeNotNull().validate(objectNode.get("test1"), "").isEmpty());
+        JsonAttribute.matchedMustBeNotNull()
+            .validate(objectNode.get("test1"), "")
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -334,17 +370,32 @@ class JsonAttributeTest {
     objectNode.put("test", true);
     objectNode.put("testFalse", false);
 
-    assertTrue(JsonAttribute.matchedMustBeTrue().validate(objectNode.get("test"), "").isEmpty());
+    assertTrue(
+        JsonAttribute.matchedMustBeTrue()
+            .validate(objectNode.get("test"), "")
+            .getErrorMessages()
+            .isEmpty());
     assertFalse(
-        JsonAttribute.matchedMustBeTrue().validate(objectNode.get("testFalse"), "").isEmpty());
+        JsonAttribute.matchedMustBeTrue()
+            .validate(objectNode.get("testFalse"), "")
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
   void testMatchedMaximum() {
     objectNode.put("test", 1);
 
-    assertTrue(JsonAttribute.matchedMaximum(2).validate(objectNode.get("test"), "").isEmpty());
-    assertFalse(JsonAttribute.matchedMaximum(0).validate(objectNode.get("test"), "").isEmpty());
+    assertTrue(
+        JsonAttribute.matchedMaximum(2)
+            .validate(objectNode.get("test"), "")
+            .getErrorMessages()
+            .isEmpty());
+    assertFalse(
+        JsonAttribute.matchedMaximum(0)
+            .validate(objectNode.get("test"), "")
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -352,9 +403,16 @@ class JsonAttributeTest {
     JsonNode emptyNode = objectMapper.createObjectNode();
     ObjectNode nonEmptyNode = objectMapper.createObjectNode().put("test", "test");
 
-    assertTrue(JsonAttribute.matchedMustBeAbsent().validate(emptyNode.path("test1"), "").isEmpty());
+    assertTrue(
+        JsonAttribute.matchedMustBeAbsent()
+            .validate(emptyNode.path("test1"), "")
+            .getErrorMessages()
+            .isEmpty());
     assertFalse(
-        JsonAttribute.matchedMustBeAbsent().validate(nonEmptyNode.get("test"), "").isEmpty());
+        JsonAttribute.matchedMustBeAbsent()
+            .validate(nonEmptyNode.get("test"), "")
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -362,9 +420,11 @@ class JsonAttributeTest {
     objectNode.put("test", "test");
     arrayNode.add(objectNode);
 
-    assertTrue(JsonAttribute.matchedMaxLength(1).validate(arrayNode, "").isEmpty());
+    assertTrue(
+        JsonAttribute.matchedMaxLength(1).validate(arrayNode, "").getErrorMessages().isEmpty());
     arrayNode.add(objectNode);
-    assertFalse(JsonAttribute.matchedMaxLength(1).validate(arrayNode, "").isEmpty());
+    assertFalse(
+        JsonAttribute.matchedMaxLength(1).validate(arrayNode, "").getErrorMessages().isEmpty());
   }
 
   @Test
@@ -385,6 +445,7 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/test"), dataset)
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -395,11 +456,13 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.atMostOneOf(JsonPointer.compile("/test"), JsonPointer.compile("/test1"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
     objectNode.put("test1", "test1");
     assertFalse(
         JsonAttribute.atMostOneOf(JsonPointer.compile("/test"), JsonPointer.compile("/test1"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -410,11 +473,13 @@ class JsonAttributeTest {
     assertTrue(
         JsonAttribute.atLeastOneOf(JsonPointer.compile("/test"), JsonPointer.compile("/test1"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
     objectNode.removeAll();
     assertFalse(
         JsonAttribute.atLeastOneOf(JsonPointer.compile("/test"), JsonPointer.compile("/test1"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -427,17 +492,17 @@ class JsonAttributeTest {
         JsonAttribute.ifThenElse(
             "Test ifThenElse",
             JsonAttribute.isTrue(JsonPointer.compile("/test")),
-            (body, contextPath) -> Set.of("then applied"),
-            (body, contextPath) -> Set.of("else applied"));
+            (body, contextPath) -> ConformanceCheckResult.simple(Set.of("then applied")),
+            (body, contextPath) -> ConformanceCheckResult.simple(Set.of("else applied")));
 
     // Test when condition is true
-    Set<String> result = check.validate(objectNode, "");
+    Set<String> result = check.validate(objectNode, "").getErrorMessages();
     assertTrue(result.contains("then applied"));
     assertFalse(result.contains("else applied"));
 
     // Test when condition is false
     objectNode.put("test", false);
-    result = check.validate(objectNode, "");
+    result = check.validate(objectNode, "").getErrorMessages();
     assertFalse(result.contains("then applied"));
     assertTrue(result.contains("else applied"));
   }
@@ -453,12 +518,12 @@ class JsonAttributeTest {
             JsonAttribute.matchedMustBePresent());
 
     // Test when condition is true
-    Set<String> result = check.validate(objectNode, "");
+    Set<String> result = check.validate(objectNode, "").getErrorMessages();
     assertTrue(result.isEmpty());
 
     // Test when condition is false
     objectNode.put("test", false);
-    result = check.validate(objectNode, "");
+    result = check.validate(objectNode, "").getErrorMessages();
     assertTrue(result.isEmpty());
   }
 
@@ -474,19 +539,19 @@ class JsonAttributeTest {
             JsonAttribute.matchedMustBeAbsent());
 
     // Test when condition is true
-    Set<String> result = check.validate(objectNode, "");
+    Set<String> result = check.validate(objectNode, "").getErrorMessages();
     assertTrue(result.isEmpty());
 
     // Test when condition is false
     objectNode.put("test", false);
-    result = check.validate(objectNode, "");
+    result = check.validate(objectNode, "").getErrorMessages();
     assertFalse(result.isEmpty());
 
     // Test when condition is true but validation fails
     objectNode.put("test", true);
     objectNode.remove("test2");
     objectNode.remove("test");
-    result = check.validate(objectNode, "");
+    result = check.validate(objectNode, "").getErrorMessages();
     assertFalse(result.isEmpty());
   }
 
@@ -496,11 +561,17 @@ class JsonAttributeTest {
 
     // Test when the node is present
     assertTrue(
-        JsonAttribute.matchedMustBePresent().validate(objectNode.path("test"), "").isEmpty());
+        JsonAttribute.matchedMustBePresent()
+            .validate(objectNode.path("test"), "")
+            .getErrorMessages()
+            .isEmpty());
 
     // Test when the node is missing
     assertFalse(
-        JsonAttribute.matchedMustBePresent().validate(objectNode.path("missing"), "").isEmpty());
+        JsonAttribute.matchedMustBePresent()
+            .validate(objectNode.path("missing"), "")
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -515,12 +586,12 @@ class JsonAttributeTest {
         JsonAttribute.matchedMustBeDatasetKeywordIfPresent(dataset);
 
     // Test when the keyword is valid
-    Set<String> result = validation.validate(objectNode.path("test"), "test");
+    Set<String> result = validation.validate(objectNode.path("test"), "test").getErrorMessages();
     assertTrue(result.isEmpty());
 
     // Test when the keyword is invalid
     objectNode.put("test", "invalidKeyword");
-    result = validation.validate(objectNode.path("test"), "test");
+    result = validation.validate(objectNode.path("test"), "test").getErrorMessages();
     assertFalse(result.isEmpty());
     assertTrue(
         result.contains(
@@ -535,12 +606,14 @@ class JsonAttributeTest {
     assertFalse(
         JsonAttribute.mustBeAbsent(JsonPointer.compile("/test"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
 
     // Test when the node is absent
     assertTrue(
         JsonAttribute.mustBeAbsent(JsonPointer.compile("/missing"))
             .validate(objectNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -552,12 +625,12 @@ class JsonAttributeTest {
     JsonContentMatchedValidation validation = JsonAttribute.matchedMustEqual(expectedValueSupplier);
 
     // Test when the value matches
-    Set<String> result = validation.validate(objectNode.path("test"), "test");
+    Set<String> result = validation.validate(objectNode.path("test"), "test").getErrorMessages();
     assertTrue(result.isEmpty());
 
     // Test when the value does not match
     objectNode.put("test", "unexpectedValue");
-    result = validation.validate(objectNode.path("test"), "test");
+    result = validation.validate(objectNode.path("test"), "test").getErrorMessages();
     assertFalse(result.isEmpty());
     assertTrue(
         result.contains("The value of 'test' was 'unexpectedValue' instead of 'expectedValue'"));
@@ -615,12 +688,12 @@ class JsonAttributeTest {
     JsonContentMatchedValidation validation = JsonAttribute.atLeastOneOfMatched(ptrSupplier);
 
     // Test when at least one field is present
-    Set<String> result = validation.validate(objectNode, "");
+    Set<String> result = validation.validate(objectNode, "").getErrorMessages();
     assertTrue(result.isEmpty());
 
     // Test when no fields are present
     objectNode.removeAll();
-    result = validation.validate(objectNode, "");
+    result = validation.validate(objectNode, "").getErrorMessages();
     assertFalse(result.isEmpty());
     assertTrue(result.contains("At least one of the following must be present: test1, test2"));
   }
@@ -635,18 +708,18 @@ class JsonAttributeTest {
             JsonPointer.compile("/test1"), JsonPointer.compile("/test2"));
 
     // Test when both fields are present
-    Set<String> result = check.validate(objectNode, "");
+    Set<String> result = check.validate(objectNode, "").getErrorMessages();
     assertTrue(result.isEmpty());
 
     // Test when one field is missing
     objectNode.remove("test2");
-    result = check.validate(objectNode, "");
+    result = check.validate(objectNode, "").getErrorMessages();
     assertFalse(result.isEmpty());
     assertTrue(result.contains("'test1' and 'test2' must both be present or absent"));
 
     // Test when both fields are missing
     objectNode.remove("test1");
-    result = check.validate(objectNode, "");
+    result = check.validate(objectNode, "").getErrorMessages();
     assertTrue(result.isEmpty());
   }
 
@@ -658,18 +731,18 @@ class JsonAttributeTest {
         JsonAttribute.xOrFields(JsonPointer.compile("/field1"), JsonPointer.compile("/field2"));
 
     // Test when only one field is present
-    Set<String> result = check.validate(objectNode, "");
+    Set<String> result = check.validate(objectNode, "").getErrorMessages();
     assertTrue(result.isEmpty());
 
     // Test when both fields are present
     objectNode.put("field2", "value2");
-    result = check.validate(objectNode, "");
+    result = check.validate(objectNode, "").getErrorMessages();
     assertFalse(result.isEmpty());
     assertTrue(result.contains("Either one of them can be present, but not both : field1, field2"));
 
     // Test when none of the fields are present
     objectNode.removeAll();
-    result = check.validate(objectNode, "");
+    result = check.validate(objectNode, "").getErrorMessages();
     assertTrue(result.isEmpty());
   }
 
@@ -678,22 +751,22 @@ class JsonAttributeTest {
     JsonNode validNode = JsonNodeFactory.instance.objectNode().put("test", "value");
     JsonNode invalidNode = JsonNodeFactory.instance.objectNode().put("test", "invalid");
 
-    Function<JsonNode, Set<String>> validator =
+    Function<JsonNode, ConformanceCheckResult> validator =
         node -> {
           if ("value".equals(node.path("test").asText())) {
-            return Collections.emptySet();
+            return ConformanceCheckResult.simple(Collections.emptySet());
           }
-          return Set.of("Invalid value for 'test'");
+          return ConformanceCheckResult.simple(Set.of("Invalid value for 'test'"));
         };
 
     JsonContentCheck customCheck =
         JsonAttribute.customValidator("Custom Validator Test", validator);
 
     // Test with valid node
-    assertTrue(customCheck.validate(validNode).isEmpty());
+    assertTrue(customCheck.validate(validNode).getErrorMessages().isEmpty());
 
     // Test with invalid node
-    Set<String> result = customCheck.validate(invalidNode);
+    Set<String> result = customCheck.validate(invalidNode).getErrorMessages();
     assertFalse(result.isEmpty());
     assertTrue(result.contains("Invalid value for 'test'"));
   }

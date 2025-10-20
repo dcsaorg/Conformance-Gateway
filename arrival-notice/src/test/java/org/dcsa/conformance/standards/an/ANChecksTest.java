@@ -29,22 +29,22 @@ class ANChecksTest {
   @Test
   void testValidateNonEmptyResponse() {
     an.put("carrierCode", "MAEU");
-    assertTrue(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(body).isEmpty());
+    assertTrue(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(body).getErrorMessages().isEmpty());
 
     ObjectNode empty = mapper.createObjectNode();
-    assertFalse(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(empty).isEmpty());
+    assertFalse(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(empty).getErrorMessages().isEmpty());
   }
 
   @Test
   void testValidateBasicFields() {
     List<JsonContentCheck> checks = ANChecks.validateBasicFields();
 
-    assertFalse(checks.stream().allMatch(c -> c.validate(body).isEmpty()));
+    assertFalse(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
 
     an.put("carrierCode", "MAEU");
     an.put("carrierCodeListProvider", "SMDG");
     an.put("deliveryTypeAtDestination", "CY");
-    assertTrue(checks.stream().allMatch(c -> c.validate(body).isEmpty()));
+    assertTrue(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
   }
 
   @Test
@@ -53,10 +53,10 @@ class ANChecksTest {
     ArrayNode carrierContactInfos = an.putArray("carrierContactInformation");
     ObjectNode contactInfo = carrierContactInfos.addObject();
     contactInfo.put("name", "Ops Desk");
-    assertFalse(ANChecks.validateCarrierContactInformation().validate(body).isEmpty());
+    assertFalse(ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
 
     contactInfo.put("email", "ops@example.com");
-    assertTrue(ANChecks.validateCarrierContactInformation().validate(body).isEmpty());
+    assertTrue(ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -70,15 +70,15 @@ class ANChecksTest {
     ObjectNode addr = p.putObject("address");
     addr.put("street", "Harbor Rd 1");
 
-    assertTrue(ANChecks.validateDocumentParties().validate(body).isEmpty());
+    assertTrue(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());
 
     p.remove("partyFunction");
-    assertFalse(ANChecks.validateDocumentParties().validate(body).isEmpty());
+    assertFalse(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
   void testValidateTransport() {
-    assertFalse(ANChecks.validateTransport().validate(body).isEmpty());
+    assertFalse(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
 
     ObjectNode transport = an.putObject("transport");
     transport.put("portOfDischargeArrivalDate", "2025-10-01T10:00:00Z");
@@ -92,10 +92,10 @@ class ANChecksTest {
     voyage.put("vesselName", "MSC Example");
     voyage.put("carrierImportVoyageNumber", "0123W");
 
-    assertTrue(ANChecks.validateTransport().validate(body).isEmpty());
+    assertTrue(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
 
     voyage.remove("vesselName");
-    assertFalse(ANChecks.validateTransport().validate(body).isEmpty());
+    assertFalse(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -112,13 +112,13 @@ class ANChecksTest {
     ObjectNode seal = seals.addObject();
     seal.put("number", "ABC123");
 
-    assertTrue(ANChecks.validateUtilizedTransportEquipments().validate(body).isEmpty());
+    assertTrue(ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
 
     ute.set("seals", mapper.createArrayNode());
-    assertFalse(ANChecks.validateUtilizedTransportEquipments().validate(body).isEmpty());
+    assertFalse(ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
 
     ute.remove("equipment");
-    assertFalse(ANChecks.validateUtilizedTransportEquipments().validate(body).isEmpty());
+    assertFalse(ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -126,7 +126,7 @@ class ANChecksTest {
 
     ArrayNode consignmentItems = an.putArray("consignmentItems");
     ObjectNode ci = consignmentItems.addObject();
-    assertFalse(ANChecks.validateConsignmentItems().validate(body).isEmpty());
+    assertFalse(ANChecks.validateConsignmentItems().validate(body).getErrorMessages().isEmpty());
 
     ArrayNode dog = ci.putArray("descriptionOfGoods");
     dog.add("Widgets");
@@ -140,12 +140,12 @@ class ANChecksTest {
     op.put("packageCode", "CT");
     op.put("numberOfPackages", 10);
 
-    assertTrue(ANChecks.validateConsignmentItems().validate(body).isEmpty());
+    assertTrue(ANChecks.validateConsignmentItems().validate(body).getErrorMessages().isEmpty());
 
     op.remove("packageCode");
     op.remove("IMOPackagingCode");
     op.remove("description");
-    assertFalse(ANChecks.validateConsignmentItems().validate(body).isEmpty());
+    assertFalse(ANChecks.validateConsignmentItems().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -159,11 +159,11 @@ class ANChecksTest {
     ft.put("duration", 5);
     ft.put("timeUnit", "DAY");
 
-    assertTrue(ANChecks.validateFreeTimeObjectStructure("FREE_TIME").validate(body).isEmpty());
+    assertTrue(ANChecks.validateFreeTimeObjectStructure("FREE_TIME").validate(body).getErrorMessages().isEmpty());
 
 
     an.set("freeTimes", mapper.createArrayNode());
-    assertFalse(ANChecks.validateFreeTimeObjectStructure("FREE_TIME").validate(body).isEmpty());
+    assertFalse(ANChecks.validateFreeTimeObjectStructure("FREE_TIME").validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -177,11 +177,11 @@ class ANChecksTest {
     ch.put("unitPrice", 50.0);
     ch.put("quantity", 1);
 
-    assertTrue(ANChecks.validateChargesStructure().validate(body).isEmpty());
+    assertTrue(ANChecks.validateChargesStructure().validate(body).getErrorMessages().isEmpty());
 
 
     ch.remove("currencyCode");
-    assertFalse(ANChecks.validateChargesStructure().validate(body).isEmpty());
+    assertFalse(ANChecks.validateChargesStructure().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test

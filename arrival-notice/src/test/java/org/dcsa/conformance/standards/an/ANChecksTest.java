@@ -44,6 +44,7 @@ class ANChecksTest {
     an.put("carrierCode", "MAEU");
     an.put("carrierCodeListProvider", "SMDG");
     an.put("deliveryTypeAtDestination", "CY");
+    an.put("transportDocumentReference", "HHL123");
     assertTrue(checks.stream().allMatch(c -> c.validate(body).isEmpty()));
   }
 

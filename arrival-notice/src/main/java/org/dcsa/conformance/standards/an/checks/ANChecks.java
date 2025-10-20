@@ -484,7 +484,7 @@ public class ANChecks {
         mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           var pod = node.get("portOfDischarge");
-          if (pod.hasNonNull("address") && pod.get("address").isEmpty()) {
+          if (pod != null && pod.hasNonNull("address") && pod.get("address").isEmpty()) {
             return Set.of(
                 contextPath + ".portOfDischarge must functionally contain a non empty 'address'");
           } else {

@@ -236,15 +236,22 @@ class ANChecksTest {
     ObjectNode facility = pod.putObject("facility");
 
     assertFalse(
-        ANChecks.validatePortOfDischargeFacilityFields("facilityCode").validate(body).isEmpty());
+        ANChecks.validatePortOfDischargeFacilityFields(
+                "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
+            .validate(body)
+            .isEmpty());
 
     facility.put("facilityCode", "NLRTM");
     assertTrue(
-        ANChecks.validatePortOfDischargeFacilityFields("facilityCode").validate(body).isEmpty());
+        ANChecks.validatePortOfDischargeFacilityFields(
+                "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
+            .validate(body)
+            .isEmpty());
 
     facility.put("facilityCodeListProvider", "SMDG");
     assertTrue(
-        ANChecks.validatePortOfDischargeFacilityFields("facilityCodeListProvider")
+        ANChecks.validatePortOfDischargeFacilityFields(
+                "facilityCodeListProvider", "arrivalNotices.*.transport.portOfDischarge")
             .validate(body)
             .isEmpty());
   }

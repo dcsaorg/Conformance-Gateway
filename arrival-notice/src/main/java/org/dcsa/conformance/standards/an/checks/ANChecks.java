@@ -46,10 +46,10 @@ public class ANChecks {
 
   public static List<JsonContentCheck> validateBasicFields() {
     return List.of(
-        validateBasicFieldWithLabel("carrierCode"),
-        validateBasicFieldWithLabel("transportDocumentReference"),
-        validateBasicFieldWithLabel("carrierCodeListProvider"),
-        validateBasicFieldWithLabel("deliveryTypeAtDestination"));
+        validateBasicFieldWithLabel("carrierCode", "arrivalNotices.*"),
+        validateBasicFieldWithLabel("transportDocumentReference", "arrivalNotices.*"),
+        validateBasicFieldWithLabel("carrierCodeListProvider", "arrivalNotices.*"),
+        validateBasicFieldWithLabel("deliveryTypeAtDestination", "arrivalNotices.*"));
   }
 
   static final JsonRebaseableContentCheck VALID_DELIVERY_TYPE_AT_DESTINATION =
@@ -66,10 +66,10 @@ public class ANChecks {
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
               ANDatasets.CARRIER_CODE_LIST_PROVIDER));
 
-  private static JsonContentCheck validateBasicFieldWithLabel(String field) {
+  private static JsonContentCheck validateBasicFieldWithLabel(String field, String path) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of the \"" + field + "\" attribute",
-        mav -> mav.submitAllMatching("arrivalNotices.*"),
+        mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
             return Set.of(
@@ -122,6 +122,24 @@ public class ANChecks {
   public static ActionCheck getANNPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
+    checks.add(
+        validateBasicFieldWithLabel("transportDocumentReference", "arrivalNoticeNotifications.*"));
+    checks.add(validateANNEquipmentReference());
+    checks.add(validateTransportETA("arrivalNoticeNotifications.*"));
+    checks.add(validatePODAdrress("arrivalNoticeNotifications.*"));
+    checks.add(validatePortOfDischargeLocation("arrivalNoticeNotifications.*"));
+    checks.add(
+        validatePortOfDischargeFacilityFields(
+            "facilityCode", "arrivalNoticeNotifications.*.portOfDischarge"));
+    checks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "Validate that 'facilityCodeListProvider' is valid",
+            mav ->
+                mav.submitAllMatching(
+                    "arrivalNoticeNotifications.*.portOfDischarge.facility.facilityCodeListProvider"),
+            JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+                ANDatasets.FACILITY_CODE_LIST_PROVIDER)));
+
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
@@ -129,6 +147,34 @@ public class ANChecks {
         HttpMessageType.REQUEST,
         expectedApiVersion,
         checks);
+  }
+
+  private static JsonContentCheck validateANNEquipmentReference() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The publisher has demonstrated the correct use of the 'equipmentReferences' field",
+        mav -> mav.submitAllMatching("arrivalNoticeNotifications.*"),
+        (notifications, contextPath) -> {
+          var node = notifications.get("equipmentReferences");
+          if (node == null || !node.isArray() || node.isEmpty()) {
+            return Set.of(
+                contextPath
+                    + ".equipmentReferences must functionally be a non-empty array of strings");
+          }
+          boolean allEmpty = true;
+          for (var item : node) {
+            if (item != null && item.isTextual() && !item.asText().trim().isEmpty()) {
+              allEmpty = false;
+              break;
+            }
+          }
+
+          if (allEmpty) {
+            return Set.of(
+                contextPath
+                    + ".equipmentReferences must contain at least one non-empty string value");
+          }
+          return Set.of();
+        });
   }
 
   public static List<JsonContentCheck> validateTransportDocumentReferences(
@@ -351,13 +397,19 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the \"transport\" object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(validateTransportETA().validate(body));
+          issues.addAll(validateTransportETA("arrivalNotices.*.transport").validate(body));
           issues.addAll(validatePortOfDischargePresence().validate(body));
-          issues.addAll(validatePortOfDischargeLocation().validate(body));
-          issues.addAll(validatePODAdrress().validate(body));
-          issues.addAll(validatePortOfDischargeFacilityFields("facilityCode").validate(body));
           issues.addAll(
-              validatePortOfDischargeFacilityFields("facilityCodeListProvider").validate(body));
+              validatePortOfDischargeLocation("arrivalNotices.*.transport").validate(body));
+          issues.addAll(validatePODAdrress("arrivalNotices.*.transport").validate(body));
+          issues.addAll(
+              validatePortOfDischargeFacilityFields(
+                      "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
+                  .validate(body));
+          issues.addAll(
+              validatePortOfDischargeFacilityFields(
+                      "facilityCodeListProvider", "arrivalNotices.*.transport.portOfDischarge")
+                  .validate(body));
           issues.addAll(validateVesselVoyage().validate(body));
           issues.addAll(validateVesselVoyageField("vesselName").validate(body));
           issues.addAll(validateVesselVoyageField("carrierImportVoyageNumber").validate(body));
@@ -365,10 +417,10 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck validateTransportETA() {
+  private static JsonContentCheck validateTransportETA(String path) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of transport ETA fields",
-        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
+        mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           boolean hasPortOfDischargeValue =
               node.hasNonNull("portOfDischargeArrivalDate")
@@ -402,10 +454,10 @@ public class ANChecks {
         });
   }
 
-  private static JsonContentCheck validatePortOfDischargeLocation() {
+  private static JsonContentCheck validatePortOfDischargeLocation(String path) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of location information in \"portOfDischarge\"",
-        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
+        mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           var pod = node.get("portOfDischarge");
           if (pod != null && pod.isObject()) {
@@ -426,28 +478,28 @@ public class ANChecks {
         });
   }
 
-  public static JsonContentCheck validatePODAdrress() {
+  public static JsonContentCheck validatePODAdrress(String path) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-        "The publisher has demonstrated the correct use of location information in \"portOfDischarge\"",
-        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
+        "The publisher has demonstrated the correct use of 'address' in \"portOfDischarge\"",
+        mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           var pod = node.get("portOfDischarge");
           if (pod.hasNonNull("address") && pod.get("address").isEmpty()) {
             return Set.of(
                 contextPath + ".portOfDischarge must functionally contain a non empty 'address'");
           } else {
-            validateAddress("portOfDischarge", "arrivalNotices.*.transport.portOfDischarge");
+            validateAddress("portOfDischarge", path + ".portOfDischarge");
           }
           return Set.of();
         });
   }
 
-  public static JsonContentCheck validatePortOfDischargeFacilityFields(String field) {
+  public static JsonContentCheck validatePortOfDischargeFacilityFields(String field, String path) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "The publisher has demonstrated the correct use of facility location "
             + field
             + " in \"portOfDischarge\"",
-        mav -> mav.submitAllMatching("arrivalNotices.*.transport.portOfDischarge"),
+        mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           var facility = node.get("facility");
           if (facility != null && facility.isObject()) {

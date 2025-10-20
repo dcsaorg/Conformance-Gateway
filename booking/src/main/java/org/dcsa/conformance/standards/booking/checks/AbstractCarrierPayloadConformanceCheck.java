@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
@@ -56,7 +58,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
 
   protected ConformanceCheckResult ensureCarrierBookingReferenceCompliance(JsonNode responsePayload) {
     if (BOOKING_STATES_WHERE_CBR_IS_OPTIONAL.contains(expectedBookingStatus)) {
-      return ConformanceCheckResult.simple(Collections.emptySet());
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
     }
     if (responsePayload.path("carrierBookingReference").isMissingNode()) {
       return ConformanceCheckResult.simple(Set.of("The 'carrierBookingReference' field was missing"));
@@ -77,6 +79,9 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected ConformanceCheckResult ensureAmendedBookingStatusIsCorrect(JsonNode responsePayload) {
     String actualState = responsePayload.path("amendedBookingStatus").asText(null);
     String expectedState = expectedAmendedBookingStatus != null ? expectedAmendedBookingStatus.name() : null;
+    if (expectedState == null && actualState == null) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
     if (Objects.equals(actualState, expectedState)) {
       return ConformanceCheckResult.simple(Collections.emptySet());
     }
@@ -89,6 +94,9 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected ConformanceCheckResult ensureBookingCancellationStatusIsCorrect(JsonNode responsePayload) {
     String actualState = responsePayload.path("bookingCancellationStatus").asText(null);
     String expectedState = expectedBookingCancellationStatus != null ? expectedBookingCancellationStatus.name() : null;
+    if (expectedState == null && actualState == null) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
     if (Objects.equals(actualState, expectedState)) {
       return ConformanceCheckResult.simple(Collections.emptySet());
     }
@@ -103,15 +111,24 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     Set<String> errors = new HashSet<>();
     boolean isPendingUpdate = BookingState.PENDING_UPDATE.name().equals(bookingStatus);
     boolean isPendingAmendment = BookingState.PENDING_AMENDMENT.name().equals(bookingStatus);
-    if ((isPendingUpdate || isPendingAmendment)
-        && (responsePayload.path(FEEDBACKS).isMissingNode()
-            || responsePayload.path(FEEDBACKS).isEmpty())) {
+    if (!isPendingUpdate && !isPendingAmendment) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
+    if (responsePayload.path(FEEDBACKS).isMissingNode()
+        || responsePayload.path(FEEDBACKS).isEmpty()) {
       errors.add("feedbacks property is required in the booking state %s".formatted(bookingStatus));
     }
     return ConformanceCheckResult.simple(errors);
   }
 
   protected ConformanceCheckResult ensureFeedbackSeverityAndCodeCompliance(JsonNode responsePayload) {
+    String bookingStatus = responsePayload.path("bookingStatus").asText(null);
+    boolean isPendingUpdate = BookingState.PENDING_UPDATE.name().equals(bookingStatus);
+    boolean isPendingAmendment = BookingState.PENDING_AMENDMENT.name().equals(bookingStatus);
+    if (!isPendingUpdate && !isPendingAmendment) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
+
     Set<String> errors = new HashSet<>();
     JsonNode feedbacks = responsePayload.path(FEEDBACKS);
     if (feedbacks.isArray()) {

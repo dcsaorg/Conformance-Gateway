@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
 import lombok.experimental.UtilityClass;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
@@ -31,7 +33,20 @@ public class BookingInputPayloadValidations {
 
     return contentChecks.stream()
         .filter(JsonContentCheck::isRelevant)
-        .flatMap(check -> check.validate(bookingNode).getErrorMessages().stream())
+        .flatMap(
+            check -> {
+              ConformanceCheckResult result = check.validate(bookingNode);
+              return switch (result) {
+                case ConformanceCheckResult.SimpleErrors(var errors) -> errors.stream();
+                case ConformanceCheckResult.ErrorsWithRelevance(var errors) ->
+                    errors.stream()
+                        .filter(
+                            conformanceError ->
+                                !ConformanceErrorSeverity.IRRELEVANT.equals(
+                                    conformanceError.severity()))
+                        .map(ConformanceError::message);
+              };
+            })
         .collect(Collectors.toSet());
   }
 }

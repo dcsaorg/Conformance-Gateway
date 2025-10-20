@@ -7,6 +7,7 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.core.util.JsonUtil;
 
 public class JsonAttribute {
 
@@ -230,26 +231,27 @@ public class JsonAttribute {
       )));
     };
   }
+
   public static JsonRebaseableContentCheck allIndividualMatchesMustBeValid(
-    @NonNull
-    String name,
-    @NonNull
-    Consumer<MultiAttributeValidator> scanner,
-    @NonNull
-    JsonContentMatchedValidation subvalidation
-  ) {
+      @NonNull String name,
+      @NonNull Consumer<MultiAttributeValidator> scanner,
+      @NonNull JsonContentMatchedValidation subvalidation) {
     return new JsonRebaseableCheckImpl(
         name,
         true,
         (body, contextPath) -> {
           var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
           scanner.accept(v);
-          return ConformanceCheckResult.simple(
+          return ConformanceCheckResult.withRelevance(
               v.getValidationIssues().stream()
-                  .map(
-                      conformanceCheckResult ->
-                          (ConformanceCheckResult.SimpleErrors) conformanceCheckResult)
-                  .flatMap(simpleErrors -> simpleErrors.errors().stream())
+                  .flatMap(
+                      result ->
+                          switch (result) {
+                            case ConformanceCheckResult.SimpleErrors(var errors) ->
+                                errors.stream().map(ConformanceError::error);
+                            case ConformanceCheckResult.ErrorsWithRelevance(var errors) ->
+                                errors.stream();
+                          })
                   .collect(Collectors.toSet()));
         });
   }
@@ -608,30 +610,32 @@ public class JsonAttribute {
     return JsonRebaseableCheckImpl.of(jsonPointer, matchedMustBeAbsent()::validate);
   }
 
-  public static JsonContentMatchedValidation combine(
-    JsonContentMatchedValidation ... subchecks
-  ) {
+  public static JsonContentMatchedValidation combine(JsonContentMatchedValidation... subchecks) {
     if (subchecks.length < 2) {
       throw new IllegalArgumentException("At least two checks must be given");
     }
     return (node, context) -> {
-      var r = new HashSet<ConformanceCheckResult>();
+      var results = new HashSet<ConformanceCheckResult>();
       for (var check : subchecks) {
-        r.add(check.validate(node, context));
+        results.add(check.validate(node, context));
       }
-      return r.stream().reduce(
-        ConformanceCheckResult.simple(Set.of()),
-        (a, b) -> {
-          var errors = new HashSet<String>();
-          if (a instanceof ConformanceCheckResult.SimpleErrors(Set<String> errors1)) {
-            errors.addAll(errors1);
-          }
-          if (b instanceof ConformanceCheckResult.SimpleErrors(Set<String> errors1)) {
-            errors.addAll(errors1);
-          }
-          return ConformanceCheckResult.simple(errors);
-        }
-      );
+      return results.stream()
+          .reduce(
+              ConformanceCheckResult.withRelevance(Set.of()),
+              (a, b) -> {
+                var combinedErrors = new HashSet<ConformanceError>();
+                combinedErrors.addAll(extractErrors(a));
+                combinedErrors.addAll(extractErrors(b));
+                return ConformanceCheckResult.withRelevance(combinedErrors);
+              });
+    };
+  }
+
+  private static Collection<ConformanceError> extractErrors(ConformanceCheckResult result) {
+    return switch (result) {
+      case ConformanceCheckResult.SimpleErrors(var errors) ->
+          errors.stream().map(ConformanceError::error).toList();
+      case ConformanceCheckResult.ErrorsWithRelevance(var errors) -> errors;
     };
   }
 

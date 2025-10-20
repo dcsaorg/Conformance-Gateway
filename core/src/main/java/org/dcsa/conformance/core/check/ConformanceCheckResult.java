@@ -19,12 +19,7 @@ public sealed interface ConformanceCheckResult {
 
     @Override
     public Set<String> getErrorMessages() {
-      return errors.stream()
-          .filter(
-              conformanceError ->
-                  !ConformanceErrorSeverity.IRRELEVANT.equals(conformanceError.severity()))
-          .map(ConformanceError::message)
-          .collect(Collectors.toSet());
+      return errors.stream().map(ConformanceError::message).collect(Collectors.toSet());
     }
   }
 

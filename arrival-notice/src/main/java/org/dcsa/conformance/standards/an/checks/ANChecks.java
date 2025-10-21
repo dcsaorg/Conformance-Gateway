@@ -291,9 +291,7 @@ public class ANChecks {
           issues.addAll(validateDocumentPartyField("partyContactDetails").validate(body));
           issues.addAll(validatePartyContactName().validate(body));
           issues.addAll(validatePartyContactEmailOrPhone().validate(body));
-          issues.addAll(
-              validateAddress("documentParties", "arrivalNotices.*.documentParties.*")
-                  .validate(body));
+          issues.addAll(validateDocumentPartyAddress().validate(body));
           return issues;
         });
   }
@@ -362,7 +360,7 @@ public class ANChecks {
         mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           var address = node.get("address");
-          if (address != null) {
+          if (address != null && !address.isEmpty()) {
             boolean hasNonEmpty =
                 ADDRESS_FIELDS.stream()
                     .anyMatch(
@@ -481,7 +479,40 @@ public class ANChecks {
                 && pod.get("address").isEmpty()) {
               return Set.of(
                   contextPath
-                      + ".address must be functionally present and contain at least one field");
+                      + ".portOfDischarge.address must be functionally present and contain at least one field");
+            }
+          }
+          return Set.of();
+        });
+  }
+
+  public static JsonContentCheck validateDocumentPartyAddress() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The publisher has demonstrated the correct use of location information in \"portOfDischarge\"",
+        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
+        (node, contextPath) -> {
+          if (node.hasNonNull("address")
+              && node.get("address").isObject()
+              && node.get("address").isEmpty()) {
+            return Set.of(
+                contextPath
+                    + ".address must be functionally present and contain at least one field");
+          } else {
+            boolean hasNonEmpty =
+                ADDRESS_FIELDS.stream()
+                    .anyMatch(
+                        f -> {
+                          var fieldNode = node.get("address").get(f);
+                          return fieldNode != null
+                              && fieldNode.isTextual()
+                              && !fieldNode.asText().isBlank();
+                        });
+
+            if (!hasNonEmpty) {
+              return Set.of(
+                  contextPath
+                      + ".address must contain at least one non-empty value among: "
+                      + String.join(", ", ADDRESS_FIELDS));
             }
           }
           return Set.of();

@@ -107,6 +107,23 @@
           }
         ]
       },
+      "freeTimes": [
+        {
+          "typeCodes": [
+            "DET"
+          ],
+          "ISOEquipmentCodes": [
+            "40HC"
+          ],
+          "equipmentReferences": [
+            "MSKU1234567",
+            "MSKU1234568"
+          ],
+          "duration": 10,
+          "timeUnit": "CD",
+          "calculationBasis": "Detention free time after gate-out full."
+        }
+      ],
       "utilizedTransportEquipments": [
         {
           "equipment": {
@@ -123,7 +140,7 @@
       "consignmentItems": [
         {
           "descriptionOfGoods": [
-            "HOUSEHOLD GOODS AND PERSONAL EFFECT"
+            "HOUSEHOLD GOODS"
           ],
           "cargoItems": [
             {
@@ -139,6 +156,16 @@
               }
             }
           ]
+        }
+      ],
+      "charges": [
+        {
+          "chargeName": "Terminal Handling Service - Destination",
+          "currencyAmount": 355.00,
+          "currencyCode": "USD",
+          "paymentTermCode": "COL",
+          "unitPrice": 355.00,
+          "quantity": 1
         }
       ]
     }

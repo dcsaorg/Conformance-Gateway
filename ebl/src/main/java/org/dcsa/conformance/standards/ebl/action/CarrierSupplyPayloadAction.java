@@ -132,7 +132,8 @@ public class CarrierSupplyPayloadAction extends EblAction {
         EblInputPayloadValidations.validateEblSchema(inputNode, requestSchemaValidator);
 
     Set<String> contentChecksErrors =
-        EblInputPayloadValidations.validateEblContent(inputNode, scenarioType, isTd);
+        EblInputPayloadValidations.validateEblContent(
+            inputNode, scenarioType, isTd, getDspSupplier().get());
 
     Set<String> allErrors =
         Stream.of(schemaChecksErrors, contentChecksErrors)

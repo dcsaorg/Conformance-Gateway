@@ -28,6 +28,7 @@ public class PublisherPostANAction extends ANAction {
     super(publisherPartyName, subscriberPartyName, previousAction, computeTitle(scenarioType));
     this.requestSchemaValidator = requestSchemaValidator;
     this.scenarioType = scenarioType;
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
   @Override

@@ -11,6 +11,7 @@ import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 
 @UtilityClass
 public class EblInputPayloadValidations {
@@ -21,12 +22,12 @@ public class EblInputPayloadValidations {
   }
 
   public static Set<String> validateEblContent(
-          JsonNode eblNode, ScenarioType scenarioType, boolean isTD) {
+      JsonNode eblNode, ScenarioType scenarioType, boolean isTD, EblDynamicScenarioParameters dsp) {
     List<JsonContentCheck> contentChecks = new ArrayList<>(EblChecks.STATIC_SI_CHECKS);
     contentChecks.add(EblChecks.DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     contentChecks.add(EblChecks.VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    contentChecks.addAll(EblChecks.generateScenarioRelatedChecks(scenarioType, isTD));
-
+    contentChecks.addAll(
+        EblChecks.generateScenarioRelatedChecks(scenarioType, isTD, dsp.isCladInSI()));
     return contentChecks.stream()
         .filter(JsonContentCheck::isRelevant)
         .flatMap(

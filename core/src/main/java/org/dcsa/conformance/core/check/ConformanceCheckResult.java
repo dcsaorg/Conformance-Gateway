@@ -30,4 +30,20 @@ public sealed interface ConformanceCheckResult {
   static ConformanceCheckResult withRelevance(Set<ConformanceError> errors) {
     return new ErrorsWithRelevance(errors);
   }
+
+  static ConformanceCheckResult from(ConformanceCheckResult other) {
+    return switch (other) {
+      case SimpleErrors(var errors) ->
+          withRelevance(errors.stream().map(ConformanceError::error).collect(Collectors.toSet()));
+      case ErrorsWithRelevance(var errors) -> withRelevance(errors);
+    };
+  }
+
+  static ConformanceCheckResult from(Set<ConformanceCheckResult> others) {
+    return withRelevance(
+        others.stream()
+            .map(ConformanceCheckResult::from)
+            .flatMap(result -> ((ErrorsWithRelevance) result).errors().stream())
+            .collect(Collectors.toSet()));
+  }
 }

@@ -10,8 +10,8 @@ import org.dcsa.conformance.core.party.ScenarioParameters;
 
 @With
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record DynamicScenarioParameters(List<String> transportDocumentReferences)
-    implements ScenarioParameters {
+public record DynamicScenarioParameters(
+    List<String> transportDocumentReferences, String scenarioType) implements ScenarioParameters {
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
     return OBJECT_MAPPER.convertValue(jsonNode, DynamicScenarioParameters.class);

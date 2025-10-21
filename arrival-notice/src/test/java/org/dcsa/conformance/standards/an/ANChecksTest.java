@@ -6,6 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
+import java.util.Set;
+
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +49,7 @@ class ANChecksTest {
     an.put("carrierCode", "MAEU");
     an.put("carrierCodeListProvider", "SMDG");
     an.put("deliveryTypeAtDestination", "CY");
+    an.put("transportDocumentReference", "HHL123");
     assertTrue(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
   }
 
@@ -53,15 +59,16 @@ class ANChecksTest {
     ArrayNode carrierContactInfos = an.putArray("carrierContactInformation");
     ObjectNode contactInfo = carrierContactInfos.addObject();
     contactInfo.put("name", "Ops Desk");
-    assertFalse(ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
+    assertFalse(
+        ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
 
     contactInfo.put("email", "ops@example.com");
-    assertTrue(ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
+    assertTrue(
+        ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
   void testValidateDocumentParties() {
-
     ArrayNode parties = an.putArray("documentParties");
     ObjectNode p = parties.addObject();
     p.put("partyFunction", "CN");
@@ -70,7 +77,9 @@ class ANChecksTest {
     ObjectNode addr = p.putObject("address");
     addr.put("street", "Harbor Rd 1");
 
-    assertTrue(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());
+    Set<ConformanceError> errors =((ConformanceCheckResult.ErrorsWithRelevance) ANChecks.validateDocumentParties().validate(body)).errors();
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
 
     p.remove("partyFunction");
     assertFalse(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());
@@ -81,7 +90,7 @@ class ANChecksTest {
     assertFalse(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
 
     ObjectNode transport = an.putObject("transport");
-    transport.put("portOfDischargeArrivalDate", "2025-10-01T10:00:00Z");
+    transport.putObject("portOfDischargeArrivalDate").put("value", "2025-10-01T10:00:00Z");
 
     ObjectNode pod = transport.putObject("portOfDischarge");
     pod.put("UNLocationCode", "NLRTM");
@@ -112,13 +121,16 @@ class ANChecksTest {
     ObjectNode seal = seals.addObject();
     seal.put("number", "ABC123");
 
-    assertTrue(ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
+    assertTrue(
+        ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
 
     ute.set("seals", mapper.createArrayNode());
-    assertFalse(ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
+    assertFalse(
+        ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
 
     ute.remove("equipment");
-    assertFalse(ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
+    assertFalse(
+        ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -134,7 +146,9 @@ class ANChecksTest {
     ArrayNode cargoItems = ci.putArray("cargoItems");
     ObjectNode item = cargoItems.addObject();
     item.put("equipmentReference", "MSCU1234567");
-    item.put("cargoGrossWeight", 1234.5);
+    ObjectNode cgw = item.putObject("cargoGrossWeight");
+    cgw.put("value", 1234.5);
+    cgw.put("unit", "KGM");
 
     ObjectNode op = item.putObject("outerPackaging");
     op.put("packageCode", "CT");
@@ -159,11 +173,18 @@ class ANChecksTest {
     ft.put("duration", 5);
     ft.put("timeUnit", "DAY");
 
-    assertTrue(ANChecks.validateFreeTimeObjectStructure("FREE_TIME").validate(body).getErrorMessages().isEmpty());
-
+    assertTrue(
+        ANChecks.validateFreeTimeObjectStructure("FREE_TIME")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
 
     an.set("freeTimes", mapper.createArrayNode());
-    assertFalse(ANChecks.validateFreeTimeObjectStructure("FREE_TIME").validate(body).getErrorMessages().isEmpty());
+    assertFalse(
+        ANChecks.validateFreeTimeObjectStructure("FREE_TIME")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -179,7 +200,6 @@ class ANChecksTest {
 
     assertTrue(ANChecks.validateChargesStructure().validate(body).getErrorMessages().isEmpty());
 
-
     ch.remove("currencyCode");
     assertFalse(ANChecks.validateChargesStructure().validate(body).getErrorMessages().isEmpty());
   }
@@ -189,7 +209,6 @@ class ANChecksTest {
 
     var checks = ANChecks.getScenarioRelatedChecks("FREE_TIME");
     assertFalse(checks.isEmpty());
-
   }
 
   @Test
@@ -199,5 +218,62 @@ class ANChecksTest {
     assertFalse(checks.isEmpty());
   }
 
-}
+  @Test
+  void testValidatePartyContactDetailsName() {
 
+    ArrayNode documentParties = an.putArray("documentParties");
+    ObjectNode documentParty = documentParties.addObject();
+    ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
+    ObjectNode partyContactDetail = partyContactDetails.addObject();
+    assertFalse(ANChecks.validatePartyContactName().validate(body).getErrorMessages().isEmpty());
+    partyContactDetail.put("name", "Ops Desk");
+    assertTrue(ANChecks.validatePartyContactName().validate(body).getErrorMessages().isEmpty());
+  }
+
+  @Test
+  void testValidatePartyContactDetailsEmailOrPhone() {
+
+    ArrayNode documentParties = an.putArray("documentParties");
+    ObjectNode documentParty = documentParties.addObject();
+    ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
+    ObjectNode partyContactDetail = partyContactDetails.addObject();
+
+    assertFalse(
+        ANChecks.validatePartyContactEmailOrPhone().validate(body).getErrorMessages().isEmpty());
+
+    partyContactDetail.put("email", "ops@example.com");
+    assertTrue(
+        ANChecks.validatePartyContactEmailOrPhone().validate(body).getErrorMessages().isEmpty());
+  }
+
+  @Test
+  void testValidatePortOfDischargeFields() {
+
+    ObjectNode transport = an.putObject("transport");
+    ObjectNode pod = transport.putObject("portOfDischarge");
+    ObjectNode facility = pod.putObject("facility");
+
+    assertFalse(
+        ANChecks.validatePortOfDischargeFacilityFields(
+                "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+
+    facility.put("facilityCode", "NLRTM");
+    assertTrue(
+        ANChecks.validatePortOfDischargeFacilityFields(
+                "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+
+    facility.put("facilityCodeListProvider", "SMDG");
+    assertTrue(
+        ANChecks.validatePortOfDischargeFacilityFields(
+                "facilityCodeListProvider", "arrivalNotices.*.transport.portOfDischarge")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+}

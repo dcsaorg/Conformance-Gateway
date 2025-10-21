@@ -133,7 +133,7 @@ public class ANChecks {
         validateBasicFieldWithLabel("transportDocumentReference", "arrivalNoticeNotifications.*"));
     checks.add(validateANNEquipmentReference());
     checks.add(validateTransportETA("arrivalNoticeNotifications.*"));
-    checks.add(validatePODAdrress("arrivalNoticeNotifications.*"));
+    checks.add(validatePODAdrressANN());
     checks.add(validatePortOfDischargeLocation("arrivalNoticeNotifications.*"));
     checks.add(
         validatePortOfDischargeFacilityFields(
@@ -408,7 +408,7 @@ public class ANChecks {
           issues.addAll(validatePortOfDischargePresence().validate(body));
           issues.addAll(
               validatePortOfDischargeLocation("arrivalNotices.*.transport").validate(body));
-          issues.addAll(validatePODAdrress("arrivalNotices.*.transport").validate(body));
+          issues.addAll(validatePODAdrressAN().validate(body));
           issues.addAll(
               validatePortOfDischargeFacilityFields(
                       "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
@@ -485,20 +485,12 @@ public class ANChecks {
         });
   }
 
-  public static JsonContentCheck validatePODAdrress(String path) {
-    return JsonAttribute.allIndividualMatchesMustBeValid(
-        "The publisher has demonstrated the correct use of 'address' in \"portOfDischarge\"",
-        mav -> mav.submitAllMatching(path),
-        (node, contextPath) -> {
-          var pod = node.get("portOfDischarge");
-          if (pod != null && pod.hasNonNull("address") && pod.get("address").isEmpty()) {
-            return Set.of(
-                contextPath + ".portOfDischarge must functionally contain a non empty 'address'");
-          } else {
-            validateAddress("portOfDischarge", path + ".portOfDischarge");
-          }
-          return Set.of();
-        });
+  public static JsonContentCheck validatePODAdrressAN() {
+    return validateAddress("portOfDischarge", "arrivalNotices.*.transport.portOfDischarge");
+  }
+
+  public static JsonContentCheck validatePODAdrressANN() {
+    return validateAddress("portOfDischarge", "arrivalNoticeNotifications.*.portOfDischarge");
   }
 
   public static JsonContentCheck validatePortOfDischargeFacilityFields(String field, String path) {

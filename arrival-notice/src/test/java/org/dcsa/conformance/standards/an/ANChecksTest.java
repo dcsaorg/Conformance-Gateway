@@ -256,5 +256,20 @@ class ANChecksTest {
             .validate(body)
             .isEmpty());
   }
+
+  @Test
+  void testValidatePortOfDischargeAddress() {
+
+    ObjectNode transport = an.putObject("transport");
+    ObjectNode pod = transport.putObject("portOfDischarge");
+    ObjectNode address = pod.putObject("address");
+    address.put("street", "");
+
+    assertFalse(ANChecks.validatePODAdrressAN().validate(body).isEmpty());
+
+    address.put("street", "Harbor Rd 1");
+    address.put("city", "Rotterdam");
+    assertTrue(ANChecks.validatePODAdrressAN().validate(body).isEmpty());
+  }
 }
 

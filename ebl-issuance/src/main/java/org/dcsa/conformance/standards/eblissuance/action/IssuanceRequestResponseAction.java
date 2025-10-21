@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -97,16 +96,11 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    String tdr = getTdrSupplier().get();
     var eblType = getDsp().eblType();
 
-    return tdr == null
-        ? getMarkdownHumanReadablePrompt(
-            Map.of("EBL_TYPE", eblType.name(), "RESPONSE_CODE", issuanceResponseCode.standardCode),
-            "prompt-iss-reqres-ebltype.md")
-        : getMarkdownHumanReadablePrompt(
-            Map.of("REFERENCE", tdr, "RESPONSE_CODE", issuanceResponseCode.standardCode),
-            "prompt-iss-reqres-tdr.md");
+    return getMarkdownHumanReadablePrompt(
+        Map.of("EBL_TYPE", eblType.name(), "RESPONSE_CODE", issuanceResponseCode.standardCode),
+        "prompt-iss-reqres-ebltype.md");
   }
 
   @Override
@@ -133,13 +127,6 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
     String exchangeTdr = requestJsonNode.get("document").get("transportDocumentReference").asText();
     if (transportDocumentReference != null && transportDocumentReference.get() == null) {
       transportDocumentReference.set(exchangeTdr);
-    } else {
-      String expectedTdr = getTdrSupplier().get();
-      if (!Objects.equals(exchangeTdr, expectedTdr)) {
-        throw new IllegalStateException(
-            "Exchange TDR '%s' does not match expected TDR '%s'"
-                .formatted(exchangeTdr, expectedTdr));
-      }
     }
   }
 

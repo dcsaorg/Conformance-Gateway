@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.UUID;
+
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
@@ -329,11 +332,13 @@ class JitChecksTest {
         createPortCallServiceRequest(
             PortCallServiceTypeCode.MOVES, PortCallServiceEventTypeCode.ARRI, null);
 
-    assertTrue(
-        JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER
-            .validate(request)
-            .getErrorMessages()
-            .isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER.validate(request);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
 
     // Add one carrierCode without the listProvider.
     // Remove the carrierCodeListProvider and verify 2 errors are returned
@@ -350,12 +355,13 @@ class JitChecksTest {
 
     // Remove the carrierCode occurrence and verify all is good
     request.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
+    resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER.validate(request);
+    assertEquals(1, resultWithRelevance.errors().size());
     assertEquals(
-        0,
-        JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER
-            .validate(request)
-            .getErrorMessages()
-            .size());
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -364,11 +370,13 @@ class JitChecksTest {
         createPortCallServiceRequest(
             PortCallServiceTypeCode.MOVES, PortCallServiceEventTypeCode.ARRI, null);
 
-    assertTrue(
-        JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE
-            .validate(request)
-            .getErrorMessages()
-            .isEmpty());
+    var resultWithRelevance =
+            (ConformanceCheckResult.ErrorsWithRelevance)
+                    JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE.validate(request);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+            ConformanceErrorSeverity.IRRELEVANT,
+            resultWithRelevance.errors().iterator().next().severity());
 
     // Remove the carrierCodeListProvider occurrence; add one carrierCodeListProvider and verify 2
     // errors are returned
@@ -385,12 +393,14 @@ class JitChecksTest {
     request
         .get("moves")
         .forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCodeListProvider"));
+
+    resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE.validate(request);
+    assertEquals(1, resultWithRelevance.errors().size());
     assertEquals(
-        0,
-        JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE
-            .validate(request)
-            .getErrorMessages()
-            .size());
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -437,11 +447,13 @@ class JitChecksTest {
             .isEmpty());
 
     ((ObjectNode) portCall.required("vessel")).remove("width");
-    assertTrue(
-        JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT
-            .validate(portCall)
-            .getErrorMessages()
-            .isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT.validate(portCall);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
 
     // Remove dimensionUnit and verify invalid
     portCall = createPortCall();
@@ -468,12 +480,15 @@ class JitChecksTest {
             .validate(vesselStatus)
             .getErrorMessages()
             .isEmpty());
+
     vesselStatus.remove("airDraft");
-    assertTrue(
-        JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT
-            .validate(vesselStatus)
-            .getErrorMessages()
-            .isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
 
     // Remove dimensionUnit and verify invalid
     vesselStatus = createVesselStatus();
@@ -492,11 +507,13 @@ class JitChecksTest {
 
     // Now all required fields are removed, should be good again.
     vesselStatus.remove("airDraft");
-    assertTrue(
-        JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT
-            .validate(vesselStatus)
-            .getErrorMessages()
-            .isEmpty());
+    resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -526,13 +543,16 @@ class JitChecksTest {
             .validate(timestamp.toJson())
             .getErrorMessages()
             .isEmpty());
+
     // validate it only works with REQ.
     timestamp = timestamp.withClassifierCode(JitClassifierCode.REQ);
-    assertTrue(
-        JitChecks.TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION
-            .validate(timestamp.toJson())
-            .getErrorMessages()
-            .isEmpty());
+    var resultWithRelevance =
+            (ConformanceCheckResult.ErrorsWithRelevance)
+                    JitChecks.TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION.validate(timestamp.toJson());
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+            ConformanceErrorSeverity.IRRELEVANT,
+            resultWithRelevance.errors().iterator().next().severity());
 
     // validate it only works with UNLocationCode (being filled).
     assertTrue(

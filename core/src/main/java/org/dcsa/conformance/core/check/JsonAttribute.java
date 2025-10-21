@@ -11,7 +11,7 @@ import org.dcsa.conformance.core.util.JsonUtil;
 
 public class JsonAttribute {
 
-  private static final BiFunction<JsonNode, String, ConformanceCheckResult> EMPTY_VALIDATOR = (ignoredA, ignoredB) -> ConformanceCheckResult.simple(Set.of());
+  private static final BiFunction<JsonNode, String, ConformanceCheckResult> EMPTY_VALIDATOR = (ignoredA, ignoredB) -> ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
   public static final String VALUE_WARNING = "The value of '%s' was '%s' instead of '%s'";
 
   public static ActionCheck contentChecks(
@@ -221,7 +221,11 @@ public class JsonAttribute {
       var sourceField = nodeToValidate.path(sourceFieldName);
       var impliedField = nodeToValidate.path(impliedFieldName);
 
-      if (sourceField.isMissingNode() || !impliedField.isMissingNode()) {
+      if (JsonUtil.isMissingOrEmpty(sourceField)){
+        return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+      }
+
+      if (!JsonUtil.isMissingOrEmpty(impliedField)) {
         return ConformanceCheckResult.simple(Set.of());
       }
 
@@ -242,17 +246,7 @@ public class JsonAttribute {
         (body, contextPath) -> {
           var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
           scanner.accept(v);
-          return ConformanceCheckResult.withRelevance(
-              v.getValidationIssues().stream()
-                  .flatMap(
-                      result ->
-                          switch (result) {
-                            case ConformanceCheckResult.SimpleErrors(var errors) ->
-                                errors.stream().map(ConformanceError::error);
-                            case ConformanceCheckResult.ErrorsWithRelevance(var errors) ->
-                                errors.stream();
-                          })
-                  .collect(Collectors.toSet()));
+          return ConformanceCheckResult.from(v.getValidationIssues());
         });
   }
 
@@ -622,20 +616,7 @@ public class JsonAttribute {
       return results.stream()
           .reduce(
               ConformanceCheckResult.withRelevance(Set.of()),
-              (a, b) -> {
-                var combinedErrors = new HashSet<ConformanceError>();
-                combinedErrors.addAll(extractErrors(a));
-                combinedErrors.addAll(extractErrors(b));
-                return ConformanceCheckResult.withRelevance(combinedErrors);
-              });
-    };
-  }
-
-  private static Collection<ConformanceError> extractErrors(ConformanceCheckResult result) {
-    return switch (result) {
-      case ConformanceCheckResult.SimpleErrors(var errors) ->
-          errors.stream().map(ConformanceError::error).toList();
-      case ConformanceCheckResult.ErrorsWithRelevance(var errors) -> errors;
+              (a, b) -> ConformanceCheckResult.from(Set.of(a, b)));
     };
   }
 
@@ -761,7 +742,7 @@ public class JsonAttribute {
       var ptrs = new ArrayList<JsonPointer>();
       ptrSupplier.accept(body, ptrs);
       if (ptrs.isEmpty()) {
-        return ConformanceCheckResult.simple(Set.of());
+        return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
       }
       var present = ptrs
         .stream()
@@ -886,7 +867,7 @@ public class JsonAttribute {
       if (when.test(body)) {
         return then.validate(body, context);
       }
-      return ConformanceCheckResult.simple(Set.of());
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
     };
   }
 

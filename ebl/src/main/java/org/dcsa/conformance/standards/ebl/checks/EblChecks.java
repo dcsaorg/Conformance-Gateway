@@ -657,14 +657,10 @@ public class EblChecks {
               JsonAttribute.path("selfFilerCode", JsonAttribute.matchedMustBePresent())));
 
   private static final Predicate<JsonNode> LOCATION_NAME_REQUIRED =
-      place ->
-          (place.path("UNLocationCode").isMissingNode()
-              && (place.path(LOCATION_NAME).isMissingNode()));
+      place -> place.path("UNLocationCode").isMissingNode();
 
   private static final Predicate<JsonNode> COUNTRY_CODE_REQUIRED =
-      place ->
-          (place.path("UNLocationCode").isMissingNode()
-              && (place.path(COUNTRY_CODE).isMissingNode()));
+      place -> place.path("UNLocationCode").isMissingNode();
 
   static final JsonRebaseableContentCheck LOCATION_NAME_CONDITIONAL_VALIDATION_POA =
       JsonAttribute.allIndividualMatchesMustBeValid(

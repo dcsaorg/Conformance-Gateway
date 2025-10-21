@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 class JsonAttributeTest {
@@ -151,15 +152,18 @@ class JsonAttributeTest {
             .getErrorMessages()
             .isEmpty());
 
-    // Test when initial condition is false
-    assertTrue(
-        JsonAttribute.ifThen(
-                "Test ifThen with initial condition false",
-                JsonAttribute.isNotNull(JsonPointer.compile("/test3")),
-                JsonAttribute.mustBePresent(JsonPointer.compile("/test2")))
-            .validate(objectNode, "")
-            .getErrorMessages()
-            .isEmpty());
+    // Test when initial condition is false so check is irrelevant
+    var irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            JsonAttribute.ifThen(
+                    "Test ifThen with initial condition false",
+                    JsonAttribute.isNotNull(JsonPointer.compile("/test3")),
+                    JsonAttribute.mustBePresent(JsonPointer.compile("/test2")))
+                .validate(objectNode, "");
+    assertEquals(1, irrelevantResult.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        irrelevantResult.errors().iterator().next().severity());
   }
 
   static Stream<Arguments> testIsNotNullArgs() {
@@ -261,6 +265,7 @@ class JsonAttributeTest {
             .validate(objectNode, "")
             .getErrorMessages()
             .isEmpty());
+
     assertFalse(
         JsonAttribute.presenceImpliesOtherField("test", "test3")
             .validate(objectNode, "")
@@ -269,23 +274,108 @@ class JsonAttributeTest {
   }
 
   @Test
-  void testAllIndividualMatchesMustBeIrrelevant() {
+  void testPresenceImpliesOtherField_Irrelevant() {
     objectNode.put("test", "test");
-    arrayNode.add(objectNode);
+    objectNode.put("test1", "test1");
+
+    var irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            JsonAttribute.presenceImpliesOtherField("test2", "test1").validate(objectNode, "");
+
+    assertEquals(1, irrelevantResult.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        irrelevantResult.errors().iterator().next().severity());
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+              "array.*",
+              "array.*.element",
+      })
+  void testAllIndividualMatchesMustBeIrrelevant_(String path) {
+    objectNode.set("array", arrayNode);
 
     String name = "test";
     Consumer<MultiAttributeValidator> consumer =
-        multiAttributeValidator -> multiAttributeValidator.submitAllMatching("test.*");
-    JsonContentMatchedValidation subvalidation = (a, b) -> ConformanceCheckResult.simple(Set.of());
+        multiAttributeValidator -> multiAttributeValidator.submitAllMatching(path);
+    JsonContentMatchedValidation subValidation =
+        (a, b) -> {
+          if (a.asText().equals("first")) {
+            return ConformanceCheckResult.simple(Collections.emptySet());
+          }
+          return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.error("Invalid")));
+        };
 
     Set<ConformanceError> errors =
         ((ConformanceCheckResult.ErrorsWithRelevance)
-                JsonAttribute.allIndividualMatchesMustBeValid(name, consumer, subvalidation)
-                    .validate(arrayNode, ""))
+                JsonAttribute.allIndividualMatchesMustBeValid(name, consumer, subValidation)
+                    .validate(objectNode, ""))
             .errors();
 
     assertEquals(1, errors.size());
     assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "array",
+        "array.*",
+        "array.*.element",
+      })
+  void testAllIndividualMatchesMustBeValid(String path) {
+    var firstElement = JsonNodeFactory.instance.objectNode().put("element", "first");
+    var secondElement = JsonNodeFactory.instance.objectNode().put("element", "second");
+    arrayNode.add(firstElement);
+    arrayNode.add(secondElement);
+    objectNode.set("array", arrayNode);
+
+    String name = "test";
+    Consumer<MultiAttributeValidator> consumer =
+        multiAttributeValidator -> multiAttributeValidator.submitAllMatching(path);
+    JsonContentMatchedValidation subValidation = (a, b) -> ConformanceCheckResult.simple(Set.of());
+
+    assertTrue(
+        JsonAttribute.allIndividualMatchesMustBeValid(name, consumer, subValidation)
+            .validate(objectNode, "")
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+          "array.*",
+          "array.*.element",
+          "notArray",
+          "array.*.otherElement",
+  })
+  void testAllIndividualMatchesMustBeInvalid(String path) {
+    var firstElement = JsonNodeFactory.instance.objectNode().put("element", "first");
+    var secondElement = JsonNodeFactory.instance.objectNode().put("element", "second");
+    arrayNode.add(firstElement);
+    arrayNode.add(secondElement);
+    objectNode.set("array", arrayNode);
+
+    String name = "test";
+    Consumer<MultiAttributeValidator> consumer =
+        multiAttributeValidator -> multiAttributeValidator.submitAllMatching(path);
+    JsonContentMatchedValidation subValidation =
+        (a, b) -> {
+          if (a.asText().equals("first")) {
+            return ConformanceCheckResult.simple(Collections.emptySet());
+          }
+          return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.error("Invalid")));
+        };
+
+    var result =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            JsonAttribute.allIndividualMatchesMustBeValid(name, consumer, subValidation)
+                .validate(objectNode, "");
+    assertFalse(result.getErrorMessages().isEmpty());
+    assertEquals(1, result.getErrorMessages().size());
+    assertEquals(ConformanceErrorSeverity.ERROR, result.errors().iterator().next().severity());
   }
 
   @Test
@@ -526,8 +616,12 @@ class JsonAttributeTest {
 
     // Test when condition is false
     objectNode.put("test", false);
-    result = check.validate(objectNode, "").getErrorMessages();
-    assertTrue(result.isEmpty());
+    var irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance) check.validate(objectNode, "");
+    assertEquals(1, irrelevantResult.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        irrelevantResult.errors().iterator().next().severity());
   }
 
   @Test

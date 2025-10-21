@@ -23,12 +23,15 @@ import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_CONSIGME
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_PARTY_FUNCTION;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_PARTY_FUNCTION_HBL;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_REQUESTED_CARRIER_CLAUSES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.junit.jupiter.api.Test;
 
@@ -135,8 +138,13 @@ class EblChecksTest {
 
     placeOfAcceptance.put("UNLocationCode", "NLAMS");
     placeOfAcceptance.remove("locationName");
-    assertTrue(
-        LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode).getErrorMessages().isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -153,8 +161,13 @@ class EblChecksTest {
 
     placeOfFinalDelivery.put("UNLocationCode", "DEBER");
     placeOfFinalDelivery.remove("locationName");
-    assertTrue(
-        LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode).getErrorMessages().isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -171,8 +184,13 @@ class EblChecksTest {
 
     placeOfAcceptance.put("UNLocationCode", "NLAMS");
     placeOfAcceptance.remove("countryCode");
-    assertTrue(
-        COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode).getErrorMessages().isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -189,8 +207,22 @@ class EblChecksTest {
 
     placeOfFinalDelivery.put("UNLocationCode", "DEBER");
     placeOfFinalDelivery.remove("countryCode");
-    assertTrue(
-        COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode).getErrorMessages().isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
+
+    placeOfFinalDelivery.remove("UNLocationCode");
+    resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.ERROR,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -452,7 +484,7 @@ class EblChecksTest {
   }
 
   @Test
-  void testEBLSCannotHaveMoreThanOneOriginalsWithandWithoutCharges() {
+  void testEBLSCannotHaveMoreThanOneOriginalsWithAndWithoutCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).getErrorMessages().isEmpty());
@@ -477,7 +509,13 @@ class EblChecksTest {
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).getErrorMessages().isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test

@@ -362,27 +362,23 @@ public class ANChecks {
         mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           var address = node.get("address");
-          if (address == null || !address.isObject() || address.isEmpty()) {
-            return Set.of(
-                contextPath
-                    + ".address must be functionally present and contain at least one field");
-          }
+          if (address != null) {
+            boolean hasNonEmpty =
+                ADDRESS_FIELDS.stream()
+                    .anyMatch(
+                        f -> {
+                          var fieldNode = address.get(f);
+                          return fieldNode != null
+                              && fieldNode.isTextual()
+                              && !fieldNode.asText().isBlank();
+                        });
 
-          boolean hasNonEmpty =
-              ADDRESS_FIELDS.stream()
-                  .anyMatch(
-                      f -> {
-                        var fieldNode = address.get(f);
-                        return fieldNode != null
-                            && fieldNode.isTextual()
-                            && !fieldNode.asText().isBlank();
-                      });
-
-          if (!hasNonEmpty) {
-            return Set.of(
-                contextPath
-                    + ".address must contain at least one non-empty value among: "
-                    + String.join(", ", ADDRESS_FIELDS));
+            if (!hasNonEmpty) {
+              return Set.of(
+                  contextPath
+                      + ".address must contain at least one non-empty value among: "
+                      + String.join(", ", ADDRESS_FIELDS));
+            }
           }
           return Set.of();
         });
@@ -479,6 +475,13 @@ public class ANChecks {
               return Set.of(
                   contextPath
                       + ".portOfDischarge.UNLocationCode must not be empty or blank in the payload");
+            }
+            if (pod.hasNonNull("address")
+                && pod.get("address").isObject()
+                && pod.get("address").isEmpty()) {
+              return Set.of(
+                  contextPath
+                      + ".address must be functionally present and contain at least one field");
             }
           }
           return Set.of();

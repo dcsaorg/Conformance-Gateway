@@ -12,17 +12,17 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
     description = "Code used to denote the type of a shipment location")
 @AllArgsConstructor
 public enum ShipmentLocationTypeCode implements EnumBase {
-  PRE("Place of Receipt"),
-  POL("Port of Loading"),
-  POD("Port of Discharge"),
-  PDE("Place of Delivery"),
-  PCF("Pre-carriage From"),
+  FCD("Full container drop-off location"),
+  IEL("Container intermediate export stop-off location"),
   OIR("Onward Inland Routing"),
   ORI("Origin of goods"),
-  IEL("Container intermediate export stop-off location"),
+  PCF("Pre-carriage From"),
+  PDE("Place of Delivery"),
+  POD("Port of Discharge"),
+  POL("Port of Loading"),
+  PRE("Place of Receipt"),
   PTP("Prohibited transshipment port"),
-  RTP("Requested transshipment port"),
-  FCD("Full container drop-off location");
+  RTP("Requested transshipment port");
 
   private final String valueDescription;
 }

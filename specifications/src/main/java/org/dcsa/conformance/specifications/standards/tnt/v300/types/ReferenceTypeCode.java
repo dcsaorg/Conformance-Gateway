@@ -6,23 +6,26 @@ import lombok.Getter;
 import org.dcsa.conformance.specifications.generator.EnumBase;
 
 @Getter
-@Schema(type = "string", example = "FF", description = "Code used to denote the type of a reference")
+@Schema(
+    type = "string",
+    example = "FF",
+    description = "Code used to denote the type of a reference")
 @AllArgsConstructor
 public enum ReferenceTypeCode implements EnumBase {
-  FF("Freight Forwarder’s Reference"),
-  SI("Shipper’s Reference"),
-  PO("Purchase Order Reference"),
-  CR("Customer’s Reference"),
   AAO("Consignee’s Reference"),
-  ECR("Empty container release reference"),
-  CSI("Customer shipment ID"),
-  BPR("Booking party reference number"),
+  AES("Automated Export System"),
   BID("Booking Request ID"),
-  EQ("Equipment Reference"),
-  RUC("Registro Único del Contribuyente"),
-  DUE("Declaração Única de Exportação"),
+  BPR("Booking party reference number"),
   CER("Canadian Export Reporting System"),
-  AES("Automated Export System");
+  CR("Customer’s Reference"),
+  CSI("Customer shipment ID"),
+  DUE("Declaração Única de Exportação"),
+  ECR("Empty container release reference"),
+  EQ("Equipment Reference"),
+  FF("Freight Forwarder’s Reference"),
+  PO("Purchase Order Reference"),
+  RUC("Registro Único del Contribuyente"),
+  SI("Shipper’s Reference");
 
   private final String valueDescription;
 }

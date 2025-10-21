@@ -44,6 +44,7 @@ class ANChecksTest {
     an.put("carrierCode", "MAEU");
     an.put("carrierCodeListProvider", "SMDG");
     an.put("deliveryTypeAtDestination", "CY");
+    an.put("transportDocumentReference", "HHL123");
     assertTrue(checks.stream().allMatch(c -> c.validate(body).isEmpty()));
   }
 
@@ -236,15 +237,22 @@ class ANChecksTest {
     ObjectNode facility = pod.putObject("facility");
 
     assertFalse(
-        ANChecks.validatePortOfDischargeFacilityFields("facilityCode").validate(body).isEmpty());
+        ANChecks.validatePortOfDischargeFacilityFields(
+                "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
+            .validate(body)
+            .isEmpty());
 
     facility.put("facilityCode", "NLRTM");
     assertTrue(
-        ANChecks.validatePortOfDischargeFacilityFields("facilityCode").validate(body).isEmpty());
+        ANChecks.validatePortOfDischargeFacilityFields(
+                "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
+            .validate(body)
+            .isEmpty());
 
     facility.put("facilityCodeListProvider", "SMDG");
     assertTrue(
-        ANChecks.validatePortOfDischargeFacilityFields("facilityCodeListProvider")
+        ANChecks.validatePortOfDischargeFacilityFields(
+                "facilityCodeListProvider", "arrivalNotices.*.transport.portOfDischarge")
             .validate(body)
             .isEmpty());
   }

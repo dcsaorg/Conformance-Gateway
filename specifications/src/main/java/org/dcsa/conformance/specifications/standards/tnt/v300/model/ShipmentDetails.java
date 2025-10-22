@@ -2,6 +2,7 @@ package org.dcsa.conformance.specifications.standards.tnt.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.core.v100.model.DocumentReference;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
 
 @Schema(description = "Shipment-specific details")

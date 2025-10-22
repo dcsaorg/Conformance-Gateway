@@ -31,7 +31,7 @@ ClassifiedDateTime,classifier,string,,maxLength=10,,EST,"Classifier denoting whe
 - `ACT` - Actual",
 ClassifiedDateTime,value,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
 DocumentReference,reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a document
+DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a document reference
 - `AMF` - Advance Manifest Filing (of any subtype)
 - `ARN` - Arrival Notice
 - `BKG` - Booking
@@ -79,7 +79,7 @@ EquipmentDetails,movementType,string,,,,EXPORT,"Code used to denote the type of 
 - `TRANSSHIPMENT` - Transshipment movement",
 EquipmentDetails,seals,"Seal list",,,,,,
 Event,"documentReferenceReplacements","DocumentReferenceReplacement list",,,,,"List of document replacements related to this event",
-Event,documentReferences,"DocumentReference list",,,,,"List of documents related to this event",
+Event,documentReferences,"DocumentReference list",,,,,"List of document references related to this event",
 Event,equipmentDetails,EquipmentDetails,,,,,"Equipment-specific details",
 Event,eventClassification,EventClassification,,,,,"Type, subtype and classifier of an event",
 Event,eventDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the real-world event has occurred or will occur.",
@@ -309,7 +309,7 @@ ShipmentDetails,priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in
 It can vary per carrier.",
 ShipmentDetails,reason,string,,,,,"The reason this event was sent",
 ShipmentReference,reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
-ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a reference
+ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a shipment reference
 - `AAO` - Consignee’s Reference
 - `AES` - Automated Export System
 - `BID` - Booking Request ID

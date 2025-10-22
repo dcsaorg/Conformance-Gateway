@@ -1,14 +1,14 @@
-package org.dcsa.conformance.specifications.standards.tnt.v300.model;
+package org.dcsa.conformance.specifications.standards.core.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.tnt.v300.types.DocumentTypeCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.DocumentReferenceTypeCode;
 
 @Data
 @Schema(description = "Referenced document")
 public class DocumentReference {
 
-  @Schema() private DocumentTypeCode typeCode;
+  @Schema() private DocumentReferenceTypeCode typeCode;
 
   @Schema(
       description = "Reference identifying the document",

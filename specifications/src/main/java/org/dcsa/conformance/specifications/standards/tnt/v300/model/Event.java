@@ -3,7 +3,7 @@ package org.dcsa.conformance.specifications.standards.tnt.v300.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
+import org.dcsa.conformance.specifications.standards.core.v100.model.*;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.tnt.v300.types.ShipmentLocationTypeCode;
 
@@ -53,7 +53,7 @@ If this flag is set, any event data other than the `eventID` is irrelevant (if p
 
   @Schema() private ShipmentLocationTypeCode shipmentLocationType;
 
-  @Schema(description = "List of documents related to this event")
+  @Schema(description = "List of document references related to this event")
   private List<DocumentReference> documentReferences;
 
   @Schema(description = "List of document replacements related to this event")

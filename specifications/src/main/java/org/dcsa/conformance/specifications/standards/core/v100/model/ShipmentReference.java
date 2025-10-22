@@ -1,8 +1,8 @@
-package org.dcsa.conformance.specifications.standards.tnt.v300.model;
+package org.dcsa.conformance.specifications.standards.core.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.tnt.v300.types.ReferenceTypeCode;
+import org.dcsa.conformance.specifications.standards.core.v100.types.ShipmentReferenceTypeCode;
 
 @Data
 @Schema(
@@ -17,7 +17,7 @@ the carrier can provide an extra type called `EQ` which is a reference to an Equ
 """)
 public class ShipmentReference {
 
-  @Schema() private ReferenceTypeCode typeCode;
+  @Schema() private ShipmentReferenceTypeCode typeCode;
 
   @Schema(description = "The actual reference value", example = "123e4567e89b", maxLength = 100)
   private String reference;

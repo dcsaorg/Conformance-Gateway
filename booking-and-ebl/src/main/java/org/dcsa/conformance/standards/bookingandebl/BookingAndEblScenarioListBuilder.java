@@ -99,7 +99,7 @@ public class BookingAndEblScenarioListBuilder
                     .then(
                         uc1BookingGet(
                             uc5BookingGet(
-                                carrierEblSupplyScenarioParameters()
+                                carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB)
                                     .then(
                                         uc1SIGet(
                                             uc6TDGetSIGet(
@@ -111,7 +111,7 @@ public class BookingAndEblScenarioListBuilder
                     .then(
                         uc1BookingGet(
                             uc5BookingGet(
-                                carrierEblSupplyScenarioParameters()
+                                carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB)
                                     .then(
                                         uc1SIGet(
                                             uc6TDGetSIGet(
@@ -131,7 +131,7 @@ public class BookingAndEblScenarioListBuilder
                     .then(
                         uc1BookingGet(
                             uc5BookingGet(
-                                carrierEblSupplyScenarioParameters()
+                                carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_STRAIGHT_BL)
                                     .then(
                                         uc1SIGet(
                                             uc6TDGetSIGet(
@@ -152,7 +152,7 @@ public class BookingAndEblScenarioListBuilder
                     .then(
                         uc1BookingGet(
                             uc5BookingGet(
-                                carrierEblSupplyScenarioParameters()
+                                carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_STRAIGHT_BL)
                                     .then(
                                         uc1SIGet(
                                             uc6TDGetSIGet(
@@ -334,7 +334,7 @@ public class BookingAndEblScenarioListBuilder
                     EblScenarioListBuilder.GET_TD_SCHEMA_NAME)));
   }
 
-  private static BookingAndEblScenarioListBuilder carrierEblSupplyScenarioParameters() {
+  private static BookingAndEblScenarioListBuilder carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType eblScenarioType) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String standardVersion = componentFactory.getStandardVersion().split("-\\+-")[1];
@@ -343,7 +343,7 @@ public class BookingAndEblScenarioListBuilder
             new CarrierSupplyPayloadAction(
                 carrierPartyName,
                 (BookingAndEblAction) previousAction,
-                org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB,
+                eblScenarioType,
                 standardVersion,
                 componentFactory.getEblMessageSchemaValidator(
                     EblScenarioListBuilder.POST_EBL_SCHEMA_NAME),

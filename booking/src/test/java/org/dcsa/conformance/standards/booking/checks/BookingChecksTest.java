@@ -49,7 +49,7 @@ class BookingChecksTest {
   }
 
   @Test
-  void testCargoGrossWeightPresentAtRequestedEquipment_irrelevant() {
+  void testEmptyCargoGrossWeightPresentAndNoCommoditiesAtRequestedEquipment_irrelevant() {
     requestedEquipment.set("cargoGrossWeight", OBJECT_MAPPER.createObjectNode());
     requestedEquipments.add(requestedEquipment);
     booking.set("requestedEquipments", requestedEquipments);

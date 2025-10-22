@@ -607,10 +607,7 @@ public class JsonAttribute {
       for (var check : subchecks) {
         results.add(check.validate(node, context));
       }
-      return results.stream()
-          .reduce(
-              ConformanceCheckResult.withRelevance(Set.of()),
-              (a, b) -> ConformanceCheckResult.from(Set.of(a, b)));
+      return ConformanceCheckResult.from(results);
     };
   }
 

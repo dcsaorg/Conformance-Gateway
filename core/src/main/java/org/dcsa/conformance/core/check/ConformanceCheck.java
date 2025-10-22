@@ -31,11 +31,7 @@ public abstract class ConformanceCheck {
 
   private synchronized List<ConformanceCheck> getSubChecks() {
     if (subChecks == null) {
-      subChecks =
-          createSubChecks()
-              .filter(Objects::nonNull)
-              .filter(ConformanceCheck::isApplicable)
-              .collect(Collectors.toList());
+      subChecks = createSubChecks().collect(Collectors.toList());
     }
     return subChecks.stream()
         .filter(Objects::nonNull)

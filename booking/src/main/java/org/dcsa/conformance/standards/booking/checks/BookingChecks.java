@@ -194,6 +194,7 @@ public class BookingChecks {
             StreamSupport.stream(requestedEquipments.spliterator(), false)
                 .forEach(
                     reqEquipNode -> {
+                      int currentIndex = index.getAndIncrement();
                       if (IS_ACTIVE_REEFER_SETTINGS_REQUIRED.test(reqEquipNode)) {
                         if (JsonUtil.isMissingOrEmpty(reqEquipNode.path(ACTIVE_REEFER_SETTINGS))) {
                           errors.add(
@@ -201,11 +202,11 @@ public class BookingChecks {
                                   "The attribute '%s[%d].%s' should have been present but was absent"
                                       .formatted(
                                           REQUESTED_EQUIPMENTS,
-                                          index.getAndIncrement(),
+                                          currentIndex,
                                           ACTIVE_REEFER_SETTINGS)));
                         }
                       } else {
-                        errors.add(ConformanceError.irrelevant(index.getAndIncrement()));
+                        errors.add(ConformanceError.irrelevant(currentIndex));
                       }
                     });
 

@@ -27,13 +27,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
   @Override
   public AttributePathBuilder at(JsonPointer pointer) {
     return new AttributePathBuilderImpl(
-        List.of(
-            new Match(
-                null,
-                body.at(pointer),
-                renderJsonPointer(pointer),
-                false,
-                !JsonUtil.isMissingOrEmpty(body.at(pointer)))));
+        List.of(new Match(null, body.at(pointer), renderJsonPointer(pointer), false)));
   }
 
   @Override
@@ -42,10 +36,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
       throw new IllegalArgumentException(
           "Segments cannot contain wildcards (a.foo*.c is not supported)");
     }
-    return new AttributePathBuilderImpl(
-        List.of(
-            new Match(
-                null, body.path(path), path, false, !JsonUtil.isMissingOrEmpty(body.path(path)))));
+    return new AttributePathBuilderImpl(List.of(new Match(null, body.path(path), path, false)));
   }
 
   @RequiredArgsConstructor
@@ -71,7 +62,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
 
     @Override
     public MultiAttributeValidator submitPath() {
-      validateAll(matchingNodes.stream().filter(match -> match.isRelevant).toList());
+      validateAll(matchingNodes);
       return MultiAttributeValidatorImpl.this;
     }
 
@@ -94,7 +85,6 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     final JsonNode node;
     private final String pathSegment;
     private final boolean isIndexNode;
-    private final boolean isRelevant;
 
     private String cached;
 
@@ -113,26 +103,15 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     }
 
     public Match at(JsonPointer jsonPointer) {
-      return new Match(
-          this,
-          node.at(jsonPointer),
-          renderJsonPointer(jsonPointer),
-          false,
-          !JsonUtil.isMissingOrEmpty(node.at(jsonPointer)));
+      return new Match(this, node.at(jsonPointer), renderJsonPointer(jsonPointer), false);
     }
 
     public Match path(String path) {
-      return new Match(
-          this, node.path(path), path, false, !JsonUtil.isMissingOrEmpty(node.path(path)));
+      return new Match(this, node.path(path), path, false);
     }
 
     public Match path(int index) {
-      return new Match(
-          this,
-          node.path(index),
-          "[" + index + "]",
-          true,
-          !JsonUtil.isMissingOrEmpty(node.path(index)));
+      return new Match(this, node.path(index), "[" + index + "]", true);
     }
 
     public boolean isArray() {

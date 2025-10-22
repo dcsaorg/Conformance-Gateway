@@ -265,13 +265,7 @@ public class JsonAttribute {
         (body, contextPath) -> {
           var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
           scanner.accept(v);
-          return ConformanceCheckResult.simple(
-              v.getValidationIssues().stream()
-                  .map(
-                      conformanceCheckResult ->
-                          (ConformanceCheckResult.SimpleErrors) conformanceCheckResult)
-                  .flatMap(simpleErrors -> simpleErrors.errors().stream())
-                  .collect(Collectors.toSet()));
+          return ConformanceCheckResult.from(v.getValidationIssues());
         });
   }
 

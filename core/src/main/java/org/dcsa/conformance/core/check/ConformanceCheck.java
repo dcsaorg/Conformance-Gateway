@@ -60,7 +60,6 @@ public abstract class ConformanceCheck {
 
   public Stream<ConformanceCheck> subChecksStream() {
     return getSubChecks().stream();
-        //.sorted((check1, check2) -> Boolean.compare(check2.isRelevant(), check1.isRelevant()));
   }
 
   protected void addResult(ConformanceResult result) {

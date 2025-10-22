@@ -48,11 +48,14 @@ public class ANSubscriber extends ConformanceParty {
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
+    ObjectNode responseNode = OBJECT_MAPPER.createObjectNode();
+    responseNode.putArray("feedbackElements");
+
     ConformanceResponse response =
         request.createResponse(
-            204,
+            200,
             Map.of(API_VERSION, List.of(apiVersion)),
-            new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
+            new ConformanceMessageBody(responseNode));
 
     addOperatorLogEntry(
         "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));

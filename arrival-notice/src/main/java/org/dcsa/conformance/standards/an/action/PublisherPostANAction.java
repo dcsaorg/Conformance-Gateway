@@ -28,6 +28,7 @@ public class PublisherPostANAction extends ANAction {
     super(publisherPartyName, subscriberPartyName, previousAction, computeTitle(scenarioType));
     this.requestSchemaValidator = requestSchemaValidator;
     this.scenarioType = scenarioType;
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
   @Override
@@ -49,7 +50,7 @@ public class PublisherPostANAction extends ANAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new UrlPathCheck(ANRole::isPublisher, getMatchedExchangeUuid(), "/arrival-notices"),
-            new ResponseStatusCheck(ANRole::isSubscriber, getMatchedExchangeUuid(), 204),
+            new ResponseStatusCheck(ANRole::isSubscriber, getMatchedExchangeUuid(), 200),
             new ApiHeaderCheck(
                 ANRole::isSubscriber,
                 getMatchedExchangeUuid(),

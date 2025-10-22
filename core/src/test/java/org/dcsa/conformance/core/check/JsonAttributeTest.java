@@ -293,6 +293,8 @@ class JsonAttributeTest {
       strings = {
               "array.*",
               "array.*.element",
+              "notArray",
+              "array.*.otherElement",
       })
   void testAllIndividualMatchesMustBeIrrelevant_(String path) {
     objectNode.set("array", arrayNode);
@@ -348,8 +350,6 @@ class JsonAttributeTest {
   @ValueSource(strings = {
           "array.*",
           "array.*.element",
-          "notArray",
-          "array.*.otherElement",
   })
   void testAllIndividualMatchesMustBeInvalid(String path) {
     var firstElement = JsonNodeFactory.instance.objectNode().put("element", "first");

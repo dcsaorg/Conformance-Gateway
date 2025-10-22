@@ -148,6 +148,8 @@ public class BookingChecks {
               if (arrivalEndDate.isBefore(arrivalStartDate)) {
                 invalidDates.add(arrivalEndDate.toString());
               }
+            } else {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
             return ConformanceCheckResult.simple(
                 invalidDates.stream()
@@ -223,11 +225,10 @@ public class BookingChecks {
       JsonAttribute.customValidator(
           "Conditional Universal Service Reference",
           body -> {
-            var routingReference = body.path(ROUTING_REFERENCE).asText("");
             var universalExportVoyageReference = body.path(UNIVERSAL_EXPORT_VOYAGE_REFERENCE);
             var universalImportVoyageReference = body.path(UNIVERSAL_IMPORT_VOYAGE_REFERENCE);
             var universalServiceReference = body.path(UNIVERSAL_SERVICE_REFERENCE1);
-            if (!routingReference.isBlank()) {
+            if (!JsonUtil.isMissingOrEmpty(body.path(ROUTING_REFERENCE))) {
               var issues = new LinkedHashSet<String>();
               if (JsonAttribute.isJsonNodePresent(universalExportVoyageReference)) {
                 issues.add(
@@ -246,9 +247,11 @@ public class BookingChecks {
               }
               return ConformanceCheckResult.simple(issues);
             }
-            if ((JsonAttribute.isJsonNodePresent(universalExportVoyageReference)
-                    || JsonAttribute.isJsonNodePresent(universalImportVoyageReference))
-                && JsonAttribute.isJsonNodeAbsent(universalServiceReference)) {
+            if (JsonUtil.isMissingOrEmpty(universalImportVoyageReference)
+                && JsonUtil.isMissingOrEmpty(universalExportVoyageReference)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            if (JsonAttribute.isJsonNodeAbsent(universalServiceReference)) {
               return ConformanceCheckResult.simple(
                   Set.of(
                       "The %s must be present as either %s or %s are present"
@@ -363,7 +366,10 @@ public class BookingChecks {
                     .filter(JsonNode::isTextual)
                     .map(n -> n.asText(""))
                     .collect(Collectors.toSet());
-            if (receiptTypeAtOrigin.equals("CFS") && !cutOffDateTimeCodes.contains("LCL")) {
+            if (!receiptTypeAtOrigin.equals("CFS")) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            if (!cutOffDateTimeCodes.contains("LCL")) {
               issues.add(
                   "'%s' 'LCL' must be present when '%s' is 'CFS'"
                       .formatted(CUT_OFF_DATE_TIME_CODE, RECEIPT_TYPE_AT_ORIGIN));
@@ -385,7 +391,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck SHIPMENT_CUTOFF_TIMES_UNIQUE =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "in '%s' cutOff date time code must be unique".formatted(SHIPMENT_CUT_OFF_TIMES),
+          "'%s' in '%s' must be unique".formatted(CUT_OFF_DATE_TIME_CODE, SHIPMENT_CUT_OFF_TIMES),
           ALL_SHIPMENT_CUTOFF_TIMES,
           JsonAttribute.unique(CUT_OFF_DATE_TIME_CODE));
 
@@ -401,6 +407,10 @@ public class BookingChecks {
             var preNode = getShipmentLocationTypeCode(body, "PRE");
             var pdeNode = getShipmentLocationTypeCode(body, "PDE");
             var podNode = getShipmentLocationTypeCode(body, "POD");
+
+            if (!routingReference.isBlank() && !"SD".equals(receiptTypeAtOrigin)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
 
             if (routingReference.isBlank()) {
               if (pdeNode.isMissingNode() && podNode.isMissingNode()) {
@@ -422,27 +432,25 @@ public class BookingChecks {
             }
             if ("SD".equals(receiptTypeAtOrigin)) {
               var requestedEquipments = body.path(REQUESTED_EQUIPMENTS);
-              if (requestedEquipments.isArray()) {
-                StreamSupport.stream(requestedEquipments.spliterator(), false)
-                    .forEach(
-                        element -> {
-                          var containerPositionings = element.path(CONTAINER_POSITIONINGS);
-                          var containerPositionsDateTime =
-                              StreamSupport.stream(containerPositionings.spliterator(), false)
-                                  .filter(o -> !o.path(DATE_TIME).asText("").isEmpty())
-                                  .findFirst()
-                                  .orElse(null);
-                          if (containerPositionsDateTime == null) {
-                            issues.add(
-                                "When %s is 'SD' (Store Door), '%s.%s.%s' is required"
-                                    .formatted(
-                                        RECEIPT_TYPE_AT_ORIGIN,
-                                        REQUESTED_EQUIPMENTS,
-                                        CONTAINER_POSITIONINGS,
-                                        DATE_TIME));
-                          }
-                        });
-              }
+              StreamSupport.stream(requestedEquipments.spliterator(), false)
+                  .forEach(
+                      element -> {
+                        var containerPositionings = element.path(CONTAINER_POSITIONINGS);
+                        var containerPositionsDateTime =
+                            StreamSupport.stream(containerPositionings.spliterator(), false)
+                                .filter(o -> !o.path(DATE_TIME).asText("").isEmpty())
+                                .findFirst()
+                                .orElse(null);
+                        if (containerPositionsDateTime == null) {
+                          issues.add(
+                              "When %s is 'SD' (Store Door), '%s.%s.%s' is required"
+                                  .formatted(
+                                      RECEIPT_TYPE_AT_ORIGIN,
+                                      REQUESTED_EQUIPMENTS,
+                                      CONTAINER_POSITIONINGS,
+                                      DATE_TIME));
+                        }
+                      });
             }
             return ConformanceCheckResult.simple(issues);
           });
@@ -652,6 +660,8 @@ public class BookingChecks {
                 issues.add(
                     S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(SHIPMENT_CUT_OFF_TIMES));
               }
+            } else {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
             return ConformanceCheckResult.simple(issues);
           });
@@ -663,28 +673,29 @@ public class BookingChecks {
           (nodeToValidate, contextPath) -> {
             var issues = new LinkedHashSet<String>();
             var cargoGrossWeight = nodeToValidate.path(CARGO_GROSS_WEIGHT);
-            if (cargoGrossWeight.isMissingNode() || cargoGrossWeight.isNull()) {
-              var commodities = nodeToValidate.path(COMMODITIES);
-              if (!(commodities.isMissingNode() || commodities.isNull()) && commodities.isArray()) {
-                AtomicInteger commodityCounter = new AtomicInteger(0);
-                StreamSupport.stream(commodities.spliterator(), false)
-                    .forEach(
-                        commodity -> {
-                          var commodityGrossWeight = commodity.path(CARGO_GROSS_WEIGHT);
-                          int currentCommodityCount = commodityCounter.getAndIncrement();
-                          if (commodityGrossWeight.isMissingNode()
-                              || commodityGrossWeight.isNull()) {
-                            issues.add(
-                                "The '%s' must have '%s' at '%s' position %s"
-                                    .formatted(
-                                        contextPath,
-                                        CARGO_GROSS_WEIGHT,
-                                        COMMODITIES,
-                                        currentCommodityCount));
-                          }
-                        });
-              }
+            if (!JsonUtil.isMissingOrEmpty(cargoGrossWeight)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
+            var commodities = nodeToValidate.path(COMMODITIES);
+            if (JsonUtil.isMissingOrEmpty(commodities)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            AtomicInteger commodityCounter = new AtomicInteger(0);
+            StreamSupport.stream(commodities.spliterator(), false)
+                .forEach(
+                    commodity -> {
+                      var commodityGrossWeight = commodity.path(CARGO_GROSS_WEIGHT);
+                      int currentCommodityCount = commodityCounter.getAndIncrement();
+                      if (commodityGrossWeight.isMissingNode() || commodityGrossWeight.isNull()) {
+                        issues.add(
+                            "The '%s' must have '%s' at '%s' position %s"
+                                .formatted(
+                                    contextPath,
+                                    CARGO_GROSS_WEIGHT,
+                                    COMMODITIES,
+                                    currentCommodityCount));
+                      }
+                    });
             return ConformanceCheckResult.simple(issues);
           });
 
@@ -960,8 +971,9 @@ public class BookingChecks {
                       S_S_S.formatted(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING)),
               (nodeToValidate, contextPath) -> {
                 var dg = nodeToValidate.path(DANGEROUS_GOODS);
-                if (!dg.isArray() || dg.isEmpty()) {
-                  return ConformanceCheckResult.simple(Set.of());
+                if (JsonUtil.isMissingOrEmpty(dg)) {
+                  return ConformanceCheckResult.withRelevance(
+                      Set.of(ConformanceError.irrelevant()));
                 }
                 if (nodeToValidate.path(PACKAGE_CODE).isMissingNode()
                     && nodeToValidate.path(IMO_PACKAGING_CODE).isMissingNode()) {
@@ -979,8 +991,9 @@ public class BookingChecks {
                       S_S_S.formatted(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING)),
               (nodeToValidate, contextPath) -> {
                 var dg = nodeToValidate.path(DANGEROUS_GOODS);
-                if (!dg.isArray() || dg.isEmpty()) {
-                  return ConformanceCheckResult.simple(Set.of());
+                if (JsonUtil.isMissingOrEmpty(dg)) {
+                  return ConformanceCheckResult.withRelevance(
+                      Set.of(ConformanceError.irrelevant()));
                 }
                 if (nodeToValidate.path(NUMBER_OF_PACKAGES).isMissingNode()) {
                   return ConformanceCheckResult.simple(
@@ -1057,7 +1070,8 @@ public class BookingChecks {
 
     var checks = new ArrayList<JsonContentCheck>();
 
-    checks.add(cbrrOrCbr(dspSupplier));
+    checks.add(cbrValidation(dspSupplier));
+    checks.add(cbrrValidation(dspSupplier));
 
     checks.add(
         JsonAttribute.mustEqual(
@@ -1068,9 +1082,10 @@ public class BookingChecks {
             "Validate '%s'".formatted(ATTR_AMENDED_BOOKING_STATUS),
             body -> {
               String amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
-              if (!amendedBookingStatus.isEmpty()
-                  && expectedAmendedBookingStatus != null
-                  && !expectedAmendedBookingStatus.name().equals(amendedBookingStatus)) {
+              if (expectedAmendedBookingStatus == null) {
+                return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+              }
+              if (!expectedAmendedBookingStatus.name().equals(amendedBookingStatus)) {
                 return ConformanceCheckResult.simple(
                     Set.of(
                         "The expected '%s' %s is not equal to response '%s' %s"
@@ -1089,9 +1104,10 @@ public class BookingChecks {
             body -> {
               String bookingCancellationStatus =
                   body.path(ATTR_BOOKING_CANCELLATION_STATUS).asText("");
-              if (!bookingCancellationStatus.isEmpty()
-                  && expectedCancelledBookingStatus != null
-                  && !expectedCancelledBookingStatus.name().equals(bookingCancellationStatus)) {
+              if (expectedCancelledBookingStatus == null) {
+                return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+              }
+              if (!expectedCancelledBookingStatus.name().equals(bookingCancellationStatus)) {
                 return ConformanceCheckResult.simple(
                     Set.of(
                         "The expected '%s' %s is not equal to response '%s' %s"
@@ -1149,6 +1165,44 @@ public class BookingChecks {
                             expectedCbrr,
                             CARRIER_BOOKING_REFERENCE,
                             expectedCbr)));
+          }
+          return ConformanceCheckResult.simple(Set.of());
+        });
+  }
+
+  public static JsonContentCheck cbrValidation(
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
+    return JsonAttribute.customValidator(
+        "Validate Carrier Booking Reference",
+        body -> {
+          String cbr = body.path(CARRIER_BOOKING_REFERENCE).asText("");
+          String expectedCbr = dspSupplier.get().carrierBookingReference();
+          if (expectedCbr == null) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+          }
+          if (!cbr.equals(expectedCbr)) {
+            return ConformanceCheckResult.simple(
+                Set.of("'%s' must equal %s.".formatted(CARRIER_BOOKING_REFERENCE, expectedCbr)));
+          }
+          return ConformanceCheckResult.simple(Set.of());
+        });
+  }
+
+  public static JsonContentCheck cbrrValidation(
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
+    return JsonAttribute.customValidator(
+        "Validate Carrier Booking Request Reference",
+        body -> {
+          String cbrr = body.path(CARRIER_BOOKING_REQUEST_REFERENCE).asText("");
+          String expectedCbrr = dspSupplier.get().carrierBookingRequestReference();
+          if (expectedCbrr == null) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+          }
+          if (!cbrr.equals(expectedCbrr)) {
+            return ConformanceCheckResult.simple(
+                Set.of(
+                    "'%s' must equal %s."
+                        .formatted(CARRIER_BOOKING_REQUEST_REFERENCE, expectedCbrr)));
           }
           return ConformanceCheckResult.simple(Set.of());
         });

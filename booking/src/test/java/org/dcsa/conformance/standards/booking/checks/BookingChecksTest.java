@@ -49,13 +49,17 @@ class BookingChecksTest {
   }
 
   @Test
-  void testCargoGrossWeightPresentAtRequestedEquipment_valid() {
+  void testCargoGrossWeightPresentAtRequestedEquipment_irrelevant() {
     requestedEquipment.set("cargoGrossWeight", OBJECT_MAPPER.createObjectNode());
     requestedEquipments.add(requestedEquipment);
     booking.set("requestedEquipments", requestedEquipments);
+
     JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_CONDITIONS;
-    Set<String> error = check.validate(booking).getErrorMessages();
-    assertTrue(error.isEmpty());
+    Set<ConformanceError> errors =
+            ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
   }
 
   @Test
@@ -764,7 +768,7 @@ class BookingChecksTest {
   }
 
   @Test
-  void testCheckConfirmedBookingFields_nonConfirmedStatus_valid() {
+  void testCheckConfirmedBookingFields_nonConfirmedStatus_irrelevant() {
     String[] nonConfirmedStates = {
       "RECEIVED", "PENDING_UPDATE", "UPDATE_RECEIVED", "DECLINED", "COMPLETED"
     };
@@ -773,10 +777,13 @@ class BookingChecksTest {
       ObjectNode testBooking = OBJECT_MAPPER.createObjectNode();
       testBooking.put("bookingStatus", status);
 
-      Set<String> errors =
-          BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(testBooking).getErrorMessages();
+      Set<ConformanceError> errors =
+          ((ConformanceCheckResult.ErrorsWithRelevance)
+                  BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(testBooking))
+              .errors();
 
-      assertTrue(errors.isEmpty());
+      assertEquals(1, errors.size());
+      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
     }
   }
 

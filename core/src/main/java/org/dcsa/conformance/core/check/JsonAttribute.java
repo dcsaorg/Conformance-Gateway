@@ -624,12 +624,14 @@ public class JsonAttribute {
     KeywordDataset dataset
   ) {
     return (node, context) -> {
-      var text = node.asText();
-      // We rely on schema validation (or mustBePresent) for required check.
-      if (!node.isMissingNode() && !dataset.contains(text)) {
-        return ConformanceCheckResult.simple(Set.of(
-            "The attribute '%s' has the value '%s', which is unknown and must match one of the values in the approved dataset."
-                .formatted(context, renderValue(node))));
+      if (JsonUtil.isMissingOrEmpty(node)) {
+        return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+      }
+      if (!dataset.contains(node.asText())) {
+        return ConformanceCheckResult.simple(
+            Set.of(
+                "The attribute '%s' has the value '%s', which is unknown and must match one of the values in the approved dataset."
+                    .formatted(context, renderValue(node))));
       }
       return ConformanceCheckResult.simple(Collections.emptySet());
     };

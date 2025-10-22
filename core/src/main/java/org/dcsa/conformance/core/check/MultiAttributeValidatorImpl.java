@@ -12,6 +12,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.dcsa.conformance.core.util.JsonUtil;
 
 @RequiredArgsConstructor
 class MultiAttributeValidatorImpl implements MultiAttributeValidator {
@@ -20,31 +22,30 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
   private final JsonNode body;
   private final JsonContentMatchedValidation validation;
 
-  @Getter
-  private final Set<ConformanceCheckResult> validationIssues = new HashSet<>();
+  @Getter private final Set<ConformanceCheckResult> validationIssues = new HashSet<>();
 
   @Override
   public AttributePathBuilder at(JsonPointer pointer) {
-    return new AttributePathBuilderImpl(List.of(
-      new Match(
-        null,
-        body.at(pointer),
-        renderJsonPointer(pointer),
-        false
-      )));
+    return new AttributePathBuilderImpl(
+        List.of(
+            new Match(
+                null,
+                body.at(pointer),
+                renderJsonPointer(pointer),
+                false,
+                !JsonUtil.isMissingOrEmpty(body.at(pointer)))));
   }
 
   @Override
   public AttributePathBuilder path(String path) {
     if (path.contains("*")) {
-      throw new IllegalArgumentException("Segments cannot contain wildcards (a.foo*.c is not supported)");
+      throw new IllegalArgumentException(
+          "Segments cannot contain wildcards (a.foo*.c is not supported)");
     }
-    return new AttributePathBuilderImpl(List.of(new Match(
-      null,
-      body.path(path),
-      path,
-      false
-    )));
+    return new AttributePathBuilderImpl(
+        List.of(
+            new Match(
+                null, body.path(path), path, false, !JsonUtil.isMissingOrEmpty(body.path(path)))));
   }
 
   @RequiredArgsConstructor
@@ -55,41 +56,35 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     @Override
     public AttributePathBuilder all() {
       return new AttributePathBuilderImpl(
-        matchingNodes.stream()
-          .filter(Match::isArray)
-          .flatMap(Match::allInArray)
-          .toList()
-      );
+          matchingNodes.stream().filter(Match::isArray).flatMap(Match::allInArray).toList());
     }
 
     @Override
     public AttributePathBuilder at(JsonPointer pointer) {
-      return new AttributePathBuilderImpl(matchingNodes.stream()
-        .map(m -> m.at(pointer))
-        .toList());
+      return new AttributePathBuilderImpl(matchingNodes.stream().map(m -> m.at(pointer)).toList());
     }
 
     @Override
     public AttributePathBuilder path(String path) {
-      return new AttributePathBuilderImpl(matchingNodes.stream()
-        .map(m -> m.path(path))
-        .toList());
+      return new AttributePathBuilderImpl(matchingNodes.stream().map(m -> m.path(path)).toList());
     }
 
     @Override
     public MultiAttributeValidator submitPath() {
-      validateAll(matchingNodes);
+      validateAll(matchingNodes.stream().filter(match -> match.isRelevant).toList());
       return MultiAttributeValidatorImpl.this;
     }
 
     private void validateAll(List<Match> matches) {
-      if (matches.isEmpty()){
-        validationIssues.add(ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant())));
+      if (matches.isEmpty()) {
+        validationIssues.add(
+            ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant())));
         return;
       }
-      matches.stream().map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
-        .filter(s -> !s.getErrorMessages().isEmpty())
-        .forEach(validationIssues::add);
+      matches.stream()
+          .map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
+          .filter(s -> !s.getErrorMessages().isEmpty())
+          .forEach(validationIssues::add);
     }
   }
 
@@ -99,6 +94,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     final JsonNode node;
     private final String pathSegment;
     private final boolean isIndexNode;
+    private final boolean isRelevant;
 
     private String cached;
 
@@ -111,21 +107,32 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
         return cached;
       }
       var parentPath = p.render();
-      var result =  parentPath + (isIndexNode ? "" : ".") + pathSegment;
+      var result = parentPath + (isIndexNode ? "" : ".") + pathSegment;
       cached = result;
       return result;
     }
 
     public Match at(JsonPointer jsonPointer) {
-      return new Match(this, node.at(jsonPointer), renderJsonPointer(jsonPointer), false);
+      return new Match(
+          this,
+          node.at(jsonPointer),
+          renderJsonPointer(jsonPointer),
+          false,
+          !JsonUtil.isMissingOrEmpty(node.at(jsonPointer)));
     }
 
     public Match path(String path) {
-      return new Match(this, node.path(path), path, false);
+      return new Match(
+          this, node.path(path), path, false, !JsonUtil.isMissingOrEmpty(node.path(path)));
     }
 
     public Match path(int index) {
-      return new Match(this, node.path(index), "[" + index + "]", true);
+      return new Match(
+          this,
+          node.path(index),
+          "[" + index + "]",
+          true,
+          !JsonUtil.isMissingOrEmpty(node.path(index)));
     }
 
     public boolean isArray() {
@@ -133,11 +140,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     }
 
     public Stream<Match> allInArray() {
-      return IntStream.range(0, node.size())
-        .mapToObj(this::path);
+      return IntStream.range(0, node.size()).mapToObj(this::path);
     }
   }
-
 }
-
-

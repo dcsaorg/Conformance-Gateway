@@ -30,7 +30,7 @@ public abstract class ConformanceCheck {
   }
 
   private synchronized List<ConformanceCheck> getSubChecks() {
-    if (subChecks== null) {
+    if (subChecks == null) {
       subChecks =
           createSubChecks()
               .filter(Objects::nonNull)
@@ -60,6 +60,7 @@ public abstract class ConformanceCheck {
 
   public Stream<ConformanceCheck> subChecksStream() {
     return getSubChecks().stream();
+        //.sorted((check1, check2) -> Boolean.compare(check2.isRelevant(), check1.isRelevant()));
   }
 
   protected void addResult(ConformanceResult result) {
@@ -79,7 +80,8 @@ public abstract class ConformanceCheck {
   }
 
   public boolean isRelevant() {
-    if (!results.isEmpty() && results.stream().allMatch(Predicate.not(ConformanceResult::isRelevant))) {
+    if (!results.isEmpty()
+        && results.stream().allMatch(Predicate.not(ConformanceResult::isRelevant))) {
       return false;
     }
     return isRelevant;

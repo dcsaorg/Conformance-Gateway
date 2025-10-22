@@ -1,0 +1,13 @@
+FilterParameters,Required
+"carrierBookingReference, updatedDateTimeMin",yes
+"carrierBookingReference, updatedDateTimeMax",yes
+"carrierBookingReference, updatedDateTimeMin, updatedDateTimeMax",yes
+"carrierBookingReference, equipmentReference, updatedDateTimeMin",yes
+"carrierBookingReference, equipmentReference, updatedDateTimeMax",yes
+"carrierBookingReference, equipmentReference, updatedDateTimeMin, updatedDateTimeMax",yes
+"transportDocumentReference, updatedDateTimeMin",yes
+"transportDocumentReference, updatedDateTimeMax",yes
+"transportDocumentReference, updatedDateTimeMin, updatedDateTimeMax",yes
+"transportDocumentReference, equipmentReference, updatedDateTimeMin",yes
+"transportDocumentReference, equipmentReference, updatedDateTimeMax",yes
+"transportDocumentReference, equipmentReference, updatedDateTimeMin, updatedDateTimeMax",yes

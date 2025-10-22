@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.standards.tnt.v300;
+package org.dcsa.conformance.specifications.standards.vgm.v100;
 
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -25,111 +25,96 @@ import org.dcsa.conformance.specifications.dataoverview.QueryParametersSheet;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
-import org.dcsa.conformance.specifications.standards.core.v100.model.ActiveReeferParameters;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ContactDetails;
+import org.dcsa.conformance.specifications.standards.core.v100.model.DocumentReference;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
-import org.dcsa.conformance.specifications.standards.core.v100.model.ServiceCodeOrReference;
-import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.FeedbackElement;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsError;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEventsResponse;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsError;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
-import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
-import org.dcsa.conformance.specifications.standards.core.v100.model.DocumentReference;
-import org.dcsa.conformance.specifications.standards.core.v100.model.DocumentReferenceReplacement;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventClassification;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventRouting;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotDetails;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Party;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferDetails;
+import org.dcsa.conformance.specifications.standards.core.v100.model.PartyDetails;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Seal;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentDetails;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ShipmentReference;
-import org.dcsa.conformance.specifications.standards.core.v100.model.ShipmentReferenceReplacement;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.VehicleDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.VesselTransport;
+import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Weight;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.FeedbackElement;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMDeclarationsError;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMDeclarationsResponse;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMDeclarationsError;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMDeclarationsRequest;
+import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMDeclarationsResponse;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.EquipmentDetails;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.ShipmentDetails;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGM;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMDeclaration;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.RoutingDetails;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.VesselVoyageDetails;
 
-public class TNTStandardSpecification extends StandardSpecification {
+public class VGMStandardSpecification extends StandardSpecification {
 
-  public static final String TAG_EVENT_PRODUCERS = "Event Producer Endpoints";
-  public static final String TAG_EVENT_CONSUMERS = "Event Consumer Endpoints";
+  public static final String TAG_VGM_PRODUCERS = "VGM Producer Endpoints";
+  public static final String TAG_VGM_CONSUMERS = "VGM Consumer Endpoints";
 
-  private final GetEventsEndpoint getEventsEndpoint;
+  private final GetVGMDeclarationsEndpoint getVGMDeclarationsEndpoint;
 
-  public TNTStandardSpecification() {
-    super("Track and Trace", "TNT", "3.0.0");
+  public VGMStandardSpecification() {
+    super("Verified Gross Mass", "VGM", "1.0.0");
 
     openAPI.addTagsItem(
         new Tag()
-            .name(TAG_EVENT_PRODUCERS)
-            .description("Endpoints implemented by the Event Producers"));
+            .name(TAG_VGM_PRODUCERS)
+            .description("Endpoints implemented by the VGM Producers"));
     openAPI.addTagsItem(
         new Tag()
-            .name(TAG_EVENT_CONSUMERS)
-            .description("Endpoints implemented by the Event Consumers"));
+            .name(TAG_VGM_CONSUMERS)
+            .description("Endpoints implemented by the VGM Consumers"));
 
-    openAPI.path("/events", new PathItem().get(operationEventsGet()).post(operationEventsPost()));
+    openAPI.path(
+        "/vgm-declarations",
+        new PathItem().get(operationVGMDeclarationsGet()).post(operationVGMDeclarationsPost()));
 
-    getEventsEndpoint = new GetEventsEndpoint();
+    getVGMDeclarationsEndpoint = new GetVGMDeclarationsEndpoint();
   }
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata(
-        "Track and Trace", "3.0.0-20251024-design", "TNT", "3.0.0-20250926-design", 4);
+    return new LegendMetadata("Verified Gross Mass", "1.0.0-20251024-design", "VGM", "", 4);
   }
 
   @Override
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
-        ActiveReeferParameters.class,
         Address.class,
         ClassifiedDateTime.class,
+        ContactDetails.class,
         DocumentReference.class,
-        DocumentReferenceReplacement.class,
         EquipmentDetails.class,
-        Event.class,
-        EventClassification.class,
-        EventRouting.class,
         Facility.class,
         FeedbackElement.class,
         GeoCoordinate.class,
-        GetEventsError.class,
-        GetEventsResponse.class,
-        IotDetails.class,
+        GetVGMDeclarationsError.class,
+        GetVGMDeclarationsResponse.class,
         Location.class,
         Party.class,
-        PostEventsError.class,
-        PostEventsRequest.class,
-        PostEventsResponse.class,
-        RailTransport.class,
-        ReeferDetails.class,
+        PartyDetails.class,
+        PostVGMDeclarationsError.class,
+        PostVGMDeclarationsRequest.class,
+        PostVGMDeclarationsResponse.class,
+        RoutingDetails.class,
         Seal.class,
-        ServiceCodeOrReference.class,
         ShipmentDetails.class,
         ShipmentReference.class,
-        ShipmentReferenceReplacement.class,
-        TransportCall.class,
-        TransportDetails.class,
-        TruckTransport.class,
-        VehicleDetails.class,
-        VesselTransport.class,
-        VoyageNumberOrReference.class);
+        VesselVoyageDetails.class,
+        VoyageNumberOrReference.class,
+        VGM.class,
+        VGMDeclaration.class,
+        Weight.class);
   }
 
   @Override
   protected List<String> getRootTypeNames() {
-    return List.of(Event.class.getSimpleName());
+    return List.of(VGMDeclaration.class.getSimpleName());
   }
 
   @Override
@@ -146,10 +131,13 @@ public class TNTStandardSpecification extends StandardSpecification {
             Collectors.toMap(
                 Map.Entry::getKey,
                 entry ->
-                    DataOverviewSheet.importFromString(
-                        SpecificationToolkit.readRemoteFile(
-                            "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/e83485c750798f3e086b5b393dd1effdf56d5185/specifications/generated-resources/standards/tnt/v300/tnt-v3.0.0-data-overview-%s.csv"
-                                .formatted(entry.getValue())))));
+                    System.currentTimeMillis() > 0
+                        ? List.of()
+                        : // TODO remove after first snapshot
+                        DataOverviewSheet.importFromString(
+                            SpecificationToolkit.readRemoteFile(
+                                "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/TODO/specifications/generated-resources/standards/vgm/v100/vgm-v1.0.0-data-overview-%s.csv"
+                                    .formatted(entry.getValue())))));
   }
 
   @Override
@@ -163,7 +151,7 @@ public class TNTStandardSpecification extends StandardSpecification {
   }
 
   protected QueryParametersFilterEndpoint getQueryParametersFilterEndpoint() {
-    return getEventsEndpoint;
+    return getVGMDeclarationsEndpoint;
   }
 
   @Override
@@ -171,15 +159,15 @@ public class TNTStandardSpecification extends StandardSpecification {
     return false;
   }
 
-  private Operation operationEventsGet() {
+  private Operation operationVGMDeclarationsGet() {
     return new Operation()
-        .summary("Retrieves a list of events")
-        .description(readResourceFile("openapi-get-events-description.md"))
-        .operationId("get-events")
-        .tags(Collections.singletonList(TAG_EVENT_PRODUCERS))
+        .summary("Retrieves a list of VGM declarations")
+        .description(readResourceFile("openapi-get-vgm-declarations-description.md"))
+        .operationId("get-vgm-declarations")
+        .tags(Collections.singletonList(TAG_VGM_PRODUCERS))
         .parameters(
             Stream.concat(
-                    new GetEventsEndpoint().getQueryParameters().stream(),
+                    new GetVGMDeclarationsEndpoint().getQueryParameters().stream(),
                     Stream.of(getApiVersionHeaderParameter()))
                 .toList())
         .responses(
@@ -187,7 +175,7 @@ public class TNTStandardSpecification extends StandardSpecification {
                 .addApiResponse(
                     "200",
                     new ApiResponse()
-                        .description("List of events matching the query parameters")
+                        .description("List of VGM declarations matching the query parameters")
                         .headers(
                             Stream.of(
                                     Map.entry(
@@ -211,20 +199,20 @@ public class TNTStandardSpecification extends StandardSpecification {
                                             new Schema<>()
                                                 .$ref(
                                                     SpecificationToolkit.getComponentSchema$ref(
-                                                        GetEventsResponse.class))))))
-                .addApiResponse("default", createErrorResponse(GetEventsError.class)));
+                                                        GetVGMDeclarationsResponse.class))))))
+                .addApiResponse("default", createErrorResponse(GetVGMDeclarationsError.class)));
   }
 
-  private Operation operationEventsPost() {
+  private Operation operationVGMDeclarationsPost() {
     return new Operation()
-        .summary("Sends a list of events")
-        .description(readResourceFile("openapi-post-events-description.md"))
-        .operationId("post-events")
-        .tags(Collections.singletonList(TAG_EVENT_CONSUMERS))
+        .summary("Sends a list of VGM declarations")
+        .description(readResourceFile("openapi-post-vgm-declarations-description.md"))
+        .operationId("post-vgm-declarations")
+        .tags(Collections.singletonList(TAG_VGM_CONSUMERS))
         .parameters(List.of(getApiVersionHeaderParameter()))
         .requestBody(
             new RequestBody()
-                .description("List of events")
+                .description("List of VGM declarations")
                 .required(true)
                 .content(
                     new Content()
@@ -235,13 +223,13 @@ public class TNTStandardSpecification extends StandardSpecification {
                                     new Schema<>()
                                         .$ref(
                                             SpecificationToolkit.getComponentSchema$ref(
-                                                PostEventsRequest.class))))))
+                                                PostVGMDeclarationsRequest.class))))))
         .responses(
             new ApiResponses()
                 .addApiResponse(
                     "200",
                     new ApiResponse()
-                        .description("Events response")
+                        .description("VGM declarations response")
                         .headers(
                             new LinkedHashMap<>(
                                 Map.ofEntries(
@@ -257,8 +245,8 @@ public class TNTStandardSpecification extends StandardSpecification {
                                             new Schema<>()
                                                 .$ref(
                                                     SpecificationToolkit.getComponentSchema$ref(
-                                                        PostEventsResponse.class))))))
-                .addApiResponse("default", createErrorResponse(PostEventsError.class)));
+                                                        PostVGMDeclarationsResponse.class))))))
+                .addApiResponse("default", createErrorResponse(PostVGMDeclarationsError.class)));
   }
 
   private ApiResponse createErrorResponse(Class<?> errorMessageClass) {

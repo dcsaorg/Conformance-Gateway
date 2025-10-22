@@ -19,7 +19,9 @@ public class ANChecks {
 
   public static ActionCheck getANPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion, String scenarioType) {
-    var checks = payloadChecks(scenarioType);
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
+    checks.addAll(payloadChecks(scenarioType));
     return JsonAttribute.contentChecks(
         "",
         "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
@@ -30,9 +32,8 @@ public class ANChecks {
         checks);
   }
 
-  private static ArrayList<JsonContentCheck> payloadChecks(String scenarioType) {
+  private static List<JsonContentCheck> payloadChecks(String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.addAll(validateBasicFields());
     checks.add(validateCarrierContactInformation());
     checks.add(validateDocumentParties());
@@ -154,11 +155,12 @@ public class ANChecks {
   public static ActionCheck getANNPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.add(
         validateBasicFieldWithLabel("transportDocumentReference", "arrivalNoticeNotifications.*"));
     checks.add(validateANNEquipmentReference());
     checks.add(validateTransportETA("arrivalNoticeNotifications.*"));
-    checks.add(validatePODAdrress("arrivalNoticeNotifications.*"));
+    checks.add(validatePODAdrressANN());
     checks.add(validatePortOfDischargeLocation("arrivalNoticeNotifications.*"));
     checks.add(
         validatePortOfDischargeFacilityFields(
@@ -310,9 +312,7 @@ public class ANChecks {
           issues.addAll(validateDocumentPartyField("partyContactDetails").validate(body));
           issues.addAll(validatePartyContactName().validate(body));
           issues.addAll(validatePartyContactEmailOrPhone().validate(body));
-          issues.addAll(
-              validateAddress("documentParties", "arrivalNotices.*.documentParties.*")
-                  .validate(body));
+          issues.addAll(validateDocumentPartyAddress().validate(body));
           return issues;
         });
   }
@@ -375,27 +375,23 @@ public class ANChecks {
         mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           var address = node.get("address");
-          if (address == null || !address.isObject() || address.isEmpty()) {
-            return Set.of(
-                contextPath
-                    + ".address must be functionally present and contain at least one field");
-          }
+          if (address != null && !address.isEmpty()) {
+            boolean hasNonEmpty =
+                ADDRESS_FIELDS.stream()
+                    .anyMatch(
+                        f -> {
+                          var fieldNode = address.get(f);
+                          return fieldNode != null
+                              && fieldNode.isTextual()
+                              && !fieldNode.asText().isBlank();
+                        });
 
-          boolean hasNonEmpty =
-              ADDRESS_FIELDS.stream()
-                  .anyMatch(
-                      f -> {
-                        var fieldNode = address.get(f);
-                        return fieldNode != null
-                            && fieldNode.isTextual()
-                            && !fieldNode.asText().isBlank();
-                      });
-
-          if (!hasNonEmpty) {
-            return Set.of(
-                contextPath
-                    + ".address must contain at least one non-empty value among: "
-                    + String.join(", ", ADDRESS_FIELDS));
+            if (!hasNonEmpty) {
+              return Set.of(
+                  contextPath
+                      + ".address must contain at least one non-empty value among: "
+                      + String.join(", ", ADDRESS_FIELDS));
+            }
           }
           return Set.of();
         });
@@ -421,7 +417,7 @@ public class ANChecks {
           issues.addAll(validatePortOfDischargePresence().validate(body));
           issues.addAll(
               validatePortOfDischargeLocation("arrivalNotices.*.transport").validate(body));
-          issues.addAll(validatePODAdrress("arrivalNotices.*.transport").validate(body));
+          issues.addAll(validatePODAdrressAN().validate(body));
           issues.addAll(
               validatePortOfDischargeFacilityFields(
                       "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
@@ -489,25 +485,60 @@ public class ANChecks {
                   contextPath
                       + ".portOfDischarge.UNLocationCode must not be empty or blank in the payload");
             }
+            if (pod.hasNonNull("address")
+                && pod.get("address").isObject()
+                && pod.get("address").isEmpty()) {
+              return Set.of(
+                  contextPath
+                      + ".portOfDischarge.address if present must contain at least one field");
+            }
           }
           return Set.of();
         });
   }
 
-  public static JsonContentCheck validatePODAdrress(String path) {
+  public static JsonContentCheck validateDocumentPartyAddress() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-        "The publisher has demonstrated the correct use of 'address' in 'portOfDischarge'",
-        mav -> mav.submitAllMatching(path),
+        "The publisher has demonstrated the correct use of location information in 'portOfDischarge'",
+        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
         (node, contextPath) -> {
-          var pod = node.get("portOfDischarge");
-          if (pod != null && pod.hasNonNull("address") && pod.get("address").isEmpty()) {
+          if (node.get("address") == null) {
+            return Set.of(contextPath + ".address must be functionally present");
+          }
+          if (node.hasNonNull("address")
+              && node.get("address").isObject()
+              && node.get("address").isEmpty()) {
             return Set.of(
-                contextPath + ".portOfDischarge must functionally contain a non empty 'address'");
+                contextPath
+                    + ".address must be functionally present and contain at least one field");
           } else {
-            validateAddress("portOfDischarge", path + ".portOfDischarge");
+            boolean hasNonEmpty =
+                ADDRESS_FIELDS.stream()
+                    .anyMatch(
+                        f -> {
+                          var fieldNode = node.get("address").get(f);
+                          return fieldNode != null
+                              && fieldNode.isTextual()
+                              && !fieldNode.asText().isBlank();
+                        });
+
+            if (!hasNonEmpty) {
+              return Set.of(
+                  contextPath
+                      + ".address must contain at least one non-empty value among: "
+                      + String.join(", ", ADDRESS_FIELDS));
+            }
           }
           return Set.of();
         });
+  }
+
+  public static JsonContentCheck validatePODAdrressAN() {
+    return validateAddress("portOfDischarge", "arrivalNotices.*.transport.portOfDischarge");
+  }
+
+  public static JsonContentCheck validatePODAdrressANN() {
+    return validateAddress("portOfDischarge", "arrivalNoticeNotifications.*.portOfDischarge");
   }
 
   public static JsonContentCheck validatePortOfDischargeFacilityFields(String field, String path) {

@@ -3,7 +3,7 @@ Event,,,,,,,,
 "Event / documentReferenceReplacements","documentReferenceReplacements","DocumentReferenceReplacement list",,,,,"List of document replacements related to this event",
 "Event / documentReferenceReplacements / newReferences",newReferences,"DocumentReference list",,,,,"References of the documents replacing those with the `oldReferences`.",
 "Event / documentReferenceReplacements / newReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-"Event / documentReferenceReplacements / newReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+"Event / documentReferenceReplacements / newReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document reference
 - `AMF` - Advance Manifest Filing (of any subtype)
 - `ARN` - Arrival Notice
 - `BKG` - Booking
@@ -31,7 +31,7 @@ Event,,,,,,,,
 - `VGM` - Verified Gross Mass",
 "Event / documentReferenceReplacements / oldReferences",oldReferences,"DocumentReference list",,,,,"References of the documents replaced by those with the `newReferences`.",
 "Event / documentReferenceReplacements / oldReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-"Event / documentReferenceReplacements / oldReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+"Event / documentReferenceReplacements / oldReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document reference
 - `AMF` - Advance Manifest Filing (of any subtype)
 - `ARN` - Arrival Notice
 - `BKG` - Booking
@@ -57,9 +57,9 @@ Event,,,,,,,,
 - `TRO` - Transport Order
 - `VCE` - Veterinary Certificate
 - `VGM` - Verified Gross Mass",
-"Event / documentReferences",documentReferences,"DocumentReference list",,,,,"List of documents related to this event",
+"Event / documentReferences",documentReferences,"DocumentReference list",,,,,"List of document references related to this event",
 "Event / documentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-"Event / documentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+"Event / documentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document reference
 - `AMF` - Advance Manifest Filing (of any subtype)
 - `ARN` - Arrival Notice
 - `BKG` - Booking
@@ -393,7 +393,7 @@ or during transit but prior arrival at POD.",
 "Event / shipmentDetails",shipmentDetails,ShipmentDetails,,,,,"Shipment-specific details",
 "Event / shipmentDetails / documentReference",documentReference,DocumentReference,,,,,"Referenced document",
 "Event / shipmentDetails / documentReference / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-"Event / shipmentDetails / documentReference / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document
+"Event / shipmentDetails / documentReference / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document reference
 - `AMF` - Advance Manifest Filing (of any subtype)
 - `ARN` - Arrival Notice
 - `BKG` - Booking
@@ -437,7 +437,7 @@ It can vary per carrier.",
 "Event / shipmentReferenceReplacements","shipmentReferenceReplacements","ShipmentReferenceReplacement list",,,,,"List of shipment reference replacements related to this event",
 "Event / shipmentReferenceReplacements / newReferences",newReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replacing those with the `oldReferences`.",
 "Event / shipmentReferenceReplacements / newReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
-"Event / shipmentReferenceReplacements / newReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference
+"Event / shipmentReferenceReplacements / newReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a shipment reference
 - `AAO` - Consignee’s Reference
 - `AES` - Automated Export System
 - `BID` - Booking Request ID
@@ -454,7 +454,7 @@ It can vary per carrier.",
 - `SI` - Shipper’s Reference",
 "Event / shipmentReferenceReplacements / oldReferences",oldReferences,"ShipmentReference list",,,,,"References of the shipment elements or equipments replaced by those with the `newReferences`.",
 "Event / shipmentReferenceReplacements / oldReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
-"Event / shipmentReferenceReplacements / oldReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference
+"Event / shipmentReferenceReplacements / oldReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a shipment reference
 - `AAO` - Consignee’s Reference
 - `AES` - Automated Export System
 - `BID` - Booking Request ID
@@ -471,7 +471,7 @@ It can vary per carrier.",
 - `SI` - Shipper’s Reference",
 "Event / shipmentReferences",shipmentReferences,"ShipmentReference list",,,,,"List of shipment references related to this event",
 "Event / shipmentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
-"Event / shipmentReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a reference
+"Event / shipmentReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a shipment reference
 - `AAO` - Consignee’s Reference
 - `AES` - Automated Export System
 - `BID` - Booking Request ID

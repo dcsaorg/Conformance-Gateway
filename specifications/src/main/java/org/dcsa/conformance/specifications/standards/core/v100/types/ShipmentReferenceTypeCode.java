@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.standards.tnt.v300.types;
+package org.dcsa.conformance.specifications.standards.core.v100.types;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -9,9 +9,9 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 @Schema(
     type = "string",
     example = "FF",
-    description = "Code used to denote the type of a reference")
+    description = "Code used to denote the type of a shipment reference")
 @AllArgsConstructor
-public enum ReferenceTypeCode implements EnumBase {
+public enum ShipmentReferenceTypeCode implements EnumBase {
   AAO("Consignee’s Reference"),
   AES("Automated Export System"),
   BID("Booking Request ID"),

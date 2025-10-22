@@ -39,3 +39,4 @@ build/
 /specifications/generated-resources/standards/ebl/v300/*.yaml
 /specifications/generated-resources/standards/jit/v200/*.xlsx
 /specifications/generated-resources/standards/tnt/v300/*.xlsx
+/specifications/generated-resources/standards/vgm/v100/*.xlsx

@@ -82,7 +82,7 @@ import org.dcsa.conformance.specifications.standards.core.v100.types.ModeOfTrans
 import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.core.v100.types.VesselIMONumber;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Volume;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.Weight;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Weight;
 
 public class ANStandardSpecification extends StandardSpecification {
 

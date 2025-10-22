@@ -21,7 +21,7 @@ public class ANChecks {
       UUID matchedExchangeUuid, String expectedApiVersion, String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
-    payloadChecks(scenarioType, checks);
+    checks.addAll(payloadChecks(scenarioType));
     return JsonAttribute.contentChecks(
         "",
         "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
@@ -32,9 +32,8 @@ public class ANChecks {
         checks);
   }
 
-  private static ArrayList<JsonContentCheck> payloadChecks(
-      String scenarioType, ArrayList<JsonContentCheck> checks) {
-
+  private static List<JsonContentCheck> payloadChecks(String scenarioType) {
+    var checks = new ArrayList<JsonContentCheck>();
     checks.addAll(validateBasicFields());
     checks.add(VALID_DELIVERY_TYPE_AT_DESTINATION);
     checks.add(VALID_CARRIER_CODE_LIST_PROVIDER);
@@ -119,7 +118,7 @@ public class ANChecks {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.addAll(validateTransportDocumentReferences(dspSupplier));
-    checks.addAll(payloadChecks(dspSupplier.get().scenarioType(), checks));
+    checks.addAll(payloadChecks(dspSupplier.get().scenarioType()));
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,

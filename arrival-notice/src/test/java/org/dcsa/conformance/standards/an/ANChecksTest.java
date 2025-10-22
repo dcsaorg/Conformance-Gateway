@@ -270,6 +270,29 @@ class ANChecksTest {
     address.put("street", "Harbor Rd 1");
     address.put("city", "Rotterdam");
     assertTrue(ANChecks.validatePODAdrressAN().validate(body).isEmpty());
+
+    pod.remove("address");
+    pod.put("UNLocationCode", "NLRTM");
+    assertTrue(ANChecks.validatePODAdrressAN().validate(body).isEmpty());
+  }
+
+  @Test
+  void testValidateDocumentPartyAddress() {
+
+    ArrayNode documentParties = an.putArray("documentParties");
+    ObjectNode documentParty = documentParties.addObject();
+    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).isEmpty());
+
+    ObjectNode address = documentParty.putObject("address");
+    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).isEmpty());
+
+    address.put("street", "");
+
+    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).isEmpty());
+
+    address.put("street", "Harbor Rd 1");
+    address.put("city", "Rotterdam");
+    assertTrue(ANChecks.validatePODAdrressAN().validate(body).isEmpty());
   }
 }
 

@@ -19,7 +19,9 @@ public class ANChecks {
 
   public static ActionCheck getANPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion, String scenarioType) {
-    var checks = payloadChecks(scenarioType);
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
+    payloadChecks(scenarioType, checks);
     return JsonAttribute.contentChecks(
         "",
         "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
@@ -30,9 +32,9 @@ public class ANChecks {
         checks);
   }
 
-  private static ArrayList<JsonContentCheck> payloadChecks(String scenarioType) {
-    var checks = new ArrayList<JsonContentCheck>();
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
+  private static ArrayList<JsonContentCheck> payloadChecks(
+      String scenarioType, ArrayList<JsonContentCheck> checks) {
+
     checks.addAll(validateBasicFields());
     checks.add(VALID_DELIVERY_TYPE_AT_DESTINATION);
     checks.add(VALID_CARRIER_CODE_LIST_PROVIDER);
@@ -117,7 +119,7 @@ public class ANChecks {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.addAll(validateTransportDocumentReferences(dspSupplier));
-    checks.addAll(payloadChecks(dspSupplier.get().scenarioType()));
+    checks.addAll(payloadChecks(dspSupplier.get().scenarioType(), checks));
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,
@@ -129,6 +131,7 @@ public class ANChecks {
   public static ActionCheck getANNPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     checks.add(
         validateBasicFieldWithLabel("transportDocumentReference", "arrivalNoticeNotifications.*"));
     checks.add(validateANNEquipmentReference());
@@ -146,8 +149,6 @@ public class ANChecks {
                     "arrivalNoticeNotifications.*.portOfDischarge.facility.facilityCodeListProvider"),
             JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
                 ANDatasets.FACILITY_CODE_LIST_PROVIDER)));
-
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,
@@ -479,7 +480,7 @@ public class ANChecks {
                 && pod.get("address").isEmpty()) {
               return Set.of(
                   contextPath
-                      + ".portOfDischarge.address must be functionally present and contain at least one field");
+                      + ".portOfDischarge.address if present must contain at least one field");
             }
           }
           return Set.of();
@@ -491,6 +492,9 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of location information in \"portOfDischarge\"",
         mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
         (node, contextPath) -> {
+          if (node.get("address") == null) {
+            return Set.of(contextPath + ".address must be functionally present");
+          }
           if (node.hasNonNull("address")
               && node.get("address").isObject()
               && node.get("address").isEmpty()) {

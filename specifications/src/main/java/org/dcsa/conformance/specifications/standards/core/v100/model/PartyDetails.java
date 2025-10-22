@@ -7,6 +7,9 @@ import lombok.Data;
 @Data
 public class PartyDetails {
 
+  @Schema(description = "Party name", example = "Acme Inc.", maxLength = 70)
+  private String partyName;
+
   @Schema() private Party party;
 
   @Schema() private Address address;

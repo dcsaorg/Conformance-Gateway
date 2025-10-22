@@ -586,6 +586,11 @@ components:
     PartyDetails:
       type: "object"
       properties:
+        partyName:
+          maxLength: 70
+          type: "string"
+          description: "Party name"
+          example: "Acme Inc."
         party:
           description: "Identification of a container shipping party"
           allOf:

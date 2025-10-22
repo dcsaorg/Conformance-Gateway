@@ -137,6 +137,7 @@ or a subsequent revision.",
 PartyDetails,address,Address,,,,,"An object for storing address-related information.",
 PartyDetails,contactDetails,ContactDetails,,,,,"The contact details of a person.",
 PartyDetails,party,Party,,,,,"Identification of a container shipping party",
+PartyDetails,partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 PostVGMDeclarationsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
 
 At least one feedback element of severity `ERROR` is expected.

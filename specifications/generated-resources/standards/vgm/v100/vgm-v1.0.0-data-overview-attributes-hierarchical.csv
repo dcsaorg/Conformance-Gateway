@@ -50,6 +50,7 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 "VGMDeclaration / authorizedParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
+"VGMDeclaration / authorizedParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / authorizedPersonSignatory","authorizedPersonSignatory",string,,maxLength=255,,"Jane Doe","Authorized person signatory",
 "VGMDeclaration / declarationDateTime",declarationDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the VGM declaration was last updated",
 "VGMDeclaration / declarationReference",declarationReference,string,,maxLength=500,,"VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z","Reference of the VGM declaration",
@@ -143,6 +144,7 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 "VGMDeclaration / holdingParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
+"VGMDeclaration / holdingParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / isRetracted",isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
 
 The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
@@ -198,6 +200,7 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 "VGMDeclaration / orderedByParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
+"VGMDeclaration / orderedByParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / responsibleParty",responsibleParty,PartyDetails,,,,,"Party responsible for the VGM declaration.",
 "VGMDeclaration / responsibleParty / address",address,Address,,,,,"An object for storing address-related information.",
 "VGMDeclaration / responsibleParty / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
@@ -248,6 +251,7 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 "VGMDeclaration / responsibleParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
+"VGMDeclaration / responsibleParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / routingDetails",routingDetails,RoutingDetails,,,,,"Technical routing of a VGM declaration from the originating party, via forwarding parties, to the destination party.",
 "VGMDeclaration / routingDetails / destinationParty",destinationParty,Party,,,,,"The final party intended as destination of the event.",
 "VGMDeclaration / routingDetails / destinationParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
@@ -452,6 +456,7 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 "VGMDeclaration / submittingParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
+"VGMDeclaration / submittingParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / vesselVoyageDetails",vesselVoyageDetails,VesselVoyageDetails,,,,,"VGM details specific to the vessel voyage",
 "VGMDeclaration / vesselVoyageDetails / carrierCode",carrierCode,string,,maxLength=4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
 [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
@@ -641,3 +646,4 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 "VGMDeclaration / weighingParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
+"VGMDeclaration / weighingParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",

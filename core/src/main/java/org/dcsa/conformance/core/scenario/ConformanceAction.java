@@ -139,6 +139,7 @@ public abstract class ConformanceAction implements StatefulEntity {
                   exchange.toJson().toPrettyString()));
       matchedExchangeUuid = exchange.getUuid();
       try {
+        this.exchangeHandlingExceptionMessage = null;
         doHandleExchange(exchange);
       } catch (RuntimeException e) {
         this.exchangeHandlingExceptionMessage = e.getMessage();
@@ -153,6 +154,7 @@ public abstract class ConformanceAction implements StatefulEntity {
                   exchange.toJson().toPrettyString()));
       matchedNotificationExchangeUuid = exchange.getUuid();
       try {
+        this.notificationHandlingExceptionMessage = null;
         doHandleNotificationExchange(exchange);
       } catch (RuntimeException e) {
         this.notificationHandlingExceptionMessage = e.getMessage();

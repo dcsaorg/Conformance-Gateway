@@ -10,14 +10,12 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.ShipmentRef
 @Data
 public class ShipmentDetails {
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       example = "ABC709951",
       description = "The reference of the booking for which this VGM was created",
       maxLength = 35)
   private String carrierBookingReference;
 
   @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
       example = "HHL71800000",
       description = "The reference of the transport document for which this VGM was created",
       maxLength = 20)

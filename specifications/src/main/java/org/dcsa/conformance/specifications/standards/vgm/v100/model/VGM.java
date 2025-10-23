@@ -4,9 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Weight;
-import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDate;
+import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.vgm.v100.types.VGMMethodCode;
-import org.dcsa.conformance.specifications.standards.vgm.v100.types.VGMSourceCode;
 
 @Data
 @Schema(
@@ -21,10 +20,8 @@ public class VGM {
 
   @Schema() private VGMMethodCode method;
 
-  @Schema() private VGMSourceCode source;
-
-  @Schema(description = "Date when a gross mass (weight) of a packed container was obtained")
-  private FormattedDate date;
+  @Schema(description = "Date and time when a gross mass (weight) of a packed container was obtained")
+  private FormattedDateTime dateTime;
 
   @Schema(
       description =
@@ -38,6 +35,6 @@ public class VGM {
           "Reference number or identifier for the certificate issued by the weighing party (or a certified weighing facility).")
   private String certificationReference;
 
-  @Schema(description = "Date when the VGM certificate has been issued.")
-  private FormattedDate certificationDate;
+  @Schema(description = "Date and time when the VGM certificate has been issued.")
+  private FormattedDateTime certificationDateTime;
 }

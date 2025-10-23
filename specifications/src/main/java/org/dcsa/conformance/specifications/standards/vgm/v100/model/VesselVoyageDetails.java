@@ -46,4 +46,7 @@ The code list provider for the `carrierCode`. Possible values are:
   @Schema(
       description = "The location where the cargo is discharged from the last sea-going vessel.")
   private Location portOfDischarge;
+
+  @Schema(maxLength = 50, example = "King of the Seas", description = "Vessel name")
+  private String vesselName;
 }

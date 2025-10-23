@@ -489,8 +489,11 @@ It can vary per carrier.",
 "Event / transportDetails",transportDetails,TransportDetails,,,,,"Transport-specific details",
 "Event / transportDetails / changeRemark",changeRemark,string,,maxLength=250,,"Bad weather","Free text information provided by the vessel operator regarding the reasons for the change in schedule
 and/or plans to mitigate schedule slippage.",
-"Event / transportDetails / delayReasonCode",delayReasonCode,string,,,,,"Code identifying the reason for the delay, as defined by SMDG here:
-https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/",
+"Event / transportDetails / delayReasonCodes",delayReasonCodes,"string list",,maxLength=3,,,"Codes identifying the reasons for a delay
+Item description:
+Code identifying the reason for a delay, as defined by SMDG here:
+https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+",
 "Event / transportDetails / transportCall",transportCall,TransportCall,,,,,"Transport call information",
 "Event / transportDetails / transportCall / exportVoyageNumberOrReference","exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
 "Event / transportDetails / transportCall / exportVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",

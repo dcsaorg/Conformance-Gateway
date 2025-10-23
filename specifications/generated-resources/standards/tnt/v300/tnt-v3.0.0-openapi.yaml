@@ -1149,11 +1149,16 @@ components:
     TransportDetails:
       type: "object"
       properties:
-        delayReasonCode:
-          type: "string"
-          description: |
-            Code identifying the reason for the delay, as defined by SMDG here:
-            https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+        delayReasonCodes:
+          type: "array"
+          description: "Codes identifying the reasons for a delay"
+          items:
+            maxLength: 3
+            type: "string"
+            description: |
+              Code identifying the reason for a delay, as defined by SMDG here:
+              https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+            example: "STR"
         changeRemark:
           maxLength: 250
           type: "string"

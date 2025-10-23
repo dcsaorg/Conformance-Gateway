@@ -59,7 +59,7 @@ public class VGMStandardSpecification extends StandardSpecification {
   private final GetVGMDeclarationsEndpoint getVGMDeclarationsEndpoint;
 
   public VGMStandardSpecification() {
-    super("Verified Gross Mass", "VGM", "1.0.0");
+    super("Verified Gross Mass", "1.0.0", "vgm", "vgm");
 
     openAPI.addTagsItem(
         new Tag()

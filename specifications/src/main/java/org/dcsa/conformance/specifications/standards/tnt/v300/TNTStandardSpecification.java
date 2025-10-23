@@ -67,7 +67,7 @@ public class TNTStandardSpecification extends StandardSpecification {
   private final GetEventsEndpoint getEventsEndpoint;
 
   public TNTStandardSpecification() {
-    super("Track and Trace", "TNT", "3.0.0");
+    super("Track and Trace", "3.0.0", "tnt", "tnt");
 
     openAPI.addTagsItem(
         new Tag()

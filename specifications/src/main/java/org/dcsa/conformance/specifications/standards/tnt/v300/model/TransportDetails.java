@@ -2,18 +2,16 @@ package org.dcsa.conformance.specifications.standards.tnt.v300.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.core.v100.types.DelayReasonCode;
+
+import java.util.List;
 
 @Schema(description = "Transport-specific details")
 @Data
 public class TransportDetails {
 
-  @Schema(
-      description =
-"""
-Code identifying the reason for the delay, as defined by SMDG here:
-https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
-""")
-  private String delayReasonCode;
+  @Schema(description = "Codes identifying the reasons for a delay")
+  private List<DelayReasonCode> delayReasonCodes;
 
   @Schema(
       example = "Bad weather",

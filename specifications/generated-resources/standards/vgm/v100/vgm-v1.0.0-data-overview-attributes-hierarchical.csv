@@ -359,7 +359,7 @@ or a subsequent revision.",
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / shipmentDetails",shipmentDetails,ShipmentDetails,,,,,"VGM details specific to the shipment",
-"VGMDeclaration / shipmentDetails / carrierBookingReference",carrierBookingReference,string,yes,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
+"VGMDeclaration / shipmentDetails / carrierBookingReference",carrierBookingReference,string,,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
 "VGMDeclaration / shipmentDetails / documentReferences",documentReferences,"DocumentReference list",,,,,"Additional list of document references related to this event",
 "VGMDeclaration / shipmentDetails / documentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
 "VGMDeclaration / shipmentDetails / documentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document reference
@@ -405,7 +405,7 @@ or a subsequent revision.",
 - `PO` - Purchase Order Reference
 - `RUC` - Registro Único del Contribuyente
 - `SI` - Shipper’s Reference",
-"VGMDeclaration / shipmentDetails / transportDocumentReference","transportDocumentReference",string,yes,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM was created",
+"VGMDeclaration / shipmentDetails / transportDocumentReference","transportDocumentReference",string,,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM was created",
 "VGMDeclaration / submittingParty",submittingParty,PartyDetails,,,,,"Party that submits the VGM declaration.",
 "VGMDeclaration / submittingParty / address",address,Address,,,,,"An object for storing address-related information.",
 "VGMDeclaration / submittingParty / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
@@ -543,10 +543,11 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+"VGMDeclaration / vesselVoyageDetails / vesselName",vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
 "VGMDeclaration / VGM",VGM,VGM,,,,,"Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6",
-"VGMDeclaration / VGM / certificationDate",certificationDate,"string(date)",,,,2025-01-23,"Date when the VGM certificate has been issued.",
+"VGMDeclaration / VGM / certificationDateTime",certificationDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Date and time when the VGM certificate has been issued.",
 "VGMDeclaration / VGM / certificationReference",certificationReference,string,,maxLength=70,,W42-23110812,"Reference number or identifier for the certificate issued by the weighing party (or a certified weighing facility).",
-"VGMDeclaration / VGM / date",date,"string(date)",,,,2025-01-23,"Date when a gross mass (weight) of a packed container was obtained",
+"VGMDeclaration / VGM / dateTime",dateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Date and time when a gross mass (weight) of a packed container was obtained",
 "VGMDeclaration / VGM / location",location,Location,,,,,"The location where the packed container was weighed to determine the Verified Gross Mass (VGM).",
 "VGMDeclaration / VGM / location / address",address,Address,,,,,"Location address",
 "VGMDeclaration / VGM / location / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
@@ -586,9 +587,6 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "VGMDeclaration / VGM / method",method,string,,,,SM1,"Method used to determine the VGM
 - `SM1` - SOLAS verification method 1  (Scaled)
 - `SM2` - SOLAS verification method 2 (Calculated)",
-"VGMDeclaration / VGM / source",source,string,,,,SM1,"Code identifying the party submitting the VGM
-- `SHIPPER` - Shipper
-- `TERMINAL` - Terminal",
 "VGMDeclaration / VGM / weight",weight,Weight,,,,,"The gross mass (weight) of the transport equipment",
 "VGMDeclaration / VGM / weight / unit",unit,string,,maxLength=10,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)

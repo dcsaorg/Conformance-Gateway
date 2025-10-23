@@ -166,10 +166,10 @@ Seal,type,string,,,,WIR,"The type of seal.
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
 - `WIR` (Wire)",
-ShipmentDetails,carrierBookingReference,string,yes,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
+ShipmentDetails,carrierBookingReference,string,,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
 ShipmentDetails,documentReferences,"DocumentReference list",,,,,"Additional list of document references related to this event",
 ShipmentDetails,shipmentReferences,"ShipmentReference list",,,,,"Additional list of shipment references related to this event",
-ShipmentDetails,"transportDocumentReference",string,yes,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM was created",
+ShipmentDetails,"transportDocumentReference",string,,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM was created",
 ShipmentReference,reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
 ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a shipment reference
 - `AAO` - Consignee’s Reference
@@ -197,16 +197,14 @@ VesselVoyageDetails,"exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,
 VesselVoyageDetails,"importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
 VesselVoyageDetails,portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 VesselVoyageDetails,portOfLoading,Location,,,,,"The location where the cargo is loaded onto a first sea-going vessel for water transportation.",
-VGM,certificationDate,"string(date)",,,,2025-01-23,"Date when the VGM certificate has been issued.",
+VesselVoyageDetails,vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
+VGM,certificationDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Date and time when the VGM certificate has been issued.",
 VGM,certificationReference,string,,maxLength=70,,W42-23110812,"Reference number or identifier for the certificate issued by the weighing party (or a certified weighing facility).",
-VGM,date,"string(date)",,,,2025-01-23,"Date when a gross mass (weight) of a packed container was obtained",
+VGM,dateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Date and time when a gross mass (weight) of a packed container was obtained",
 VGM,location,Location,,,,,"The location where the packed container was weighed to determine the Verified Gross Mass (VGM).",
 VGM,method,string,,,,SM1,"Method used to determine the VGM
 - `SM1` - SOLAS verification method 1  (Scaled)
 - `SM2` - SOLAS verification method 2 (Calculated)",
-VGM,source,string,,,,SM1,"Code identifying the party submitting the VGM
-- `SHIPPER` - Shipper
-- `TERMINAL` - Terminal",
 VGM,weight,Weight,,,,,"The gross mass (weight) of the transport equipment",
 VGMDeclaration,authorizedParty,PartyDetails,,,,,"Party authorized to act on behalf of the `responsibleParty`.",
 VGMDeclaration,"authorizedPersonSignatory",string,,maxLength=255,,"Jane Doe","Authorized person signatory",

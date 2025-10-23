@@ -702,9 +702,6 @@ components:
         A seal is put on a shipment equipment once it is loaded.
         This seal is meant to stay on until the shipment equipment reaches its final destination.
     ShipmentDetails:
-      required:
-      - "carrierBookingReference"
-      - "transportDocumentReference"
       type: "object"
       properties:
         carrierBookingReference:
@@ -776,18 +773,12 @@ components:
             - `SM1` - SOLAS verification method 1  (Scaled)
             - `SM2` - SOLAS verification method 2 (Calculated)
           example: "SM1"
-        source:
+        dateTime:
+          maxLength: 30
           type: "string"
-          description: |-
-            Code identifying the party submitting the VGM
-            - `SHIPPER` - Shipper
-            - `TERMINAL` - Terminal
-          example: "SM1"
-        date:
-          type: "string"
-          description: "Date when a gross mass (weight) of a packed container was obtained"
-          format: "date"
-          example: "2025-01-23"
+          description: "Date and time when a gross mass (weight) of a packed container was obtained"
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
         location:
           description: "The location where the packed container was weighed to determine the Verified Gross Mass (VGM)."
           allOf:
@@ -797,11 +788,12 @@ components:
           type: "string"
           description: "Reference number or identifier for the certificate issued by the weighing party (or a certified weighing facility)."
           example: "W42-23110812"
-        certificationDate:
+        certificationDateTime:
+          maxLength: 30
           type: "string"
-          description: "Date when the VGM certificate has been issued."
-          format: "date"
-          example: "2025-01-23"
+          description: "Date and time when the VGM certificate has been issued."
+          format: "date-time"
+          example: "2025-01-23T01:23:45Z"
       description: |
         Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6
     VGMDeclaration:
@@ -915,6 +907,11 @@ components:
           description: "The location where the cargo is discharged from the last sea-going vessel."
           allOf:
           - $ref: "#/components/schemas/Location"
+        vesselName:
+          maxLength: 50
+          type: "string"
+          description: "Vessel name"
+          example: "King of the Seas"
       description: "VGM details specific to the vessel voyage"
     VoyageNumberOrReference:
       type: "object"

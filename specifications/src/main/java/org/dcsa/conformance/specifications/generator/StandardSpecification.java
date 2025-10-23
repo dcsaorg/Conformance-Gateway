@@ -43,17 +43,22 @@ public abstract class StandardSpecification {
       "Every API request and response must contain the `API-Version` header,"
           + " set to the full version of the implemented DCSA standard.";
 
-  private final String standardAbbreviation;
   private final String standardVersion;
+  private final String resourcesDirName;
+  private final String generatedFilesPrefix;
 
   @Getter() protected final OpenAPI openAPI;
 
   private final Map<String, Map<String, List<SchemaConstraint>>> constraintsByClassAndField;
 
   protected StandardSpecification(
-      String standardName, String standardAbbreviation, String standardVersion) {
-    this.standardAbbreviation = standardAbbreviation;
+      String standardName,
+      String standardVersion,
+      String resourcesDirName,
+      String generatedFilesPrefix) {
     this.standardVersion = standardVersion;
+    this.resourcesDirName = resourcesDirName;
+    this.generatedFilesPrefix = generatedFilesPrefix;
     openAPI =
         new OpenAPI()
             .openapi("3.0.3")
@@ -158,7 +163,7 @@ public abstract class StandardSpecification {
     return SpecificationToolkit.readResourceFile(
         "conformance/specifications/%s/v%s/%s"
             .formatted(
-                standardAbbreviation.toLowerCase(),
+                resourcesDirName,
                 standardVersion.replaceAll("\\.", ""),
                 fileName));
   }
@@ -166,11 +171,10 @@ public abstract class StandardSpecification {
   @SneakyThrows
   public void generateArtifacts() {
     String yamlContent = SpecificationToolkit.createYamlObjectMapper().writeValueAsString(openAPI);
-    String lowerCaseStandardAbbreviation = standardAbbreviation.toLowerCase();
-    String fileNamePrefix = "%s-v%s".formatted(lowerCaseStandardAbbreviation, standardVersion);
+    String fileNamePrefix = "%s-v%s".formatted(generatedFilesPrefix, standardVersion);
     String exportFileDir =
         "./generated-resources/standards/%s/v%s/"
-            .formatted(lowerCaseStandardAbbreviation, standardVersion.replaceAll("\\.", ""));
+            .formatted(resourcesDirName, standardVersion.replaceAll("\\.", ""));
     String yamlFilePath = exportFileDir + "%s-openapi.yaml".formatted(fileNamePrefix);
     Files.writeString(Paths.get(yamlFilePath), yamlContent);
     log.info("OpenAPI spec exported to {}", yamlFilePath);

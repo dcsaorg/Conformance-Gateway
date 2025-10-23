@@ -32,8 +32,8 @@ public abstract class ConformanceAction implements StatefulEntity {
   private final String sourcePartyName;
   private final String targetPartyName;
   protected final ConformanceAction previousAction;
-  private final String actionPath;
-  private final String actionTitle;
+  private String actionPath;
+  private String actionTitle;
 
   protected volatile UUID id = UUID.randomUUID();
   private volatile UUID matchedExchangeUuid;
@@ -51,7 +51,7 @@ public abstract class ConformanceAction implements StatefulEntity {
     this.previousAction = previousAction;
     this.actionTitle = actionTitle;
     this.actionPath =
-        (previousAction == null ? "" : previousAction.actionPath + " - ") + actionTitle;
+        (previousAction == null ? "" : previousAction.actionPath + " - ") + this.actionTitle;
   }
 
   public void reset() {
@@ -305,5 +305,17 @@ public abstract class ConformanceAction implements StatefulEntity {
   @Override
   public int hashCode() {
     return Objects.hash(id);
+  }
+
+  public ConformanceAction withTitleComplement(String complement) {
+    this.actionTitle = complement + " " + this.actionTitle;
+    int lastDashIndex = this.actionPath.lastIndexOf(" - ");
+    this.actionPath =
+        this.actionPath.substring(0, lastDashIndex)
+            + " - "
+            + complement
+            + " "
+            + this.actionPath.substring(lastDashIndex + 3);
+    return this;
   }
 }

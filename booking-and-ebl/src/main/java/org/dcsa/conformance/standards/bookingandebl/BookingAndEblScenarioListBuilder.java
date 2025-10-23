@@ -49,6 +49,9 @@ import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 public class BookingAndEblScenarioListBuilder
     extends ScenarioListBuilder<BookingAndEblScenarioListBuilder> {
 
+  private static final String BOOKING_ACTION_NAME_COMPLEMENT = "[Booking]";
+  private static final String EBL_ACTION_NAME_COMPLEMENT = "[eBL]";
+
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 
   private static final ThreadLocal<BookingAndEblComponentFactory> threadLocalComponentFactory =
@@ -185,15 +188,16 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new ShipperGetBookingAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                null,
-                componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.GET_BOOKING_SCHEMA_NAME),
-                requestAmendedContent));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (BookingAction) previousAction,
+                    expectedBookingStatus,
+                    expectedAmendedBookingStatus,
+                    null,
+                    componentFactory.getBookingMessageSchemaValidator(
+                        BookingScenarioListBuilder.GET_BOOKING_SCHEMA_NAME),
+                    requestAmendedContent)
+                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder carrierSupplyBookingScenarioParameters(
@@ -218,16 +222,17 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC1_Shipper_SubmitBookingRequestAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.CREATE_BOOKING_SCHEMA_NAME),
-                componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
-                componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
-                isWithNotifications));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (BookingAction) previousAction,
+                    componentFactory.getBookingMessageSchemaValidator(
+                        BookingScenarioListBuilder.CREATE_BOOKING_SCHEMA_NAME),
+                    componentFactory.getBookingMessageSchemaValidator(
+                        BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
+                    componentFactory.getBookingMessageSchemaValidator(
+                        BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
+                    isWithNotifications)
+                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc5CarrierConfirmBookingRequest() {
@@ -242,18 +247,19 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC7_Shipper_SubmitBookingAmendment(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAndEblAction) previousAction,
-                BookingState.CONFIRMED,
-                BookingState.AMENDMENT_RECEIVED,
-                componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.UPDATE_BOOKING_SCHEMA_NAME),
-                componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
-                componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
-                isWithNotifications));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (BookingAndEblAction) previousAction,
+                    BookingState.CONFIRMED,
+                    BookingState.AMENDMENT_RECEIVED,
+                    componentFactory.getBookingMessageSchemaValidator(
+                        BookingScenarioListBuilder.UPDATE_BOOKING_SCHEMA_NAME),
+                    componentFactory.getBookingMessageSchemaValidator(
+                        BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
+                    componentFactory.getBookingMessageSchemaValidator(
+                        BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
+                    isWithNotifications)
+                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc8aCarrierApproveBookingAmendment() {
@@ -272,6 +278,25 @@ public class BookingAndEblScenarioListBuilder
                 requestSchemaValidator,
                 true,
                 isWithNotifications));
+  }
+
+  private static BookingAndEblScenarioListBuilder carrierStateChange(
+      BookingScenarioListBuilder.CarrierNotificationUseCase constructor) {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            constructor
+                .newInstance(
+                    carrierPartyName,
+                    shipperPartyName,
+                    (BookingAction) previousAction,
+                    componentFactory.getBookingMessageSchemaValidator(
+                        BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
+                    isWithNotifications)
+                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc1BookingGet(
@@ -306,16 +331,17 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new Shipper_GetShippingInstructionsAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                ShippingInstructionsStatus.SI_RECEIVED,
-                expectedUpdatedSiStatus,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.GET_EBL_SCHEMA_NAME),
-                false,
-                recordTDR,
-                false));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    ShippingInstructionsStatus.SI_RECEIVED,
+                    expectedUpdatedSiStatus,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.GET_EBL_SCHEMA_NAME),
+                    false,
+                    recordTDR,
+                    false)
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder shipperGetTransportDocument(
@@ -326,12 +352,13 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new Shipper_GetTransportDocumentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                expectedTdStatus,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.GET_TD_SCHEMA_NAME)));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    expectedTdStatus,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.GET_TD_SCHEMA_NAME))
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType eblScenarioType) {
@@ -358,16 +385,17 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC1_Shipper_SubmitShippingInstructionsAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.POST_EBL_SCHEMA_NAME),
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_SI_NOTIFICATION_SCHEMA_NAME),
-                isWithNotifications));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.POST_EBL_SCHEMA_NAME),
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.EBL_SI_NOTIFICATION_SCHEMA_NAME),
+                    isWithNotifications)
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc6CarrierPublishDraftTransportDocument() {
@@ -378,13 +406,14 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC6_Carrier_PublishDraftTransportDocumentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                false,
-                isWithNotifications));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                    false,
+                    isWithNotifications)
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc7ShipperApproveDraftTransportDocument() {
@@ -395,14 +424,15 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC7_Shipper_ApproveDraftTransportDocumentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.PATCH_TD_SCHEMA_NAME),
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                isWithNotifications));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.PATCH_TD_SCHEMA_NAME),
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                    isWithNotifications)
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc8CarrierIssueTransportDocument() {
@@ -413,12 +443,13 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC8_Carrier_IssueTransportDocumentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAndEblAction) previousAction,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                isWithNotifications));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (BookingAndEblAction) previousAction,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                    isWithNotifications)
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc9CarrierAwaitSurrenderRequestForAmendment() {
@@ -429,12 +460,13 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAndEblAction) previousAction,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                isWithNotifications));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (BookingAndEblAction) previousAction,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                    isWithNotifications)
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc10aCarrierAcceptSurrenderRequestForAmendment() {
@@ -445,13 +477,14 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC10_Carrier_ProcessSurrenderRequestForAmendmentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAndEblAction) previousAction,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                true,
-                isWithNotifications));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (BookingAndEblAction) previousAction,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                    true,
+                    isWithNotifications)
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder
@@ -463,29 +496,13 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAndEblAction) previousAction,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                isWithNotifications));
-  }
-
-  private static BookingAndEblScenarioListBuilder carrierStateChange(
-      BookingScenarioListBuilder.CarrierNotificationUseCase constructor) {
-    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    boolean isWithNotifications = threadLocalIsWithNotifications.get();
-    return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            constructor.newInstance(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
-                isWithNotifications));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (BookingAndEblAction) previousAction,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                    isWithNotifications)
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc1SIGet(

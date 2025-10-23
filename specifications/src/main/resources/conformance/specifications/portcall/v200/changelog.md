@@ -4,6 +4,8 @@
 
 Removed all references (except below in this changelog) to the old standard name ("Just in Time") and acronym ("JIT"). (SD-2489)
 
+Added support for multiple `delayReasonCodes`. (SD-2405)
+
 
 ## Snapshot v2.0.0-20251010-beta
 

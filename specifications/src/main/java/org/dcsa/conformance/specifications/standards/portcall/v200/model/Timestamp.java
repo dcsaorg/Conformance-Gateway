@@ -2,8 +2,11 @@ package org.dcsa.conformance.specifications.standards.portcall.v200.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.core.v100.types.DelayReasonCode;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
 import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
+
+import java.util.List;
 
 @Data
 @Schema(
@@ -58,15 +61,8 @@ Timestamps of type `EST`, `REQ` and `PLN` are relevant in port call services of 
           "The date and time when the service was provided or is expected to be provided.")
   private FormattedDateTime serviceDateTime;
 
-  @Schema(
-      maxLength = 3,
-      example = "STR",
-      description =
-"""
-Code identifying the reason for a delay, as defined by SMDG here:
-https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
-""")
-  private String delayReasonCode;
+  @Schema(description = "Codes identifying the reasons for a delay")
+  private List<DelayReasonCode> delayReasonCodes;
 
   @Schema(
       maxLength = 500,

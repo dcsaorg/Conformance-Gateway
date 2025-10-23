@@ -1072,13 +1072,16 @@ components:
           description: "The date and time when the service was provided or is expected to be provided."
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
-        delayReasonCode:
-          maxLength: 3
-          type: "string"
-          description: |
-            Code identifying the reason for a delay, as defined by SMDG here:
-            https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
-          example: "STR"
+        delayReasonCodes:
+          type: "array"
+          description: "Codes identifying the reasons for a delay"
+          items:
+            maxLength: 3
+            type: "string"
+            description: |
+              Code identifying the reason for a delay, as defined by SMDG here:
+              https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+            example: "STR"
         remark:
           maxLength: 500
           type: "string"

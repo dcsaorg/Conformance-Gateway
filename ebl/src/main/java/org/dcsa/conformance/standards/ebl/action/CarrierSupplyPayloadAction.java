@@ -22,6 +22,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
   public static final String CARRIER_PAYLOAD = "carrierPayload";
   private static final String SCENARIO_TYPE = "scenarioType";
   private static final String INPUT = "input";
+  private static final String CBR_PLACEHOLDER = "{CBR}";
 
   private ScenarioType scenarioType;
   private JsonNode carrierPayload;
@@ -108,7 +109,8 @@ public class CarrierSupplyPayloadAction extends EblAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/ebl/messages/" + scenarioType.eblPayload(standardVersion), Map.of());
+        "/standards/ebl/messages/" + scenarioType.eblPayload(standardVersion),
+        Map.of(CBR_PLACEHOLDER, determineCbr()));
   }
 
   @Override
@@ -159,5 +161,12 @@ public class CarrierSupplyPayloadAction extends EblAction {
   @Override
   protected Supplier<JsonNode> getCarrierPayloadSupplier() {
     return () -> carrierPayload;
+  }
+
+  private String determineCbr() {
+    if (previousAction instanceof BookingAndEblAction && !(previousAction instanceof EblAction)) {
+      return getBookingDspReference().get().carrierBookingReference();
+    }
+    return "BOOKING202507041234567890123456"; // Default fallback
   }
 }

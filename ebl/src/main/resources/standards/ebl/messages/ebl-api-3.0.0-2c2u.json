@@ -16,7 +16,7 @@
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "BOOKREF1234567890123456789012345",
+      "carrierBookingReference": "{CBR}",
       "descriptionOfGoods": [
         "Automotive Parts"
       ],

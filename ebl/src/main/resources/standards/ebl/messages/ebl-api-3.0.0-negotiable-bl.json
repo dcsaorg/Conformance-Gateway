@@ -16,7 +16,7 @@
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "BOOKNEGOTIABLE123456789012345",
+      "carrierBookingReference": "{CBR}",
       "descriptionOfGoods": [
         "Refined Soybean Oil"
       ],

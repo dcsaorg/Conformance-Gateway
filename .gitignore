@@ -33,10 +33,6 @@ build/
 .vscode/
 
 ### Temporary DCSA generated resources ###
-/specifications/generated-resources/standards/an/v100/*.xlsx
-/specifications/generated-resources/standards/ebl/v300/*.xlsx
+/specifications/generated-resources/standards/**/*.xlsx
 /specifications/generated-resources/standards/ebl/v300/*.csv
 /specifications/generated-resources/standards/ebl/v300/*.yaml
-/specifications/generated-resources/standards/jit/v200/*.xlsx
-/specifications/generated-resources/standards/tnt/v300/*.xlsx
-/specifications/generated-resources/standards/vgm/v100/*.xlsx

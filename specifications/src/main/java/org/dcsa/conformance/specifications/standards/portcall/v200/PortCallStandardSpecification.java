@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.standards.jit.v200;
+package org.dcsa.conformance.specifications.standards.portcall.v200;
 
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -31,23 +31,23 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
-import org.dcsa.conformance.specifications.standards.jit.v200.messages.FeedbackElement;
-import org.dcsa.conformance.specifications.standards.jit.v200.messages.GetEventsError;
-import org.dcsa.conformance.specifications.standards.jit.v200.messages.GetEventsResponse;
-import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsError;
-import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsRequest;
-import org.dcsa.conformance.specifications.standards.jit.v200.messages.PostEventsResponse;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.ContainerCountBySize;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.ContainerCountByTypeAndSize;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.Event;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.MovesForecast;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.PortCall;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.PortCallService;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.TerminalCall;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.Timestamp;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.Vessel;
+import org.dcsa.conformance.specifications.standards.portcall.v200.messages.FeedbackElement;
+import org.dcsa.conformance.specifications.standards.portcall.v200.messages.GetEventsError;
+import org.dcsa.conformance.specifications.standards.portcall.v200.messages.GetEventsResponse;
+import org.dcsa.conformance.specifications.standards.portcall.v200.messages.PostEventsError;
+import org.dcsa.conformance.specifications.standards.portcall.v200.messages.PostEventsRequest;
+import org.dcsa.conformance.specifications.standards.portcall.v200.messages.PostEventsResponse;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.ContainerCountBySize;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.ContainerCountByTypeAndSize;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.Event;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.MovesForecast;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.PortCall;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.PortCallService;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.TerminalCall;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.Timestamp;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.Vessel;
 
-public class JITStandardSpecification extends StandardSpecification {
+public class PortCallStandardSpecification extends StandardSpecification {
 
   private static final String TAG_EVENT_PUBLISHERS = "Event Publisher Endpoints";
   private static final String TAG_EVENT_SUBSCRIBERS = "Event Subscriber Endpoints";
@@ -102,8 +102,8 @@ public class JITStandardSpecification extends StandardSpecification {
 
   private final GetEventsEndpoint getEventsEndpoint;
 
-  public JITStandardSpecification() {
-    super("Port Call (JIT)", "JIT", "2.0.0");
+  public PortCallStandardSpecification() {
+    super("Port Call", "2.0.0", "portcall", "port-call");
 
     openAPI.addTagsItem(
         new Tag()
@@ -121,7 +121,8 @@ public class JITStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata("Port Call (JIT)", "2.0.0-20251010-design", "", "", 4);
+    return new LegendMetadata(
+        "Port Call", "2.0.0-20251024-design", "", "", 3);
   }
 
   @Override
@@ -171,7 +172,7 @@ public class JITStandardSpecification extends StandardSpecification {
                         ? List.of()
                         : DataOverviewSheet.importFromString(
                             SpecificationToolkit.readRemoteFile(
-                                "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/TBD/specifications/generated-resources/standards/jit/v200/jit-v2.0.0-data-overview-%s.csv"
+                                "https://raw.githubusercontent.com/dcsaorg/Conformance-Gateway/TBD/specifications/generated-resources/standards/portcall/v200/port-call-v2.0.0-data-overview-%s.csv"
                                     .formatted(entry.getValue())))));
   }
 

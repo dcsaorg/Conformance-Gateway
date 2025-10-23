@@ -1,9 +1,9 @@
-package org.dcsa.conformance.specifications.standards.jit.v200.messages;
+package org.dcsa.conformance.specifications.standards.portcall.v200.messages;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.jit.v200.model.Event;
+import org.dcsa.conformance.specifications.standards.portcall.v200.model.Event;
 
 @Data
 @Schema(

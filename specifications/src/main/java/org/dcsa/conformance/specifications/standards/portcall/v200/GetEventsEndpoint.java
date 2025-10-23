@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.standards.jit.v200;
+package org.dcsa.conformance.specifications.standards.portcall.v200;
 
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;

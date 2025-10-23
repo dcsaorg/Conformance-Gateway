@@ -92,7 +92,7 @@ public class ANStandardSpecification extends StandardSpecification {
   private final GetArrivalNoticesEndpoint getArrivalNoticesEndpoint;
 
   public ANStandardSpecification() {
-    super("Arrival Notice", "AN", "1.0.0");
+    super("Arrival Notice", "1.0.0", "an", "an");
 
     openAPI.addTagsItem(
         new Tag()

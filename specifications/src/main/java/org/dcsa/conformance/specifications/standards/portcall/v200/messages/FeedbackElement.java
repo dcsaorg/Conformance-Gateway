@@ -1,4 +1,4 @@
-package org.dcsa.conformance.specifications.standards.jit.v200.messages;
+package org.dcsa.conformance.specifications.standards.portcall.v200.messages;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

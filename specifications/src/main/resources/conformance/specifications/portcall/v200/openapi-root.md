@@ -1,6 +1,6 @@
-# DCSA Port Call (JIT) API
+# DCSA Port Call API
 
-This is the OpenAPI specification of the **DCSA Port Call (JIT)** standard.
+This is the OpenAPI specification of the **DCSA Port Call** standard.
 
 This API allows the transfer of structured Port Call events from a publisher to a subscriber.
 
@@ -19,4 +19,4 @@ The authentication and authorization in both directions between event publishers
 
 ### Work in progress ⚠️
 
-The DCSA Port Call (JIT) standard, including this API, is currently in beta validation and is **not** ready for general adoption yet.
+The DCSA Port Call standard, including this API, is currently in beta validation and is **not** ready for general adoption yet.

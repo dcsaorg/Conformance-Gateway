@@ -191,12 +191,12 @@ public class EblChecks {
   static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES =
       eblsCannotHaveCopiesCheck(
           NUMBER_OF_COPIES_WITH_CHARGES,
-          "Electronic original Bills of Lading cannot have any copies with charges.");
+          "Electronic original Bills of Lading(isElectronic=true and transportDocumentTypeCode=BOL) cannot have any copies with charges.");
 
   static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES =
       eblsCannotHaveCopiesCheck(
           "numberOfCopiesWithoutCharges",
-          "Electronic original Bills of Lading cannot have any copies without charges.");
+          "Electronic original Bills of Lading(isElectronic=true and transportDocumentTypeCode=BOL) cannot have any copies without charges.");
 
   private static JsonRebaseableContentCheck eblsCannotHaveCopiesCheck(
       String fieldName, String errorMessage) {
@@ -218,11 +218,11 @@ public class EblChecks {
   static final JsonRebaseableContentCheck SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES =
       eblsCannotHaveOriginalsCheck(
           "numberOfOriginalsWithCharges",
-          "Number of originals with charges must be absent for SWBs");
+          "Number of originals with charges must be absent for SWBs(transportDocumentTypeCode=SWB)");
   static final JsonRebaseableContentCheck SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES =
       eblsCannotHaveOriginalsCheck(
           "numberOfOriginalsWithoutCharges",
-          "Number of originals without charges must be absent for SWBs");
+          "Number of originals without charges must be absent for SWBs(transportDocumentTypeCode=SWB)");
 
   private static JsonRebaseableContentCheck eblsCannotHaveOriginalsCheck(
       String fieldName, String errorMessage) {

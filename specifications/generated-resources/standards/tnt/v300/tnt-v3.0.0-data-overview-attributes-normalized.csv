@@ -348,8 +348,11 @@ TransportCall,truckTransport,TruckTransport,,,,,"Truck transport information",
 TransportCall,vesselTransport,VesselTransport,,,,,"Vessel or barge transport information",
 TransportDetails,changeRemark,string,,maxLength=250,,"Bad weather","Free text information provided by the vessel operator regarding the reasons for the change in schedule
 and/or plans to mitigate schedule slippage.",
-TransportDetails,delayReasonCode,string,,,,,"Code identifying the reason for the delay, as defined by SMDG here:
-https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/",
+TransportDetails,delayReasonCodes,"string list",,maxLength=3,,,"Codes identifying the reasons for a delay
+Item description:
+Code identifying the reason for a delay, as defined by SMDG here:
+https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+",
 TransportDetails,transportCall,TransportCall,,,,,"Transport call information",
 TruckTransport,tractorDetails,VehicleDetails,,,,,"The license plate and VIN of the tractor of the truck used to transport the equipment.",
 TruckTransport,trailerDetails,VehicleDetails,,,,,"The license plate and VIN of the trailer of the truck on which the equipment is transported,

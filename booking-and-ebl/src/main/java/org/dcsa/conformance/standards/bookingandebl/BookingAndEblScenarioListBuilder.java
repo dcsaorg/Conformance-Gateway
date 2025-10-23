@@ -49,8 +49,8 @@ import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 public class BookingAndEblScenarioListBuilder
     extends ScenarioListBuilder<BookingAndEblScenarioListBuilder> {
 
-  private static final String BOOKING_ACTION_NAME_COMPLEMENT = " (Booking)";
-  private static final String EBL_ACTION_NAME_COMPLEMENT = " (eBL)";
+  private static final String BOOKING_ACTION_NAME_COMPLEMENT = "[Booking]";
+  private static final String EBL_ACTION_NAME_COMPLEMENT = "[eBL]";
 
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 
@@ -331,16 +331,17 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new Shipper_GetShippingInstructionsAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                ShippingInstructionsStatus.SI_RECEIVED,
-                expectedUpdatedSiStatus,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.GET_EBL_SCHEMA_NAME),
-                false,
-                recordTDR,
-                false));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    ShippingInstructionsStatus.SI_RECEIVED,
+                    expectedUpdatedSiStatus,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.GET_EBL_SCHEMA_NAME),
+                    false,
+                    recordTDR,
+                    false)
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder shipperGetTransportDocument(
@@ -351,12 +352,13 @@ public class BookingAndEblScenarioListBuilder
     return new BookingAndEblScenarioListBuilder(
         previousAction ->
             new Shipper_GetTransportDocumentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                expectedTdStatus,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.GET_TD_SCHEMA_NAME)));
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    expectedTdStatus,
+                    componentFactory.getEblMessageSchemaValidator(
+                        EblScenarioListBuilder.GET_TD_SCHEMA_NAME))
+                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder carrierEblSupplyScenarioParameters() {

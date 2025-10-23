@@ -306,8 +306,14 @@ public abstract class ConformanceAction implements StatefulEntity {
   }
 
   public ConformanceAction withTitleComplement(String complement) {
-    this.actionTitle = this.actionTitle.concat(complement);
-    this.actionPath = this.actionPath.concat(complement);
+    this.actionTitle = complement + " " + this.actionTitle;
+    int lastDashIndex = this.actionPath.lastIndexOf(" - ");
+    this.actionPath =
+        this.actionPath.substring(0, lastDashIndex)
+            + " - "
+            + complement
+            + " "
+            + this.actionPath.substring(lastDashIndex + 3);
     return this;
   }
 }

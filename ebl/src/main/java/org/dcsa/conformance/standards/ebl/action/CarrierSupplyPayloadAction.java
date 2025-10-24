@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.ebl.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -23,6 +24,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
   private static final String SCENARIO_TYPE = "scenarioType";
   private static final String INPUT = "input";
   private static final String CBR_PLACEHOLDER = "{CBR}";
+  private static final String DEFAULT_CBR = "BOOKING202507041234567890123456";
 
   private ScenarioType scenarioType;
   private JsonNode carrierPayload;
@@ -170,13 +172,12 @@ public class CarrierSupplyPayloadAction extends EblAction {
   }
 
   private boolean shouldIncludeCbr() {
-    return previousAction != null && !(previousAction instanceof EblAction);
+    return !(previousAction instanceof EblAction);
   }
 
   private String getCbrValue() {
-    if (shouldIncludeCbr()) {
-      return getBookingDspReference().get().carrierBookingReference();
-    }
-    return "BOOKING202507041234567890123456"; // Default fallback
+    return shouldIncludeCbr()
+        ? Optional.of(getBookingDspReference().get().carrierBookingReference()).orElse(DEFAULT_CBR)
+        : DEFAULT_CBR;
   }
 }

@@ -649,17 +649,30 @@ public class BookingChecks {
           "check confirmed booking fields availability",
           body -> {
             var issues = new LinkedHashSet<String>();
-            var bookingStatus = body.path(BOOKING_STATUS).asText("");
-            if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
-              if (body.path(CONFIRMED_EQUIPMENTS).isEmpty()) {
-                issues.add(S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(CONFIRMED_EQUIPMENTS));
+            var bookingStatusAttribute = body.path(BOOKING_STATUS).asText("");
+            if (bookingStatusAttribute.isEmpty()) {
+              issues.add("Missing or empty 'bookingStatus' attribute");
+            } else {
+              BookingState bookingStatus = null;
+              try {
+                bookingStatus = BookingState.fromString(bookingStatusAttribute);
+              } catch (Exception e) {
+                issues.add("Invalid 'bookingStatus' attribute value: '%s'".formatted(bookingStatusAttribute));
               }
-              if (body.path(TRANSPORT_PLAN).isEmpty()) {
-                issues.add(S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(TRANSPORT_PLAN));
-              }
-              if (body.path(SHIPMENT_CUT_OFF_TIMES).isEmpty()) {
-                issues.add(
-                    S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(SHIPMENT_CUT_OFF_TIMES));
+              if (bookingStatus != null) {
+                if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
+                  if (body.path(CONFIRMED_EQUIPMENTS).isEmpty()) {
+                    issues.add(
+                        S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(CONFIRMED_EQUIPMENTS));
+                  }
+                  if (body.path(TRANSPORT_PLAN).isEmpty()) {
+                    issues.add(S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(TRANSPORT_PLAN));
+                  }
+                  if (body.path(SHIPMENT_CUT_OFF_TIMES).isEmpty()) {
+                    issues.add(
+                        S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(SHIPMENT_CUT_OFF_TIMES));
+                  }
+                }
               }
             } else {
               return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));

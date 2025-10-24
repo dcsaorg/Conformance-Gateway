@@ -71,7 +71,6 @@ class ANChecksTest {
   void testValidateDocumentParties() {
     ArrayNode parties = an.putArray("documentParties");
     ObjectNode p = parties.addObject();
-    p.put("partyFunction", "CN");
     p.put("partyName", "Consignee LLC");
     p.put("partyContactDetails", "consignee@example.com");
     ObjectNode addr = p.putObject("address");
@@ -81,7 +80,7 @@ class ANChecksTest {
     assertEquals(1, errors.size());
     assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
 
-    p.remove("partyFunction");
+    p.remove("partyName");
     assertFalse(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());
   }
 

@@ -12,6 +12,8 @@ Aligned the actor names with the use cases and user stories. (SD-2531)
 
 Updated rail and truck attributes. (SD-263)
 
+Added support for multiple `delayReasonCodes`. (SD-2405)
+
 
 ## Snapshot v3.0.0-20250926-design
 

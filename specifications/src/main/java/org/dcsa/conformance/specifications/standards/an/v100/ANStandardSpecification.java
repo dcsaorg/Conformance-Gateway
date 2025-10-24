@@ -82,7 +82,7 @@ import org.dcsa.conformance.specifications.standards.core.v100.types.ModeOfTrans
 import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.core.v100.types.VesselIMONumber;
 import org.dcsa.conformance.specifications.standards.dt.v100.model.Volume;
-import org.dcsa.conformance.specifications.standards.dt.v100.model.Weight;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Weight;
 
 public class ANStandardSpecification extends StandardSpecification {
 
@@ -92,7 +92,7 @@ public class ANStandardSpecification extends StandardSpecification {
   private final GetArrivalNoticesEndpoint getArrivalNoticesEndpoint;
 
   public ANStandardSpecification() {
-    super("Arrival Notice", "AN", "1.0.0");
+    super("Arrival Notice", "1.0.0", "an", "an");
 
     openAPI.addTagsItem(
         new Tag()

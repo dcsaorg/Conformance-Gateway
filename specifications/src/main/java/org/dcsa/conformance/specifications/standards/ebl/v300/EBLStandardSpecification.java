@@ -79,7 +79,7 @@ public class EBLStandardSpecification extends StandardSpecification {
   private final GetTransportDocumentEndpoint getTransportDocumentEndpoint;
 
   public EBLStandardSpecification() {
-    super("Bill of Lading", "EBL", "3.0.0");
+    super("Bill of Lading", "3.0.0", "ebl", "ebl");
 
     openAPI.path(
         "/v3/transport-documents/{transportDocumentReference}",

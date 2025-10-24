@@ -39,20 +39,20 @@ import org.dcsa.conformance.specifications.standards.tnt.v300.messages.GetEvents
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsError;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsRequest;
 import org.dcsa.conformance.specifications.standards.tnt.v300.messages.PostEventsResponse;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReference;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.DocumentReferenceReplacement;
+import org.dcsa.conformance.specifications.standards.core.v100.model.DocumentReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.DocumentReferenceReplacement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EquipmentDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.Event;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventClassification;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.EventRouting;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.IotDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.Party;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Party;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.RailTransport;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ReeferDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.Seal;
+import org.dcsa.conformance.specifications.standards.core.v100.model.Seal;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentDetails;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReference;
-import org.dcsa.conformance.specifications.standards.tnt.v300.model.ShipmentReferenceReplacement;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ShipmentReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ShipmentReferenceReplacement;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportCall;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TransportDetails;
 import org.dcsa.conformance.specifications.standards.tnt.v300.model.TruckTransport;
@@ -67,7 +67,7 @@ public class TNTStandardSpecification extends StandardSpecification {
   private final GetEventsEndpoint getEventsEndpoint;
 
   public TNTStandardSpecification() {
-    super("Track and Trace", "TNT", "3.0.0");
+    super("Track and Trace", "3.0.0", "tnt", "tnt");
 
     openAPI.addTagsItem(
         new Tag()

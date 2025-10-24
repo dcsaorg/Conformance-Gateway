@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JWSObject;
 import lombok.experimental.UtilityClass;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonContentCheckRebaser;
 import org.dcsa.conformance.core.check.JsonContentMatchedValidation;
 import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
@@ -22,25 +23,25 @@ public class SignatureChecks {
   private static final JsonContentCheckRebaser SIGNED_CONTENT_REBASER = delegate -> (nodeToValidate, contextPath) -> {
     var content = nodeToValidate.asText();
     if (content == null || !content.contains(".")) {
-      return Set.of(
-        "The path '%s' should have been a signed payload, but was not".formatted(contextPath));
+      return ConformanceCheckResult.simple(Set.of(
+        "The path '%s' should have been a signed payload, but was not".formatted(contextPath)));
     }
     JWSObject jwsObject;
     try {
       jwsObject = JWSObject.parse(content);
     } catch (ParseException e) {
-      return Set.of(
+      return ConformanceCheckResult.simple(Set.of(
         "The path '%s' should have been a signed payload, but could not be parsed as a JWS."
-          .formatted(contextPath));
+          .formatted(contextPath)));
     }
     JsonNode jsonBody;
     try {
       jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
     } catch (Exception e) {
-      return Set.of(
+      return ConformanceCheckResult.simple(Set.of(
         "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
           contextPath, e.toString()
-        ));
+        )));
     }
     return delegate.validate(jsonBody, contextPath + "!");
   };
@@ -61,26 +62,26 @@ public class SignatureChecks {
     return (nodeToValidate, contextPath) -> {
       var content = nodeToValidate.asText();
       if (content == null || !content.contains(".")) {
-        return Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath));
+        return ConformanceCheckResult.simple(Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath)));
       }
       JWSObject jwsObject;
       try {
         jwsObject = JWSObject.parse(content);
       } catch (ParseException e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload, but could not be parsed as a JWS.".formatted(contextPath));
+        return ConformanceCheckResult.simple(Set.of(
+            "The path '%s' should have been a signed payload, but could not be parsed as a JWS.".formatted(contextPath)));
       }
       JsonNode jsonBody;
       try {
         jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
       } catch (Exception e) {
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
             "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
               contextPath,
               e.toString()
-            ));
+            )));
       }
-      return schemaValidator.validate(jsonBody);
+      return ConformanceCheckResult.simple(schemaValidator.validate(jsonBody));
     };
   }
 
@@ -89,27 +90,27 @@ public class SignatureChecks {
     return (nodeToValidate, contextPath) -> {
       var content = nodeToValidate.asText();
       if (content == null || !content.contains(".")) {
-        return Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath));
+        return ConformanceCheckResult.simple(Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath)));
       }
       JWSObject jwsObject;
       try {
         jwsObject = JWSObject.parse(content);
       } catch (ParseException e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload, but could not be parsed as a JWS (%s).".formatted(contextPath, e.toString()));
+        return ConformanceCheckResult.simple(Set.of(
+            "The path '%s' should have been a signed payload, but could not be parsed as a JWS (%s).".formatted(contextPath, e.toString())));
       }
       if (Algorithm.NONE.equals(jwsObject.getHeader().getAlgorithm())) {
-        return Set.of(
-          "The JWS payload at '%s' uses the 'none' algorithm and is therefore unsigned.".formatted(contextPath));
+        return ConformanceCheckResult.simple(Set.of(
+          "The JWS payload at '%s' uses the 'none' algorithm and is therefore unsigned.".formatted(contextPath)));
       }
       var signatureVerifier = signatureVerifierSupplier.get();
       if (signatureVerifier == null) {
         throw new AssertionError("Missing signatureVerifier");
       }
       if (!signatureVerifier.verifySignature(jwsObject)) {
-        return Set.of("The path '%s' was a valid JWS, but it was not signed by the expected key".formatted(contextPath));
+        return ConformanceCheckResult.simple(Set.of("The path '%s' was a valid JWS, but it was not signed by the expected key".formatted(contextPath)));
       }
-      return Set.of();
+      return ConformanceCheckResult.simple(Set.of());
     };
   }
 

@@ -48,26 +48,26 @@ public class PintChecks {
       if (!nodeToValidate.isArray()) {
         var expectedSize = expectedSizeSupplier.getAsInt();
         if (expectedSize > 0) {
-          return Set.of(
+          return ConformanceCheckResult.simple(Set.of(
               "Expected '%s' to be an array with size %d, but it was not an array"
-                  .formatted(contextPath, expectedSize));
+                  .formatted(contextPath, expectedSize)));
         }
         // Schema validation error if anything
-        return Set.of();
+        return ConformanceCheckResult.simple(Set.of());
       }
       var size = nodeToValidate.size();
       var expectedSize = expectedSizeSupplier.getAsInt();
       if (expectedSize == size) {
-        return Set.of();
+        return ConformanceCheckResult.simple(Set.of());
       }
       if (expectedSize < 0) {
-        return Set.of(
+        return ConformanceCheckResult.simple(Set.of(
             "Error: Could not determine the expected size of the array at '%s'. This is a bug in the test"
-                .formatted(contextPath));
+                .formatted(contextPath)));
       }
-      return Set.of(
+      return ConformanceCheckResult.simple(Set.of(
           "The size of the array at '%s' was %d, but it should have been %d"
-              .formatted(contextPath, size, expectedSize));
+              .formatted(contextPath, size, expectedSize)));
     };
   }
 
@@ -76,7 +76,7 @@ public class PintChecks {
     return (nodeToValidate, contextPath) -> {
       if (!nodeToValidate.isArray()) {
         // Schema validation will take care of this one.
-        return Set.of();
+        return ConformanceCheckResult.simple(Set.of());
       }
       var checksums = dspSupplier.get().documentChecksums();
       int idx = 0;
@@ -91,7 +91,7 @@ public class PintChecks {
                   .formatted(value, path));
         }
       }
-      return issues;
+      return ConformanceCheckResult.simple(issues);
     };
   }
 
@@ -176,13 +176,13 @@ public class PintChecks {
                         (n, p) -> {
                           if (senderTransmissionClass
                               == SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM) {
-                            return Set.of();
+                            return ConformanceCheckResult.simple(Set.of());
                           }
                           if (Objects.equals(rspSupplier.get().receiverParty(), n)) {
-                            return Set.of();
+                            return ConformanceCheckResult.simple(Set.of());
                           }
-                          return Set.of(
-                              "[Scenario] Last transaction did not use the receiving party provided by the receiver (exactly as-is)");
+                          return ConformanceCheckResult.simple(Set.of(
+                              "[Scenario] Last transaction did not use the receiving party provided by the receiver (exactly as-is)"));
                         },
                         "transactions",
                         -1,
@@ -382,7 +382,7 @@ public class PintChecks {
                   String expectedChecksum = null;
                   if (!etc.isArray()) {
                     // Leave that to schema validation
-                    return Set.of();
+                    return ConformanceCheckResult.simple(Set.of());
                   }
                   var issues = new LinkedHashSet<String>();
                   for (int i = 0; i < etc.size(); i++) {
@@ -410,7 +410,7 @@ public class PintChecks {
                     }
                     expectedChecksum = Checksums.sha256(entry.asText());
                   }
-                  return issues;
+                  return ConformanceCheckResult.simple(issues);
                 })));
     jsonContentChecks.add(
         JsonAttribute.customValidator(
@@ -432,7 +432,7 @@ public class PintChecks {
                 issues.add(
                     "Issuance transaction implies 'issuanceManifestSignedContent' being present");
               }
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
     jsonContentChecks.add(
         JsonAttribute.customValidator(

@@ -6,37 +6,45 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
+import lombok.Setter;
 import org.dcsa.conformance.core.report.ConformanceStatus;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
+@Setter
 @Getter
 public abstract class ConformanceCheck {
-  protected final String title;
-  private List<ConformanceCheck> _subChecks;
-  protected boolean isApplicable = true;
 
+  protected final String title;
+  private List<ConformanceCheck> subChecks;
   private final List<ConformanceResult> results = new ArrayList<>();
+
+  private boolean isRelevant = true;
+  private boolean isApplicable = true;
 
   protected ConformanceCheck(String title) {
     this.title = title;
   }
 
   private synchronized List<ConformanceCheck> getSubChecks() {
-    if (_subChecks == null) {
-      _subChecks = createSubChecks().filter(Objects::nonNull).collect(Collectors.toList());
+    if (subChecks == null) {
+      subChecks = createSubChecks().collect(Collectors.toList());
     }
-    return _subChecks;
+    return subChecks.stream()
+        .filter(Objects::nonNull)
+        .filter(ConformanceCheck::isApplicable)
+        .toList();
   }
 
   public final void check(Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    List<ConformanceCheck> subChecks = getSubChecks();
-    if (subChecks.isEmpty()) {
+    List<ConformanceCheck> conformanceChecks = getSubChecks();
+    if (conformanceChecks.isEmpty()) {
       this.doCheck(getExchangeByUuid);
     } else {
-      subChecks.forEach(subCheck -> subCheck.check(getExchangeByUuid));
+      conformanceChecks.forEach(subCheck -> subCheck.check(getExchangeByUuid));
     }
   }
 
@@ -64,5 +72,13 @@ public abstract class ConformanceCheck {
 
   public Consumer<ConformanceStatus> computedStatusConsumer() {
     return ignoredStatus -> {};
+  }
+
+  public boolean isRelevant() {
+    if (!results.isEmpty()
+        && results.stream().allMatch(Predicate.not(ConformanceResult::isRelevant))) {
+      return false;
+    }
+    return isRelevant;
   }
 }

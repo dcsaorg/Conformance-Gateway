@@ -69,12 +69,12 @@ public class ResponseStatusCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Collections.emptySet();
+    if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
     int responseStatus = exchange.getResponse().statusCode();
-    return expectedResponseStatus.contains(responseStatus)
+    return ConformanceCheckResult.simple(expectedResponseStatus.contains(responseStatus)
         ? Collections.emptySet()
-        : Set.of(validationErrorMessage(responseStatus));
+        : Set.of(validationErrorMessage(responseStatus)));
   }
 }

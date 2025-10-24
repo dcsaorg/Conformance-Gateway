@@ -8,6 +8,7 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
@@ -56,11 +57,11 @@ public class QueryParameterSchemaCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     Set<String> errors = new HashSet<>();
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) {
-      return Set.of();
+      return ConformanceCheckResult.simple(Set.of());
     }
     Map<String, String> queryParams =
         exchange.getRequest().queryParams().entrySet().stream()
@@ -99,6 +100,6 @@ public class QueryParameterSchemaCheck extends ActionCheck {
                 .collect(Collectors.toSet()));
       }
     }
-    return errors;
+    return ConformanceCheckResult.simple(errors);
   }
 }

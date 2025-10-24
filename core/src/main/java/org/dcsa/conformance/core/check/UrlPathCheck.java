@@ -34,18 +34,18 @@ public class UrlPathCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Set.of();
+    if (exchange == null) return ConformanceCheckResult.simple(Set.of());
 
     String requestUrl = exchange.getRequest().url();
 
     boolean matches = expectedUrlPathEnd.stream().anyMatch(requestUrl::endsWith);
 
-    return matches
+    return ConformanceCheckResult.simple(matches
         ? Collections.emptySet()
         : Set.of(
             "Request URL '%s' does not end with any of %s"
-                .formatted(requestUrl, expectedUrlPathEnd));
+                .formatted(requestUrl, expectedUrlPathEnd)));
   }
 }

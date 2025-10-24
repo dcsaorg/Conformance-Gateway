@@ -34,17 +34,17 @@ public class IssuanceChecks {
       JsonAttribute.path("document", JsonAttribute.path("documentParties",
         (documentParties, contextPath) -> {
           if (!eblType.isToOrder()) {
-            return Set.of();
+            return ConformanceCheckResult.simple(Set.of());
           }
           var hadEndorsee = documentParties.has("endorsee");
           var endorseePath = concatContextPath(contextPath, "documentParties.endorsee");
           if (eblType.isBlankEbl() && hadEndorsee) {
-            return Set.of("The EBL should have been blank endorsed, but it has an '%s' attribute".formatted(endorseePath));
+            return ConformanceCheckResult.simple(Set.of("The EBL should have been blank endorsed, but it has an '%s' attribute".formatted(endorseePath)));
           }
           if (!eblType.isBlankEbl() && !hadEndorsee) {
-            return Set.of("The EBL should have had a named endorsee, but it is missing the '%s' attribute".formatted(endorseePath));
+            return ConformanceCheckResult.simple(Set.of("The EBL should have had a named endorsee, but it is missing the '%s' attribute".formatted(endorseePath)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         }
       ))
     );

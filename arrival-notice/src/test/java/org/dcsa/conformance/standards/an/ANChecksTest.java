@@ -6,6 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
+import java.util.Set;
+
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,23 +34,23 @@ class ANChecksTest {
   @Test
   void testValidateNonEmptyResponse() {
     an.put("carrierCode", "MAEU");
-    assertTrue(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(body).isEmpty());
+    assertTrue(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(body).getErrorMessages().isEmpty());
 
     ObjectNode empty = mapper.createObjectNode();
-    assertFalse(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(empty).isEmpty());
+    assertFalse(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(empty).getErrorMessages().isEmpty());
   }
 
   @Test
   void testValidateBasicFields() {
     List<JsonContentCheck> checks = ANChecks.validateBasicFields();
 
-    assertFalse(checks.stream().allMatch(c -> c.validate(body).isEmpty()));
+    assertFalse(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
 
     an.put("carrierCode", "MAEU");
     an.put("carrierCodeListProvider", "SMDG");
     an.put("deliveryTypeAtDestination", "CY");
     an.put("transportDocumentReference", "HHL123");
-    assertTrue(checks.stream().allMatch(c -> c.validate(body).isEmpty()));
+    assertTrue(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
   }
 
   @Test
@@ -54,15 +59,16 @@ class ANChecksTest {
     ArrayNode carrierContactInfos = an.putArray("carrierContactInformation");
     ObjectNode contactInfo = carrierContactInfos.addObject();
     contactInfo.put("name", "Ops Desk");
-    assertFalse(ANChecks.validateCarrierContactInformation().validate(body).isEmpty());
+    assertFalse(
+        ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
 
     contactInfo.put("email", "ops@example.com");
-    assertTrue(ANChecks.validateCarrierContactInformation().validate(body).isEmpty());
+    assertTrue(
+        ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
   void testValidateDocumentParties() {
-
     ArrayNode parties = an.putArray("documentParties");
     ObjectNode p = parties.addObject();
     p.put("partyName", "Consignee LLC");
@@ -70,15 +76,17 @@ class ANChecksTest {
     ObjectNode addr = p.putObject("address");
     addr.put("street", "Harbor Rd 1");
 
-    assertTrue(ANChecks.validateDocumentParties().validate(body).isEmpty());
+    Set<ConformanceError> errors =((ConformanceCheckResult.ErrorsWithRelevance) ANChecks.validateDocumentParties().validate(body)).errors();
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
 
     p.remove("partyName");
-    assertFalse(ANChecks.validateDocumentParties().validate(body).isEmpty());
+    assertFalse(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
   void testValidateTransport() {
-    assertFalse(ANChecks.validateTransport().validate(body).isEmpty());
+    assertFalse(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
 
     ObjectNode transport = an.putObject("transport");
     transport.putObject("portOfDischargeArrivalDate").put("value", "2025-10-01T10:00:00Z");
@@ -92,10 +100,10 @@ class ANChecksTest {
     voyage.put("vesselName", "MSC Example");
     voyage.put("carrierImportVoyageNumber", "0123W");
 
-    assertTrue(ANChecks.validateTransport().validate(body).isEmpty());
+    assertTrue(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
 
     voyage.remove("vesselName");
-    assertFalse(ANChecks.validateTransport().validate(body).isEmpty());
+    assertFalse(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -112,13 +120,16 @@ class ANChecksTest {
     ObjectNode seal = seals.addObject();
     seal.put("number", "ABC123");
 
-    assertTrue(ANChecks.validateUtilizedTransportEquipments().validate(body).isEmpty());
+    assertTrue(
+        ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
 
     ute.set("seals", mapper.createArrayNode());
-    assertFalse(ANChecks.validateUtilizedTransportEquipments().validate(body).isEmpty());
+    assertFalse(
+        ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
 
     ute.remove("equipment");
-    assertFalse(ANChecks.validateUtilizedTransportEquipments().validate(body).isEmpty());
+    assertFalse(
+        ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -126,7 +137,7 @@ class ANChecksTest {
 
     ArrayNode consignmentItems = an.putArray("consignmentItems");
     ObjectNode ci = consignmentItems.addObject();
-    assertFalse(ANChecks.validateConsignmentItems().validate(body).isEmpty());
+    assertFalse(ANChecks.validateConsignmentItems().validate(body).getErrorMessages().isEmpty());
 
     ArrayNode dog = ci.putArray("descriptionOfGoods");
     dog.add("Widgets");
@@ -142,12 +153,12 @@ class ANChecksTest {
     op.put("packageCode", "CT");
     op.put("numberOfPackages", 10);
 
-    assertTrue(ANChecks.validateConsignmentItems().validate(body).isEmpty());
+    assertTrue(ANChecks.validateConsignmentItems().validate(body).getErrorMessages().isEmpty());
 
     op.remove("packageCode");
     op.remove("IMOPackagingCode");
     op.remove("description");
-    assertFalse(ANChecks.validateConsignmentItems().validate(body).isEmpty());
+    assertFalse(ANChecks.validateConsignmentItems().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -161,11 +172,18 @@ class ANChecksTest {
     ft.put("duration", 5);
     ft.put("timeUnit", "DAY");
 
-    assertTrue(ANChecks.validateFreeTimeObjectStructure("FREE_TIME").validate(body).isEmpty());
-
+    assertTrue(
+        ANChecks.validateFreeTimeObjectStructure("FREE_TIME")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
 
     an.set("freeTimes", mapper.createArrayNode());
-    assertFalse(ANChecks.validateFreeTimeObjectStructure("FREE_TIME").validate(body).isEmpty());
+    assertFalse(
+        ANChecks.validateFreeTimeObjectStructure("FREE_TIME")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -179,11 +197,10 @@ class ANChecksTest {
     ch.put("unitPrice", 50.0);
     ch.put("quantity", 1);
 
-    assertTrue(ANChecks.validateChargesStructure().validate(body).isEmpty());
-
+    assertTrue(ANChecks.validateChargesStructure().validate(body).getErrorMessages().isEmpty());
 
     ch.remove("currencyCode");
-    assertFalse(ANChecks.validateChargesStructure().validate(body).isEmpty());
+    assertFalse(ANChecks.validateChargesStructure().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -191,7 +208,6 @@ class ANChecksTest {
 
     var checks = ANChecks.getScenarioRelatedChecks("FREE_TIME");
     assertFalse(checks.isEmpty());
-
   }
 
   @Test
@@ -208,10 +224,9 @@ class ANChecksTest {
     ObjectNode documentParty = documentParties.addObject();
     ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
     ObjectNode partyContactDetail = partyContactDetails.addObject();
-    assertFalse(ANChecks.validatePartyContactName().validate(body).isEmpty());
+    assertFalse(ANChecks.validatePartyContactName().validate(body).getErrorMessages().isEmpty());
     partyContactDetail.put("name", "Ops Desk");
-    assertTrue(ANChecks.validatePartyContactName().validate(body).isEmpty());
-
+    assertTrue(ANChecks.validatePartyContactName().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -222,10 +237,12 @@ class ANChecksTest {
     ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
     ObjectNode partyContactDetail = partyContactDetails.addObject();
 
-    assertFalse(ANChecks.validatePartyContactEmailOrPhone().validate(body).isEmpty());
+    assertFalse(
+        ANChecks.validatePartyContactEmailOrPhone().validate(body).getErrorMessages().isEmpty());
 
     partyContactDetail.put("email", "ops@example.com");
-    assertTrue(ANChecks.validatePartyContactEmailOrPhone().validate(body).isEmpty());
+    assertTrue(
+        ANChecks.validatePartyContactEmailOrPhone().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -239,6 +256,7 @@ class ANChecksTest {
         ANChecks.validatePortOfDischargeFacilityFields(
                 "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
             .validate(body)
+            .getErrorMessages()
             .isEmpty());
 
     facility.put("facilityCode", "NLRTM");
@@ -246,6 +264,7 @@ class ANChecksTest {
         ANChecks.validatePortOfDischargeFacilityFields(
                 "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
             .validate(body)
+            .getErrorMessages()
             .isEmpty());
 
     facility.put("facilityCodeListProvider", "SMDG");
@@ -253,6 +272,7 @@ class ANChecksTest {
         ANChecks.validatePortOfDischargeFacilityFields(
                 "facilityCodeListProvider", "arrivalNotices.*.transport.portOfDischarge")
             .validate(body)
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -264,15 +284,15 @@ class ANChecksTest {
     ObjectNode address = pod.putObject("address");
     address.put("street", "");
 
-    assertFalse(ANChecks.validatePODAdrressAN().validate(body).isEmpty());
+    assertFalse(ANChecks.validatePODAdrressAN().validate(body).getErrorMessages().isEmpty());
 
     address.put("street", "Harbor Rd 1");
     address.put("city", "Rotterdam");
-    assertTrue(ANChecks.validatePODAdrressAN().validate(body).isEmpty());
+    assertTrue(ANChecks.validatePODAdrressAN().validate(body).getErrorMessages().isEmpty());
 
     pod.remove("address");
     pod.put("UNLocationCode", "NLRTM");
-    assertTrue(ANChecks.validatePODAdrressAN().validate(body).isEmpty());
+    assertTrue(ANChecks.validatePODAdrressAN().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -280,18 +300,17 @@ class ANChecksTest {
 
     ArrayNode documentParties = an.putArray("documentParties");
     ObjectNode documentParty = documentParties.addObject();
-    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).isEmpty());
+    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).getErrorMessages().isEmpty());
 
     ObjectNode address = documentParty.putObject("address");
-    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).isEmpty());
+    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).getErrorMessages().isEmpty());
 
     address.put("street", "");
 
-    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).isEmpty());
+    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).getErrorMessages().isEmpty());
 
     address.put("street", "Harbor Rd 1");
     address.put("city", "Rotterdam");
-    assertTrue(ANChecks.validatePODAdrressAN().validate(body).isEmpty());
+    assertTrue(ANChecks.validatePODAdrressAN().validate(body).getErrorMessages().isEmpty());
   }
 }
-

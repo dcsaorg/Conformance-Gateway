@@ -34,14 +34,14 @@ public class HttpMethodCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Set.of();
+    if (exchange == null) return ConformanceCheckResult.simple(Set.of());
     var method = exchange.getRequest().method();
-    return method.equals(expectedHttpMethod)
+    return ConformanceCheckResult.simple(method.equals(expectedHttpMethod)
         ? Collections.emptySet()
         : Set.of(
             "Request HTTP method was '%s' but should have been '%s'"
-                .formatted(method, expectedHttpMethod));
+                .formatted(method, expectedHttpMethod)));
   }
 }

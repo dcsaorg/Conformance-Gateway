@@ -1,7 +1,6 @@
 package org.dcsa.conformance.core.check;
 
 import java.util.Collections;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -36,10 +35,10 @@ public class JsonSchemaCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    return exchange == null
+    return ConformanceCheckResult.simple(exchange == null
         ? Collections.emptySet()
-        : jsonSchemaValidator.validate(exchange.getMessage(httpMessageType).body().getStringBody());
+        : jsonSchemaValidator.validate(exchange.getMessage(httpMessageType).body().getStringBody()));
   }
 }

@@ -60,9 +60,7 @@ class OvsChecksTest {
 
     OvsChecks.buildResponseContentChecks(ovsFilterParameterStringMap)
         .forEach(
-            validator -> {
-              issues.addAll(validator.validate(serviceNodes));
-            });
+            validator -> issues.addAll(validator.validate(serviceNodes).getErrorMessages()));
     return issues;
   }
 

@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
@@ -62,16 +63,16 @@ public class JitChecks {
                 } else emptyCount++;
               }
               if (emptyCount > 1) {
-                return Set.of(
+                return ConformanceCheckResult.simple(Set.of(
                     "Expected at most one moves object without a carrierCode; found %s!"
-                        .formatted(emptyCount));
+                        .formatted(emptyCount)));
               }
               if (carrierCodes.stream().distinct().count() != carrierCodes.size()) {
-                return Set.of(
-                    "Expected carrierCodes to be different in the given moves objects; found multiple are the same!");
+                return ConformanceCheckResult.simple(Set.of(
+                    "Expected carrierCodes to be different in the given moves objects; found multiple are the same!"));
               }
             }
-            return Collections.emptySet();
+            return ConformanceCheckResult.simple(Collections.emptySet());
           });
 
   static final JsonRebaseableContentCheck TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION =
@@ -192,12 +193,12 @@ public class JitChecks {
                     && !PortCallServiceTypeCode.getServicesWithERPAndA().contains(serviceType))
                 || (dsp.selector() == JitServiceTypeSelector.S_A_PATTERN
                     && !PortCallServiceTypeCode.getServicesHavingOnlyA().contains(serviceType))) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   "Expected matching Port Call Service type with scenario '%s'. Found non-matching type: '%s'"
-                      .formatted(dsp.selector().getFullName(), actualServiceType));
+                      .formatted(dsp.selector().getFullName(), actualServiceType)));
             }
           }
-          return Collections.emptySet();
+          return ConformanceCheckResult.simple(Collections.emptySet());
         });
   }
 
@@ -211,11 +212,11 @@ public class JitChecks {
           if (!body.isArray()
               || (!moreResultsAllowed && body.size() != expectedResults)
               || (moreResultsAllowed && body.size() < expectedResults)) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 "Expected %s%s result(s), but got %s result(s)."
-                    .formatted(expectedResults, orMore, body.size()));
+                    .formatted(expectedResults, orMore, body.size())));
           }
-          return Collections.emptySet();
+          return ConformanceCheckResult.simple(Collections.emptySet());
         });
   }
 
@@ -228,7 +229,7 @@ public class JitChecks {
             String actualServiceType = body.path(PORT_CALL_SERVICE_TYPE).asText();
             issues.add(verifyPortCallServiceEventTypeCode(body, actualServiceType));
           }
-          return issues.stream().filter(Objects::nonNull).collect(Collectors.toSet());
+          return ConformanceCheckResult.simple(issues.stream().filter(Objects::nonNull).collect(Collectors.toSet()));
         });
   }
 
@@ -264,15 +265,15 @@ public class JitChecks {
     return JsonAttribute.customValidator(
         "Check if the reply timestamp matches the previous timestamp.",
         body -> {
-          if (dsp.previousTimestamp() == null) return Collections.emptySet();
+          if (dsp.previousTimestamp() == null) return ConformanceCheckResult.simple(Collections.emptySet());
           String previousTimestampID = dsp.previousTimestamp().timestampID();
           JitTimestamp timestamp = JitTimestamp.fromJson(body);
           if (!previousTimestampID.equals(timestamp.replyToTimestampID())) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 "Expected replyToTimestampID matches previous sent timestampId: '%s' but found replyToTimestampID: '%s'"
-                    .formatted(previousTimestampID, timestamp.replyToTimestampID()));
+                    .formatted(previousTimestampID, timestamp.replyToTimestampID())));
           }
-          return Collections.emptySet();
+          return ConformanceCheckResult.simple(Collections.emptySet());
         });
   }
 
@@ -287,11 +288,11 @@ public class JitChecks {
           JitTimestamp receivedTimestamp = JitTimestamp.fromJson(body);
           if (dsp.previousTimestamp().classifierCode().equals(JitClassifierCode.REQ)
               && !dsp.previousTimestamp().dateTime().equals(receivedTimestamp.dateTime())) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 "Expected matching timestamp: '%s' but got Planned timestamp: '%s'"
-                    .formatted(dsp.previousTimestamp().dateTime(), receivedTimestamp.dateTime()));
+                    .formatted(dsp.previousTimestamp().dateTime(), receivedTimestamp.dateTime())));
           }
-          return Collections.emptySet();
+          return ConformanceCheckResult.simple(Collections.emptySet());
         });
   }
 
@@ -321,7 +322,7 @@ public class JitChecks {
                 "Expected matching portCallServiceID: '%s' but got a different portCallServiceID: '%s'"
                     .formatted(dsp.portCallServiceID(), body.path(PORT_CALL_SERVICE_ID)));
           }
-          return errors;
+          return ConformanceCheckResult.simple(errors);
         });
   }
 

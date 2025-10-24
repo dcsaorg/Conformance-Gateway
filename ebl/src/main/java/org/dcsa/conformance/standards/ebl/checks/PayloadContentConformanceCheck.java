@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -34,24 +35,24 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   }
 
   @Override
-  protected final Set<String> checkConformance(
+  protected final ConformanceCheckResult performCheck(
       Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
-    return Collections.emptySet();
+    return ConformanceCheckResult.simple(Collections.emptySet());
   }
 
   @Override
   protected abstract Stream<? extends ConformanceCheck> createSubChecks();
 
   protected ConformanceCheck createSubCheck(
-      String prefix, String subtitle, Function<JsonNode, Set<String>> subCheck) {
+      String prefix, String subtitle, Function<JsonNode, ConformanceCheckResult> subCheck) {
     return new ActionCheck(
         prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
       @Override
-      protected Set<String> checkConformance(
+      protected ConformanceCheckResult performCheck(
           Function<UUID, ConformanceExchange> getExchangeByUuid) {
         ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-        if (exchange == null) return Collections.emptySet();
+        if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
         var conformanceMessage =
             this.httpMessageType == HttpMessageType.RESPONSE
                 ? exchange.getResponse().message()
@@ -62,8 +63,8 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
     };
   }
 
-  protected Function<JsonNode, Set<String>> at(
-      String path, Function<JsonNode, Set<String>> subCheck) {
+  protected Function<JsonNode, ConformanceCheckResult> at(
+      String path, Function<JsonNode, ConformanceCheckResult> subCheck) {
     var pointer = JsonPointer.compile(path);
     return payload -> subCheck.apply(payload.at(pointer));
   }
@@ -81,7 +82,7 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
             path,
             jsonNode -> {
               if (jsonNode.isMissingNode() || jsonNode.isEmpty()) {
-                return Set.of();
+                return ConformanceCheckResult.simple(Set.of());
               }
               return check.validate(jsonNode);
             }));

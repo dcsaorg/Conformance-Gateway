@@ -8,6 +8,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.KeywordDataset;
@@ -60,14 +63,14 @@ public class ANChecks {
         mav -> mav.submitAllMatching(path),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
-            return Set.of(
-                contextPath + "." + field + " must be functionally present in the payload");
+            return ConformanceCheckResult.simple(Set.of(
+                contextPath + "." + field + " must be functionally present in the payload"));
           }
           if (node.get(field).asText().isBlank()) {
-            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
           }
 
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -101,10 +104,10 @@ public class ANChecks {
           final String fieldPath = contextPath + "." + attribute;
 
           if (fieldNode.isMissingNode() || fieldNode.isNull()) {
-            return Set.of(fieldPath + " must be functionally present in the payload");
+            return ConformanceCheckResult.simple(Set.of(fieldPath + " must be functionally present in the payload"));
           }
           if (fieldNode.asText().isBlank()) {
-            return Set.of(fieldPath + " must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(fieldPath + " must not be empty or blank in the payload"));
           }
           var validator = JsonAttribute.matchedMustBeDatasetKeywordIfPresent(dataset);
 
@@ -115,7 +118,7 @@ public class ANChecks {
   public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
       JsonAttribute.customValidator(
           "Every response received during a conformance test must not be empty",
-          body -> body.isEmpty() ? Set.of("The response body must not be empty") : Set.of());
+          body -> ConformanceCheckResult.simple(body.isEmpty() ? Set.of("The response body must not be empty") : Set.of()));
 
   public static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
@@ -187,9 +190,9 @@ public class ANChecks {
         (notifications, contextPath) -> {
           var node = notifications.get("equipmentReferences");
           if (node == null || !node.isArray() || node.isEmpty()) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 contextPath
-                    + ".equipmentReferences must functionally be a non-empty array of strings");
+                    + ".equipmentReferences must functionally be a non-empty array of strings"));
           }
           boolean allEmpty = true;
           for (var item : node) {
@@ -200,11 +203,11 @@ public class ANChecks {
           }
 
           if (allEmpty) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 contextPath
-                    + ".equipmentReferences must contain at least one non-empty string value");
+                    + ".equipmentReferences must contain at least one non-empty string value"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -219,7 +222,7 @@ public class ANChecks {
 
               if (arrivalNotices == null || !arrivalNotices.isArray()) {
                 issues.add("Missing or invalid 'arrivalNotices' array in payload.");
-                return issues;
+                return ConformanceCheckResult.simple(issues);
               }
 
               Set<String> expectedTDRs = new HashSet<>(dsp.get().transportDocumentReferences());
@@ -255,7 +258,7 @@ public class ANChecks {
                         missingTdr));
               }
 
-              return issues;
+              return ConformanceCheckResult.simple(issues);
             }));
   }
 
@@ -264,9 +267,9 @@ public class ANChecks {
         "The publisher has demonstrated the correct use of the 'carrierContactInformation' object",
         body -> {
           var issues = new LinkedHashSet<String>();
-          issues.addAll(validateCarrierContactName().validate(body));
-          issues.addAll(validateCarrierContactEmailOrPhone().validate(body));
-          return issues;
+          issues.addAll(validateCarrierContactName().validate(body).getErrorMessages());
+          issues.addAll(validateCarrierContactEmailOrPhone().validate(body).getErrorMessages());
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -276,11 +279,11 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull("name")) {
-            return Set.of(contextPath + ".name must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".name must be functionally present"));
           } else if (node.get("name").asText().isBlank()) {
-            return Set.of(contextPath + ".name must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".name must not be empty or blank in the payload"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -291,15 +294,15 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull("email") && !node.hasNonNull("phone")) {
-            return Set.of(contextPath + " must functionally include either 'email' or 'phone'");
+            return ConformanceCheckResult.simple(Set.of(contextPath + " must functionally include either 'email' or 'phone'"));
           }
           if (node.hasNonNull("email") && node.get("email").asText().isBlank()) {
-            return Set.of(contextPath + ".'email' must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".'email' must not be empty or blank in the payload"));
           }
           if (node.hasNonNull("phone") && node.get("phone").asText().isBlank()) {
-            return Set.of(contextPath + ".'phone' must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".'phone' must not be empty or blank in the payload"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -307,13 +310,13 @@ public class ANChecks {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the 'documentParties' object",
         body -> {
-          var issues = new LinkedHashSet<String>();
-          issues.addAll(validateDocumentPartyField("partyName").validate(body));
-          issues.addAll(validateDocumentPartyField("partyContactDetails").validate(body));
-          issues.addAll(validatePartyContactName().validate(body));
-          issues.addAll(validatePartyContactEmailOrPhone().validate(body));
-          issues.addAll(validateDocumentPartyAddress().validate(body));
-          return issues;
+          var results = new LinkedHashSet<ConformanceCheckResult>();
+          results.add(validateDocumentPartyField("partyName").validate(body));
+          results.add(validateDocumentPartyField("partyContactDetails").validate(body));
+          results.add(validatePartyContactName().validate(body));
+          results.add(validatePartyContactEmailOrPhone().validate(body));
+          results.add(validateDocumentPartyAddress().validate(body));
+          return ConformanceCheckResult.from(results);
         });
   }
 
@@ -325,12 +328,12 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*.partyContactDetails.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull("name")) {
-            return Set.of(contextPath + ". 'name' must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ". 'name' must be functionally present"));
           } else if (node.get("name").asText().isBlank()) {
-            return Set.of(contextPath + ". 'name' must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ". 'name' must not be empty or blank in the payload"));
           }
 
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -340,15 +343,15 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*.partyContactDetails.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull("email") && !node.hasNonNull("phone")) {
-            return Set.of(contextPath + " must functionally include either 'email' or 'phone'");
+            return ConformanceCheckResult.simple(Set.of(contextPath + " must functionally include either 'email' or 'phone'"));
           }
           if (node.hasNonNull("email") && node.get("email").asText().isBlank()) {
-            return Set.of(contextPath + ". 'email' must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ". 'email' must not be empty or blank in the payload"));
           }
           if (node.hasNonNull("phone") && node.get("phone").asText().isBlank()) {
-            return Set.of(contextPath + ". 'phone' must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ". 'phone' must not be empty or blank in the payload"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -360,12 +363,12 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally  present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally  present"));
           }
           if (field.equals("partyName") && node.get(field).asText().isBlank()) {
-            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -387,13 +390,13 @@ public class ANChecks {
                         });
 
             if (!hasNonEmpty) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   contextPath
                       + ".address must contain at least one non-empty value among: "
-                      + String.join(", ", ADDRESS_FIELDS));
+                      + String.join(", ", ADDRESS_FIELDS)));
             }
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -412,20 +415,20 @@ public class ANChecks {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the 'transport' object",
         body -> {
-          var issues = new LinkedHashSet<String>();
-          issues.addAll(validateTransportETA("arrivalNotices.*.transport").validate(body));
-          issues.addAll(validatePortOfDischargePresence().validate(body));
-          issues.addAll(
+          var checkResults = new LinkedHashSet<ConformanceCheckResult>();
+          checkResults.add(validateTransportETA("arrivalNotices.*.transport").validate(body));
+          checkResults.add(validatePortOfDischargePresence().validate(body));
+          checkResults.add(
               validatePortOfDischargeLocation("arrivalNotices.*.transport").validate(body));
-          issues.addAll(validatePODAdrressAN().validate(body));
-          issues.addAll(
+          checkResults.add(validatePODAdrressAN().validate(body));
+          checkResults.add(
               validatePortOfDischargeFacilityFields(
                       "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
                   .validate(body));
-          issues.addAll(validateVesselVoyage().validate(body));
-          issues.addAll(validateVesselVoyageField("vesselName").validate(body));
-          issues.addAll(validateVesselVoyageField("carrierImportVoyageNumber").validate(body));
-          return issues;
+          checkResults.add(validateVesselVoyage().validate(body));
+          checkResults.add(validateVesselVoyageField("vesselName").validate(body));
+          checkResults.add(validateVesselVoyageField("carrierImportVoyageNumber").validate(body));
+          return ConformanceCheckResult.from(checkResults);
         });
   }
 
@@ -443,12 +446,12 @@ public class ANChecks {
                   && node.path("placeOfDeliveryArrivalDate").hasNonNull("value");
 
           if (!hasPortOfDischargeValue && !hasPlaceOfDeliveryValue) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 contextPath
                     + ": must functionally include either 'portOfDischargeArrivalDate.value' "
-                    + "or 'placeOfDeliveryArrivalDate.value'");
+                    + "or 'placeOfDeliveryArrivalDate.value'"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -460,9 +463,9 @@ public class ANChecks {
         (node, contextPath) -> {
           var pod = node.get("portOfDischarge");
           if (pod == null) {
-            return Set.of(contextPath + ".portOfDischarge must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".portOfDischarge must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -476,24 +479,24 @@ public class ANChecks {
             if (!pod.hasNonNull("address")
                 && !pod.hasNonNull("UNLocationCode")
                 && !pod.hasNonNull("facility")) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   contextPath
-                      + ".portOfDischarge must functionally contain at least one of 'address', 'UNLocationCode', or 'facility'");
+                      + ".portOfDischarge must functionally contain at least one of 'address', 'UNLocationCode', or 'facility'"));
             }
             if (pod.hasNonNull("UNLocationCode") && pod.get("UNLocationCode").asText().isBlank()) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   contextPath
-                      + ".portOfDischarge.UNLocationCode must not be empty or blank in the payload");
+                      + ".portOfDischarge.UNLocationCode must not be empty or blank in the payload"));
             }
             if (pod.hasNonNull("address")
                 && pod.get("address").isObject()
                 && pod.get("address").isEmpty()) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   contextPath
-                      + ".portOfDischarge.address if present must contain at least one field");
+                      + ".portOfDischarge.address if present must contain at least one field"));
             }
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -503,14 +506,14 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
         (node, contextPath) -> {
           if (node.get("address") == null) {
-            return Set.of(contextPath + ".address must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".address must be functionally present"));
           }
           if (node.hasNonNull("address")
               && node.get("address").isObject()
               && node.get("address").isEmpty()) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 contextPath
-                    + ".address must be functionally present and contain at least one field");
+                    + ".address must be functionally present and contain at least one field"));
           } else {
             boolean hasNonEmpty =
                 ADDRESS_FIELDS.stream()
@@ -523,13 +526,13 @@ public class ANChecks {
                         });
 
             if (!hasNonEmpty) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   contextPath
                       + ".address must contain at least one non-empty value among: "
-                      + String.join(", ", ADDRESS_FIELDS));
+                      + String.join(", ", ADDRESS_FIELDS)));
             }
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -552,16 +555,16 @@ public class ANChecks {
           if (facility != null && facility.isObject()) {
 
             if (!facility.hasNonNull(field)) {
-              return Set.of(contextPath + ".facility must functionally contain " + field);
+              return ConformanceCheckResult.simple(Set.of(contextPath + ".facility must functionally contain " + field));
             } else if (facility.get(field).asText().isBlank()) {
-              return Set.of(
+              return ConformanceCheckResult.simple(Set.of(
                   contextPath
                       + ".facility."
                       + field
-                      + " must not be empty or blank in the payload");
+                      + " must not be empty or blank in the payload"));
             }
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -572,9 +575,9 @@ public class ANChecks {
         (node, contextPath) -> {
           var voyage = node.get("vesselVoyage");
           if (voyage == null || voyage.isEmpty()) {
-            return Set.of(contextPath + ".vesselVoyage must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".vesselVoyage must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -584,11 +587,11 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.transport.legs.*.vesselVoyage"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally present"));
           } else if (node.get(field).asText().isBlank()) {
-            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -600,10 +603,10 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.freeTimes.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(attributeName)) {
-            return Set.of(
-                String.format("%s.%s must be functionally present", contextPath, attributeName));
+            return ConformanceCheckResult.simple(Set.of(
+                String.format("%s.%s must be functionally present", contextPath, attributeName)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -622,13 +625,13 @@ public class ANChecks {
                       + ": 'freeTimes' must be functionally present and contain at least one item for FREE_TIME scenario");
             }
           }
-          issues.addAll(validateFreeTimeArrayAttribute("typeCodes").validate(body));
-          issues.addAll(validateFreeTimeArrayAttribute("ISOEquipmentCodes").validate(body));
-          issues.addAll(validateFreeTimeArrayAttribute("equipmentReferences").validate(body));
-          issues.addAll(validateFreeTimeAttribute("duration").validate(body));
-          issues.addAll(validateFreeTimeAttribute("timeUnit").validate(body));
+          issues.addAll(validateFreeTimeArrayAttribute("typeCodes").validate(body).getErrorMessages());
+          issues.addAll(validateFreeTimeArrayAttribute("ISOEquipmentCodes").validate(body).getErrorMessages());
+          issues.addAll(validateFreeTimeArrayAttribute("equipmentReferences").validate(body).getErrorMessages());
+          issues.addAll(validateFreeTimeAttribute("duration").validate(body).getErrorMessages());
+          issues.addAll(validateFreeTimeAttribute("timeUnit").validate(body).getErrorMessages());
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -642,10 +645,11 @@ public class ANChecks {
         (node, contextPath) -> {
           var arrayNode = node.get(attributeName);
           if (arrayNode == null || !arrayNode.isArray() || arrayNode.isEmpty()) {
-            return Set.of(
-                String.format(
-                    "%s.%s must be functionally present and be a non-empty array",
-                    contextPath, attributeName));
+            return ConformanceCheckResult.simple(
+                Set.of(
+                    String.format(
+                        "%s.%s must be functionally present and be a non-empty array",
+                        contextPath, attributeName)));
           }
 
           boolean allEmpty = true;
@@ -656,22 +660,24 @@ public class ANChecks {
             }
           }
           if (allEmpty) {
-            return Set.of(
-                String.format(
-                    "%s.%s must contain at least one non-empty value", contextPath, attributeName));
+            return ConformanceCheckResult.simple(
+                Set.of(
+                    String.format(
+                        "%s.%s must contain at least one non-empty value",
+                        contextPath, attributeName)));
           }
 
           if (attributeName.equals("typeCodes")) {
-            var issues = new LinkedHashSet<String>();
+            var results = new LinkedHashSet<ConformanceCheckResult>();
             for (var element : arrayNode) {
               var validator =
                   JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
                       ANDatasets.FREE_TIME_TYPE_CODES);
-              issues.addAll(validator.validate(element, contextPath + "." + attributeName));
+              results.add(validator.validate(element, contextPath + "." + attributeName));
             }
-            return issues;
+            return ConformanceCheckResult.from(results);
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -683,14 +689,14 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.charges.*"),
         (node, contextPath) -> {
           if (!node.hasNonNull(attributeName)) {
-            return Set.of(
-                String.format("%s.%s must be functionally present", contextPath, attributeName));
+            return ConformanceCheckResult.simple(Set.of(
+                String.format("%s.%s must be functionally present", contextPath, attributeName)));
           } else if (node.get(attributeName).asText().isBlank()) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 String.format(
-                    "%s.%s must not be empty or blank in the payload", contextPath, attributeName));
+                    "%s.%s must not be empty or blank in the payload", contextPath, attributeName)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -698,23 +704,25 @@ public class ANChecks {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the 'charges' object",
         body -> {
-          var issues = new LinkedHashSet<String>();
+          var results = new LinkedHashSet<ConformanceCheckResult>();
           var arrivalNotices = body.path("arrivalNotices");
           for (int i = 0; i < arrivalNotices.size(); i++) {
             var freeTimes = arrivalNotices.get(i).path("charges");
             if (freeTimes == null || !freeTimes.isArray() || freeTimes.isEmpty()) {
-              issues.add(
-                  "ArrivalNotice "
-                      + i
-                      + ": 'charges' must be functionally present and contain at least one item for FREIGHTED scenario");
+              results.add(
+                  ConformanceCheckResult.simple(
+                      Set.of(
+                          "ArrivalNotice "
+                              + i
+                              + ": 'charges' must be functionally present and contain at least one item for FREIGHTED scenario")));
             }
           }
-          issues.addAll(validateChargeAttribute("chargeName").validate(body));
-          issues.addAll(validateChargeAttribute("currencyAmount").validate(body));
-          issues.addAll(validateChargeAttribute("currencyCode").validate(body));
-          issues.addAll(validateChargeAttribute("unitPrice").validate(body));
-          issues.addAll(validateChargeAttribute("quantity").validate(body));
-          return issues;
+          results.add(validateChargeAttribute("chargeName").validate(body));
+          results.add(validateChargeAttribute("currencyAmount").validate(body));
+          results.add(validateChargeAttribute("currencyCode").validate(body));
+          results.add(validateChargeAttribute("unitPrice").validate(body));
+          results.add(validateChargeAttribute("quantity").validate(body));
+          return ConformanceCheckResult.from(results);
         });
   }
 
@@ -724,13 +732,13 @@ public class ANChecks {
         body -> {
           var issues = new LinkedHashSet<String>();
 
-          issues.addAll(validateUTEEquipmentPresence().validate(body));
-          issues.addAll(validateUTEEquipmentField("equipmentReference").validate(body));
-          issues.addAll(validateUTEEquipmentField("ISOEquipmentCode").validate(body));
-          issues.addAll(validateUTESealsPresence().validate(body));
-          issues.addAll(validateUTESealNumber().validate(body));
+          issues.addAll(validateUTEEquipmentPresence().validate(body).getErrorMessages());
+          issues.addAll(validateUTEEquipmentField("equipmentReference").validate(body).getErrorMessages());
+          issues.addAll(validateUTEEquipmentField("ISOEquipmentCode").validate(body).getErrorMessages());
+          issues.addAll(validateUTESealsPresence().validate(body).getErrorMessages());
+          issues.addAll(validateUTESealNumber().validate(body).getErrorMessages());
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -742,11 +750,11 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*.equipment"),
         (node, contextPath) -> {
           if (!node.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally present"));
           } else if (node.get(field).asText().isBlank()) {
-            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -756,9 +764,9 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*"),
         (ute, contextPath) -> {
           if (ute.get("equipment") == null || ute.get("equipment").isNull()) {
-            return Set.of(contextPath + ".equipment must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".equipment must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -782,7 +790,7 @@ public class ANChecks {
             }
           }
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 
@@ -792,12 +800,12 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*.seals.*"),
         (seal, contextPath) -> {
           if (!seal.hasNonNull("number")) {
-            return Set.of(contextPath + ".number must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".number must be functionally present"));
           } else if (seal.get("number").asText().isBlank())
-            return Set.of(contextPath + ".number must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".number must not be empty or blank in the payload"));
           {
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -807,16 +815,16 @@ public class ANChecks {
         body -> {
           var issues = new LinkedHashSet<String>();
 
-          issues.addAll(validateConsignmentItemsDescriptionOfGoods().validate(body));
-          issues.addAll(validateCargoItemPresence().validate(body));
-          issues.addAll(validateCargoItemField("equipmentReference").validate(body));
-          issues.addAll(validateCargoItemField("cargoGrossWeight").validate(body));
-          issues.addAll(validateCargoGrossWeightField("value").validate(body));
-          issues.addAll(validateCargoGrossWeightField("unit").validate(body));
-          issues.addAll(validateOuterPackagingStructure().validate(body));
-          issues.addAll(validateOuterPackagingFields().validate(body));
+          issues.addAll(validateConsignmentItemsDescriptionOfGoods().validate(body).getErrorMessages());
+          issues.addAll(validateCargoItemPresence().validate(body).getErrorMessages());
+          issues.addAll(validateCargoItemField("equipmentReference").validate(body).getErrorMessages());
+          issues.addAll(validateCargoItemField("cargoGrossWeight").validate(body).getErrorMessages());
+          issues.addAll(validateCargoGrossWeightField("value").validate(body).getErrorMessages());
+          issues.addAll(validateCargoGrossWeightField("unit").validate(body).getErrorMessages());
+          issues.addAll(validateOuterPackagingStructure().validate(body).getErrorMessages());
+          issues.addAll(validateOuterPackagingFields().validate(body).getErrorMessages());
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
   private static JsonContentCheck validateConsignmentItemsDescriptionOfGoods() {
@@ -826,9 +834,9 @@ public class ANChecks {
         (ci, contextPath) -> {
           var node = ci.get("descriptionOfGoods");
           if (node == null || !node.isArray() || node.isEmpty()) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 contextPath
-                    + ".descriptionOfGoods must functionally be a non-empty array of strings");
+                    + ".descriptionOfGoods must functionally be a non-empty array of strings"));
           }
           boolean allEmpty = true;
           for (var item : node) {
@@ -839,11 +847,11 @@ public class ANChecks {
           }
 
           if (allEmpty) {
-            return Set.of(
+            return ConformanceCheckResult.simple(Set.of(
                 contextPath
-                    + ".descriptionOfGoods must contain at least one non-empty string value");
+                    + ".descriptionOfGoods must contain at least one non-empty string value"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -854,9 +862,9 @@ public class ANChecks {
         (ci, contextPath) -> {
           var items = ci.get("cargoItems");
           if (items == null || !items.isArray() || items.isEmpty()) {
-            return Set.of(contextPath + ".cargoItems must functionally be a non-empty array");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".cargoItems must functionally be a non-empty array"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -868,11 +876,11 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*.cargoItems.*"),
         (item, contextPath) -> {
           if (!item.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally present"));
           } else if (!field.equals("cargoGrossWeight") && item.get(field).asText().isBlank()) {
-            return Set.of(contextPath + "." + field + " must not be empty or blank in the payload");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -886,9 +894,9 @@ public class ANChecks {
                 "arrivalNotices.*.consignmentItems.*.cargoItems.*.cargoGrossWeight"),
         (item, contextPath) -> {
           if (!item.hasNonNull(field)) {
-            return Set.of(contextPath + "." + field + " must be functionally present");
+            return ConformanceCheckResult.simple(Set.of(contextPath + "." + field + " must be functionally present"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -899,9 +907,9 @@ public class ANChecks {
         (item, contextPath) -> {
           var op = item.get("outerPackaging");
           if (op == null || !op.isObject() || op.isEmpty()) {
-            return Set.of(contextPath + ".outerPackaging must functionally be a non-empty object");
+            return ConformanceCheckResult.simple(Set.of(contextPath + ".outerPackaging must functionally be a non-empty object"));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         });
   }
 
@@ -935,7 +943,7 @@ public class ANChecks {
             issues.add(contextPath + ".numberOfPackages must be functionally present");
           }
 
-          return issues;
+          return ConformanceCheckResult.simple(issues);
         });
   }
 

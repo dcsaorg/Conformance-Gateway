@@ -5,12 +5,12 @@ public enum ConformanceStatus {
   NON_CONFORMANT,
   PARTIALLY_CONFORMANT,
   CONFORMANT,
-  NOT_RELEVANT;
+  IRRELEVANT;
 
   public static ConformanceStatus forExchangeCounts(
       int conformantExchangeCount, int nonConformantExchangeCount, boolean isRelevant) {
     if (!isRelevant) {
-      return NOT_RELEVANT;
+      return IRRELEVANT;
     }
 
     boolean hasConformantExchanges = conformantExchangeCount > 0;

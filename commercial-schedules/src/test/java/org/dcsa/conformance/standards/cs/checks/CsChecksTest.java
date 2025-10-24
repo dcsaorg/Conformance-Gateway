@@ -23,11 +23,11 @@ class CsChecksTest {
     ObjectNode cutOffTime = cutOffTimes.addObject();
     cutOffTime.put("cutOffDateTimeCode", "LCO");
     rootNodeArray.add(routing);
-    assertTrue(VALIDATE_CUTOFF_TIME_CODE.validate(rootNodeArray).isEmpty());
+    assertTrue(VALIDATE_CUTOFF_TIME_CODE.validate(rootNodeArray).getErrorMessages().isEmpty());
 
     cutOffTime.put("cutOffDateTimeCode", "LCR");
     rootNodeArray.add(routing);
-    assertFalse(VALIDATE_CUTOFF_TIME_CODE.validate(rootNodeArray).isEmpty());
+    assertFalse(VALIDATE_CUTOFF_TIME_CODE.validate(rootNodeArray).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -37,15 +37,15 @@ class CsChecksTest {
     cutOffTime.put("cutOffDateTimeCode", "LCO");
     routing.put("receiptTypeAtOrigin", "CFS");
     rootNodeArray.add(routing);
-    assertTrue(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray).isEmpty());
+    assertTrue(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray).getErrorMessages().isEmpty());
 
     cutOffTime.put("cutOffDateTimeCode", "LCO");
     routing.put("receiptTypeAtOrigin", "CO");
-    assertFalse(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray).isEmpty());
+    assertFalse(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray).getErrorMessages().isEmpty());
 
     cutOffTime.put("cutOffDateTimeCode", "PCO");
     routing.put("receiptTypeAtOrigin", "CO");
-    assertTrue(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray).isEmpty());
+    assertTrue(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -57,18 +57,18 @@ class CsChecksTest {
     ObjectNode cutOffTime = cutOffTimes.addObject();
     cutOffTime.put("cutOffDateTimeCode", "LCO");
     rootNodeArray.add(schedule);
-    assertTrue(VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray).isEmpty());
+    assertTrue(VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray).getErrorMessages().isEmpty());
 
     cutOffTime.put("cutOffDateTimeCode", "LCR");
     rootNodeArray.add(schedule);
-    assertFalse(VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray).isEmpty());
+    assertFalse(VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray).getErrorMessages().isEmpty());
   }
 
   @Test
   void testValidateNonEmptyResponse() {
     rootNodeArray.add(objectMapper.createObjectNode());
-    assertTrue(CsChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(rootNodeArray).isEmpty());
+    assertTrue(CsChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(rootNodeArray).getErrorMessages().isEmpty());
     rootNodeArray.removeAll();
-    assertFalse(CsChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(rootNodeArray).isEmpty());
+    assertFalse(CsChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(rootNodeArray).getErrorMessages().isEmpty());
   }
 }

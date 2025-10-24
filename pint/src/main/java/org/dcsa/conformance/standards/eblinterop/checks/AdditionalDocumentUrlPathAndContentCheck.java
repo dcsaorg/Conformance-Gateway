@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
@@ -39,9 +40,9 @@ public class AdditionalDocumentUrlPathAndContentCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Set.of();
+    if (exchange == null) return ConformanceCheckResult.simple(Set.of());
     String requestUrl = exchange.getRequest().url();
     var m = URL_PATTERN.matcher(requestUrl);
     var issues = new LinkedHashSet<String>();
@@ -73,6 +74,6 @@ public class AdditionalDocumentUrlPathAndContentCheck extends ActionCheck {
           .formatted(requestUrl, expectedReference));
     }
 
-    return issues;
+    return ConformanceCheckResult.simple(issues);
   }
 }

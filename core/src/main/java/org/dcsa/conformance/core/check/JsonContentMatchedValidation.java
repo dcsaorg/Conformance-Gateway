@@ -11,5 +11,5 @@ public interface JsonContentMatchedValidation {
    *                    to describe where in the Json tree the error applies.
    * @return A set of validation errors (returns the empty set if everything is ok)
    */
-  Set<String> validate(JsonNode nodeToValidate, String contextPath);
+  ConformanceCheckResult validate(JsonNode nodeToValidate, String contextPath);
 }

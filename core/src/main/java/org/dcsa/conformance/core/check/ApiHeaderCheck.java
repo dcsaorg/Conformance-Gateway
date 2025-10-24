@@ -68,9 +68,9 @@ public class ApiHeaderCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Collections.emptySet();
+    if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
     Map<String, ? extends Collection<String>> headers =
         exchange.getMessage(httpMessageType).headers();
     String headerName =
@@ -80,20 +80,20 @@ public class ApiHeaderCheck extends ActionCheck {
             .orElse(ConformanceParty.API_VERSION);
     Collection<String> headerValues = headers.get(headerName);
     if (headerValues == null || headerValues.isEmpty()) {
-      return httpMessageType.equals(HttpMessageType.RESPONSE) && !isNotification
+      return ConformanceCheckResult.simple(httpMessageType.equals(HttpMessageType.RESPONSE) && !isNotification
           ? Set.of("Missing %s header".formatted(ConformanceParty.API_VERSION))
-          : Collections.emptySet();
+          : Collections.emptySet());
     }
-    if (headerValues.size() > 1) return Set.of("Duplicate %s headers".formatted(ConformanceParty.API_VERSION));
+    if (headerValues.size() > 1) return ConformanceCheckResult.simple(Set.of("Duplicate %s headers".formatted(ConformanceParty.API_VERSION)));
     String exchangeApiVersion = headerValues.stream().findFirst().orElseThrow();
     if (exchangeApiVersion.contains("-")) {
       exchangeApiVersion = exchangeApiVersion.substring(0, exchangeApiVersion.indexOf("-"));
     }
     return switch (httpMessageType) {
-      case REQUEST -> isNotification
+      case REQUEST -> ConformanceCheckResult.simple(isNotification
           ? _checkNotificationRequestApiVersionHeader(expectedVersion, exchangeApiVersion)
-          : _checkRegularExchangeRequestApiVersionHeader(expectedVersion, exchangeApiVersion);
-      case RESPONSE -> _checkResponseApiVersionHeader(expectedVersion, exchangeApiVersion);
+          : _checkRegularExchangeRequestApiVersionHeader(expectedVersion, exchangeApiVersion));
+      case RESPONSE -> ConformanceCheckResult.simple(_checkResponseApiVersionHeader(expectedVersion, exchangeApiVersion));
     };
   }
 

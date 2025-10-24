@@ -17,6 +17,8 @@ public class LostAttributeCheck implements JsonRebaseableContentCheck {
 
   @Getter
   private final String description;
+  @Getter
+  private final boolean isRelevant = true;
   private final Supplier<JsonNode> baseNode;
   private final BiConsumer<JsonNode, JsonNode> normalizer;
 
@@ -50,11 +52,11 @@ public class LostAttributeCheck implements JsonRebaseableContentCheck {
   }
 
   @Override
-  public Set<String> validate(JsonNode nodeToValidate, String contextPath) {
+  public ConformanceCheckResult validate(JsonNode nodeToValidate, String contextPath) {
     var left = baseNode.get();
     var right = nodeToValidate;
     if (left == null) {
-      return Set.of();
+      return ConformanceCheckResult.simple(Set.of());
     }
     if (normalizer != null) {
       left = left.deepCopy();
@@ -63,7 +65,7 @@ public class LostAttributeCheck implements JsonRebaseableContentCheck {
     }
     var issues = new LinkedHashSet<String>();
     this.checkNode(left, right, contextPath, issues);
-    return issues;
+    return ConformanceCheckResult.simple(issues);
   }
 
   @Override

@@ -3,7 +3,7 @@ export enum ConformanceStatus {
     NON_CONFORMANT = "NON_CONFORMANT",
     PARTIALLY_CONFORMANT = "PARTIALLY_CONFORMANT",
     NO_TRAFFIC = "NO_TRAFFIC",
-    NOT_RELEVANT= "NOT_RELEVANT",
+    IRRELEVANT= "IRRELEVANT",
 }
 
 export function asConformanceStatus(stringConformanceStatus: string): ConformanceStatus {
@@ -20,7 +20,7 @@ export function getConformanceStatusEmoji(conformanceStatus: ConformanceStatus):
             return "✔️";
         case ConformanceStatus.NO_TRAFFIC:
             return "❔";
-        case ConformanceStatus.NOT_RELEVANT:
+        case ConformanceStatus.IRRELEVANT:
             return "➖";
     }
 }
@@ -35,7 +35,7 @@ export function getConformanceStatusTitle(conformanceStatus: ConformanceStatus):
             return "Partially conformant";
         case ConformanceStatus.NO_TRAFFIC:
             return "No traffic";
-        case ConformanceStatus.NOT_RELEVANT:
-            return "Not relevant";
+        case ConformanceStatus.IRRELEVANT:
+            return "Irrelevant";
     }
 }

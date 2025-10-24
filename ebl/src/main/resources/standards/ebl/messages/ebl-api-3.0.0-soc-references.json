@@ -16,7 +16,7 @@
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "SOCBOOKING202507041234567890123456",
+      "carrierBookingReference": "{CBR}",
       "descriptionOfGoods": [
         "Agricultural Equipment"
       ],

@@ -16,7 +16,7 @@
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "BOOKREQ-HBOL-1234567890123456",
+      "carrierBookingReference": "{CBR}",
       "descriptionOfGoods": [
         "Electronics - Consumer Devices"
       ],

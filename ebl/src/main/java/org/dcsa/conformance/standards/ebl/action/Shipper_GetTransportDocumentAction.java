@@ -45,7 +45,6 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDspSupplier().get();
-    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
     getDspConsumer().accept(dsp);
   }
 

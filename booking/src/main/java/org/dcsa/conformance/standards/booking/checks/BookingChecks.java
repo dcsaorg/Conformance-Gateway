@@ -608,8 +608,13 @@ public class BookingChecks {
           "check confirmed booking fields availability",
           body -> {
             var issues = new LinkedHashSet<String>();
-            var bookingStatus = body.path(BOOKING_STATUS).asText("");
-            if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
+            var bookingStatusAttribute = body.path(BOOKING_STATUS).asText("");
+            BookingState bookingStatus = BookingState.fromString(bookingStatusAttribute);
+            if (Objects.isNull(bookingStatus)) {
+              issues.add("Invalid or empty 'bookingStatus' attribute value: '%s'".formatted(bookingStatusAttribute));
+              return issues;
+            }
+            if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
               if (body.path(CONFIRMED_EQUIPMENTS).isEmpty()) {
                 issues.add(S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(CONFIRMED_EQUIPMENTS));
               }

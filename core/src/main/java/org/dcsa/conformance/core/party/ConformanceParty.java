@@ -106,13 +106,15 @@ public abstract class ConformanceParty implements StatefulEntity {
     actionPromptsQueue.importJsonState(jsonState.get("actionPromptsQueue"));
 
     JsonNode operatorLogNode = jsonState.get(operatorLogName);
-    StreamSupport.stream(operatorLogNode.spliterator(), false)
-        .forEach(
-            entryNode -> {
-              String message = entryNode.get("message").asText();
-              Instant timestamp = Instant.parse(entryNode.get("timestamp").asText());
-              operatorLog.add(new TimestampedLogEntry(message, timestamp));
-            });
+    if (operatorLogNode != null) {
+      StreamSupport.stream(operatorLogNode.spliterator(), false)
+          .forEach(
+              entryNode -> {
+                String message = entryNode.get("message").asText();
+                Instant timestamp = Instant.parse(entryNode.get("timestamp").asText());
+                operatorLog.add(new TimestampedLogEntry(message, timestamp));
+              });
+    }
 
     importPartyJsonState((ObjectNode) jsonState);
   }

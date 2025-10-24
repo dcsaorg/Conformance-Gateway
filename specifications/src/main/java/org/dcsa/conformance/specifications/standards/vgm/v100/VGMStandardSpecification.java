@@ -79,7 +79,7 @@ public class VGMStandardSpecification extends StandardSpecification {
 
   @Override
   protected LegendMetadata getLegendMetadata() {
-    return new LegendMetadata("Verified Gross Mass", "1.0.0-20251024-design", "VGM", "", 4);
+    return new LegendMetadata("Verified Gross Mass", "1.0.0-20251024-design", "", "", 4);
   }
 
   @Override

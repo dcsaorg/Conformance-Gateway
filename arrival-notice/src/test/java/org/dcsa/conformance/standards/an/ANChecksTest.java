@@ -65,7 +65,6 @@ class ANChecksTest {
 
     ArrayNode parties = an.putArray("documentParties");
     ObjectNode p = parties.addObject();
-    p.put("partyFunction", "CN");
     p.put("partyName", "Consignee LLC");
     p.put("partyContactDetails", "consignee@example.com");
     ObjectNode addr = p.putObject("address");
@@ -73,7 +72,7 @@ class ANChecksTest {
 
     assertTrue(ANChecks.validateDocumentParties().validate(body).isEmpty());
 
-    p.remove("partyFunction");
+    p.remove("partyName");
     assertFalse(ANChecks.validateDocumentParties().validate(body).isEmpty());
   }
 

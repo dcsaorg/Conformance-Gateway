@@ -14,8 +14,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -723,18 +723,20 @@ class BookingChecksTest {
 
   @Test
   void testCheckConfirmedBookingFields_noBookingStatus_throwException() {
-    Assertions.assertThrows(
-        IllegalArgumentException.class,
-        () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: ''"));
   }
 
   @Test
   void testCheckConfirmedBookingFields_emptyBookingStatus_throwException() {
     booking.put("bookingStatus", "");
 
-    Assertions.assertThrows(
-        IllegalArgumentException.class,
-        () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: ''"));
   }
 
   @Test
@@ -920,8 +922,9 @@ class BookingChecksTest {
   void testCheckConfirmedBookingFields_unknownBookingStatus_throwsException() {
     booking.put("bookingStatus", "UNKNOWN_STATUS");
 
-    Assertions.assertThrows(
-        IllegalArgumentException.class,
-        () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: 'UNKNOWN_STATUS'"));
   }
 }

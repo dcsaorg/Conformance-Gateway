@@ -259,9 +259,36 @@ TerminalCall,terminalCallID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb
 TerminalCall,terminalCallReference,string,,maxLength=100,,15063401,"The unique reference of a terminal call, provided by the vessel operator.
 
 This corresponds to the property `transportCallReference` from the DCSA Operational Vessel Schedules (OVS) 3.0 standard.",
-TerminalCall,"universalExportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the export voyage.",
-TerminalCall,"universalImportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the import voyage.",
-TerminalCall,"universalServiceReference",string,,maxLength=8,,SR12345A,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",
+TerminalCall,"universalExportVoyageReference",string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
+TerminalCall,"universalImportVoyageReference",string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
+TerminalCall,"universalServiceReference",string,,maxLength=8,,SR12345A,"Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+DCSA generates and distributes batches of Universal Service References (USRs)
+to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+or independently for one of its own non-VSA, non-Alliance services.
+
+Every Universal Service Reference is an 8-character string with the following format:
+ * the prefix ""SR""
+ * 5 digits
+ * 1 uppercase English letter (A-Z).",
 Timestamp,classifierCode,string,,maxLength=3,,EST,"Code identifying the type of this timestamp within the context of
 [the ""ERP"" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
 - `ACT` (Actual)

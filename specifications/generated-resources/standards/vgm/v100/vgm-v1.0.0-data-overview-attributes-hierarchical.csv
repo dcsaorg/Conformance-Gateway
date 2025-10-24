@@ -467,10 +467,26 @@ or a subsequent revision.",
 - `NMFTA` (National Motor Freight Traffic Association)",
 "VGMDeclaration / vesselVoyageDetails / exportVoyageNumberOrReference","exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
 "VGMDeclaration / vesselVoyageDetails / exportVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-"VGMDeclaration / vesselVoyageDetails / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"VGMDeclaration / vesselVoyageDetails / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 "VGMDeclaration / vesselVoyageDetails / importVoyageNumberOrReference","importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
 "VGMDeclaration / vesselVoyageDetails / importVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-"VGMDeclaration / vesselVoyageDetails / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"VGMDeclaration / vesselVoyageDetails / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 "VGMDeclaration / vesselVoyageDetails / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 "VGMDeclaration / vesselVoyageDetails / portOfDischarge / address",address,Address,,,,,"Location address",
 "VGMDeclaration / vesselVoyageDetails / portOfDischarge / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",

@@ -303,7 +303,18 @@ Seal,type,string,,,,WIR,"The type of seal.
 - `BLT` (Bolt)
 - `WIR` (Wire)",
 ServiceCodeOrReference,carrierServiceCode,string,,,,FE1,"Carrier-specific identifier of a service.",
-ServiceCodeOrReference,"universalServiceReference",string,,,,SR12345A,"Reference of a service agreed between the VSA partners.",
+ServiceCodeOrReference,"universalServiceReference",string,,maxLength=8,,SR12345A,"Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+DCSA generates and distributes batches of Universal Service References (USRs)
+to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+or independently for one of its own non-VSA, non-Alliance services.
+
+Every Universal Service Reference is an 8-character string with the following format:
+ * the prefix ""SR""
+ * 5 digits
+ * 1 uppercase English letter (A-Z).",
 ShipmentDetails,documentReference,DocumentReference,,,,,"Referenced document",
 ShipmentDetails,priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in consideration for the tariff applicability, that differs depending on the trade.
 It can vary per carrier.",
@@ -374,4 +385,12 @@ VesselTransport,vesselIMONumber,string,,maxLength=8,,9321483,"The unique referen
 The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.",
 VesselTransport,vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
 VoyageNumberOrReference,carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-VoyageNumberOrReference,universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+VoyageNumberOrReference,universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",

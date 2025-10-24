@@ -497,10 +497,26 @@ Code identifying the reason for a delay,
 "Event / transportDetails / transportCall",transportCall,TransportCall,,,,,"Transport call information",
 "Event / transportDetails / transportCall / exportVoyageNumberOrReference","exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
 "Event / transportDetails / transportCall / exportVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-"Event / transportDetails / transportCall / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"Event / transportDetails / transportCall / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 "Event / transportDetails / transportCall / importVoyageNumberOrReference","importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
 "Event / transportDetails / transportCall / importVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-"Event / transportDetails / transportCall / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"Event / transportDetails / transportCall / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 "Event / transportDetails / transportCall / modeOfTransport",modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA
 - `VESSEL` - Vessel
 - `RAIL` - Rail
@@ -516,7 +532,18 @@ The reference is provided by the port to uniquely identify a port call.",
 "Event / transportDetails / transportCall / railTransport / railServiceReference",railServiceReference,string,,maxLength=50,,,"Reference of the rail service on which the equipment is transported.",
 "Event / transportDetails / transportCall / serviceCodeOrReference",serviceCodeOrReference,ServiceCodeOrReference,,,,,"Carrier service code and/or universal service reference",
 "Event / transportDetails / transportCall / serviceCodeOrReference / carrierServiceCode",carrierServiceCode,string,,,,FE1,"Carrier-specific identifier of a service.",
-"Event / transportDetails / transportCall / serviceCodeOrReference / universalServiceReference","universalServiceReference",string,,,,SR12345A,"Reference of a service agreed between the VSA partners.",
+"Event / transportDetails / transportCall / serviceCodeOrReference / universalServiceReference","universalServiceReference",string,,maxLength=8,,SR12345A,"Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+DCSA generates and distributes batches of Universal Service References (USRs)
+to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+or independently for one of its own non-VSA, non-Alliance services.
+
+Every Universal Service Reference is an 8-character string with the following format:
+ * the prefix ""SR""
+ * 5 digits
+ * 1 uppercase English letter (A-Z).",
 "Event / transportDetails / transportCall / transportCallReference",transportCallReference,string,,,,,"Carrier-defined reference of a `TransportCall`.
 
 If the mode of transport is Vessel and the facility is a Port or Terminal,

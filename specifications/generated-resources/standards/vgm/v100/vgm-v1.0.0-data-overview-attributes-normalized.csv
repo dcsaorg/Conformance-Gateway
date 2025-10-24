@@ -226,7 +226,15 @@ VGMDeclaration,vesselVoyageDetails,VesselVoyageDetails,,,,,"VGM details specific
 VGMDeclaration,VGM,VGM,,,,,"Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6",
 VGMDeclaration,weighingParty,PartyDetails,,,,,"Legally accepted party designated to perform the weighing.",
 VoyageNumberOrReference,carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-VoyageNumberOrReference,universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+VoyageNumberOrReference,universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 Weight,unit,string,,maxLength=10,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)

@@ -2,6 +2,7 @@ package org.dcsa.conformance.specifications.standards.portcall.v200.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalServiceReference;
 import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalVoyageReference;
 import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
 
@@ -48,12 +49,7 @@ This number helps differentiate multiple terminal visits in the same port call.
           "The carrier-specific code of the service for which the schedule details are published.")
   private String carrierServiceCode;
 
-  @Schema(
-      maxLength = 8,
-      example = "SR12345A",
-      description =
-          "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.")
-  private String universalServiceReference;
+  @Schema() private UniversalServiceReference universalServiceReference;
 
   @Schema(
       maxLength = 50,
@@ -61,8 +57,7 @@ This number helps differentiate multiple terminal visits in the same port call.
       description = "Carrier-specific identifier of the import voyage.")
   private String carrierImportVoyageNumber;
 
-  @Schema(description = "Universal identifier of the import voyage.")
-  private UniversalVoyageReference universalImportVoyageReference;
+  @Schema() private UniversalVoyageReference universalImportVoyageReference;
 
   @Schema(
       maxLength = 50,
@@ -70,8 +65,7 @@ This number helps differentiate multiple terminal visits in the same port call.
       description = "Carrier-specific identifier of the export voyage.")
   private String carrierExportVoyageNumber;
 
-  @Schema(description = "Universal identifier of the export voyage.")
-  private UniversalVoyageReference universalExportVoyageReference;
+  @Schema() private UniversalVoyageReference universalExportVoyageReference;
 
   @Schema(
       example = "false",

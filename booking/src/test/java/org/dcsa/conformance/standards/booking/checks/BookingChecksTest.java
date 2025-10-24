@@ -19,7 +19,6 @@ import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -753,38 +752,35 @@ class BookingChecksTest {
 
   @Test
   void testCheckConfirmedBookingFields_noBookingStatus_throwException() {
-    Assertions.assertThrows(
-        IllegalArgumentException.class,
-        () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking).getErrorMessages();
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: ''"));
   }
 
   @Test
   void testCheckConfirmedBookingFields_emptyBookingStatus_throwException() {
     booking.put("bookingStatus", "");
 
-    Assertions.assertThrows(
-        IllegalArgumentException.class,
-        () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking).getErrorMessages();
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: ''"));
   }
 
-  @Test
-  void testCheckConfirmedBookingFields_nonConfirmedStatus_irrelevant() {
-    String[] nonConfirmedStates = {
-      "RECEIVED", "PENDING_UPDATE", "UPDATE_RECEIVED", "DECLINED", "COMPLETED"
-    };
+  @ParameterizedTest
+  @ValueSource(strings = {"RECEIVED", "PENDING_UPDATE", "UPDATE_RECEIVED", "DECLINED", "COMPLETED"})
+  void testCheckConfirmedBookingFields_nonConfirmedStatus_irrelevant(String status) {
+    ObjectNode testBooking = OBJECT_MAPPER.createObjectNode();
+    testBooking.put("bookingStatus", status);
 
-    for (String status : nonConfirmedStates) {
-      ObjectNode testBooking = OBJECT_MAPPER.createObjectNode();
-      testBooking.put("bookingStatus", status);
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(testBooking))
+            .errors();
 
-      Set<ConformanceError> errors =
-          ((ConformanceCheckResult.ErrorsWithRelevance)
-                  BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(testBooking))
-              .errors();
-
-      assertEquals(1, errors.size());
-      assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
-    }
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
   }
 
   @Test
@@ -965,9 +961,10 @@ class BookingChecksTest {
   void testCheckConfirmedBookingFields_unknownBookingStatus_throwsException() {
     booking.put("bookingStatus", "UNKNOWN_STATUS");
 
-    Assertions.assertThrows(
-        IllegalArgumentException.class,
-        () -> BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking));
+    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking).getErrorMessages();
+
+    assertEquals(1, errors.size());
+    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: 'UNKNOWN_STATUS'"));
   }
 
   @Nested

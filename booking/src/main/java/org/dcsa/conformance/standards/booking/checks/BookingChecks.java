@@ -657,7 +657,9 @@ public class BookingChecks {
               try {
                 bookingStatus = BookingState.fromString(bookingStatusAttribute);
               } catch (Exception e) {
-                issues.add("Invalid 'bookingStatus' attribute value: '%s'".formatted(bookingStatusAttribute));
+                issues.add(
+                    "Invalid 'bookingStatus' attribute value: '%s'"
+                        .formatted(bookingStatusAttribute));
               }
               if (bookingStatus != null) {
                 if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
@@ -672,10 +674,11 @@ public class BookingChecks {
                     issues.add(
                         S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(SHIPMENT_CUT_OFF_TIMES));
                   }
+                } else {
+                  return ConformanceCheckResult.withRelevance(
+                      Set.of(ConformanceError.irrelevant()));
                 }
               }
-            } else {
-              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
             return ConformanceCheckResult.simple(issues);
           });

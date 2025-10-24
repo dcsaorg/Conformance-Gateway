@@ -1,12 +1,12 @@
 package org.dcsa.conformance.standards.booking.party;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class BookingStateTest {
 
@@ -25,7 +25,6 @@ class BookingStateTest {
     "received",
   })
   void testFromString_invalidInput(String input) {
-    assertThrows(IllegalArgumentException.class, () -> BookingState.fromString(input));
+    assertNull(BookingState.fromString(input));
   }
-
 }

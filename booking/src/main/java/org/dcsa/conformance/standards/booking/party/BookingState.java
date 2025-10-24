@@ -20,7 +20,7 @@ public enum BookingState {
     try {
       return valueOf(bookingStateName); // Case-sensitive
     } catch (IllegalArgumentException | NullPointerException e) {
-      throw new IllegalArgumentException("Unknown booking state: " + bookingStateName);
+      return null;
     }
   }
 

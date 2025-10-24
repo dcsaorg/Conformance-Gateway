@@ -726,7 +726,7 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute"));
+    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: ''"));
   }
 
   @Test
@@ -736,7 +736,7 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute"));
+    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: ''"));
   }
 
   @Test
@@ -925,6 +925,6 @@ class BookingChecksTest {
     Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking);
 
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute"));
+    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: 'UNKNOWN_STATUS'"));
   }
 }

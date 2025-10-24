@@ -611,7 +611,7 @@ public class BookingChecks {
             var bookingStatusAttribute = body.path(BOOKING_STATUS).asText("");
             BookingState bookingStatus = BookingState.fromString(bookingStatusAttribute);
             if (Objects.isNull(bookingStatus)) {
-              issues.add("Invalid or empty 'bookingStatus' attribute");
+              issues.add("Invalid or empty 'bookingStatus' attribute value: '%s'".formatted(bookingStatusAttribute));
               return issues;
             }
             if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {

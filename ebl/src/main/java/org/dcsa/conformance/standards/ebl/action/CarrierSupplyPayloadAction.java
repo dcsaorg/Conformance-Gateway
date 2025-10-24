@@ -103,14 +103,20 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
+    if (shouldIncludeCbr()) {
+      return getMarkdownHumanReadablePrompt(
+          Map.of("SCENARIO_TYPE", scenarioType.name(), CBR_PLACEHOLDER, getCbrValue()),
+          "prompt-carrier-supply-csp-with-cbr.md");
+    }
+    return getMarkdownHumanReadablePrompt(
+        Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return JsonToolkit.templateFileToJsonNode(
         "/standards/ebl/messages/" + scenarioType.eblPayload(standardVersion),
-        Map.of(CBR_PLACEHOLDER, determineCbr()));
+        Map.of(CBR_PLACEHOLDER, getCbrValue()));
   }
 
   @Override
@@ -163,8 +169,12 @@ public class CarrierSupplyPayloadAction extends EblAction {
     return () -> carrierPayload;
   }
 
-  private String determineCbr() {
-    if (previousAction instanceof BookingAndEblAction && !(previousAction instanceof EblAction)) {
+  private boolean shouldIncludeCbr() {
+    return !(previousAction instanceof EblAction);
+  }
+
+  private String getCbrValue() {
+    if (shouldIncludeCbr()) {
       return getBookingDspReference().get().carrierBookingReference();
     }
     return "BOOKING202507041234567890123456"; // Default fallback

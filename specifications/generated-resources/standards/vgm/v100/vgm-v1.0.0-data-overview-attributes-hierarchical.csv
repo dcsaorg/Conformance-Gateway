@@ -145,11 +145,11 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / holdingParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
-"VGMDeclaration / isRetracted",isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
+"VGMDeclaration / isRetracted",isRetracted,boolean,,,,,"Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
 
-The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+The data in all previously transmitted VGM declarations with the same `declarationReference` must be discarded or ignored.
 
-If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).",
+If this flag is set, any data in this `VGMDeclaration` object other than the `declarationReference` is irrelevant (if present).",
 "VGMDeclaration / orderedByParty",orderedByParty,PartyDetails,,,,,"Party that orders the weighing at the terminal or weighing station.",
 "VGMDeclaration / orderedByParty / address",address,Address,,,,,"An object for storing address-related information.",
 "VGMDeclaration / orderedByParty / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",

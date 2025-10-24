@@ -57,11 +57,11 @@ paths:
         * `transportDocumentReference`, `equipmentReference`
 
         Every VGM Producer must support combining any of the query parameter filters above with all of these additional filters:
-        * `vgmUpdatedDateTimeMin`
-        * `vgmUpdatedDateTimeMax`
-        * `vgmUpdatedDateTimeMin`, `vgmUpdatedDateTimeMax`
+        * `declarationDateTimeMin`
+        * `declarationDateTimeMax`
+        * `declarationDateTimeMin`, `declarationDateTimeMax`
 
-        Each VGM Producer can separately also decide to have default relative date ranges and only return VGM declarations having an `updatedDateTime` within those ranges.
+        Each VGM Producer can separately also decide to have default relative date ranges and only return VGM declarations having a `declarationDateTime` within those ranges.
 
         When receiving requests containing an unsupported query parameter, a VGM Producer can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 
@@ -100,10 +100,10 @@ paths:
       parameters:
       - name: "carrierBookingReference"
         in: "query"
-        description: "Reference of the transport document for which to return the associated VGMs"
+        description: "Reference of the booking for which to return the associated VGMs"
         schema:
           type: "string"
-        example: "HHL71800000"
+        example: "ABC709951"
       - name: "transportDocumentReference"
         in: "query"
         description: "Reference of the transport document for which to return the associated VGMs"
@@ -116,16 +116,16 @@ paths:
         schema:
           type: "string"
         example: "APZU4812090"
-      - name: "updatedDateTimeMin"
+      - name: "declarationDateTimeMin"
         in: "query"
-        description: "Retrieve VGMs with an `updatedDateTime` at or after this timestamp"
+        description: "Retrieve VGMs with a `declarationDateTime` at or after this timestamp"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
-      - name: "updatedDateTimeMax"
+      - name: "declarationDateTimeMax"
         in: "query"
-        description: "Retrieve VGMs with an `updatedDateTime` at or before this timestamp"
+        description: "Retrieve VGMs with a `declarationDateTime` at or before this timestamp"
         schema:
           type: "string"
           format: "date-time"
@@ -812,11 +812,11 @@ components:
         isRetracted:
           type: "boolean"
           description: |
-            Flag indicating that the VGM is retracted.
+            Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
 
-            The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+            The data in all previously transmitted VGM declarations with the same `declarationReference` must be discarded or ignored.
 
-            If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).
+            If this flag is set, any data in this `VGMDeclaration` object other than the `declarationReference` is irrelevant (if present).
         declarationDateTime:
           maxLength: 30
           type: "string"

@@ -100,10 +100,10 @@ paths:
       parameters:
       - name: "carrierBookingReference"
         in: "query"
-        description: "Reference of the transport document for which to return the associated events"
+        description: "Reference of the booking for which to return the associated events"
         schema:
           type: "string"
-        example: "HHL71800000"
+        example: "ABC709951"
       - name: "transportDocumentReference"
         in: "query"
         description: "Reference of the transport document for which to return the associated events"

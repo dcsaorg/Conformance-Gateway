@@ -25,11 +25,11 @@ public class VGMDeclaration {
   @Schema(
       description =
 """
-Flag indicating that the VGM is retracted.
+Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
 
-The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+The data in all previously transmitted VGM declarations with the same `declarationReference` must be discarded or ignored.
 
-If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).
+If this flag is set, any data in this `VGMDeclaration` object other than the `declarationReference` is irrelevant (if present).
 """)
   private Boolean isRetracted;
 

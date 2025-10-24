@@ -212,11 +212,11 @@ VGMDeclaration,declarationDateTime,"string(date-time)",,maxLength=30,,2025-01-23
 VGMDeclaration,declarationReference,string,,maxLength=500,,"VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z","Reference of the VGM declaration",
 VGMDeclaration,equipmentDetails,EquipmentDetails,,,,,"VGM details specific to the equipment",
 VGMDeclaration,holdingParty,PartyDetails,,,,,"Information reference agency holding the VGM declaration.",
-VGMDeclaration,isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
+VGMDeclaration,isRetracted,boolean,,,,,"Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
 
-The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+The data in all previously transmitted VGM declarations with the same `declarationReference` must be discarded or ignored.
 
-If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).",
+If this flag is set, any data in this `VGMDeclaration` object other than the `declarationReference` is irrelevant (if present).",
 VGMDeclaration,orderedByParty,PartyDetails,,,,,"Party that orders the weighing at the terminal or weighing station.",
 VGMDeclaration,responsibleParty,PartyDetails,,,,,"Party responsible for the VGM declaration.",
 VGMDeclaration,routingDetails,RoutingDetails,,,,,"Technical routing of a VGM declaration from the originating party, via forwarding parties, to the destination party.",

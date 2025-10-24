@@ -170,7 +170,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
   }
 
   private boolean shouldIncludeCbr() {
-    return !(previousAction instanceof EblAction);
+    return previousAction != null && !(previousAction instanceof EblAction);
   }
 
   private String getCbrValue() {

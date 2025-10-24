@@ -177,7 +177,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   private String getCbrValue() {
     return shouldIncludeCbr()
-        ? Optional.of(getBookingDspReference().get().carrierBookingReference()).orElse(DEFAULT_CBR)
+        ? Optional.ofNullable(getBookingDspReference().get().carrierBookingReference()).orElse(DEFAULT_CBR)
         : DEFAULT_CBR;
   }
 }

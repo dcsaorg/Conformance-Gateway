@@ -21,7 +21,9 @@ public class ANChecks {
       UUID matchedExchangeUuid, String expectedApiVersion, String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
-    checks.addAll(payloadChecks(scenarioType));
+    checks.add(
+        runIfBodyNotEmpty(
+            "Payload checks (only when body is not empty)", () -> payloadChecks(scenarioType)));
     return JsonAttribute.contentChecks(
         "",
         "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
@@ -47,6 +49,21 @@ public class ANChecks {
     return checks;
   }
 
+  private static JsonContentCheck runIfBodyNotEmpty(
+      String description, Supplier<List<JsonContentCheck>> checksSupplier) {
+    return JsonAttribute.customValidator(
+        description,
+        body -> {
+          if (body == null || body.isEmpty()) {
+            return Set.of();
+          }
+          var issues = new LinkedHashSet<String>();
+          for (var check : checksSupplier.get()) {
+            issues.addAll(check.validate(body));
+          }
+          return issues;
+        });
+  }
 
   public static List<JsonContentCheck> validateBasicFields() {
     return List.of(

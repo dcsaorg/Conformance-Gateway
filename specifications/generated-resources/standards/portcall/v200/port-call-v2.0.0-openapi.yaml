@@ -10,7 +10,7 @@ info:
     This API allows the transfer of structured Port Call events from a publisher to a subscriber.
 
     Port Call events are used by port call service providers and consumers to exchange information about the service, including:
-    - estimated, requested and planned service timestamps as part of the "ERP" pattern [defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf);
+    - estimated, requested and planned service timestamps as part of [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf);
     - actual service timestamps;
     - container move counts (loads, discharges and restows).
 
@@ -480,6 +480,15 @@ components:
           description: "Universal unique identifier of the event"
           format: "uuid"
           example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        replyToEventID:
+          type: "string"
+          description: |
+            ID of an earlier event to which this event is a reply.
+
+            Used when sending a timestamp as a reply to another timestamp as part of
+            [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
         eventUpdatedDateTime:
           maxLength: 30
           type: "string"
@@ -509,8 +518,9 @@ components:
           - $ref: "#/components/schemas/Vessel"
         timestamp:
           description: |
-            Date and time (and related metadata) of a port call service,
-            exchanged between the service provider and service consumer as part of the "ERP" pattern.
+            Timestamp and associated metadata of a port call service,
+            exchanged between the service provider and service consumer as part of
+            [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).
           allOf:
           - $ref: "#/components/schemas/Timestamp"
         movesForecasts:
@@ -1028,22 +1038,12 @@ components:
     Timestamp:
       type: "object"
       properties:
-        timestampID:
-          type: "string"
-          description: "Universal unique identifier of the timestamp"
-          format: "uuid"
-          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
-        replyToTimestampID:
-          type: "string"
-          description: "Universal unique identifier of the timestamp to which this timestamp is a reply"
-          format: "uuid"
-          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
         classifierCode:
           maxLength: 3
           type: "string"
           description: |
-            Code identifying the type of this timestamp
-            [as defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
+            Code identifying the type of this timestamp within the context of
+            [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
             - `ACT` (Actual)
             - `EST` (Estimated)
             - `PLN` (Planned)
@@ -1079,8 +1079,8 @@ components:
             maxLength: 3
             type: "string"
             description: |
-              Code identifying the reason for a delay, as defined by SMDG here:
-              https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+              Code identifying the reason for a delay,
+              [as defined by SMDG](https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/).
             example: "STR"
         remark:
           maxLength: 500
@@ -1088,8 +1088,9 @@ components:
           description: "Free text used to provide any relevant additional information."
           example: "Port closed due to strike"
       description: |
-        Date and time (and related metadata) of a port call service,
-        exchanged between the service provider and service consumer as part of the "ERP" pattern.
+        Timestamp and associated metadata of a port call service,
+        exchanged between the service provider and service consumer as part of
+        [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).
     Vessel:
       type: "object"
       properties:
@@ -1161,7 +1162,7 @@ components:
         lengthOverall:
           type: "number"
           description: |
-            The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).
+            The maximum length of the vessel's hull measured parallel to the waterline ("length overall").
           format: "float"
           example: 245.45
         width:

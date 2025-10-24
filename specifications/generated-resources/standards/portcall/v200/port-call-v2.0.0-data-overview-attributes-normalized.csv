@@ -22,9 +22,14 @@ Event,isFYI,boolean,,,,false,"Flag indicating that this event is primarily meant
 Event,movesForecasts,"MovesForecast list",,,,,"The moves forecasts of a port call service with `portCallServiceTypeCode='MOVES'`",
 Event,portCall,PortCall,,,,,"Port call information",
 Event,portCallService,PortCallService,,,,,"Port call service information",
+Event,replyToEventID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","ID of an earlier event to which this event is a reply.
+
+Used when sending a timestamp as a reply to another timestamp as part of
+[the ""ERP"" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).",
 Event,terminalCall,TerminalCall,,,,,"Terminal call information",
-Event,timestamp,Timestamp,,,,,"Date and time (and related metadata) of a port call service,
-exchanged between the service provider and service consumer as part of the ""ERP"" pattern.",
+Event,timestamp,Timestamp,,,,,"Timestamp and associated metadata of a port call service,
+exchanged between the service provider and service consumer as part of
+[the ""ERP"" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).",
 Event,vessel,Vessel,,,,,"Vessel information relevant for a port call service",
 Facility,facilityCode,string,,maxLength=6,,ADT,"Code identifying a specific facility, as defined by the `facilityCodeListProvider`.",
 Facility,facilityCodeListProvider,string,,maxLength=10,,SMDG,"Code list provider (each with its relevant code list) defining the `facilityCode`:
@@ -257,8 +262,8 @@ This corresponds to the property `transportCallReference` from the DCSA Operatio
 TerminalCall,"universalExportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the export voyage.",
 TerminalCall,"universalImportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the import voyage.",
 TerminalCall,"universalServiceReference",string,,maxLength=8,,SR12345A,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",
-Timestamp,classifierCode,string,,maxLength=3,,EST,"Code identifying the type of this timestamp
-[as defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
+Timestamp,classifierCode,string,,maxLength=3,,EST,"Code identifying the type of this timestamp within the context of
+[the ""ERP"" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
 - `ACT` (Actual)
 - `EST` (Estimated)
 - `PLN` (Planned)
@@ -282,13 +287,11 @@ Timestamps of type `EST`, `REQ` and `PLN` are relevant in port call services of 
 - `SLUDGE` (Sludge)",
 Timestamp,delayReasonCodes,"string list",,maxLength=3,,,"Codes identifying the reasons for a delay
 Item description:
-Code identifying the reason for a delay, as defined by SMDG here:
-https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+Code identifying the reason for a delay,
+[as defined by SMDG](https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/).
 ",
 Timestamp,remark,string,,maxLength=500,,"Port closed due to strike","Free text used to provide any relevant additional information.",
-Timestamp,replyToTimestampID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the timestamp to which this timestamp is a reply",
 Timestamp,serviceDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the service was provided or is expected to be provided.",
-Timestamp,timestampID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the timestamp",
 Vessel,aftDraft,number,,,,37,"The vertical distance between the waterline and the bottom of the hull (keel) at the stern (after part) of the vessel.
 The depth to which the after part of the ship is immersed in water.",
 Vessel,airDraft,number,,,,55.0,"The vertical distance from the surface of the water to the highest point of mast or aerial.",
@@ -302,7 +305,7 @@ If values are specified in feet (`FOT`) then the decimal part means a fraction o
 E.g. 120.5 feet means 120 and a half foot (which would be 120'6"").",
 Vessel,forwardDraft,number,,,,35,"The vertical distance between the waterline and the bottom of the hull (keel) at the bow (forward part) of the vessel.
 The depth to which the forward part of the ship is immersed in water.",
-Vessel,lengthOverall,number,,,,245.45,"The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).",
+Vessel,lengthOverall,number,,,,245.45,"The maximum length of the vessel's hull measured parallel to the waterline (""length overall"").",
 Vessel,milesToDestinationPort,number,,,,245.45,"Remaining distance reported by the vessel to the berth in the next destination port, expressed in nautical miles.",
 Vessel,vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU).
 It consists of a three-letter alphanumeric prefix that indicates nationality, followed by one to four characters

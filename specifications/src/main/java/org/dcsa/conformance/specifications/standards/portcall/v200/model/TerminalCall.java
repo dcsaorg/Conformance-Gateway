@@ -2,8 +2,8 @@ package org.dcsa.conformance.specifications.standards.portcall.v200.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalServiceReference;
-import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalVoyageReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ServiceCodeOrReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
 import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
 
 @Data
@@ -42,30 +42,13 @@ This number helps differentiate multiple terminal visits in the same port call.
           "The carrier-specific name of the service for which the schedule details are published.")
   private String carrierServiceName;
 
-  @Schema(
-      maxLength = 11,
-      example = "FE1",
-      description =
-          "The carrier-specific code of the service for which the schedule details are published.")
-  private String carrierServiceCode;
+  @Schema() private ServiceCodeOrReference serviceCodeOrReference;
 
-  @Schema() private UniversalServiceReference universalServiceReference;
+  @Schema(description = "Export voyage number or reference")
+  private VoyageNumberOrReference exportVoyageNumberOrReference;
 
-  @Schema(
-      maxLength = 50,
-      example = "2208N",
-      description = "Carrier-specific identifier of the import voyage.")
-  private String carrierImportVoyageNumber;
-
-  @Schema() private UniversalVoyageReference universalImportVoyageReference;
-
-  @Schema(
-      maxLength = 50,
-      example = "2208N",
-      description = "Carrier-specific identifier of the export voyage.")
-  private String carrierExportVoyageNumber;
-
-  @Schema() private UniversalVoyageReference universalExportVoyageReference;
+  @Schema(description = "Import voyage number or reference")
+  private VoyageNumberOrReference importVoyageNumberOrReference;
 
   @Schema(
       example = "false",

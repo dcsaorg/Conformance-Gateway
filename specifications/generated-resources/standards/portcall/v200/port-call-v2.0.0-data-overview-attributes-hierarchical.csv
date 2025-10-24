@@ -261,37 +261,36 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 Used when sending a timestamp as a reply to another timestamp as part of
 [the ""ERP"" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).",
 "Event / terminalCall",terminalCall,TerminalCall,,,,,"Terminal call information",
-"Event / terminalCall / carrierExportVoyageNumber","carrierExportVoyageNumber",string,,maxLength=50,,2208N,"Carrier-specific identifier of the export voyage.",
-"Event / terminalCall / carrierImportVoyageNumber","carrierImportVoyageNumber",string,,maxLength=50,,2208N,"Carrier-specific identifier of the import voyage.",
-"Event / terminalCall / carrierServiceCode",carrierServiceCode,string,,maxLength=11,,FE1,"The carrier-specific code of the service for which the schedule details are published.",
 "Event / terminalCall / carrierServiceName",carrierServiceName,string,,maxLength=50,,"Great Lion Service","The carrier-specific name of the service for which the schedule details are published.",
+"Event / terminalCall / exportVoyageNumberOrReference","exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
+"Event / terminalCall / exportVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
+"Event / terminalCall / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
+"Event / terminalCall / importVoyageNumberOrReference","importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
+"Event / terminalCall / importVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
+"Event / terminalCall / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 "Event / terminalCall / isOmitted",isOmitted,boolean,,,,false,"Flag indicating whether the terminal call is omitted by the carrier.",
 "Event / terminalCall / sequenceNumber",sequenceNumber,integer,,,,2,"Sequential number assigned to each terminal call within a port call,
 indicating the order in which the terminal calls are scheduled to occur.
 This number helps differentiate multiple terminal visits in the same port call.",
-"Event / terminalCall / terminalCallID",terminalCallID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the terminal call",
-"Event / terminalCall / terminalCallReference",terminalCallReference,string,,maxLength=100,,15063401,"The unique reference of a terminal call, provided by the vessel operator.
-
-This corresponds to the property `transportCallReference` from the DCSA Operational Vessel Schedules (OVS) 3.0 standard.",
-"Event / terminalCall / universalExportVoyageReference","universalExportVoyageReference",string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
-
-Carriers assign a Universal Voyage Reference (UVR) to a voyage,
-either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
-
-Every Universal Voyage Reference is a 5-character string with the following format:
- * the last 2 digits of the year
- * 2 alphanumeric characters for the sequence number of the voyage
- * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
-"Event / terminalCall / universalImportVoyageReference","universalImportVoyageReference",string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
-
-Carriers assign a Universal Voyage Reference (UVR) to a voyage,
-either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
-
-Every Universal Voyage Reference is a 5-character string with the following format:
- * the last 2 digits of the year
- * 2 alphanumeric characters for the sequence number of the voyage
- * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
-"Event / terminalCall / universalServiceReference","universalServiceReference",string,,maxLength=8,,SR12345A,"Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+"Event / terminalCall / serviceCodeOrReference",serviceCodeOrReference,ServiceCodeOrReference,,,,,"Carrier service code and/or universal service reference",
+"Event / terminalCall / serviceCodeOrReference / carrierServiceCode",carrierServiceCode,string,,,,FE1,"Carrier-specific identifier of a service.",
+"Event / terminalCall / serviceCodeOrReference / universalServiceReference","universalServiceReference",string,,maxLength=8,,SR12345A,"Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
 
 DCSA generates and distributes batches of Universal Service References (USRs)
 to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
@@ -303,6 +302,10 @@ Every Universal Service Reference is an 8-character string with the following fo
  * the prefix ""SR""
  * 5 digits
  * 1 uppercase English letter (A-Z).",
+"Event / terminalCall / terminalCallID",terminalCallID,"string(uuid)",,,,"3910eb91-8791-4699-8029-8bba8cedb6f5","Universal unique identifier of the terminal call",
+"Event / terminalCall / terminalCallReference",terminalCallReference,string,,maxLength=100,,15063401,"The unique reference of a terminal call, provided by the vessel operator.
+
+This corresponds to the property `transportCallReference` from the DCSA Operational Vessel Schedules (OVS) 3.0 standard.",
 "Event / timestamp",timestamp,Timestamp,,,,,"Timestamp and associated metadata of a port call service,
 exchanged between the service provider and service consumer as part of
 [the ""ERP"" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).",

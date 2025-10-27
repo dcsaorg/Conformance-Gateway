@@ -21,6 +21,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.an.action.PublisherPostANAction;
 import org.dcsa.conformance.standards.an.action.PublisherPostANNotificationAction;
+import org.dcsa.conformance.standards.an.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.an.checks.ScenarioType;
 
 @Slf4j
@@ -47,8 +48,21 @@ public class ANPublisher extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
+        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(PublisherPostANAction.class, this::sendArrivalNotices),
         Map.entry(PublisherPostANNotificationAction.class, this::sendArrivalNoticeNotification));
+  }
+
+  private void supplyScenarioParameters(JsonNode actionPrompt) {
+    log.info(
+        "{}.supplyScenarioParameters({})",
+        getClass().getSimpleName(),
+        actionPrompt.toPrettyString());
+
+    ObjectNode ssp = SupplyScenarioParametersAction.examplePrompt();
+    asyncOrchestratorPostPartyInput(actionPrompt.required("actionId").asText(), ssp);
+
+    addOperatorLogEntry("Supplying scenario parameters: %s".formatted(ssp.toPrettyString()));
   }
 
   private void sendArrivalNotices(JsonNode actionPrompt) {

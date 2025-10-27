@@ -3,12 +3,12 @@ UNLocationCode,string,"UN location code.",NLAMS
 portVisitReference,string,"Port visit reference.",NLAMS1234589
 carrierServiceName,string,"Carrier-specific service name.","Great Lion Service"
 carrierServiceCode,string,"Carrier-specific service code.",FE1
-"universalServiceReference",string,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",SR12345A
+"universalServiceReference",string,"Unique identifier of a liner service, defined and distributed by DCSA to carriers.",SR12345A
 terminalCallReference,string,"The terminal call reference for which to retrieve available events.",15063401
 "carrierImportVoyageNumber",string,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage.",1234N
-"universalImportVoyageReference",string,"A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",2301W
+"universalImportVoyageReference",string,"Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA.",2301W
 "carrierExportVoyageNumber",string,"The identifier of an export voyage. The carrier-specific identifier of the export Voyage.",1234N
-"universalExportVoyageReference",string,"A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",2301W
+"universalExportVoyageReference",string,"Unique identifier of the export voyage within the service, assigned by carriers as specified by DCSA.",2301W
 portCallServiceTypeCode,string,"Port call service type.",BERTH
 vesselIMONumber,string,"Vessel IMO number.",12345678
 vesselName,string,"Vessel name.","King of the Seas"

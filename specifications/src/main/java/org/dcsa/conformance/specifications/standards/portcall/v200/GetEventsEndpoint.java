@@ -26,7 +26,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
       createStringQueryParameter(
           "universalServiceReference",
           "SR12345A",
-          "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.");
+        "Unique identifier of a liner service, defined and distributed by DCSA to carriers.");
 
   private final Parameter terminalCallReference =
       createStringQueryParameter(
@@ -44,7 +44,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
       createStringQueryParameter(
           "universalImportVoyageReference",
           "2301W",
-          "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.");
+        "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA.");
 
   private final Parameter carrierExportVoyageNumber =
       createStringQueryParameter(
@@ -56,7 +56,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
       createStringQueryParameter(
           "universalExportVoyageReference",
           "2301W",
-          "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.");
+        "Unique identifier of the export voyage within the service, assigned by carriers as specified by DCSA.");
 
   private final Parameter portCallServiceTypeCode =
       createStringQueryParameter("portCallServiceTypeCode", "BERTH", "Port call service type.");

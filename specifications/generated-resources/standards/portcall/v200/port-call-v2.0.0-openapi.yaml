@@ -124,7 +124,7 @@ paths:
         example: "FE1"
       - name: "universalServiceReference"
         in: "query"
-        description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
+        description: "Unique identifier of a liner service, defined and distributed by DCSA to carriers."
         schema:
           type: "string"
         example: "SR12345A"
@@ -142,7 +142,7 @@ paths:
         example: "1234N"
       - name: "universalImportVoyageReference"
         in: "query"
-        description: "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
+        description: "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA."
         schema:
           type: "string"
         example: "2301W"
@@ -154,7 +154,7 @@ paths:
         example: "1234N"
       - name: "universalExportVoyageReference"
         in: "query"
-        description: "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
+        description: "Unique identifier of the export voyage within the service, assigned by carriers as specified by DCSA."
         schema:
           type: "string"
         example: "2301W"

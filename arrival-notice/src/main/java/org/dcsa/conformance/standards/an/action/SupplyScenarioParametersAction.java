@@ -14,7 +14,11 @@ import org.dcsa.conformance.standards.an.checks.ScenarioType;
 public class SupplyScenarioParametersAction extends ANAction {
 
   public SupplyScenarioParametersAction(String publisherPartyName, ScenarioType scenarioType) {
-    super(publisherPartyName, null, null, "SupplyScenarioParameters");
+    super(
+        publisherPartyName,
+        null,
+        null,
+        "SupplyScenarioParameters [%s]".formatted(scenarioType.name()));
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 

@@ -105,13 +105,12 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    if (shouldIncludeCbr()) {
-      return getMarkdownHumanReadablePrompt(
-          Map.of("SCENARIO_TYPE", scenarioType.name(), CBR_PLACEHOLDER, getCbrValue()),
-          "prompt-carrier-supply-csp-with-cbr.md");
-    }
-    return getMarkdownHumanReadablePrompt(
-        Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
+    return shouldIncludeCbr()
+        ? getMarkdownHumanReadablePrompt(
+            Map.of("SCENARIO_TYPE", scenarioType.name(), CBR_PLACEHOLDER, getCbrValue()),
+            "prompt-carrier-supply-csp-with-cbr.md")
+        : getMarkdownHumanReadablePrompt(
+            Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
   }
 
   @Override

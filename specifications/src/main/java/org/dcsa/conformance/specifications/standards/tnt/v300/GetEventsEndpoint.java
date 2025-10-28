@@ -13,8 +13,8 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
   private final Parameter carrierBookingReference =
       createStringQueryParameter(
           "carrierBookingReference",
-          "HHL71800000",
-          "Reference of the transport document for which to return the associated events");
+          "ABC709951",
+          "Reference of the booking for which to return the associated events");
 
   private final Parameter transportDocumentReference =
       createStringQueryParameter(

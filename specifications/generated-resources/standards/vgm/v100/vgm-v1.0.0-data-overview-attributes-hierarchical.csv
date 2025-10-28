@@ -145,11 +145,11 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / holdingParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
-"VGMDeclaration / isRetracted",isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
+"VGMDeclaration / isRetracted",isRetracted,boolean,,,,,"Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
 
-The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+The data in all previously transmitted VGM declarations with the same `declarationReference` must be discarded or ignored.
 
-If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).",
+If this flag is set, any data in this `VGMDeclaration` object other than the `declarationReference` is irrelevant (if present).",
 "VGMDeclaration / orderedByParty",orderedByParty,PartyDetails,,,,,"Party that orders the weighing at the terminal or weighing station.",
 "VGMDeclaration / orderedByParty / address",address,Address,,,,,"An object for storing address-related information.",
 "VGMDeclaration / orderedByParty / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",
@@ -467,10 +467,26 @@ or a subsequent revision.",
 - `NMFTA` (National Motor Freight Traffic Association)",
 "VGMDeclaration / vesselVoyageDetails / exportVoyageNumberOrReference","exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
 "VGMDeclaration / vesselVoyageDetails / exportVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-"VGMDeclaration / vesselVoyageDetails / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"VGMDeclaration / vesselVoyageDetails / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 "VGMDeclaration / vesselVoyageDetails / importVoyageNumberOrReference","importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
 "VGMDeclaration / vesselVoyageDetails / importVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-"VGMDeclaration / vesselVoyageDetails / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"VGMDeclaration / vesselVoyageDetails / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 "VGMDeclaration / vesselVoyageDetails / portOfDischarge",portOfDischarge,Location,,,,,"The location where the cargo is discharged from the last sea-going vessel.",
 "VGMDeclaration / vesselVoyageDetails / portOfDischarge / address",address,Address,,,,,"Location address",
 "VGMDeclaration / vesselVoyageDetails / portOfDischarge / address / city",city,string,,maxLength=35,,Amsterdam,"The name of the city.",

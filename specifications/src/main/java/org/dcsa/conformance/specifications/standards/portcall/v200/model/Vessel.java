@@ -78,7 +78,7 @@ E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
       example = "245.45",
       description =
 """
-The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).
+The maximum length of the vessel's hull measured parallel to the waterline ("length overall").
 """)
   private Double lengthOverall;
 

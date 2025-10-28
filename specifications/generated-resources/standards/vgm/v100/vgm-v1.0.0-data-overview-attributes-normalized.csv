@@ -212,11 +212,11 @@ VGMDeclaration,declarationDateTime,"string(date-time)",,maxLength=30,,2025-01-23
 VGMDeclaration,declarationReference,string,,maxLength=500,,"VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z","Reference of the VGM declaration",
 VGMDeclaration,equipmentDetails,EquipmentDetails,,,,,"VGM details specific to the equipment",
 VGMDeclaration,holdingParty,PartyDetails,,,,,"Information reference agency holding the VGM declaration.",
-VGMDeclaration,isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
+VGMDeclaration,isRetracted,boolean,,,,,"Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
 
-The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+The data in all previously transmitted VGM declarations with the same `declarationReference` must be discarded or ignored.
 
-If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).",
+If this flag is set, any data in this `VGMDeclaration` object other than the `declarationReference` is irrelevant (if present).",
 VGMDeclaration,orderedByParty,PartyDetails,,,,,"Party that orders the weighing at the terminal or weighing station.",
 VGMDeclaration,responsibleParty,PartyDetails,,,,,"Party responsible for the VGM declaration.",
 VGMDeclaration,routingDetails,RoutingDetails,,,,,"Technical routing of a VGM declaration from the originating party, via forwarding parties, to the destination party.",
@@ -226,7 +226,15 @@ VGMDeclaration,vesselVoyageDetails,VesselVoyageDetails,,,,,"VGM details specific
 VGMDeclaration,VGM,VGM,,,,,"Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6",
 VGMDeclaration,weighingParty,PartyDetails,,,,,"Legally accepted party designated to perform the weighing.",
 VoyageNumberOrReference,carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-VoyageNumberOrReference,universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+VoyageNumberOrReference,universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 Weight,unit,string,,maxLength=10,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
 - `LBR` (Pounds)

@@ -12,8 +12,8 @@ public class GetVGMDeclarationsEndpoint implements QueryParametersFilterEndpoint
   private final Parameter carrierBookingReference =
       createStringQueryParameter(
           "carrierBookingReference",
-          "HHL71800000",
-          "Reference of the transport document for which to return the associated VGMs");
+          "ABC709951",
+          "Reference of the booking for which to return the associated VGMs");
 
   private final Parameter transportDocumentReference =
       createStringQueryParameter(
@@ -27,15 +27,15 @@ public class GetVGMDeclarationsEndpoint implements QueryParametersFilterEndpoint
           "APZU4812090",
           "Reference of the equipment for which to return the associated VGMs");
 
-  private final Parameter updatedDateTimeMin =
+  private final Parameter declarationDateTimeMin =
       createDateTimeQueryParameter(
-          "updatedDateTimeMin",
-          "Retrieve VGMs with an `updatedDateTime` at or after this timestamp");
+          "declarationDateTimeMin",
+          "Retrieve VGMs with a `declarationDateTime` at or after this timestamp");
 
-  private final Parameter updatedDateTimeMax =
+  private final Parameter declarationDateTimeMax =
       createDateTimeQueryParameter(
-          "updatedDateTimeMax",
-          "Retrieve VGMs with an `updatedDateTime` at or before this timestamp");
+          "declarationDateTimeMax",
+          "Retrieve VGMs with a `declarationDateTime` at or before this timestamp");
 
   private final Parameter limit =
       createIntegerQueryParameter(
@@ -53,8 +53,8 @@ public class GetVGMDeclarationsEndpoint implements QueryParametersFilterEndpoint
         carrierBookingReference,
         transportDocumentReference,
         equipmentReference,
-        updatedDateTimeMin,
-        updatedDateTimeMax,
+        declarationDateTimeMin,
+        declarationDateTimeMax,
         limit,
         cursor);
   }
@@ -71,9 +71,9 @@ public class GetVGMDeclarationsEndpoint implements QueryParametersFilterEndpoint
                     List.of(transportDocumentReference),
                     List.of(transportDocumentReference, equipmentReference)),
                 List.of(
-                    List.of(updatedDateTimeMin),
-                    List.of(updatedDateTimeMax),
-                    List.of(updatedDateTimeMin, updatedDateTimeMax)))),
+                    List.of(declarationDateTimeMin),
+                    List.of(declarationDateTimeMax),
+                    List.of(declarationDateTimeMin, declarationDateTimeMax)))),
         Map.entry(Boolean.FALSE, List.of()));
   }
 

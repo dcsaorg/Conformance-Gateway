@@ -854,9 +854,36 @@ It can be used for customs clearance purposes in specific countries (e.g. NL, UK
 "ArrivalNotice / transport / legs / vesselVoyage / carrierExportVoyageNumber","carrierExportVoyageNumber",string,,maxLength=50,,2208N,"Carrier-specific identifier of the export voyage",
 "ArrivalNotice / transport / legs / vesselVoyage / carrierImportVoyageNumber","carrierImportVoyageNumber",string,,maxLength=50,,2208N,"Carrier-specific identifier of the import voyage",
 "ArrivalNotice / transport / legs / vesselVoyage / carrierServiceCode",carrierServiceCode,string,,maxLength=11,,FE1,"The carrier-specific code of the service for which the schedule details are published",
-"ArrivalNotice / transport / legs / vesselVoyage / universalExportVoyageReference","universalExportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the export voyage",
-"ArrivalNotice / transport / legs / vesselVoyage / universalImportVoyageReference","universalImportVoyageReference",string,,maxLength=5,,2301W,"Universal identifier of the import voyage",
-"ArrivalNotice / transport / legs / vesselVoyage / universalServiceReference","universalServiceReference",string,,maxLength=8,,SR12345A,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service",
+"ArrivalNotice / transport / legs / vesselVoyage / universalExportVoyageReference","universalExportVoyageReference",string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
+"ArrivalNotice / transport / legs / vesselVoyage / universalImportVoyageReference","universalImportVoyageReference",string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
+"ArrivalNotice / transport / legs / vesselVoyage / universalServiceReference","universalServiceReference",string,,maxLength=8,,SR12345A,"Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+DCSA generates and distributes batches of Universal Service References (USRs)
+to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+or independently for one of its own non-VSA, non-Alliance services.
+
+Every Universal Service Reference is an 8-character string with the following format:
+ * the prefix ""SR""
+ * 5 digits
+ * 1 uppercase English letter (A-Z).",
 "ArrivalNotice / transport / legs / vesselVoyage / vesselCallSign",vesselCallSign,string,,maxLength=10,,NCVV,"A unique alphanumeric identity that belongs to the vessel
 and is assigned by the International Telecommunication Union (ITU).
 It consists of a three-letter alphanumeric prefix that indicates nationality,

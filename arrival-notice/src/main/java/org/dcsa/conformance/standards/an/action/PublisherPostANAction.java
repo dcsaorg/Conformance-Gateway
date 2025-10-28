@@ -16,7 +16,7 @@ import org.dcsa.conformance.standards.an.party.ANRole;
 public class PublisherPostANAction extends ANAction {
 
   private final JsonSchemaValidator requestSchemaValidator;
-  private ScenarioType scenarioType;
+  private final ScenarioType scenarioType;
 
   public PublisherPostANAction(
       String publisherPartyName,
@@ -33,7 +33,7 @@ public class PublisherPostANAction extends ANAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Submit a Arrival Notice to the subscriber.";
+    return "Have your application POST one or more Arrival Notices to its synthetic counterpart running in the sandbox";
   }
 
   @Override

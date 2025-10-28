@@ -1,5 +1,5 @@
 Name,Type,Description,Example
-carrierBookingReference,string,"Reference of the transport document for which to return the associated events",HHL71800000
+carrierBookingReference,string,"Reference of the booking for which to return the associated events",ABC709951
 "transportDocumentReference",string,"Reference of the transport document for which to return the associated events",HHL71800000
 equipmentReference,string,"Reference of the equipment for which to return the associated events",APZU4812090
 eventUpdatedDateTimeMin,string,"Retrieve events with an `eventUpdatedDateTime` at or after this timestamp",2025-01-23T01:23:45Z

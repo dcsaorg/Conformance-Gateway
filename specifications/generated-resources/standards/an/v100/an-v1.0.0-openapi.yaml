@@ -164,7 +164,7 @@ paths:
         example: "2208N"
       - name: "universalImportVoyageReference"
         in: "query"
-        description: "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
+        description: "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA."
         schema:
           type: "string"
         example: "2301W"
@@ -176,7 +176,7 @@ paths:
         example: "FE1"
       - name: "universalServiceReference"
         in: "query"
-        description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
+        description: "Unique identifier of a liner service, defined and distributed by DCSA to carriers."
         schema:
           type: "string"
         example: "SR12345A"
@@ -2385,7 +2385,19 @@ components:
         universalServiceReference:
           maxLength: 8
           type: "string"
-          description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service"
+          description: |
+            Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+            DCSA generates and distributes batches of Universal Service References (USRs)
+            to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+            A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+            or independently for one of its own non-VSA, non-Alliance services.
+
+            Every Universal Service Reference is an 8-character string with the following format:
+             * the prefix "SR"
+             * 5 digits
+             * 1 uppercase English letter (A-Z).
           example: "SR12345A"
         carrierImportVoyageNumber:
           maxLength: 50
@@ -2395,7 +2407,16 @@ components:
         universalImportVoyageReference:
           maxLength: 5
           type: "string"
-          description: "Universal identifier of the import voyage"
+          description: |
+            Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+            Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+            either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+            Every Universal Voyage Reference is a 5-character string with the following format:
+             * the last 2 digits of the year
+             * 2 alphanumeric characters for the sequence number of the voyage
+             * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).
           example: "2301W"
         carrierExportVoyageNumber:
           maxLength: 50
@@ -2405,7 +2426,16 @@ components:
         universalExportVoyageReference:
           maxLength: 5
           type: "string"
-          description: "Universal identifier of the export voyage"
+          description: |
+            Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+            Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+            either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+            Every Universal Voyage Reference is a 5-character string with the following format:
+             * the last 2 digits of the year
+             * 2 alphanumeric characters for the sequence number of the voyage
+             * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).
           example: "2301W"
         callReferenceNumber:
           maxLength: 100

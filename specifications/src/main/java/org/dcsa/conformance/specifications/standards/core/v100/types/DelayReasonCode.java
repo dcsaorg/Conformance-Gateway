@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
     example = "STR",
     description =
 """
-Code identifying the reason for a delay, as defined by SMDG here:
-https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+Code identifying the reason for a delay,
+[as defined by SMDG](https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/).
 """)
 public class DelayReasonCode {}

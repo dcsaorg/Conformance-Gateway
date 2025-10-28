@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.types.DelayReasonCode;
 import org.dcsa.conformance.specifications.standards.core.v100.types.FormattedDateTime;
-import org.dcsa.conformance.specifications.standards.core.v100.types.UniversallyUniqueID;
 
 import java.util.List;
 
@@ -12,26 +11,19 @@ import java.util.List;
 @Schema(
     description =
 """
-Date and time (and related metadata) of a port call service,
-exchanged between the service provider and service consumer as part of the "ERP" pattern.
+Timestamp and associated metadata of a port call service,
+exchanged between the service provider and service consumer as part of
+[the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).
 """)
 public class Timestamp {
-
-  @Schema(description = "Universal unique identifier of the timestamp")
-  private UniversallyUniqueID timestampID;
-
-  @Schema(
-      description =
-          "Universal unique identifier of the timestamp to which this timestamp is a reply")
-  private UniversallyUniqueID replyToTimestampID;
 
   @Schema(
       maxLength = 3,
       example = "EST",
       description =
 """
-Code identifying the type of this timestamp
-[as defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
+Code identifying the type of this timestamp within the context of
+[the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
 - `ACT` (Actual)
 - `EST` (Estimated)
 - `PLN` (Planned)

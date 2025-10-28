@@ -15,11 +15,11 @@ Every VGM Producer must support the following combinations of query parameter fi
 * `transportDocumentReference`, `equipmentReference`
 
 Every VGM Producer must support combining any of the query parameter filters above with all of these additional filters:
-* `vgmUpdatedDateTimeMin`
-* `vgmUpdatedDateTimeMax`
-* `vgmUpdatedDateTimeMin`, `vgmUpdatedDateTimeMax`
+* `declarationDateTimeMin`
+* `declarationDateTimeMax`
+* `declarationDateTimeMin`, `declarationDateTimeMax`
 
-Each VGM Producer can separately also decide to have default relative date ranges and only return VGM declarations having an `updatedDateTime` within those ranges.
+Each VGM Producer can separately also decide to have default relative date ranges and only return VGM declarations having a `declarationDateTime` within those ranges.
 
 When receiving requests containing an unsupported query parameter, a VGM Producer can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 

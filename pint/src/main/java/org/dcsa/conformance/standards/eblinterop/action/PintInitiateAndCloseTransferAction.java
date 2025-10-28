@@ -43,7 +43,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
         sendingPlatform,
         receivingPlatform,
         previousAction,
-        "SingleRequestTransfer(%s)".formatted(pintResponseCode.name()),
+        "SingleRequestTransfer(%s, %s)".formatted(pintResponseCode.name(), senderTransmissionClass.name()),
         pintResponseCode.getHttpResponseCode()
     );
     this.pintResponseCode = pintResponseCode;

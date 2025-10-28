@@ -342,7 +342,7 @@ components:
           description: "The tare weight of the container"
           allOf:
           - $ref: "#/components/schemas/Weight"
-      description: "VGM details specific to the equipment"
+      description: "VGM declaration details specific to the equipment"
     Facility:
       type: "object"
       properties:
@@ -494,7 +494,9 @@ components:
           description: |-
             Code qualifying a reference.
 
-            In addition to the codes listed here, any other code as defined in UN/EDIFACT 16A 1153 or a subsequent revision may also be used.
+            In addition to the codes listed here, any other code as defined in
+            [UN/EDIFACT 16A 1153](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred1153.htm)
+            or a subsequent revision may also be used.
 
             - `AOW` - Transportation Control Number (TCN)
             - `SI` - Shipper's identifying number for shipment (SID)
@@ -692,12 +694,12 @@ components:
         carrierBookingReference:
           maxLength: 35
           type: "string"
-          description: "The reference of the booking for which this VGM was created"
+          description: "The reference of the booking for which this VGM declaration was created"
           example: "ABC709951"
         transportDocumentReference:
           maxLength: 20
           type: "string"
-          description: "The reference of the transport document for which this VGM was created"
+          description: "The reference of the transport document for which this VGM declaration was created"
           example: "HHL71800000"
         otherReferences:
           type: "array"
@@ -706,7 +708,7 @@ components:
             excluding the Carrier Booking Reference and the Transport Document Reference
           items:
             $ref: "#/components/schemas/OtherReference"
-      description: "VGM details specific to the shipment"
+      description: "VGM declaration details specific to the shipment"
     VGM:
       type: "object"
       properties:
@@ -777,15 +779,15 @@ components:
           allOf:
           - $ref: "#/components/schemas/VGM"
         equipmentDetails:
-          description: "VGM details specific to the equipment"
+          description: "VGM declaration details specific to the equipment"
           allOf:
           - $ref: "#/components/schemas/EquipmentDetails"
         shipmentDetails:
-          description: "VGM details specific to the shipment"
+          description: "VGM declaration details specific to the shipment"
           allOf:
           - $ref: "#/components/schemas/ShipmentDetails"
         vesselVoyageDetails:
-          description: "VGM details specific to the vessel voyage"
+          description: "VGM declaration details specific to the vessel voyage"
           allOf:
           - $ref: "#/components/schemas/VesselVoyageDetails"
         responsibleParty:
@@ -860,7 +862,7 @@ components:
           type: "string"
           description: "Vessel name"
           example: "King of the Seas"
-      description: "VGM details specific to the vessel voyage"
+      description: "VGM declaration details specific to the vessel voyage"
     VoyageNumberOrReference:
       type: "object"
       properties:

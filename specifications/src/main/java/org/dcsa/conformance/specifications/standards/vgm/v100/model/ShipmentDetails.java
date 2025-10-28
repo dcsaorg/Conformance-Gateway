@@ -4,18 +4,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 
-@Schema(description = "VGM details specific to the shipment")
+@Schema(description = "VGM declaration details specific to the shipment")
 @Data
 public class ShipmentDetails {
   @Schema(
       example = "ABC709951",
-      description = "The reference of the booking for which this VGM was created",
+      description = "The reference of the booking for which this VGM declaration was created",
       maxLength = 35)
   private String carrierBookingReference;
 
   @Schema(
       example = "HHL71800000",
-      description = "The reference of the transport document for which this VGM was created",
+      description = "The reference of the transport document for which this VGM declaration was created",
       maxLength = 20)
   private String transportDocumentReference;
 

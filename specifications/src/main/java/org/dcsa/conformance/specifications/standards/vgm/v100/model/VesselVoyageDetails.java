@@ -5,7 +5,7 @@ import lombok.Data;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
 
-@Schema(description = "VGM details specific to the vessel voyage")
+@Schema(description = "VGM declaration details specific to the vessel voyage")
 @Data
 public class VesselVoyageDetails {
 

@@ -76,7 +76,9 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 OtherReference,reference,string,,maxLength=100,,A456C,"The actual reference value",
 OtherReference,typeCode,string,,,,SI,"Code qualifying a reference.
 
-In addition to the codes listed here, any other code as defined in UN/EDIFACT 16A 1153 or a subsequent revision may also be used.
+In addition to the codes listed here, any other code as defined in
+[UN/EDIFACT 16A 1153](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred1153.htm)
+or a subsequent revision may also be used.
 
 - `AOW` - Transportation Control Number (TCN)
 - `SI` - Shipper's identifying number for shipment (SID)
@@ -151,10 +153,10 @@ Seal,type,string,,,,WIR,"The type of seal.
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
 - `WIR` (Wire)",
-ShipmentDetails,carrierBookingReference,string,,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
+ShipmentDetails,carrierBookingReference,string,,maxLength=35,,ABC709951,"The reference of the booking for which this VGM declaration was created",
 ShipmentDetails,otherReferences,"OtherReference list",,,,,"List of additional references related to the VGM declaration,
 excluding the Carrier Booking Reference and the Transport Document Reference",
-ShipmentDetails,"transportDocumentReference",string,,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM was created",
+ShipmentDetails,"transportDocumentReference",string,,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM declaration was created",
 VesselVoyageDetails,carrierCode,string,,maxLength=4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
 [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
 
@@ -179,7 +181,7 @@ VGMDeclaration,authorizedParty,PartyDetails,,,,,"Party authorized to act on beha
 VGMDeclaration,"authorizedPersonSignatory",string,,maxLength=255,,"Jane Doe","Authorized person signatory",
 VGMDeclaration,declarationDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the VGM declaration was last updated",
 VGMDeclaration,declarationReference,string,,maxLength=500,,"VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z","Reference of the VGM declaration",
-VGMDeclaration,equipmentDetails,EquipmentDetails,,,,,"VGM details specific to the equipment",
+VGMDeclaration,equipmentDetails,EquipmentDetails,,,,,"VGM declaration details specific to the equipment",
 VGMDeclaration,holdingParty,PartyDetails,,,,,"Information reference agency holding the VGM declaration.",
 VGMDeclaration,isRetracted,boolean,,,,,"Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
 
@@ -189,9 +191,9 @@ If this flag is set, any data in this `VGMDeclaration` object other than the `de
 VGMDeclaration,orderedByParty,PartyDetails,,,,,"Party that orders the weighing at the terminal or weighing station.",
 VGMDeclaration,responsibleParty,PartyDetails,,,,,"Party responsible for the VGM declaration.",
 VGMDeclaration,routingDetails,RoutingDetails,,,,,"Technical routing of a VGM declaration from the originating party, via forwarding parties, to the destination party.",
-VGMDeclaration,shipmentDetails,ShipmentDetails,,,,,"VGM details specific to the shipment",
+VGMDeclaration,shipmentDetails,ShipmentDetails,,,,,"VGM declaration details specific to the shipment",
 VGMDeclaration,submittingParty,PartyDetails,,,,,"Party that submits the VGM declaration.",
-VGMDeclaration,vesselVoyageDetails,VesselVoyageDetails,,,,,"VGM details specific to the vessel voyage",
+VGMDeclaration,vesselVoyageDetails,VesselVoyageDetails,,,,,"VGM declaration details specific to the vessel voyage",
 VGMDeclaration,VGM,VGM,,,,,"Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6",
 VGMDeclaration,weighingParty,PartyDetails,,,,,"Legally accepted party designated to perform the weighing.",
 VoyageNumberOrReference,carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",

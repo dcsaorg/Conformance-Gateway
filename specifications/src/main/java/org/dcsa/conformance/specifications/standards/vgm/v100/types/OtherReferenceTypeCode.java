@@ -13,7 +13,9 @@ import org.dcsa.conformance.specifications.generator.EnumBase;
 """
 Code qualifying a reference.
 
-In addition to the codes listed here, any other code as defined in UN/EDIFACT 16A 1153 or a subsequent revision may also be used.
+In addition to the codes listed here, any other code as defined in
+[UN/EDIFACT 16A 1153](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred1153.htm)
+or a subsequent revision may also be used.
 """)
 @AllArgsConstructor
 public enum OtherReferenceTypeCode implements EnumBase {

@@ -121,26 +121,21 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     return ConformanceCheckResult.simple(errors);
   }
 
-  protected ConformanceCheckResult ensureFeedbackSeverityAndCodeCompliance(JsonNode responsePayload) {
-    String bookingStatus = responsePayload.path("bookingStatus").asText(null);
-    boolean isPendingUpdate = BookingState.PENDING_UPDATE.name().equals(bookingStatus);
-    boolean isPendingAmendment = BookingState.PENDING_AMENDMENT.name().equals(bookingStatus);
-    if (!isPendingUpdate && !isPendingAmendment) {
-      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
-    }
-
+  protected ConformanceCheckResult ensureFeedbackSeverityAndCodeCompliance(
+      JsonNode responsePayload) {
     Set<String> errors = new HashSet<>();
     JsonNode feedbacks = responsePayload.path(FEEDBACKS);
-    if (feedbacks.isArray()) {
-      for (JsonNode feedback : feedbacks) {
-        String severity = feedback.path("severity").asText(null);
-        String code = feedback.path("code").asText(null);
-        if (!BookingDataSets.FEEDBACKS_SEVERITY.contains(severity)) {
-          errors.add("Invalid feedback severity: " + severity);
-        }
-        if (!BookingDataSets.FEEDBACKS_CODE.contains(code)) {
-          errors.add("Invalid feedback code: " + code);
-        }
+    if (JsonUtil.isMissingOrEmpty(feedbacks)) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
+    for (JsonNode feedback : feedbacks) {
+      String severity = feedback.path("severity").asText(null);
+      String code = feedback.path("code").asText(null);
+      if (!BookingDataSets.FEEDBACKS_SEVERITY.contains(severity)) {
+        errors.add("Invalid feedback severity: " + severity);
+      }
+      if (!BookingDataSets.FEEDBACKS_CODE.contains(code)) {
+        errors.add("Invalid feedback code: " + code);
       }
     }
     return ConformanceCheckResult.simple(errors);

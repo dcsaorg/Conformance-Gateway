@@ -101,7 +101,7 @@ public class JsonAttribute {
     JsonContentCheckRebaser rebaser,
     List<JsonRebasableContentCheck> checks
   ) {
-    return new JsonRebaseableAttributeBasedCheck(
+    return new JsonRebasableAttributeBasedCheck(
       titlePrefix,
       title,
       isRelevantForRoleName,
@@ -887,7 +887,7 @@ public class JsonAttribute {
     @NonNull String description,
     @NonNull JsonContentMatchedValidation validator
   ) {
-    return JsonRebasableCheckImpl.of(description,true, validator::validate);
+    return JsonRebasableCheckImpl.of(description, validator::validate);
   }
 
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {

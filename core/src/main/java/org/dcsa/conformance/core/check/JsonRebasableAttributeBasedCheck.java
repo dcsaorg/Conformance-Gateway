@@ -11,13 +11,13 @@ import lombok.NonNull;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
-class JsonRebaseableAttributeBasedCheck extends ActionCheck {
+class JsonRebasableAttributeBasedCheck extends ActionCheck {
 
   private final String standardsVersion;
   private final JsonContentCheckRebaser rebaser;
   private final List<JsonRebasableContentCheck> validators;
 
-  JsonRebaseableAttributeBasedCheck(
+  JsonRebasableAttributeBasedCheck(
     String titlePrefix,
     String title,
     Predicate<String> isRelevantForRoleName,
@@ -58,6 +58,7 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
       super(validator.description(), isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
       this.standardsVersion = standardsVersion;
       this.validator = validator;
+      this.setRelevant(validator.isRelevant());
     }
 
     @Override

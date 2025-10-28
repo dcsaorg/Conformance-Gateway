@@ -66,7 +66,7 @@ Name of the code list in which the `codeListProvider` defines the `partyCode`, i
       description =
 """
 Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.
 """,
       example = "CA",

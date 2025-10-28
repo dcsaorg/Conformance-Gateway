@@ -269,7 +269,7 @@ Party,codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a lis
 - `ZZZ` (Mutually defined)",
 Party,partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 Party,partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 PostEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
 
@@ -297,7 +297,10 @@ Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the se
 - `SHI` (Shipper)
 - `PHY` (Phytosanitary)
 - `VET` (Veterinary)
-- `CUS` (Customs)",
+- `CUS` (Customs)
+
+In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).",
 Seal,type,string,,,,WIR,"The type of seal.
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)

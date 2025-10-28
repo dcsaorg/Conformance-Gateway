@@ -3,9 +3,11 @@ package org.dcsa.conformance.specifications.standards.core.v100.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "Weight value and measurement unit")
+@Schema(description = Weight.CLASS_SCHEMA_DESCRIPTION)
 @Data
 public class Weight {
+
+  public static final String CLASS_SCHEMA_DESCRIPTION = "Weight value and measurement unit";
 
   @Schema(
       description = "Weight value expressed in the measurement `unit`",

@@ -114,7 +114,7 @@ Party,codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a lis
 - `ZZZ` (Mutually defined)",
 Party,partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 Party,partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 PartyDetails,address,Address,,,,,"An object for storing address-related information.",
 PartyDetails,contactDetails,ContactDetails,,,,,"The contact details of a person.",
@@ -134,16 +134,19 @@ Instead, the relevant request VGM declaration is indicated by the `propertyPath`
 There can be zero, one or more feedback elements per event in the request.
 The order of `feedbackElements` is not related to the order of VGM declarations in the request.
 Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.",
-RoutingDetails,destinationParty,Party,,,,,"The final party intended as destination of the event.",
-RoutingDetails,forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
-RoutingDetails,originatingParty,Party,,,,,"The initial party with which the event originated.",
+RoutingDetails,destinationParty,Party,,,,,"The final party intended as destination of the VGM declaration.",
+RoutingDetails,forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the VGM declaration between the originating and destination party.",
+RoutingDetails,originatingParty,Party,,,,,"The initial party with which the VGM declaration originated.",
 Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
 - `CAR` (Carrier)
 - `SHI` (Shipper)
 - `PHY` (Phytosanitary)
 - `VET` (Veterinary)
-- `CUS` (Customs)",
+- `CUS` (Customs)
+
+In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).",
 Seal,type,string,,,,WIR,"The type of seal.
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
@@ -203,7 +206,5 @@ Every Universal Voyage Reference is a 5-character string with the following form
  * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 Weight,unit,string,,maxLength=10,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)
-- `GRM` (Grams)
-- `ONZ` (Ounce)",
+- `LBR` (Pounds)",
 Weight,value,number,,,,2.4,"Weight value expressed in the measurement `unit`",

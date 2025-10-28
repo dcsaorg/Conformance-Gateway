@@ -111,7 +111,10 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `SHI` (Shipper)
 - `PHY` (Phytosanitary)
 - `VET` (Veterinary)
-- `CUS` (Customs)",
+- `CUS` (Customs)
+
+In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).",
 "Event / equipmentDetails / seals / type",type,string,,,,WIR,"The type of seal.
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
@@ -269,7 +272,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 - `ZZZ` (Mutually defined)",
 "Event / eventRouting / destinationParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "Event / eventRouting / destinationParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "Event / eventRouting / forwardingParties",forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
 "Event / eventRouting / forwardingParties / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
@@ -304,7 +307,7 @@ or a subsequent revision.",
 - `ZZZ` (Mutually defined)",
 "Event / eventRouting / forwardingParties / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "Event / eventRouting / forwardingParties / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "Event / eventRouting / originatingParty",originatingParty,Party,,,,,"The initial party with which the event originated.",
 "Event / eventRouting / originatingParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
@@ -339,7 +342,7 @@ or a subsequent revision.",
 - `ZZZ` (Mutually defined)",
 "Event / eventRouting / originatingParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "Event / eventRouting / originatingParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "Event / eventUpdatedDateTime",eventUpdatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
 "Event / iotDetails",iotDetails,IotDetails,,,,,"IoT-specific details",

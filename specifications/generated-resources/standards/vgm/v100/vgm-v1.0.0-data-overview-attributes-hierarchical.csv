@@ -48,7 +48,7 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `ZZZ` (Mutually defined)",
 "VGMDeclaration / authorizedParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / authorizedParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / authorizedParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / authorizedPersonSignatory","authorizedPersonSignatory",string,,maxLength=255,,"Jane Doe","Authorized person signatory",
@@ -59,9 +59,7 @@ or a subsequent revision.",
 Excludes the tare weight of the container.",
 "VGMDeclaration / equipmentDetails / cargoGrossWeight / unit",unit,string,,maxLength=10,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)
-- `GRM` (Grams)
-- `ONZ` (Ounce)",
+- `LBR` (Pounds)",
 "VGMDeclaration / equipmentDetails / cargoGrossWeight / value",value,number,,,,2.4,"Weight value expressed in the measurement `unit`",
 "VGMDeclaration / equipmentDetails / equipmentReference",equipmentReference,string,,maxLength=11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 
@@ -82,7 +80,10 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `SHI` (Shipper)
 - `PHY` (Phytosanitary)
 - `VET` (Veterinary)
-- `CUS` (Customs)",
+- `CUS` (Customs)
+
+In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).",
 "VGMDeclaration / equipmentDetails / seals / type",type,string,,,,WIR,"The type of seal.
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
@@ -90,9 +91,7 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 "VGMDeclaration / equipmentDetails / tareWeight",tareWeight,Weight,,,,,"The tare weight of the container",
 "VGMDeclaration / equipmentDetails / tareWeight / unit",unit,string,,maxLength=10,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)
-- `GRM` (Grams)
-- `ONZ` (Ounce)",
+- `LBR` (Pounds)",
 "VGMDeclaration / equipmentDetails / tareWeight / value",value,number,,,,2.4,"Weight value expressed in the measurement `unit`",
 "VGMDeclaration / holdingParty",holdingParty,PartyDetails,,,,,"Information reference agency holding the VGM declaration.",
 "VGMDeclaration / holdingParty / address",address,Address,,,,,"An object for storing address-related information.",
@@ -142,7 +141,7 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `ZZZ` (Mutually defined)",
 "VGMDeclaration / holdingParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / holdingParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / holdingParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / isRetracted",isRetracted,boolean,,,,,"Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
@@ -198,7 +197,7 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `ZZZ` (Mutually defined)",
 "VGMDeclaration / orderedByParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / orderedByParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / orderedByParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / responsibleParty",responsibleParty,PartyDetails,,,,,"Party responsible for the VGM declaration.",
@@ -249,11 +248,11 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `ZZZ` (Mutually defined)",
 "VGMDeclaration / responsibleParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / responsibleParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / responsibleParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / routingDetails",routingDetails,RoutingDetails,,,,,"Technical routing of a VGM declaration from the originating party, via forwarding parties, to the destination party.",
-"VGMDeclaration / routingDetails / destinationParty",destinationParty,Party,,,,,"The final party intended as destination of the event.",
+"VGMDeclaration / routingDetails / destinationParty",destinationParty,Party,,,,,"The final party intended as destination of the VGM declaration.",
 "VGMDeclaration / routingDetails / destinationParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
@@ -286,9 +285,9 @@ or a subsequent revision.",
 - `ZZZ` (Mutually defined)",
 "VGMDeclaration / routingDetails / destinationParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / routingDetails / destinationParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
-"VGMDeclaration / routingDetails / forwardingParties",forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
+"VGMDeclaration / routingDetails / forwardingParties",forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the VGM declaration between the originating and destination party.",
 "VGMDeclaration / routingDetails / forwardingParties / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
@@ -321,9 +320,9 @@ or a subsequent revision.",
 - `ZZZ` (Mutually defined)",
 "VGMDeclaration / routingDetails / forwardingParties / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / routingDetails / forwardingParties / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
-"VGMDeclaration / routingDetails / originatingParty",originatingParty,Party,,,,,"The initial party with which the event originated.",
+"VGMDeclaration / routingDetails / originatingParty",originatingParty,Party,,,,,"The initial party with which the VGM declaration originated.",
 "VGMDeclaration / routingDetails / originatingParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
@@ -356,7 +355,7 @@ or a subsequent revision.",
 - `ZZZ` (Mutually defined)",
 "VGMDeclaration / routingDetails / originatingParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / routingDetails / originatingParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / shipmentDetails",shipmentDetails,ShipmentDetails,,,,,"VGM details specific to the shipment",
 "VGMDeclaration / shipmentDetails / carrierBookingReference",carrierBookingReference,string,,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
@@ -420,7 +419,7 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `ZZZ` (Mutually defined)",
 "VGMDeclaration / submittingParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / submittingParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / submittingParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",
 "VGMDeclaration / vesselVoyageDetails",vesselVoyageDetails,VesselVoyageDetails,,,,,"VGM details specific to the vessel voyage",
@@ -572,9 +571,7 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 "VGMDeclaration / VGM / weight",weight,Weight,,,,,"The gross mass (weight) of the transport equipment",
 "VGMDeclaration / VGM / weight / unit",unit,string,,maxLength=10,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)
-- `GRM` (Grams)
-- `ONZ` (Ounce)",
+- `LBR` (Pounds)",
 "VGMDeclaration / VGM / weight / value",value,number,,,,2.4,"Weight value expressed in the measurement `unit`",
 "VGMDeclaration / weighingParty",weighingParty,PartyDetails,,,,,"Legally accepted party designated to perform the weighing.",
 "VGMDeclaration / weighingParty / address",address,Address,,,,,"An object for storing address-related information.",
@@ -624,6 +621,6 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `ZZZ` (Mutually defined)",
 "VGMDeclaration / weighingParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / weighingParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "VGMDeclaration / weighingParty / partyName",partyName,string,,maxLength=70,,"Acme Inc.","Party name",

@@ -35,7 +35,6 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.Party;
 import org.dcsa.conformance.specifications.standards.core.v100.model.PartyDetails;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Seal;
 import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
-import org.dcsa.conformance.specifications.standards.core.v100.model.Weight;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.FeedbackElement;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMDeclarationsError;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.GetVGMDeclarationsResponse;
@@ -49,6 +48,7 @@ import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGM;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMDeclaration;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.RoutingDetails;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.VesselVoyageDetails;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.Weight;
 
 public class VGMStandardSpecification extends StandardSpecification {
 

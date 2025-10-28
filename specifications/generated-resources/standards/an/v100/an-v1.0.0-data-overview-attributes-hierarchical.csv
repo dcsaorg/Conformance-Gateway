@@ -1288,7 +1288,10 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 - `SHI` (Shipper)
 - `PHY` (Phytosanitary)
 - `VET` (Veterinary)
-- `CUS` (Customs)",
+- `CUS` (Customs)
+
+In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).",
 "ArrivalNotice / utilizedTransportEquipments / shippingMarks",shippingMarks,"string list",,"maxItems=50
 maxLength=35",,,"A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`
 Item description:

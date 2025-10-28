@@ -360,51 +360,17 @@ or a subsequent revision.",
 or a subsequent revision.",
 "VGMDeclaration / shipmentDetails",shipmentDetails,ShipmentDetails,,,,,"VGM details specific to the shipment",
 "VGMDeclaration / shipmentDetails / carrierBookingReference",carrierBookingReference,string,,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
-"VGMDeclaration / shipmentDetails / documentReferences",documentReferences,"DocumentReference list",,,,,"Additional list of document references related to this event",
-"VGMDeclaration / shipmentDetails / documentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-"VGMDeclaration / shipmentDetails / documentReferences / typeCode",typeCode,string,,,,BKG,"Code used to denote the type of a document reference
-- `AMF` - Advance Manifest Filing (of any subtype)
-- `ARN` - Arrival Notice
-- `BKG` - Booking
-- `CAS` - Cargo Survey
-- `CBR` - Carrier Booking Request
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin
-- `CQU` - Contract Quotation
-- `CRO` - Container Release Order
-- `CUC` - Customs Clearance
-- `DEI` - Delivery Instructions
-- `DEO` - Delivery Order
-- `DGD` - Dangerous Goods Declaration
-- `FCE` - Fumigation Certificate
-- `HCE` - Health Certificate
-- `ICE` - Inspection Certificate
-- `INV` - Invoice
-- `OOG` - Out of Gauge
-- `PCE` - Phytosanitary Certificate
-- `PFD` - Proof of Delivery
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
-- `TRO` - Transport Order
-- `VCE` - Veterinary Certificate
-- `VGM` - Verified Gross Mass",
-"VGMDeclaration / shipmentDetails / shipmentReferences",shipmentReferences,"ShipmentReference list",,,,,"Additional list of shipment references related to this event",
-"VGMDeclaration / shipmentDetails / shipmentReferences / reference",reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
-"VGMDeclaration / shipmentDetails / shipmentReferences / typeCode",typeCode,string,,,,FF,"Code used to denote the type of a shipment reference
-- `AAO` - Consignee’s Reference
-- `AES` - Automated Export System
-- `BID` - Booking Request ID
-- `BPR` - Booking party reference number
-- `CER` - Canadian Export Reporting System
-- `CR` - Customer’s Reference
-- `CSI` - Customer shipment ID
-- `DUE` - Declaração Única de Exportação
-- `ECR` - Empty container release reference
-- `EQ` - Equipment Reference
-- `FF` - Freight Forwarder’s Reference
-- `PO` - Purchase Order Reference
-- `RUC` - Registro Único del Contribuyente
-- `SI` - Shipper’s Reference",
+"VGMDeclaration / shipmentDetails / otherReferences",otherReferences,"OtherReference list",,,,,"List of additional references related to the VGM declaration,
+excluding the Carrier Booking Reference and the Transport Document Reference",
+"VGMDeclaration / shipmentDetails / otherReferences / reference",reference,string,,maxLength=100,,A456C,"The actual reference value",
+"VGMDeclaration / shipmentDetails / otherReferences / typeCode",typeCode,string,,,,SI,"Code qualifying a reference.
+
+In addition to the codes listed here, any other code as defined in UN/EDIFACT 16A 1153 or a subsequent revision may also be used.
+
+- `AOW` - Transportation Control Number (TCN)
+- `SI` - Shipper's identifying number for shipment (SID)
+- `SQ` - Equipment sequence number
+- `VOR` - Transport equipment gross mass verification order reference",
 "VGMDeclaration / shipmentDetails / transportDocumentReference","transportDocumentReference",string,,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM was created",
 "VGMDeclaration / submittingParty",submittingParty,PartyDetails,,,,,"Party that submits the VGM declaration.",
 "VGMDeclaration / submittingParty / address",address,Address,,,,,"An object for storing address-related information.",

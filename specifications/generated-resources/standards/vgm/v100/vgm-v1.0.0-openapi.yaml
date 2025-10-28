@@ -301,45 +301,6 @@ components:
           description: "Contact email address"
           example: "jane.doe@example.com"
       description: "The contact details of a person."
-    DocumentReference:
-      type: "object"
-      properties:
-        typeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of a document reference
-            - `AMF` - Advance Manifest Filing (of any subtype)
-            - `ARN` - Arrival Notice
-            - `BKG` - Booking
-            - `CAS` - Cargo Survey
-            - `CBR` - Carrier Booking Request
-            - `CEA` - Certificate of Analysis
-            - `CEO` - Certificate of Origin
-            - `CQU` - Contract Quotation
-            - `CRO` - Container Release Order
-            - `CUC` - Customs Clearance
-            - `DEI` - Delivery Instructions
-            - `DEO` - Delivery Order
-            - `DGD` - Dangerous Goods Declaration
-            - `FCE` - Fumigation Certificate
-            - `HCE` - Health Certificate
-            - `ICE` - Inspection Certificate
-            - `INV` - Invoice
-            - `OOG` - Out of Gauge
-            - `PCE` - Phytosanitary Certificate
-            - `PFD` - Proof of Delivery
-            - `SHI` - Shipping Instruction
-            - `TRD` - Transport Document
-            - `TRO` - Transport Order
-            - `VCE` - Veterinary Certificate
-            - `VGM` - Verified Gross Mass
-          example: "BKG"
-        reference:
-          maxLength: 100
-          type: "string"
-          description: "Reference identifying the document"
-          example: "123e4567e89b"
-      description: "Referenced document"
     EquipmentDetails:
       type: "object"
       properties:
@@ -525,6 +486,27 @@ components:
           allOf:
           - $ref: "#/components/schemas/GeoCoordinate"
       description: "Location information"
+    OtherReference:
+      type: "object"
+      properties:
+        typeCode:
+          type: "string"
+          description: |-
+            Code qualifying a reference.
+
+            In addition to the codes listed here, any other code as defined in UN/EDIFACT 16A 1153 or a subsequent revision may also be used.
+
+            - `AOW` - Transportation Control Number (TCN)
+            - `SI` - Shipper's identifying number for shipment (SID)
+            - `SQ` - Equipment sequence number
+            - `VOR` - Transport equipment gross mass verification order reference
+          example: "SI"
+        reference:
+          maxLength: 100
+          type: "string"
+          description: "The actual reference value"
+          example: "A456C"
+      description: "Other reference"
     Party:
       type: "object"
       properties:
@@ -714,51 +696,14 @@ components:
           type: "string"
           description: "The reference of the transport document for which this VGM was created"
           example: "HHL71800000"
-        documentReferences:
+        otherReferences:
           type: "array"
-          description: "Additional list of document references related to this event"
+          description: |
+            List of additional references related to the VGM declaration,
+            excluding the Carrier Booking Reference and the Transport Document Reference
           items:
-            $ref: "#/components/schemas/DocumentReference"
-        shipmentReferences:
-          type: "array"
-          description: "Additional list of shipment references related to this event"
-          items:
-            $ref: "#/components/schemas/ShipmentReference"
+            $ref: "#/components/schemas/OtherReference"
       description: "VGM details specific to the shipment"
-    ShipmentReference:
-      type: "object"
-      properties:
-        typeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of a shipment reference
-            - `AAO` - Consignee’s Reference
-            - `AES` - Automated Export System
-            - `BID` - Booking Request ID
-            - `BPR` - Booking party reference number
-            - `CER` - Canadian Export Reporting System
-            - `CR` - Customer’s Reference
-            - `CSI` - Customer shipment ID
-            - `DUE` - Declaração Única de Exportação
-            - `ECR` - Empty container release reference
-            - `EQ` - Equipment Reference
-            - `FF` - Freight Forwarder’s Reference
-            - `PO` - Purchase Order Reference
-            - `RUC` - Registro Único del Contribuyente
-            - `SI` - Shipper’s Reference
-          example: "FF"
-        reference:
-          maxLength: 100
-          type: "string"
-          description: "The actual reference value"
-          example: "123e4567e89b"
-      description: |
-        References provided by the shipper or freight forwarder at the time of booking or at the time of providing shipping instructions.
-        Carriers share it back when providing track and trace event updates, some are also printed on the B/L.
-        Customers can use these references to track shipments in their internal systems.
-
-        In addition to the References provided by the shipper or freight forwarder,
-        the carrier can provide an extra type called `EQ` which is a reference to an Equipment.
     VGM:
       type: "object"
       properties:

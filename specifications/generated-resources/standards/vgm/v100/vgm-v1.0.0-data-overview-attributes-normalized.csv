@@ -16,33 +16,6 @@ ContactDetails,email,string,,maxLength=255,,jane.doe@example.com,"Contact email 
 ContactDetails,name,string,,maxLength=255,,"Jane Doe","Contact name",
 ContactDetails,phone,string,,maxLength=30,,"+14155552671","Contact phone number, including an international phone number format
 as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
-DocumentReference,reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a document reference
-- `AMF` - Advance Manifest Filing (of any subtype)
-- `ARN` - Arrival Notice
-- `BKG` - Booking
-- `CAS` - Cargo Survey
-- `CBR` - Carrier Booking Request
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin
-- `CQU` - Contract Quotation
-- `CRO` - Container Release Order
-- `CUC` - Customs Clearance
-- `DEI` - Delivery Instructions
-- `DEO` - Delivery Order
-- `DGD` - Dangerous Goods Declaration
-- `FCE` - Fumigation Certificate
-- `HCE` - Health Certificate
-- `ICE` - Inspection Certificate
-- `INV` - Invoice
-- `OOG` - Out of Gauge
-- `PCE` - Phytosanitary Certificate
-- `PFD` - Proof of Delivery
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
-- `TRO` - Transport Order
-- `VCE` - Veterinary Certificate
-- `VGM` - Verified Gross Mass",
 EquipmentDetails,cargoGrossWeight,Weight,,,,,"Gross weight of the cargo item including packaging being carried in the container.
 Excludes the tare weight of the container.",
 EquipmentDetails,equipmentReference,string,,maxLength=11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -100,6 +73,15 @@ Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specify
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+OtherReference,reference,string,,maxLength=100,,A456C,"The actual reference value",
+OtherReference,typeCode,string,,,,SI,"Code qualifying a reference.
+
+In addition to the codes listed here, any other code as defined in UN/EDIFACT 16A 1153 or a subsequent revision may also be used.
+
+- `AOW` - Transportation Control Number (TCN)
+- `SI` - Shipper's identifying number for shipment (SID)
+- `SQ` - Equipment sequence number
+- `VOR` - Transport equipment gross mass verification order reference",
 Party,codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
@@ -167,25 +149,9 @@ Seal,type,string,,,,WIR,"The type of seal.
 - `BLT` (Bolt)
 - `WIR` (Wire)",
 ShipmentDetails,carrierBookingReference,string,,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
-ShipmentDetails,documentReferences,"DocumentReference list",,,,,"Additional list of document references related to this event",
-ShipmentDetails,shipmentReferences,"ShipmentReference list",,,,,"Additional list of shipment references related to this event",
+ShipmentDetails,otherReferences,"OtherReference list",,,,,"List of additional references related to the VGM declaration,
+excluding the Carrier Booking Reference and the Transport Document Reference",
 ShipmentDetails,"transportDocumentReference",string,,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM was created",
-ShipmentReference,reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
-ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a shipment reference
-- `AAO` - Consignee’s Reference
-- `AES` - Automated Export System
-- `BID` - Booking Request ID
-- `BPR` - Booking party reference number
-- `CER` - Canadian Export Reporting System
-- `CR` - Customer’s Reference
-- `CSI` - Customer shipment ID
-- `DUE` - Declaração Única de Exportação
-- `ECR` - Empty container release reference
-- `EQ` - Equipment Reference
-- `FF` - Freight Forwarder’s Reference
-- `PO` - Purchase Order Reference
-- `RUC` - Registro Único del Contribuyente
-- `SI` - Shipper’s Reference",
 VesselVoyageDetails,carrierCode,string,,maxLength=4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
 [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
 

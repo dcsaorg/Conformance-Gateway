@@ -28,14 +28,12 @@ import org.dcsa.conformance.specifications.generator.StandardSpecification;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ContactDetails;
-import org.dcsa.conformance.specifications.standards.core.v100.model.DocumentReference;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Party;
 import org.dcsa.conformance.specifications.standards.core.v100.model.PartyDetails;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Seal;
-import org.dcsa.conformance.specifications.standards.core.v100.model.ShipmentReference;
 import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Weight;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.FeedbackElement;
@@ -45,6 +43,7 @@ import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMDe
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMDeclarationsRequest;
 import org.dcsa.conformance.specifications.standards.vgm.v100.messages.PostVGMDeclarationsResponse;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.EquipmentDetails;
+import org.dcsa.conformance.specifications.standards.vgm.v100.model.OtherReference;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.ShipmentDetails;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGM;
 import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMDeclaration;
@@ -88,7 +87,6 @@ public class VGMStandardSpecification extends StandardSpecification {
         Address.class,
         ClassifiedDateTime.class,
         ContactDetails.class,
-        DocumentReference.class,
         EquipmentDetails.class,
         Facility.class,
         FeedbackElement.class,
@@ -96,6 +94,7 @@ public class VGMStandardSpecification extends StandardSpecification {
         GetVGMDeclarationsError.class,
         GetVGMDeclarationsResponse.class,
         Location.class,
+        OtherReference.class,
         Party.class,
         PartyDetails.class,
         PostVGMDeclarationsError.class,
@@ -104,7 +103,6 @@ public class VGMStandardSpecification extends StandardSpecification {
         RoutingDetails.class,
         Seal.class,
         ShipmentDetails.class,
-        ShipmentReference.class,
         VesselVoyageDetails.class,
         VoyageNumberOrReference.class,
         VGM.class,

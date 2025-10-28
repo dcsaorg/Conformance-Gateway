@@ -581,7 +581,7 @@ class JsonAttributeTest {
     objectNode.put("test", true);
     objectNode.put("test2", "value");
 
-    JsonRebaseableContentCheck check =
+    JsonRebasableContentCheck check =
         JsonAttribute.ifThenElse(
             "Test ifThenElse",
             JsonAttribute.isTrue(JsonPointer.compile("/test")),
@@ -800,7 +800,7 @@ class JsonAttributeTest {
     objectNode.put("test1", "value1");
     objectNode.put("test2", "value2");
 
-    JsonRebaseableContentCheck check =
+    JsonRebasableContentCheck check =
         JsonAttribute.allOrNoneArePresent(
             JsonPointer.compile("/test1"), JsonPointer.compile("/test2"));
 
@@ -824,7 +824,7 @@ class JsonAttributeTest {
   void testXOrFields() {
     objectNode.put("field1", "value1");
 
-    JsonRebaseableContentCheck check =
+    JsonRebasableContentCheck check =
         JsonAttribute.xOrFields(JsonPointer.compile("/field1"), JsonPointer.compile("/field2"));
 
     // Test when only one field is present

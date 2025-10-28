@@ -3,7 +3,6 @@ package org.dcsa.conformance.core.check;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -16,7 +15,7 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
 
   private final String standardsVersion;
   private final JsonContentCheckRebaser rebaser;
-  private final List<JsonRebaseableContentCheck> validators;
+  private final List<JsonRebasableContentCheck> validators;
 
   JsonRebaseableAttributeBasedCheck(
     String titlePrefix,
@@ -27,7 +26,7 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
     String standardsVersion,
     @NonNull JsonContentCheckRebaser rebaser,
     @NonNull
-    List<@NonNull JsonRebaseableContentCheck> validators) {
+    List<@NonNull JsonRebasableContentCheck> validators) {
     super(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
     if (validators.isEmpty()) {
       throw new IllegalArgumentException("Must have at least one subcheck (validators must be non-empty)");
@@ -53,9 +52,9 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
   private static class SingleValidatorCheck extends ActionCheck {
 
     private final String standardsVersion;
-    private final JsonRebaseableContentCheck validator;
+    private final JsonRebasableContentCheck validator;
 
-    public SingleValidatorCheck(Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType, String standardsVersion, @NonNull JsonRebaseableContentCheck validator) {
+    public SingleValidatorCheck(Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType, String standardsVersion, @NonNull JsonRebasableContentCheck validator) {
       super(validator.description(), isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
       this.standardsVersion = standardsVersion;
       this.validator = validator;

@@ -70,7 +70,6 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
       if (matches.isEmpty()) {
         validationIssues.add(
             ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant())));
-        return;
       }
       matches.stream()
           .map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))

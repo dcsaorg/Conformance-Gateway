@@ -7,7 +7,7 @@ import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonContentCheckRebaser;
 import org.dcsa.conformance.core.check.JsonContentMatchedValidation;
-import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
+import org.dcsa.conformance.core.check.JsonRebasableContentCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 
@@ -46,8 +46,8 @@ public class SignatureChecks {
     return delegate.validate(jsonBody, contextPath + "!");
   };
 
-  public static JsonRebaseableContentCheck signedContentValidation(
-    JsonRebaseableContentCheck delegate
+  public static JsonRebasableContentCheck signedContentValidation(
+    JsonRebasableContentCheck delegate
   ) {
     return SIGNED_CONTENT_REBASER.offset(delegate);
   }

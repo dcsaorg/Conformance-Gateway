@@ -33,7 +33,7 @@ public class PintChecks {
   private static final JsonPointer TDR_PTR =
       JsonPointer.compile("/transportDocument/transportDocumentReference");
 
-  private static final JsonRebaseableContentCheck TRANSACTION_PARTY_CODE_LIST_PROVIDER =
+  private static final JsonRebasableContentCheck TRANSACTION_PARTY_CODE_LIST_PROVIDER =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate 'codeListProvider' is a known value",
           (mav) -> {

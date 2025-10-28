@@ -13,7 +13,7 @@ import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
 import static org.dcsa.conformance.core.check.JsonAttribute.renderValue;
 
 @RequiredArgsConstructor(staticName = "of")
-public class LostAttributeCheck implements JsonRebaseableContentCheck {
+public class LostAttributeCheck implements JsonRebasableContentCheck {
 
   @Getter
   private final String description;

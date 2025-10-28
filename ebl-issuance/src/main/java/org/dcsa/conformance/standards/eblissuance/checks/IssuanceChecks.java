@@ -22,13 +22,13 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 public class IssuanceChecks {
 
-  private static final JsonRebaseableContentCheck ISSUE_TO_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebasableContentCheck ISSUE_TO_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
     "The 'codeListProvider' is valid",
     mav -> mav.submitAllMatching("issueTo.identifyingCodes.*.codeListProvider"),
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES)
   );
 
-  private static JsonRebaseableContentCheck hasEndorseeScenarioCheck(String standardsVersion, EblType eblType) {
+  private static JsonRebasableContentCheck hasEndorseeScenarioCheck(String standardsVersion, EblType eblType) {
     return JsonAttribute.customValidator(
       "[Scenario] Validate endorsee party presence is correct",
       JsonAttribute.path("document", JsonAttribute.path("documentParties",

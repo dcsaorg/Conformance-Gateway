@@ -77,7 +77,7 @@ public class JsonAttribute {
     HttpMessageType httpMessageType,
     String standardsVersion,
     JsonContentCheckRebaser rebaser,
-    List<JsonRebaseableContentCheck> checks
+    List<JsonRebasableContentCheck> checks
   ) {
     return contentChecks(
       "",
@@ -99,7 +99,7 @@ public class JsonAttribute {
     HttpMessageType httpMessageType,
     String standardsVersion,
     JsonContentCheckRebaser rebaser,
-    List<JsonRebaseableContentCheck> checks
+    List<JsonRebasableContentCheck> checks
   ) {
     return new JsonRebaseableAttributeBasedCheck(
       titlePrefix,
@@ -182,7 +182,7 @@ public class JsonAttribute {
     };
   }
 
-  public static JsonRebaseableContentCheck lostAttributeCheck(
+  public static JsonRebasableContentCheck lostAttributeCheck(
     @NonNull
     String description,
     @NonNull
@@ -196,7 +196,7 @@ public class JsonAttribute {
   }
 
 
-  public static JsonRebaseableContentCheck lostAttributeCheck(
+  public static JsonRebasableContentCheck lostAttributeCheck(
     @NonNull
     String description,
     @NonNull
@@ -236,13 +236,12 @@ public class JsonAttribute {
     };
   }
 
-  public static JsonRebaseableContentCheck allIndividualMatchesMustBeValid(
+  public static JsonRebasableContentCheck allIndividualMatchesMustBeValid(
       @NonNull String name,
       @NonNull Consumer<MultiAttributeValidator> scanner,
       @NonNull JsonContentMatchedValidation subvalidation) {
-    return new JsonRebaseableCheckImpl(
+    return JsonRebasableCheckImpl.of(
         name,
-        true,
         (body, contextPath) -> {
           var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
           scanner.accept(v);
@@ -250,7 +249,7 @@ public class JsonAttribute {
         });
   }
 
-  public static JsonRebaseableContentCheck allIndividualMatchesMustBeValid(
+  public static JsonRebasableContentCheck allIndividualMatchesMustBeValid(
           @NonNull
           String name,
           boolean isRelevant,
@@ -259,7 +258,7 @@ public class JsonAttribute {
           @NonNull
           JsonContentMatchedValidation subvalidation
   ) {
-    return new JsonRebaseableCheckImpl(
+    return JsonRebasableCheckImpl.of(
         name,
         isRelevant,
         (body, contextPath) -> {
@@ -370,13 +369,12 @@ public class JsonAttribute {
     };
   }
 
-  public static JsonRebaseableContentCheck mustBeNotNull(
+  public static JsonRebasableContentCheck mustBeNotNull(
     JsonPointer jsonPointer,
     String reason
   ) {
-    return new JsonRebaseableCheckImpl(
+    return JsonRebasableCheckImpl.of(
         jsonCheckName(jsonPointer),
-            true,
         (body, contextPath) -> {
           var node = body.at(jsonPointer);
           if (node.isMissingNode() || node.isNull()) {
@@ -389,16 +387,15 @@ public class JsonAttribute {
   }
 
 
-  public static JsonRebaseableContentCheck mustEqual(
+  public static JsonRebasableContentCheck mustEqual(
       JsonPointer jsonPointer,
       String expectedValue) {
     Objects.requireNonNull(
       expectedValue,
       "expectedValue cannot be null; Note: Use `() -> getDspSupplier().get().foo()` (or similar) when testing a value against a dynamic scenario property"
     );
-    return new JsonRebaseableCheckImpl(
+    return  JsonRebasableCheckImpl.of(
         "%s: Must equal '%s'".formatted(jsonCheckName(jsonPointer), expectedValue),
-            true,
         (body, contextPath) -> {
           var node = body.at(jsonPointer);
           var actualValue = node.asText(null);
@@ -415,13 +412,12 @@ public class JsonAttribute {
   }
 
 
-  public static JsonRebaseableContentCheck mustEqual(
+  public static JsonRebasableContentCheck mustEqual(
     String title,
     JsonPointer jsonPointer,
     boolean expectedValue) {
-    return new JsonRebaseableCheckImpl(
+    return  JsonRebasableCheckImpl.of(
       title,
-            true,
       (body, contextPath) -> {
         var node = body.at(jsonPointer);
         if (!node.isBoolean() || node.asBoolean() != expectedValue) {
@@ -436,7 +432,7 @@ public class JsonAttribute {
       });
   }
 
-  public static JsonRebaseableContentCheck mustEqual(
+  public static JsonRebasableContentCheck mustEqual(
     JsonPointer jsonPointer,
     @NonNull
     Supplier<String> expectedValueSupplier) {
@@ -448,7 +444,7 @@ public class JsonAttribute {
   }
 
 
-  public static JsonRebaseableContentCheck mustEqual(
+  public static JsonRebasableContentCheck mustEqual(
     String name,
     JsonPointer jsonPointer,
     @NonNull
@@ -458,9 +454,8 @@ public class JsonAttribute {
     if (v != null) {
       context = ": Must equal '%s'".formatted(v);
     }
-    return new JsonRebaseableCheckImpl(
+    return JsonRebasableCheckImpl.of(
       name + context,
-            true,
       (body, contextPath) -> {
           var node = body.at(jsonPointer);
           var actualValue = node.asText(null);
@@ -481,7 +476,7 @@ public class JsonAttribute {
   }
 
 
-  public static JsonRebaseableContentCheck mustEqual(
+  public static JsonRebasableContentCheck mustEqual(
     String name,
     String path,
     @NonNull
@@ -491,9 +486,8 @@ public class JsonAttribute {
     if (v != null) {
       context = ": Must equal '%s'".formatted(v);
     }
-    return new JsonRebaseableCheckImpl(
+    return JsonRebasableCheckImpl.of(
       name + context,
-            true,
       (body, contextPath) -> {
         var node = body.path(path);
         var actualValue = node.asText(null);
@@ -555,8 +549,8 @@ public class JsonAttribute {
     };
   }
 
-  public static JsonRebaseableContentCheck mustBePresent(JsonPointer jsonPointer) {
-    return JsonRebaseableCheckImpl.of(jsonPointer, matchedMustBePresent()::validate);
+  public static JsonRebasableContentCheck mustBePresent(JsonPointer jsonPointer) {
+    return JsonRebasableCheckImpl.of(jsonPointer, matchedMustBePresent()::validate);
   }
 
   public static JsonContentMatchedValidation matchedMaximum(int limit) {
@@ -592,10 +586,10 @@ public class JsonAttribute {
     };
   }
 
-  public static JsonRebaseableContentCheck mustBeAbsent(
+  public static JsonRebasableContentCheck mustBeAbsent(
     JsonPointer jsonPointer
   ) {
-    return JsonRebaseableCheckImpl.of(jsonPointer, matchedMustBeAbsent()::validate);
+    return JsonRebasableCheckImpl.of(jsonPointer, matchedMustBeAbsent()::validate);
   }
 
   public static JsonContentMatchedValidation combine(JsonContentMatchedValidation... subchecks) {
@@ -628,18 +622,18 @@ public class JsonAttribute {
     };
   }
 
-  public static JsonRebaseableContentCheck mustBeDatasetKeywordIfPresent(
+  public static JsonRebasableContentCheck mustBeDatasetKeywordIfPresent(
     JsonPointer jsonPointer,
     KeywordDataset dataset
   ) {
-    return JsonRebaseableCheckImpl.of(
+    return JsonRebasableCheckImpl.of(
       renderJsonPointer(jsonPointer),
       jsonPointer,
       matchedMustBeDatasetKeywordIfPresent(dataset)::validate
     );
   }
 
-  public static JsonRebaseableContentCheck atMostOneOf(
+  public static JsonRebasableContentCheck atMostOneOf(
     @NonNull JsonPointer ... ptrs
   ) {
     if (ptrs.length < 2) {
@@ -650,9 +644,8 @@ public class JsonAttribute {
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
     );
-    return new JsonRebaseableCheckImpl(
+    return JsonRebasableCheckImpl.of(
       name,
-            true,
       (body, contextPath) -> {
         var present = Arrays.stream(ptrs)
           .filter(p -> isJsonNodePresent(body.at(p)))
@@ -670,7 +663,7 @@ public class JsonAttribute {
       });
   }
 
-  public static JsonRebaseableContentCheck atLeastOneOf(
+  public static JsonRebasableContentCheck atLeastOneOf(
     @NonNull JsonPointer ... ptrs
   ) {
     if (ptrs.length < 2) {
@@ -681,9 +674,8 @@ public class JsonAttribute {
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
     );
-    return new JsonRebaseableCheckImpl(
+    return  JsonRebasableCheckImpl.of(
       name,
-            true,
       (body, contextPath) -> {
         var present = Arrays.stream(ptrs)
           .anyMatch(p -> isJsonNodePresent(body.at(p)));
@@ -699,7 +691,7 @@ public class JsonAttribute {
       });
   }
 
-  public static JsonRebaseableContentCheck xOrFields(
+  public static JsonRebasableContentCheck xOrFields(
     @NonNull JsonPointer ... ptrs
   ) {
     if (ptrs.length < 2) {
@@ -710,9 +702,8 @@ public class JsonAttribute {
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
     );
-    return new JsonRebaseableCheckImpl(
+    return JsonRebasableCheckImpl.of(
       name,
-            true,
       (body, contextPath) -> {
         var allPresent = Arrays.stream(ptrs)
           .allMatch(p -> isJsonNodePresent(body.at(p)));
@@ -758,7 +749,7 @@ public class JsonAttribute {
       };
   }
 
-  public static JsonRebaseableContentCheck allOrNoneArePresent(
+  public static JsonRebasableContentCheck allOrNoneArePresent(
     @NonNull JsonPointer ... ptrs
   ) {
     if (ptrs.length < 2) {
@@ -769,9 +760,8 @@ public class JsonAttribute {
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
     );
-    return new JsonRebaseableCheckImpl(
+    return  JsonRebasableCheckImpl.of(
         name,
-            true,
         (body, contextPath) -> {
           var firstPtr = ptrs[0];
           var firstNode = body.at(firstPtr);
@@ -794,18 +784,18 @@ public class JsonAttribute {
         });
   }
 
-  public static JsonRebaseableContentCheck ifThen(
+  public static JsonRebasableContentCheck ifThen(
     @NonNull
     String name,
     @NonNull
     Predicate<JsonNode> when,
     @NonNull
-    JsonRebaseableContentCheck then
+    JsonRebasableContentCheck then
   ) {
     return ifThenElse(name, when, then::validate, EMPTY_VALIDATOR);
   }
 
-  public static JsonRebaseableContentCheck ifThen(
+  public static JsonRebasableContentCheck ifThen(
     @NonNull
     String name,
     @NonNull
@@ -816,7 +806,7 @@ public class JsonAttribute {
     return ifThenElse(name, when, then::validate, EMPTY_VALIDATOR);
   }
 
-  public static JsonRebaseableContentCheck ifThenElse(
+  public static JsonRebasableContentCheck ifThenElse(
     @NonNull
     String name,
     @NonNull
@@ -826,9 +816,8 @@ public class JsonAttribute {
     @NonNull
     BiFunction<JsonNode, String, ConformanceCheckResult> elseCheck
   ) {
-    return new JsonRebaseableCheckImpl(
+    return JsonRebasableCheckImpl.of(
         name,
-            true,
         (body, contextPath) -> {
           if (when.test(body)) {
             return then.apply(body, contextPath);
@@ -837,15 +826,15 @@ public class JsonAttribute {
         });
   }
 
-  public static JsonRebaseableContentCheck ifThenElse(
+  public static JsonRebasableContentCheck ifThenElse(
     @NonNull
     String name,
     @NonNull
     Predicate<JsonNode> when,
     @NonNull
-    JsonRebaseableContentCheck then,
+    JsonRebasableContentCheck then,
     @NonNull
-    JsonRebaseableContentCheck elseCheck
+    JsonRebasableContentCheck elseCheck
   ) {
     return ifThenElse(name, when, then::validate, elseCheck::validate);
   }
@@ -894,11 +883,11 @@ public class JsonAttribute {
     return JsonContentCheckImpl.of(description, isRelevant, validator);
   }
 
-  public static JsonRebaseableContentCheck customValidator(
+  public static JsonRebasableContentCheck customValidator(
     @NonNull String description,
     @NonNull JsonContentMatchedValidation validator
   ) {
-    return new JsonRebaseableCheckImpl(description,true, validator::validate);
+    return JsonRebasableCheckImpl.of(description,true, validator::validate);
   }
 
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
@@ -961,46 +950,61 @@ public class JsonAttribute {
     };
   }
 
-  record JsonRebaseableCheckImpl(
-    String description,
-    boolean isRelevant,
-    BiFunction<JsonNode, String, ConformanceCheckResult> impl
-  ) implements JsonRebaseableContentCheck {
+  record JsonRebasableCheckImpl(
+      String description,
+      boolean isRelevant,
+      BiFunction<JsonNode, String, ConformanceCheckResult> impl)
+      implements JsonRebasableContentCheck {
+
     @Override
     public ConformanceCheckResult validate(JsonNode body, String contextPath) {
       return impl.apply(body, contextPath);
     }
 
-    public static JsonRebaseableContentCheck of(JsonPointer jsonPointer, BiFunction<JsonNode, String, ConformanceCheckResult> validator) {
-      return of(jsonCheckName(jsonPointer), jsonPointer, validator);
+    public static JsonRebasableContentCheck of(
+        String description,
+        boolean isRelevant,
+        BiFunction<JsonNode, String, ConformanceCheckResult> validator) {
+      return new JsonRebasableCheckImpl(description, isRelevant, validator);
     }
 
-    public static JsonRebaseableContentCheck of(String description, JsonPointer jsonPointer, BiFunction<JsonNode, String, ConformanceCheckResult> validator) {
-      return new JsonRebaseableCheckImpl(
-        description,
-              true,
-        (refNode, context) -> {
-          var node = refNode.at(jsonPointer);
-          var path = renderJsonPointer(jsonPointer, context);
-          return validator.apply(node, path);
-        }
-      );
+    public static JsonRebasableContentCheck of(
+        String description, BiFunction<JsonNode, String, ConformanceCheckResult> validator) {
+      return of(description, true, validator);
+    }
+
+    public static JsonRebasableContentCheck of(
+        String description,
+        JsonPointer jsonPointer,
+        BiFunction<JsonNode, String, ConformanceCheckResult> validator) {
+      return of(
+          description,
+          (refNode, context) -> {
+            var node = refNode.at(jsonPointer);
+            var path = renderJsonPointer(jsonPointer, context);
+            return validator.apply(node, path);
+          });
+    }
+
+    public static JsonRebasableContentCheck of(
+        JsonPointer jsonPointer, BiFunction<JsonNode, String, ConformanceCheckResult> validator) {
+      return of(jsonCheckName(jsonPointer), jsonPointer, validator);
     }
   }
 
   record JsonContentCheckImpl(
-    @NonNull
-    String description,
-    boolean isRelevant,
-    @NonNull
-    Function<JsonNode, ConformanceCheckResult> impl
-  ) implements JsonContentCheck {
+      @NonNull String description,
+      boolean isRelevant,
+      @NonNull Function<JsonNode, ConformanceCheckResult> impl)
+      implements JsonContentCheck {
+
     @Override
     public ConformanceCheckResult validate(JsonNode body) {
       return impl.apply(body);
     }
 
-    private static JsonContentCheck of(String description, Function<JsonNode, ConformanceCheckResult> impl) {
+    private static JsonContentCheck of(
+        String description, Function<JsonNode, ConformanceCheckResult> impl) {
       return new JsonContentCheckImpl(description, true, impl);
     }
 

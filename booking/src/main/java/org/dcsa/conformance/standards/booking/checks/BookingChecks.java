@@ -120,7 +120,7 @@ public class BookingChecks {
         BookingRole::isShipper, matched, HttpMessageType.REQUEST, standardVersion, checks);
   }
 
-  private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION =
+  private static final JsonRebasableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate that '%s' of '%s' is a known code".formatted(TYPE, NATIONAL_COMMODITY_CODES),
           mav ->
@@ -931,13 +931,13 @@ public class BookingChecks {
     }
   }
 
-  static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
+  static final JsonRebasableContentCheck VALID_FEEDBACK_SEVERITY =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate that '%s.*.%s' is valid".formatted(FEEDBACKS, SEVERITY),
           mav -> mav.submitAllMatching(S_S.formatted(FEEDBACKS, SEVERITY)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
 
-  static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
+  static final JsonRebasableContentCheck VALID_FEEDBACK_CODE =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "Validate that '%s.*.%s' is valid".formatted(FEEDBACKS, CODE),
           mav -> mav.submitAllMatching(S_S.formatted(FEEDBACKS, CODE)),

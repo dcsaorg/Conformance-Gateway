@@ -16,7 +16,7 @@ import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
+import org.dcsa.conformance.core.check.JsonRebasableContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
@@ -37,13 +37,13 @@ public class JitChecks {
   public static final String MOVES = "moves";
   public static final String CARRIER_CODE = "carrierCode";
 
-  static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER =
+  static final JsonRebasableContentCheck MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "The moves.carrierCode implies moves.carrierCodeListProvider",
           mav -> mav.submitAllMatching("moves.*"),
           JsonAttribute.presenceImpliesOtherField(CARRIER_CODE, "carrierCodeListProvider"));
 
-  static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE =
+  static final JsonRebasableContentCheck MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "The moves.carrierCodeListProvider implies moves.carrierCode",
           mav -> mav.submitAllMatching("moves.*"),
@@ -75,14 +75,14 @@ public class JitChecks {
             return ConformanceCheckResult.simple(Collections.emptySet());
           });
 
-  static final JsonRebaseableContentCheck TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION =
+  static final JsonRebasableContentCheck TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION =
       JsonAttribute.ifThen(
           "If timestamp is not of type REQ, it should not have a portCallServiceLocation",
           jsonNode ->
               !jsonNode.path(CLASSIFIER_CODE).asText("").equals(JitClassifierCode.REQ.name()),
           JsonAttribute.mustBeAbsent(JsonPointer.compile("/portCallServiceLocation")));
 
-  static final JsonRebaseableContentCheck TIMESTAMP_VALIDATE_PORT_CALL_SERVICE_LOCATION =
+  static final JsonRebasableContentCheck TIMESTAMP_VALIDATE_PORT_CALL_SERVICE_LOCATION =
       JsonAttribute.ifThen(
           "If timestamp has a portCallServiceLocation, it should have an UNLocationCode field.",
           jsonNode -> jsonNode.has("portCallServiceLocation"),
@@ -90,7 +90,7 @@ public class JitChecks {
               JsonPointer.compile("/portCallServiceLocation/UNLocationCode"),
               "it is a mandatory property of portCallServiceLocation."));
 
-  public static final JsonRebaseableContentCheck
+  public static final JsonRebasableContentCheck
       VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER =
           JsonAttribute.ifThen(
               "Vessel should at least have vesselIMONumber or MMSINumber",
@@ -101,7 +101,7 @@ public class JitChecks {
                     jsonPointers.add(JsonPointer.compile("/vessel/MMSINumber"));
                   }));
 
-  public static final JsonRebaseableContentCheck
+  public static final JsonRebasableContentCheck
       VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT =
           JsonAttribute.ifThen(
               "Vessel: width or lengthOverall requires dimensionUnit property.",
@@ -110,7 +110,7 @@ public class JitChecks {
                       || jsonNode.path("vessel").has("lengthOverall"),
               JsonAttribute.mustBePresent(JsonPointer.compile("/vessel/dimensionUnit")));
 
-  public static final JsonRebaseableContentCheck VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT =
+  public static final JsonRebasableContentCheck VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT =
       JsonAttribute.ifThen(
           "Property dimensionUnit is mandatory to provide if 'draft', 'airDraft', 'aftDraft' or 'forwardDraft' is provided.",
           jsonNode ->
@@ -120,7 +120,7 @@ public class JitChecks {
                   || jsonNode.has("forwardDraft"),
           JsonAttribute.mustBePresent(JsonPointer.compile("/dimensionUnit")));
 
-  static final JsonRebaseableContentCheck IS_FYI_TRUE =
+  static final JsonRebasableContentCheck IS_FYI_TRUE =
       JsonAttribute.mustEqual(
           "Expected isFYI=true when message is For Your Information only.",
           JsonPointer.compile("/isFYI"),
@@ -170,7 +170,7 @@ public class JitChecks {
 
   static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has(PORT_CALL_SERVICE_TYPE);
 
-  static JsonRebaseableContentCheck checkPortCallService(PortCallServiceTypeCode serviceType) {
+  static JsonRebasableContentCheck checkPortCallService(PortCallServiceTypeCode serviceType) {
     return JsonAttribute.ifThen(
         "Expected Port Call Service type should match scenario (%s).".formatted(serviceType.name()),
         IS_PORT_CALL_SERVICE,

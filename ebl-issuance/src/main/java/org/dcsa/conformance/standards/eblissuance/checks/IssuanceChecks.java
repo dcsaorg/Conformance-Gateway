@@ -22,29 +22,29 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 public class IssuanceChecks {
 
-  private static final JsonRebaseableContentCheck ISSUE_TO_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebasableContentCheck ISSUE_TO_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
     "The 'codeListProvider' is valid",
     mav -> mav.submitAllMatching("issueTo.identifyingCodes.*.codeListProvider"),
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES)
   );
 
-  private static JsonRebaseableContentCheck hasEndorseeScenarioCheck(String standardsVersion, EblType eblType) {
+  private static JsonRebasableContentCheck hasEndorseeScenarioCheck(String standardsVersion, EblType eblType) {
     return JsonAttribute.customValidator(
       "[Scenario] Validate endorsee party presence is correct",
       JsonAttribute.path("document", JsonAttribute.path("documentParties",
         (documentParties, contextPath) -> {
           if (!eblType.isToOrder()) {
-            return Set.of();
+            return ConformanceCheckResult.simple(Set.of());
           }
           var hadEndorsee = documentParties.has("endorsee");
           var endorseePath = concatContextPath(contextPath, "documentParties.endorsee");
           if (eblType.isBlankEbl() && hadEndorsee) {
-            return Set.of("The EBL should have been blank endorsed, but it has an '%s' attribute".formatted(endorseePath));
+            return ConformanceCheckResult.simple(Set.of("The EBL should have been blank endorsed, but it has an '%s' attribute".formatted(endorseePath)));
           }
           if (!eblType.isBlankEbl() && !hadEndorsee) {
-            return Set.of("The EBL should have had a named endorsee, but it is missing the '%s' attribute".formatted(endorseePath));
+            return ConformanceCheckResult.simple(Set.of("The EBL should have had a named endorsee, but it is missing the '%s' attribute".formatted(endorseePath)));
           }
-          return Set.of();
+          return ConformanceCheckResult.simple(Set.of());
         }
       ))
     );

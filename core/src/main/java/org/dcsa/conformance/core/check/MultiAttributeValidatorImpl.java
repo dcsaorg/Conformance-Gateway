@@ -12,6 +12,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.dcsa.conformance.core.util.JsonUtil;
 
 @RequiredArgsConstructor
 class MultiAttributeValidatorImpl implements MultiAttributeValidator {
@@ -20,31 +22,21 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
   private final JsonNode body;
   private final JsonContentMatchedValidation validation;
 
-  @Getter
-  private final Set<String> validationIssues = new HashSet<>();
+  @Getter private final Set<ConformanceCheckResult> validationIssues = new HashSet<>();
 
   @Override
   public AttributePathBuilder at(JsonPointer pointer) {
-    return new AttributePathBuilderImpl(List.of(
-      new Match(
-        null,
-        body.at(pointer),
-        renderJsonPointer(pointer),
-        false
-      )));
+    return new AttributePathBuilderImpl(
+        List.of(new Match(null, body.at(pointer), renderJsonPointer(pointer), false)));
   }
 
   @Override
   public AttributePathBuilder path(String path) {
     if (path.contains("*")) {
-      throw new IllegalArgumentException("Segments cannot contain wildcards (a.foo*.c is not supported)");
+      throw new IllegalArgumentException(
+          "Segments cannot contain wildcards (a.foo*.c is not supported)");
     }
-    return new AttributePathBuilderImpl(List.of(new Match(
-      null,
-      body.path(path),
-      path,
-      false
-    )));
+    return new AttributePathBuilderImpl(List.of(new Match(null, body.path(path), path, false)));
   }
 
   @RequiredArgsConstructor
@@ -55,25 +47,17 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     @Override
     public AttributePathBuilder all() {
       return new AttributePathBuilderImpl(
-        matchingNodes.stream()
-          .filter(Match::isArray)
-          .flatMap(Match::allInArray)
-          .toList()
-      );
+          matchingNodes.stream().filter(Match::isArray).flatMap(Match::allInArray).toList());
     }
 
     @Override
     public AttributePathBuilder at(JsonPointer pointer) {
-      return new AttributePathBuilderImpl(matchingNodes.stream()
-        .map(m -> m.at(pointer))
-        .toList());
+      return new AttributePathBuilderImpl(matchingNodes.stream().map(m -> m.at(pointer)).toList());
     }
 
     @Override
     public AttributePathBuilder path(String path) {
-      return new AttributePathBuilderImpl(matchingNodes.stream()
-        .map(m -> m.path(path))
-        .toList());
+      return new AttributePathBuilderImpl(matchingNodes.stream().map(m -> m.path(path)).toList());
     }
 
     @Override
@@ -83,9 +67,14 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     }
 
     private void validateAll(List<Match> matches) {
-      matches.stream().map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
-        .filter(s -> !s.isEmpty())
-        .forEach(validationIssues::addAll);
+      if (matches.isEmpty()) {
+        validationIssues.add(
+            ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant())));
+      }
+      matches.stream()
+          .map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
+          .filter(s -> !s.getErrorMessages().isEmpty())
+          .forEach(validationIssues::add);
     }
   }
 
@@ -107,7 +96,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
         return cached;
       }
       var parentPath = p.render();
-      var result =  parentPath + (isIndexNode ? "" : ".") + pathSegment;
+      var result = parentPath + (isIndexNode ? "" : ".") + pathSegment;
       cached = result;
       return result;
     }
@@ -129,11 +118,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     }
 
     public Stream<Match> allInArray() {
-      return IntStream.range(0, node.size())
-        .mapToObj(this::path);
+      return IntStream.range(0, node.size()).mapToObj(this::path);
     }
   }
-
 }
-
-

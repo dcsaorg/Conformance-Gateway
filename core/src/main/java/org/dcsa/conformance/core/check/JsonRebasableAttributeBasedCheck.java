@@ -3,7 +3,6 @@ package org.dcsa.conformance.core.check;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -12,13 +11,13 @@ import lombok.NonNull;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
-class JsonRebaseableAttributeBasedCheck extends ActionCheck {
+class JsonRebasableAttributeBasedCheck extends ActionCheck {
 
   private final String standardsVersion;
   private final JsonContentCheckRebaser rebaser;
-  private final List<JsonRebaseableContentCheck> validators;
+  private final List<JsonRebasableContentCheck> validators;
 
-  JsonRebaseableAttributeBasedCheck(
+  JsonRebasableAttributeBasedCheck(
     String titlePrefix,
     String title,
     Predicate<String> isRelevantForRoleName,
@@ -27,7 +26,7 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
     String standardsVersion,
     @NonNull JsonContentCheckRebaser rebaser,
     @NonNull
-    List<@NonNull JsonRebaseableContentCheck> validators) {
+    List<@NonNull JsonRebasableContentCheck> validators) {
     super(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
     if (validators.isEmpty()) {
       throw new IllegalArgumentException("Must have at least one subcheck (validators must be non-empty)");
@@ -38,9 +37,9 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
   }
 
   @Override
-  protected final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected final ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
-    return Collections.emptySet();
+    return ConformanceCheckResult.simple(Collections.emptySet());
   }
 
   @Override
@@ -53,18 +52,19 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
   private static class SingleValidatorCheck extends ActionCheck {
 
     private final String standardsVersion;
-    private final JsonRebaseableContentCheck validator;
+    private final JsonRebasableContentCheck validator;
 
-    public SingleValidatorCheck(Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType, String standardsVersion, @NonNull JsonRebaseableContentCheck validator) {
+    public SingleValidatorCheck(Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType, String standardsVersion, @NonNull JsonRebasableContentCheck validator) {
       super(validator.description(), isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
       this.standardsVersion = standardsVersion;
       this.validator = validator;
+      this.setRelevant(validator.isRelevant());
     }
 
     @Override
-    protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
       ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-      if (exchange == null) return Collections.emptySet();
+      if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
       return VersionedKeywordDataset.withVersion(standardsVersion, () -> validator.validate(jsonBody));
     }

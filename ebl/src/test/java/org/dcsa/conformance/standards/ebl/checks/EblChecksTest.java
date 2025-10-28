@@ -23,12 +23,15 @@ import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_CONSIGME
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_PARTY_FUNCTION;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_PARTY_FUNCTION_HBL;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_REQUESTED_CARRIER_CLAUSES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.junit.jupiter.api.Test;
 
@@ -41,10 +44,12 @@ class EblChecksTest {
   void testENSManifestTypeRequiresHBLIssued() {
     ArrayNode advanceManifestFilings = rootNode.putArray("advanceManifestFilings");
     advanceManifestFilings.addObject().put("manifestTypeCode", "ENS");
-    assertFalse(ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED.validate(rootNode).isEmpty());
+    assertFalse(
+        ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isHouseBillOfLadingsIssued", true);
-    assertTrue(ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED.validate(rootNode).isEmpty());
+    assertTrue(
+        ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -53,10 +58,12 @@ class EblChecksTest {
     ObjectNode hbl = houseBillOfLadings.addObject();
     hbl.put("isToOrder", true);
     hbl.set("documentParties", objectMapper.createObjectNode());
-    assertFalse(HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER.validate(rootNode).isEmpty());
+    assertFalse(
+        HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER.validate(rootNode).getErrorMessages().isEmpty());
 
     ((ObjectNode) hbl.get("documentParties")).set("notifyParty", objectMapper.createObjectNode());
-    assertTrue(HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER.validate(rootNode).isEmpty());
+    assertTrue(
+        HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -69,10 +76,12 @@ class EblChecksTest {
     ObjectNode cargoItem = cargoItems.addObject();
     ObjectNode outerPackaging = cargoItem.putObject("outerPackaging");
     outerPackaging.put("packageCode", "SH");
-    assertFalse(NUMBER_OF_PACKAGES_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
+    assertFalse(
+        NUMBER_OF_PACKAGES_CONDITIONAL_CHECK.validate(rootNode).getErrorMessages().isEmpty());
 
     outerPackaging.put("numberOfPackages", 10);
-    assertTrue(NUMBER_OF_PACKAGES_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
+    assertTrue(
+        NUMBER_OF_PACKAGES_CONDITIONAL_CHECK.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -81,10 +90,18 @@ class EblChecksTest {
     ObjectNode filing = advanceManifestFilings.addObject();
     filing.put("manifestTypeCode", "ENS");
     filing.put("advanceManifestFilingsHouseBLPerformedBy", "SELF");
-    assertFalse(IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF.validate(rootNode).isEmpty());
+    assertFalse(
+        IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF
+            .validate(rootNode)
+            .getErrorMessages()
+            .isEmpty());
 
     filing.put("identificationNumber", "ID12345");
-    assertTrue(IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF.validate(rootNode).isEmpty());
+    assertTrue(
+        IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF
+            .validate(rootNode)
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -93,10 +110,18 @@ class EblChecksTest {
     ObjectNode filing = advanceManifestFilings.addObject();
     filing.put("manifestTypeCode", "ACE");
     filing.put("advanceManifestFilingsHouseBLPerformedBy", "SELF");
-    assertFalse(SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF.validate(rootNode).isEmpty());
+    assertFalse(
+        SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF
+            .validate(rootNode)
+            .getErrorMessages()
+            .isEmpty());
 
     filing.put("selfFilerCode", "FLXP");
-    assertTrue(SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF.validate(rootNode).isEmpty());
+    assertTrue(
+        SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF
+            .validate(rootNode)
+            .getErrorMessages()
+            .isEmpty());
   }
 
   @Test
@@ -104,14 +129,22 @@ class EblChecksTest {
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     ObjectNode placeOfAcceptance = hbl.putObject("placeOfAcceptance");
-    assertFalse(LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode).isEmpty());
+    assertFalse(
+        LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode).getErrorMessages().isEmpty());
 
     placeOfAcceptance.put("locationName", "Amsterdam");
-    assertTrue(LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode).isEmpty());
+    assertTrue(
+        LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode).getErrorMessages().isEmpty());
 
     placeOfAcceptance.put("UNLocationCode", "NLAMS");
     placeOfAcceptance.remove("locationName");
-    assertTrue(LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode).isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -119,14 +152,22 @@ class EblChecksTest {
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     ObjectNode placeOfFinalDelivery = hbl.putObject("placeOfFinalDelivery");
-    assertFalse(LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode).isEmpty());
+    assertFalse(
+        LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode).getErrorMessages().isEmpty());
 
     placeOfFinalDelivery.put("locationName", "Berlin");
-    assertTrue(LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode).isEmpty());
+    assertTrue(
+        LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode).getErrorMessages().isEmpty());
 
     placeOfFinalDelivery.put("UNLocationCode", "DEBER");
     placeOfFinalDelivery.remove("locationName");
-    assertTrue(LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode).isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -134,14 +175,22 @@ class EblChecksTest {
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     ObjectNode placeOfAcceptance = hbl.putObject("placeOfAcceptance");
-    assertFalse(COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode).isEmpty());
+    assertFalse(
+        COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode).getErrorMessages().isEmpty());
 
     placeOfAcceptance.put("countryCode", "NL");
-    assertTrue(COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode).isEmpty());
+    assertTrue(
+        COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode).getErrorMessages().isEmpty());
 
     placeOfAcceptance.put("UNLocationCode", "NLAMS");
     placeOfAcceptance.remove("countryCode");
-    assertTrue(COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode).isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -149,14 +198,31 @@ class EblChecksTest {
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     ObjectNode placeOfFinalDelivery = hbl.putObject("placeOfFinalDelivery");
-    assertFalse(COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode).isEmpty());
+    assertFalse(
+        COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode).getErrorMessages().isEmpty());
 
     placeOfFinalDelivery.put("countryCode", "DE");
-    assertTrue(COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode).isEmpty());
+    assertTrue(
+        COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode).getErrorMessages().isEmpty());
 
     placeOfFinalDelivery.put("UNLocationCode", "DEBER");
     placeOfFinalDelivery.remove("countryCode");
-    assertTrue(COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode).isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
+
+    placeOfFinalDelivery.remove("UNLocationCode");
+    resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.ERROR,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -171,11 +237,11 @@ class EblChecksTest {
     filing.put("manifestTypeCode", "ENS");
     filing.put("advanceManifestFilingsHouseBLPerformedBy", "CARRIER");
     rootNode.put("isHouseBillOfLadingsIssued", false);
-    assertFalse(BUYER_AND_SELLER_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
+    assertFalse(BUYER_AND_SELLER_CONDITIONAL_CHECK.validate(rootNode).getErrorMessages().isEmpty());
 
     documentParties.putObject("buyer");
     documentParties.putObject("seller");
-    assertTrue(BUYER_AND_SELLER_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
+    assertTrue(BUYER_AND_SELLER_CONDITIONAL_CHECK.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -193,7 +259,8 @@ class EblChecksTest {
     routingOfConsignmentCountries.add("NL");
     routingOfConsignmentCountries.add("BE");
     routingOfConsignmentCountries.add("DE");
-    assertTrue(ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK.validate(rootNode).isEmpty());
+    assertTrue(
+        ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -210,7 +277,8 @@ class EblChecksTest {
     ArrayNode routingOfConsignmentCountries = hbl.putArray("routingOfConsignmentCountries");
     routingOfConsignmentCountries.add("BE");
     routingOfConsignmentCountries.add("DE");
-    assertFalse(ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK.validate(rootNode).isEmpty());
+    assertFalse(
+        ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -228,7 +296,8 @@ class EblChecksTest {
     routingOfConsignmentCountries.add("NL");
     routingOfConsignmentCountries.add("BE");
     routingOfConsignmentCountries.add("FR");
-    assertFalse(ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK.validate(rootNode).isEmpty());
+    assertFalse(
+        ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -237,10 +306,10 @@ class EblChecksTest {
     requestedCarrierClauses.add("CARGO_CARGOSPECIFICS");
     requestedCarrierClauses.add("VESSELCONVEYANCE_COUNTRYSPECIFIC");
 
-    assertTrue(VALID_REQUESTED_CARRIER_CLAUSES.validate(rootNode).isEmpty());
+    assertTrue(VALID_REQUESTED_CARRIER_CLAUSES.validate(rootNode).getErrorMessages().isEmpty());
 
     requestedCarrierClauses.add("CARGO_CARGO");
-    assertFalse(VALID_REQUESTED_CARRIER_CLAUSES.validate(rootNode).isEmpty());
+    assertFalse(VALID_REQUESTED_CARRIER_CLAUSES.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -250,10 +319,12 @@ class EblChecksTest {
     ArrayNode references = consignmentItem.putArray("references");
     references.addObject().put("type", "CR");
     references.addObject().put("type", "SPO");
-    assertTrue(VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES.validate(rootNode).isEmpty());
+    assertTrue(
+        VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES.validate(rootNode).getErrorMessages().isEmpty());
 
     references.addObject().put("type", "CRR");
-    assertFalse(VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES.validate(rootNode).isEmpty());
+    assertFalse(
+        VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -262,10 +333,10 @@ class EblChecksTest {
     ArrayNode otherParties = documentParties.putArray("other");
     ObjectNode otherParty = otherParties.addObject();
     otherParty.put("partyFunction", "SCO");
-    assertTrue(VALID_PARTY_FUNCTION.validate(rootNode).isEmpty());
+    assertTrue(VALID_PARTY_FUNCTION.validate(rootNode).getErrorMessages().isEmpty());
 
     otherParty.put("partyFunction", "SSS");
-    assertFalse(VALID_PARTY_FUNCTION.validate(rootNode).isEmpty());
+    assertFalse(VALID_PARTY_FUNCTION.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -276,151 +347,175 @@ class EblChecksTest {
     ArrayNode otherParties = documentParties.putArray("other");
     ObjectNode otherParty = otherParties.addObject();
     otherParty.put("partyFunction", "CS");
-    assertTrue(VALID_PARTY_FUNCTION_HBL.validate(rootNode).isEmpty());
+    assertTrue(VALID_PARTY_FUNCTION_HBL.validate(rootNode).getErrorMessages().isEmpty());
 
     otherParty.put("partyFunction", "SSS");
-    assertFalse(VALID_PARTY_FUNCTION_HBL.validate(rootNode).isEmpty());
+    assertFalse(VALID_PARTY_FUNCTION_HBL.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
   void testSendToPlatformConditionalCheck() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    assertFalse(SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
+    assertFalse(SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.putObject("documentParties").putObject("issueTo").put("sendToPlatform", "CARX");
-    assertTrue(SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
+    assertTrue(SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("transportDocumentTypeCode", "SWB");
-    assertFalse(SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
+    assertFalse(SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", false);
-    assertFalse(SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode).isEmpty());
+    assertFalse(SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
   void testEBLSCannotHaveCopiesWithCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfCopiesWithCharges", 1);
-    assertFalse(EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertFalse(
+        EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfCopiesWithCharges", 0);
-    assertTrue(EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfCopiesWithCharges", 1);
-    assertTrue(EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     rootNode.put("numberOfCopiesWithCharges", 1);
-    assertTrue(EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
   void testEBLSCannotHaveCopiesWithoutCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfCopiesWithoutCharges", 1);
-    assertFalse(EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).isEmpty());
+    assertFalse(
+        EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfCopiesWithoutCharges", 0);
-    assertTrue(EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfCopiesWithoutCharges", 1);
-    assertTrue(EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     rootNode.put("numberOfCopiesWithoutCharges", 1);
-    assertTrue(EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
   void testSWBsCannotHaveOriginalsWithCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
-    assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "SWB");
-    assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     rootNode.put("numberOfOriginalsWithCharges", 1);
-    assertFalse(SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertFalse(
+        SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 1);
-    assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
   void testSWBsCannotHaveOriginalsWithoutCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
-    assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "SWB");
-    assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     rootNode.put("numberOfOriginalsWithoutCharges", 1);
-    assertFalse(SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).isEmpty());
+    assertFalse(
+        SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithoutCharges", 1);
-    assertTrue(SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).isEmpty());
+    assertTrue(
+        SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
-  void testEBLSCannotHaveMoreThanOneOriginalsWithandWithoutCharges() {
+  void testEBLSCannotHaveMoreThanOneOriginalsWithAndWithoutCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 0);
     rootNode.put("numberOfOriginalsWithoutCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 1);
     rootNode.put("numberOfOriginalsWithoutCharges", 0);
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
+    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 1);
     rootNode.put("numberOfOriginalsWithoutCharges", 1);
-    assertFalse(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
+    assertFalse(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    assertTrue(EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode).isEmpty());
+    var resultWithRelevance =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            EBL_AT_MOST_ONE_ORIGINAL_TOTAL.validate(rootNode);
+    assertEquals(1, resultWithRelevance.errors().size());
+    assertEquals(
+        ConformanceErrorSeverity.IRRELEVANT,
+        resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test
@@ -431,14 +526,14 @@ class EblChecksTest {
     ObjectNode party = otherParties.addObject().putObject("party");
     party.putObject("address").put("street", "Ruijggoordweg");
     party.putArray("identifyingCodes").addObject().put("codeListProvider", "WAVE");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
 
     party.remove("address");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
 
     party.remove("address");
     party.remove("identifyingCodes");
-    assertFalse(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertFalse(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -448,59 +543,59 @@ class EblChecksTest {
     ObjectNode notifyParty = notifyParties.addObject();
     notifyParty.putObject("address").put("street", "Ruijggoordweg");
     notifyParty.putArray("identifyingCodes").addObject().put("codeListProvider", "WAVE");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
 
     notifyParty.remove("address");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
 
     notifyParty.remove("identifyingCodes");
-    assertFalse(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertFalse(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
   void testValidateDocumentPartyBuyerAndSeller() {
     ObjectNode documentParties = rootNode.putObject("documentParties");
     ObjectNode buyer = documentParties.putObject("buyer");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
 
     buyer.putObject("address").put("street", "Ruijggoordweg");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
 
     ObjectNode seller = documentParties.putObject("seller");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
 
     seller.putObject("address").put("street", "Ruijggoordweg");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
   void testValidateDocumentParty() {
     ObjectNode documentParties = rootNode.putObject("documentParties");
     ObjectNode shipper = documentParties.putObject("shipper");
-    assertFalse(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertFalse(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
 
     shipper.putObject("address").put("street", "Ruijggoordweg");
     shipper.putArray("identifyingCodes").addObject().put("codeListProvider", "WAVE");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
 
     shipper.remove("address");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
   void testFeedbacksPresence() {
     rootNode.put(
         "shippingInstructionsStatus", ShippingInstructionsStatus.SI_PENDING_UPDATE.wireName());
-    assertFalse(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
+    assertFalse(FEEDBACKS_PRESENCE.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.putArray("feedbacks").addObject().put("code", "INFORMATIONAL_MESSAGE");
-    assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
+    assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).getErrorMessages().isEmpty());
 
     rootNode.put(
         "updatedShippingInstructionsStatus",
         ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
     rootNode.remove("feedbacks");
-    assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
+    assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -511,6 +606,7 @@ class EblChecksTest {
     assertTrue(
         EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_1U)
             .validate(rootNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -519,6 +615,7 @@ class EblChecksTest {
     assertFalse(
         EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_1U)
             .validate(rootNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -531,6 +628,7 @@ class EblChecksTest {
     assertFalse(
         EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_1U)
             .validate(rootNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -543,6 +641,7 @@ class EblChecksTest {
     assertTrue(
         EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_2U)
             .validate(rootNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -554,6 +653,7 @@ class EblChecksTest {
     assertFalse(
         EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_2U)
             .validate(rootNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -567,6 +667,7 @@ class EblChecksTest {
     assertFalse(
         EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.REGULAR_2C_2U)
             .validate(rootNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 
@@ -575,6 +676,7 @@ class EblChecksTest {
     assertTrue(
         EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.ACTIVE_REEFER)
             .validate(rootNode, "")
+            .getErrorMessages()
             .isEmpty());
   }
 }

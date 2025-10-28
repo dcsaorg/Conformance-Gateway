@@ -22,7 +22,7 @@ public class ConformanceReport {
   private final ConformanceStatus conformanceStatus;
   private int conformantExchangeCount;
   private int nonConformantExchangeCount;
-  private final Set<String> errorMessages = new LinkedHashSet<>();
+  private Set<String> errorMessages = new LinkedHashSet<>();
   private final List<ConformanceReport> subReports;
 
   public ConformanceReport(ConformanceCheck conformanceCheck, String roleName) {
@@ -53,7 +53,11 @@ public class ConformanceReport {
                 ConformanceStatus.forExchangeCounts(
                     conformantExchangeCount,
                     nonConformantExchangeCount,
-                    conformanceCheck.isApplicable()));
+                    conformanceCheck.isRelevant()));
+
+    if (this.conformanceStatus.equals(ConformanceStatus.IRRELEVANT)) {
+      this.errorMessages = Set.of();
+    }
 
     conformanceCheck.computedStatusConsumer().accept(this.conformanceStatus);
   }
@@ -190,7 +194,7 @@ public class ConformanceReport {
       case CONFORMANT -> "✅";
       case PARTIALLY_CONFORMANT -> "✔️";
       case NON_CONFORMANT -> "🚫";
-      case NOT_RELEVANT -> "➖";
+      case IRRELEVANT -> "➖";
       default -> "❔";
     };
   }
@@ -200,7 +204,7 @@ public class ConformanceReport {
       case CONFORMANT -> "CONFORMANT";
       case PARTIALLY_CONFORMANT -> "PARTIALLY CONFORMANT";
       case NON_CONFORMANT -> "NON-CONFORMANT";
-      case NOT_RELEVANT -> "NOT RELEVANT";
+      case IRRELEVANT -> "IRRELEVANT";
       default -> "NO TRAFFIC";
     };
   }

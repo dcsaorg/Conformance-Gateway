@@ -20,9 +20,9 @@ class UrlPathCheckTest {
 
         ConformanceExchange exchange = mockExchangeWithUrl(url);
 
-        Set<String> result = check.checkConformance(uuid -> dummyUuid.equals(uuid) ? exchange : null);
+        ConformanceCheckResult.SimpleErrors result = (ConformanceCheckResult.SimpleErrors) check.performCheck(uuid -> dummyUuid.equals(uuid) ? exchange : null);
 
-        assertEquals(Set.of(), result);
+        assertEquals(Set.of(), result.errors());
     }
 
     @Test
@@ -32,9 +32,9 @@ class UrlPathCheckTest {
 
         ConformanceExchange exchange = mockExchangeWithUrl(url);
 
-        Set<String> result = check.checkConformance(uuid -> dummyUuid.equals(uuid) ? exchange : null);
+        ConformanceCheckResult.SimpleErrors result = (ConformanceCheckResult.SimpleErrors) check.performCheck(uuid -> dummyUuid.equals(uuid) ? exchange : null);
 
-        assertEquals(Set.of(), result);
+        assertEquals(Set.of(), result.errors());
     }
 
     @Test
@@ -44,20 +44,20 @@ class UrlPathCheckTest {
 
         ConformanceExchange exchange = mockExchangeWithUrl(url);
 
-        Set<String> result = check.checkConformance(uuid -> dummyUuid.equals(uuid) ? exchange : null);
+        ConformanceCheckResult.SimpleErrors result = (ConformanceCheckResult.SimpleErrors) check.performCheck(uuid -> dummyUuid.equals(uuid) ? exchange : null);
 
         assertEquals(
                 Set.of("Request URL '%s' does not end with any of %s".formatted(url, Set.of("/cancel", "/submit"))),
-                result);
+                result.errors());
     }
 
     @Test
     void testCheckConformance_ExchangeIsNull() {
         UrlPathCheck check = new UrlPathCheck(role -> true, dummyUuid, "/bookings");
 
-        Set<String> result = check.checkConformance(uuid -> null);
+        ConformanceCheckResult.SimpleErrors result = (ConformanceCheckResult.SimpleErrors) check.performCheck(uuid -> null);
 
-        assertEquals(Set.of(), result);
+        assertEquals(Set.of(), result.errors());
     }
 
     private ConformanceExchange mockExchangeWithUrl(String url) {

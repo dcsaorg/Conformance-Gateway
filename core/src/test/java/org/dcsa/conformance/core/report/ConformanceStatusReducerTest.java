@@ -134,7 +134,7 @@ class ConformanceStatusReducerTest {
   void reduce_notRelevantAndNonConformant_returnsNonConformant() {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
-            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.NON_CONFORMANT);
+            ConformanceStatus.IRRELEVANT, ConformanceStatus.NON_CONFORMANT);
     assertEquals(ConformanceStatus.NON_CONFORMANT, result);
   }
 
@@ -142,7 +142,7 @@ class ConformanceStatusReducerTest {
   void reduce_nonConformantAndNotRelevant_returnsNonConformant() {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
-            ConformanceStatus.NON_CONFORMANT, ConformanceStatus.NOT_RELEVANT);
+            ConformanceStatus.NON_CONFORMANT, ConformanceStatus.IRRELEVANT);
     assertEquals(ConformanceStatus.NON_CONFORMANT, result);
   }
 
@@ -150,7 +150,7 @@ class ConformanceStatusReducerTest {
   void reduce_notRelevantAndPartiallyConformant_returnsPartiallyConformant() {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
-            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.PARTIALLY_CONFORMANT);
+            ConformanceStatus.IRRELEVANT, ConformanceStatus.PARTIALLY_CONFORMANT);
     assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
   }
 
@@ -158,7 +158,7 @@ class ConformanceStatusReducerTest {
   void reduce_partiallyConformantAndNotRelevant_returnsPartiallyConformant() {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
-            ConformanceStatus.PARTIALLY_CONFORMANT, ConformanceStatus.NOT_RELEVANT);
+            ConformanceStatus.PARTIALLY_CONFORMANT, ConformanceStatus.IRRELEVANT);
     assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
   }
 
@@ -166,7 +166,7 @@ class ConformanceStatusReducerTest {
   void reduce_notRelevantAndConformant_returnsConformant() {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
-            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.CONFORMANT);
+            ConformanceStatus.IRRELEVANT, ConformanceStatus.CONFORMANT);
     assertEquals(ConformanceStatus.CONFORMANT, result);
   }
 
@@ -174,7 +174,7 @@ class ConformanceStatusReducerTest {
   void reduce_conformantAndNotRelevant_returnsConformant() {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
-            ConformanceStatus.CONFORMANT, ConformanceStatus.NOT_RELEVANT);
+            ConformanceStatus.CONFORMANT, ConformanceStatus.IRRELEVANT);
     assertEquals(ConformanceStatus.CONFORMANT, result);
   }
 
@@ -182,7 +182,7 @@ class ConformanceStatusReducerTest {
   void reduce_notRelevantAndNotRelevant_returnsConformant() {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
-            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.NOT_RELEVANT);
+            ConformanceStatus.IRRELEVANT, ConformanceStatus.IRRELEVANT);
     assertEquals(ConformanceStatus.CONFORMANT, result);
   }
 
@@ -190,7 +190,7 @@ class ConformanceStatusReducerTest {
   void reduce_notRelevantAndNoTraffic_returnsPartiallyConformant() {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
-            ConformanceStatus.NOT_RELEVANT, ConformanceStatus.NO_TRAFFIC);
+            ConformanceStatus.IRRELEVANT, ConformanceStatus.NO_TRAFFIC);
     assertEquals(ConformanceStatus.NO_TRAFFIC, result);
   }
 
@@ -198,7 +198,7 @@ class ConformanceStatusReducerTest {
   void reduce_noTrafficAndNotRelevant_returnsPartiallyConformant() {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
-            ConformanceStatus.NO_TRAFFIC, ConformanceStatus.NOT_RELEVANT);
+            ConformanceStatus.NO_TRAFFIC, ConformanceStatus.IRRELEVANT);
     assertEquals(ConformanceStatus.NO_TRAFFIC, result);
   }
 }

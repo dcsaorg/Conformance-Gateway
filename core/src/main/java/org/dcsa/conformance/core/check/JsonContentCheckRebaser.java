@@ -7,10 +7,10 @@ import static org.dcsa.conformance.core.check.JsonAttribute.rebaserFor;
 public interface JsonContentCheckRebaser {
 
 
-  default JsonRebaseableContentCheck offset(JsonRebaseableContentCheck jsonRebaseableContentCheck) {
-    JsonContentMatchedValidation m = offset(jsonRebaseableContentCheck::validate);
-    return new JsonAttribute.JsonRebaseableCheckImpl(
-      jsonRebaseableContentCheck.description(),
+  default JsonRebasableContentCheck offset(JsonRebasableContentCheck jsonRebasableContentCheck) {
+    JsonContentMatchedValidation m = offset(jsonRebasableContentCheck::validate);
+    return JsonAttribute.JsonRebasableCheckImpl.of(
+      jsonRebasableContentCheck.description(),
       m::validate
     );
   }

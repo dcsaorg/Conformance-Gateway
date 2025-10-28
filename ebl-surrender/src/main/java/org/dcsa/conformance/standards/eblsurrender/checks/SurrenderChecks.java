@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
+import org.dcsa.conformance.core.check.JsonRebasableContentCheck;
 import org.dcsa.conformance.core.check.KeywordDataset;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
@@ -26,7 +26,7 @@ public class SurrenderChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(SURRENDER_ACTIONS_DATA_SET)
   );
 
-  private static final JsonRebaseableContentCheck SURRENDER_PARTY_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebasableContentCheck SURRENDER_PARTY_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate 'codeListProvider' is a known value",
     (mav) -> {
       mav.submitAllMatching("endorsementChain.*.actor.identifyingCodes.*.codeListProvider");

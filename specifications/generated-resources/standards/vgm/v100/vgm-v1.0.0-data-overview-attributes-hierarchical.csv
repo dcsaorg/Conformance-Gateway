@@ -21,31 +21,11 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "VGMDeclaration / authorizedParty / party / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "VGMDeclaration / authorizedParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / authorizedParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
@@ -114,31 +94,11 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "VGMDeclaration / holdingParty / party / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "VGMDeclaration / holdingParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / holdingParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
@@ -170,31 +130,11 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "VGMDeclaration / orderedByParty / party / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "VGMDeclaration / orderedByParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / orderedByParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
@@ -221,31 +161,11 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "VGMDeclaration / responsibleParty / party / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "VGMDeclaration / responsibleParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / responsibleParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
@@ -258,31 +178,11 @@ or a subsequent revision.",
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "VGMDeclaration / routingDetails / destinationParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "VGMDeclaration / routingDetails / destinationParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / routingDetails / destinationParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
@@ -293,31 +193,11 @@ or a subsequent revision.",
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "VGMDeclaration / routingDetails / forwardingParties / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "VGMDeclaration / routingDetails / forwardingParties / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / routingDetails / forwardingParties / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
@@ -328,31 +208,11 @@ or a subsequent revision.",
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "VGMDeclaration / routingDetails / originatingParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "VGMDeclaration / routingDetails / originatingParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / routingDetails / originatingParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
@@ -394,31 +254,11 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "VGMDeclaration / submittingParty / party / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "VGMDeclaration / submittingParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / submittingParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
@@ -596,31 +436,11 @@ as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.1
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "VGMDeclaration / weighingParty / party / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "VGMDeclaration / weighingParty / party / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "VGMDeclaration / weighingParty / party / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
 [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)

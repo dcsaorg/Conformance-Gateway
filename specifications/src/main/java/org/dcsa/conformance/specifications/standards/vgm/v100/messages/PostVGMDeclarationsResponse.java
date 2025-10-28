@@ -8,7 +8,7 @@ import lombok.Data;
 @Schema(
     description =
 """
-API response to a `POST VGMs` request
+API response to a `POST VGM declarations` request
 """)
 public class PostVGMDeclarationsResponse {
 
@@ -18,8 +18,8 @@ public class PostVGMDeclarationsResponse {
 Optional list of feedback elements indicating how the request was processed.
 
 There can be zero, one or more feedback elements per event in the request.
-The order of `feedbackElements` is not related to the order of VGMs in the request.
-Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.
+The order of `feedbackElements` is not related to the order of VGM declarations in the request.
+Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.
 """)
   private List<FeedbackElement> feedbackElements;
 }

@@ -13,33 +13,33 @@ public class GetVGMDeclarationsEndpoint implements QueryParametersFilterEndpoint
       createStringQueryParameter(
           "carrierBookingReference",
           "ABC709951",
-          "Reference of the booking for which to return the associated VGMs");
+          "Reference of the booking for which to return the associated VGM declarations");
 
   private final Parameter transportDocumentReference =
       createStringQueryParameter(
           "transportDocumentReference",
           "HHL71800000",
-          "Reference of the transport document for which to return the associated VGMs");
+          "Reference of the transport document for which to return the associated VGM declarations");
 
   private final Parameter equipmentReference =
       createStringQueryParameter(
           "equipmentReference",
           "APZU4812090",
-          "Reference of the equipment for which to return the associated VGMs");
+          "Reference of the equipment for which to return the associated VGM declarations");
 
   private final Parameter declarationDateTimeMin =
       createDateTimeQueryParameter(
           "declarationDateTimeMin",
-          "Retrieve VGMs with a `declarationDateTime` at or after this timestamp");
+          "Retrieve VGM declarations with a `declarationDateTime` at or after this timestamp");
 
   private final Parameter declarationDateTimeMax =
       createDateTimeQueryParameter(
           "declarationDateTimeMax",
-          "Retrieve VGMs with a `declarationDateTime` at or before this timestamp");
+          "Retrieve VGM declarations with a `declarationDateTime` at or before this timestamp");
 
   private final Parameter limit =
       createIntegerQueryParameter(
-          "limit", 10, "Maximum number of VGMs to include in each page of the response.");
+          "limit", 10, "Maximum number of VGM declarations to include in each page of the response.");
 
   private final Parameter cursor =
       createStringQueryParameter(

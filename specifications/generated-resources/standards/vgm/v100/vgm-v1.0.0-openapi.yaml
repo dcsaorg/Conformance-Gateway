@@ -100,39 +100,39 @@ paths:
       parameters:
       - name: "carrierBookingReference"
         in: "query"
-        description: "Reference of the booking for which to return the associated VGMs"
+        description: "Reference of the booking for which to return the associated VGM declarations"
         schema:
           type: "string"
         example: "ABC709951"
       - name: "transportDocumentReference"
         in: "query"
-        description: "Reference of the transport document for which to return the associated VGMs"
+        description: "Reference of the transport document for which to return the associated VGM declarations"
         schema:
           type: "string"
         example: "HHL71800000"
       - name: "equipmentReference"
         in: "query"
-        description: "Reference of the equipment for which to return the associated VGMs"
+        description: "Reference of the equipment for which to return the associated VGM declarations"
         schema:
           type: "string"
         example: "APZU4812090"
       - name: "declarationDateTimeMin"
         in: "query"
-        description: "Retrieve VGMs with a `declarationDateTime` at or after this timestamp"
+        description: "Retrieve VGM declarations with a `declarationDateTime` at or after this timestamp"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
       - name: "declarationDateTimeMax"
         in: "query"
-        description: "Retrieve VGMs with a `declarationDateTime` at or before this timestamp"
+        description: "Retrieve VGM declarations with a `declarationDateTime` at or before this timestamp"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
       - name: "limit"
         in: "query"
-        description: "Maximum number of VGMs to include in each page of the response."
+        description: "Maximum number of VGM declarations to include in each page of the response."
         schema:
           type: "integer"
           format: "int32"
@@ -387,7 +387,7 @@ components:
           description: |
             [JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
             about which the feedback is provided (if applicable)
-          example: "$.VGMs[2].location"
+          example: "$.VGMDeclarations[2].location"
       description: |
         An individual piece of feedback (potentially out of several) providing information on how an API request is processed
     GeoCoordinate:
@@ -419,7 +419,7 @@ components:
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
-        Error API response to a `GET VGMs` request
+        Error API response to a `GET VGM declarations` request
     GetVGMDeclarationsResponse:
       type: "object"
       properties:
@@ -436,7 +436,7 @@ components:
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
-        API response to a `GET VGMs` request
+        API response to a `GET VGM declarations` request
     Location:
       type: "object"
       properties:
@@ -597,17 +597,17 @@ components:
             At least one feedback element of severity `ERROR` is expected.
             Lower severity feedback elements may also be included.
 
-            When sent in response to a request that contains an array of VGMs,
-            the order of the `feedbackElements` is not related to the list of request VGMs.
-            Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.
+            When sent in response to a request that contains an array of VGM declarations,
+            the order of the `feedbackElements` is not related to the list of request VGM declarations.
+            Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
-        Error API response to a `POST VGMs` request.
+        Error API response to a `POST VGM declarations` request.
 
-        If some of the VGMs in the request were successfully processed,
-        a regular `PostVGMsResponse` is expected to be used instead,
-        with `feedbackElements` indicating which VGMs were not processed and why.
+        If some of the VGM declarations in the request were successfully processed,
+        a regular `PostVGMDeclarationsResponse` is expected to be used instead,
+        with `feedbackElements` indicating which VGM declarations were not processed and why.
     PostVGMDeclarationsRequest:
       type: "object"
       properties:
@@ -626,12 +626,12 @@ components:
             Optional list of feedback elements indicating how the request was processed.
 
             There can be zero, one or more feedback elements per event in the request.
-            The order of `feedbackElements` is not related to the order of VGMs in the request.
-            Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.
+            The order of `feedbackElements` is not related to the order of VGM declarations in the request.
+            Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
-        API response to a `POST VGMs` request
+        API response to a `POST VGM declarations` request
     RoutingDetails:
       type: "object"
       properties:

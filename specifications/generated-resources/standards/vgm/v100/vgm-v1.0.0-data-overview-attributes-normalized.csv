@@ -37,7 +37,7 @@ Facility,facilityCodeListProvider,string,,maxLength=10,,SMDG,"Code list provider
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
 - `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed to a user of the VGM publishing organization",
-FeedbackElement,propertyPath,string,,maxLength=1000,,"$.VGMs[2].location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
+FeedbackElement,propertyPath,string,,maxLength=1000,,"$.VGMDeclarations[2].location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
 about which the feedback is provided (if applicable)",
 FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity of a `FeedbackElement`
 
@@ -125,15 +125,15 @@ PostVGMDeclarationsError,feedbackElements,"FeedbackElement list",,,,,"Feedback e
 At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.
 
-When sent in response to a request that contains an array of VGMs,
-the order of the `feedbackElements` is not related to the list of request VGMs.
-Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.",
+When sent in response to a request that contains an array of VGM declarations,
+the order of the `feedbackElements` is not related to the list of request VGM declarations.
+Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.",
 "PostVGMDeclarationsRequest",VGMDeclarations,"VGMDeclaration list",,,,,"List of VGM declarations.",
 "PostVGMDeclarationsResponse",feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
 
 There can be zero, one or more feedback elements per event in the request.
-The order of `feedbackElements` is not related to the order of VGMs in the request.
-Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.",
+The order of `feedbackElements` is not related to the order of VGM declarations in the request.
+Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.",
 RoutingDetails,destinationParty,Party,,,,,"The final party intended as destination of the event.",
 RoutingDetails,forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
 RoutingDetails,originatingParty,Party,,,,,"The initial party with which the event originated.",

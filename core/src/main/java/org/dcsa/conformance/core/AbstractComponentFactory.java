@@ -83,6 +83,17 @@ public abstract class AbstractComponentFactory {
                   scenarioListBuilder.buildScenarioList(nextModuleIndex.getAndIncrement()));
           scenariosByModuleName.put(moduleName, moduleScenarios);
         });
+    // scenario titles must be unique
+    Set<String> uniqueScenarioTitles = new HashSet<>();
+    Optional<String> firstDuplicateScenarioTitle =
+        scenariosByModuleName.values().stream()
+            .flatMap(Collection::stream)
+            .map(ConformanceScenario::getTitle)
+            .filter(title -> !uniqueScenarioTitles.add(title))
+            .findFirst();
+    if (firstDuplicateScenarioTitle.isPresent()) {
+      throw new RuntimeException("Duplicate scenario title: " + firstDuplicateScenarioTitle.get());
+    }
   }
 
   public abstract SortedSet<String> getRoleNames();

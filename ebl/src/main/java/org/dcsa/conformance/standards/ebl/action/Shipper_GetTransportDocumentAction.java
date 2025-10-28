@@ -45,7 +45,6 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDspSupplier().get();
-    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
     getDspConsumer().accept(dsp);
   }
 
@@ -80,10 +79,7 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of
-            // an earlier action
-            // checkTDChanged(getMatchedExchangeUuid(), expectedApiVersion, dsp), // see commit
-            // history
+
             EblChecks.tdPlusScenarioContentChecks(
                 getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getDspSupplier()));
       }

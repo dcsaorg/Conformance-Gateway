@@ -11,12 +11,13 @@ import org.dcsa.conformance.standards.an.action.ANAction;
 import org.dcsa.conformance.standards.an.action.PublisherPostANAction;
 import org.dcsa.conformance.standards.an.action.PublisherPostANNotificationAction;
 import org.dcsa.conformance.standards.an.action.SubscriberGetANAction;
+import org.dcsa.conformance.standards.an.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.an.checks.ScenarioType;
 
 public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBuilder> {
 
   private static final ThreadLocal<ANComponentFactory> threadLocalComponentFactory =
-    new ThreadLocal<>();
+      new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalPublisherPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalSubscriberPartyName = new ThreadLocal<>();
 
@@ -35,19 +36,41 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
 
     return Stream.of(
             Map.entry(
-                "",
+                "POST+GET scenarios (for adopters supporting GET and POST)",
                 noAction()
                     .thenEither(
-                        sendArrivalNotices(ScenarioType.REGULAR).then(getArrivalNotices()),
-                        sendArrivalNotices(ScenarioType.FREIGHTED).then(getArrivalNotices()),
-                        sendArrivalNotices(ScenarioType.FREE_TIME).then(getArrivalNotices()),
-                        sendArrivalNoticesNotification().then(getArrivalNotices()))))
+                        postArrivalNotices(ScenarioType.REGULAR).then(getArrivalNotices()),
+                        postArrivalNotices(ScenarioType.FREIGHTED).then(getArrivalNotices()),
+                        postArrivalNotices(ScenarioType.FREE_TIME).then(getArrivalNotices()),
+                        postArrivalNoticesNotification().then(getArrivalNotices()))),
+            Map.entry(
+                "GET-only scenarios (for adopters only supporting GET)",
+                noAction()
+                    .thenEither(
+                        supplyScenarioParameters(ScenarioType.REGULAR).then(getArrivalNotices()),
+                        supplyScenarioParameters(ScenarioType.FREIGHTED).then(getArrivalNotices()),
+                        supplyScenarioParameters(ScenarioType.FREE_TIME)
+                            .then(getArrivalNotices()))),
+            Map.entry(
+                "POST-only scenarios (for adopters only supporting POST)",
+                noAction()
+                    .thenEither(
+                        postArrivalNotices(ScenarioType.REGULAR),
+                        postArrivalNotices(ScenarioType.FREIGHTED),
+                        postArrivalNotices(ScenarioType.FREE_TIME),
+                        postArrivalNoticesNotification())))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  private static ANScenarioListBuilder sendArrivalNotices(ScenarioType scenarioType) {
+  private static ANScenarioListBuilder supplyScenarioParameters(ScenarioType scenarioType) {
+    String publisherPartyName = threadLocalPublisherPartyName.get();
+    return new ANScenarioListBuilder(
+        previousAction -> new SupplyScenarioParametersAction(publisherPartyName, scenarioType));
+  }
+
+  private static ANScenarioListBuilder postArrivalNotices(ScenarioType scenarioType) {
     ANComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();
     String subscriberPartyName = threadLocalSubscriberPartyName.get();
@@ -74,7 +97,7 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
                 componentFactory.getMessageSchemaValidator("GetArrivalNoticesResponse")));
   }
 
-  private static ANScenarioListBuilder sendArrivalNoticesNotification() {
+  private static ANScenarioListBuilder postArrivalNoticesNotification() {
     ANComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();
     String subscriberPartyName = threadLocalSubscriberPartyName.get();
@@ -84,7 +107,8 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
                 publisherPartyName,
                 subscriberPartyName,
                 (ANAction) previousAction,
-                componentFactory.getMessageSchemaValidator("PostArrivalNoticeNotificationsRequest")));
+                componentFactory.getMessageSchemaValidator(
+                    "PostArrivalNoticeNotificationsRequest")));
   }
 
   private static ANScenarioListBuilder noAction() {

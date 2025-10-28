@@ -5,9 +5,9 @@ portOfDischarge,string,"UN location of the port of discharge for which to retrie
 vesselIMONumber,string,"IMO number of the vessel for which to retrieve available arrival notices",9321483
 vesselName,string,"Name of the vessel for which to retrieve available arrival notices","King of the Seas"
 "carrierImportVoyageNumber",string,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage.",2208N
-"universalImportVoyageReference",string,"A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",2301W
+"universalImportVoyageReference",string,"Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA.",2301W
 carrierServiceCode,string,"The carrier specific code of the service for which the schedule details are published.",FE1
-"universalServiceReference",string,"A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.",SR12345A
+"universalServiceReference",string,"Unique identifier of a liner service, defined and distributed by DCSA to carriers.",SR12345A
 "portOfDischargeArrivalDateMin",string,"Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date",2025-01-22
 "portOfDischargeArrivalDateMax",string,"Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date",2025-01-23
 includeVisualization,boolean,"Optional flag indicating whether the PDF `arrivalNoticeVisualization` should be included in each returned arrival notice.

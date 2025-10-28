@@ -30,7 +30,7 @@ public class SubscriberGetANAction extends ANAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "GET the arrival notices with the given transport document references from the publisher."
+    return "Have your application GET from its counterpart running in the sandbox the Arrival Notices with the following transport document references: "
         + getDspSupplier().get().transportDocumentReferences().toString();
   }
 

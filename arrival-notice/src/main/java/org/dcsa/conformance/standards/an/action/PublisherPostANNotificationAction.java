@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.an.action;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -27,13 +26,7 @@ public class PublisherPostANNotificationAction extends ANAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Arrival Notice notification to the subscriber.";
-  }
-
-  @Override
-  public ObjectNode asJsonNode() {
-    ObjectNode jsonNode = super.asJsonNode();
-    return jsonNode;
+    return "Have your application POST one or more Arrival Notice notifications to its synthetic counterpart running in the sandbox";
   }
 
   @Override
@@ -44,7 +37,7 @@ public class PublisherPostANNotificationAction extends ANAction {
         return Stream.of(
             new UrlPathCheck(
                 ANRole::isPublisher, getMatchedExchangeUuid(), "/arrival-notice-notifications"),
-            new ResponseStatusCheck(ANRole::isSubscriber, getMatchedExchangeUuid(), 204),
+            new ResponseStatusCheck(ANRole::isSubscriber, getMatchedExchangeUuid(), 200),
             new ApiHeaderCheck(
                 ANRole::isSubscriber,
                 getMatchedExchangeUuid(),

@@ -79,7 +79,7 @@ public class EBLStandardSpecification extends StandardSpecification {
   private final GetTransportDocumentEndpoint getTransportDocumentEndpoint;
 
   public EBLStandardSpecification() {
-    super("Bill of Lading", "EBL", "3.0.0");
+    super("Bill of Lading", "3.0.0", "ebl", "ebl");
 
     openAPI.path(
         "/v3/transport-documents/{transportDocumentReference}",
@@ -91,7 +91,7 @@ public class EBLStandardSpecification extends StandardSpecification {
   @Override
   protected LegendMetadata getLegendMetadata() {
     return new LegendMetadata(
-        "Arrival Notice", "1.0.0-20251010-beta", "eBL TD", "3.0.1 release", 1);
+        "Arrival Notice", "1.0.0-20251107-beta", "eBL TD", "3.0.1 release", 1);
   }
 
   @Override

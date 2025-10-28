@@ -191,12 +191,12 @@ public class EblChecks {
   static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES =
       eblsCannotHaveCopiesCheck(
           NUMBER_OF_COPIES_WITH_CHARGES,
-          "Electronic original Bills of Lading cannot have any copies with charges.");
+          "Electronic original Bills of Lading(isElectronic=true and transportDocumentTypeCode=BOL) cannot have any copies with charges.");
 
   static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES =
       eblsCannotHaveCopiesCheck(
           "numberOfCopiesWithoutCharges",
-          "Electronic original Bills of Lading cannot have any copies without charges.");
+          "Electronic original Bills of Lading(isElectronic=true and transportDocumentTypeCode=BOL) cannot have any copies without charges.");
 
   private static JsonRebaseableContentCheck eblsCannotHaveCopiesCheck(
       String fieldName, String errorMessage) {
@@ -218,11 +218,11 @@ public class EblChecks {
   static final JsonRebaseableContentCheck SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES =
       eblsCannotHaveOriginalsCheck(
           "numberOfOriginalsWithCharges",
-          "Number of originals with charges must be absent for SWBs");
+          "Number of originals with charges must be absent for SWBs(transportDocumentTypeCode=SWB)");
   static final JsonRebaseableContentCheck SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES =
       eblsCannotHaveOriginalsCheck(
           "numberOfOriginalsWithoutCharges",
-          "Number of originals without charges must be absent for SWBs");
+          "Number of originals without charges must be absent for SWBs(transportDocumentTypeCode=SWB)");
 
   private static JsonRebaseableContentCheck eblsCannotHaveOriginalsCheck(
       String fieldName, String errorMessage) {
@@ -960,7 +960,7 @@ public class EblChecks {
   }
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
-          ScenarioType scenarioType, boolean isTD) {
+      ScenarioType scenarioType, boolean isTD, boolean isCladInSI) {
     List<JsonContentCheck> checks = new ArrayList<>();
     checks.add(
         JsonAttribute.mustEqual(
@@ -968,17 +968,17 @@ public class EblChecks {
             "transportDocumentTypeCode",
             scenarioType::transportDocumentTypeCode));
     if (isTD) {
-/* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
       checks.add(
-        JsonAttribute.ifThen(
-          "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
-          ignored -> {
-            var dsp = scenarioType.get();
-            return dsp.shippingInstructions().path("isCarriersAgentAtDestinationRequired").asBoolean(false) || dsp.eblScenarioType().isCarriersAgentAtDestinationRequired();
-          },
-          JsonAttribute.path(DOCUMENT_PARTIES, JsonAttribute.path("carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))
-      ));
-*/
+          JsonAttribute.ifThen(
+              "[Scenario] Verify that the transportDocument contains 'carriersAgentAtDestination'",
+              ignored -> {
+                return isCladInSI || scenarioType.isCarriersAgentAtDestinationRequired();
+              },
+              JsonAttribute.path(
+                  DOCUMENT_PARTIES,
+                  JsonAttribute.path(
+                      "carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))));
+
     } else {
       checks.add(
         JsonAttribute.ifThen(
@@ -1082,7 +1082,7 @@ public class EblChecks {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
     checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     checks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    checks.addAll(generateScenarioRelatedChecks(scenarioType, false));
+    checks.addAll(generateScenarioRelatedChecks(scenarioType, false, false));
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
       matched,
@@ -1134,14 +1134,10 @@ public class EblChecks {
     checks.addAll(STATIC_SI_CHECKS);
 
     checks.add(FEEDBACKS_PRESENCE);
-    /* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
-        checks.add(JsonAttribute.lostAttributeCheck(
-          "Validate that shipper provided data was not altered",
-          delayedValue(dspSupplier, dsp -> requestedAmendment ? dsp.updatedShippingInstructions() : dsp.shippingInstructions()),
-          SI_NORMALIZER
-        ));
-    */
-    checks.addAll(generateScenarioRelatedChecks(ScenarioType.valueOf(dspSupplier.get().scenarioType()), false));
+
+    checks.addAll(
+        generateScenarioRelatedChecks(
+            ScenarioType.valueOf(dspSupplier.get().scenarioType()), false, false));
     return checks;
   }
 
@@ -1325,7 +1321,11 @@ public class EblChecks {
               }
               return Set.of();
             }));
-    jsonContentChecks.addAll(generateScenarioRelatedChecks(ScenarioType.valueOf(dspSupplier.get().scenarioType()), true));
+    jsonContentChecks.addAll(
+        generateScenarioRelatedChecks(
+            ScenarioType.valueOf(dspSupplier.get().scenarioType()),
+            true,
+            dspSupplier.get().isCladInSI()));
     return jsonContentChecks;
   }
 

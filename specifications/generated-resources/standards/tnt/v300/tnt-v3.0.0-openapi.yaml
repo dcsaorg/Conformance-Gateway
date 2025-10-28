@@ -7,15 +7,15 @@ info:
 
     This is the OpenAPI specification of the **DCSA Track and Trace** standard.
 
-    This API allows the transfer of structured track and trace events from a publisher to a subscriber.
+    This API allows the transfer of structured track and trace Events from an  Event Producer to an Event Consumer.
 
-    The event publisher implements the `GET /events` endpoint, which can be called by authorized API consumers to retrieve relevant available events.
+    Each Event Producer implements the `GET /events` endpoint, which can be called by the authorized Event Consumers to retrieve relevant available Events.
 
-    The event subscribers implement the `POST /events` endpoint, which can be called by event publishers call to send relevant events as they become available.
+    Each Event Consumer implements the `POST /events` endpoint, which can be called by Event Producers call to send relevant Events as they become available.
 
-    The registration of event subscribers with event publishers is out of scope.
+    The registration of Event Consumers with Event Producers is out of scope.
 
-    The authentication and authorization in both directions between event publishers and subscribers is out of scope.
+    The authentication and authorization in both directions between Event Producers and Event Consumers is out of scope.
 
     ### Work in progress ⚠️
 
@@ -29,41 +29,41 @@ info:
     url: "https://www.apache.org/licenses/LICENSE-2.0.html"
   version: "3.0.0"
 tags:
-- name: "Event Publisher Endpoints"
-  description: "Endpoints implemented by the adopters who publish events"
-- name: "Event Subscriber Endpoints"
-  description: "Endpoints implemented by the adopters who receive events"
+- name: "Event Producer Endpoints"
+  description: "Endpoints implemented by the Event Producers"
+- name: "Event Consumer Endpoints"
+  description: "Endpoints implemented by the Event Consumers"
 paths:
   /events:
     get:
       tags:
-      - "Event Publisher Endpoints"
+      - "Event Producer Endpoints"
       summary: "Retrieves a list of events"
       description: |
-        Retrieves the list of events matching the criteria provided as query parameters.
+        Retrieves the list of Events matching the criteria provided as query parameters.
 
-        If no events match the criteria provided as query parameters, the response should not be an HTTP 404 error message, but a regular HTTP 200 response with an empty array in the message body.
+        If no Events match the criteria provided as query parameters, the response should not be an HTTP 404 error message, but a regular HTTP 200 response with an empty array in the message body.
 
-        The ordering of events in the response message is unspecified.
+        The ordering of Events in the response message is unspecified.
 
-        The event publisher is expected to additionally filter the events based on the authorization and registration profile of the authenticated party calling this endpoint. Authorization, registration and any such additional filtering are out of scope in this standard.
+        The Event Producer is expected to additionally filter the Events based on the authorization and registration profile of the authenticated Event Consumer calling this endpoint. Authorization, registration and any such additional filtering are out of scope in this standard.
 
         ## Event filtering
 
-        Every event publisher must support the following combinations of query parameter filters:
+        Every Event Producer must support the following combinations of query parameter filters:
         * `carrierBookingReference`
         * `carrierBookingReference`, `equipmentReference`
         * `transportDocumentReference`
         * `transportDocumentReference`, `equipmentReference`
 
-        Every event publisher must support combining any of the query parameter filters above with all of these additional filters:
+        Every Event Producer must support combining any of the query parameter filters above with all of these additional filters:
         * `eventUpdatedDateTimeMin`
         * `eventUpdatedDateTimeMax`
         * `eventUpdatedDateTimeMin`, `eventUpdatedDateTimeMax`
 
-        Each event publisher can separately also decide to have default relative date ranges and only return events having an `eventUpdatedDateTime` within those ranges.
+        Each Event Producer can separately also decide to have default relative date ranges and only return Events having an `eventUpdatedDateTime` within those ranges.
 
-        When receiving requests containing an unsupported query parameter, an event publisher can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
+        When receiving requests containing an unsupported query parameter, an Event Producer can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 
         ## Pagination
 
@@ -71,39 +71,39 @@ paths:
 
         ### Optional support
 
-        Each event publisher can decide whether to support the pagination of results, or to only allow limiting the response size using filtering query parameters.
+        Each Event Producer can decide whether to support the pagination of results, or to only allow limiting the response size using filtering query parameters.
 
-        If the event publisher does not provide pagination support, it can choose to either reject with an HTTP 400 any request containing the `limit` or `cursor` query parameters, or to handle the request normally while silently ignoring the pagination query parameters.
+        If the Event Producer does not provide pagination support, it can choose to either reject with an HTTP 400 any request containing the `limit` or `cursor` query parameters, or to handle the request normally while silently ignoring the pagination query parameters.
 
         ### Enabling pagination
 
-        The event retriever can use the `limit` query parameter to specify a maximum number of events that should be included in the response.
+        The Event Consumer can use the `limit` query parameter to specify a maximum number of Events that should be included in the response.
 
-        The event publisher can separately choose (and document on their copy of the published API specification) its own limit to the number of events that it would include in responses.
+        The Event Producer can separately choose (and document on their copy of the published API specification) its own limit to the number of Events that it would include in responses.
 
-        The effective page size limit is the minimum between the `limit` query parameter (if specified) and the publisher's own maximum page size configuration setting.
+        The effective page size limit is the minimum between the `limit` query parameter (if specified) and the Event Producer's own maximum page size configuration setting.
 
         ### Retrieving results pages
 
-        If based on filtering the response would include more events than this effective page size limit, the event publisher only adds events to the response up to this effective page size limit, setting in the response the `Next-Page-Cursor` to a value that it can accept as the value of the `cursor` query parameter in a subsequent request and use it to return the next page of results.
+        If based on filtering the response would include more Events than this effective page size limit, the Event Producer only adds Events to the response up to this effective page size limit, setting in the response the `Next-Page-Cursor` to a value that it can accept as the value of the `cursor` query parameter in a subsequent request and use it to return the next page of results.
 
-        The API client reads the value of the `Next-Page-Cursor` response header and sets it as the value of the `cursor` query parameter in its next request.
+        The Event Consumer reads the value of the `Next-Page-Cursor` response header and sets it as the value of the `cursor` query parameter in its next request.
 
-        The API client **must** keep alongside the `cursor` all the original query parameters from the request that retrieved the first page, in order to allow either a stateful or a stateless implementation of the pagination mechanism by the event publisher.
+        The Event Consumer **must** keep alongside the `cursor` all the original query parameters from the request that retrieved the first page, in order to allow either a stateful or a stateless implementation of the pagination mechanism by the Event Producer.
 
-        The effect of changing any of the original query parameters in subsequent pagination requests is unspecified and may result in the rejection of the request by the event publisher with an HTTP 4xx response.
+        The effect of changing any of the original query parameters in subsequent pagination requests is unspecified and may result in the rejection of the request by the Event Producer with an HTTP 4xx response.
 
-        The effect of attempting to use a cursor more than once (for example to "go back" to previous pages) is unspecified and may result in the rejection of the request by the event publisher with an HTTP 4xx response. (This is by design a backend-to-backend API, not intended for use directly from frontend applications and therefore not directly supporting a typical full set of web frontend pagination actions.)
+        The effect of attempting to use a cursor more than once (for example to "go back" to previous pages) is unspecified and may result in the rejection of the request by the Event Producer with an HTTP 4xx response. (This is by design a backend-to-backend API, not intended for use directly from frontend applications and therefore not directly supporting a typical full set of web frontend pagination actions.)
 
-        When responding with the last page of results, the event publisher no longer includes a `Next-Page-Cursor` response header. The last page of results may be empty, for example in the case of a stateless pagination implementation by the event publisher.
+        When responding with the last page of results, the Event Producer no longer includes a `Next-Page-Cursor` response header. The last page of results may be empty, for example in the case of a stateless pagination implementation by the Event Producer.
       operationId: "get-events"
       parameters:
       - name: "carrierBookingReference"
         in: "query"
-        description: "Reference of the transport document for which to return the associated events"
+        description: "Reference of the booking for which to return the associated events"
         schema:
           type: "string"
-        example: "HHL71800000"
+        example: "ABC709951"
       - name: "transportDocumentReference"
         in: "query"
         description: "Reference of the transport document for which to return the associated events"
@@ -173,12 +173,12 @@ paths:
                 $ref: "#/components/schemas/GetEventsError"
     post:
       tags:
-      - "Event Subscriber Endpoints"
+      - "Event Consumer Endpoints"
       summary: "Sends a list of events"
       description: |
-        Used by an event publisher to send events to a registered subscriber.
+        Used by an Event Producer to send T&T Events to a registered Event Consumer.
 
-        The subscription mechanism and the management of subscriber profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
+        The subscription mechanism and the management of Event Consumer profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
       operationId: "post-events"
       parameters:
       - name: "API-Version"
@@ -357,7 +357,7 @@ components:
         typeCode:
           type: "string"
           description: |-
-            Code used to denote the type of a document
+            Code used to denote the type of a document reference
             - `AMF` - Advance Manifest Filing (of any subtype)
             - `ARN` - Arrival Notice
             - `BKG` - Booking
@@ -465,7 +465,7 @@ components:
           maxLength: 500
           type: "string"
           description: |
-            ID of the event, unique among all the events published by a T&T event publisher.
+            ID of the event, unique among all the events published by a T&T Event Producer.
 
             An event overrides any other event that has the same `eventID` and an earlier `eventUpdatedDateTime`.
 
@@ -504,21 +504,21 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of a shipment location
-            - `PRE` - Place of Receipt
-            - `POL` - Port of Loading
-            - `POD` - Port of Discharge
-            - `PDE` - Place of Delivery
-            - `PCF` - Pre-carriage From
+            - `FCD` - Full container drop-off location
+            - `IEL` - Container intermediate export stop-off location
             - `OIR` - Onward Inland Routing
             - `ORI` - Origin of goods
-            - `IEL` - Container intermediate export stop-off location
+            - `PCF` - Pre-carriage From
+            - `PDE` - Place of Delivery
+            - `POD` - Port of Discharge
+            - `POL` - Port of Loading
+            - `PRE` - Place of Receipt
             - `PTP` - Prohibited transshipment port
             - `RTP` - Requested transshipment port
-            - `FCD` - Full container drop-off location
           example: "PRE"
         documentReferences:
           type: "array"
-          description: "List of documents related to this event"
+          description: "List of document references related to this event"
           items:
             $ref: "#/components/schemas/DocumentReference"
         documentReferenceReplacements:
@@ -587,21 +587,40 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of a shipment event
-            - `RECE` - Received
-            - `DRFT` - Drafted
-            - `PENA` - Pending Approval
-            - `PENU` - Pending Update
-            - `REJE` - Rejected
+            - `AMCF` - Amendment Confirmed
+            - `AMCN` - Amendment Cancelled
+            - `AMDC` - Amendment Declined
+            - `AMPR` - Amendment In Progress
+            - `AMRE` - Amendment Received
             - `APPR` - Approved
-            - `ISSU` - Arrived
-            - `SURR` - Surrendered
-            - `SUBM` - Submitted
-            - `VOID` - Void
-            - `CONF` - Confirmed
-            - `REQS` - Requested
+            - `CACF` - Cancellation Confirmed
+            - `CADC` - Cancellation Declined
+            - `CARE` - Cancellation Received
             - `CMPL` - Completed
+            - `CONF` - Confirmed
+            - `DECL` - Declined
+            - `DRFT` - Drafted
             - `HOLD` - On Hold
+            - `ISSU` - Issued
+            - `PENA` - Pending Approval
+            - `PENM` - Pending Amendment
+            - `PENU` - Pending Update
+            - `PSAM` - Pending Surrender for Amendment
+            - `PSDL` - Pending Surrender for Delivery
+            - `RECE` - Received
+            - `REJE` - Rejected
             - `RELS` - Released
+            - `REQS` - Requested
+            - `SUAM` - Surrendered for Amendment
+            - `SUBM` - Submitted
+            - `SUDL` - Surrendered for Delivery
+            - `SURR` - Surrendered
+            - `UPCF` - Update Confirmed
+            - `UPCN` - Update Cancelled
+            - `UPDC` - Update Declined
+            - `UPDT` - Update In Progress
+            - `UPRE` - Update Received
+            - `VOID` - Voided
           example: "APPR"
         transportEventTypeCode:
           type: "string"
@@ -614,17 +633,23 @@ components:
           type: "string"
           description: |-
             Code used to denote the type of an equipment event
-            - `LOAD` - Loaded
+            - `AVDO` - Available for Drop-off
+            - `AVPU` - Available for Pick-up
+            - `CROS` - Crossed
+            - `CUSI` - Customs Selected for Inspection
+            - `CUSR` - Customs Released
+            - `CUSS` - Customs Selected for Scan
             - `DISC` - Discharged
+            - `DROP` - Drop-off
             - `GTIN` - Gated in
             - `GTOT` - Gated out
-            - `STUF` - Stuffed
-            - `STRP` - Stripped
-            - `PICK` - Pick-up
-            - `DROP` - Drop-off
             - `INSP` - Inspected
-            - `RSEA` - Resealed
+            - `LOAD` - Loaded
+            - `PICK` - Pick-up
             - `RMVD` - Removed
+            - `RSEA` - Resealed
+            - `STRP` - Stripped
+            - `STUF` - Stuffed
           example: "LOAD"
         iotEventTypeCode:
           type: "string"
@@ -869,7 +894,7 @@ components:
           type: "string"
           description: |
             Code identifying the function of the party, as defined in
-            [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+            [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
             or a subsequent revision.
           example: "CA"
       description: "Identification of a container shipping party"
@@ -922,18 +947,16 @@ components:
     RailTransport:
       type: "object"
       properties:
-        railCar:
+        railCarReference:
           maxLength: 50
           type: "string"
           description: |
-            A railcar is a type of railway vehicle that is designed to transport freight or passengers on a railway track.
-            They are also known as rail vehicles, railcars, or rolling stock.
-            Railcars can be powered by an on-board locomotive or they can be pulled by a separate locomotive.
-        railService:
+            Reference of the rail car on which the equipment is transported.
+        railServiceReference:
           maxLength: 50
           type: "string"
           description: |
-            A rail service number is a unique identifying number assigned to a specific rail service or train.
+            Reference of the rail service on which the equipment is transported.
         departureID:
           maxLength: 100
           type: "string"
@@ -970,6 +993,9 @@ components:
             - `PHY` (Phytosanitary)
             - `VET` (Veterinary)
             - `CUS` (Customs)
+
+            In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+            both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).
           example: "CUS"
         type:
           type: "string"
@@ -991,8 +1017,21 @@ components:
           description: "Carrier-specific identifier of a service."
           example: "FE1"
         universalServiceReference:
+          maxLength: 8
           type: "string"
-          description: "Reference of a service agreed between the VSA partners."
+          description: |
+            Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+            DCSA generates and distributes batches of Universal Service References (USRs)
+            to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+            A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+            or independently for one of its own non-VSA, non-Alliance services.
+
+            Every Universal Service Reference is an 8-character string with the following format:
+             * the prefix "SR"
+             * 5 digits
+             * 1 uppercase English letter (A-Z).
           example: "SR12345A"
       description: "Carrier service code and/or universal service reference"
     ShipmentDetails:
@@ -1019,21 +1058,21 @@ components:
         typeCode:
           type: "string"
           description: |-
-            Code used to denote the type of a reference
-            - `FF` - Freight Forwarder’s Reference
-            - `SI` - Shipper’s Reference
-            - `PO` - Purchase Order Reference
-            - `CR` - Customer’s Reference
+            Code used to denote the type of a shipment reference
             - `AAO` - Consignee’s Reference
-            - `ECR` - Empty container release reference
-            - `CSI` - Customer shipment ID
-            - `BPR` - Booking party reference number
-            - `BID` - Booking Request ID
-            - `EQ` - Equipment Reference
-            - `RUC` - Registro Único del Contribuyente
-            - `DUE` - Declaração Única de Exportação
-            - `CER` - Canadian Export Reporting System
             - `AES` - Automated Export System
+            - `BID` - Booking Request ID
+            - `BPR` - Booking party reference number
+            - `CER` - Canadian Export Reporting System
+            - `CR` - Customer’s Reference
+            - `CSI` - Customer shipment ID
+            - `DUE` - Declaração Única de Exportação
+            - `ECR` - Empty container release reference
+            - `EQ` - Equipment Reference
+            - `FF` - Freight Forwarder’s Reference
+            - `PO` - Purchase Order Reference
+            - `RUC` - Registro Único del Contribuyente
+            - `SI` - Shipper’s Reference
           example: "FF"
         reference:
           maxLength: 100
@@ -1126,11 +1165,16 @@ components:
     TransportDetails:
       type: "object"
       properties:
-        delayReasonCode:
-          type: "string"
-          description: |
-            Code identifying the reason for the delay, as defined by SMDG here:
-            https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+        delayReasonCodes:
+          type: "array"
+          description: "Codes identifying the reasons for a delay"
+          items:
+            maxLength: 3
+            type: "string"
+            description: |
+              Code identifying the reason for a delay,
+              [as defined by SMDG](https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/).
+            example: "STR"
         changeRemark:
           maxLength: 250
           type: "string"
@@ -1146,19 +1190,34 @@ components:
     TruckTransport:
       type: "object"
       properties:
+        tractorDetails:
+          description: |
+            The license plate and VIN of the tractor of the truck used to transport the equipment.
+          allOf:
+          - $ref: "#/components/schemas/VehicleDetails"
+        trailerDetails:
+          description: |
+            The license plate and VIN of the trailer of the truck on which the equipment is transported,
+            if the trailer is separate from the truck trailer and has its own details.
+          allOf:
+          - $ref: "#/components/schemas/VehicleDetails"
+      description: "Truck transport information"
+    VehicleDetails:
+      type: "object"
+      properties:
         licensePlate:
           maxLength: 15
           type: "string"
           description: |
             A license plate is a tag that is attached to a vehicle and displays a unique number or code assigned to the vehicle.
             The format, design, and issuing authority for license plates vary by country, state, and province.
-        chassisLicensePlate:
+        vehicleIdentificationNumber:
           maxLength: 15
           type: "string"
           description: |
             A chassis number is a unique identifying number or code assigned to the chassis of a vehicle.
-            It may also be referred to as a "vehicle identification number" (VIN) or "frame number".
-      description: "Truck transport information"
+            It may also be referred to as a "vehicle identification number" (VIN), "chassis number" or "frame number".
+      description: "Details of a vehicle, typically of the tractor or of each trailer of a truck"
     VesselTransport:
       type: "object"
       properties:
@@ -1212,9 +1271,19 @@ components:
           description: "Carrier-specific identifier of the voyage"
           example: "2103S"
         universalVoyageReference:
+          maxLength: 5
           type: "string"
-          description: "Reference of the voyage agreed between the VSA partners"
-          example: "SR12345A"
+          description: |
+            Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+            Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+            either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+            Every Universal Voyage Reference is a 5-character string with the following format:
+             * the last 2 digits of the year
+             * 2 alphanumeric characters for the sequence number of the voyage
+             * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).
+          example: "2301W"
       description: "Carrier voyage number and/or universal voyage reference"
   headers:
     API-Version:

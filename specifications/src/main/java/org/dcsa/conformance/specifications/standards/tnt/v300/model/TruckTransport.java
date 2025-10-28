@@ -8,20 +8,17 @@ import lombok.Data;
 public class TruckTransport {
 
   @Schema(
-      maxLength = 15,
       description =
 """
-A license plate is a tag that is attached to a vehicle and displays a unique number or code assigned to the vehicle.
-The format, design, and issuing authority for license plates vary by country, state, and province.
+The license plate and VIN of the tractor of the truck used to transport the equipment.
 """)
-  private String licensePlate;
+  private VehicleDetails tractorDetails;
 
   @Schema(
-    maxLength = 15,
-    description =
+      description =
 """
-A chassis number is a unique identifying number or code assigned to the chassis of a vehicle.
-It may also be referred to as a "vehicle identification number" (VIN) or "frame number".
+The license plate and VIN of the trailer of the truck on which the equipment is transported,
+if the trailer is separate from the truck trailer and has its own details.
 """)
-  private String chassisLicensePlate;
+  private VehicleDetails trailerDetails;
 }

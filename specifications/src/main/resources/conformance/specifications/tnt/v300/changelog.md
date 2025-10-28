@@ -1,5 +1,20 @@
 # Track and Trace v3.0.0 Changelog
 
+## Snapshot v3.0.0-20251024-design
+
+Added the missing `EquipmentEventTypeCode` values. (SD-2514)
+
+Added more `ShipmentEventTypeCode` values. (SD-290)
+
+Fixed the description of `ShipmentEventTypeCode` value `ISSU`. (SD-2515)
+
+Aligned the actor names with the use cases and user stories. (SD-2531)
+
+Updated rail and truck attributes. (SD-263)
+
+Added support for multiple `delayReasonCodes`. (SD-2405)
+
+
 ## Snapshot v3.0.0-20250926-design
 
 Added to type `Event` attribute `shipmentLocationType` of type `ShipmentLocationTypeCode`. (SD-2144)

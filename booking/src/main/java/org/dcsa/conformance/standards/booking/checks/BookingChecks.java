@@ -7,6 +7,7 @@ import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATI
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
@@ -16,8 +17,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import com.fasterxml.jackson.databind.node.MissingNode;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
@@ -609,8 +608,13 @@ public class BookingChecks {
           "check confirmed booking fields availability",
           body -> {
             var issues = new LinkedHashSet<String>();
-            var bookingStatus = body.path(BOOKING_STATUS).asText("");
-            if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
+            var bookingStatusAttribute = body.path(BOOKING_STATUS).asText("");
+            BookingState bookingStatus = BookingState.fromString(bookingStatusAttribute);
+            if (Objects.isNull(bookingStatus)) {
+              issues.add("Invalid or empty 'bookingStatus' attribute value: '%s'".formatted(bookingStatusAttribute));
+              return issues;
+            }
+            if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
               if (body.path(CONFIRMED_EQUIPMENTS).isEmpty()) {
                 issues.add(S_FOR_CONFIRMED_BOOKING_IS_NOT_PRESENT.formatted(CONFIRMED_EQUIPMENTS));
               }
@@ -1032,13 +1036,6 @@ public class BookingChecks {
 
     checks.addAll(RESPONSE_ONLY_CHECKS);
 
-    /*
-    FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
-        checks.add(JsonAttribute.lostAttributeCheck(
-          "Validate that shipper provided data was not altered",
-          delayedValue(dspSupplier, dsp -> requestAmendedContent ? dsp.updatedBooking() : dsp.booking())
-        ));
-        */
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);
       checks.add(

@@ -41,9 +41,7 @@ public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getSimpleNotificationChecks(
-            expectedApiVersion,
-            requestSchemaValidator,
-            BookingState.COMPLETED);
+            expectedApiVersion, requestSchemaValidator, BookingState.COMPLETED);
       }
     };
   }

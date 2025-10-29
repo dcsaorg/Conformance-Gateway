@@ -88,7 +88,9 @@ public abstract class BookingAction extends BookingAndEblAction {
   }
 
   private <T> BookingDynamicScenarioParameters updateIfNotNull(
-          BookingDynamicScenarioParameters dsp, T value, Function<T, BookingDynamicScenarioParameters> with) {
+      BookingDynamicScenarioParameters dsp,
+      T value,
+      Function<T, BookingDynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }
@@ -266,12 +268,12 @@ public abstract class BookingAction extends BookingAndEblAction {
         .filter(Objects::nonNull);
   }
 
-
   protected Stream<ActionCheck> getSimpleNotificationChecks(
       String expectedApiVersion,
       JsonSchemaValidator requestSchemaValidator,
       BookingState bookingState) {
-    return getSimpleNotificationChecks(expectedApiVersion, requestSchemaValidator, bookingState, null, null);
+    return getSimpleNotificationChecks(
+        expectedApiVersion, requestSchemaValidator, bookingState, null, null);
   }
 
   protected Stream<ActionCheck> getSimpleNotificationChecks(
@@ -279,7 +281,8 @@ public abstract class BookingAction extends BookingAndEblAction {
       JsonSchemaValidator requestSchemaValidator,
       BookingState bookingState,
       BookingState amendedBookingState) {
-    return getSimpleNotificationChecks(expectedApiVersion, requestSchemaValidator, bookingState, amendedBookingState, null);
+    return getSimpleNotificationChecks(
+        expectedApiVersion, requestSchemaValidator, bookingState, amendedBookingState, null);
   }
 
   protected Stream<ActionCheck> getSimpleNotificationChecks(

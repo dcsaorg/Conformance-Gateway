@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.ebl.action;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
@@ -36,16 +35,22 @@ public abstract class EblAction extends BookingAndEblAction {
       String actionTitle,
       int expectedStatus,
       boolean isWithNotifications) {
-    this(sourcePartyName, targetPartyName, previousAction, actionTitle, Set.of(expectedStatus), isWithNotifications);
+    this(
+        sourcePartyName,
+        targetPartyName,
+        previousAction,
+        actionTitle,
+        Set.of(expectedStatus),
+        isWithNotifications);
   }
 
   protected EblAction(
-    String sourcePartyName,
-    String targetPartyName,
-    BookingAndEblAction previousAction,
-    String actionTitle,
-    Set<Integer> expectedStatus,
-    boolean isWithNotifications) {
+      String sourcePartyName,
+      String targetPartyName,
+      BookingAndEblAction previousAction,
+      String actionTitle,
+      Set<Integer> expectedStatus,
+      boolean isWithNotifications) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
     this.isWithNotifications = isWithNotifications;
@@ -141,7 +146,8 @@ public abstract class EblAction extends BookingAndEblAction {
       updatedDsp = updateIfNotNull(updatedDsp, isCladInSI, updatedDsp::withCladInSI);
     }
 
-    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
+    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not
+    // have been added to the DSP
     updatedDsp = updatedDsp.withShippingInstructions(null).withUpdatedShippingInstructions(null);
 
     if (!dsp.equals(updatedDsp)) {
@@ -150,7 +156,7 @@ public abstract class EblAction extends BookingAndEblAction {
   }
 
   private <T> EblDynamicScenarioParameters updateIfNotNull(
-          EblDynamicScenarioParameters dsp, T value, Function<T, EblDynamicScenarioParameters> with) {
+      EblDynamicScenarioParameters dsp, T value, Function<T, EblDynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }
@@ -218,17 +224,35 @@ public abstract class EblAction extends BookingAndEblAction {
   }
 
   protected Stream<ActionCheck> getTDNotificationChecks(
-    String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, TransportDocumentStatus transportDocumentStatus) {
-    return getTDNotificationChecks(getMatchedNotificationExchangeUuid(), expectedApiVersion, notificationSchemaValidator, transportDocumentStatus);
+      String expectedApiVersion,
+      JsonSchemaValidator notificationSchemaValidator,
+      TransportDocumentStatus transportDocumentStatus) {
+    return getTDNotificationChecks(
+        getMatchedNotificationExchangeUuid(),
+        expectedApiVersion,
+        notificationSchemaValidator,
+        transportDocumentStatus);
   }
 
   protected Stream<ActionCheck> getTDNotificationChecks(
-    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, TransportDocumentStatus transportDocumentStatus) {
-    return getTDNotificationChecks(notificationExchangeUuid, expectedApiVersion, notificationSchemaValidator, transportDocumentStatus, true);
+      UUID notificationExchangeUuid,
+      String expectedApiVersion,
+      JsonSchemaValidator notificationSchemaValidator,
+      TransportDocumentStatus transportDocumentStatus) {
+    return getTDNotificationChecks(
+        notificationExchangeUuid,
+        expectedApiVersion,
+        notificationSchemaValidator,
+        transportDocumentStatus,
+        true);
   }
 
   protected Stream<ActionCheck> getTDNotificationChecks(
-    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, TransportDocumentStatus transportDocumentStatus, boolean tdrIsKnown) {
+      UUID notificationExchangeUuid,
+      String expectedApiVersion,
+      JsonSchemaValidator notificationSchemaValidator,
+      TransportDocumentStatus transportDocumentStatus,
+      boolean tdrIsKnown) {
     String titlePrefix = "[Notification]";
     return Stream.of(
         new HttpMethodCheck(titlePrefix, EblRole::isCarrier, notificationExchangeUuid, "POST"),
@@ -259,9 +283,6 @@ public abstract class EblAction extends BookingAndEblAction {
             HttpMessageType.REQUEST,
             notificationSchemaValidator),
         new CarrierTdNotificationPayloadRequestConformanceCheck(
-            notificationExchangeUuid,
-            transportDocumentStatus,
-            tdrIsKnown,
-            getDspSupplier()));
+            notificationExchangeUuid, transportDocumentStatus, tdrIsKnown, getDspSupplier()));
   }
 }

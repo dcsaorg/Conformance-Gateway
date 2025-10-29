@@ -40,9 +40,7 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends StateChangingBookin
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getSimpleNotificationChecks(
-            expectedApiVersion,
-            requestSchemaValidator,
-            BookingState.CONFIRMED);
+            expectedApiVersion, requestSchemaValidator, BookingState.CONFIRMED);
       }
     };
   }

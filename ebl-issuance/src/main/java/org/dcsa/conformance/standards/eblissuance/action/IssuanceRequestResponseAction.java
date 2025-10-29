@@ -40,12 +40,12 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
         previousAction,
         "Request() Response(%s)"
             .formatted(
-                    latestPlatformScenarioParametersAction(previousAction)
+                latestPlatformScenarioParametersAction(previousAction)
                     .getResponseCode()
                     .standardCode),
         204);
     this.issuanceResponseCode =
-            latestPlatformScenarioParametersAction(previousAction).getResponseCode();
+        latestPlatformScenarioParametersAction(previousAction).getResponseCode();
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.requestSchemaValidator = requestSchemaValidator;
     this.issuanceManifestSchemaValidator = issuanceManifestSchemaValidator;
@@ -137,9 +137,9 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         Supplier<SignatureVerifier> signatureVerifier =
             () ->
-              PayloadSignerFactory.verifierFromPemEncodedCertificate(
-                getCspSupplier().get().carriersX509SigningCertificateInPEMFormat(),
-                "carriersX509SigningCertificateInPEMFormat");
+                PayloadSignerFactory.verifierFromPemEncodedCertificate(
+                    getCspSupplier().get().carriersX509SigningCertificateInPEMFormat(),
+                    "carriersX509SigningCertificateInPEMFormat");
         String asyncResponseChecksPrefix = "[Response]";
         UUID matchedExchangeUuid = getMatchedExchangeUuid();
         UUID matchedNotificationExchangeUuid = getMatchedNotificationExchangeUuid();

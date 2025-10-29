@@ -26,7 +26,13 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator,
       boolean isWithNotifications) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC7", Set.of(200, 202), isWithNotifications);
+    super(
+        shipperPartyName,
+        carrierPartyName,
+        previousAction,
+        "UC7",
+        Set.of(200, 202),
+        isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
   }
@@ -42,7 +48,7 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().transportDocumentReference());
+        .put("documentReference", getDspSupplier().get().transportDocumentReference());
   }
 
   @Override
@@ -66,35 +72,45 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        var tdr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : "<DSP MISSING TD REFERENCE>";
+        var tdr =
+            dsp.transportDocumentReference() != null
+                ? dsp.transportDocumentReference()
+                : "<DSP MISSING TD REFERENCE>";
         Stream<ActionCheck> primaryExchangeChecks =
-          Stream.of(
-            new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
-            new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), "/v3/transport-documents/%s".formatted(tdr)),
-            new ResponseStatusCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
-            new ApiHeaderCheck(
-                EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new ApiHeaderCheck(
-                EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-                EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator),
-                EblChecks.tdRefStatusChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier(), TransportDocumentStatus.TD_APPROVED));
+            Stream.of(
+                new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
+                new UrlPathCheck(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    "/v3/transport-documents/%s".formatted(tdr)),
+                new ResponseStatusCheck(
+                    EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+                new ApiHeaderCheck(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    expectedApiVersion),
+                new ApiHeaderCheck(
+                    EblRole::isCarrier,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    expectedApiVersion),
+                new JsonSchemaCheck(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    requestSchemaValidator),
+                EblChecks.tdRefStatusChecks(
+                    getMatchedExchangeUuid(),
+                    expectedApiVersion,
+                    getDspSupplier(),
+                    TransportDocumentStatus.TD_APPROVED));
         return Stream.concat(
-          primaryExchangeChecks,
-          getTDNotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator,
-            TransportDocumentStatus.TD_APPROVED));
+            primaryExchangeChecks,
+            getTDNotificationChecks(
+                expectedApiVersion,
+                notificationSchemaValidator,
+                TransportDocumentStatus.TD_APPROVED));
       }
     };
   }

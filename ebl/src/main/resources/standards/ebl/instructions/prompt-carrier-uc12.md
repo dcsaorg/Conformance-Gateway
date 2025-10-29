@@ -1,2 +1,7 @@
-Perform Use Case 12: Shipper requests surrender for delivery (via the surrender API if applicable) for transport document with reference REFERENCE and carrier sends notification that surrender has been requested. Note when the conformance sandbox is acting as carrier, no action is required from the shipper (the action will auto-resolve). When the conformance sandbox is acting like the Shipper, you will have to ensure that the carrier system sees a surrender request (the surrender uses a different API not in scope for this test).
+Perform Use Case 12: Shipper requests surrender for delivery (via the surrender API if applicable) for transport
+document with reference REFERENCE and carrier sends notification that surrender has been requested. Note when the
+conformance sandbox is acting as carrier, no action is required from the shipper (the action will auto-resolve). When
+the conformance sandbox is acting like the Shipper, you will have to ensure that the carrier system sees a surrender
+request (the surrender uses a different API not in scope for this test).
+
 * Set the transport document status to `PENDING_SURRENDER_FOR_DELIVERY`.

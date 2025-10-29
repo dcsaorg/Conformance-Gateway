@@ -25,11 +25,10 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
     super(actionBuilder);
   }
 
-  public static Map<String, EblSurrenderScenarioListBuilder>
-      createModuleScenarioListBuilders(
-          EblSurrenderComponentFactory componentFactory,
-          String carrierPartyName,
-          String platformPartyName) {
+  public static Map<String, EblSurrenderScenarioListBuilder> createModuleScenarioListBuilders(
+      EblSurrenderComponentFactory componentFactory,
+      String carrierPartyName,
+      String platformPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);

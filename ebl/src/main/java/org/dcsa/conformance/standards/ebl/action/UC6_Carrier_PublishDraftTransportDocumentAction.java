@@ -117,14 +117,16 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     if (!skipSI) {
       return null;
     }
-    return OBJECT_MAPPER.createObjectNode()
-      .put("transportDocumentReference", "Insert TDR here");
+    return OBJECT_MAPPER.createObjectNode().put("transportDocumentReference", "Insert TDR here");
   }
 
   @Override
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
-    var dr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+    var dr =
+        dsp.transportDocumentReference() != null
+            ? dsp.transportDocumentReference()
+            : dsp.shippingInstructionsReference();
     return super.asJsonNode()
         .put("documentReference", dr)
         .put("scenarioType", getDspSupplier().get().scenarioType())
@@ -146,5 +148,4 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       }
     };
   }
-
 }

@@ -1,10 +1,10 @@
 package org.dcsa.conformance.standards.ebl.crypto.impl;
 
+import static org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory.pemEncodeCertificate;
+
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.dcsa.conformance.standards.ebl.crypto.JWSSignerDetails;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
-
-import static org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory.pemEncodeCertificate;
 
 public class X509BackedPayloadSigner extends DefaultPayloadSigner implements PayloadSignerWithKey {
 

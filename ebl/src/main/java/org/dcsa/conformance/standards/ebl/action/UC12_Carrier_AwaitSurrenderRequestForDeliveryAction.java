@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;

@@ -21,12 +21,8 @@ public record SenderScenarioParameters(
 
   public void validate() {
     PayloadSignerFactory.verifierFromPemEncodedCertificate(
-      carriersX509SigningCertificateInPEMFormat,
-      "carriersX509SigningCertificateInPEMFormat"
-    );
+        carriersX509SigningCertificateInPEMFormat, "carriersX509SigningCertificateInPEMFormat");
     PayloadSignerFactory.verifierFromPemEncodedCertificate(
-      sendersX509SigningCertificateInPEMFormat,
-      "sendersX509SigningCertificateInPEMFormat"
-    );
+        sendersX509SigningCertificateInPEMFormat, "sendersX509SigningCertificateInPEMFormat");
   }
 }

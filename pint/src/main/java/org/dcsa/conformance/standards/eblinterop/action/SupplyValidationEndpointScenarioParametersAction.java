@@ -12,9 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SupplyValidationEndpointScenarioParametersAction extends PintAction {
 
   public SupplyValidationEndpointScenarioParametersAction(
-      String platformPartyName,
-      String carrierPartyName,
-      PintAction previousAction) {
+      String platformPartyName, String carrierPartyName, PintAction previousAction) {
     super(
         carrierPartyName,
         platformPartyName,
@@ -35,9 +33,10 @@ public class SupplyValidationEndpointScenarioParametersAction extends PintAction
 
   public static ObjectNode getJsonForPrompt() {
     var partyDef = OBJECT_MAPPER.createObjectNode();
-    partyDef.put("codeListProvider", "ZZZ")
-      .put("partyCode", "valid-party")
-      .put("codeListName", "CTK");
+    partyDef
+        .put("codeListProvider", "ZZZ")
+        .put("partyCode", "valid-party")
+        .put("codeListName", "CTK");
     return partyDef;
   }
 
@@ -48,7 +47,7 @@ public class SupplyValidationEndpointScenarioParametersAction extends PintAction
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt("prompt-supply-validation-endpoint-scenario-parameters.md");
+    return getMarkdownHumanReadablePrompt(
+        "prompt-supply-validation-endpoint-scenario-parameters.md");
   }
-
 }

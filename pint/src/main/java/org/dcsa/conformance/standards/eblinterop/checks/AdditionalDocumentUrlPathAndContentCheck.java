@@ -16,12 +16,15 @@ import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 
 public class AdditionalDocumentUrlPathAndContentCheck extends ActionCheck {
 
-  private static final Pattern URL_PATTERN = Pattern.compile("/envelopes/([^/]++)/additional-documents/[0-9a-fA-F]{64}/?$");
+  private static final Pattern URL_PATTERN =
+      Pattern.compile("/envelopes/([^/]++)/additional-documents/[0-9a-fA-F]{64}/?$");
 
   private final Supplier<String> envelopeReferenceSupplier;
 
   public AdditionalDocumentUrlPathAndContentCheck(
-    Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, Supplier<String> envelopeReferenceSupplier) {
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      Supplier<String> envelopeReferenceSupplier) {
     this("", isRelevantForRoleName, matchedExchangeUuid, envelopeReferenceSupplier);
   }
 
@@ -40,7 +43,8 @@ public class AdditionalDocumentUrlPathAndContentCheck extends ActionCheck {
   }
 
   @Override
-  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(
+      Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) return ConformanceCheckResult.simple(Set.of());
     String requestUrl = exchange.getRequest().url();
@@ -56,22 +60,24 @@ public class AdditionalDocumentUrlPathAndContentCheck extends ActionCheck {
       ok = expectedReference.equals(reference);
     }
     if (ok) {
-        try {
-            var bytes = exchange.getRequest().message().body().getJsonBody().binaryValue();
-            var checksum = Checksums.sha256(bytes);
-            var urlLc = requestUrl.toLowerCase().replaceAll("/++$", "");
-            var idx = urlLc.lastIndexOf('/');
-            var urlChecksum = urlLc.substring(idx + 1);
-            if (!urlChecksum.equals(checksum)) {
-              issues.add("The decoded payload had checksum '%s' but according to the URL it should have had checksum '%s'".formatted(checksum, urlChecksum));
-            }
-        } catch (IOException e) {
-            issues.add("Could not parse the payload as a base64 encoded byte sequence");
+      try {
+        var bytes = exchange.getRequest().message().body().getJsonBody().binaryValue();
+        var checksum = Checksums.sha256(bytes);
+        var urlLc = requestUrl.toLowerCase().replaceAll("/++$", "");
+        var idx = urlLc.lastIndexOf('/');
+        var urlChecksum = urlLc.substring(idx + 1);
+        if (!urlChecksum.equals(checksum)) {
+          issues.add(
+              "The decoded payload had checksum '%s' but according to the URL it should have had checksum '%s'"
+                  .formatted(checksum, urlChecksum));
         }
+      } catch (IOException e) {
+        issues.add("Could not parse the payload as a base64 encoded byte sequence");
+      }
     } else {
       issues.add(
-        "Request URL '%s' does not match '/envelopes/%s/additional-documents/{sha256checksum}'"
-          .formatted(requestUrl, expectedReference));
+          "Request URL '%s' does not match '/envelopes/%s/additional-documents/{sha256checksum}'"
+              .formatted(requestUrl, expectedReference));
     }
 
     return ConformanceCheckResult.simple(issues);

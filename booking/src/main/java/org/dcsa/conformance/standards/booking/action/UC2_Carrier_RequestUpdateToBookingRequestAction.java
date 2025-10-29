@@ -38,9 +38,7 @@ public class UC2_Carrier_RequestUpdateToBookingRequestAction extends StateChangi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getSimpleNotificationChecks(
-            expectedApiVersion,
-            requestSchemaValidator,
-            BookingState.PENDING_UPDATE);
+            expectedApiVersion, requestSchemaValidator, BookingState.PENDING_UPDATE);
       }
     };
   }

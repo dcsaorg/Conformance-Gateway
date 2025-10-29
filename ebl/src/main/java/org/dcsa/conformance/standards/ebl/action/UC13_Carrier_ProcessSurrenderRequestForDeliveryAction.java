@@ -48,8 +48,8 @@ public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends State
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().transportDocumentReference())
-      .put("acceptDeliveryRequest", acceptDeliveryRequest);
+        .put("documentReference", getDspSupplier().get().transportDocumentReference())
+        .put("acceptDeliveryRequest", acceptDeliveryRequest);
   }
 
   @Override
@@ -67,15 +67,12 @@ public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends State
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var expectedStatus = acceptDeliveryRequest
-          ? TransportDocumentStatus.TD_SURRENDERED_FOR_DELIVERY
-          : TransportDocumentStatus.TD_ISSUED;
+        var expectedStatus =
+            acceptDeliveryRequest
+                ? TransportDocumentStatus.TD_SURRENDERED_FOR_DELIVERY
+                : TransportDocumentStatus.TD_ISSUED;
         return getTDNotificationChecks(
-          getMatchedExchangeUuid(),
-          expectedApiVersion,
-          requestSchemaValidator,
-          expectedStatus
-        );
+            getMatchedExchangeUuid(), expectedApiVersion, requestSchemaValidator, expectedStatus);
       }
     };
   }

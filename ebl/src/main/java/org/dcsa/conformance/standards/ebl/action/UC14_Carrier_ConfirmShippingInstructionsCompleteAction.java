@@ -32,7 +32,7 @@ public class UC14_Carrier_ConfirmShippingInstructionsCompleteAction extends Stat
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().shippingInstructionsReference());
+        .put("documentReference", getDspSupplier().get().shippingInstructionsReference());
   }
 
   @Override

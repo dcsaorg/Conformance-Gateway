@@ -13,9 +13,20 @@ import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 public abstract class StateChangingBookingAction extends BookingAction {
 
-  protected StateChangingBookingAction(String sourcePartyName, String targetPartyName, BookingAndEblAction previousAction,
-                                    String actionTitle, int expectedStatus, boolean isWithNotifications) {
-    super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus, isWithNotifications);
+  protected StateChangingBookingAction(
+      String sourcePartyName,
+      String targetPartyName,
+      BookingAndEblAction previousAction,
+      String actionTitle,
+      int expectedStatus,
+      boolean isWithNotifications) {
+    super(
+        sourcePartyName,
+        targetPartyName,
+        previousAction,
+        actionTitle,
+        expectedStatus,
+        isWithNotifications);
   }
 
   @Override
@@ -24,24 +35,22 @@ public abstract class StateChangingBookingAction extends BookingAction {
     updateDSPFromResponsePayload(exchange);
   }
 
-  protected Stream<ActionCheck> createPrimarySubChecks(String httpMethod,
-                                                       String expectedApiVersion,
-                                                       String uri,
-                                                       String... uriReference) {
+  protected Stream<ActionCheck> createPrimarySubChecks(
+      String httpMethod, String expectedApiVersion, String uri, String... uriReference) {
     return Stream.of(
-      new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), httpMethod),
-      new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), buildFullUris(uri, uriReference)),
-      new ResponseStatusCheck(
-        BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
-      new ApiHeaderCheck(
-        BookingRole::isShipper,
-        getMatchedExchangeUuid(),
-        HttpMessageType.REQUEST,
-        expectedApiVersion),
-      new ApiHeaderCheck(
-        BookingRole::isCarrier,
-        getMatchedExchangeUuid(),
-        HttpMessageType.RESPONSE,
-        expectedApiVersion));
+        new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), httpMethod),
+        new UrlPathCheck(
+            BookingRole::isShipper, getMatchedExchangeUuid(), buildFullUris(uri, uriReference)),
+        new ResponseStatusCheck(BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+        new ApiHeaderCheck(
+            BookingRole::isShipper,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+        new ApiHeaderCheck(
+            BookingRole::isCarrier,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            expectedApiVersion));
   }
 }

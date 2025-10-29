@@ -5,7 +5,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;

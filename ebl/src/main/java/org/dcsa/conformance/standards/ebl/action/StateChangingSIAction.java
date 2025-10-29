@@ -1,9 +1,8 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import java.util.Set;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
-
-import java.util.Set;
 
 public abstract class StateChangingSIAction extends EblAction {
 
@@ -14,7 +13,13 @@ public abstract class StateChangingSIAction extends EblAction {
       String actionTitle,
       int expectedStatus,
       boolean isWithNotifications) {
-    super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus, isWithNotifications);
+    super(
+        sourcePartyName,
+        targetPartyName,
+        previousAction,
+        actionTitle,
+        expectedStatus,
+        isWithNotifications);
   }
 
   protected StateChangingSIAction(
@@ -24,7 +29,13 @@ public abstract class StateChangingSIAction extends EblAction {
       String actionTitle,
       Set<Integer> expectedStatus,
       boolean isWithNotifications) {
-    super(sourcePartyName, targetPartyName, previousAction, actionTitle, expectedStatus, isWithNotifications);
+    super(
+        sourcePartyName,
+        targetPartyName,
+        previousAction,
+        actionTitle,
+        expectedStatus,
+        isWithNotifications);
   }
 
   @Override

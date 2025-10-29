@@ -16,7 +16,8 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   private String response;
   private String eblType;
 
-  public SupplyScenarioParametersAction(String carrierPartyName, ConformanceAction previousAction, String response, String eblType) {
+  public SupplyScenarioParametersAction(
+      String carrierPartyName, ConformanceAction previousAction, String response, String eblType) {
     super(carrierPartyName, null, previousAction, "SupplyTDR[%s]".formatted(eblType));
     this.response = response;
     this.eblType = eblType;
@@ -34,8 +35,8 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
     if (suppliedScenarioParameters != null) {
       jsonState.set("suppliedScenarioParameters", suppliedScenarioParameters.toJson());
     }
-    jsonState.put("response",response);
-    jsonState.put("eblType",eblType);
+    jsonState.put("response", response);
+    jsonState.put("eblType", eblType);
     return jsonState;
   }
 
@@ -62,23 +63,19 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    String eblPlatform = response.equals("SURR")?"WAVE":"WAVER";
+    String eblPlatform = response.equals("SURR") ? "WAVE" : "WAVER";
     var issueToParty = OBJECT_MAPPER.createObjectNode();
-    issueToParty.put("partyName", "Issue To name")
-      .put("eblPlatform", eblPlatform);
+    issueToParty.put("partyName", "Issue To name").put("eblPlatform", eblPlatform);
     var carrierParty = OBJECT_MAPPER.createObjectNode();
-    carrierParty.put("partyName", "Carrier name")
-      .put("eblPlatform", "WAVE");
+    carrierParty.put("partyName", "Carrier name").put("eblPlatform", "WAVE");
 
     var surrendereeParty = OBJECT_MAPPER.createObjectNode();
-    surrendereeParty.put("partyName", "Surrenderee name")
-      .put("eblPlatform", "BOLE");
+    surrendereeParty.put("partyName", "Surrenderee name").put("eblPlatform", "BOLE");
     return new SuppliedScenarioParameters(
-      UUID.randomUUID().toString().replace("-", "").substring(0, 20),
-      issueToParty,
-      carrierParty,
-      surrendereeParty
-    )
+            UUID.randomUUID().toString().replace("-", "").substring(0, 20),
+            issueToParty,
+            carrierParty,
+            surrendereeParty)
         .toJson();
   }
 
@@ -94,8 +91,6 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode()
-      .put("eblType", eblType)
-      .put("response", response);
+    return super.asJsonNode().put("eblType", eblType).put("response", response);
   }
 }

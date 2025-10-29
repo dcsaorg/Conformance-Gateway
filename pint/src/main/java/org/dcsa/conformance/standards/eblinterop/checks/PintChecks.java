@@ -48,9 +48,10 @@ public class PintChecks {
       if (!nodeToValidate.isArray()) {
         var expectedSize = expectedSizeSupplier.getAsInt();
         if (expectedSize > 0) {
-          return ConformanceCheckResult.simple(Set.of(
-              "Expected '%s' to be an array with size %d, but it was not an array"
-                  .formatted(contextPath, expectedSize)));
+          return ConformanceCheckResult.simple(
+              Set.of(
+                  "Expected '%s' to be an array with size %d, but it was not an array"
+                      .formatted(contextPath, expectedSize)));
         }
         // Schema validation error if anything
         return ConformanceCheckResult.simple(Set.of());
@@ -61,13 +62,15 @@ public class PintChecks {
         return ConformanceCheckResult.simple(Set.of());
       }
       if (expectedSize < 0) {
-        return ConformanceCheckResult.simple(Set.of(
-            "Error: Could not determine the expected size of the array at '%s'. This is a bug in the test"
-                .formatted(contextPath)));
+        return ConformanceCheckResult.simple(
+            Set.of(
+                "Error: Could not determine the expected size of the array at '%s'. This is a bug in the test"
+                    .formatted(contextPath)));
       }
-      return ConformanceCheckResult.simple(Set.of(
-          "The size of the array at '%s' was %d, but it should have been %d"
-              .formatted(contextPath, size, expectedSize)));
+      return ConformanceCheckResult.simple(
+          Set.of(
+              "The size of the array at '%s' was %d, but it should have been %d"
+                  .formatted(contextPath, size, expectedSize)));
     };
   }
 
@@ -181,8 +184,9 @@ public class PintChecks {
                           if (Objects.equals(rspSupplier.get().receiverParty(), n)) {
                             return ConformanceCheckResult.simple(Set.of());
                           }
-                          return ConformanceCheckResult.simple(Set.of(
-                              "[Scenario] Last transaction did not use the receiving party provided by the receiver (exactly as-is)"));
+                          return ConformanceCheckResult.simple(
+                              Set.of(
+                                  "[Scenario] Last transaction did not use the receiving party provided by the receiver (exactly as-is)"));
                         },
                         "transactions",
                         -1,

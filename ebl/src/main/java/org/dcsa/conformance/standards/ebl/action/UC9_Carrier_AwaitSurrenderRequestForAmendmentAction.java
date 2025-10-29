@@ -6,8 +6,8 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 @Getter
 public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends StateChangingSIAction {
@@ -34,7 +34,7 @@ public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends StateCh
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().transportDocumentReference());
+        .put("documentReference", getDspSupplier().get().transportDocumentReference());
   }
 
   @Override
@@ -53,11 +53,10 @@ public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends StateCh
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getTDNotificationChecks(
-          getMatchedExchangeUuid(),
-          expectedApiVersion,
-          requestSchemaValidator,
-          TransportDocumentStatus.TD_PENDING_SURRENDER_FOR_AMENDMENT
-        );
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            requestSchemaValidator,
+            TransportDocumentStatus.TD_PENDING_SURRENDER_FOR_AMENDMENT);
       }
     };
   }

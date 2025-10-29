@@ -74,10 +74,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
             Stream.concat(
                 createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
                 getNotificationChecks(
-                    expectedApiVersion,
-                    notificationSchemaValidator,
-                    expectedBookingState,
-                    null)));
+                    expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)));
       }
     };
   }

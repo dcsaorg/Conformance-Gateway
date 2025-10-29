@@ -32,25 +32,23 @@ public class PintRetryTransferAndCloseAction extends PintAction {
   private final JsonSchemaValidator issuanceManifestSchemaValidator;
 
   public PintRetryTransferAndCloseAction(
-    String receivingPlatform,
-    String sendingPlatform,
-    PintAction previousAction,
-    PintResponseCode responseCode,
-    SenderTransmissionClass senderTransmissionClass,
-    RetryType retryType,
-    JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator envelopeEnvelopeSchemaValidator,
-    JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
-    JsonSchemaValidator issuanceManifestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator
-    ) {
+      String receivingPlatform,
+      String sendingPlatform,
+      PintAction previousAction,
+      PintResponseCode responseCode,
+      SenderTransmissionClass senderTransmissionClass,
+      RetryType retryType,
+      JsonSchemaValidator requestSchemaValidator,
+      JsonSchemaValidator envelopeEnvelopeSchemaValidator,
+      JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
+      JsonSchemaValidator issuanceManifestSchemaValidator,
+      JsonSchemaValidator responseSchemaValidator) {
     super(
         sendingPlatform,
         receivingPlatform,
         previousAction,
         "RetryTransfer(%s, %s)".formatted(responseCode.name(), retryType.name()),
-        responseCode.getHttpResponseCode()
-    );
+        responseCode.getHttpResponseCode());
     this.responseCode = responseCode;
     this.senderTransmissionClass = senderTransmissionClass;
     this.retryType = retryType;
@@ -72,9 +70,10 @@ public class PintRetryTransferAndCloseAction extends PintAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    var node = super.asJsonNode()
-      .put("senderTransmissionClass", senderTransmissionClass.name())
-      .put("retryType", retryType.name());
+    var node =
+        super.asJsonNode()
+            .put("senderTransmissionClass", senderTransmissionClass.name())
+            .put("retryType", retryType.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());
@@ -87,17 +86,17 @@ public class PintRetryTransferAndCloseAction extends PintAction {
     boolean dspChanged = false;
     var requestBody = exchange.getRequest().message().body().getJsonBody();
     if (dsp.documentChecksums().isEmpty()) {
-      var envelopeNode = parseSignedNodeNoErrors(
-        requestBody.path("envelopeManifestSignedContent")
-      );
+      var envelopeNode = parseSignedNodeNoErrors(requestBody.path("envelopeManifestSignedContent"));
       var supportingDocuments = envelopeNode.path("supportingDocuments");
-      var visualizationChecksum = envelopeNode.path("eBLVisualisationByCarrier").path("documentChecksum").asText(null);
+      var visualizationChecksum =
+          envelopeNode.path("eBLVisualisationByCarrier").path("documentChecksum").asText(null);
 
-      var missingDocuments = StreamSupport.stream(supportingDocuments.spliterator(), false)
-        .map(n -> n.path("documentChecksum"))
-        .filter(JsonNode::isTextual)
-        .map(JsonNode::asText)
-        .collect(Collectors.toSet());
+      var missingDocuments =
+          StreamSupport.stream(supportingDocuments.spliterator(), false)
+              .map(n -> n.path("documentChecksum"))
+              .filter(JsonNode::isTextual)
+              .map(JsonNode::asText)
+              .collect(Collectors.toSet());
 
       if (visualizationChecksum != null) {
         missingDocuments.add(visualizationChecksum);
@@ -113,7 +112,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
     }
 
     if (dspChanged) {
-        setDsp(dsp);
+      setDsp(dsp);
     }
   }
 
@@ -122,45 +121,44 @@ public class PintRetryTransferAndCloseAction extends PintAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        Supplier<SignatureVerifier> senderVerifierSupplier = () -> resolveSignatureVerifierSenderSignatures();
-        Supplier<SignatureVerifier> carrierVerifierSupplier = () -> resolveSignatureVerifierCarrierSignatures();
-        Supplier<SignatureVerifier> receiverVerifierSupplier = () -> resolveSignatureVerifierForReceiverSignatures();
+        Supplier<SignatureVerifier> senderVerifierSupplier =
+            () -> resolveSignatureVerifierSenderSignatures();
+        Supplier<SignatureVerifier> carrierVerifierSupplier =
+            () -> resolveSignatureVerifierCarrierSignatures();
+        Supplier<SignatureVerifier> receiverVerifierSupplier =
+            () -> resolveSignatureVerifierForReceiverSignatures();
 
         return Stream.of(
-                new UrlPathCheck(
-                    PintRole::isSendingPlatform, getMatchedExchangeUuid(), "/envelopes"),
-                new ResponseStatusCheck(
-                    PintRole::isReceivingPlatform, getMatchedExchangeUuid(), expectedStatus),
-                new ApiHeaderCheck(
-                    PintRole::isSendingPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    expectedApiVersion),
-                new ApiHeaderCheck(
-                    PintRole::isReceivingPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    expectedApiVersion),
-                new JsonSchemaCheck(
-                  PintRole::isReceivingPlatform,
-                  getMatchedExchangeUuid(),
-                  HttpMessageType.RESPONSE,
-                  responseSchemaValidator
-                ),
-                validateRequestSignatures(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  senderVerifierSupplier,
-                  carrierVerifierSupplier
-                ),
-                validateInnerRequestSchemas(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  envelopeEnvelopeSchemaValidator,
-                  envelopeTransferChainEntrySchemaValidator,
-                  issuanceManifestSchemaValidator
-                ),
-              JsonAttribute.contentChecks(
+            new UrlPathCheck(PintRole::isSendingPlatform, getMatchedExchangeUuid(), "/envelopes"),
+            new ResponseStatusCheck(
+                PintRole::isReceivingPlatform, getMatchedExchangeUuid(), expectedStatus),
+            new ApiHeaderCheck(
+                PintRole::isSendingPlatform,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                PintRole::isReceivingPlatform,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            new JsonSchemaCheck(
+                PintRole::isReceivingPlatform,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            validateRequestSignatures(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                senderVerifierSupplier,
+                carrierVerifierSupplier),
+            validateInnerRequestSchemas(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                envelopeEnvelopeSchemaValidator,
+                envelopeTransferChainEntrySchemaValidator,
+                issuanceManifestSchemaValidator),
+            JsonAttribute.contentChecks(
                 "",
                 "The signatures of the signed content of the HTTP response can be validated",
                 PintRole::isReceivingPlatform,
@@ -168,30 +166,22 @@ public class PintRetryTransferAndCloseAction extends PintAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion,
                 JsonAttribute.customValidator(
-                  "Response signature must be valid",
-                  SignatureChecks.signatureValidates(receiverVerifierSupplier)
-                )
-              ),
-                new JsonSchemaCheck(
-                        PintRole::isSendingPlatform,
-                        getMatchedExchangeUuid(),
-                        HttpMessageType.REQUEST,
-                        requestSchemaValidator
-                ),
-                validateInitiateTransferRequest(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  senderTransmissionClass,
-                  () -> getSsp(),
-                  () -> getRsp(),
-                  () -> getDsp()
-                ),
-                validateSignedFinishResponse(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  responseCode
-                )
-            );
+                    "Response signature must be valid",
+                    SignatureChecks.signatureValidates(receiverVerifierSupplier))),
+            new JsonSchemaCheck(
+                PintRole::isSendingPlatform,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                requestSchemaValidator),
+            validateInitiateTransferRequest(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                senderTransmissionClass,
+                () -> getSsp(),
+                () -> getRsp(),
+                () -> getDsp()),
+            validateSignedFinishResponse(
+                getMatchedExchangeUuid(), expectedApiVersion, responseCode));
       }
     };
   }

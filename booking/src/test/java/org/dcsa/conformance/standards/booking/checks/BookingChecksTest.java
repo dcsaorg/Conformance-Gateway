@@ -55,7 +55,7 @@ class BookingChecksTest {
 
     JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_CONDITIONS;
     Set<ConformanceError> errors =
-            ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
+        ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
 
     assertEquals(1, errors.size());
     assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
@@ -752,7 +752,8 @@ class BookingChecksTest {
 
   @Test
   void testCheckConfirmedBookingFields_noBookingStatus_throwException() {
-    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking).getErrorMessages();
+    Set<String> errors =
+        BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking).getErrorMessages();
 
     assertEquals(1, errors.size());
     assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: ''"));
@@ -762,7 +763,8 @@ class BookingChecksTest {
   void testCheckConfirmedBookingFields_emptyBookingStatus_throwException() {
     booking.put("bookingStatus", "");
 
-    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking).getErrorMessages();
+    Set<String> errors =
+        BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking).getErrorMessages();
 
     assertEquals(1, errors.size());
     assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: ''"));
@@ -961,10 +963,12 @@ class BookingChecksTest {
   void testCheckConfirmedBookingFields_unknownBookingStatus_throwsException() {
     booking.put("bookingStatus", "UNKNOWN_STATUS");
 
-    Set<String> errors = BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking).getErrorMessages();
+    Set<String> errors =
+        BookingChecks.CHECK_CONFIRMED_BOOKING_FIELDS.validate(booking).getErrorMessages();
 
     assertEquals(1, errors.size());
-    assertTrue(errors.contains("Invalid or empty 'bookingStatus' attribute value: 'UNKNOWN_STATUS'"));
+    assertTrue(
+        errors.contains("Invalid or empty 'bookingStatus' attribute value: 'UNKNOWN_STATUS'"));
   }
 
   @Nested

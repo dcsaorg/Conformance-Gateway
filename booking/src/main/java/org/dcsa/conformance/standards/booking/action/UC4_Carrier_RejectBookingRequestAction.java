@@ -40,9 +40,7 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getSimpleNotificationChecks(
-            expectedApiVersion,
-            requestSchemaValidator,
-            BookingState.REJECTED);
+            expectedApiVersion, requestSchemaValidator, BookingState.REJECTED);
       }
     };
   }

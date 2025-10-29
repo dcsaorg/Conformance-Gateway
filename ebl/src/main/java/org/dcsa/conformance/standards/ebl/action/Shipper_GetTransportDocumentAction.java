@@ -28,10 +28,8 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode()
-      .put("tdr", getDspSupplier().get().transportDocumentReference());
+    return super.asJsonNode().put("tdr", getDspSupplier().get().transportDocumentReference());
   }
-
 
   @Override
   public String getHumanReadablePrompt() {
@@ -56,7 +54,10 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {
     var dsp = getDspSupplier().get();
-    var tdr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : "<UNKNOWN-TDR>";
+    var tdr =
+        dsp.transportDocumentReference() != null
+            ? dsp.transportDocumentReference()
+            : "<UNKNOWN-TDR>";
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
@@ -79,7 +80,6 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-
             EblChecks.tdPlusScenarioContentChecks(
                 getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getDspSupplier()));
       }

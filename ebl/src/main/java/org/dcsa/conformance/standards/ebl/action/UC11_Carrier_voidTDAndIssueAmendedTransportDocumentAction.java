@@ -6,11 +6,12 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 @Getter
-public class UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction extends StateChangingSIAction {
+public class UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction
+    extends StateChangingSIAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
@@ -51,8 +52,8 @@ public class UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction extends S
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
     return super.asJsonNode()
-      .put("documentReference", dsp.transportDocumentReference())
-      .put("scenarioType", getDspSupplier().get().scenarioType());
+        .put("documentReference", dsp.transportDocumentReference())
+        .put("scenarioType", getDspSupplier().get().scenarioType());
   }
 
   @Override
@@ -61,11 +62,10 @@ public class UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction extends S
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getTDNotificationChecks(
-          getMatchedExchangeUuid(),
-          expectedApiVersion,
-          requestSchemaValidator,
-          TransportDocumentStatus.TD_ISSUED
-        );
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            requestSchemaValidator,
+            TransportDocumentStatus.TD_ISSUED);
       }
     };
   }

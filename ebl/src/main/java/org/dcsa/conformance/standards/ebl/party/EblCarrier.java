@@ -128,26 +128,34 @@ public class EblCarrier extends ConformanceParty {
   }
 
   private void requestUpdateToShippingInstructions(JsonNode actionPrompt) {
-    log.info("Carrier.requestUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Carrier.requestUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
-    si.provideFeedbackToShippingInstructions(documentReference, feedbacks -> feedbacks.addObject()
-      .put("severity", "ERROR")
-      .put("code", "PROPERTY_VALUE_MUST_CHANGE")
-      .put(MESSAGE, "Please perform the changes requested by the Conformance orchestrator")
-    );
+    si.provideFeedbackToShippingInstructions(
+        documentReference,
+        feedbacks ->
+            feedbacks
+                .addObject()
+                .put("severity", "ERROR")
+                .put("code", "PROPERTY_VALUE_MUST_CHANGE")
+                .put(
+                    MESSAGE,
+                    "Please perform the changes requested by the Conformance orchestrator"));
     si.save(persistentMap);
     generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
 
-    addOperatorLogEntry("Requested update to the shipping instructions with document reference '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Requested update to the shipping instructions with document reference '%s'"
+            .formatted(documentReference));
   }
 
-
   private void processUpdatedShippingInstructions(JsonNode actionPrompt) {
-    log.info("Carrier.processUpdatedShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Carrier.processUpdatedShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
     var accept = actionPrompt.required("acceptChanges").asBoolean(true);
@@ -162,13 +170,16 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
 
-    addOperatorLogEntry("Processed update to the shipping instructions with document reference '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Processed update to the shipping instructions with document reference '%s'"
+            .formatted(documentReference));
   }
 
-
-
-  private void processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction(JsonNode actionPrompt) {
-    log.info("Carrier.processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction(%s)".formatted(actionPrompt.toPrettyString()));
+  private void processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction(
+      JsonNode actionPrompt) {
+    log.info(
+        "Carrier.processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction(%s)"
+            .formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
@@ -178,7 +189,8 @@ public class EblCarrier extends ConformanceParty {
     si.acceptUpdatedShippingInstructions(documentReference);
     asyncOrchestratorPostPartyInput(
         actionPrompt.required(ACTION_ID).asText(), OBJECT_MAPPER.createObjectNode());
-    addOperatorLogEntry("Process out of band amendment for transport document '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Process out of band amendment for transport document '%s'".formatted(documentReference));
   }
 
   private void publishDraftTransportDocument(JsonNode actionPrompt) {
@@ -204,12 +216,17 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
     if (skipSI) {
-      var json = OBJECT_MAPPER.createObjectNode().put(TRANSPORT_DOCUMENT_REFERENCE, si.getTransportDocumentReference());
-      addOperatorLogEntry("Prompt answer for publishDraftTransportDocument: %s".formatted(json.toString()));
+      var json =
+          OBJECT_MAPPER
+              .createObjectNode()
+              .put(TRANSPORT_DOCUMENT_REFERENCE, si.getTransportDocumentReference());
+      addOperatorLogEntry(
+          "Prompt answer for publishDraftTransportDocument: %s".formatted(json.toString()));
     }
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Published draft transport document '%s'".formatted(si.getTransportDocumentReference()));
+    addOperatorLogEntry(
+        "Published draft transport document '%s'".formatted(si.getTransportDocumentReference()));
   }
 
   private void issueTransportDocument(JsonNode actionPrompt) {
@@ -237,7 +254,9 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Sent notification for surrender for amendment of transport document with reference '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Sent notification for surrender for amendment of transport document with reference '%s'"
+            .formatted(documentReference));
   }
 
   private void notifyOfSurrenderForDelivery(JsonNode actionPrompt) {
@@ -250,11 +269,14 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Sent notification for surrender for delivery of transport document with reference '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Sent notification for surrender for delivery of transport document with reference '%s'"
+            .formatted(documentReference));
   }
 
   private void processSurrenderRequestForAmendment(JsonNode actionPrompt) {
-    log.info("Carrier.processSurrenderRequestForAmendment(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Carrier.processSurrenderRequestForAmendment(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
@@ -296,7 +318,8 @@ public class EblCarrier extends ConformanceParty {
   }
 
   private void processSurrenderRequestForDelivery(JsonNode actionPrompt) {
-    log.info("Carrier.processSurrenderRequestForDelivery(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Carrier.processSurrenderRequestForDelivery(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
@@ -311,11 +334,14 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Processed surrender request for delivery of transport document with reference '%s'".formatted(documentReference));
+    addOperatorLogEntry(
+        "Processed surrender request for delivery of transport document with reference '%s'"
+            .formatted(documentReference));
   }
 
   private void confirmShippingInstructionsComplete(JsonNode actionPrompt) {
-    log.info("Carrier.confirmShippingInstructionsComplete(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Carrier.confirmShippingInstructionsComplete(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
@@ -325,10 +351,15 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
 
-    addOperatorLogEntry("Confirmed shipping instructions with reference %s is complete".formatted(documentReference));
+    addOperatorLogEntry(
+        "Confirmed shipping instructions with reference %s is complete"
+            .formatted(documentReference));
   }
 
-  private void generateAndEmitNotificationFromShippingInstructions(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {
+  private void generateAndEmitNotificationFromShippingInstructions(
+      JsonNode actionPrompt,
+      CarrierShippingInstructions shippingInstructions,
+      boolean includeShippingInstructionsReference) {
     var notification =
         ShippingInstructionsNotification.builder()
             .apiVersion(apiVersion)
@@ -349,17 +380,22 @@ public class EblCarrier extends ConformanceParty {
         notification);
   }
 
-
-  private void generateAndEmitNotificationFromTransportDocument(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {
+  private void generateAndEmitNotificationFromTransportDocument(
+      JsonNode actionPrompt,
+      CarrierShippingInstructions shippingInstructions,
+      boolean includeShippingInstructionsReference) {
     var notification =
-      TransportDocumentNotification.builder()
-        .apiVersion(apiVersion)
-        .transportDocument(shippingInstructions.getTransportDocument().orElseThrow())
-        .feedbacks(shippingInstructions.getfeedbacks() != null ? shippingInstructions.getfeedbacks() : OBJECT_MAPPER.createArrayNode())
-        .includeShippingInstructionsReference(includeShippingInstructionsReference)
-        .subscriptionReference(shippingInstructions.getSubscriptionReference())
-        .build()
-        .asJsonNode();
+        TransportDocumentNotification.builder()
+            .apiVersion(apiVersion)
+            .transportDocument(shippingInstructions.getTransportDocument().orElseThrow())
+            .feedbacks(
+                shippingInstructions.getfeedbacks() != null
+                    ? shippingInstructions.getfeedbacks()
+                    : OBJECT_MAPPER.createArrayNode())
+            .includeShippingInstructionsReference(includeShippingInstructionsReference)
+            .subscriptionReference(shippingInstructions.getSubscriptionReference())
+            .build()
+            .asJsonNode();
     asyncCounterpartNotification(
         actionPrompt.required(ACTION_ID).asText(),
         "/v3/transport-document-notifications",
@@ -368,20 +404,20 @@ public class EblCarrier extends ConformanceParty {
 
   private ConformanceResponse return405(ConformanceRequest request, String... allowedMethods) {
     return request.createResponse(
-      405,
-      Map.of(
-        API_VERSION, List.of(apiVersion), "Allow", List.of(String.join(",", allowedMethods))),
-      new ConformanceMessageBody(
-        OBJECT_MAPPER
-          .createObjectNode()
-          .put(MESSAGE, "Returning 405 because the method was not supported")));
+        405,
+        Map.of(
+            API_VERSION, List.of(apiVersion), "Allow", List.of(String.join(",", allowedMethods))),
+        new ConformanceMessageBody(
+            OBJECT_MAPPER
+                .createObjectNode()
+                .put(MESSAGE, "Returning 405 because the method was not supported")));
   }
 
   private ConformanceResponse return400(ConformanceRequest request, String message) {
     return request.createResponse(
-      400,
-      Map.of(API_VERSION, List.of(apiVersion)),
-      new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put(MESSAGE, message)));
+        400,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put(MESSAGE, message)));
   }
 
   private ConformanceResponse return404(ConformanceRequest request) {
@@ -411,12 +447,13 @@ public class EblCarrier extends ConformanceParty {
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(
-      409,
-      Map.of(API_VERSION, List.of(apiVersion)),
-      new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put(MESSAGE, message)));
+        409,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put(MESSAGE, message)));
   }
 
   private static final Set<String> QUERY_BOOLEAN = Set.of("true", "false");
+
   private String readAmendedContent(ConformanceRequest request) {
     var queryParams = request.queryParams();
     var operationParams = queryParams.get("updatedContent");
@@ -430,14 +467,17 @@ public class EblCarrier extends ConformanceParty {
     return operation;
   }
 
-  private ConformanceResponse handleGetShippingInstructionsRequest(ConformanceRequest request, String documentReference) {
+  private ConformanceResponse handleGetShippingInstructionsRequest(
+      ConformanceRequest request, String documentReference) {
     var amendedContentRaw = readAmendedContent(request);
     boolean amendedContent;
     if (amendedContentRaw.equals("true") || amendedContentRaw.equals("false")) {
       amendedContent = amendedContentRaw.equals("true");
     } else {
-      return return400(request, "The amendedContent queryParam must be used at most once and" +
-        " must be one of true or false");
+      return return400(
+          request,
+          "The amendedContent queryParam must be used at most once and"
+              + " must be one of true or false");
     }
     // documentReference can either be a SIR or TDR.
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
@@ -449,7 +489,8 @@ public class EblCarrier extends ConformanceParty {
       if (amendedContent) {
         body = si.getUpdatedShippingInstructions().orElse(null);
         if (body == null) {
-          return return404(request, "No amended version of booking with reference: " + documentReference);
+          return return404(
+              request, "No amended version of booking with reference: " + documentReference);
         }
       } else {
         body = si.getShippingInstructions();
@@ -457,19 +498,18 @@ public class EblCarrier extends ConformanceParty {
       body = body.deepCopy();
       SI_ARRAY_ORDER_DEFINITIONS.accept(body, ArrayOrderHelper::shuffleArrayOrder);
       ConformanceResponse response =
-        request.createResponse(
-          200,
-          Map.of(API_VERSION, List.of(apiVersion)),
-          new ConformanceMessageBody(body));
+          request.createResponse(
+              200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(body));
       addOperatorLogEntry(
-        "Responded to GET shipping instructions request '%s' (in state '%s')"
-          .formatted(documentReference, si.getShippingInstructionsState().wireName()));
+          "Responded to GET shipping instructions request '%s' (in state '%s')"
+              .formatted(documentReference, si.getShippingInstructionsState().wireName()));
       return response;
     }
     return return404(request, "The Shipping Instructions does not exist");
   }
 
-  private ConformanceResponse handleGetTransportDocument(ConformanceRequest request, String documentReference) {
+  private ConformanceResponse handleGetTransportDocument(
+      ConformanceRequest request, String documentReference) {
     // bookingReference can either be a CBR or CBRR.
     var sir = tdrToSir.get(documentReference);
     if (sir == null) {
@@ -477,24 +517,23 @@ public class EblCarrier extends ConformanceParty {
     }
     var persistedSi = persistentMap.load(sir);
     if (persistedSi == null) {
-      throw new IllegalStateException("We had a TDR -> SIR mapping, but there is no data related to that reference");
+      throw new IllegalStateException(
+          "We had a TDR -> SIR mapping, but there is no data related to that reference");
     }
     var si = CarrierShippingInstructions.fromPersistentStore(persistedSi);
     // If the TDR is resolvable, then the document must have a TD.
     var body = si.getTransportDocument().orElseThrow();
     ConformanceResponse response =
-      request.createResponse(
-        200,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(body));
+        request.createResponse(
+            200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(body));
     addOperatorLogEntry(
-      "Responded to GET transport document request '%s' (in state '%s')"
-        .formatted(documentReference, si.getShippingInstructionsState().wireName()));
+        "Responded to GET transport document request '%s' (in state '%s')"
+            .formatted(documentReference, si.getShippingInstructionsState().wireName()));
     return response;
   }
 
-
-  private ConformanceResponse handlePatchShippingInstructions(ConformanceRequest request, String documentReference) {
+  private ConformanceResponse handlePatchShippingInstructions(
+      ConformanceRequest request, String documentReference) {
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
     var persistedSi = persistentMap.load(sir);
     if (persistedSi == null) {
@@ -516,21 +555,19 @@ public class EblCarrier extends ConformanceParty {
             .build()
             .asJsonNode());
 
-    return returnEmpty202Response(
-      request,
-      siData,
-      documentReference
-    );
+    return returnEmpty202Response(request, siData, documentReference);
   }
 
-  private ConformanceResponse handlePatchTransportDocument(ConformanceRequest request, String documentReference) {
+  private ConformanceResponse handlePatchTransportDocument(
+      ConformanceRequest request, String documentReference) {
     var sir = tdrToSir.get(documentReference);
     if (sir == null) {
       return return404(request);
     }
     var persistedSi = persistentMap.load(sir);
     if (persistedSi == null) {
-      throw new IllegalStateException("We had a TDR -> SIR mapping, but there is no data related to that reference");
+      throw new IllegalStateException(
+          "We had a TDR -> SIR mapping, but there is no data related to that reference");
     }
     var si = CarrierShippingInstructions.fromPersistentStore(persistedSi);
     si.approveDraftTransportDocument(documentReference);
@@ -547,74 +584,72 @@ public class EblCarrier extends ConformanceParty {
             .build()
             .asJsonNode());
 
-    return returnTransportDocumentRefStatusResponse(
-      200,
-      request,
-      td,
-      documentReference
-    );
+    return returnTransportDocumentRefStatusResponse(200, request, td, documentReference);
   }
 
   private ConformanceResponse returnShippingInstructionsReferenceResponse(
-    int responseCode, ConformanceRequest request, ObjectNode shippingInstructions, String documentReference) {
+      int responseCode,
+      ConformanceRequest request,
+      ObjectNode shippingInstructions,
+      String documentReference) {
     var sir = shippingInstructions.required("shippingInstructionsReference").asText();
     var siStatus = shippingInstructions.required("shippingInstructionsStatus").asText();
-    var statusObject =
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("shippingInstructionsReference", sir);
+    var statusObject = OBJECT_MAPPER.createObjectNode().put("shippingInstructionsReference", sir);
 
     ConformanceResponse response =
-      request.createResponse(
-        responseCode,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(statusObject));
+        request.createResponse(
+            responseCode,
+            Map.of(API_VERSION, List.of(apiVersion)),
+            new ConformanceMessageBody(statusObject));
     addOperatorLogEntry(
-      "Responded %d to %s SI '%s' (resulting state '%s')"
-        .formatted(responseCode, request.method(), documentReference, siStatus));
+        "Responded %d to %s SI '%s' (resulting state '%s')"
+            .formatted(responseCode, request.method(), documentReference, siStatus));
     return response;
   }
 
-  private ConformanceResponse returnEmpty202Response(ConformanceRequest request, ObjectNode shippingInstructions, String documentReference) {
+  private ConformanceResponse returnEmpty202Response(
+      ConformanceRequest request, ObjectNode shippingInstructions, String documentReference) {
     var siStatus = shippingInstructions.required("shippingInstructionsStatus").asText();
 
     ConformanceResponse response =
-      request.createResponse(
-        202,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(""));
+        request.createResponse(
+            202, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(""));
     addOperatorLogEntry(
-      "Responded %d to %s SI '%s' (resulting state '%s')"
-        .formatted(202, request.method(), documentReference, siStatus));
+        "Responded %d to %s SI '%s' (resulting state '%s')"
+            .formatted(202, request.method(), documentReference, siStatus));
     return response;
   }
 
-
   private ConformanceResponse returnTransportDocumentRefStatusResponse(
-    int responseCode, ConformanceRequest request, ObjectNode transportDocument, String documentReference) {
+      int responseCode,
+      ConformanceRequest request,
+      ObjectNode transportDocument,
+      String documentReference) {
     var tdr = transportDocument.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
     var tdStatus = transportDocument.required("transportDocumentStatus").asText();
     var statusObject =
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("transportDocumentStatus", tdStatus)
-        .put(TRANSPORT_DOCUMENT_REFERENCE, tdr);
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("transportDocumentStatus", tdStatus)
+            .put(TRANSPORT_DOCUMENT_REFERENCE, tdr);
     ConformanceResponse response =
-      request.createResponse(
-        responseCode,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(statusObject));
+        request.createResponse(
+            responseCode,
+            Map.of(API_VERSION, List.of(apiVersion)),
+            new ConformanceMessageBody(statusObject));
     addOperatorLogEntry(
-      "Responded %d to %s TD '%s' (resulting state '%s')"
-        .formatted(responseCode, request.method(), documentReference, tdStatus));
+        "Responded %d to %s TD '%s' (resulting state '%s')"
+            .formatted(responseCode, request.method(), documentReference, tdStatus));
     return response;
   }
 
   @SneakyThrows
   private ConformanceResponse handlePostShippingInstructions(ConformanceRequest request) {
     ObjectNode siPayload =
-      (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
-    var si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(siPayload, apiVersion);
+        (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
+    var si =
+        CarrierShippingInstructions.initializeFromShippingInstructionsRequest(
+            siPayload, apiVersion);
     si.save(persistentMap);
 
     asyncCounterpartNotification(
@@ -629,13 +664,8 @@ public class EblCarrier extends ConformanceParty {
             .asJsonNode());
 
     return returnShippingInstructionsReferenceResponse(
-      202,
-      request,
-      siPayload,
-      si.getShippingInstructionsReference()
-    );
+        202, request, siPayload, si.getShippingInstructionsReference());
   }
-
 
   @SneakyThrows
   private ConformanceResponse handlePutShippingInstructions(ConformanceRequest request) {
@@ -647,7 +677,7 @@ public class EblCarrier extends ConformanceParty {
       return return404(request);
     }
     ObjectNode updatedShippingInstructions =
-      (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
+        (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
     var si = CarrierShippingInstructions.fromPersistentStore(siData);
     si.putShippingInstructions(sir, updatedShippingInstructions);
     si.save(persistentMap);
@@ -663,11 +693,7 @@ public class EblCarrier extends ConformanceParty {
             .build()
             .asJsonNode());
 
-    return returnEmpty202Response(
-      request,
-      si.getShippingInstructions(),
-      documentReference
-    );
+    return returnEmpty202Response(request, si.getShippingInstructions(), documentReference);
   }
 
   @SneakyThrows
@@ -681,46 +707,47 @@ public class EblCarrier extends ConformanceParty {
     var url = uriContextPath(request.url());
     try {
       var result =
-        switch (request.method()) {
-          case "GET" -> {
-            var lastSegment = lastUrlSegment(url);
-            var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
-            if (urlStem.endsWith("/v3/shipping-instructions")) {
-              yield handleGetShippingInstructionsRequest(request, lastSegment);
+          switch (request.method()) {
+            case "GET" -> {
+              var lastSegment = lastUrlSegment(url);
+              var urlStem =
+                  url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
+              if (urlStem.endsWith("/v3/shipping-instructions")) {
+                yield handleGetShippingInstructionsRequest(request, lastSegment);
+              }
+              if (urlStem.endsWith("/v3/transport-documents")) {
+                yield handleGetTransportDocument(request, lastSegment);
+              }
+              yield return404(request);
             }
-            if (urlStem.endsWith("/v3/transport-documents")) {
-              yield handleGetTransportDocument(request, lastSegment);
+            case "POST" -> {
+              if (url.endsWith("/v3/shipping-instructions")) {
+                yield handlePostShippingInstructions(request);
+              }
+              yield return404(request);
             }
-            yield return404(request);
-          }
-          case "POST" -> {
-            if (url.endsWith("/v3/shipping-instructions")) {
-              yield handlePostShippingInstructions(request);
+            case "PATCH" -> {
+              var lastSegment = lastUrlSegment(url);
+              var urlStem =
+                  url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
+              if (urlStem.endsWith("/v3/shipping-instructions")) {
+                yield handlePatchShippingInstructions(request, lastSegment);
+              }
+              if (urlStem.endsWith("/v3/transport-documents")) {
+                yield handlePatchTransportDocument(request, lastSegment);
+              }
+              yield return404(request);
             }
-            yield return404(request);
-          }
-          case "PATCH" -> {
-            var lastSegment = lastUrlSegment(url);
-            var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
-            if (urlStem.endsWith("/v3/shipping-instructions")) {
-              yield handlePatchShippingInstructions(request, lastSegment);
-            }
-            if (urlStem.endsWith("/v3/transport-documents")) {
-              yield handlePatchTransportDocument(request, lastSegment);
-            }
-            yield return404(request);
-          }
-          case "PUT" -> handlePutShippingInstructions(request);
-          default -> return405(request, "GET", "POST", "PUT", "PATCH");
-        };
+            case "PUT" -> handlePutShippingInstructions(request);
+            default -> return405(request, "GET", "POST", "PUT", "PATCH");
+          };
       addOperatorLogEntry(
-        "Responded to request '%s %s' with '%d'"
-          .formatted(request.method(), request.url(), result.statusCode()));
+          "Responded to request '%s %s' with '%d'"
+              .formatted(request.method(), request.url(), result.statusCode()));
       return result;
     } catch (IllegalStateException e) {
       addOperatorLogEntry(
-        "Responded to request '%s %s' with '%d'"
-          .formatted(request.method(), request.url(), 409));
+          "Responded to request '%s %s' with '%d'".formatted(request.method(), request.url(), 409));
       return return409(request, e.getMessage());
     }
   }
@@ -729,7 +756,6 @@ public class EblCarrier extends ConformanceParty {
     // ".../foo" and ".../foo/" should be the same
     return url.substring(1 + url.replaceAll("/++$", "").lastIndexOf("/"));
   }
-
 
   @SuperBuilder
   private abstract static class DocumentNotification {
@@ -746,9 +772,7 @@ public class EblCarrier extends ConformanceParty {
     private String transportDocumentStatus;
     private String subscriptionReference;
     private JsonNode feedbacks;
-    @Builder.Default
-    private boolean includeShippingInstructionsReference = true;
-
+    @Builder.Default private boolean includeShippingInstructionsReference = true;
 
     private String computedType() {
       if (type != null) {
@@ -781,7 +805,7 @@ public class EblCarrier extends ConformanceParty {
       setDocumentProvidedField(data, TRANSPORT_DOCUMENT_REFERENCE, transportDocumentReference);
       if (includeShippingInstructionsReference) {
         setDocumentProvidedField(
-          data, "shippingInstructionsReference", shippingInstructionsReference);
+            data, "shippingInstructionsReference", shippingInstructionsReference);
       }
       if (isSINotification()) {
         setDocumentProvidedField(data, "shippingInstructionsStatus", shippingInstructionsStatus);

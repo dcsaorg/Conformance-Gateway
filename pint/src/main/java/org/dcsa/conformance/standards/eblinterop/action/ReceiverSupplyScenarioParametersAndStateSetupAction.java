@@ -23,15 +23,13 @@ public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAct
         sendingPlatform,
         previousAction,
         "%s(%s)".formatted(ACTION_PREFIX, scenarioClass.name()),
-      -1
-      );
+        -1);
     this.scenarioClass = scenarioClass;
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    var node = super.asJsonNode()
-      .put("scenarioClass", this.scenarioClass.name());
+    var node = super.asJsonNode().put("scenarioClass", this.scenarioClass.name());
     node.set("ssp", this.getSsp().toJson());
     return node;
   }
@@ -56,8 +54,7 @@ public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAct
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return PintReceivingPlatform.getReceiverScenarioParameters(
-      getSsp().eblPlatform(),
-      scenarioClass
-    ).toJson();
+            getSsp().eblPlatform(), scenarioClass)
+        .toJson();
   }
 }

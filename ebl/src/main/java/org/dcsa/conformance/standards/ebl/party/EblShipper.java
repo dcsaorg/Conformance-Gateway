@@ -62,45 +62,58 @@ public class EblShipper extends ConformanceParty {
   @Override
   public Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(UC1_Shipper_SubmitShippingInstructionsAction.class, this::sendShippingInstructionsRequest),
-      Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
-      Map.entry(Shipper_GetTransportDocumentAction.class, this::getTransportDocument),
-      Map.entry(AUC_Shipper_SendOutOfOrderSIMessageAction.class, this::sendOutOfOrderMessage),
-      Map.entry(UC3ShipperSubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
-      Map.entry(UC5_Shipper_CancelUpdateToShippingInstructionsAction.class, this::cancelUpdateToShippingInstructions),
-      Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument),
-      Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument),
-      Map.entry(ShipperGetShippingInstructionsErrorAction.class, this::getShippingInstructionsRequest)
-    );
+        Map.entry(
+            UC1_Shipper_SubmitShippingInstructionsAction.class,
+            this::sendShippingInstructionsRequest),
+        Map.entry(
+            Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
+        Map.entry(Shipper_GetTransportDocumentAction.class, this::getTransportDocument),
+        Map.entry(AUC_Shipper_SendOutOfOrderSIMessageAction.class, this::sendOutOfOrderMessage),
+        Map.entry(
+            UC3ShipperSubmitUpdatedShippingInstructionsAction.class,
+            this::sendUpdatedShippingInstructionsRequest),
+        Map.entry(
+            UC5_Shipper_CancelUpdateToShippingInstructionsAction.class,
+            this::cancelUpdateToShippingInstructions),
+        Map.entry(
+            UC7_Shipper_ApproveDraftTransportDocumentAction.class,
+            this::approveDraftTransportDocument),
+        Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument),
+        Map.entry(
+            ShipperGetShippingInstructionsErrorAction.class, this::getShippingInstructionsRequest));
   }
 
   private void sendShippingInstructionsRequest(JsonNode actionPrompt) {
-    log.info("Shipper.sendShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Shipper.sendShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
     JsonNode siPayload = actionPrompt.get(CarrierSupplyPayloadAction.CARRIER_PAYLOAD);
 
-    ConformanceResponse conformanceResponse = syncCounterpartPost("/v3/shipping-instructions", siPayload);
+    ConformanceResponse conformanceResponse =
+        syncCounterpartPost("/v3/shipping-instructions", siPayload);
 
     JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
     String shippingInstructionsReference = jsonBody.path("shippingInstructionsReference").asText();
-    ObjectNode updatedShippingInstructions = ((ObjectNode) siPayload)
-        .put("shippingInstructionsReference", shippingInstructionsReference);
+    ObjectNode updatedShippingInstructions =
+        ((ObjectNode) siPayload)
+            .put("shippingInstructionsReference", shippingInstructionsReference);
     persistentMap.save(shippingInstructionsReference, updatedShippingInstructions);
 
     addOperatorLogEntry(
-        "Sent a shipping instructions request with the parameters: %s"
-            .formatted(siPayload));
+        "Sent a shipping instructions request with the parameters: %s".formatted(siPayload));
   }
 
   private void sendUpdatedShippingInstructionsRequest(JsonNode actionPrompt) {
-    log.info("Shipper.sendUpdatedShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Shipper.sendUpdatedShippingInstructionsRequest(%s)"
+            .formatted(actionPrompt.toPrettyString()));
     var sir = actionPrompt.required("sir").asText();
     var documentReference = actionPrompt.required("documentReference").asText();
     var updatedSI = sendUpdatedShippingInstructions(sir, documentReference);
     persistentMap.save(documentReference, updatedSI);
     addOperatorLogEntry(
-      "Sent a shipping instructions update with the parameters: %s"
-        .formatted(actionPrompt.toPrettyString()));
+        "Sent a shipping instructions update with the parameters: %s"
+            .formatted(actionPrompt.toPrettyString()));
   }
 
   private ObjectNode sendUpdatedShippingInstructions(String sir, String documentReference) {
@@ -108,9 +121,11 @@ public class EblShipper extends ConformanceParty {
     var siWithoutStatus = si.deepCopy();
     siWithoutStatus.remove("shippingInstructionsStatus");
 
-    ConformanceResponse conformanceResponse = syncCounterpartPut("/v3/shipping-instructions/%s".formatted(
-      URLEncoder.encode(documentReference, StandardCharsets.UTF_8)
-    ), siWithoutStatus);
+    ConformanceResponse conformanceResponse =
+        syncCounterpartPut(
+            "/v3/shipping-instructions/%s"
+                .formatted(URLEncoder.encode(documentReference, StandardCharsets.UTF_8)),
+            siWithoutStatus);
 
     JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
     String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
@@ -124,53 +139,61 @@ public class EblShipper extends ConformanceParty {
             .toString()
             .substring(0, 8)
             .toUpperCase(); // adding a different seal number for each UC3
-    ((ObjectNode)seal).put("number", newSealNumber);
+    ((ObjectNode) seal).put("number", newSealNumber);
     return si;
   }
 
   private void sendCancellationToUpdatedShippingInstructions(String documentReference) {
-    var approvePayload = OBJECT_MAPPER.createObjectNode()
-      .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_CANCELLED.wireName());
+    var approvePayload =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put(
+                "updatedShippingInstructionsStatus",
+                ShippingInstructionsStatus.SI_UPDATE_CANCELLED.wireName());
 
     syncCounterpartPatch(
-      "/v3/shipping-instructions/%s".formatted(URLEncoder.encode(documentReference, StandardCharsets.UTF_8)),
-      Collections.emptyMap(),
-      approvePayload);
-
+        "/v3/shipping-instructions/%s"
+            .formatted(URLEncoder.encode(documentReference, StandardCharsets.UTF_8)),
+        Collections.emptyMap(),
+        approvePayload);
   }
 
   private void cancelUpdateToShippingInstructions(JsonNode actionPrompt) {
-    log.info("Shipper.cancelUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Shipper.cancelUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required("documentReference").asText();
     sendCancellationToUpdatedShippingInstructions(documentReference);
     addOperatorLogEntry(
-      "Cancelled update to shipping instructions the parameters: %s"
-        .formatted(actionPrompt.toPrettyString()));
+        "Cancelled update to shipping instructions the parameters: %s"
+            .formatted(actionPrompt.toPrettyString()));
   }
 
   private void sendOutOfOrderMessage(JsonNode actionPrompt) {
-    var outOfOrderMessageType = OutOfOrderMessageType.valueOf(actionPrompt.required("outOfOrderMessageType").asText("<?>"));
+    var outOfOrderMessageType =
+        OutOfOrderMessageType.valueOf(actionPrompt.required("outOfOrderMessageType").asText("<?>"));
     var documentReference = actionPrompt.required("documentReference").asText();
     switch (outOfOrderMessageType) {
       case CANCEL_SI_UPDATE -> sendCancellationToUpdatedShippingInstructions(documentReference);
-      case SUBMIT_SI_UPDATE -> sendUpdatedShippingInstructions(
-        actionPrompt.required("sir").asText("<?>"),
-        documentReference
-      );
+      case SUBMIT_SI_UPDATE ->
+          sendUpdatedShippingInstructions(
+              actionPrompt.required("sir").asText("<?>"), documentReference);
       case APPROVE_TD -> sendApproveDraftTransportDocument(documentReference);
       default -> throw new AssertionError("Missing case for " + outOfOrderMessageType.name());
     }
   }
 
   private void sendApproveDraftTransportDocument(String documentReference) {
-    var approvePayload = OBJECT_MAPPER.createObjectNode()
-      .put("transportDocumentStatus", TransportDocumentStatus.TD_APPROVED.wireName());
+    var approvePayload =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("transportDocumentStatus", TransportDocumentStatus.TD_APPROVED.wireName());
 
     syncCounterpartPatch(
-      "/v3/transport-documents/%s".formatted(URLEncoder.encode(documentReference, StandardCharsets.UTF_8)),
-      Collections.emptyMap(),
-      approvePayload);
+        "/v3/transport-documents/%s"
+            .formatted(URLEncoder.encode(documentReference, StandardCharsets.UTF_8)),
+        Collections.emptyMap(),
+        approvePayload);
   }
 
   private void approveDraftTransportDocument(JsonNode actionPrompt) {
@@ -180,44 +203,52 @@ public class EblShipper extends ConformanceParty {
     sendApproveDraftTransportDocument(documentReference);
 
     addOperatorLogEntry(
-      "Approved transport document the parameters: %s"
-        .formatted(actionPrompt.toPrettyString()));
+        "Approved transport document the parameters: %s".formatted(actionPrompt.toPrettyString()));
   }
-
 
   private void getShippingInstructionsRequest(JsonNode actionPrompt) {
     log.info("Shipper.getShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String documentReference = actionPrompt.get("documentReference").asText();
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
-    boolean errorScenario = actionPrompt.path(ShipperGetShippingInstructionsErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
+    boolean errorScenario =
+        actionPrompt
+            .path(ShipperGetShippingInstructionsErrorAction.SEND_INVALID_DOCUMENT_REFERENCE)
+            .asBoolean(false);
 
-    Map<String, List<String>> queryParams = requestAmendment
-      ? Map.of("updatedContent", List.of("true"))
-      : Collections.emptyMap();
+    Map<String, List<String>> queryParams =
+        requestAmendment ? Map.of("updatedContent", List.of("true")) : Collections.emptyMap();
 
     if (errorScenario) {
       documentReference = "NON-EXISTING-SI";
     }
 
-    syncCounterpartGet("/v3/shipping-instructions/" + URLEncoder.encode(documentReference, StandardCharsets.UTF_8), queryParams);
+    syncCounterpartGet(
+        "/v3/shipping-instructions/" + URLEncoder.encode(documentReference, StandardCharsets.UTF_8),
+        queryParams);
 
-    addOperatorLogEntry("Sent a GET request for shipping instructions with documentReference: %s".formatted(documentReference));
+    addOperatorLogEntry(
+        "Sent a GET request for shipping instructions with documentReference: %s"
+            .formatted(documentReference));
   }
 
   private void getTransportDocument(JsonNode actionPrompt) {
     log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("tdr").asText();
-    boolean errorScenario = actionPrompt.path(ShipperGetTransportDocumentErrorAction.SEND_INVALID_DOCUMENT_REFERENCE).asBoolean(false);
+    boolean errorScenario =
+        actionPrompt
+            .path(ShipperGetTransportDocumentErrorAction.SEND_INVALID_DOCUMENT_REFERENCE)
+            .asBoolean(false);
 
     if (errorScenario) {
       tdr = "NON-EXISTING-TD";
     }
 
-    syncCounterpartGet("/v3/transport-documents/" + URLEncoder.encode(tdr, StandardCharsets.UTF_8), Collections.emptyMap());
+    syncCounterpartGet(
+        "/v3/transport-documents/" + URLEncoder.encode(tdr, StandardCharsets.UTF_8),
+        Collections.emptyMap());
 
     addOperatorLogEntry("Sent a GET request for transport document with TDR: %s".formatted(tdr));
   }
-
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
@@ -233,6 +264,4 @@ public class EblShipper extends ConformanceParty {
         "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
-
-
 }

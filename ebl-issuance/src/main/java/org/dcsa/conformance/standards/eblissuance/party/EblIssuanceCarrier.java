@@ -212,7 +212,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
     var tdChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("document"));
     var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
     var eblVisualization = generateDocument();
-    jsonRequestBody.set("eBLVisualisationByCarrier", wrapInSupportingDocumentObject(eblVisualization));
+    jsonRequestBody.set(
+        "eBLVisualisationByCarrier", wrapInSupportingDocumentObject(eblVisualization));
     var eBLVisualisationByCarrierChecksum = Checksums.sha256(eblVisualization);
     var issuanceManifest =
         OBJECT_MAPPER

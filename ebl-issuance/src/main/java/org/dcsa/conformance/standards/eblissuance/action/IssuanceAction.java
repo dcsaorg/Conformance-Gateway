@@ -32,9 +32,10 @@ public abstract class IssuanceAction extends ConformanceAction {
   private void initializeDsp() {
     if (previousAction == null) {
       this.dspReference =
-        new OverwritingReference<>(null, new DynamicScenarioParameters(EblType.STRAIGHT_EBL));
+          new OverwritingReference<>(null, new DynamicScenarioParameters(EblType.STRAIGHT_EBL));
     } else {
-      this.dspReference = new OverwritingReference<>(getPreviousIssuanceAction().dspReference, null);
+      this.dspReference =
+          new OverwritingReference<>(getPreviousIssuanceAction().dspReference, null);
     }
   }
 
@@ -47,7 +48,6 @@ public abstract class IssuanceAction extends ConformanceAction {
   protected IssuanceAction getPreviousIssuanceAction() {
     return (IssuanceAction) previousAction;
   }
-
 
   public DynamicScenarioParameters getDsp() {
     return this.dspReference.get();
@@ -100,14 +100,13 @@ public abstract class IssuanceAction extends ConformanceAction {
     return getPreviousIssuanceAction().getCspSupplier();
   }
 
-
   protected abstract Supplier<String> getTdrSupplier();
 
   public static PlatformScenarioParametersAction latestPlatformScenarioParametersAction(
-          IssuanceAction previousAction) {
+      IssuanceAction previousAction) {
     return previousAction
             instanceof PlatformScenarioParametersAction platformScenarioParametersAction
-            ? platformScenarioParametersAction
-            : latestPlatformScenarioParametersAction(previousAction.getPreviousIssuanceAction());
+        ? platformScenarioParametersAction
+        : latestPlatformScenarioParametersAction(previousAction.getPreviousIssuanceAction());
   }
 }

@@ -17,8 +17,8 @@ public enum InvalidBookingMessageType {
 
   public String getExpectedRequestMethod() {
     return switch (this) {
-      case CANCEL_BOOKING_AMENDMENT,CANCEL_BOOKING -> "PATCH";
-      case SUBMIT_BOOKING_AMENDMENT,UPDATE_BOOKING -> "PUT";
+      case CANCEL_BOOKING_AMENDMENT, CANCEL_BOOKING -> "PATCH";
+      case SUBMIT_BOOKING_AMENDMENT, UPDATE_BOOKING -> "PUT";
     };
   }
 

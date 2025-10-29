@@ -5,12 +5,11 @@ import java.util.Map;
 import lombok.Getter;
 
 @Getter
-public class UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction extends StateChangingSIAction {
+public class UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction
+    extends StateChangingSIAction {
 
   public UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction(
-      String carrierPartyName,
-      String shipperPartyName,
-      EblAction previousAction) {
+      String carrierPartyName, String shipperPartyName, EblAction previousAction) {
     super(carrierPartyName, shipperPartyName, previousAction, "TD Change (Out of Band)", 204, true);
   }
 
@@ -23,8 +22,7 @@ public class UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTran
   @Override
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
-    var node = super.asJsonNode()
-      .put("documentReference", dsp.transportDocumentReference());
+    var node = super.asJsonNode().put("documentReference", dsp.transportDocumentReference());
     return node;
   }
 

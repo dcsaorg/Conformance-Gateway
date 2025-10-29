@@ -221,8 +221,7 @@ class EblChecksTest {
             COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
     assertEquals(1, resultWithRelevance.errors().size());
     assertEquals(
-        ConformanceErrorSeverity.ERROR,
-        resultWithRelevance.errors().iterator().next().severity());
+        ConformanceErrorSeverity.ERROR, resultWithRelevance.errors().iterator().next().severity());
   }
 
   @Test

@@ -6,8 +6,8 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
+import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 @Getter
 public class UC10_Carrier_ProcessSurrenderRequestForAmendmentAction extends StateChangingSIAction {

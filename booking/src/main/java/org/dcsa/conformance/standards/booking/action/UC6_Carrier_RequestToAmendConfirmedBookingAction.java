@@ -41,9 +41,7 @@ public class UC6_Carrier_RequestToAmendConfirmedBookingAction extends StateChang
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getSimpleNotificationChecks(
-            expectedApiVersion,
-            requestSchemaValidator,
-            BookingState.PENDING_AMENDMENT);
+            expectedApiVersion, requestSchemaValidator, BookingState.PENDING_AMENDMENT);
       }
     };
   }

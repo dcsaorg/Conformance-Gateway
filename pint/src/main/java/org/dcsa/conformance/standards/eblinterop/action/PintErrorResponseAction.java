@@ -29,7 +29,12 @@ public class PintErrorResponseAction extends PintAction {
       PintAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator) {
-    super(sendingPlatform, receivingPlatform, previousAction, "IncorrectSingleRequestTransfer", RESPONSE_CODE);
+    super(
+        sendingPlatform,
+        receivingPlatform,
+        previousAction,
+        "IncorrectSingleRequestTransfer",
+        RESPONSE_CODE);
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestSchemaValidator = requestSchemaValidator;
   }

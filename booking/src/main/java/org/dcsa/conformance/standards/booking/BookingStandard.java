@@ -19,9 +19,7 @@ public class BookingStandard extends AbstractStandard {
         Map.ofEntries(
             Map.entry(
                 "2.0.0",
-                new TreeSet<>(
-                    Set.of(
-                        BookingScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE)))));
+                new TreeSet<>(Set.of(BookingScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE)))));
   }
 
   @Override

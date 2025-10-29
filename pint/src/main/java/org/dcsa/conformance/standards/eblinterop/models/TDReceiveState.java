@@ -1,20 +1,19 @@
 package org.dcsa.conformance.standards.eblinterop.models;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.*;
 import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNode;
+import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.nimbusds.jose.JWSObject;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import com.nimbusds.jose.JWSObject;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
@@ -45,7 +44,6 @@ public class TDReceiveState {
     this.state = state;
   }
 
-
   public TransferState getTransferState() {
     var v = state.path(TRANSFER_STATE).asText(null);
     if (v == null) {
@@ -58,7 +56,6 @@ public class TDReceiveState {
     state.put(TRANSFER_STATE, transferState.name());
   }
 
-
   public String getTransportDocumentReference() {
     return state.path(TRANSPORT_DOCUMENT_REFERENCE).asText();
   }
@@ -69,23 +66,23 @@ public class TDReceiveState {
 
   public Set<String> getKnownDocumentChecksums() {
     return StreamSupport.stream(this.state.path(KNOWN_DOCUMENTS).spliterator(), false)
-      .map(JsonNode::asText)
-      .collect(Collectors.toUnmodifiableSet());
+        .map(JsonNode::asText)
+        .collect(Collectors.toUnmodifiableSet());
   }
 
   public Set<String> getMissingDocumentChecksums() {
     return StreamSupport.stream(this.state.path(MISSING_DOCUMENTS).spliterator(), false)
-      .map(JsonNode::asText)
-      .collect(Collectors.toUnmodifiableSet());
+        .map(JsonNode::asText)
+        .collect(Collectors.toUnmodifiableSet());
   }
 
   public boolean receiveMissingDocument(String checksum) {
     var missingDocumentsRaw = this.state.path(MISSING_DOCUMENTS);
     var known = false;
     if (missingDocumentsRaw.isArray()) {
-      var missingDocuments = (ArrayNode)missingDocumentsRaw;
+      var missingDocuments = (ArrayNode) missingDocumentsRaw;
       int idx = -1;
-      for (int i = 0 ; i < missingDocuments.size() ; i++) {
+      for (int i = 0; i < missingDocuments.size(); i++) {
         if (missingDocuments.get(i).asText("").equals(checksum)) {
           // In theory, we should also check the size. In practice, we assume that
           // the sha256 checksum is "unbreakable" proof of the size match as well.
@@ -115,12 +112,14 @@ public class TDReceiveState {
     return known;
   }
 
-
-  public JsonNode generateSignedResponse(PintResponseCode responseCode, PayloadSigner payloadSigner) {
+  public JsonNode generateSignedResponse(
+      PintResponseCode responseCode, PayloadSigner payloadSigner) {
     var lastEnvelopeTransferChainEntry = lastEnvelopeTransferChainEntry();
     var lastEntryChecksum = Checksums.sha256(lastEnvelopeTransferChainEntry.asText(""));
-    var unsignedPayload = OBJECT_MAPPER.createObjectNode()
-      .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEntryChecksum);
+    var unsignedPayload =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEntryChecksum);
 
     unsignedPayload.put("responseCode", responseCode.name());
 
@@ -131,7 +130,9 @@ public class TDReceiveState {
           receivedDocuments.add(checksum);
         }
         if (responseCode == DUPE) {
-          unsignedPayload.set("duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent", lastEnvelopeTransferChainEntry);
+          unsignedPayload.set(
+              "duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent",
+              lastEnvelopeTransferChainEntry);
         }
       }
       case MDOC -> {
@@ -140,7 +141,9 @@ public class TDReceiveState {
           receivedDocuments.add(checksum);
         }
       }
-      default -> {/* nothing */}
+      default -> {
+        /* nothing */
+      }
     }
     var signedPayload = payloadSigner.sign(unsignedPayload.toString());
     return TextNode.valueOf(signedPayload);
@@ -160,11 +163,12 @@ public class TDReceiveState {
     for (JsonNode entry : etc) {
       JsonNode parsed;
       try {
-          parsed = parseSignedNode(entry);
+        parsed = parseSignedNode(entry);
       } catch (ParseException | JsonProcessingException e) {
-          return false;
+        return false;
       }
-      var actualChecksum = parsed.path("previousEnvelopeTransferChainEntrySignedContentChecksum").asText(null);
+      var actualChecksum =
+          parsed.path("previousEnvelopeTransferChainEntrySignedContentChecksum").asText(null);
       if (!Objects.equals(expectedChecksum, actualChecksum)) {
         return false;
       }
@@ -173,17 +177,19 @@ public class TDReceiveState {
     return true;
   }
 
-  public PintResponseCode recommendedFinishTransferResponse(JsonNode initiateRequest, SignatureVerifier signatureVerifier) {
+  public PintResponseCode recommendedFinishTransferResponse(
+      JsonNode initiateRequest, SignatureVerifier signatureVerifier) {
     var etc = initiateRequest.path("envelopeTransferChain");
     var lastEtcEntry = etc.path(etc.size() - 1);
     JsonNode etcEntryParsed, envelopeParsed;
     try {
       etcEntryParsed = parseSignedNode(lastEtcEntry, signatureVerifier);
-      envelopeParsed = parseSignedNode(initiateRequest.path("envelopeManifestSignedContent"), signatureVerifier);
+      envelopeParsed =
+          parseSignedNode(initiateRequest.path("envelopeManifestSignedContent"), signatureVerifier);
     } catch (ParseException | JsonProcessingException e) {
-        return PintResponseCode.BENV;
+      return PintResponseCode.BENV;
     } catch (CouldNotValidateSignatureException e) {
-        return PintResponseCode.BSIG;
+      return PintResponseCode.BSIG;
     }
     if (!isEnvelopeTransferChainValid(etc)) {
       return PintResponseCode.BENV;
@@ -193,7 +199,7 @@ public class TDReceiveState {
     var recipient = lastTransactionNode.path("recipient");
     var expectedReceiver = state.path(EXPECTED_RECEIVER);
     var transferChainEntryHistory = this.state.path(TRANSFER_CHAIN_ENTRY_HISTORY);
-    for (int i = 0; i < transferChainEntryHistory.size() ; i++) {
+    for (int i = 0; i < transferChainEntryHistory.size(); i++) {
       var transferChainEntry = etc.path(i);
       var expectedTransferChainEntry = transferChainEntryHistory.path(i);
       if (expectedTransferChainEntry.isNull()) {
@@ -210,8 +216,11 @@ public class TDReceiveState {
       if (i == transferChainEntryHistory.size() - 2 && lastHistoryNode.isNull()) {
         // Allow resigning of the last entry.
         try {
-          var expected = Checksums.sha256(JWSObject.parse(expectedTransferChainEntry.asText()).getPayload().toBytes());
-          var actual = Checksums.sha256(JWSObject.parse(transferChainEntry.asText()).getPayload().toBytes());
+          var expected =
+              Checksums.sha256(
+                  JWSObject.parse(expectedTransferChainEntry.asText()).getPayload().toBytes());
+          var actual =
+              Checksums.sha256(JWSObject.parse(transferChainEntry.asText()).getPayload().toBytes());
           if (expected.equals(actual)) {
             continue;
           }
@@ -249,7 +258,7 @@ public class TDReceiveState {
     var ridx = transferChainEntryHistory.size();
     JsonNode lastNode;
     do {
-        lastNode = transferChainEntryHistory.path(--ridx);
+      lastNode = transferChainEntryHistory.path(--ridx);
     } while (ridx >= 0 && lastNode.isNull());
     return lastNode;
   }
@@ -266,7 +275,7 @@ public class TDReceiveState {
         newTransferHistory = this.state.putArray(TRANSFER_CHAIN_ENTRY_HISTORY);
       }
       // We use the null node to mark it as us owning the eBL.
-      ((ArrayNode)newTransferHistory).addNull();
+      ((ArrayNode) newTransferHistory).addNull();
     }
     if (this.getTransferState() == TransferState.ACCEPTED) {
       responseCode = PintResponseCode.DUPE;
@@ -275,11 +284,12 @@ public class TDReceiveState {
   }
 
   public void updateTransferState(PintResponseCode code) {
-    var state = switch (code){
-      case RECE, DUPE -> TransferState.ACCEPTED;
-      case BENV, BSIG, DISE -> TransferState.REJECTED;
-      case INCD, MDOC, BETR -> TransferState.INCOMPLETE;
-    };
+    var state =
+        switch (code) {
+          case RECE, DUPE -> TransferState.ACCEPTED;
+          case BENV, BSIG, DISE -> TransferState.REJECTED;
+          case INCD, MDOC, BETR -> TransferState.INCOMPLETE;
+        };
     this.setTransferState(state);
   }
 
@@ -292,11 +302,16 @@ public class TDReceiveState {
     return new TDReceiveState((ObjectNode) state);
   }
 
-  public static TDReceiveState newInstance(String transportDocumentReference, String senderPublicKeyPEM, ReceiverScenarioParameters receivingParameters) {
-    var state = OBJECT_MAPPER.createObjectNode()
-      .put(TRANSPORT_DOCUMENT_REFERENCE, transportDocumentReference)
-      .put(TRANSFER_STATE, TransferState.NOT_STARTED.name())
-      .put(EXPECTED_SIGNING_CERT_ATTR, senderPublicKeyPEM);
+  public static TDReceiveState newInstance(
+      String transportDocumentReference,
+      String senderPublicKeyPEM,
+      ReceiverScenarioParameters receivingParameters) {
+    var state =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put(TRANSPORT_DOCUMENT_REFERENCE, transportDocumentReference)
+            .put(TRANSFER_STATE, TransferState.NOT_STARTED.name())
+            .put(EXPECTED_SIGNING_CERT_ATTR, senderPublicKeyPEM);
     return new TDReceiveState(state);
   }
 
@@ -304,7 +319,8 @@ public class TDReceiveState {
     return this.state;
   }
 
-  public static TDReceiveState fromPersistentStore(JsonNodeMap jsonNodeMap, String transportDocumentReference) {
+  public static TDReceiveState fromPersistentStore(
+      JsonNodeMap jsonNodeMap, String transportDocumentReference) {
     var data = jsonNodeMap.load(transportDocumentReference);
     if (data == null) {
       throw new IllegalArgumentException("Unknown TD Reference: " + transportDocumentReference);
@@ -321,12 +337,14 @@ public class TDReceiveState {
   }
 
   public ConformanceResponse cannedResponse(ConformanceRequest conformanceRequest) {
-    var scenarioClass = ScenarioClass.valueOf(this.state.path(SCENARIO_CLASS).asText(ScenarioClass.NO_ISSUES.name()));
+    var scenarioClass =
+        ScenarioClass.valueOf(
+            this.state.path(SCENARIO_CLASS).asText(ScenarioClass.NO_ISSUES.name()));
     if (scenarioClass == ScenarioClass.FAIL_W_503) {
-      return conformanceRequest.createResponse(503,
-        Map.of("Retry-after", List.of("10")),
-        new ConformanceMessageBody("Please retry as directed by the scenario")
-      );
+      return conformanceRequest.createResponse(
+          503,
+          Map.of("Retry-after", List.of("10")),
+          new ConformanceMessageBody("Please retry as directed by the scenario"));
     }
     return null;
   }

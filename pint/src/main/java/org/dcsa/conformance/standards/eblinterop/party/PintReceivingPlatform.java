@@ -151,11 +151,11 @@ public class PintReceivingPlatform extends ConformanceParty {
     }
 
     var facilityCode =
-            td.path("transports")
-                    .path("placeOfReceipt")
-                    .path("facility")
-                    .path("facilityCode")
-                    .asText(null);
+        td.path("transports")
+            .path("placeOfReceipt")
+            .path("facility")
+            .path("facilityCode")
+            .asText(null);
     if (PintSendingPlatform.INVALID_FACILITY_CODE.equals(facilityCode)) {
       return sendErrorResponse(request, apiVersion, this);
     }
@@ -204,27 +204,26 @@ public class PintReceivingPlatform extends ConformanceParty {
   }
 
   private static ConformanceResponse sendErrorResponse(
-          ConformanceRequest request, String apiVersion, ConformanceParty jitParty) {
+      ConformanceRequest request, String apiVersion, ConformanceParty jitParty) {
     String path = request.url();
     ObjectNode response =
-            (ObjectNode)
-                    JsonToolkit.templateFileToJsonNode(
-                            "/standards/pint/messages/pint-3.0.0-error-message.json",
-                            Map.of(
-                                    "HTTP_METHOD_PLACEHOLDER",
-                                    request.method(),
-                                    "REQUEST_URI_PLACEHOLDER",
-                                    path,
-                                    "REFERENCE_PLACEHOLDER",
-                                    UUID.randomUUID().toString(),
-                                    "ERROR_DATE_TIME_PLACEHOLDER",
-                                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT)));
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/pint/messages/pint-3.0.0-error-message.json",
+                Map.of(
+                    "HTTP_METHOD_PLACEHOLDER",
+                    request.method(),
+                    "REQUEST_URI_PLACEHOLDER",
+                    path,
+                    "REFERENCE_PLACEHOLDER",
+                    UUID.randomUUID().toString(),
+                    "ERROR_DATE_TIME_PLACEHOLDER",
+                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT)));
 
-    jitParty.addOperatorLogEntry(
-            "Handled a request with an invalid facilityCode");
+    jitParty.addOperatorLogEntry("Handled a request with an invalid facilityCode");
 
     return request.createResponse(
-            400, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
+        400, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 
   @Override

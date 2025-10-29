@@ -26,7 +26,6 @@ import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoi
 import org.dcsa.conformance.specifications.generator.SpecificationToolkit;
 import org.dcsa.conformance.specifications.generator.StandardSpecification;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
-import org.dcsa.conformance.specifications.standards.core.v100.model.ClassifiedDateTime;
 import org.dcsa.conformance.specifications.standards.core.v100.model.ContactDetails;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
@@ -85,7 +84,6 @@ public class VGMStandardSpecification extends StandardSpecification {
   protected Stream<Class<?>> modelClassesStream() {
     return Stream.of(
         Address.class,
-        ClassifiedDateTime.class,
         ContactDetails.class,
         EquipmentDetails.class,
         Facility.class,

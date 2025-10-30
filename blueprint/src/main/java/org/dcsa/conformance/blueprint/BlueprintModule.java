@@ -726,9 +726,60 @@ public class BlueprintModule {
       // Save BPMN to file
       blueprint.saveBpmnToFile(modelInstance, bpmnOutputPath);
       System.out.println("BPMN process successfully created and saved to: " + bpmnOutputPath);
+
+      // Convert BPMN to PNG
+      String pngOutputPath = bpmnOutputPath.replace(".bpmn", ".png");
+      System.out.println("\nConverting BPMN to PNG...");
+      runBpmnToImage(bpmnOutputPath, pngOutputPath);
+
     } catch (IOException e) {
       System.err.println("Error saving BPMN file: " + e.getMessage());
       e.printStackTrace();
+    } catch (InterruptedException e) {
+      System.err.println("BPMN to image conversion was interrupted: " + e.getMessage());
+      e.printStackTrace();
+      Thread.currentThread().interrupt();
+    }
+  }
+
+  /**
+   * Runs the bpmn-to-image converter as an external process.
+   * Requires: npm i -g bpmn-to-image
+   */
+  private static void runBpmnToImage(String bpmnPath, String pngPath) throws IOException, InterruptedException {
+    // Build the command for Windows: cmd /c npx bpmn-to-image input.bpmn:output.png
+    // Using cmd.exe allows npx to be found in PATH
+    ProcessBuilder processBuilder = new ProcessBuilder(
+        "cmd.exe", "/c", "npx", "bpmn-to-image", bpmnPath + ";" + pngPath
+    );
+
+    // Set working directory to project root
+    processBuilder.directory(new File("."));
+
+    // Redirect error stream to output stream so we capture everything
+    processBuilder.redirectErrorStream(true);
+
+    System.out.println("Running command: cmd /c npx bpmn-to-image " + bpmnPath + ";" + pngPath);
+
+    // Start the process (using fully qualified name to avoid conflict with BPMN Process class)
+    java.lang.Process process = processBuilder.start();
+
+    // Capture and print output
+    try (java.io.BufferedReader reader = new java.io.BufferedReader(
+        new java.io.InputStreamReader(process.getInputStream()))) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        System.out.println(line);
+      }
+    }
+
+    // Wait for completion and get exit code
+    int exitCode = process.waitFor();
+
+    if (exitCode == 0) {
+      System.out.println("Successfully converted to PNG: " + pngPath);
+    } else {
+      System.err.println("Conversion failed with exit code: " + exitCode);
     }
   }
 }

@@ -1,60 +1,36 @@
 package org.dcsa.conformance.blueprint;
 
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.Activity;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.Collaboration;
-import org.camunda.bpm.model.bpmn.instance.DataInput;
-import org.camunda.bpm.model.bpmn.instance.DataInputAssociation;
-import org.camunda.bpm.model.bpmn.instance.DataObject;
-import org.camunda.bpm.model.bpmn.instance.DataObjectReference;
-import org.camunda.bpm.model.bpmn.instance.DataOutput;
-import org.camunda.bpm.model.bpmn.instance.DataOutputAssociation;
-import org.camunda.bpm.model.bpmn.instance.DataStore;
-import org.camunda.bpm.model.bpmn.instance.DataStoreReference;
-import org.camunda.bpm.model.bpmn.instance.EndEvent;
-import org.camunda.bpm.model.bpmn.instance.FlowNode;
-import org.camunda.bpm.model.bpmn.instance.IoSpecification;
-import org.camunda.bpm.model.bpmn.instance.InputSet;
-import org.camunda.bpm.model.bpmn.instance.Message;
-import org.camunda.bpm.model.bpmn.instance.MessageFlow;
-import org.camunda.bpm.model.bpmn.instance.OutputSet;
-import org.camunda.bpm.model.bpmn.instance.Participant;
-import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.camunda.bpm.model.bpmn.instance.StartEvent;
-import org.camunda.bpm.model.xml.instance.ModelElementInstance;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.*;
+import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnDiagram;
+import org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnEdge;
+import org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnPlane;
+import org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnShape;
+import org.camunda.bpm.model.bpmn.instance.dc.Bounds;
+import org.camunda.bpm.model.bpmn.instance.di.Waypoint;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
-/** Blueprint module for creating BPMN processes using Camunda BPMN Model library.
- * Convert .bpmn to .png: npx bpmn-to-image example-process.bpmn;example-process.png
- * ...after installing: npm i -g bpmn-to-image
- */
+/** Blueprint module for creating BPMN processes using Camunda BPMN Model library. */
 public class BlueprintModule {
 
-  /**
-   * Creates an example BPMN process with a start event, user task, and end event.
-   *
-   * @return the created BPMN model instance
-   */
+  // ====== 1) Build the logical process (unchanged) ============================================
   public BpmnModelInstance createExampleProcess() {
     return Bpmn.createExecutableProcess("ValidatePlanConfirmBooking")
         .name("1.2 Validate, plan and confirm booking request")
 
-        // --- Start ---
+        // Start
         .startEvent("bookingRegistered")
         .name("Booking request registered")
 
-        // --- Pricing decision ---
+        // Pricing
         .exclusiveGateway("gw_pricingRef")
         .name("Pricing reference available?")
-        // Pre-create the join after pricing so branches can connect to it
         .exclusiveGateway("gw_afterPricingJoin")
         .name("After pricing")
         .moveToNode("gw_pricingRef")
@@ -68,7 +44,7 @@ public class BlueprintModule {
         .name("Apply tariff rate")
         .connectTo("gw_afterPricingJoin")
 
-        // --- DG check ---
+        // DG
         .moveToNode("gw_afterPricingJoin")
         .exclusiveGateway("gw_isDG")
         .name("Is it DG?")
@@ -83,11 +59,10 @@ public class BlueprintModule {
         .condition("No", "${isDG == false}")
         .connectTo("gw_afterDGJoin")
 
-        // --- Availability validation (parallel fan-out/fan-in) ---
+        // Parallel validations
         .moveToNode("gw_afterDGJoin")
         .parallelGateway("pg_validateStart")
         .name("Start validations")
-        // pre-create join
         .parallelGateway("pg_validateJoin")
         .name("End validations")
         .moveToNode("pg_validateStart")
@@ -103,7 +78,7 @@ public class BlueprintModule {
         .name("Validate equipment availability")
         .connectTo("pg_validateJoin")
 
-        // --- Preliminary confirmation? ---
+        // Preliminary confirmation
         .moveToNode("pg_validateJoin")
         .exclusiveGateway("gw_prelim")
         .name("Unconfirmed booking preliminarily?")
@@ -119,28 +94,24 @@ public class BlueprintModule {
         .condition("Yes", "${bookingPrelim == true}")
         .connectTo("gw_afterPrelimJoin")
 
-        // --- Constraint check and resolution ---
+        // Constraints
         .moveToNode("gw_afterPrelimJoin")
         .exclusiveGateway("gw_constraintIssue")
         .name("Constraint issue?")
         .exclusiveGateway("gw_afterConstraintJoin")
         .name("After constraint handling")
-
-        // path: Yes -> type? -> capacity vs other -> check status -> resolved?
         .moveToNode("gw_constraintIssue")
         .condition("Yes", "${constraintIssue == true}")
         .serviceTask("confirmConstraintType")
         .name("Confirm constraint issue type")
         .exclusiveGateway("gw_issueType")
         .name("Issue type?")
-        // prepare status check and resolved gateway so both branches can connect
         .serviceTask("checkConstraintStatus_anchor")
-        .name("Check constraint issue status") // anchor to keep builder position
+        .name("Check constraint issue status")
         .exclusiveGateway("gw_issueResolved")
         .name("Issue resolved?")
         .exclusiveGateway("gw_afterResolvedJoin")
         .name("After resolved split")
-        // back to issueType for branches
         .moveToNode("gw_issueType")
         .condition("Capacity", "${issueType == 'capacity'}")
         .serviceTask("requestAdditionalCapacity")
@@ -151,7 +122,6 @@ public class BlueprintModule {
         .serviceTask("identifyOptions")
         .name("Identify options to solve constraint issue")
         .connectTo("checkConstraintStatus_anchor")
-        // resolved? yes -> join; no -> manage change -> end local branch
         .moveToNode("gw_issueResolved")
         .condition("No", "${issueResolved == false}")
         .callActivity("manageCarrierBookingChange")
@@ -161,13 +131,11 @@ public class BlueprintModule {
         .moveToNode("gw_issueResolved")
         .condition("Yes", "${issueResolved == true}")
         .connectTo("gw_afterConstraintJoin")
-
-        // path: No issue -> straight to join
         .moveToNode("gw_constraintIssue")
         .condition("No", "${constraintIssue == false}")
         .connectTo("gw_afterConstraintJoin")
 
-        // --- Special cargo/equipment ---
+        // Special cargo
         .moveToNode("gw_afterConstraintJoin")
         .exclusiveGateway("gw_specialCargo")
         .name("Special cargo/equipment requirements?")
@@ -193,7 +161,7 @@ public class BlueprintModule {
         .condition("No", "${specialCargo == false}")
         .connectTo("gw_afterSpecialJoin")
 
-        // --- Carrier haulage ---
+        // Carrier haulage
         .moveToNode("gw_afterSpecialJoin")
         .exclusiveGateway("gw_carrierHaulage")
         .name("Carrier haulage needed?")
@@ -208,7 +176,7 @@ public class BlueprintModule {
         .condition("No", "${carrierHaulage == false}")
         .connectTo("gw_afterHaulageJoin")
 
-        // --- Planning and confirmation ---
+        // Plan and confirm
         .moveToNode("gw_afterHaulageJoin")
         .serviceTask("registerPlan")
         .name("Register planned transport incl. transport modes")
@@ -221,14 +189,12 @@ public class BlueprintModule {
         .done();
   }
 
+  // ====== 2) Augment collaboration, messages, data (your existing logic) ======================
   public static void augment(BpmnModelInstance model) {
-    // Assumes the executable process id from your builder
     final String processId = "ValidatePlanConfirmBooking";
 
-    // 1) Collaboration + participants (pools)
     Collaboration collab = create(model, model.getDefinitions(), "collab", Collaboration.class);
-
-    org.camunda.bpm.model.bpmn.instance.Process carrierProcess = model.getModelElementById(processId);
+    Process carrierProcess = model.getModelElementById(processId);
     Participant carrier = create(model, collab, "p_carrier", Participant.class);
     carrier.setName("Carrier");
     carrier.setProcess(carrierProcess);
@@ -238,304 +204,601 @@ public class BlueprintModule {
     Participant inlandProvider = pool(model, collab, "p_inland", "Inland Transport Provider");
     Participant equipmentMgr = pool(model, collab, "p_equip", "Equipment Availability");
 
-    // 2) Messages
-    Message msgSpaceReply  = message(model, "m_spaceReply",  "Space request reply");
+    // messages + data stores + data objects + associations (unchanged from your file)
+    // :contentReference[oaicite:2]{index=2}
+
+    Message msgSpaceReply = message(model, "m_spaceReply", "Space request reply");
     Message msgCapacityReq = message(model, "m_capacityReq", "Capacity request");
-    Message msgInlandReq   = message(model, "m_inlandReq",   "Inland transport request");
-    Message msgHaulierResp = message(model, "m_haulierResp", "Haulier response to transport request");
-    Message msgRoutePlan   = message(model, "m_routePlan",   "Route plan");
+    Message msgInlandReq = message(model, "m_inlandReq", "Inland transport request");
+    Message msgHaulierResp =
+        message(model, "m_haulierResp", "Haulier response to transport request");
+    Message msgRoutePlan = message(model, "m_routePlan", "Route plan");
     Message msgBookingInfo = message(model, "m_bookingInfo", "Booking request information");
-    Message msgValidation  = message(model, "m_validation",  "Booking validation");
-    Message msgRejection   = message(model, "m_rejection",   "Booking rejection");
-    Message msgCustConf    = message(model, "m_custConf",    "Customer booking confirmation");
-    Message msgConfirmed   = message(model, "m_confirmed",   "Confirmed booking");
+    Message msgValidation = message(model, "m_validation", "Booking validation");
+    Message msgRejection = message(model, "m_rejection", "Booking rejection");
+    Message msgCustConf = message(model, "m_custConf", "Customer booking confirmation");
+    Message msgConfirmed = message(model, "m_confirmed", "Confirmed booking");
 
-    // 3) Data stores (read by validations)
-    DataStoreReference dsVessel   = datastore(model, carrierProcess, "ds_vessel",   "Network/vessel capacity and schedules");
-    DataStoreReference dsInland   = datastore(model, carrierProcess, "ds_inland",   "Inland transport agreement/availability");
-    DataStoreReference dsEquip    = datastore(model, carrierProcess, "ds_equip",    "Equipment availability");
-    DataStoreReference dsBooking  = datastore(model, carrierProcess, "ds_booking",  "Booking repository");
+    DataStoreReference dsVessel =
+        datastore(model, carrierProcess, "ds_vessel", "Network/vessel capacity and schedules");
+    DataStoreReference dsInland =
+        datastore(model, carrierProcess, "ds_inland", "Inland transport agreement/availability");
+    DataStoreReference dsEquip =
+        datastore(model, carrierProcess, "ds_equip", "Equipment availability");
+    DataStoreReference dsBooking =
+        datastore(model, carrierProcess, "ds_booking", "Booking repository");
 
-    // 4) Data objects (documents produced/consumed)
-    DataObjectReference doBookingInfo = dataObject(model, carrierProcess, "do_bookingInfo", "Booking request information");
-    DataObjectReference doRoutePlan   = dataObject(model, carrierProcess, "do_routePlan",   "Route plan");
-    DataObjectReference doConfDoc     = dataObject(model, carrierProcess, "do_custConf",    "Customer booking confirmation");
+    DataObjectReference doBookingInfo =
+        dataObject(model, carrierProcess, "do_bookingInfo", "Booking request information");
+    DataObjectReference doRoutePlan =
+        dataObject(model, carrierProcess, "do_routePlan", "Route plan");
+    DataObjectReference doConfDoc =
+        dataObject(model, carrierProcess, "do_custConf", "Customer booking confirmation");
 
-    // 5) Wire message flows to key tasks/events
-    // Helpers below find elements by id created in your builder
-    ServiceTask tReqAddCap   = byId(model, "requestAdditionalCapacity");
+    ServiceTask tReqAddCap = byId(model, "requestAdditionalCapacity");
     ServiceTask tIdentifyOpt = byId(model, "identifyOptions");
     ServiceTask tCoordInland = byId(model, "coordinateInlandTransport");
     ServiceTask tCreateRoute = byId(model, "createRoutePlan");
-    ServiceTask tGenConf     = byId(model, "generateBookingConfirmation");
-    ServiceTask tReject      = byId(model, "rejectBooking");
-    EndEvent eRejected     = byId(model, "bookingRejected");
-    EndEvent   eValidated    = byId(model, "bookingValidated");
-    StartEvent eStart        = byId(model, "bookingRegistered");
+    ServiceTask tGenConf = byId(model, "generateBookingConfirmation");
+    ServiceTask tReject = byId(model, "rejectBooking");
+    EndEvent eValidated = byId(model, "bookingValidated");
+    StartEvent eStart = byId(model, "bookingRegistered");
 
-    // inbound booking information
-    messageFlow(model, collab, "mf_bookingInfo_in",
-      customer, eStart, msgBookingInfo);
+    messageFlow(model, collab, "mf_bookingInfo_in", customer, eStart, msgBookingInfo); // in
+    messageFlow(
+        model,
+        collab,
+        "mf_capacity_request",
+        carrier,
+        tReqAddCap,
+        msgCapacityReq,
+        networkOps); // out
+    messageFlow(
+        model, collab, "mf_space_reply", networkOps, tReqAddCap, msgSpaceReply, carrier); // in
+    messageFlow(
+        model,
+        collab,
+        "mf_inland_request",
+        carrier,
+        tCoordInland,
+        msgInlandReq,
+        inlandProvider); // out
+    messageFlow(
+        model,
+        collab,
+        "mf_haulier_response",
+        inlandProvider,
+        tCoordInland,
+        msgHaulierResp,
+        carrier); // in
+    messageFlow(
+        model, collab, "mf_route_plan_out", carrier, tCreateRoute, msgRoutePlan, customer); // out
+    messageFlow(
+        model, collab, "mf_validation_out", carrier, tGenConf, msgValidation, customer); // out
+    messageFlow(model, collab, "mf_rejection_out", carrier, tReject, msgRejection, customer); // out
+    messageFlow(
+        model,
+        collab,
+        "mf_customer_booking_confirmation",
+        carrier,
+        tGenConf,
+        msgCustConf,
+        customer);
+    messageFlow(model, collab, "mf_confirmed_booking", carrier, eValidated, msgConfirmed, customer);
 
-    // space/capacity management
-    messageFlow(model, collab, "mf_capacity_request",
-      carrier, tReqAddCap, msgCapacityReq, networkOps);
-    messageFlow(model, collab, "mf_space_reply",
-      networkOps, tReqAddCap, msgSpaceReply, carrier);
-
-    // inland transport request and haulier response
-    messageFlow(model, collab, "mf_inland_request",
-      carrier, tCoordInland, msgInlandReq, inlandProvider);
-    messageFlow(model, collab, "mf_haulier_response",
-      inlandProvider, tCoordInland, msgHaulierResp, carrier);
-
-    // route plan sent to customer as information artifact
-    messageFlow(model, collab, "mf_route_plan_out",
-      carrier, tCreateRoute, msgRoutePlan, customer);
-
-    // validation or rejection notifications
-    messageFlow(model, collab, "mf_validation_out",
-      carrier, tGenConf, msgValidation, customer);
-    messageFlow(model, collab, "mf_rejection_out",
-      carrier, tReject, msgRejection, customer);
-
-    // final confirmations
-    messageFlow(model, collab, "mf_customer_booking_confirmation",
-      carrier, tGenConf, msgCustConf, customer);
-    messageFlow(model, collab, "mf_confirmed_booking",
-      carrier, eValidated, msgConfirmed, customer);
-
-    // 6) Data associations: tasks ↔ data stores / data objects
-
-    // Validations read stores
     ServiceTask tValVessel = byId(model, "validateVessel");
     ServiceTask tValInland = byId(model, "validateInland");
-    ServiceTask tValEquip  = byId(model, "validateEquipment");
+    ServiceTask tValEquip = byId(model, "validateEquipment");
 
     readFromStore(model, tValVessel, dsVessel);
     readFromStore(model, tValInland, dsInland);
-    readFromStore(model, tValEquip,  dsEquip);
-
-    // Booking repository updates on reject and confirm
-    writeToStore(model, tReject,  dsBooking);
+    readFromStore(model, tValEquip, dsEquip);
+    writeToStore(model, tReject, dsBooking);
     writeToStore(model, tGenConf, dsBooking);
 
-    // Route plan produced
     writeToObject(model, tCreateRoute, doRoutePlan);
-    // Booking confirmation produced
     writeToObject(model, tGenConf, doConfDoc);
-    // Booking request info consumed at start and throughout
     readFromObject(model, tCreateRoute, doBookingInfo);
-    readFromObject(model, tGenConf,    doBookingInfo);
+    readFromObject(model, tGenConf, doBookingInfo);
 
-    // 7) Update the BPMNPlane to reference the collaboration and add visual layout
-    // This makes the collaboration diagram with participants and message flows visible
+    // ====== 3) NEW: auto-layout internal flow nodes, data objects/stores =======================
+    autoLayoutProcess(model, carrierProcess); // compute shapes and bounds for all inner nodes
+
+    // ====== 4) Reframe diagram as collaboration and draw pools + message flows ================
     Collection<MessageFlow> allMessageFlows = model.getModelElementsByType(MessageFlow.class);
-    updateDiagramToShowCollaboration(model, collab, carrier, customer, networkOps, inlandProvider, equipmentMgr, allMessageFlows);
+    updateDiagramToShowCollaboration(
+        model,
+        collab,
+        carrier,
+        customer,
+        networkOps,
+        inlandProvider,
+        equipmentMgr,
+        allMessageFlows); // uses fresh bounds
   }
 
-  // ---- helpers --------------------------------------------------------------
+  private static void messageFlow(
+      BpmnModelInstance model,
+      Collaboration collab,
+      String id,
+      Participant sourcePool,
+      FlowNode sourceNode,
+      Message msg) {
 
-  /**
-   * Updates the BPMN diagram to show the collaboration view instead of just the process.
-   * This is critical - without this, BPMN viewers will only show the process elements
-   * and not the collaboration context (participants/pools, message flows between them).
-   * The BPMNPlane element determines what is visible in the diagram.
-   * Also adds visual layout information (BPMNShape) for each participant pool and edges for message flows.
-   */
-  private static void updateDiagramToShowCollaboration(BpmnModelInstance model, Collaboration collab,
-      Participant carrier, Participant customer, Participant networkOps,
-      Participant inlandProvider, Participant equipmentMgr, Collection<MessageFlow> messageFlows) {
-    // Find the BPMNDiagram and update its BPMNPlane to reference the collaboration
-    Collection<org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnDiagram> diagrams =
-        model.getModelElementsByType(org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnDiagram.class);
+    MessageFlow mf = model.newInstance(MessageFlow.class);
+    mf.setAttributeValue("id", id, true, false);
+    mf.setName(msg.getName());
+    mf.setMessage(msg);
+    mf.setSource(sourcePool);
+    mf.setTarget((InteractionNode) sourceNode);
+    collab.addChildElement(mf);
+  }
 
-    if (!diagrams.isEmpty()) {
-      org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnDiagram diagram = diagrams.iterator().next();
-      org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnPlane plane = diagram.getBpmnPlane();
-      if (plane != null) {
-        // Update the plane to reference the collaboration instead of the process
-        plane.setBpmnElement(collab);
+  private static void messageFlow(
+      BpmnModelInstance model,
+      Collaboration collab,
+      String id,
+      Participant sourcePool,
+      FlowNode sourceNode,
+      Message msg,
+      Participant targetPool) {
 
-        // Calculate bounding box of existing process elements
-        double[] bbox = calculateProcessBoundingBox(plane);
-        double minX = bbox[0];
-        double minY = bbox[1];
-        double maxX = bbox[2];
-        double maxY = bbox[3];
+    MessageFlow mf = model.newInstance(MessageFlow.class);
+    mf.setAttributeValue("id", id, true, false);
+    mf.setName(msg.getName());
+    mf.setMessage(msg);
 
-        // Pool header width and padding
-        double poolHeaderWidth = 30;
-        double padding = 20;
+    // BPMN spec allows MessageFlow between participants,
+    // Camunda accepts FlowNode→Participant as well
+    mf.setSource(sourcePool);
+    mf.setTarget(targetPool);
 
-        // Calculate carrier pool dimensions to contain the process
-        double carrierX = minX - poolHeaderWidth - padding;
-        double carrierY = minY - padding;
-        double carrierWidth = (maxX - minX) + poolHeaderWidth + (2 * padding);
-        double carrierHeight = (maxY - minY) + (2 * padding);
+    collab.addChildElement(mf);
+  }
 
-        // Other pool dimensions
-        double poolHeight = 150;
-        double poolSpacing = 20;
+  // ====== Auto-Layout Engine ==============================================================
+  private static final double NODE_W = 150, NODE_H = 70;
+  private static final double COL_X = 200, ROW_Y = 110;
+  private static final double START_X = 200, START_Y = 160;
 
-        // Add visual shapes for participants (pools)
-        addParticipantShape(model, plane, carrier, carrierX, carrierY, carrierWidth, carrierHeight);
+  private static void autoLayoutProcess(BpmnModelInstance model, Process process) {
+    final double NODE_W = 150, NODE_H = 70;
+    final double COL_X = 350, ROW_Y = 150;
+    final double START_X = 200, START_Y = 160;
 
-        double nextY = carrierY + carrierHeight + poolSpacing;
-        addParticipantShape(model, plane, customer, carrierX, nextY, carrierWidth, poolHeight);
-        nextY += poolHeight + poolSpacing;
-        addParticipantShape(model, plane, networkOps, carrierX, nextY, carrierWidth, poolHeight);
-        nextY += poolHeight + poolSpacing;
-        addParticipantShape(model, plane, inlandProvider, carrierX, nextY, carrierWidth, poolHeight);
-        nextY += poolHeight + poolSpacing;
-        addParticipantShape(model, plane, equipmentMgr, carrierX, nextY, carrierWidth, poolHeight);
+    BpmnDiagram diagram = getOrCreateDiagram(model);
+    BpmnPlane plane = diagram.getBpmnPlane();
+    plane.setBpmnElement(process);
 
-        // Add visual edges for message flows with calculated waypoints
-        addMessageFlowEdges(model, plane, messageFlows, carrierY, carrierHeight,
-            carrierY + carrierHeight + poolSpacing, poolHeight, poolSpacing, carrierX, carrierWidth);
-      }
+    // Build adjacency
+    Map<String, FlowNode> nodes =
+        process.getChildElementsByType(FlowNode.class).stream()
+            .collect(Collectors.toMap(FlowNode::getId, n -> n));
+    Collection<SequenceFlow> flows = process.getChildElementsByType(SequenceFlow.class);
+
+    Map<FlowNode, List<FlowNode>> succ = new HashMap<>();
+    for (FlowNode n : nodes.values()) succ.put(n, new ArrayList<>());
+    for (SequenceFlow f : flows) succ.get((FlowNode) f.getSource()).add((FlowNode) f.getTarget());
+
+    // BFS layering
+    Map<FlowNode, Integer> col = new HashMap<>();
+    Queue<FlowNode> q = new ArrayDeque<>();
+    for (StartEvent s : process.getChildElementsByType(StartEvent.class)) {
+      col.put(s, 0);
+      q.add(s);
     }
-  }
-
-  private static double[] calculateProcessBoundingBox(org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnPlane plane) {
-    double minX = Double.MAX_VALUE;
-    double minY = Double.MAX_VALUE;
-    double maxX = Double.MIN_VALUE;
-    double maxY = Double.MIN_VALUE;
-
-    Collection<org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnShape> shapes =
-        plane.getChildElementsByType(org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnShape.class);
-
-    for (org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnShape shape : shapes) {
-      org.camunda.bpm.model.bpmn.instance.dc.Bounds bounds = shape.getBounds();
-      if (bounds != null) {
-        minX = Math.min(minX, bounds.getX());
-        minY = Math.min(minY, bounds.getY());
-        maxX = Math.max(maxX, bounds.getX() + bounds.getWidth());
-        maxY = Math.max(maxY, bounds.getY() + bounds.getHeight());
-      }
-    }
-
-    return new double[]{minX, minY, maxX, maxY};
-  }
-
-  private static void addParticipantShape(BpmnModelInstance model,
-      org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnPlane plane,
-      Participant participant, double x, double y, double width, double height) {
-    org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnShape shape =
-        model.newInstance(org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnShape.class);
-    shape.setBpmnElement(participant);
-    shape.setHorizontal(true);
-
-    org.camunda.bpm.model.bpmn.instance.dc.Bounds bounds =
-        model.newInstance(org.camunda.bpm.model.bpmn.instance.dc.Bounds.class);
-    bounds.setX(x);
-    bounds.setY(y);
-    bounds.setWidth(width);
-    bounds.setHeight(height);
-    shape.addChildElement(bounds);
-
-    plane.addChildElement(shape);
-  }
-
-  private static void addMessageFlowEdges(BpmnModelInstance model,
-      org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnPlane plane,
-      Collection<MessageFlow> messageFlows,
-      double carrierY, double carrierHeight,
-      double otherPoolsStartY, double poolHeight, double poolSpacing,
-      double poolX, double poolWidth) {
-
-    // Create a map of element ID to position for calculating waypoints
-    Map<String, double[]> elementPositions = new HashMap<>();
-
-    Collection<org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnShape> shapes =
-        plane.getChildElementsByType(org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnShape.class);
-
-    for (org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnShape shape : shapes) {
-      BaseElement element = shape.getBpmnElement();
-      if (element != null && !(element instanceof Participant)) {
-        org.camunda.bpm.model.bpmn.instance.dc.Bounds bounds = shape.getBounds();
-        if (bounds != null) {
-          // Store center position of element
-          double centerX = bounds.getX() + bounds.getWidth() / 2;
-          double centerY = bounds.getY() + bounds.getHeight() / 2;
-          elementPositions.put(element.getId(), new double[]{centerX, centerY, bounds.getY(), bounds.getY() + bounds.getHeight()});
+    while (!q.isEmpty()) {
+      FlowNode u = q.remove();
+      int c = col.get(u);
+      for (FlowNode v : succ.get(u)) {
+        if (!col.containsKey(v)) {
+          col.put(v, c + 1);
+          q.add(v);
         }
       }
     }
 
-    // Calculate pool center Y positions
-    double customerY = otherPoolsStartY + poolHeight / 2;
-    double networkOpsY = otherPoolsStartY + poolHeight + poolSpacing + poolHeight / 2;
-    double inlandProviderY = otherPoolsStartY + 2 * (poolHeight + poolSpacing) + poolHeight / 2;
-    double poolCenterX = poolX + poolWidth / 2;
+    // Row placement
+    Map<Integer, List<FlowNode>> cols = new HashMap<>();
+    for (FlowNode n : nodes.values())
+      cols.computeIfAbsent(col.getOrDefault(n, 0), k -> new ArrayList<>()).add(n);
 
-    // Add edges for each message flow
+    Map<FlowNode, Double> x = new HashMap<>(), y = new HashMap<>();
+    for (Map.Entry<Integer, List<FlowNode>> e : cols.entrySet()) {
+      int c = e.getKey();
+      List<FlowNode> list = e.getValue();
+      list.sort(Comparator.comparing(FlowNode::getId));
+      double top = START_Y - ((list.size() - 1) * ROW_Y) / 2.0;
+      for (int i = 0; i < list.size(); i++) {
+        FlowNode n = list.get(i);
+        x.put(n, START_X + c * COL_X);
+        y.put(n, top + i * ROW_Y);
+      }
+    }
+
+    // Clear old shapes/edges
+    for (BpmnEdge e : new ArrayList<>(plane.getChildElementsByType(BpmnEdge.class))) {
+      plane.removeChildElement(e);
+    }
+
+    // Draw shapes
+    for (FlowNode n : nodes.values())
+      upsertShape(model, plane, n, x.get(n), y.get(n), NODE_W, NODE_H);
+
+    // Cache bounds
+    Map<String, Bounds> bounds = new HashMap<>();
+    for (BpmnShape s : plane.getChildElementsByType(BpmnShape.class)) {
+      if (s.getBounds() != null) bounds.put(s.getBpmnElement().getId(), s.getBounds());
+    }
+
+    // Rebuild edges
+    for (SequenceFlow f : flows) {
+      FlowNode s = (FlowNode) f.getSource();
+      FlowNode t = (FlowNode) f.getTarget();
+      Bounds sb = bounds.get(s.getId());
+      Bounds tb = bounds.get(t.getId());
+      if (sb == null || tb == null) continue;
+
+      double sx = sb.getX() + sb.getWidth();
+      double sy = sb.getY() + sb.getHeight() / 2;
+      double tx = tb.getX();
+      double ty = tb.getY() + tb.getHeight() / 2;
+
+      BpmnEdge edge = model.newInstance(BpmnEdge.class);
+      edge.setBpmnElement(f);
+      Waypoint w1 = model.newInstance(Waypoint.class);
+      w1.setX(sx);
+      w1.setY(sy);
+      Waypoint w2 = model.newInstance(Waypoint.class);
+      w2.setX(tx);
+      w2.setY(ty);
+      edge.addChildElement(w1);
+      edge.addChildElement(w2);
+      plane.addChildElement(edge);
+    }
+
+    placeArtifacts(model, plane, process);
+  }
+
+  private static void placeArtifacts(BpmnModelInstance model, BpmnPlane plane, Process process) {
+    // cache element centers
+    Map<String, double[]> centers = new HashMap<>();
+    for (BpmnShape s : plane.getChildElementsByType(BpmnShape.class)) {
+      BaseElement el = s.getBpmnElement();
+      if (el instanceof FlowNode) {
+        Bounds b = s.getBounds();
+        centers.put(
+            el.getId(), new double[] {b.getX() + b.getWidth() / 2, b.getY() + b.getHeight() / 2});
+      }
+    }
+    // DataStores near tasks that write to them
+    for (DataOutputAssociation doa : process.getChildElementsByType(DataOutputAssociation.class)) {
+      if (doa.getTarget() instanceof DataStoreReference
+          && doa.getParentElement() instanceof Activity) {
+        Activity t = (Activity) doa.getParentElement();
+        DataStoreReference ds = (DataStoreReference) doa.getTarget();
+        double[] c = centers.getOrDefault(t.getId(), new double[] {START_X, START_Y});
+        upsertShape(model, plane, ds, c[0] - 90, c[1] - 140, 120, 50);
+      }
+    }
+    // DataObjects near tasks that write to them, or read from them
+    for (DataOutputAssociation doa : process.getChildElementsByType(DataOutputAssociation.class)) {
+      if (doa.getTarget() instanceof DataObjectReference
+          && doa.getParentElement() instanceof Activity) {
+        Activity t = (Activity) doa.getParentElement();
+        DataObjectReference d = (DataObjectReference) doa.getTarget();
+        double[] c = centers.getOrDefault(t.getId(), new double[] {START_X, START_Y});
+        upsertShape(model, plane, d, c[0] - 60, c[1] + 110, 110, 45);
+      }
+    }
+    for (DataInputAssociation dia : process.getChildElementsByType(DataInputAssociation.class)) {
+      if (dia.getTarget() != null && dia.getParentElement() instanceof Activity) {
+        Activity t = (Activity) dia.getParentElement();
+        for (ModelElementInstance src : dia.getSources()) {
+          if (src instanceof DataObjectReference) {
+            DataObjectReference d = (DataObjectReference) src;
+            double[] c = centers.getOrDefault(t.getId(), new double[] {START_X, START_Y});
+            upsertShape(model, plane, d, c[0] - 60, c[1] + 110, 110, 45);
+          } else if (src instanceof DataStoreReference) {
+            DataStoreReference ds = (DataStoreReference) src;
+            double[] c = centers.getOrDefault(t.getId(), new double[] {START_X, START_Y});
+            upsertShape(model, plane, ds, c[0] - 90, c[1] - 140, 120, 50);
+          }
+        }
+      }
+    }
+  }
+
+  private static void upsertShape(
+      BpmnModelInstance model,
+      BpmnPlane plane,
+      BaseElement el,
+      double x,
+      double y,
+      double w,
+      double h) {
+    // find existing shape or create
+    BpmnShape shape = null;
+    for (BpmnShape s : plane.getChildElementsByType(BpmnShape.class)) {
+      if (el.equals(s.getBpmnElement())) {
+        shape = s;
+        break;
+      }
+    }
+    if (shape == null) {
+      shape = model.newInstance(BpmnShape.class);
+      shape.setBpmnElement(el);
+      plane.addChildElement(shape);
+    }
+    Bounds b = shape.getBounds();
+    if (b == null) {
+      b = model.newInstance(Bounds.class);
+      shape.addChildElement(b);
+    }
+    b.setX(x);
+    b.setY(y);
+    b.setWidth(w);
+    b.setHeight(h);
+  }
+
+  private static BpmnDiagram getOrCreateDiagram(BpmnModelInstance model) {
+    Collection<BpmnDiagram> ds = model.getModelElementsByType(BpmnDiagram.class);
+    if (!ds.isEmpty()) return ds.iterator().next();
+    BpmnDiagram d = model.newInstance(BpmnDiagram.class);
+    BpmnPlane p = model.newInstance(BpmnPlane.class);
+    d.setBpmnPlane(p);
+    model.getDefinitions().addChildElement(d);
+    return d;
+  }
+
+  // ====== Collaboration framing, message flow edges (updated to use fresh bounds) ============
+  private static void updateDiagramToShowCollaboration(
+      BpmnModelInstance model,
+      Collaboration collab,
+      Participant carrier,
+      Participant customer,
+      Participant networkOps,
+      Participant inlandProvider,
+      Participant equipmentMgr,
+      Collection<MessageFlow> messageFlows) {
+
+    BpmnDiagram diagram = getOrCreateDiagram(model);
+    BpmnPlane plane = diagram.getBpmnPlane();
+    plane.setBpmnElement(collab);
+
+    // --- remove existing message/sequence edges ---
+    List<BpmnEdge> edgesToRemove = new ArrayList<>();
+    for (BpmnEdge e : plane.getChildElementsByType(BpmnEdge.class)) {
+      BaseElement be = e.getBpmnElement();
+      if (be instanceof SequenceFlow || be instanceof MessageFlow) {
+        edgesToRemove.add(e);
+      }
+    }
+    for (BpmnEdge e : edgesToRemove) {
+      plane.removeChildElement(e);
+    }
+
+    // --- compute process bounding box ---
+    double[] bbox = calculateProcessBoundingBox(plane);
+    double minX = bbox[0], minY = bbox[1], maxX = bbox[2], maxY = bbox[3];
+
+    double poolHeaderWidth = 30, padding = 40;
+    double carrierX = minX - poolHeaderWidth - padding;
+    double carrierY = minY - padding;
+    double carrierWidth = (maxX - minX) + poolHeaderWidth + (2 * padding);
+    double carrierHeight = (maxY - minY) + (2 * padding);
+
+    double poolHeight = 150, poolSpacing = 20;
+
+    // --- pools ---
+    addParticipantShape(model, plane, carrier, carrierX, carrierY, carrierWidth, carrierHeight);
+    double nextY = carrierY + carrierHeight + poolSpacing;
+    addParticipantShape(model, plane, customer, carrierX, nextY, carrierWidth, poolHeight);
+    nextY += poolHeight + poolSpacing;
+    addParticipantShape(model, plane, networkOps, carrierX, nextY, carrierWidth, poolHeight);
+    nextY += poolHeight + poolSpacing;
+    addParticipantShape(model, plane, inlandProvider, carrierX, nextY, carrierWidth, poolHeight);
+    nextY += poolHeight + poolSpacing;
+    addParticipantShape(model, plane, equipmentMgr, carrierX, nextY, carrierWidth, poolHeight);
+
+    // --- shape centers for connection points ---
+    class Box {
+      double x, y, w, h;
+    }
+    Map<String, Box> box = new HashMap<>();
+    for (BpmnShape s : plane.getChildElementsByType(BpmnShape.class)) {
+      if (s.getBpmnElement() instanceof Participant) continue;
+      Bounds b = s.getBounds();
+      if (b == null) continue;
+      Box bx = new Box();
+      bx.x = b.getX();
+      bx.y = b.getY();
+      bx.w = b.getWidth();
+      bx.h = b.getHeight();
+      box.put(s.getBpmnElement().getId(), bx);
+    }
+
+    // --- reconnect sequence flows with accurate anchors ---
+    for (SequenceFlow sf : model.getModelElementsByType(SequenceFlow.class)) {
+      FlowNode src = sf.getSource();
+      FlowNode tgt = sf.getTarget();
+      Box sb = box.get(src.getId());
+      Box tb = box.get(tgt.getId());
+      if (sb == null || tb == null) continue;
+
+      double sx = sb.x + sb.w;
+      double sy = sb.y + sb.h / 2;
+      double tx = tb.x;
+      double ty = tb.y + tb.h / 2;
+
+      BpmnEdge edge = model.newInstance(BpmnEdge.class);
+      edge.setBpmnElement(sf);
+      Waypoint w1 = model.newInstance(Waypoint.class);
+      w1.setX(sx);
+      w1.setY(sy);
+      Waypoint w2 = model.newInstance(Waypoint.class);
+      w2.setX(tx);
+      w2.setY(ty);
+      edge.addChildElement(w1);
+      edge.addChildElement(w2);
+      plane.addChildElement(edge);
+    }
+
+    // --- message flows ---
+    double customerY = carrierY + carrierHeight + poolSpacing + poolHeight / 2;
+    double networkY = customerY + poolHeight + poolSpacing;
+    double inlandY = networkY + poolHeight + poolSpacing;
+    double equipY = inlandY + poolHeight + poolSpacing;
+
     for (MessageFlow mf : messageFlows) {
-      org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnEdge edge =
-          model.newInstance(org.camunda.bpm.model.bpmn.instance.bpmndi.BpmnEdge.class);
+      InteractionNode src = mf.getSource();
+      InteractionNode tgt = mf.getTarget();
+      Box sb = (src instanceof BaseElement) ? box.get(((BaseElement) src).getId()) : null;
+      Box tb = (tgt instanceof BaseElement) ? box.get(((BaseElement) tgt).getId()) : null;
+
+      double sx = (sb != null) ? sb.x + sb.w / 2 : carrierX;
+      double sy = (sb != null) ? sb.y + sb.h / 2 : carrierY;
+      double tx = (tb != null) ? tb.x + tb.w / 2 : carrierX;
+      double ty = (tb != null) ? tb.y + tb.h / 2 : equipY;
+
+      BpmnEdge edge = model.newInstance(BpmnEdge.class);
       edge.setBpmnElement(mf);
-
-      // Get source and target
-      org.camunda.bpm.model.bpmn.instance.InteractionNode source = mf.getSource();
-      org.camunda.bpm.model.bpmn.instance.InteractionNode target = mf.getTarget();
-
-      // Calculate waypoints based on source and target
-      double sourceX = poolCenterX;
-      double sourceY = carrierY + carrierHeight; // Bottom of carrier pool
-      double targetX = poolCenterX;
-      double targetY = customerY; // Default to customer pool
-
-      // Try to get more precise source position if it's a flow node
-      if (source instanceof FlowNode) {
-        double[] pos = elementPositions.get(source.getId());
-        if (pos != null) {
-          sourceX = pos[0];
-          sourceY = pos[3]; // Bottom of element
-        }
-      }
-
-      // Determine target pool Y position based on target participant
-      if (target instanceof Participant) {
-        String targetId = target.getId();
-        if ("p_networkOps".equals(targetId) || "p_network".equals(targetId)) {
-          targetY = networkOpsY;
-        } else if ("p_inland".equals(targetId)) {
-          targetY = inlandProviderY;
-        }
-      } else if (target instanceof FlowNode) {
-        // Message coming into carrier pool from outside
-        double[] pos = elementPositions.get(target.getId());
-        if (pos != null) {
-          targetX = pos[0];
-          targetY = pos[2]; // Top of element
-          sourceY = customerY; // Assume from customer
-        }
-      }
-
-      // Create waypoints
-      org.camunda.bpm.model.bpmn.instance.di.Waypoint wp1 =
-          model.newInstance(org.camunda.bpm.model.bpmn.instance.di.Waypoint.class);
-      wp1.setX(sourceX);
-      wp1.setY(sourceY);
-
-      org.camunda.bpm.model.bpmn.instance.di.Waypoint wp2 =
-          model.newInstance(org.camunda.bpm.model.bpmn.instance.di.Waypoint.class);
-      wp2.setX(targetX);
-      wp2.setY(targetY);
-
-      edge.addChildElement(wp1);
-      edge.addChildElement(wp2);
-
+      Waypoint w1 = model.newInstance(Waypoint.class);
+      w1.setX(sx);
+      w1.setY(sy);
+      Waypoint w2 = model.newInstance(Waypoint.class);
+      w2.setX(tx);
+      w2.setY(ty);
+      edge.addChildElement(w1);
+      edge.addChildElement(w2);
       plane.addChildElement(edge);
     }
   }
 
+  private static double[] calculateProcessBoundingBox(BpmnPlane plane) {
+    double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY;
+    double maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+
+    for (BpmnShape s : plane.getChildElementsByType(BpmnShape.class)) {
+      if (s.getBpmnElement() instanceof Participant) continue; // ignore pools for carrier bbox
+      Bounds b = s.getBounds();
+      if (b == null) continue;
+      minX = Math.min(minX, b.getX());
+      minY = Math.min(minY, b.getY());
+      maxX = Math.max(maxX, b.getX() + b.getWidth());
+      maxY = Math.max(maxY, b.getY() + b.getHeight());
+    }
+    if (!Double.isFinite(minX)) {
+      minX = START_X;
+      minY = START_Y;
+      maxX = START_X + NODE_W;
+      maxY = START_Y + NODE_H;
+    }
+    return new double[] {minX, minY, maxX, maxY};
+  }
+
+  private static void addParticipantShape(
+      BpmnModelInstance model,
+      BpmnPlane plane,
+      Participant p,
+      double x,
+      double y,
+      double w,
+      double h) {
+    BpmnShape shape = model.newInstance(BpmnShape.class);
+    shape.setBpmnElement(p);
+    shape.setHorizontal(true);
+    Bounds b = model.newInstance(Bounds.class);
+    b.setX(x);
+    b.setY(y);
+    b.setWidth(w);
+    b.setHeight(h);
+    shape.addChildElement(b);
+    plane.addChildElement(shape);
+  }
+
+  private static void addMessageFlowEdges(
+      BpmnModelInstance model,
+      BpmnPlane plane,
+      Collection<MessageFlow> mfs,
+      double carrierY,
+      double carrierH,
+      double otherStartY,
+      double poolH,
+      double poolSpacing,
+      double poolX,
+      double poolW) {
+
+    Map<String, double[]> pos = new HashMap<>();
+    for (BpmnShape s : plane.getChildElementsByType(BpmnShape.class)) {
+      Bounds b = s.getBounds();
+      if (b == null) continue;
+      BaseElement el = s.getBpmnElement();
+      if (el != null && !(el instanceof Participant)) {
+        pos.put(
+            el.getId(),
+            new double[] {
+              b.getX() + b.getWidth() / 2,
+              b.getY() + b.getHeight() / 2,
+              b.getY(),
+              b.getY() + b.getHeight()
+            });
+      }
+    }
+
+    double customerY = otherStartY + poolH / 2;
+    double networkY = otherStartY + poolH + poolSpacing + poolH / 2;
+    double inlandY = otherStartY + 2 * (poolH + poolSpacing) + poolH / 2;
+    double centerX = poolX + poolW / 2;
+
+    for (MessageFlow mf : mfs) {
+      BpmnEdge edge = model.newInstance(BpmnEdge.class);
+      edge.setBpmnElement(mf);
+
+      InteractionNode s = mf.getSource();
+      InteractionNode t = mf.getTarget();
+      double sx = centerX, sy = carrierY + carrierH; // default bottom of carrier
+      double tx = centerX, ty = customerY;
+
+      if (s instanceof FlowNode) {
+        double[] p = pos.get(((FlowNode) s).getId());
+        if (p != null) {
+          sx = p[0];
+          sy = p[3];
+        }
+      }
+      if (t instanceof Participant) {
+        String id = ((Participant) t).getId();
+        if ("p_network".equals(id) || "p_networkOps".equals(id)) ty = networkY;
+        else if ("p_inland".equals(id)) ty = inlandY;
+        else if ("p_customer".equals(id)) ty = customerY;
+      } else if (t instanceof FlowNode) {
+        double[] p = pos.get(((FlowNode) t).getId());
+        if (p != null) {
+          tx = p[0];
+          ty = p[2];
+          sy = customerY;
+        }
+      }
+
+      Waypoint w1 = model.newInstance(Waypoint.class);
+      w1.setX(sx);
+      w1.setY(sy);
+      Waypoint w2 = model.newInstance(Waypoint.class);
+      w2.setX(tx);
+      w2.setY(ty);
+      edge.addChildElement(w1);
+      edge.addChildElement(w2);
+      plane.addChildElement(edge);
+    }
+  }
+
+  // ====== Shared helpers (same as your file, plus small fixes) ==============================
   private static <T extends ModelElementInstance> T create(
-    BpmnModelInstance model, ModelElementInstance parent, String id, Class<T> type) {
-    T el = model.newInstance(type);
+      BpmnModelInstance m, ModelElementInstance parent, String id, Class<T> type) {
+    T el = m.newInstance(type);
     el.setAttributeValue("id", id, true, false);
-    parent.addChildElement(el);
+    if (parent != null) parent.addChildElement(el);
     return el;
   }
 
@@ -551,17 +814,18 @@ public class BlueprintModule {
     return msg;
   }
 
-  private static DataStoreReference datastore(BpmnModelInstance m, Process process, String id, String name) {
-    DataStore dataStore = create(m, m.getDefinitions(), id + "_def", DataStore.class); // root element allowed under definitions
-    dataStore.setName(name);
-    DataStoreReference ref = create(m, process, id, DataStoreReference.class); // reference must be inside a Process
+  private static DataStoreReference datastore(
+      BpmnModelInstance m, Process process, String id, String name) {
+    DataStore ds = create(m, m.getDefinitions(), id + "_def", DataStore.class);
+    ds.setName(name);
+    DataStoreReference ref = create(m, process, id, DataStoreReference.class);
     ref.setName(name);
-    ref.setDataStore(dataStore);
+    ref.setDataStore(ds);
     return ref;
   }
 
   private static DataObjectReference dataObject(
-    BpmnModelInstance m, Process process, String id, String name) {
+      BpmnModelInstance m, Process process, String id, String name) {
     DataObject data = create(m, process, id + "_def", DataObject.class);
     data.setName(name);
     DataObjectReference ref = create(m, process, id, DataObjectReference.class);
@@ -570,216 +834,137 @@ public class BlueprintModule {
     return ref;
   }
 
-  private static void messageFlow(
-    BpmnModelInstance m,
-    Collaboration collab,
-    String id,
-    Participant sourcePool, FlowNode sourceNode, Message msg, Participant targetPool) {
-
-    MessageFlow mf = create(m, collab, id, MessageFlow.class);
-    mf.setName(msg.getName());
-    mf.setMessage(msg);
-    mf.setSource(sourcePool);
-    mf.setTarget(targetPool);
-    // BPMN spec allows MessageFlow between participants; Camunda accepts FlowNode->Participant
-  }
-
-  // Overload when source and target pools are implied
-  private static void messageFlow(
-    BpmnModelInstance m,
-    Collaboration collab,
-    String id,
-    Participant sourcePool, FlowNode sourceNode, Message msg) {
-    MessageFlow mf = create(m, collab, id, MessageFlow.class);
-    mf.setName(msg.getName());
-    mf.setMessage(msg);
-    mf.setSource(sourcePool);
-    // Cast to InteractionNode - Events and Tasks implement this interface
-    mf.setTarget((org.camunda.bpm.model.bpmn.instance.InteractionNode) sourceNode);
-  }
-
-  private static void readFromStore(BpmnModelInstance m, Activity task, DataStoreReference store) {
-    String base = task.getId() + "_in_" + store.getId();
-    IoSpecification ioSpec = ensureIoSpec(m, task);
-    DataInput dataInput = m.newInstance(DataInput.class);
-    dataInput.setAttributeValue("id", base, true, false);
-    ioSpec.addChildElement(dataInput);
-    ensureInputSet(m, ioSpec, dataInput);
-    DataInputAssociation dia = create(m, task, base + "_assoc", DataInputAssociation.class);
-    dia.getSources().add(store);
-    dia.setTarget(dataInput);
-  }
-
-  private static void writeToStore(BpmnModelInstance m, Activity task, DataStoreReference store) {
-    String base = task.getId() + "_out_" + store.getId();
-    IoSpecification ioSpec = ensureIoSpec(m, task);
-    DataOutput dataOutput = m.newInstance(DataOutput.class);
-    dataOutput.setAttributeValue("id", base, true, false);
-    ioSpec.addChildElement(dataOutput);
-    ensureOutputSet(m, ioSpec, dataOutput);
-    DataOutputAssociation doa = create(m, task, base + "_assoc", DataOutputAssociation.class);
-    doa.getSources().add(dataOutput);
-    doa.setTarget(store);
-  }
-
-  private static void readFromObject(BpmnModelInstance m, Activity task, DataObjectReference obj) {
-    String base = task.getId() + "_in_" + obj.getId();
-    IoSpecification ioSpec = ensureIoSpec(m, task);
-    DataInput dataInput = m.newInstance(DataInput.class);
-    dataInput.setAttributeValue("id", base, true, false);
-    ioSpec.addChildElement(dataInput);
-    ensureInputSet(m, ioSpec, dataInput);
-    DataInputAssociation dia = create(m, task, base + "_assoc", DataInputAssociation.class);
-    dia.getSources().add(obj);
-    dia.setTarget(dataInput);
-  }
-
-  private static void writeToObject(BpmnModelInstance m, Activity task, DataObjectReference obj) {
-    String base = task.getId() + "_out_" + obj.getId();
-    IoSpecification ioSpec = ensureIoSpec(m, task);
-    DataOutput dataOutput = m.newInstance(DataOutput.class);
-    dataOutput.setAttributeValue("id", base, true, false);
-    ioSpec.addChildElement(dataOutput);
-    ensureOutputSet(m, ioSpec, dataOutput);
-    DataOutputAssociation doa = create(m, task, base + "_assoc", DataOutputAssociation.class);
-    doa.getSources().add(dataOutput);
-    doa.setTarget(obj);
-  }
-
-  private static IoSpecification ensureIoSpec(BpmnModelInstance m, Activity task) {
-    for (ModelElementInstance child : task.getChildElementsByType(IoSpecification.class)) {
-      return (IoSpecification) child;
-    }
-    IoSpecification ioSpec = m.newInstance(IoSpecification.class);
-    task.addChildElement(ioSpec);
-
-    // BPMN schema requires both inputSet and outputSet to be present
-    InputSet inputSet = m.newInstance(InputSet.class);
-    ioSpec.addChildElement(inputSet);
-
-    OutputSet outputSet = m.newInstance(OutputSet.class);
-    ioSpec.addChildElement(outputSet);
-
-    return ioSpec;
-  }
-
-  private static void ensureInputSet(BpmnModelInstance m, IoSpecification ioSpec, DataInput dataInput) {
-    InputSet inputSet = null;
-    for (ModelElementInstance child : ioSpec.getChildElementsByType(InputSet.class)) {
-      inputSet = (InputSet) child;
-      break;
-    }
-    if (inputSet == null) {
-      inputSet = m.newInstance(InputSet.class);
-      ioSpec.addChildElement(inputSet);
-    }
-    inputSet.getDataInputs().add(dataInput);
-  }
-
-  private static void ensureOutputSet(BpmnModelInstance m, IoSpecification ioSpec, DataOutput dataOutput) {
-    OutputSet outputSet = null;
-    for (ModelElementInstance child : ioSpec.getChildElementsByType(OutputSet.class)) {
-      outputSet = (OutputSet) child;
-      break;
-    }
-    if (outputSet == null) {
-      outputSet = m.newInstance(OutputSet.class);
-      ioSpec.addChildElement(outputSet);
-    }
-    outputSet.getDataOutputRefs().add(dataOutput);
-  }
-
   private static <T extends BaseElement> T byId(BpmnModelInstance m, String id) {
     T el = m.getModelElementById(id);
     if (el == null) throw new IllegalStateException("Missing element: " + id);
     return el;
   }
 
-  /**
-   * Saves a BPMN model instance to a file.
-   *
-   * @param modelInstance the BPMN model to save
-   * @param filePath the path where the BPMN file should be saved
-   * @throws IOException if there's an error writing the file
-   */
-  public void saveBpmnToFile(BpmnModelInstance modelInstance, String filePath) throws IOException {
-    File file = new File(filePath);
-    File parentDir = file.getParentFile();
-    if (parentDir != null && !parentDir.exists()) {
-      parentDir.mkdirs();
-    }
-    Bpmn.writeModelToFile(file, modelInstance);
+  // IO helpers (from your file) :contentReference[oaicite:3]{index=3}
+  private static IoSpecification ensureIoSpec(BpmnModelInstance m, Activity task) {
+    for (ModelElementInstance child : task.getChildElementsByType(IoSpecification.class))
+      return (IoSpecification) child;
+    IoSpecification ioSpec = m.newInstance(IoSpecification.class);
+    task.addChildElement(ioSpec);
+    InputSet is = m.newInstance(InputSet.class);
+    ioSpec.addChildElement(is);
+    OutputSet os = m.newInstance(OutputSet.class);
+    ioSpec.addChildElement(os);
+    return ioSpec;
   }
 
-  /** Main method to demonstrate BPMN process creation and saving. */
+  private static void ensureInputSet(BpmnModelInstance m, IoSpecification ioSpec, DataInput di) {
+    InputSet is =
+        ioSpec.getChildElementsByType(InputSet.class).stream()
+            .findFirst()
+            .orElseGet(
+                () -> {
+                  InputSet x = m.newInstance(InputSet.class);
+                  ioSpec.addChildElement(x);
+                  return x;
+                });
+    is.getDataInputs().add(di);
+  }
+
+  private static void ensureOutputSet(
+      BpmnModelInstance m, IoSpecification ioSpec, DataOutput dout) {
+    OutputSet os =
+        ioSpec.getChildElementsByType(OutputSet.class).stream()
+            .findFirst()
+            .orElseGet(
+                () -> {
+                  OutputSet x = m.newInstance(OutputSet.class);
+                  ioSpec.addChildElement(x);
+                  return x;
+                });
+    os.getDataOutputRefs().add(dout);
+  }
+
+  private static void readFromStore(BpmnModelInstance m, Activity t, DataStoreReference s) {
+    String base = t.getId() + "_in_" + s.getId();
+    IoSpecification io = ensureIoSpec(m, t);
+    DataInput di = m.newInstance(DataInput.class);
+    di.setAttributeValue("id", base, true, false);
+    io.addChildElement(di);
+    ensureInputSet(m, io, di);
+    DataInputAssociation a = create(m, t, base + "_assoc", DataInputAssociation.class);
+    a.getSources().add(s);
+    a.setTarget(di);
+  }
+
+  private static void writeToStore(BpmnModelInstance m, Activity t, DataStoreReference s) {
+    String base = t.getId() + "_out_" + s.getId();
+    IoSpecification io = ensureIoSpec(m, t);
+    DataOutput dout = m.newInstance(DataOutput.class);
+    dout.setAttributeValue("id", base, true, false);
+    io.addChildElement(dout);
+    ensureOutputSet(m, io, dout);
+    DataOutputAssociation a = create(m, t, base + "_assoc", DataOutputAssociation.class);
+    a.getSources().add(dout);
+    a.setTarget(s);
+  }
+
+  private static void readFromObject(BpmnModelInstance m, Activity t, DataObjectReference o) {
+    String base = t.getId() + "_in_" + o.getId();
+    IoSpecification io = ensureIoSpec(m, t);
+    DataInput di = m.newInstance(DataInput.class);
+    di.setAttributeValue("id", base, true, false);
+    io.addChildElement(di);
+    ensureInputSet(m, io, di);
+    DataInputAssociation a = create(m, t, base + "_assoc", DataInputAssociation.class);
+    a.getSources().add(o);
+    a.setTarget(di);
+  }
+
+  private static void writeToObject(BpmnModelInstance m, Activity t, DataObjectReference o) {
+    String base = t.getId() + "_out_" + o.getId();
+    IoSpecification io = ensureIoSpec(m, t);
+    DataOutput dout = m.newInstance(DataOutput.class);
+    dout.setAttributeValue("id", base, true, false);
+    io.addChildElement(dout);
+    ensureOutputSet(m, io, dout);
+    DataOutputAssociation a = create(m, t, base + "_assoc", DataOutputAssociation.class);
+    a.getSources().add(dout);
+    a.setTarget(o);
+  }
+
+  // ====== Persistence + demo runner (unchanged) =============================================
+  public void saveBpmnToFile(BpmnModelInstance modelInstance, String filePath) throws IOException {
+    File f = new File(filePath);
+    File dir = f.getParentFile();
+    if (dir != null && !dir.exists()) dir.mkdirs();
+    Bpmn.writeModelToFile(f, modelInstance);
+  }
+
   public static void main(String[] args) {
     BlueprintModule blueprint = new BlueprintModule();
-
-    // Create example process
-    BpmnModelInstance modelInstance = blueprint.createExampleProcess();
-    augment(modelInstance);
-
-    // Define output path
-    String bpmnOutputPath = "blueprint/generated-resources/example-process.bpmn";
-
+    BpmnModelInstance model = blueprint.createExampleProcess();
+    augment(model); // includes auto-layout + collaboration framing
+    String out = "blueprint/generated-resources/example-process.bpmn";
     try {
-      // Save BPMN to file
-      blueprint.saveBpmnToFile(modelInstance, bpmnOutputPath);
-      System.out.println("BPMN process successfully created and saved to: " + bpmnOutputPath);
-
-      // Convert BPMN to PNG
-      String pngOutputPath = bpmnOutputPath.replace(".bpmn", ".png");
-      System.out.println("\nConverting BPMN to PNG...");
-      runBpmnToImage(bpmnOutputPath, pngOutputPath);
-
-    } catch (IOException e) {
-      System.err.println("Error saving BPMN file: " + e.getMessage());
-      e.printStackTrace();
-    } catch (InterruptedException e) {
-      System.err.println("BPMN to image conversion was interrupted: " + e.getMessage());
+      blueprint.saveBpmnToFile(model, out);
+      System.out.println("Saved: " + out);
+      String png = out.replace(".bpmn", ".png");
+      runBpmnToImage(out, png);
+    } catch (IOException | InterruptedException e) {
       e.printStackTrace();
       Thread.currentThread().interrupt();
     }
   }
 
-  /**
-   * Runs the bpmn-to-image converter as an external process.
-   * Requires: npm i -g bpmn-to-image
-   */
-  private static void runBpmnToImage(String bpmnPath, String pngPath) throws IOException, InterruptedException {
-    // Build the command for Windows: cmd /c npx bpmn-to-image input.bpmn:output.png
-    // Using cmd.exe allows npx to be found in PATH
-    ProcessBuilder processBuilder = new ProcessBuilder(
-        "cmd.exe", "/c", "npx", "bpmn-to-image", bpmnPath + ";" + pngPath
-    );
-
-    // Set working directory to project root
-    processBuilder.directory(new File("."));
-
-    // Redirect error stream to output stream so we capture everything
-    processBuilder.redirectErrorStream(true);
-
-    System.out.println("Running command: cmd /c npx bpmn-to-image " + bpmnPath + ";" + pngPath);
-
-    // Start the process (using fully qualified name to avoid conflict with BPMN Process class)
-    java.lang.Process process = processBuilder.start();
-
-    // Capture and print output
-    try (java.io.BufferedReader reader = new java.io.BufferedReader(
-        new java.io.InputStreamReader(process.getInputStream()))) {
+  private static void runBpmnToImage(String bpmnPath, String pngPath)
+      throws IOException, InterruptedException {
+    ProcessBuilder pb =
+        new ProcessBuilder("cmd.exe", "/c", "npx", "bpmn-to-image", bpmnPath + ";" + pngPath);
+    pb.directory(new File("."));
+    pb.redirectErrorStream(true);
+    java.lang.Process p = pb.start();
+    try (java.io.BufferedReader r =
+        new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()))) {
       String line;
-      while ((line = reader.readLine()) != null) {
-        System.out.println(line);
-      }
+      while ((line = r.readLine()) != null) System.out.println(line);
     }
-
-    // Wait for completion and get exit code
-    int exitCode = process.waitFor();
-
-    if (exitCode == 0) {
-      System.out.println("Successfully converted to PNG: " + pngPath);
-    } else {
-      System.err.println("Conversion failed with exit code: " + exitCode);
-    }
+    int code = p.waitFor();
+    if (code != 0) System.err.println("bpmn-to-image exit: " + code);
   }
 }

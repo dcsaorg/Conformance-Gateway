@@ -1,0 +1,92 @@
+{
+  "events": [
+    {
+      "eventID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
+      "eventUpdatedDateTime": "2025-01-23T01:23:45Z",
+      "isFYI": false,
+      "portCall": {
+        "portCallID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
+        "portVisitReference": "NLAMS1234589",
+        "UNLocationCode": "NLAMS",
+        "isOmitted": false
+      },
+      "terminalCall": {
+        "terminalCallID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
+        "terminalCallReference": "15063401",
+        "sequenceNumber": 2,
+        "carrierServiceName": "Great Lion Service",
+        "carrierServiceCode": "FE1",
+        "universalServiceReference": "SR12345A",
+        "carrierImportVoyageNumber": "2208N",
+        "universalImportVoyageReference": "2301W",
+        "carrierExportVoyageNumber": "2208N",
+        "universalExportVoyageReference": "2301W",
+        "isOmitted": false
+      },
+      "portCallService": {
+        "portCallID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
+        "portCallServiceTypeCode": "BERTH",
+        "portCallServiceEventTypeCode": "STRT",
+        "portCallPhaseTypeCode": "ALGS",
+        "facilityTypeCode": "BRTH",
+        "serviceLocation": {
+          "locationName": "Port of Amsterdam",
+          "facilityTypeCode": "RAMP",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "isCanceled": false,
+        "isDeclined": false
+      },
+      "vessel": {
+        "vesselIMONumber": "9321483",
+        "vesselMMSINumber": "278111222",
+        "vesselName": "King of the Seas",
+        "vesselCallSign": "NCVV",
+        "vesselTypeCode": "CONT",
+        "vesselPosition": {
+          "locationName": "Port of Amsterdam",
+          "facilityTypeCode": "RAMP",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "milesToDestinationPort": 245.45,
+        "vesselSizeUnit": "MTR",
+        "lengthOverall": 245.45,
+        "width": 37.33,
+        "draftUnit": "MTR",
+        "airDraft": 55,

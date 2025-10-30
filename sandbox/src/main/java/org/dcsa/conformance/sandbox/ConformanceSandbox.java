@@ -42,7 +42,7 @@ import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
-import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.portcall.JitStandard;
 import org.dcsa.conformance.standards.ovs.OvsStandard;
 import org.dcsa.conformance.standards.tnt.TntStandard;
 

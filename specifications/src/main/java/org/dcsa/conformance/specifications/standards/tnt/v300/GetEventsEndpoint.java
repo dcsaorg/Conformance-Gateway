@@ -4,6 +4,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.List;
 import java.util.Map;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
+import org.dcsa.conformance.specifications.standards.tnt.v300.types.EventTypeCode;
 
 public class GetEventsEndpoint extends QueryParametersFilterEndpoint {
 
@@ -24,6 +25,15 @@ public class GetEventsEndpoint extends QueryParametersFilterEndpoint {
           "equipmentReference",
           "APZU4812090",
           "Reference of the equipment for which to return the associated events");
+
+  private final Parameter eventTypes =
+      createStringListQueryParameter(
+          "eventTypes",
+          List.of(
+              EventTypeCode.EQUIPMENT.name(),
+              EventTypeCode.IOT.name(),
+              EventTypeCode.REEFER.name()),
+          "Retrieve only events whose `eventType` is in this list");
 
   private final Parameter eventUpdatedDateTimeMin =
       createDateTimeQueryParameter(
@@ -51,6 +61,7 @@ public class GetEventsEndpoint extends QueryParametersFilterEndpoint {
         carrierBookingReference,
         transportDocumentReference,
         equipmentReference,
+        eventTypes,
         eventUpdatedDateTimeMin,
         eventUpdatedDateTimeMax,
         limit,
@@ -69,10 +80,13 @@ public class GetEventsEndpoint extends QueryParametersFilterEndpoint {
                     List.of(transportDocumentReference),
                     List.of(transportDocumentReference, equipmentReference),
                     List.of(equipmentReference)),
-                List.of(
-                    List.of(eventUpdatedDateTimeMin),
-                    List.of(eventUpdatedDateTimeMax),
-                    List.of(eventUpdatedDateTimeMin, eventUpdatedDateTimeMax)))),
+                allCombinationsOf(
+                    List.of(List.of(), List.of(eventTypes)),
+                    List.of(
+                        List.of(),
+                        List.of(eventUpdatedDateTimeMin),
+                        List.of(eventUpdatedDateTimeMax),
+                        List.of(eventUpdatedDateTimeMin, eventUpdatedDateTimeMax))))),
         Map.entry(Boolean.FALSE, List.of()));
   }
 }

@@ -80,9 +80,8 @@ public class BookingShipper extends ConformanceParty {
     String reference = getBookingReference(actionPrompt);
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
     boolean errorScenario = actionPrompt.path("invalidBookingReference").asBoolean(false);
-    Map<String, List<String>> queryParams = requestAmendment
-      ? Map.of("amendedContent", List.of("true"))
-      : Collections.emptyMap();
+    Map<String, List<String>> queryParams =
+        requestAmendment ? Map.of("amendedContent", List.of("true")) : Collections.emptyMap();
     if (errorScenario) {
       syncCounterpartGet("/v2/bookings/" + "ABC123", queryParams);
       cbrr = "ABC123";
@@ -115,10 +114,8 @@ public class BookingShipper extends ConformanceParty {
     String cbrr = actionPrompt.path("cbrr").asText();
     syncCounterpartPatch(
         "/v2/bookings/%s".formatted(cbrr),
-      Collections.emptyMap(),
-      OBJECT_MAPPER
-            .createObjectNode()
-            .put("bookingStatus", BookingState.CANCELLED.name()));
+        Collections.emptyMap(),
+        OBJECT_MAPPER.createObjectNode().put("bookingStatus", BookingState.CANCELLED.name()));
 
     addOperatorLogEntry(
         BookingAction.createMessageForUIPrompt(
@@ -126,15 +123,17 @@ public class BookingShipper extends ConformanceParty {
   }
 
   private void sendConfirmedBookingCancellationRequest(JsonNode actionPrompt) {
-    log.info("Shipper.sendConfirmedBookingCancellationRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Shipper.sendConfirmedBookingCancellationRequest(%s)"
+            .formatted(actionPrompt.toPrettyString()));
     String cbr = actionPrompt.path("cbr").asText();
     syncCounterpartPatch(
-      "/v2/bookings/%s".formatted(cbr),
-      Collections.emptyMap(),
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
-        .put("reason", "Cancelling due to internal issues"));
+        "/v2/bookings/%s".formatted(cbr),
+        Collections.emptyMap(),
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
+            .put("reason", "Cancelling due to internal issues"));
 
     addOperatorLogEntry(
         BookingAction.createMessageForUIPrompt(
@@ -145,11 +144,11 @@ public class BookingShipper extends ConformanceParty {
     log.info("Shipper.sendCancelBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
     String reference = getBookingReference(actionPrompt);
     syncCounterpartPatch(
-      "/v2/bookings/%s".formatted(reference),
-      Collections.emptyMap(),
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
+        "/v2/bookings/%s".formatted(reference),
+        Collections.emptyMap(),
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
 
     addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(reference));
   }
@@ -160,12 +159,10 @@ public class BookingShipper extends ConformanceParty {
     String cbrr = actionPrompt.path("cbrr").asText();
     var bookingData = persistentMap.load(cbrr);
     ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
-    syncCounterpartPut(
-      "/v2/bookings/%s".formatted(reference),bookingData);
+    syncCounterpartPut("/v2/bookings/%s".formatted(reference), bookingData);
 
     addOperatorLogEntry(
-      "Sent an updated booking request with the parameters: %s"
-        .formatted(reference));
+        "Sent an updated booking request with the parameters: %s".formatted(reference));
   }
 
   private void sendUpdatedConfirmedBooking(JsonNode actionPrompt) {
@@ -174,14 +171,11 @@ public class BookingShipper extends ConformanceParty {
     String cbrr = actionPrompt.path("cbrr").asText();
     var bookingData = persistentMap.load(cbrr);
     ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
-    syncCounterpartPut(
-      "/v2/bookings/%s".formatted(reference),bookingData);
+    syncCounterpartPut("/v2/bookings/%s".formatted(reference), bookingData);
 
     addOperatorLogEntry(
-      "Sent an updated confirmed booking with the parameters: %s"
-        .formatted(reference));
+        "Sent an updated confirmed booking with the parameters: %s".formatted(reference));
   }
-
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
@@ -197,10 +191,9 @@ public class BookingShipper extends ConformanceParty {
     return response;
   }
 
-  private String getBookingReference(JsonNode actionPrompt ) {
+  private String getBookingReference(JsonNode actionPrompt) {
     String cbr = actionPrompt.path("cbr").asText(null);
     String cbrr = actionPrompt.path("cbrr").asText();
-    return  cbr != null ? cbr : cbrr;
+    return cbr != null ? cbr : cbrr;
   }
-
 }

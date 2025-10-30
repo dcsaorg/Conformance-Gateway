@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
@@ -43,9 +40,7 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends StateChangingBookin
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getSimpleNotificationChecks(
-            expectedApiVersion,
-            requestSchemaValidator,
-            BookingState.CONFIRMED);
+            expectedApiVersion, requestSchemaValidator, BookingState.CONFIRMED);
       }
     };
   }

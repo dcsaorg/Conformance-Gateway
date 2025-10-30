@@ -29,7 +29,13 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator,
       boolean isWithNotifications) {
-    super(shipperPartyName, carrierPartyName, previousAction, useTDRef ? "UC5 [TDR]" : "UC5", 202, isWithNotifications);
+    super(
+        shipperPartyName,
+        carrierPartyName,
+        previousAction,
+        useTDRef ? "UC5 [TDR]" : "UC5",
+        202,
+        isWithNotifications);
     this.expectedSIStatus = expectedSIStatus;
     this.useTDRef = useTDRef;
     this.requestSchemaValidator = requestSchemaValidator;
@@ -51,7 +57,9 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
   public ObjectNode asJsonNode() {
     var dsp = getDSP();
     return super.asJsonNode()
-      .put("documentReference", useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference());
+        .put(
+            "documentReference",
+            useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference());
   }
 
   @Override

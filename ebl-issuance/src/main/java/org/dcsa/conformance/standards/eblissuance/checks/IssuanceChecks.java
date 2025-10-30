@@ -22,53 +22,65 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 public class IssuanceChecks {
 
-  private static final JsonRebaseableContentCheck ISSUE_TO_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
-    "The 'codeListProvider' is valid",
-    mav -> mav.submitAllMatching("issueTo.identifyingCodes.*.codeListProvider"),
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES)
-  );
+  private static final JsonRebasableContentCheck ISSUE_TO_CODE_LIST_PROVIDER =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The 'codeListProvider' is valid",
+          mav -> mav.submitAllMatching("issueTo.identifyingCodes.*.codeListProvider"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES));
 
-  private static JsonRebaseableContentCheck hasEndorseeScenarioCheck(String standardsVersion, EblType eblType) {
+  private static JsonRebasableContentCheck hasEndorseeScenarioCheck(
+      String standardsVersion, EblType eblType) {
     return JsonAttribute.customValidator(
-      "[Scenario] Validate endorsee party presence is correct",
-      JsonAttribute.path("document", JsonAttribute.path("documentParties",
-        (documentParties, contextPath) -> {
-          if (!eblType.isToOrder()) {
-            return Set.of();
-          }
-          var hadEndorsee = documentParties.has("endorsee");
-          var endorseePath = concatContextPath(contextPath, "documentParties.endorsee");
-          if (eblType.isBlankEbl() && hadEndorsee) {
-            return Set.of("The EBL should have been blank endorsed, but it has an '%s' attribute".formatted(endorseePath));
-          }
-          if (!eblType.isBlankEbl() && !hadEndorsee) {
-            return Set.of("The EBL should have had a named endorsee, but it is missing the '%s' attribute".formatted(endorseePath));
-          }
-          return Set.of();
-        }
-      ))
-    );
+        "[Scenario] Validate endorsee party presence is correct",
+        JsonAttribute.path(
+            "document",
+            JsonAttribute.path(
+                "documentParties",
+                (documentParties, contextPath) -> {
+                  if (!eblType.isToOrder()) {
+                    return ConformanceCheckResult.simple(Set.of());
+                  }
+                  var hadEndorsee = documentParties.has("endorsee");
+                  var endorseePath = concatContextPath(contextPath, "documentParties.endorsee");
+                  if (eblType.isBlankEbl() && hadEndorsee) {
+                    return ConformanceCheckResult.simple(
+                        Set.of(
+                            "The EBL should have been blank endorsed, but it has an '%s' attribute"
+                                .formatted(endorseePath)));
+                  }
+                  if (!eblType.isBlankEbl() && !hadEndorsee) {
+                    return ConformanceCheckResult.simple(
+                        Set.of(
+                            "The EBL should have had a named endorsee, but it is missing the '%s' attribute"
+                                .formatted(endorseePath)));
+                  }
+                  return ConformanceCheckResult.simple(Set.of());
+                })));
   }
 
-  public static ActionCheck tdScenarioChecks(UUID matched, String standardsVersion, EblType eblType) {
+  public static ActionCheck tdScenarioChecks(
+      UUID matched, String standardsVersion, EblType eblType) {
     return JsonAttribute.contentChecks(
-      "Complex validations of transport document",
-      null,
-      EblIssuanceRole::isCarrier,
-      matched,
-      HttpMessageType.REQUEST,
-      standardsVersion,
-      JsonAttribute.mustEqual(
-        "[Scenario] The 'document.isToOrder' attribute must match the scenario requirements",
-        JsonPointer.compile("/document/isToOrder"),
-        eblType.isToOrder()
-      ),
-      ISSUE_TO_CODE_LIST_PROVIDER,
-      hasEndorseeScenarioCheck(standardsVersion, eblType)
-    );
+        "Complex validations of transport document",
+        null,
+        EblIssuanceRole::isCarrier,
+        matched,
+        HttpMessageType.REQUEST,
+        standardsVersion,
+        JsonAttribute.mustEqual(
+            "[Scenario] The 'document.isToOrder' attribute must match the scenario requirements",
+            JsonPointer.compile("/document/isToOrder"),
+            eblType.isToOrder()),
+        ISSUE_TO_CODE_LIST_PROVIDER,
+        hasEndorseeScenarioCheck(standardsVersion, eblType));
   }
 
-  public static ActionCheck issuanceRequestSignatureChecks(UUID matched, String standardsVersion, JsonSchemaValidator issuanceManifestSchemaValidator, Supplier<SignatureVerifier> signatureVerifierSupplier) {
+  public static ActionCheck issuanceRequestSignatureChecks(
+      UUID matched,
+      String standardsVersion,
+      JsonSchemaValidator issuanceManifestSchemaValidator,
+      Supplier<SignatureVerifier> signatureVerifierSupplier) {
     return JsonAttribute.contentChecks(
         "",
         "Complex validations of issuanceManifest",
@@ -77,40 +89,29 @@ public class IssuanceChecks {
         HttpMessageType.REQUEST,
         standardsVersion,
         JsonAttribute.customValidator(
-          "Signature of the issuanceManifestSignedContent is valid",
-          path("issuanceManifestSignedContent", SignatureChecks.signatureValidates(signatureVerifierSupplier))
-         ),
+            "Signature of the issuanceManifestSignedContent is valid",
+            path(
+                "issuanceManifestSignedContent",
+                SignatureChecks.signatureValidates(signatureVerifierSupplier))),
         JsonAttribute.customValidator(
-          "Schema validation of the payload of issuanceManifestSignedManifest",
-          path("issuanceManifestSignedContent", SignatureChecks.signedContentSchemaValidation(
-            issuanceManifestSchemaValidator
-          ))
-        ),
+            "Schema validation of the payload of issuanceManifestSignedManifest",
+            path(
+                "issuanceManifestSignedContent",
+                SignatureChecks.signedContentSchemaValidation(issuanceManifestSchemaValidator))),
         JsonAttribute.customValidator(
-          "Validate checksum of transportDocument vs. the checksum provided in the issuanceManifest",
-          validateJsonNodeToChecksumAttribute(
-            "document",
-            "documentChecksum",
-            Checksums::sha256CanonicalJson
-          )
-        ),
+            "Validate checksum of transportDocument vs. the checksum provided in the issuanceManifest",
+            validateJsonNodeToChecksumAttribute(
+                "document", "documentChecksum", Checksums::sha256CanonicalJson)),
         JsonAttribute.customValidator(
-          "Validate checksum of issueTo vs. the checksum provided in the issuanceManifest",
-          validateJsonNodeToChecksumAttribute(
-            "issueTo",
-            "issueToChecksum",
-            Checksums::sha256CanonicalJson
-          )
-        ),
+            "Validate checksum of issueTo vs. the checksum provided in the issuanceManifest",
+            validateJsonNodeToChecksumAttribute(
+                "issueTo", "issueToChecksum", Checksums::sha256CanonicalJson)),
         JsonAttribute.customValidator(
-          "Validate checksum of eBLVisualisationByCarrier vs. the checksum provided in the issuanceManifest",
-          validateJsonNodeToChecksumAttribute(
-            "eBLVisualisationByCarrier",
-            "eBLVisualisationByCarrierChecksum",
-            IssuanceChecks::checksumSupportingDocument
-          )
-        )
-    );
+            "Validate checksum of eBLVisualisationByCarrier vs. the checksum provided in the issuanceManifest",
+            validateJsonNodeToChecksumAttribute(
+                "eBLVisualisationByCarrier",
+                "eBLVisualisationByCarrierChecksum",
+                IssuanceChecks::checksumSupportingDocument)));
   }
 
   private static String checksumSupportingDocument(JsonNode node) {
@@ -122,21 +123,23 @@ public class IssuanceChecks {
   }
 
   public static JsonContentMatchedValidation validateJsonNodeToChecksumAttribute(
-    String protectedAttribute,
-    String manifestChecksumAttribute,
-    Function<JsonNode, String> checksummer
-  ) {
+      String protectedAttribute,
+      String manifestChecksumAttribute,
+      Function<JsonNode, String> checksummer) {
     return (nodeToValidate, contextPath) -> {
       var json = nodeToValidate.path(protectedAttribute);
       var checksumValidator = JsonAttribute.matchedMustBeAbsent();
       if (!json.isMissingNode()) {
         var actualChecksum = checksummer.apply(json);
-        checksumValidator = JsonAttribute.combine(
-          JsonAttribute.matchedMustBePresent(),
-          matchedMustEqual(() -> actualChecksum)
-        );
+        checksumValidator =
+            JsonAttribute.combine(
+                JsonAttribute.matchedMustBePresent(), matchedMustEqual(() -> actualChecksum));
       }
-      var c = path("issuanceManifestSignedContent", SignatureChecks.signedContentValidation(path(manifestChecksumAttribute, checksumValidator)));
+      var c =
+          path(
+              "issuanceManifestSignedContent",
+              SignatureChecks.signedContentValidation(
+                  path(manifestChecksumAttribute, checksumValidator)));
       return c.validate(nodeToValidate, contextPath);
     };
   }
@@ -144,13 +147,12 @@ public class IssuanceChecks {
   public static ActionCheck tdContentChecks(UUID matched, String standardsVersion) {
     var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, null);
     return JsonAttribute.contentChecks(
-      "Complex validations of transport document",
-      EblIssuanceRole::isCarrier,
-      matched,
-      HttpMessageType.REQUEST,
-      standardsVersion,
-      JsonContentCheckRebaser.of("document"),
-      checks
-    );
+        "Complex validations of transport document",
+        EblIssuanceRole::isCarrier,
+        matched,
+        HttpMessageType.REQUEST,
+        standardsVersion,
+        JsonContentCheckRebaser.of("document"),
+        checks);
   }
 }

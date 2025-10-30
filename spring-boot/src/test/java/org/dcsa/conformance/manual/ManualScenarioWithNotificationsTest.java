@@ -1,8 +1,5 @@
 package org.dcsa.conformance.manual;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +15,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = ConformanceApplication.class)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
+    classes = ConformanceApplication.class)
 class ManualScenarioWithNotificationsTest extends ManualTestBase {
 
   @SuppressWarnings("unused")
@@ -76,12 +75,16 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
                                 .forEach(
                                     role ->
                                         runManualTests(
-                                            standard1.name(), version.number(), suite, role.name(), secondRun))));
+                                            standard1.name(),
+                                            version.number(),
+                                            suite,
+                                            role.name(),
+                                            secondRun))));
   }
 
   @Test
   @Disabled("Only for debugging")
-  void testOnlyOneSpecificScenario(){
+  void testOnlyOneSpecificScenario() {
     runManualTests(
         EblStandard.INSTANCE.getName(),
         EblStandard.INSTANCE.getScenarioSuitesByStandardVersion().keySet().stream()

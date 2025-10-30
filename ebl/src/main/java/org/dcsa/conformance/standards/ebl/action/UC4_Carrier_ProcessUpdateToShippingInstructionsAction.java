@@ -22,7 +22,13 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
       JsonSchemaValidator requestSchemaValidator,
       boolean acceptChanges,
       boolean isWithNotifications) {
-    super(carrierPartyName, shipperPartyName, previousAction, acceptChanges ? "UC4a" : "UC4d", 204, isWithNotifications);
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        acceptChanges ? "UC4a" : "UC4d",
+        204,
+        isWithNotifications);
     this.expectedSIStatus = expectedSIStatus;
     this.requestSchemaValidator = requestSchemaValidator;
     this.acceptChanges = acceptChanges;
@@ -46,8 +52,8 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().shippingInstructionsReference())
-      .put("acceptChanges",  acceptChanges);
+        .put("documentReference", getDspSupplier().get().shippingInstructionsReference())
+        .put("acceptChanges", acceptChanges);
   }
 
   @Override
@@ -56,13 +62,14 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getSINotificationChecks(
-          getMatchedExchangeUuid(),
-          expectedApiVersion,
-          requestSchemaValidator,
-          expectedSIStatus,
-          acceptChanges ? ShippingInstructionsStatus.SI_UPDATE_CONFIRMED : ShippingInstructionsStatus.SI_UPDATE_DECLINED,
-          EblChecks.sirInNotificationMustMatchDSP(getDspSupplier())
-        );
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            requestSchemaValidator,
+            expectedSIStatus,
+            acceptChanges
+                ? ShippingInstructionsStatus.SI_UPDATE_CONFIRMED
+                : ShippingInstructionsStatus.SI_UPDATE_DECLINED,
+            EblChecks.sirInNotificationMustMatchDSP(getDspSupplier()));
       }
     };
   }

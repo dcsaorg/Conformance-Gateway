@@ -32,7 +32,8 @@ public class AUC_Shipper_SendOutOfOrderSIMessageAction extends StateChangingSIAc
         409,
         true);
     if (!useTDRef && outOfOrderMessageType.isTDRequest()) {
-      throw new IllegalArgumentException("useTDRef must be true for " + outOfOrderMessageType.name());
+      throw new IllegalArgumentException(
+          "useTDRef must be true for " + outOfOrderMessageType.name());
     }
     this.outOfOrderMessageType = outOfOrderMessageType;
     this.useTDRef = useTDRef;
@@ -55,9 +56,9 @@ public class AUC_Shipper_SendOutOfOrderSIMessageAction extends StateChangingSIAc
     var dsp = getDspSupplier().get();
     var sir = dsp.shippingInstructionsReference();
     return super.asJsonNode()
-      .put("outOfOrderMessageType", this.outOfOrderMessageType.name())
-      .put("documentReference", useTDRef ? dsp.transportDocumentReference() : sir)
-      .put("sir", sir);
+        .put("outOfOrderMessageType", this.outOfOrderMessageType.name())
+        .put("documentReference", useTDRef ? dsp.transportDocumentReference() : sir)
+        .put("sir", sir);
   }
 
   @Override
@@ -69,15 +70,24 @@ public class AUC_Shipper_SendOutOfOrderSIMessageAction extends StateChangingSIAc
         var urlFormat = outOfOrderMessageType.getExpectedRequestUrlFormat();
         String documentReference;
         if (useTDRef) {
-          documentReference = Objects.requireNonNullElse(dsp.transportDocumentReference(), "<DSP MISSING TD REFERENCE>");
+          documentReference =
+              Objects.requireNonNullElse(
+                  dsp.transportDocumentReference(), "<DSP MISSING TD REFERENCE>");
         } else {
-          documentReference = Objects.requireNonNullElse(dsp.shippingInstructionsReference(), "<DSP MISSING SI REFERENCE>");
+          documentReference =
+              Objects.requireNonNullElse(
+                  dsp.shippingInstructionsReference(), "<DSP MISSING SI REFERENCE>");
         }
         return Stream.of(
-            new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), outOfOrderMessageType.getExpectedRequestMethod()),
-            new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), urlFormat.formatted(documentReference)),
-            new ResponseStatusCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+            new HttpMethodCheck(
+                EblRole::isShipper,
+                getMatchedExchangeUuid(),
+                outOfOrderMessageType.getExpectedRequestMethod()),
+            new UrlPathCheck(
+                EblRole::isShipper,
+                getMatchedExchangeUuid(),
+                urlFormat.formatted(documentReference)),
+            new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),

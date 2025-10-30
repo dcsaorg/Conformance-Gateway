@@ -31,6 +31,8 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.Address;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Facility;
 import org.dcsa.conformance.specifications.standards.core.v100.model.GeoCoordinate;
 import org.dcsa.conformance.specifications.standards.core.v100.model.Location;
+import org.dcsa.conformance.specifications.standards.core.v100.model.ServiceCodeOrReference;
+import org.dcsa.conformance.specifications.standards.core.v100.model.VoyageNumberOrReference;
 import org.dcsa.conformance.specifications.standards.portcall.v200.messages.FeedbackElement;
 import org.dcsa.conformance.specifications.standards.portcall.v200.messages.GetEventsError;
 import org.dcsa.conformance.specifications.standards.portcall.v200.messages.GetEventsResponse;
@@ -144,9 +146,11 @@ public class PortCallStandardSpecification extends StandardSpecification {
         PostEventsError.class,
         PostEventsRequest.class,
         PostEventsResponse.class,
+        ServiceCodeOrReference.class,
         TerminalCall.class,
         Timestamp.class,
-        Vessel.class);
+        Vessel.class,
+        VoyageNumberOrReference.class);
   }
 
   @Override

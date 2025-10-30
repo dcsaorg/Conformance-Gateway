@@ -47,8 +47,7 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
               persistentMap,
               webClient,
               orchestratorAuthHeader,
-              PayloadSignerFactory.carrierPayloadSigner()
-            ));
+              PayloadSignerFactory.carrierPayloadSigner()));
     }
 
     PartyConfiguration platformConfiguration =
@@ -101,13 +100,14 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toSet());
   }
 
-  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest, boolean issuanceManifest) {
+  public JsonSchemaValidator getMessageSchemaValidator(
+      String apiProviderRole, boolean forRequest, boolean issuanceManifest) {
     String schemaFilePath =
-        "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml"
-            .formatted(standardVersion);
-    String schemaName = EblIssuanceRole.isCarrier(apiProviderRole)
-        ? (forRequest ? "IssuanceRequest" : null)
-        : (forRequest ? "IssuanceResponse" : null);
+        "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml".formatted(standardVersion);
+    String schemaName =
+        EblIssuanceRole.isCarrier(apiProviderRole)
+            ? (forRequest ? "IssuanceRequest" : null)
+            : (forRequest ? "IssuanceResponse" : null);
     if (issuanceManifest) {
       schemaName = "IssuanceManifest";
     }

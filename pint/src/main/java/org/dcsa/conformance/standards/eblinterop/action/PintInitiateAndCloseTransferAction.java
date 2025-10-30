@@ -28,24 +28,23 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
   private final JsonSchemaValidator issuanceManifestSchemaValidator;
 
   public PintInitiateAndCloseTransferAction(
-    String receivingPlatform,
-    String sendingPlatform,
-    PintAction previousAction,
-    PintResponseCode pintResponseCode,
-    SenderTransmissionClass senderTransmissionClass,
-    JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator envelopeEnvelopeSchemaValidator,
-    JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
-    JsonSchemaValidator issuanceManifestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator
-    ) {
+      String receivingPlatform,
+      String sendingPlatform,
+      PintAction previousAction,
+      PintResponseCode pintResponseCode,
+      SenderTransmissionClass senderTransmissionClass,
+      JsonSchemaValidator requestSchemaValidator,
+      JsonSchemaValidator envelopeEnvelopeSchemaValidator,
+      JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
+      JsonSchemaValidator issuanceManifestSchemaValidator,
+      JsonSchemaValidator responseSchemaValidator) {
     super(
         sendingPlatform,
         receivingPlatform,
         previousAction,
-        "SingleRequestTransfer(%s)".formatted(pintResponseCode.name()),
-        pintResponseCode.getHttpResponseCode()
-    );
+        "SingleRequestTransfer(%s, %s)"
+            .formatted(pintResponseCode.name(), senderTransmissionClass.name()),
+        pintResponseCode.getHttpResponseCode());
     this.pintResponseCode = pintResponseCode;
     this.senderTransmissionClass = senderTransmissionClass;
     this.requestSchemaValidator = requestSchemaValidator;
@@ -62,8 +61,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    var node = super.asJsonNode()
-      .put("senderTransmissionClass", senderTransmissionClass.name());
+    var node = super.asJsonNode().put("senderTransmissionClass", senderTransmissionClass.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());
@@ -85,9 +83,12 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        Supplier<SignatureVerifier> senderVerifierSupplier = () -> resolveSignatureVerifierSenderSignatures();
-        Supplier<SignatureVerifier> carrierVerifierSupplier = () -> resolveSignatureVerifierCarrierSignatures();
-        Supplier<SignatureVerifier> receiverVerifierSupplier = () -> resolveSignatureVerifierForReceiverSignatures();
+        Supplier<SignatureVerifier> senderVerifierSupplier =
+            () -> resolveSignatureVerifierSenderSignatures();
+        Supplier<SignatureVerifier> carrierVerifierSupplier =
+            () -> resolveSignatureVerifierCarrierSignatures();
+        Supplier<SignatureVerifier> receiverVerifierSupplier =
+            () -> resolveSignatureVerifierForReceiverSignatures();
 
         return Stream.of(
                 new UrlPathCheck(
@@ -105,63 +106,49 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                     HttpMessageType.RESPONSE,
                     expectedApiVersion),
                 new JsonSchemaCheck(
-                  PintRole::isReceivingPlatform,
-                  getMatchedExchangeUuid(),
-                  HttpMessageType.RESPONSE,
-                  responseSchemaValidator
-                ),
+                    PintRole::isReceivingPlatform,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    responseSchemaValidator),
                 senderTransmissionClass != SenderTransmissionClass.SIGNATURE_ISSUE
-                  ? validateRequestSignatures(
-                      getMatchedExchangeUuid(),
-                      expectedApiVersion,
-                      senderVerifierSupplier,
-                      carrierVerifierSupplier
-                    )
-                  : null,
-              validateInnerRequestSchemas(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                envelopeEnvelopeSchemaValidator,
-                envelopeTransferChainEntrySchemaValidator,
-                issuanceManifestSchemaValidator
-              ),
-                JsonAttribute.contentChecks(
-                  "",
-                  "The signatures of the signed content of the HTTP response can be validated",
-                  PintRole::isReceivingPlatform,
-                  getMatchedExchangeUuid(),
-                  HttpMessageType.RESPONSE,
-                  expectedApiVersion,
-                  JsonAttribute.customValidator(
-                    "Response signature must be valid",
-                    SignatureChecks.signatureValidates(receiverVerifierSupplier)
-                  )
-                ),
-                new JsonSchemaCheck(
-                        PintRole::isSendingPlatform,
+                    ? validateRequestSignatures(
                         getMatchedExchangeUuid(),
-                        HttpMessageType.REQUEST,
-                        requestSchemaValidator
-                ),
-                tdContentChecks(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  () -> getSsp()
-                ),
+                        expectedApiVersion,
+                        senderVerifierSupplier,
+                        carrierVerifierSupplier)
+                    : null,
+                validateInnerRequestSchemas(
+                    getMatchedExchangeUuid(),
+                    expectedApiVersion,
+                    envelopeEnvelopeSchemaValidator,
+                    envelopeTransferChainEntrySchemaValidator,
+                    issuanceManifestSchemaValidator),
+                JsonAttribute.contentChecks(
+                    "",
+                    "The signatures of the signed content of the HTTP response can be validated",
+                    PintRole::isReceivingPlatform,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    expectedApiVersion,
+                    JsonAttribute.customValidator(
+                        "Response signature must be valid",
+                        SignatureChecks.signatureValidates(receiverVerifierSupplier))),
+                new JsonSchemaCheck(
+                    PintRole::isSendingPlatform,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    requestSchemaValidator),
+                tdContentChecks(getMatchedExchangeUuid(), expectedApiVersion, () -> getSsp()),
                 validateInitiateTransferRequest(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  senderTransmissionClass,
-                  () -> getSsp(),
-                  () -> getRsp(),
-                  () -> getDsp()
-                ),
+                    getMatchedExchangeUuid(),
+                    expectedApiVersion,
+                    senderTransmissionClass,
+                    () -> getSsp(),
+                    () -> getRsp(),
+                    () -> getDsp()),
                 validateSignedFinishResponse(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  pintResponseCode
-                )
-            ).filter(Objects::nonNull);
+                    getMatchedExchangeUuid(), expectedApiVersion, pintResponseCode))
+            .filter(Objects::nonNull);
       }
     };
   }

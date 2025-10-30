@@ -47,10 +47,12 @@ public class PayloadSignerFactory {
 
   private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    // Generated with `openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 4 -subj "/C=US/ST=Delaware/L=Delaware/O=SELFSIGNED/CN=foo" -nodes`
-    // Contents in the `key.pem`
-    @SuppressWarnings("secrets:S6706") // It is a non-issue to us that the key is "leaked".
-    private static final String CTK_SENDER_PRIVATE_KEY_PEM = """
+  // Generated with `openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 4 -subj
+  // "/C=US/ST=Delaware/L=Delaware/O=SELFSIGNED/CN=foo" -nodes`
+  // Contents in the `key.pem`
+  @SuppressWarnings("secrets:S6706") // It is a non-issue to us that the key is "leaked".
+  private static final String CTK_SENDER_PRIVATE_KEY_PEM =
+      """
             -----BEGIN PRIVATE KEY-----
             MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCXTD3XOeBMYVZS
             Pd1LmImkCzAvCqTZ/YnMh0uhYW3HUOBOdRvE++BY5uny8EZvKI4onH10SI1Wm+oy
@@ -81,8 +83,9 @@ public class PayloadSignerFactory {
             -----END PRIVATE KEY-----
             """;
 
-    @SuppressWarnings("secrets:S6706") // It is a non-issue to us that the key is "leaked".
-    private static final String CTK_CARRIER_PRIVATE_RSA_KEY_PEM = """
+  @SuppressWarnings("secrets:S6706") // It is a non-issue to us that the key is "leaked".
+  private static final String CTK_CARRIER_PRIVATE_RSA_KEY_PEM =
+      """
             -----BEGIN PRIVATE KEY-----
             MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC588633cONawxd
             r7ynVvwmeRd2KVTpskYHxn51qYwUqK1jVPxGgDy1I8j+ImWbI1Q8ZaDbvWoIHcrv
@@ -114,7 +117,8 @@ public class PayloadSignerFactory {
             """;
 
   @SuppressWarnings("secrets:S6706") // It is a non-issue to us that the key is "leaked".
-  private static final String CTK_RECEIVER_PRIVATE_KEY_PEM = """
+  private static final String CTK_RECEIVER_PRIVATE_KEY_PEM =
+      """
             -----BEGIN EC PRIVATE KEY-----
             MHcCAQEEIJTPoxr2hvrglK9q4L8UUBZk1QYm9Yv4wstC5BKPaxPYoAoGCCqGSM49
             AwEHoUQDQgAEBHrpbOJO5f60HZIq0p8Ia/Xp5SA+xQf6xk0JfVNi6Ny7bjCHy7bK
@@ -122,123 +126,138 @@ public class PayloadSignerFactory {
             -----END EC PRIVATE KEY-----
             """;
 
-    private static final KeyPair CTK_SENDER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_SENDER_PRIVATE_KEY_PEM);
-    private static final KeyPair CTK_CARRIER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_CARRIER_PRIVATE_RSA_KEY_PEM);
-    private static final KeyPair CTK_RECEIVER_EC_KEY_PAIR = parsePEMPrivateECKey(CTK_RECEIVER_PRIVATE_KEY_PEM);
-    private static final PayloadSignerWithKey CTK_SENDER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_SENDER_RSA_KEY_PAIR);
-    private static final PayloadSignerWithKey CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_CARRIER_RSA_KEY_PAIR);
-    private static final PayloadSignerWithKey CTK_RECEIVER_KEY_PAYLOAD_SIGNER = ecBasedPayloadSigner(CTK_RECEIVER_EC_KEY_PAIR);
+  private static final KeyPair CTK_SENDER_RSA_KEY_PAIR =
+      parsePEMPrivateRSAKey(CTK_SENDER_PRIVATE_KEY_PEM);
+  private static final KeyPair CTK_CARRIER_RSA_KEY_PAIR =
+      parsePEMPrivateRSAKey(CTK_CARRIER_PRIVATE_RSA_KEY_PEM);
+  private static final KeyPair CTK_RECEIVER_EC_KEY_PAIR =
+      parsePEMPrivateECKey(CTK_RECEIVER_PRIVATE_KEY_PEM);
+  private static final PayloadSignerWithKey CTK_SENDER_KEY_PAYLOAD_SIGNER =
+      rsaBasedPayloadSigner(CTK_SENDER_RSA_KEY_PAIR);
+  private static final PayloadSignerWithKey CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER =
+      rsaBasedPayloadSigner(CTK_CARRIER_RSA_KEY_PAIR);
+  private static final PayloadSignerWithKey CTK_RECEIVER_KEY_PAYLOAD_SIGNER =
+      ecBasedPayloadSigner(CTK_RECEIVER_EC_KEY_PAIR);
 
-    public static PayloadSignerWithKey senderPayloadSigner() {
-        return CTK_SENDER_KEY_PAYLOAD_SIGNER;
-    }
+  public static PayloadSignerWithKey senderPayloadSigner() {
+    return CTK_SENDER_KEY_PAYLOAD_SIGNER;
+  }
 
-    public static PayloadSignerWithKey receiverPayloadSigner() {
-      return CTK_RECEIVER_KEY_PAYLOAD_SIGNER;
-    }
+  public static PayloadSignerWithKey receiverPayloadSigner() {
+    return CTK_RECEIVER_KEY_PAYLOAD_SIGNER;
+  }
 
-    public static PayloadSignerWithKey carrierPayloadSigner() {
-        return CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER;
-    }
+  public static PayloadSignerWithKey carrierPayloadSigner() {
+    return CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER;
+  }
 
-    private static PayloadSignerWithKey rsaBasedPayloadSigner(KeyPair keyPair) {
-        return new X509BackedPayloadSigner(
-                new JWSSignerDetails(
-                        JWSAlgorithm.PS256,
-                        new RSASSASigner(keyPair.getPrivate())
-                ),
-                generateSelfSignedCertificateSecret(keyPair)
-        );
-    }
+  private static PayloadSignerWithKey rsaBasedPayloadSigner(KeyPair keyPair) {
+    return new X509BackedPayloadSigner(
+        new JWSSignerDetails(JWSAlgorithm.PS256, new RSASSASigner(keyPair.getPrivate())),
+        generateSelfSignedCertificateSecret(keyPair));
+  }
 
   @SneakyThrows
   private static PayloadSignerWithKey ecBasedPayloadSigner(KeyPair keyPair) {
     return new X509BackedPayloadSigner(
-      new JWSSignerDetails(
-        JWSAlgorithm.ES256,
-        new ECDSASigner((ECPrivateKey) keyPair.getPrivate())
-      ),
-      generateSelfSignedCertificateSecret(keyPair)
-    );
+        new JWSSignerDetails(
+            JWSAlgorithm.ES256, new ECDSASigner((ECPrivateKey) keyPair.getPrivate())),
+        generateSelfSignedCertificateSecret(keyPair));
   }
 
-    @SneakyThrows
-    private static KeyPair parsePEMPrivateRSAKey(String pem) {
-        String privKeyPEM = pem.replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "")
-                .replaceAll("\\s++", "");
+  @SneakyThrows
+  private static KeyPair parsePEMPrivateRSAKey(String pem) {
+    String privKeyPEM =
+        pem.replace("-----BEGIN PRIVATE KEY-----", "")
+            .replace("-----END PRIVATE KEY-----", "")
+            .replaceAll("\\s++", "");
 
-        byte [] encoded = Base64.getDecoder().decode(privKeyPEM);
+    byte[] encoded = Base64.getDecoder().decode(privKeyPEM);
 
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        var privateKey = (RSAPrivateCrtKey)kf.generatePrivate(keySpec);
-        var publicKey = kf.generatePublic(new RSAPublicKeySpec(privateKey.getModulus(), privateKey.getPublicExponent()));
-        return new KeyPair(publicKey, privateKey);
-    }
-
+    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+    KeyFactory kf = KeyFactory.getInstance("RSA");
+    var privateKey = (RSAPrivateCrtKey) kf.generatePrivate(keySpec);
+    var publicKey =
+        kf.generatePublic(
+            new RSAPublicKeySpec(privateKey.getModulus(), privateKey.getPublicExponent()));
+    return new KeyPair(publicKey, privateKey);
+  }
 
   @SneakyThrows
   private static KeyPair parsePEMPrivateECKey(String pem) {
     ECPrivateKey privateKey;
     try (var pemParser = new PEMParser(new StringReader(pem))) {
-      var privateKeyInfo = (PEMKeyPair)pemParser.readObject();
-      privateKey = (ECPrivateKey) new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo.getPrivateKeyInfo());
-      var publicKey = (ECPublicKey) new JcaPEMKeyConverter().getPublicKey(privateKeyInfo.getPublicKeyInfo());
+      var privateKeyInfo = (PEMKeyPair) pemParser.readObject();
+      privateKey =
+          (ECPrivateKey) new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo.getPrivateKeyInfo());
+      var publicKey =
+          (ECPublicKey) new JcaPEMKeyConverter().getPublicKey(privateKeyInfo.getPublicKeyInfo());
       return new KeyPair(publicKey, privateKey);
     }
   }
 
-    @SneakyThrows
-    public static SignatureVerifier verifierFromPublicKey(PublicKey publicKey, String attributeName) {
-      if (publicKey instanceof RSAPublicKey rsaPublicKey) {
-        return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
-      }
-      if (publicKey instanceof ECPublicKey ecPublicKey) {
-        return new SingleKeySignatureVerifier(new ECDSAVerifier(ecPublicKey));
-      }
-      // We only accept RSA and ECDHE based algorithms due to the JWS standard.
-      // However, X.509 can support other key algorithms. This exception is for
-      // when users provide certificates with keys beyond what is supposed by
-      // JWS.
-      throw new UserFacingException("Unsupported certificate/public key in \"" + attributeName + "\". The underlying public key must be a RSAPublicKey or an ECPublicKey.");
+  @SneakyThrows
+  public static SignatureVerifier verifierFromPublicKey(PublicKey publicKey, String attributeName) {
+    if (publicKey instanceof RSAPublicKey rsaPublicKey) {
+      return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
     }
+    if (publicKey instanceof ECPublicKey ecPublicKey) {
+      return new SingleKeySignatureVerifier(new ECDSAVerifier(ecPublicKey));
+    }
+    // We only accept RSA and ECDHE based algorithms due to the JWS standard.
+    // However, X.509 can support other key algorithms. This exception is for
+    // when users provide certificates with keys beyond what is supposed by
+    // JWS.
+    throw new UserFacingException(
+        "Unsupported certificate/public key in \""
+            + attributeName
+            + "\". The underlying public key must be a RSAPublicKey or an ECPublicKey.");
+  }
+
+  @SneakyThrows
+  public static SignatureVerifier verifierFromPemEncodedCertificate(
+      String pemContent, String attributeName) {
+    if (pemContent == null || pemContent.trim().isEmpty()) {
+      throw new UserFacingException(
+          "The PEM certificate in \"" + attributeName + "\" cannot be null or empty");
+    }
+    try (var reader = new PEMParser(new StringReader(pemContent))) {
+      var parsedObject = reader.readObject();
+      if (parsedObject instanceof X509CertificateHolder x509CertificateHolder) {
+        var cert =
+            CertificateFactory.getInstance("X.509")
+                .generateCertificate(new ByteArrayInputStream(x509CertificateHolder.getEncoded()));
+        return verifierFromPublicKey(cert.getPublicKey(), attributeName);
+      }
+      throw new UserFacingException(
+          "The provided PEM object in \""
+              + attributeName
+              + "\" was a not X509 encoded certificate. Please provide a CERTIFICATE instead");
+    } catch (Exception e) {
+      throw new UserFacingException(
+          "Could not parse the PEM content in \""
+              + attributeName
+              + "\" as an X509 encoded PEM certificate");
+    }
+  }
+
+  private record SingleKeySignatureVerifier(JWSVerifier jwsVerifier) implements SignatureVerifier {
 
     @SneakyThrows
-    public static SignatureVerifier verifierFromPemEncodedCertificate(String pemContent, String attributeName) {
-      if (pemContent == null || pemContent.trim().isEmpty()) {
-         throw new UserFacingException("The PEM certificate in \"" + attributeName + "\" cannot be null or empty");
-      }
-      try (var reader = new PEMParser(new StringReader(pemContent))) {
-        var parsedObject = reader.readObject();
-        if (parsedObject instanceof X509CertificateHolder x509CertificateHolder) {
-          var cert = CertificateFactory.getInstance("X.509")
-            .generateCertificate(new ByteArrayInputStream(x509CertificateHolder.getEncoded()));
-          return verifierFromPublicKey(cert.getPublicKey(), attributeName);
-        }
-        throw new UserFacingException("The provided PEM object in \"" + attributeName + "\" was a not X509 encoded certificate. Please provide a CERTIFICATE instead");
-      } catch (Exception e) {
-        throw new UserFacingException("Could not parse the PEM content in \"" + attributeName + "\" as an X509 encoded PEM certificate");
-      }
+    @Override
+    public boolean verifySignature(JWSObject jwsObject) {
+      return jwsObject.verify(jwsVerifier);
     }
+  }
 
-    private record SingleKeySignatureVerifier(JWSVerifier jwsVerifier) implements SignatureVerifier {
-
-        @SneakyThrows
-        @Override
-        public boolean verifySignature(JWSObject jwsObject) {
-            return jwsObject.verify(jwsVerifier);
-        }
+  @SneakyThrows
+  public static String pemEncodeCertificate(X509CertificateHolder x509CertificateHolder) {
+    var w = new StringWriter();
+    try (var pemWriter = new PemWriter(w)) {
+      pemWriter.writeObject(new PemObject("CERTIFICATE", x509CertificateHolder.getEncoded()));
     }
-
-    @SneakyThrows
-    public static String pemEncodeCertificate(X509CertificateHolder x509CertificateHolder) {
-      var w = new StringWriter();
-      try (var pemWriter = new PemWriter(w)) {
-        pemWriter.writeObject(new PemObject("CERTIFICATE", x509CertificateHolder.getEncoded()));
-      }
-      return w.getBuffer().toString();
-    }
+    return w.getBuffer().toString();
+  }
 
   private static X509CertificateHolder generateSelfSignedCertificateSecret(KeyPair keyPair) {
     X500Principal subject = new X500Principal("CN=DCSA-Conformance-Framework");
@@ -248,28 +267,33 @@ public class PayloadSignerFactory {
     long notAfter = notBefore + (1000L * 3600L * 24 * 2500);
     byte[] serialBytes = new byte[16];
     SECURE_RANDOM.nextBytes(serialBytes);
-    X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
-      subject,
-      new BigInteger(serialBytes),
-      new Date(notBefore),
-      new Date(notAfter),
-      subject,
-      keyPair.getPublic()
-    );
+    X509v3CertificateBuilder certBuilder =
+        new JcaX509v3CertificateBuilder(
+            subject,
+            new BigInteger(serialBytes),
+            new Date(notBefore),
+            new Date(notAfter),
+            subject,
+            keyPair.getPublic());
 
     try {
       certBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
-      certBuilder.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+      certBuilder.addExtension(
+          Extension.keyUsage,
+          true,
+          new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
 
-      var algo = switch (keyPair.getPrivate()) {
-        case ECPrivateKey ignored -> "SHA256withECDSA";
-        case RSAPrivateKey ignored -> "SHA256withRSA";
-        default -> throw new UnsupportedOperationException("Unsupported key");
-      };
+      var algo =
+          switch (keyPair.getPrivate()) {
+            case ECPrivateKey ignored -> "SHA256withECDSA";
+            case RSAPrivateKey ignored -> "SHA256withRSA";
+            default -> throw new UnsupportedOperationException("Unsupported key");
+          };
       final ContentSigner signer = new JcaContentSignerBuilder(algo).build(keyPair.getPrivate());
       return certBuilder.build(signer);
     } catch (Exception e) {
-      throw new UserFacingException("Error while generating a self-certificate: " + e.getMessage(), e);
+      throw new UserFacingException(
+          "Error while generating a self-certificate: " + e.getMessage(), e);
     }
   }
 }

@@ -9,7 +9,7 @@ import org.dcsa.conformance.specifications.standards.core.v100.model.Seal;
 
 import java.util.List;
 
-@Schema(description = "VGM details specific to the equipment")
+@Schema(description = "VGM declaration details specific to the equipment")
 @Data
 public class EquipmentDetails {
 

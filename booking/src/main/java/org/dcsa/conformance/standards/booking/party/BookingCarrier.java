@@ -365,7 +365,6 @@ public class BookingCarrier extends ConformanceParty {
         404, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 
-
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(
         409,
@@ -403,7 +402,7 @@ public class BookingCarrier extends ConformanceParty {
 
   private String readCancelOperation(ConformanceRequest request) {
     var requestPayload = request.message();
-    if (requestPayload == null || requestPayload.body() == null ) {
+    if (requestPayload == null || requestPayload.body() == null) {
       return null;
     }
     var cancelJsonBody = requestPayload.body().getJsonBody();
@@ -418,7 +417,7 @@ public class BookingCarrier extends ConformanceParty {
     if (cancelJsonBody.get(AMENDED_BOOKING_STATUS) != null) {
       return CANCEL_AMENDMENT_OPERATION;
     }
-    if(cancelJsonBody.get(BOOKING_CANCELLATION_STATUS) != null ) {
+    if (cancelJsonBody.get(BOOKING_CANCELLATION_STATUS) != null) {
       return CANCEL_CONFIRMED_BOOKING_OPERATION;
     }
     return "#INVALID";
@@ -472,7 +471,7 @@ public class BookingCarrier extends ConformanceParty {
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode());
-    return returnEmpty202Response( request, booking, cbrr);
+    return returnEmpty202Response(request, booking, cbrr);
   }
 
   private ConformanceResponse handlePatchBookingRequest(ConformanceRequest request) {
@@ -528,37 +527,34 @@ public class BookingCarrier extends ConformanceParty {
         request, persistableCarrierBooking.getBooking(), bookingReference);
   }
 
-  private ConformanceResponse returnBookingCBRRResponse(ConformanceRequest request, ObjectNode booking, String bookingReference) {
+  private ConformanceResponse returnBookingCBRRResponse(
+      ConformanceRequest request, ObjectNode booking, String bookingReference) {
     var cbrr = booking.get(CARRIER_BOOKING_REQUEST_REFERENCE).asText();
     var bookingStatus = booking.get(BOOKING_STATUS).asText();
     var statusObject =
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr);
+        OBJECT_MAPPER.createObjectNode().put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr);
     ConformanceResponse response =
-      request.createResponse(
-        202,
-        Map.of("Api-Version", List.of(apiVersion)),
-        new ConformanceMessageBody(statusObject));
+        request.createResponse(
+            202,
+            Map.of("Api-Version", List.of(apiVersion)),
+            new ConformanceMessageBody(statusObject));
     addOperatorLogEntry(
-      "Responded %d to %s booking '%s' (resulting state '%s')"
-        .formatted(202, request.method(), bookingReference, bookingStatus));
+        "Responded %d to %s booking '%s' (resulting state '%s')"
+            .formatted(202, request.method(), bookingReference, bookingStatus));
     return response;
   }
 
-  private ConformanceResponse returnEmpty202Response(ConformanceRequest request, ObjectNode booking, String bookingReference) {
+  private ConformanceResponse returnEmpty202Response(
+      ConformanceRequest request, ObjectNode booking, String bookingReference) {
     var bookingStatus = booking.get(BOOKING_STATUS).asText();
     ConformanceResponse response =
-      request.createResponse(
-        202,
-        Map.of("Api-Version", List.of(apiVersion)),
-        new ConformanceMessageBody(""));
+        request.createResponse(
+            202, Map.of("Api-Version", List.of(apiVersion)), new ConformanceMessageBody(""));
     addOperatorLogEntry(
-      "Responded %d to %s booking '%s' (resulting state '%s')"
-        .formatted(202, request.method(), bookingReference, bookingStatus));
+        "Responded %d to %s booking '%s' (resulting state '%s')"
+            .formatted(202, request.method(), bookingReference, bookingStatus));
     return response;
   }
-
 
   private ConformanceResponse _handleGetBookingRequest(ConformanceRequest request) {
     var amendedContentRaw = readAmendedContent(request);
@@ -594,9 +590,7 @@ public class BookingCarrier extends ConformanceParty {
               200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(body));
       addOperatorLogEntry(
           "Responded to GET booking request '%s' (in state '%s')"
-              .formatted(
-                  bookingReference,
-                  persistableCarrierBooking.getOriginalBookingState()));
+              .formatted(bookingReference, persistableCarrierBooking.getOriginalBookingState()));
       return response;
     }
     return return404(request);
@@ -626,7 +620,6 @@ public class BookingCarrier extends ConformanceParty {
         bookingRequestPayload,
         persistableCarrierBooking.getCarrierBookingRequestReference());
   }
-
 
   @Builder
   private static class BookingNotification {

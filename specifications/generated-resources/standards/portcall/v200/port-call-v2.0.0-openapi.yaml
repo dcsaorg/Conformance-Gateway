@@ -10,7 +10,7 @@ info:
     This API allows the transfer of structured Port Call events from a publisher to a subscriber.
 
     Port Call events are used by port call service providers and consumers to exchange information about the service, including:
-    - estimated, requested and planned service timestamps as part of the "ERP" pattern [defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf);
+    - estimated, requested and planned service timestamps as part of [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf);
     - actual service timestamps;
     - container move counts (loads, discharges and restows).
 
@@ -124,7 +124,7 @@ paths:
         example: "FE1"
       - name: "universalServiceReference"
         in: "query"
-        description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
+        description: "Unique identifier of a liner service, defined and distributed by DCSA to carriers."
         schema:
           type: "string"
         example: "SR12345A"
@@ -142,7 +142,7 @@ paths:
         example: "1234N"
       - name: "universalImportVoyageReference"
         in: "query"
-        description: "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
+        description: "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA."
         schema:
           type: "string"
         example: "2301W"
@@ -154,7 +154,7 @@ paths:
         example: "1234N"
       - name: "universalExportVoyageReference"
         in: "query"
-        description: "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage."
+        description: "Unique identifier of the export voyage within the service, assigned by carriers as specified by DCSA."
         schema:
           type: "string"
         example: "2301W"
@@ -480,6 +480,15 @@ components:
           description: "Universal unique identifier of the event"
           format: "uuid"
           example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
+        replyToEventID:
+          type: "string"
+          description: |
+            ID of an earlier event to which this event is a reply.
+
+            Used when sending a timestamp as a reply to another timestamp as part of
+            [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).
+          format: "uuid"
+          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
         eventUpdatedDateTime:
           maxLength: 30
           type: "string"
@@ -509,8 +518,9 @@ components:
           - $ref: "#/components/schemas/Vessel"
         timestamp:
           description: |
-            Date and time (and related metadata) of a port call service,
-            exchanged between the service provider and service consumer as part of the "ERP" pattern.
+            Timestamp and associated metadata of a port call service,
+            exchanged between the service provider and service consumer as part of
+            [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).
           allOf:
           - $ref: "#/components/schemas/Timestamp"
         movesForecasts:
@@ -961,6 +971,31 @@ components:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
         API response to a `POST Events` request
+    ServiceCodeOrReference:
+      type: "object"
+      properties:
+        carrierServiceCode:
+          type: "string"
+          description: "Carrier-specific identifier of a service."
+          example: "FE1"
+        universalServiceReference:
+          maxLength: 8
+          type: "string"
+          description: |
+            Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+            DCSA generates and distributes batches of Universal Service References (USRs)
+            to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+            A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+            or independently for one of its own non-VSA, non-Alliance services.
+
+            Every Universal Service Reference is an 8-character string with the following format:
+             * the prefix "SR"
+             * 5 digits
+             * 1 uppercase English letter (A-Z).
+          example: "SR12345A"
+      description: "Carrier service code and/or universal service reference"
     TerminalCall:
       type: "object"
       properties:
@@ -990,36 +1025,18 @@ components:
           type: "string"
           description: "The carrier-specific name of the service for which the schedule details are published."
           example: "Great Lion Service"
-        carrierServiceCode:
-          maxLength: 11
-          type: "string"
-          description: "The carrier-specific code of the service for which the schedule details are published."
-          example: "FE1"
-        universalServiceReference:
-          maxLength: 8
-          type: "string"
-          description: "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service."
-          example: "SR12345A"
-        carrierImportVoyageNumber:
-          maxLength: 50
-          type: "string"
-          description: "Carrier-specific identifier of the import voyage."
-          example: "2208N"
-        universalImportVoyageReference:
-          maxLength: 5
-          type: "string"
-          description: "Universal identifier of the import voyage."
-          example: "2301W"
-        carrierExportVoyageNumber:
-          maxLength: 50
-          type: "string"
-          description: "Carrier-specific identifier of the export voyage."
-          example: "2208N"
-        universalExportVoyageReference:
-          maxLength: 5
-          type: "string"
-          description: "Universal identifier of the export voyage."
-          example: "2301W"
+        serviceCodeOrReference:
+          description: "Carrier service code and/or universal service reference"
+          allOf:
+          - $ref: "#/components/schemas/ServiceCodeOrReference"
+        exportVoyageNumberOrReference:
+          description: "Export voyage number or reference"
+          allOf:
+          - $ref: "#/components/schemas/VoyageNumberOrReference"
+        importVoyageNumberOrReference:
+          description: "Import voyage number or reference"
+          allOf:
+          - $ref: "#/components/schemas/VoyageNumberOrReference"
         isOmitted:
           type: "boolean"
           description: "Flag indicating whether the terminal call is omitted by the carrier."
@@ -1028,22 +1045,12 @@ components:
     Timestamp:
       type: "object"
       properties:
-        timestampID:
-          type: "string"
-          description: "Universal unique identifier of the timestamp"
-          format: "uuid"
-          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
-        replyToTimestampID:
-          type: "string"
-          description: "Universal unique identifier of the timestamp to which this timestamp is a reply"
-          format: "uuid"
-          example: "3910eb91-8791-4699-8029-8bba8cedb6f5"
         classifierCode:
           maxLength: 3
           type: "string"
           description: |
-            Code identifying the type of this timestamp
-            [as defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
+            Code identifying the type of this timestamp within the context of
+            [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf):
             - `ACT` (Actual)
             - `EST` (Estimated)
             - `PLN` (Planned)
@@ -1079,8 +1086,8 @@ components:
             maxLength: 3
             type: "string"
             description: |
-              Code identifying the reason for a delay, as defined by SMDG here:
-              https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+              Code identifying the reason for a delay,
+              [as defined by SMDG](https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/).
             example: "STR"
         remark:
           maxLength: 500
@@ -1088,8 +1095,9 @@ components:
           description: "Free text used to provide any relevant additional information."
           example: "Port closed due to strike"
       description: |
-        Date and time (and related metadata) of a port call service,
-        exchanged between the service provider and service consumer as part of the "ERP" pattern.
+        Timestamp and associated metadata of a port call service,
+        exchanged between the service provider and service consumer as part of
+        [the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).
     Vessel:
       type: "object"
       properties:
@@ -1161,7 +1169,7 @@ components:
         lengthOverall:
           type: "number"
           description: |
-            The maximum length of a ship's hull measured parallel to the waterline (Length OverAll).
+            The maximum length of the vessel's hull measured parallel to the waterline ("length overall").
           format: "float"
           example: 245.45
         width:
@@ -1209,6 +1217,28 @@ components:
           format: "float"
           example: 35
       description: "Vessel information relevant for a port call service"
+    VoyageNumberOrReference:
+      type: "object"
+      properties:
+        carrierVoyageNumber:
+          type: "string"
+          description: "Carrier-specific identifier of the voyage"
+          example: "2103S"
+        universalVoyageReference:
+          maxLength: 5
+          type: "string"
+          description: |
+            Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+            Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+            either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+            Every Universal Voyage Reference is a 5-character string with the following format:
+             * the last 2 digits of the year
+             * 2 alphanumeric characters for the sequence number of the voyage
+             * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).
+          example: "2301W"
+      description: "Carrier voyage number and/or universal voyage reference"
   headers:
     API-Version:
       description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."

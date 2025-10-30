@@ -1,12 +1,11 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.party.PintSendingPlatform;
-
-import java.util.Map;
 
 @Getter
 @Slf4j

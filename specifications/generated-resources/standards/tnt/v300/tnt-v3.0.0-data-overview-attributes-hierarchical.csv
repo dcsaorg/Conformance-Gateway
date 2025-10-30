@@ -111,7 +111,10 @@ following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.",
 - `SHI` (Shipper)
 - `PHY` (Phytosanitary)
 - `VET` (Veterinary)
-- `CUS` (Customs)",
+- `CUS` (Customs)
+
+In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).",
 "Event / equipmentDetails / seals / type",type,string,,,,WIR,"The type of seal.
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
@@ -242,34 +245,14 @@ More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "Event / eventRouting / destinationParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "Event / eventRouting / destinationParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "Event / eventRouting / destinationParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "Event / eventRouting / forwardingParties",forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
 "Event / eventRouting / forwardingParties / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
@@ -277,34 +260,14 @@ or a subsequent revision.",
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "Event / eventRouting / forwardingParties / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "Event / eventRouting / forwardingParties / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "Event / eventRouting / forwardingParties / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "Event / eventRouting / originatingParty",originatingParty,Party,,,,,"The initial party with which the event originated.",
 "Event / eventRouting / originatingParty / codeListName",codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
@@ -312,34 +275,14 @@ or a subsequent revision.",
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 "Event / eventRouting / originatingParty / codeListProvider",codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 "Event / eventRouting / originatingParty / partyCode",partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 "Event / eventRouting / originatingParty / partyFunction",partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 "Event / eventUpdatedDateTime",eventUpdatedDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the technical event was last updated.",
 "Event / iotDetails",iotDetails,IotDetails,,,,,"IoT-specific details",
@@ -491,16 +434,32 @@ It can vary per carrier.",
 and/or plans to mitigate schedule slippage.",
 "Event / transportDetails / delayReasonCodes",delayReasonCodes,"string list",,maxLength=3,,,"Codes identifying the reasons for a delay
 Item description:
-Code identifying the reason for a delay, as defined by SMDG here:
-https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+Code identifying the reason for a delay,
+[as defined by SMDG](https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/).
 ",
 "Event / transportDetails / transportCall",transportCall,TransportCall,,,,,"Transport call information",
 "Event / transportDetails / transportCall / exportVoyageNumberOrReference","exportVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Export voyage number or reference",
 "Event / transportDetails / transportCall / exportVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-"Event / transportDetails / transportCall / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"Event / transportDetails / transportCall / exportVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 "Event / transportDetails / transportCall / importVoyageNumberOrReference","importVoyageNumberOrReference",VoyageNumberOrReference,,,,,"Import voyage number or reference",
 "Event / transportDetails / transportCall / importVoyageNumberOrReference / carrierVoyageNumber",carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-"Event / transportDetails / transportCall / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+"Event / transportDetails / transportCall / importVoyageNumberOrReference / universalVoyageReference",universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 "Event / transportDetails / transportCall / modeOfTransport",modeOfTransport,string,,maxLength=50,,VESSEL,"The mode of transport as defined by DCSA
 - `VESSEL` - Vessel
 - `RAIL` - Rail
@@ -516,7 +475,18 @@ The reference is provided by the port to uniquely identify a port call.",
 "Event / transportDetails / transportCall / railTransport / railServiceReference",railServiceReference,string,,maxLength=50,,,"Reference of the rail service on which the equipment is transported.",
 "Event / transportDetails / transportCall / serviceCodeOrReference",serviceCodeOrReference,ServiceCodeOrReference,,,,,"Carrier service code and/or universal service reference",
 "Event / transportDetails / transportCall / serviceCodeOrReference / carrierServiceCode",carrierServiceCode,string,,,,FE1,"Carrier-specific identifier of a service.",
-"Event / transportDetails / transportCall / serviceCodeOrReference / universalServiceReference","universalServiceReference",string,,,,SR12345A,"Reference of a service agreed between the VSA partners.",
+"Event / transportDetails / transportCall / serviceCodeOrReference / universalServiceReference","universalServiceReference",string,,maxLength=8,,SR12345A,"Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+DCSA generates and distributes batches of Universal Service References (USRs)
+to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+or independently for one of its own non-VSA, non-Alliance services.
+
+Every Universal Service Reference is an 8-character string with the following format:
+ * the prefix ""SR""
+ * 5 digits
+ * 1 uppercase English letter (A-Z).",
 "Event / transportDetails / transportCall / transportCallReference",transportCallReference,string,,,,,"Carrier-defined reference of a `TransportCall`.
 
 If the mode of transport is Vessel and the facility is a Port or Terminal,

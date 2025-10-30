@@ -23,11 +23,10 @@ class EblIssuanceScenarioListBuilder extends ScenarioListBuilder<EblIssuanceScen
     super(actionBuilder);
   }
 
-  public static Map<String, EblIssuanceScenarioListBuilder>
-      createModuleScenarioListBuilders(
-          EblIssuanceComponentFactory componentFactory,
-          String carrierPartyName,
-          String platformPartyName) {
+  public static Map<String, EblIssuanceScenarioListBuilder> createModuleScenarioListBuilders(
+      EblIssuanceComponentFactory componentFactory,
+      String carrierPartyName,
+      String platformPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);

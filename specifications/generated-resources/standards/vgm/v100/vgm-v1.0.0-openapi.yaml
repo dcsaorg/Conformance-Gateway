@@ -57,11 +57,11 @@ paths:
         * `transportDocumentReference`, `equipmentReference`
 
         Every VGM Producer must support combining any of the query parameter filters above with all of these additional filters:
-        * `vgmUpdatedDateTimeMin`
-        * `vgmUpdatedDateTimeMax`
-        * `vgmUpdatedDateTimeMin`, `vgmUpdatedDateTimeMax`
+        * `declarationDateTimeMin`
+        * `declarationDateTimeMax`
+        * `declarationDateTimeMin`, `declarationDateTimeMax`
 
-        Each VGM Producer can separately also decide to have default relative date ranges and only return VGM declarations having an `updatedDateTime` within those ranges.
+        Each VGM Producer can separately also decide to have default relative date ranges and only return VGM declarations having a `declarationDateTime` within those ranges.
 
         When receiving requests containing an unsupported query parameter, a VGM Producer can choose to either ignore the query parameter (if possible) or to reject the request with an HTTP 400.
 
@@ -100,39 +100,39 @@ paths:
       parameters:
       - name: "carrierBookingReference"
         in: "query"
-        description: "Reference of the transport document for which to return the associated VGMs"
+        description: "Reference of the booking for which to return the associated VGM declarations"
         schema:
           type: "string"
-        example: "HHL71800000"
+        example: "ABC709951"
       - name: "transportDocumentReference"
         in: "query"
-        description: "Reference of the transport document for which to return the associated VGMs"
+        description: "Reference of the transport document for which to return the associated VGM declarations"
         schema:
           type: "string"
         example: "HHL71800000"
       - name: "equipmentReference"
         in: "query"
-        description: "Reference of the equipment for which to return the associated VGMs"
+        description: "Reference of the equipment for which to return the associated VGM declarations"
         schema:
           type: "string"
         example: "APZU4812090"
-      - name: "updatedDateTimeMin"
+      - name: "declarationDateTimeMin"
         in: "query"
-        description: "Retrieve VGMs with an `updatedDateTime` at or after this timestamp"
+        description: "Retrieve VGM declarations with a `declarationDateTime` at or after this timestamp"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
-      - name: "updatedDateTimeMax"
+      - name: "declarationDateTimeMax"
         in: "query"
-        description: "Retrieve VGMs with an `updatedDateTime` at or before this timestamp"
+        description: "Retrieve VGM declarations with a `declarationDateTime` at or before this timestamp"
         schema:
           type: "string"
           format: "date-time"
         example: "2025-01-23T01:23:45Z"
       - name: "limit"
         in: "query"
-        description: "Maximum number of VGMs to include in each page of the response."
+        description: "Maximum number of VGM declarations to include in each page of the response."
         schema:
           type: "integer"
           format: "int32"
@@ -260,26 +260,6 @@ components:
           description: "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)"
           example: "NL"
       description: "An object for storing address-related information."
-    ClassifiedDateTime:
-      type: "object"
-      properties:
-        value:
-          maxLength: 30
-          type: "string"
-          description: |
-            Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
-          format: "date-time"
-          example: "2025-01-23T01:23:45Z"
-        classifier:
-          maxLength: 10
-          type: "string"
-          description: |-
-            Classifier denoting whether an event is planned, estimated or actual
-            - `PLN` - Planned
-            - `EST` - Estimated
-            - `ACT` - Actual
-          example: "EST"
-      description: "Date and time classified as planned, estimated or actual"
     ContactDetails:
       type: "object"
       properties:
@@ -301,45 +281,6 @@ components:
           description: "Contact email address"
           example: "jane.doe@example.com"
       description: "The contact details of a person."
-    DocumentReference:
-      type: "object"
-      properties:
-        typeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of a document reference
-            - `AMF` - Advance Manifest Filing (of any subtype)
-            - `ARN` - Arrival Notice
-            - `BKG` - Booking
-            - `CAS` - Cargo Survey
-            - `CBR` - Carrier Booking Request
-            - `CEA` - Certificate of Analysis
-            - `CEO` - Certificate of Origin
-            - `CQU` - Contract Quotation
-            - `CRO` - Container Release Order
-            - `CUC` - Customs Clearance
-            - `DEI` - Delivery Instructions
-            - `DEO` - Delivery Order
-            - `DGD` - Dangerous Goods Declaration
-            - `FCE` - Fumigation Certificate
-            - `HCE` - Health Certificate
-            - `ICE` - Inspection Certificate
-            - `INV` - Invoice
-            - `OOG` - Out of Gauge
-            - `PCE` - Phytosanitary Certificate
-            - `PFD` - Proof of Delivery
-            - `SHI` - Shipping Instruction
-            - `TRD` - Transport Document
-            - `TRO` - Transport Order
-            - `VCE` - Veterinary Certificate
-            - `VGM` - Verified Gross Mass
-          example: "BKG"
-        reference:
-          maxLength: 100
-          type: "string"
-          description: "Reference identifying the document"
-          example: "123e4567e89b"
-      description: "Referenced document"
     EquipmentDetails:
       type: "object"
       properties:
@@ -381,7 +322,7 @@ components:
           description: "The tare weight of the container"
           allOf:
           - $ref: "#/components/schemas/Weight"
-      description: "VGM details specific to the equipment"
+      description: "VGM declaration details specific to the equipment"
     Facility:
       type: "object"
       properties:
@@ -426,7 +367,7 @@ components:
           description: |
             [JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
             about which the feedback is provided (if applicable)
-          example: "$.VGMs[2].location"
+          example: "$.VGMDeclarations[2].location"
       description: |
         An individual piece of feedback (potentially out of several) providing information on how an API request is processed
     GeoCoordinate:
@@ -458,7 +399,7 @@ components:
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
-        Error API response to a `GET VGMs` request
+        Error API response to a `GET VGM declarations` request
     GetVGMDeclarationsResponse:
       type: "object"
       properties:
@@ -475,7 +416,7 @@ components:
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
-        API response to a `GET VGMs` request
+        API response to a `GET VGM declarations` request
     Location:
       type: "object"
       properties:
@@ -525,6 +466,29 @@ components:
           allOf:
           - $ref: "#/components/schemas/GeoCoordinate"
       description: "Location information"
+    OtherReference:
+      type: "object"
+      properties:
+        typeCode:
+          type: "string"
+          description: |-
+            Code qualifying a reference.
+
+            In addition to the codes listed here, any other code as defined in
+            [UN/EDIFACT 16A 1153](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred1153.htm)
+            or a subsequent revision may also be used.
+
+            - `AOW` - Transportation Control Number (TCN)
+            - `SI` - Shipper's identifying number for shipment (SID)
+            - `SQ` - Equipment sequence number
+            - `VOR` - Transport equipment gross mass verification order reference
+          example: "SI"
+        reference:
+          maxLength: 100
+          type: "string"
+          description: "The actual reference value"
+          example: "A456C"
+      description: "Other reference"
     Party:
       type: "object"
       properties:
@@ -539,31 +503,11 @@ components:
           type: "string"
           description: |
             Code of the provider of a list of codes identifying a party, including but not limited to:
-            - `BOLE` (Bolero)
-            - `BRIT` (BRITC eBL)
-            - `CARX` (CargoX)
-            - `COVA` (Covantis)
-            - `CRED` (Credore)
-            - `DCSA` (Digital Container Shipping Association)
-            - `DNB` (Dun and Bradstreet)
-            - `ESSD` (EssDOCS)
-            - `ETEU` (eTEU)
-            - `ETIT` (e-title)
-            - `FMC` (Federal Maritime Commission)
-            - `GLEIF` (Global Legal Entity Identifier Foundation)
-            - `GSBN` (Global Shipping Business Network)
-            - `IDT` (ICE Digital Trade)
-            - `IQAX` (IQAX)
-            - `KTNE` (KTNET)
-            - `NMFTA` (National Motor Freight Traffic Association)
-            - `SECR` (Secro)
             - `SMDG` (Ship Message Design Group)
-            - `TRAC` (Enigio trace:original)
-            - `TRGO` (TradeGO)
-            - `W3C` (World Wide Web Consortium)
-            - `WAVE` (Wave)
-            - `WISE` (WiseTech)
             - `ZZZ` (Mutually defined)
+
+            or any other code as defined in the
+            [DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).
           example: "W3C"
         codeListName:
           maxLength: 100
@@ -579,7 +523,7 @@ components:
           type: "string"
           description: |
             Code identifying the function of the party, as defined in
-            [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+            [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
             or a subsequent revision.
           example: "CA"
       description: "Identification of a container shipping party"
@@ -615,17 +559,17 @@ components:
             At least one feedback element of severity `ERROR` is expected.
             Lower severity feedback elements may also be included.
 
-            When sent in response to a request that contains an array of VGMs,
-            the order of the `feedbackElements` is not related to the list of request VGMs.
-            Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.
+            When sent in response to a request that contains an array of VGM declarations,
+            the order of the `feedbackElements` is not related to the list of request VGM declarations.
+            Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
-        Error API response to a `POST VGMs` request.
+        Error API response to a `POST VGM declarations` request.
 
-        If some of the VGMs in the request were successfully processed,
-        a regular `PostVGMsResponse` is expected to be used instead,
-        with `feedbackElements` indicating which VGMs were not processed and why.
+        If some of the VGM declarations in the request were successfully processed,
+        a regular `PostVGMDeclarationsResponse` is expected to be used instead,
+        with `feedbackElements` indicating which VGM declarations were not processed and why.
     PostVGMDeclarationsRequest:
       type: "object"
       properties:
@@ -644,29 +588,29 @@ components:
             Optional list of feedback elements indicating how the request was processed.
 
             There can be zero, one or more feedback elements per event in the request.
-            The order of `feedbackElements` is not related to the order of VGMs in the request.
-            Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.
+            The order of `feedbackElements` is not related to the order of VGM declarations in the request.
+            Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.
           items:
             $ref: "#/components/schemas/FeedbackElement"
       description: |
-        API response to a `POST VGMs` request
+        API response to a `POST VGM declarations` request
     RoutingDetails:
       type: "object"
       properties:
         originatingParty:
           description: |
-            The initial party with which the event originated.
+            The initial party with which the VGM declaration originated.
           allOf:
           - $ref: "#/components/schemas/Party"
         forwardingParties:
           type: "array"
           description: |
-            Ordered list of parties forwarding the event between the originating and destination party.
+            Ordered list of parties forwarding the VGM declaration between the originating and destination party.
           items:
             $ref: "#/components/schemas/Party"
         destinationParty:
           description: |
-            The final party intended as destination of the event.
+            The final party intended as destination of the VGM declaration.
           allOf:
           - $ref: "#/components/schemas/Party"
       description: |
@@ -688,6 +632,9 @@ components:
             - `PHY` (Phytosanitary)
             - `VET` (Veterinary)
             - `CUS` (Customs)
+
+            In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+            both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).
           example: "CUS"
         type:
           type: "string"
@@ -707,58 +654,21 @@ components:
         carrierBookingReference:
           maxLength: 35
           type: "string"
-          description: "The reference of the booking for which this VGM was created"
+          description: "The reference of the booking for which this VGM declaration was created"
           example: "ABC709951"
         transportDocumentReference:
           maxLength: 20
           type: "string"
-          description: "The reference of the transport document for which this VGM was created"
+          description: "The reference of the transport document for which this VGM declaration was created"
           example: "HHL71800000"
-        documentReferences:
+        otherReferences:
           type: "array"
-          description: "Additional list of document references related to this event"
+          description: |
+            List of additional references related to the VGM declaration,
+            excluding the Carrier Booking Reference and the Transport Document Reference
           items:
-            $ref: "#/components/schemas/DocumentReference"
-        shipmentReferences:
-          type: "array"
-          description: "Additional list of shipment references related to this event"
-          items:
-            $ref: "#/components/schemas/ShipmentReference"
-      description: "VGM details specific to the shipment"
-    ShipmentReference:
-      type: "object"
-      properties:
-        typeCode:
-          type: "string"
-          description: |-
-            Code used to denote the type of a shipment reference
-            - `AAO` - Consignee’s Reference
-            - `AES` - Automated Export System
-            - `BID` - Booking Request ID
-            - `BPR` - Booking party reference number
-            - `CER` - Canadian Export Reporting System
-            - `CR` - Customer’s Reference
-            - `CSI` - Customer shipment ID
-            - `DUE` - Declaração Única de Exportação
-            - `ECR` - Empty container release reference
-            - `EQ` - Equipment Reference
-            - `FF` - Freight Forwarder’s Reference
-            - `PO` - Purchase Order Reference
-            - `RUC` - Registro Único del Contribuyente
-            - `SI` - Shipper’s Reference
-          example: "FF"
-        reference:
-          maxLength: 100
-          type: "string"
-          description: "The actual reference value"
-          example: "123e4567e89b"
-      description: |
-        References provided by the shipper or freight forwarder at the time of booking or at the time of providing shipping instructions.
-        Carriers share it back when providing track and trace event updates, some are also printed on the B/L.
-        Customers can use these references to track shipments in their internal systems.
-
-        In addition to the References provided by the shipper or freight forwarder,
-        the carrier can provide an extra type called `EQ` which is a reference to an Equipment.
+            $ref: "#/components/schemas/OtherReference"
+      description: "VGM declaration details specific to the shipment"
     VGM:
       type: "object"
       properties:
@@ -812,11 +722,11 @@ components:
         isRetracted:
           type: "boolean"
           description: |
-            Flag indicating that the VGM is retracted.
+            Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
 
-            The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+            The data in all previously transmitted VGM declarations with the same `declarationReference` must be discarded or ignored.
 
-            If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).
+            If this flag is set, any data in this `VGMDeclaration` object other than the `declarationReference` is irrelevant (if present).
         declarationDateTime:
           maxLength: 30
           type: "string"
@@ -829,15 +739,15 @@ components:
           allOf:
           - $ref: "#/components/schemas/VGM"
         equipmentDetails:
-          description: "VGM details specific to the equipment"
+          description: "VGM declaration details specific to the equipment"
           allOf:
           - $ref: "#/components/schemas/EquipmentDetails"
         shipmentDetails:
-          description: "VGM details specific to the shipment"
+          description: "VGM declaration details specific to the shipment"
           allOf:
           - $ref: "#/components/schemas/ShipmentDetails"
         vesselVoyageDetails:
-          description: "VGM details specific to the vessel voyage"
+          description: "VGM declaration details specific to the vessel voyage"
           allOf:
           - $ref: "#/components/schemas/VesselVoyageDetails"
         responsibleParty:
@@ -912,7 +822,7 @@ components:
           type: "string"
           description: "Vessel name"
           example: "King of the Seas"
-      description: "VGM details specific to the vessel voyage"
+      description: "VGM declaration details specific to the vessel voyage"
     VoyageNumberOrReference:
       type: "object"
       properties:
@@ -921,9 +831,19 @@ components:
           description: "Carrier-specific identifier of the voyage"
           example: "2103S"
         universalVoyageReference:
+          maxLength: 5
           type: "string"
-          description: "Reference of the voyage agreed between the VSA partners"
-          example: "SR12345A"
+          description: |
+            Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+            Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+            either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+            Every Universal Voyage Reference is a 5-character string with the following format:
+             * the last 2 digits of the year
+             * 2 alphanumeric characters for the sequence number of the voyage
+             * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).
+          example: "2301W"
       description: "Carrier voyage number and/or universal voyage reference"
     Weight:
       type: "object"
@@ -940,8 +860,6 @@ components:
             Measurement unit in which the weight `value` is expressed:
             - `KGM` (Kilograms)
             - `LBR` (Pounds)
-            - `GRM` (Grams)
-            - `ONZ` (Ounce)
           example: "KGM"
       description: "Weight value and measurement unit"
   headers:

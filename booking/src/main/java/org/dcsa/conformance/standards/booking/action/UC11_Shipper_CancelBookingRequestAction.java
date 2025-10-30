@@ -70,10 +70,7 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
                         HttpMessageType.REQUEST,
                         requestSchemaValidator))),
             getNotificationChecks(
-                expectedApiVersion,
-                notificationSchemaValidator,
-                expectedBookingStatus,
-                null));
+                expectedApiVersion, notificationSchemaValidator, expectedBookingStatus, null));
       }
     };
   }

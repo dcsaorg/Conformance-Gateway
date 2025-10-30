@@ -50,14 +50,14 @@ public class JsonAttributeCheck extends ActionCheck {
 
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Collections.emptySet();
+    if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
     JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
     var actualValue = jsonBody.at(jsonPointer).asText(null);
-    if (expectedValue.equals(actualValue)) return Collections.emptySet();
-    return Set.of(
+    if (expectedValue.equals(actualValue)) return ConformanceCheckResult.simple(Collections.emptySet());
+    return ConformanceCheckResult.simple(Set.of(
         "The value of '%s' was '%s' instead of '%s'"
-            .formatted(renderJsonPointer(jsonPointer), renderValue(actualValue), renderValue(expectedValue)));
+            .formatted(renderJsonPointer(jsonPointer), renderValue(actualValue), renderValue(expectedValue))));
   }
 }

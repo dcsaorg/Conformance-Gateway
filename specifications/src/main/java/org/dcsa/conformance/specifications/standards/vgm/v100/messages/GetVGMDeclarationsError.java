@@ -8,7 +8,7 @@ import lombok.Data;
 @Schema(
     description =
 """
-Error API response to a `GET VGMs` request
+Error API response to a `GET VGM declarations` request
 """)
 public class GetVGMDeclarationsError {
 

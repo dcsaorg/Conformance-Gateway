@@ -22,6 +22,5 @@ signatures in a PINT (Platform Interoperability) scenario.
 - Response may include updated `missingAdditionalDocumentChecksums` if additional documents are still required
 - The receiving platform should validate the fresh signatures appropriately
 
-
 This tests your platform's ability to re-sign transfer data and the receiving platform's ability to validate renewed
 signatures according to PINT interoperability standards.

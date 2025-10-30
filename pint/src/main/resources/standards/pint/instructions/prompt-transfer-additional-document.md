@@ -33,6 +33,5 @@ Platform Interoperability) scenario.
 - **HTTP 4xx**: Document rejected due to validation errors (for corrupted/unrelated documents)
 - **Signed response payload**: May include completion confirmation for some scenarios
 
-
 This tests your platform's ability to handle additional document transfers and the receiving platform's document
 validation capabilities according to PINT interoperability standards.

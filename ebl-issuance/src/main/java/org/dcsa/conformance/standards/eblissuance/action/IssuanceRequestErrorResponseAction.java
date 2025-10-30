@@ -1,6 +1,10 @@
 package org.dcsa.conformance.standards.eblissuance.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
@@ -8,14 +12,8 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
-import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
-
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @Getter
 @Slf4j

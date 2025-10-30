@@ -1,12 +1,11 @@
 package org.dcsa.conformance.standards.ebl.crypto;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.SneakyThrows;
-import org.erdtman.jcs.JsonCanonicalizer;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
+import lombok.SneakyThrows;
+import org.erdtman.jcs.JsonCanonicalizer;
 
 public class Checksums {
 

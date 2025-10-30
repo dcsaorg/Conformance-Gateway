@@ -4,7 +4,8 @@ validation parameters you configured earlier.
 **What happens in this test:**
 
 - The conformance system will send a validation request to your receiving platform's validation endpoint
-- The request will include the party validation parameters you configured (`codeListProvider`, `partyCode` and `codeListName`)
+- The request will include the party validation parameters you configured (`codeListProvider`, `partyCode` and
+  `codeListName`)
 - Your platform should validate the party information and respond appropriately
 
 **Validation parameters being tested:**

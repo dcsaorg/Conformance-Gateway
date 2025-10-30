@@ -26,16 +26,12 @@ public class CarrierShippingInstructions {
   private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
   private static final String FEEDBACKS = "feedbacks";
 
-
   private static final String SHIPPING_INSTRUCTIONS_REFERENCE = "shippingInstructionsReference";
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
   private static final String TRANSPORT_DOCUMENT_STATUS = "transportDocumentStatus";
 
   private static final String[] METADATA_FIELDS_TO_PRESERVE = {
-    SHIPPING_INSTRUCTIONS_REFERENCE,
-    TRANSPORT_DOCUMENT_REFERENCE,
-    SI_STATUS,
-    UPDATED_SI_STATUS,
+    SHIPPING_INSTRUCTIONS_REFERENCE, TRANSPORT_DOCUMENT_REFERENCE, SI_STATUS, UPDATED_SI_STATUS,
   };
 
   private static final String[] COPY_SI_INTO_TD_FIELDS = {
@@ -68,19 +64,20 @@ public class CarrierShippingInstructions {
     "isShippedOnBoardType",
   };
 
-  private static final Map<String, VesselDetails> CARRIER_SMDG_2_VESSEL = Map.ofEntries(
-    Map.entry("CMA", new VesselDetails("9839179", "CMA CGM Jacques Saadé")),
-    Map.entry("EMC", new VesselDetails("9893890", "Ever Ace")),
-    Map.entry("HLC", new VesselDetails("9540118", "Berlin Express")),
-    Map.entry("HMM", new VesselDetails("9863297", "HMM Algeciras")),
-    Map.entry("MSK", new VesselDetails("9778791", "Madrid Maersk")),
-    Map.entry("MSC", new VesselDetails("9839430", "MSC Gülsün")),
-    Map.entry("ONE", new VesselDetails("9865879", "CONFIDENCE")),
-    Map.entry("YML", new VesselDetails("9757228", "YM WARRANTY")),
-    Map.entry("ZIM", new VesselDetails("9699115", "ZIM WILMINGTON"))
-  );
+  private static final Map<String, VesselDetails> CARRIER_SMDG_2_VESSEL =
+      Map.ofEntries(
+          Map.entry("CMA", new VesselDetails("9839179", "CMA CGM Jacques Saadé")),
+          Map.entry("EMC", new VesselDetails("9893890", "Ever Ace")),
+          Map.entry("HLC", new VesselDetails("9540118", "Berlin Express")),
+          Map.entry("HMM", new VesselDetails("9863297", "HMM Algeciras")),
+          Map.entry("MSK", new VesselDetails("9778791", "Madrid Maersk")),
+          Map.entry("MSC", new VesselDetails("9839430", "MSC Gülsün")),
+          Map.entry("ONE", new VesselDetails("9865879", "CONFIDENCE")),
+          Map.entry("YML", new VesselDetails("9757228", "YM WARRANTY")),
+          Map.entry("ZIM", new VesselDetails("9699115", "ZIM WILMINGTON")));
 
-  private static Function<String, JsonNode> issuingCarrier(String name, String smdgCode, String countryCode) {
+  private static Function<String, JsonNode> issuingCarrier(
+      String name, String smdgCode, String countryCode) {
     return (String version) -> {
       var issuingCarrier = OBJECT_MAPPER.createObjectNode().put("partyName", name);
       issuingCarrier
@@ -100,18 +97,19 @@ public class CarrierShippingInstructions {
 
   // Randomize the issuing carrier to avoid favouring a particular carrier
   @SuppressWarnings("unchecked")
-  private static final Function<String, JsonNode>[] ISSUING_CARRIER_DEFINITIONS = new Function[]{
-    // Name is from the SMDG code list
-    issuingCarrier("CMA CGM", "CMA", "US"),
-    issuingCarrier("Evergreen Marine Corporation", "EMC", "TW"),
-    issuingCarrier("Hapag Lloyd", "HLC", "DE"),
-    issuingCarrier("Hyundai", "HMM", "KR"),
-    issuingCarrier("Maersk", "MSK", "DK"),
-    issuingCarrier("Mediterranean Shipping Company", "MSC", "CH"),
-    issuingCarrier("Ocean Network Express Pte. Ltd.", "ONE", "JP"),
-    issuingCarrier("Yang Ming Line", "YML", "TW"),
-    issuingCarrier("Zim Israel Navigation Company", "ZIM", "IL")
-  };
+  private static final Function<String, JsonNode>[] ISSUING_CARRIER_DEFINITIONS =
+      new Function[] {
+        // Name is from the SMDG code list
+        issuingCarrier("CMA CGM", "CMA", "US"),
+        issuingCarrier("Evergreen Marine Corporation", "EMC", "TW"),
+        issuingCarrier("Hapag Lloyd", "HLC", "DE"),
+        issuingCarrier("Hyundai", "HMM", "KR"),
+        issuingCarrier("Maersk", "MSK", "DK"),
+        issuingCarrier("Mediterranean Shipping Company", "MSC", "CH"),
+        issuingCarrier("Ocean Network Express Pte. Ltd.", "ONE", "JP"),
+        issuingCarrier("Yang Ming Line", "YML", "TW"),
+        issuingCarrier("Zim Israel Navigation Company", "ZIM", "IL")
+      };
 
   private static TDField initialFieldValue(String attribute, String value) {
     return initialFieldValue(attribute, (o, a, v) -> o.put(a, value));
@@ -121,7 +119,8 @@ public class CarrierShippingInstructions {
     return initialFieldValue(attribute, (o, a, v) -> o.put(a, valueGenerator.get()));
   }
 
-  private static TDField initialFieldValue(String attribute, TriConsumer<ObjectNode, String, String> valueSetter) {
+  private static TDField initialFieldValue(
+      String attribute, TriConsumer<ObjectNode, String, String> valueSetter) {
     return new TDField(attribute, valueSetter, null);
   }
 
@@ -129,7 +128,10 @@ public class CarrierShippingInstructions {
     return new TDField(attribute, null, null);
   }
 
-  private static TDField field(String attribute, TriConsumer<ObjectNode, String, String> initializer, TriConsumer<ObjectNode, String, String> updater) {
+  private static TDField field(
+      String attribute,
+      TriConsumer<ObjectNode, String, String> initializer,
+      TriConsumer<ObjectNode, String, String> updater) {
     return new TDField(attribute, initializer, updater);
   }
 
@@ -146,10 +148,9 @@ public class CarrierShippingInstructions {
   }
 
   private record TDField(
-    String attribute,
-    TriConsumer<ObjectNode, String, String> initializer,
-    TriConsumer<ObjectNode, String, String> updater
-  ) {
+      String attribute,
+      TriConsumer<ObjectNode, String, String> initializer,
+      TriConsumer<ObjectNode, String, String> updater) {
 
     public void provideField(JsonNode source, ObjectNode dest, String standardsVersion) {
       var data = source != null ? source.get(attribute) : null;
@@ -195,23 +196,23 @@ public class CarrierShippingInstructions {
     initialFieldValue(
         "carrierCode",
         (o, a, v) -> {
-          var identifyingPartyCode = o.path("documentParties").path("issuingParty").path("identifyingCodes").path(0);
+          var identifyingPartyCode =
+              o.path("documentParties").path("issuingParty").path("identifyingCodes").path(0);
           ensureTrue(
-            Objects.equals(
-              identifyingPartyCode.path("codeListProvider").asText(), "SMDG"),
-            "Unexpected 'codeListProvider' for issuingParty"
-          );
+              Objects.equals(identifyingPartyCode.path("codeListProvider").asText(), "SMDG"),
+              "Unexpected 'codeListProvider' for issuingParty");
           ensureTrue(
-            Objects.equals(identifyingPartyCode.path("codeListName").asText(), "LCL"),
-            "Unexpected 'codeListName' for issuingParty"
-          );
+              Objects.equals(identifyingPartyCode.path("codeListName").asText(), "LCL"),
+              "Unexpected 'codeListName' for issuingParty");
           var result = identifyingPartyCode.path("partyCode");
           assert result.isTextual();
           o.set(a, result);
         }),
     initialFieldValue("carrierCodeListProvider", "SMDG"),
-    // We always add a charge per amendment to ensure an amendment is never identical to the document
-    // it replaces (which could cause issues with the issuance API). In reality, the carrier would also
+    // We always add a charge per amendment to ensure an amendment is never identical to the
+    // document
+    // it replaces (which could cause issues with the issuance API). In reality, the carrier would
+    // also
     // change some other detail (like the requested change or the issuance date). But in the
     // conformance tests every thing happens in the same day and when the conformance sandbox is
     // the carrier, booking amendments are "zero-change" amendments.
@@ -250,7 +251,8 @@ public class CarrierShippingInstructions {
                 }
               }));
 
-  private static void initializeTransports(ObjectNode td, ObjectNode transportsNode, String standardsVersion) {
+  private static void initializeTransports(
+      ObjectNode td, ObjectNode transportsNode, String standardsVersion) {
     var carrierCode = td.required("carrierCode").asText("<MISSING>");
     var vessel = CARRIER_SMDG_2_VESSEL.get(carrierCode);
     if (vessel == null) {
@@ -259,15 +261,16 @@ public class CarrierShippingInstructions {
     var today = LocalDate.now();
     // The voyage is/was based on scheduled voyage of "MARSEILLE MAERSK" ("402E") as it looked on
     // December 15th, 2023. The schedule has been rebased onto "today"
-    transportsNode.put("plannedDepartureDate", today.toString())
+    transportsNode
+        .put("plannedDepartureDate", today.toString())
         .put("plannedArrivalDate", today.plusDays(2).toString());
     transportsNode.set("portOfLoading", td.required("invoicePayableAt").deepCopy());
     unLocation(transportsNode.putObject("portOfDischarge"), "DEBRV");
     transportsNode
-      .putArray("vesselVoyages")
-      .addObject()
-      .put("vesselName", vessel.vesselName())
-      .put("carrierExportVoyageNumber", "402E");
+        .putArray("vesselVoyages")
+        .addObject()
+        .put("vesselName", vessel.vesselName())
+        .put("carrierExportVoyageNumber", "402E");
   }
 
   private static void unLocation(ObjectNode locationNode, String unlocationCode) {
@@ -278,27 +281,27 @@ public class CarrierShippingInstructions {
     if (!chargesArray.isArray()) {
       return;
     }
-    var charges = (ArrayNode)chargesArray;
+    var charges = (ArrayNode) chargesArray;
     if (charges.isEmpty()) {
       charges
-        .addObject()
-        .put("chargeName", "Fictive transport document fee")
-        .put("currencyAmount", 1f)
-        .put("currencyCode", "EUR")
-        .put("paymentTermCode", "COL")
-        .put("calculationBasis", "Per transport document")
-        .put("unitPrice", 1f)
-        .put("quantity", 1);
+          .addObject()
+          .put("chargeName", "Fictive transport document fee")
+          .put("currencyAmount", 1f)
+          .put("currencyCode", "EUR")
+          .put("paymentTermCode", "COL")
+          .put("calculationBasis", "Per transport document")
+          .put("unitPrice", 1f)
+          .put("quantity", 1);
     } else {
       charges
-        .addObject()
-        .put("chargeName", "Fictive amendment fee")
-        .put("currencyAmount", 1f)
-        .put("currencyCode", "EUR")
-        .put("paymentTermCode", "PRE")
-        .put("calculationBasis", "Per amendment")
-        .put("unitPrice", 1f)
-        .put("quantity", 1);
+          .addObject()
+          .put("chargeName", "Fictive amendment fee")
+          .put("currencyAmount", 1f)
+          .put("currencyCode", "EUR")
+          .put("paymentTermCode", "PRE")
+          .put("calculationBasis", "Per amendment")
+          .put("unitPrice", 1f)
+          .put("quantity", 1);
     }
   }
 
@@ -321,7 +324,7 @@ public class CarrierShippingInstructions {
     return this.state.required(SUBSCRIPTION_REFERENCE).asText("");
   }
 
-  public JsonNode getfeedbacks(){
+  public JsonNode getfeedbacks() {
     return getShippingInstructions().path(FEEDBACKS);
   }
 
@@ -346,7 +349,7 @@ public class CarrierShippingInstructions {
   }
 
   public Optional<ObjectNode> getUpdatedShippingInstructions() {
-    return Optional.ofNullable((ObjectNode)state.get(UPDATED_SI_DATA_FIELD));
+    return Optional.ofNullable((ObjectNode) state.get(UPDATED_SI_DATA_FIELD));
   }
 
   private void setUpdatedShippingInstructions(ObjectNode node) {
@@ -358,19 +361,25 @@ public class CarrierShippingInstructions {
     mutateShippingInstructionsAndUpdate(siData -> siData.remove(UPDATED_SI_STATUS));
   }
 
-
   public void cancelShippingInstructionsUpdate(String shippingInstructionsReference) {
-    checkState(shippingInstructionsReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
+    checkState(
+        shippingInstructionsReference,
+        getShippingInstructionsState(),
+        s -> s == SI_UPDATE_RECEIVED);
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_CANCELLED);
-
   }
 
-  public void provideFeedbackToShippingInstructions(String documentReference, Consumer<ArrayNode> feedbackGenerator) {
-    checkState(documentReference, getShippingInstructionsState(), s -> s != SI_PENDING_UPDATE && s != SI_COMPLETED );
+  public void provideFeedbackToShippingInstructions(
+      String documentReference, Consumer<ArrayNode> feedbackGenerator) {
+    checkState(
+        documentReference,
+        getShippingInstructionsState(),
+        s -> s != SI_PENDING_UPDATE && s != SI_COMPLETED);
     clearUpdatedShippingInstructions();
     changeSIState(SI_STATUS, SI_PENDING_UPDATE);
 
-    mutateShippingInstructionsAndUpdate(siData -> feedbackGenerator.accept(siData.putArray(FEEDBACKS)));
+    mutateShippingInstructionsAndUpdate(
+        siData -> feedbackGenerator.accept(siData.putArray(FEEDBACKS)));
   }
 
   public void acceptUpdatedShippingInstructions(String documentReference) {
@@ -404,13 +413,17 @@ public class CarrierShippingInstructions {
   }
 
   public void acceptSurrenderForAmendment(String documentReference) {
-    checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_AMENDMENT);
+    checkState(
+        documentReference,
+        getTransportDocumentState(),
+        s -> s == TD_PENDING_SURRENDER_FOR_AMENDMENT);
     var td = getTransportDocument().orElseThrow();
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_SURRENDERED_FOR_AMENDMENT.wireName());
   }
 
   public void voidTransportDocument(String documentReference) {
-    checkState(documentReference, getTransportDocumentState(), s -> s == TD_SURRENDERED_FOR_AMENDMENT);
+    checkState(
+        documentReference, getTransportDocumentState(), s -> s == TD_SURRENDERED_FOR_AMENDMENT);
     var td = getTransportDocument().orElseThrow();
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_VOIDED.wireName());
   }
@@ -425,19 +438,28 @@ public class CarrierShippingInstructions {
   }
 
   public void rejectSurrenderForAmendment(String documentReference) {
-    checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_AMENDMENT);
+    checkState(
+        documentReference,
+        getTransportDocumentState(),
+        s -> s == TD_PENDING_SURRENDER_FOR_AMENDMENT);
     var td = getTransportDocument().orElseThrow();
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_ISSUED.wireName());
   }
 
   public void acceptSurrenderForDelivery(String documentReference) {
-    checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_DELIVERY);
+    checkState(
+        documentReference,
+        getTransportDocumentState(),
+        s -> s == TD_PENDING_SURRENDER_FOR_DELIVERY);
     var td = getTransportDocument().orElseThrow();
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_SURRENDERED_FOR_DELIVERY.wireName());
   }
 
   public void rejectSurrenderForDelivery(String documentReference) {
-    checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_DELIVERY);
+    checkState(
+        documentReference,
+        getTransportDocumentState(),
+        s -> s == TD_PENDING_SURRENDER_FOR_DELIVERY);
     var td = getTransportDocument().orElseThrow();
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_ISSUED.wireName());
   }
@@ -447,7 +469,8 @@ public class CarrierShippingInstructions {
     //  1) The original ("black") state is RECEIVED, *and*
     //  2) There is no update received (that is "grey" is not UPDATE_RECEIVED)
     checkState(documentReference, getOriginalShippingInstructionState(), s -> s == SI_RECEIVED);
-    checkState(documentReference, getOriginalShippingInstructionState(), s -> s != SI_UPDATE_RECEIVED);
+    checkState(
+        documentReference, getOriginalShippingInstructionState(), s -> s != SI_UPDATE_RECEIVED);
     this.generateDraftTD(scenarioType);
     var tdData = getTransportDocument().orElseThrow();
     var tdr = tdData.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
@@ -465,14 +488,15 @@ public class CarrierShippingInstructions {
   private void updateTDForIssuance() {
     var td = getTransportDocument().orElseThrow();
     var date = LocalDate.now().toString();
-    var shippedDateField = td.path("isShippedOnBoardType").asBoolean(true)
-      ? "shippedOnBoardDate"
-      : "receivedForShipmentDate";
+    var shippedDateField =
+        td.path("isShippedOnBoardType").asBoolean(true)
+            ? "shippedOnBoardDate"
+            : "receivedForShipmentDate";
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_ISSUED.wireName())
-      .put("issueDate", date)
-      // Reset the shippedOnBoardDate as it generally cannot happen before the issueDate.
-      // It is less clear whether we should do it for receivedForShipmentDate but ¯\_(ツ)_/¯
-      .put(shippedDateField, date);
+        .put("issueDate", date)
+        // Reset the shippedOnBoardDate as it generally cannot happen before the issueDate.
+        // It is less clear whether we should do it for receivedForShipmentDate but ¯\_(ツ)_/¯
+        .put(shippedDateField, date);
   }
 
   public void surrenderForAmendmentRequest(String documentReference) {
@@ -487,7 +511,7 @@ public class CarrierShippingInstructions {
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_PENDING_SURRENDER_FOR_DELIVERY.wireName());
   }
 
-  private void copyFieldsWherePresent(JsonNode source, ObjectNode dest, String ... fields) {
+  private void copyFieldsWherePresent(JsonNode source, ObjectNode dest, String... fields) {
     for (var field : fields) {
       var data = source.get(field);
       if (data != null) {
@@ -512,19 +536,21 @@ public class CarrierShippingInstructions {
     handler.accept(transportDocument, scenarioType);
   }
 
-  private void fixupUtilizedTransportEquipments(ObjectNode transportDocument, ScenarioType scenarioType) {
+  private void fixupUtilizedTransportEquipments(
+      ObjectNode transportDocument, ScenarioType scenarioType) {
     // These code must be aligned with the equipment references.
-    var containerISOEquipmentCode = switch (scenarioType) {
-      case ACTIVE_REEFER, NON_OPERATING_REEFER -> "45R1";
-      case DG -> "22GP";
-      default -> "22G1";
-    };
+    var containerISOEquipmentCode =
+        switch (scenarioType) {
+          case ACTIVE_REEFER, NON_OPERATING_REEFER -> "45R1";
+          case DG -> "22GP";
+          default -> "22G1";
+        };
     var consignmentItemsNode = transportDocument.path("consignmentItems");
     for (JsonNode node : transportDocument.path("utilizedTransportEquipments")) {
       if (!node.isObject()) {
         continue;
       }
-      ObjectNode ute = (ObjectNode)node;
+      ObjectNode ute = (ObjectNode) node;
       var ref = ute.path("equipmentReference").asText("");
       // Shipper could provide a SOC, which is done via the equipment node.
       // If they do, we assume the information in there is correct and just copy
@@ -540,9 +566,9 @@ public class CarrierShippingInstructions {
       ute.remove("equipmentReference");
       if (scenarioType == ScenarioType.ACTIVE_REEFER) {
         ute.put("isNonOperatingReefer", false)
-          .putObject("activeReeferSettings")
-          .put("temperatureSetpoint", -18)
-          .put("temperatureUnit", "CEL");
+            .putObject("activeReeferSettings")
+            .put("temperatureSetpoint", -18)
+            .put("temperatureUnit", "CEL");
       } else if (scenarioType == ScenarioType.NON_OPERATING_REEFER) {
         ute.put("isNonOperatingReefer", true);
       }
@@ -567,7 +593,7 @@ public class CarrierShippingInstructions {
     if (!docParties.isObject()) {
       return;
     }
-    var docPartiesObject = (ObjectNode)docParties;
+    var docPartiesObject = (ObjectNode) docParties;
     var issuingParty = existingTd != null ? existingTd.path("issuingParty") : null;
     if (issuingParty == null || issuingParty.isMissingNode()) {
       issuingParty = issuingParty(getStandardsVersion());
@@ -577,39 +603,43 @@ public class CarrierShippingInstructions {
 
   private void provideCarriersAgentAtDestinationIfNecessary(ObjectNode td) {
     var docParties = td.path("documentParties");
-    var isCarriersAgentAtDestinationRequiredNode = this.getShippingInstructions().path("isCarriersAgentAtDestinationRequired");
+    var isCarriersAgentAtDestinationRequiredNode =
+        this.getShippingInstructions().path("isCarriersAgentAtDestinationRequired");
     if (!docParties.isObject()) {
       return;
     }
     final var key = "carriersAgentAtDestination";
-    var docPartiesObject = (ObjectNode)docParties;
+    var docPartiesObject = (ObjectNode) docParties;
     if (!isCarriersAgentAtDestinationRequiredNode.asBoolean(false)) {
       docPartiesObject.remove(key);
       return;
     }
     var carrierAgent = docPartiesObject.putObject(key);
     carrierAgent.put("partyName", "Local Agent in Bremerhaven");
-    carrierAgent.putObject("address")
-      .put("street", "Street and number of the agent")
-      .put("city", "Bremerhaven")
-      .put("countryCode", "DE");
-    carrierAgent.putArray("partyContactDetails")
-      .addObject()
-      .put("name", "Jane Doe")
-      .put("email", "no-one.local.agent@example.org");
+    carrierAgent
+        .putObject("address")
+        .put("street", "Street and number of the agent")
+        .put("city", "Bremerhaven")
+        .put("countryCode", "DE");
+    carrierAgent
+        .putArray("partyContactDetails")
+        .addObject()
+        .put("name", "Jane Doe")
+        .put("email", "no-one.local.agent@example.org");
   }
 
   private void changeSIState(String attributeName, ShippingInstructionsStatus newState) {
     if (newState == null && attributeName.equals(SI_STATUS)) {
       throw new IllegalArgumentException("The attribute " + SI_STATUS + " is mandatory");
     }
-    mutateShippingInstructionsAndUpdate(b -> {
-      if (newState != null) {
-        b.put(attributeName, newState.wireName());
-      } else {
-        b.remove(attributeName);
-      }
-    });
+    mutateShippingInstructionsAndUpdate(
+        b -> {
+          if (newState != null) {
+            b.put(attributeName, newState.wireName());
+          } else {
+            b.remove(attributeName);
+          }
+        });
   }
 
   private void mutateShippingInstructionsAndUpdate(Consumer<ObjectNode> mutator) {
@@ -618,18 +648,22 @@ public class CarrierShippingInstructions {
   }
 
   private static void checkState(
-    String reference, ShippingInstructionsStatus currentState, Predicate<ShippingInstructionsStatus> expectedState) {
+      String reference,
+      ShippingInstructionsStatus currentState,
+      Predicate<ShippingInstructionsStatus> expectedState) {
     if (!expectedState.test(currentState)) {
       throw new IllegalStateException(
-        "SI '%s' is in state '%s'".formatted(reference, currentState));
+          "SI '%s' is in state '%s'".formatted(reference, currentState));
     }
   }
 
   private static void checkState(
-    String reference, TransportDocumentStatus currentState, Predicate<TransportDocumentStatus> expectedState) {
+      String reference,
+      TransportDocumentStatus currentState,
+      Predicate<TransportDocumentStatus> expectedState) {
     if (!expectedState.test(currentState)) {
       throw new IllegalStateException(
-        "TD '%s' is in state '%s'".formatted(reference, currentState));
+          "TD '%s' is in state '%s'".formatted(reference, currentState));
     }
   }
 
@@ -638,14 +672,11 @@ public class CarrierShippingInstructions {
     getUpdatedShippingInstructions().ifPresent(amendedBooking -> amendedBooking.remove(FEEDBACKS));
   }
 
-  public void putShippingInstructions(String documentReference, ObjectNode newShippingInstructionData) {
+  public void putShippingInstructions(
+      String documentReference, ObjectNode newShippingInstructionData) {
     var currentState = getShippingInstructionsState();
 
-    checkState(
-      documentReference,
-      currentState,
-      s -> s != SI_COMPLETED
-    );
+    checkState(documentReference, currentState, s -> s != SI_COMPLETED);
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_RECEIVED);
     copyMetadataFields(getShippingInstructions(), newShippingInstructionData);
     setUpdatedShippingInstructions(newShippingInstructionData);
@@ -667,7 +698,6 @@ public class CarrierShippingInstructions {
     return ShippingInstructionsStatus.fromWireName(siData.required(SI_STATUS).asText());
   }
 
-
   public TransportDocumentStatus getTransportDocumentState() {
     var tdData = getTransportDocument().orElse(null);
     if (tdData == null) {
@@ -680,13 +710,15 @@ public class CarrierShippingInstructions {
     return TD_START;
   }
 
-  public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(ObjectNode siRequest, String standardsVersion) {
+  public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(
+      ObjectNode siRequest, String standardsVersion) {
     String sir = UUID.randomUUID().toString();
-    siRequest.put(SHIPPING_INSTRUCTIONS_REFERENCE, sir)
-      .put(SI_STATUS, SI_RECEIVED.wireName());
-    var state = OBJECT_MAPPER.createObjectNode()
-      .put(STD_VERSION_FIELD, standardsVersion)
-      .put(SUBSCRIPTION_REFERENCE, UUID.randomUUID().toString());
+    siRequest.put(SHIPPING_INSTRUCTIONS_REFERENCE, sir).put(SI_STATUS, SI_RECEIVED.wireName());
+    var state =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put(STD_VERSION_FIELD, standardsVersion)
+            .put(SUBSCRIPTION_REFERENCE, UUID.randomUUID().toString());
     state.set(SI_DATA_FIELD, siRequest);
     return new CarrierShippingInstructions(state);
   }
@@ -707,7 +739,8 @@ public class CarrierShippingInstructions {
     return r;
   }
 
-  public static CarrierShippingInstructions fromPersistentStore(JsonNodeMap jsonNodeMap, String shippingInstructionsReference) {
+  public static CarrierShippingInstructions fromPersistentStore(
+      JsonNodeMap jsonNodeMap, String shippingInstructionsReference) {
     var data = jsonNodeMap.load(notNull(shippingInstructionsReference));
     if (data == null) {
       throw new IllegalArgumentException("Unknown SI Reference: " + shippingInstructionsReference);
@@ -722,7 +755,7 @@ public class CarrierShippingInstructions {
   private void copyMetadataFields(JsonNode originalBooking, ObjectNode updatedBooking) {
     for (String field : METADATA_FIELDS_TO_PRESERVE) {
       var previousValue = originalBooking.path(field);
-      if (previousValue != null && previousValue.isTextual()){
+      if (previousValue != null && previousValue.isTextual()) {
         updatedBooking.put(field, previousValue.asText());
       } else {
         updatedBooking.remove(field);
@@ -757,8 +790,5 @@ public class CarrierShippingInstructions {
             """;
   }
 
-  private record VesselDetails(
-    String vesselIMONumber,
-    String vesselName
-  ) {}
+  private record VesselDetails(String vesselIMONumber, String vesselName) {}
 }

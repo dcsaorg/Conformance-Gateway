@@ -1,7 +1,13 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
@@ -11,22 +17,18 @@ import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameter
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 public abstract class PintAction extends ConformanceAction {
   protected final int expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
   private final OverwritingReference<ReceiverScenarioParameters> rspReference;
   private final OverwritingReference<SenderScenarioParameters> sspReference;
 
-  private static final DynamicScenarioParameters INITIAL_DSP_VALUE = new DynamicScenarioParameters(null, -1, Set.of(), null, OBJECT_MAPPER.createObjectNode());
-  private static final ReceiverScenarioParameters INITIAL_RSP_VALUE = new ReceiverScenarioParameters(OBJECT_MAPPER.createObjectNode(), "");
-  private static final SenderScenarioParameters INITIAL_SSP_VALUE = new SenderScenarioParameters(null, "WAVE", "", "");
+  private static final DynamicScenarioParameters INITIAL_DSP_VALUE =
+      new DynamicScenarioParameters(null, -1, Set.of(), null, OBJECT_MAPPER.createObjectNode());
+  private static final ReceiverScenarioParameters INITIAL_RSP_VALUE =
+      new ReceiverScenarioParameters(OBJECT_MAPPER.createObjectNode(), "");
+  private static final SenderScenarioParameters INITIAL_SSP_VALUE =
+      new SenderScenarioParameters(null, "WAVE", "", "");
 
   public PintAction(
       String sourcePartyName,
@@ -73,17 +75,20 @@ public abstract class PintAction extends ConformanceAction {
 
   public SignatureVerifier resolveSignatureVerifierSenderSignatures() {
     var pem = getSsp().sendersX509SigningCertificateInPEMFormat();
-    return PayloadSignerFactory.verifierFromPemEncodedCertificate(pem, "sendersX509SigningCertificateInPEMFormat");
+    return PayloadSignerFactory.verifierFromPemEncodedCertificate(
+        pem, "sendersX509SigningCertificateInPEMFormat");
   }
 
   public SignatureVerifier resolveSignatureVerifierCarrierSignatures() {
     var pem = getSsp().carriersX509SigningCertificateInPEMFormat();
-    return PayloadSignerFactory.verifierFromPemEncodedCertificate(pem, "carriersX509SigningCertificateInPEMFormat");
+    return PayloadSignerFactory.verifierFromPemEncodedCertificate(
+        pem, "carriersX509SigningCertificateInPEMFormat");
   }
 
   public SignatureVerifier resolveSignatureVerifierForReceiverSignatures() {
     var pem = getRsp().receiversX509SigningCertificateInPEMFormat();
-    return PayloadSignerFactory.verifierFromPemEncodedCertificate(pem, "receiversX509SigningCertificateInPEMFormat");
+    return PayloadSignerFactory.verifierFromPemEncodedCertificate(
+        pem, "receiversX509SigningCertificateInPEMFormat");
   }
 
   @Override
@@ -117,7 +122,6 @@ public abstract class PintAction extends ConformanceAction {
       sspReference.set(SenderScenarioParameters.fromJson(sspNode));
     }
   }
-
 
   public DynamicScenarioParameters getDsp() {
     return this.dspReference.get();

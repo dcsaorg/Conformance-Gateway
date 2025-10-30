@@ -3,11 +3,9 @@ package org.dcsa.conformance.standards.eblinterop.action;
 import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;

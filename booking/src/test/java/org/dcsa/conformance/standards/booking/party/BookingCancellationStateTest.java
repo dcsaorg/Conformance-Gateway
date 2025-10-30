@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.booking.party;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class BookingCancellationStateTest {
 

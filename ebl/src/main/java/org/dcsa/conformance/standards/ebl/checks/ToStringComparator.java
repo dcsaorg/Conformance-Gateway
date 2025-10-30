@@ -1,11 +1,10 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Comparator;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ToStringComparator implements Comparator<JsonNode> {

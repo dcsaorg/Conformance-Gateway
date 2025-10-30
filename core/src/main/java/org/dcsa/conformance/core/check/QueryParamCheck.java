@@ -34,20 +34,20 @@ public class QueryParamCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Set.of();
+    if (exchange == null) return ConformanceCheckResult.simple(Set.of());
     var queryParams = exchange.getRequest().queryParams();
     var values = queryParams.get(queryParamName);
     if (values == null || values.isEmpty()) {
-      return Set.of("Missing the query parameter '%s' (which should be set to '%s')".formatted(queryParamName, queryParamValue));
+      return ConformanceCheckResult.simple(Set.of("Missing the query parameter '%s' (which should be set to '%s')".formatted(queryParamName, queryParamValue)));
     }
     if (values.size() != 1) {
-      return Set.of("The query parameter '%s' should be given exactly once".formatted(queryParamName));
+      return ConformanceCheckResult.simple(Set.of("The query parameter '%s' should be given exactly once".formatted(queryParamName)));
     }
     var actualValue = values.iterator().next();
-    return queryParamValue.equals(actualValue)
+    return ConformanceCheckResult.simple(queryParamValue.equals(actualValue)
         ? Collections.emptySet()
-        : Set.of("The query parameter '%s' should have been '%s' but was '%s'".formatted(queryParamName, queryParamValue, actualValue));
+        : Set.of("The query parameter '%s' should have been '%s' but was '%s'".formatted(queryParamName, queryParamValue, actualValue)));
   }
 }

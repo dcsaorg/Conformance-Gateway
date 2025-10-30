@@ -28,6 +28,9 @@ The source of the seal, namely who has affixed the seal.
 - `PHY` (Phytosanitary)
 - `VET` (Veterinary)
 - `CUS` (Customs)
+
+In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).
 """,
       example = "CUS")
   protected String source;

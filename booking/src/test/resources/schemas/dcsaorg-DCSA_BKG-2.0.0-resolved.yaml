@@ -53,33 +53,33 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 2.0.0
 servers:
-- url: https://virtserver.swaggerhub.com/dcsaorg/DCSA_BKG/2.0.0
-  description: SwaggerHub API Auto Mocking
+  - url: https://virtserver.swaggerhub.com/dcsaorg/DCSA_BKG/2.0.0
+    description: SwaggerHub API Auto Mocking
 tags:
-- name: Booking
-  description: Booking endPoints to be implemented by **providers** of the Booking API
-- name: Notifications
-  description: Notifications to be implemented by the **consumers** of the Booking API
+  - name: Booking
+    description: Booking endPoints to be implemented by **providers** of the Booking API
+  - name: Notifications
+    description: Notifications to be implemented by the **consumers** of the Booking API
 paths:
   /v2/bookings:
     post:
       tags:
-      - Booking
+        - Booking
       summary: |
         Creates a new Booking
       description: "Creates a new booking request. This endPoint corresponds with **UseCase 1 - Submit booking request**.\n\n## Precondition\nThe consumer has information for a `Booking Request`\n\n## Postcondition\nThe provider has received the `Booking Request`. \n\nThe consumer will receive a `202` (Accepted) if the request payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for the `202` (Accepted) response\nThe following occurs when a provider receives a `Booking Request`:\n\n1. The payload (`Booking Request`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means\n    - all required properties are provided\n    - all values provided have correct data type.\n\n    A `carrierBookingRequestReference` (as a reference to the `Booking Request`) is created and linked to the payload in the provider system.\n\n    **For the rest of this description and in all examples the value `cbrr-123` will be used as `carrierBookingRequestReference`**\n\n3. A `202` (Accepted) response is returned with a payload containing **only** the `carrierBookingRequestReference`:\n    ```\n    {\n      carrierBookingRequestReference: 'cbrr-123'\n    }\n    ```\n\nFor `POST` `Booking Request` the process ends here. The `Booking Request`:\n  - is now accepted by the provider system\n  - the `Booking Request` does not yet have any status and cannot be queried (no `GET` request is possible until the `Booking Request` is further processed in the provider system)\n  - a `202` (Accepted) response is sent to the consumer with a payload **only** containing the `carrierBookingRequestReference`\n  - awaits further processing by the provider\n\nThe provider will now start asynchronous processing. Once processed, the status `RECEIVED` of the `Booking Request` will be communicated via a [Booking Notification](#/BookingNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v2/bookings/{bookingReference}\n\nendPoint to check if the `bookingStatus` of the `Booking Request` has changed.\n\nAfter the status has changed to `RECEIVED` further processing can continue by provider and will be communicated via a [Booking Notification](#/BookingNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll the above endPoint.\n"
       operationId: create-bookings
       parameters:
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
-        required: false
-        style: simple
-        explode: false
-        schema:
-          type: string
-          example: "2"
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
+          required: false
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "2"
       requestBody:
         description: The payload used to create a `Booking Request`
         content:
@@ -118,8 +118,8 @@ paths:
                   incoTerms: EXW
                   isEquipmentSubstitutionAllowed: false
                   references:
-                  - type: CR
-                    value: KN-00103004
+                    - type: CR
+                      value: KN-00103004
                   documentParties:
                     bookingAgent:
                       partyName: KN Bremerhaven
@@ -130,29 +130,29 @@ paths:
                         city: Bremerhaven
                         countryCode: DE
                       partyContactDetails:
-                      - name: Export operations department
-                        phone: +49 471 945410
+                        - name: Export operations department
+                          phone: +49 471 945410
                   partyContactDetails:
-                  - name: Diane
-                    phone: +49 471 945410
+                    - name: Diane
+                      phone: +49 471 945410
                   shipmentLocations:
-                  - location:
-                      locationName: Bremerhaven
-                      UNLocationCode: DEBRV
-                    locationTypeCode: POL
-                  - location:
-                      locationName: Norfolk
-                      UNLocationCode: USORF
-                    locationTypeCode: POD
+                    - location:
+                        locationName: Bremerhaven
+                        UNLocationCode: DEBRV
+                      locationTypeCode: POL
+                    - location:
+                        locationName: Norfolk
+                        UNLocationCode: USORF
+                      locationTypeCode: POD
                   requestedEquipments:
-                  - isShipperOwned: false
-                    ISOEquipmentCode: 42G1
-                    units: 3
-                    commodities:
-                    - commodityType: "Dry cargo, Freight all kinds"
-                      cargoGrossWeight:
-                        value: 36000
-                        unit: KGM
+                    - isShipperOwned: false
+                      ISOEquipmentCode: 42G1
+                      units: 3
+                      commodities:
+                        - commodityType: "Dry cargo, Freight all kinds"
+                          cargoGrossWeight:
+                            value: 36000
+                            unit: KGM
               reeferExample:
                 summary: |
                   Reefer cargo Booking (Apple Juice)
@@ -184,8 +184,8 @@ paths:
                   incoTerms: EXW
                   isEquipmentSubstitutionAllowed: false
                   references:
-                  - type: CR
-                    value: KN-00103004
+                    - type: CR
+                      value: KN-00103004
                   documentParties:
                     bookingAgent:
                       partyName: KN Bremerhaven
@@ -196,38 +196,38 @@ paths:
                         city: Bremerhaven
                         countryCode: DE
                       partyContactDetails:
-                      - name: Export operations department
-                        phone: +49 471 945410
+                        - name: Export operations department
+                          phone: +49 471 945410
                   partyContactDetails:
-                  - name: Diane
-                    phone: +49 471 945410
+                    - name: Diane
+                      phone: +49 471 945410
                   shipmentLocations:
-                  - location:
-                      locationName: Bremerhaven
-                      UNLocationCode: DEBRV
-                    locationTypeCode: POL
-                  - location:
-                      locationName: Norfolk
-                      UNLocationCode: USORF
-                    locationTypeCode: POD
+                    - location:
+                        locationName: Bremerhaven
+                        UNLocationCode: DEBRV
+                      locationTypeCode: POL
+                    - location:
+                        locationName: Norfolk
+                        UNLocationCode: USORF
+                      locationTypeCode: POD
                   requestedEquipments:
-                  - isShipperOwned: false
-                    ISOEquipmentCode: 45R1
-                    units: 3
-                    isNonOperatingReefer: false
-                    activeReeferSettings:
-                      temperatureSetpoint: 1
-                      temperatureUnit: CEL
-                      isVentilationOpen: true
-                      isDrainholesOpen: false
-                      isGeneratorSetRequired: true
-                    commodities:
-                    - commodityType: Apple juice
-                      HSCodes:
-                      - "20097919"
-                      cargoGrossWeight:
-                        value: 36000
-                        unit: KGM
+                    - isShipperOwned: false
+                      ISOEquipmentCode: 45R1
+                      units: 3
+                      isNonOperatingReefer: false
+                      activeReeferSettings:
+                        temperatureSetpoint: 1
+                        temperatureUnit: CEL
+                        isVentilationOpen: true
+                        isDrainholesOpen: false
+                        isGeneratorSetRequired: true
+                      commodities:
+                        - commodityType: Apple juice
+                          HSCodes:
+                            - "20097919"
+                          cargoGrossWeight:
+                            value: 36000
+                            unit: KGM
               norExample:
                 summary: |
                   Standard dry cargo Booking using a Reefer Container
@@ -259,8 +259,8 @@ paths:
                   incoTerms: EXW
                   isEquipmentSubstitutionAllowed: false
                   references:
-                  - type: CR
-                    value: KN-00103004
+                    - type: CR
+                      value: KN-00103004
                   documentParties:
                     bookingAgent:
                       partyName: KN Bremerhaven
@@ -271,30 +271,30 @@ paths:
                         city: Bremerhaven
                         countryCode: DE
                       partyContactDetails:
-                      - name: Export operations department
-                        phone: +49 471 945410
+                        - name: Export operations department
+                          phone: +49 471 945410
                   partyContactDetails:
-                  - name: Diane
-                    phone: +49 471 945410
+                    - name: Diane
+                      phone: +49 471 945410
                   shipmentLocations:
-                  - location:
-                      locationName: Bremerhaven
-                      UNLocationCode: DEBRV
-                    locationTypeCode: POL
-                  - location:
-                      locationName: Norfolk
-                      UNLocationCode: USORF
-                    locationTypeCode: POD
+                    - location:
+                        locationName: Bremerhaven
+                        UNLocationCode: DEBRV
+                      locationTypeCode: POL
+                    - location:
+                        locationName: Norfolk
+                        UNLocationCode: USORF
+                      locationTypeCode: POD
                   requestedEquipments:
-                  - isShipperOwned: false
-                    ISOEquipmentCode: 45R1
-                    isNonOperatingReefer: true
-                    units: 3
-                    commodities:
-                    - commodityType: "Dry cargo, Freight all kinds"
-                      cargoGrossWeight:
-                        value: 36000
-                        unit: KGM
+                    - isShipperOwned: false
+                      ISOEquipmentCode: 45R1
+                      isNonOperatingReefer: true
+                      units: 3
+                      commodities:
+                        - commodityType: "Dry cargo, Freight all kinds"
+                          cargoGrossWeight:
+                            value: 36000
+                            unit: KGM
               dgExample:
                 summary: |
                   Dangerous Goods (DG) cargo Booking
@@ -325,8 +325,8 @@ paths:
                   incoTerms: EXW
                   isEquipmentSubstitutionAllowed: false
                   references:
-                  - type: CR
-                    value: KN-00103004
+                    - type: CR
+                      value: KN-00103004
                   documentParties:
                     bookingAgent:
                       partyName: KN Bremerhaven
@@ -337,57 +337,57 @@ paths:
                         city: Bremerhaven
                         countryCode: DE
                       partyContactDetails:
-                      - name: Export operations department
-                        phone: +49 471 945410
+                        - name: Export operations department
+                          phone: +49 471 945410
                   partyContactDetails:
-                  - name: Diane
-                    phone: +49 471 945410
+                    - name: Diane
+                      phone: +49 471 945410
                   shipmentLocations:
-                  - location:
-                      locationName: Bremerhaven
-                      UNLocationCode: DEBRV
-                    locationTypeCode: POL
-                  - location:
-                      locationName: Norfolk
-                      UNLocationCode: USORF
-                    locationTypeCode: POD
+                    - location:
+                        locationName: Bremerhaven
+                        UNLocationCode: DEBRV
+                      locationTypeCode: POL
+                    - location:
+                        locationName: Norfolk
+                        UNLocationCode: USORF
+                      locationTypeCode: POD
                   requestedEquipments:
-                  - isShipperOwned: false
-                    ISOEquipmentCode: 42G1
-                    units: 3
-                    commodities:
-                    - commodityType: "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"
-                      HSCodes:
-                      - "293499"
-                      cargoGrossWeight:
-                        value: 36000
-                        unit: KGM
-                      outerPackaging:
-                        imoPackagingCode: 3A1
-                        numberOfPackages: 100
-                        description: "Jerrican, steel"
-                        dangerousGoods:
-                        - UNNumber: "3082"
-                          properShippingName: |
-                            Environmentally hazardous substance, liquid, N.O.S
-                          imoClass: "9"
-                          isMarinePollutant: false
-                          packingGroup: 3
-                          isLimitedQuantity: false
-                          isExceptedQuantity: false
-                          isSalvagePackings: false
-                          isEmptyUncleanedResidue: false
-                          isWaste: false
-                          isHot: false
-                          isCompetentAuthorityApprovalRequired: false
-                          emergencyContactDetails:
-                            contact: John Doe
-                            phone: +1 123062970
-                          EMSNumber: F-A S-F
-                          isReportableQuantity: false
-                          grossWeight:
-                            value: 12000
+                    - isShipperOwned: false
+                      ISOEquipmentCode: 42G1
+                      units: 3
+                      commodities:
+                        - commodityType: "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"
+                          HSCodes:
+                            - "293499"
+                          cargoGrossWeight:
+                            value: 36000
                             unit: KGM
+                          outerPackaging:
+                            imoPackagingCode: 3A1
+                            numberOfPackages: 100
+                            description: "Jerrican, steel"
+                            dangerousGoods:
+                              - UNNumber: "3082"
+                                properShippingName: |
+                                  Environmentally hazardous substance, liquid, N.O.S
+                                imoClass: "9"
+                                isMarinePollutant: false
+                                packingGroup: 3
+                                isLimitedQuantity: false
+                                isExceptedQuantity: false
+                                isSalvagePackings: false
+                                isEmptyUncleanedResidue: false
+                                isWaste: false
+                                isHot: false
+                                isCompetentAuthorityApprovalRequired: false
+                                emergencyContactDetails:
+                                  contact: John Doe
+                                  phone: +1 123062970
+                                EMSNumber: F-A S-F
+                                isReportableQuantity: false
+                                grossWeight:
+                                  value: 12000
+                                  unit: KGM
         required: true
       responses:
         "202":
@@ -436,11 +436,11 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      property: receiptTypeAtOrigin
-                      errorCodeText: mandatory property missing
-                      errorCodeMessage: |
-                        receiptTypeAtOrigin must be provided as part of a Booking request
+                      - errorCode: 7003
+                        property: receiptTypeAtOrigin
+                        errorCodeText: mandatory property missing
+                        errorCodeMessage: |
+                          receiptTypeAtOrigin must be provided as part of a Booking request
         "500":
           description: |
             In case a server error occurs in provider system a `500` (Internal Server Error) is returned
@@ -469,9 +469,9 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Internal Error occurred
-                      errorCodeMessage: Internal Error occurred
+                      - errorCode: 7003
+                        errorCodeText: Internal Error occurred
+                        errorCodeMessage: Internal Error occurred
         default:
           description: |
             For other errors the error object should be populated with relevant information
@@ -504,13 +504,13 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Max Booking requests reached
-                      errorCodeMessage: A maximum of 10 Bookings can be created per hour
+                      - errorCode: 7003
+                        errorCodeText: Max Booking requests reached
+                        errorCodeMessage: A maximum of 10 Bookings can be created per hour
   /v2/bookings/{bookingReference}:
     get:
       tags:
-      - Booking
+        - Booking
       summary: |
         Gets the Booking
       description: |
@@ -534,43 +534,43 @@ paths:
         In case a previous request is being processed by the provider - a `202` (Accepted) with **no payload** can be used as a response until the processing is finished.
       operationId: get-bookings
       parameters:
-      - name: bookingReference
-        in: path
-        description: |
-          This can be one of:
-          - `carrierBookingRequestReference` (in case no carrierBookingReference has yet been appointed to the booking)
-          - `carrierBookingReference`
-        required: true
-        style: simple
-        explode: false
-        schema:
-          maxLength: 100
-          pattern: ^\S(?:.*\S)?$
-          type: string
-          example: CBR001
-      - name: amendedContent
-        in: query
-        description: |
-          Controls whether the content of this payload is the amended Booking (`amendedContent=true`) or the confirmed Booking (`amendedContent=false`).
-
-          If `amendedContent=true` and no amendment has been requested or if the provider is not able to send the amendment - the response will be a `404` Not Found
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: boolean
-          example: false
-          default: false
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
-        required: false
-        style: simple
-        explode: false
-        schema:
-          type: string
-          example: "2"
+        - name: bookingReference
+          in: path
+          description: |
+            This can be one of:
+            - `carrierBookingRequestReference` (in case no carrierBookingReference has yet been appointed to the booking)
+            - `carrierBookingReference`
+          required: true
+          style: simple
+          explode: false
+          schema:
+            maxLength: 100
+            pattern: ^\S(?:.*\S)?$
+            type: string
+            example: CBR001
+        - name: amendedContent
+          in: query
+          description: |
+            Controls whether the content of this payload is the amended Booking (`amendedContent=true`) or the confirmed Booking (`amendedContent=false`).
+            
+            If `amendedContent=true` and no amendment has been requested or if the provider is not able to send the amendment - the response will be a `404` Not Found
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+            example: false
+            default: false
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
+          required: false
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "2"
       responses:
         "200":
           description: Request successful
@@ -615,8 +615,8 @@ paths:
                     incoTerms: EXW
                     isEquipmentSubstitutionAllowed: false
                     references:
-                    - type: CR
-                      value: KN-00103004
+                      - type: CR
+                        value: KN-00103004
                     documentParties:
                       bookingAgent:
                         partyName: KN Bremerhaven
@@ -627,36 +627,36 @@ paths:
                           city: Bremerhaven
                           countryCode: DE
                         partyContactDetails:
-                        - name: Export operations department
-                          phone: +49 471 945410
+                          - name: Export operations department
+                            phone: +49 471 945410
                     partyContactDetails:
-                    - name: Diane
-                      phone: +49 471 945410
+                      - name: Diane
+                        phone: +49 471 945410
                     shipmentLocations:
-                    - location:
-                        locationName: Bremerhaven
-                        UNLocationCode: DEBRV
-                      locationTypeCode: POL
-                    - location:
-                        locationName: Norfolk
-                        UNLocationCode: USORF
-                      locationTypeCode: POD
+                      - location:
+                          locationName: Bremerhaven
+                          UNLocationCode: DEBRV
+                        locationTypeCode: POL
+                      - location:
+                          locationName: Norfolk
+                          UNLocationCode: USORF
+                        locationTypeCode: POD
                     requestedEquipments:
-                    - isShipperOwned: false
-                      ISOEquipmentCode: 42G1
-                      units: 3
-                      commodities:
-                      - commodityType: "Dry cargo, Freight all kinds"
-                        cargoGrossWeight:
-                          value: 36000
-                          unit: KGM
+                      - isShipperOwned: false
+                        ISOEquipmentCode: 42G1
+                        units: 3
+                        commodities:
+                          - commodityType: "Dry cargo, Freight all kinds"
+                            cargoGrossWeight:
+                              value: 36000
+                              unit: KGM
                     feedbacks:
-                    - severity: ERROR
-                      code: PROPERTY_VALUE_MUST_CHANGE
-                      message: |
-                        Not enough available "42G1" equipment. Please change to "22G1" instead
-                      jsonPath: $.requestedEquipment.units
-                      property: units
+                      - severity: ERROR
+                        code: PROPERTY_VALUE_MUST_CHANGE
+                        message: |
+                          Not enough available "42G1" equipment. Please change to "22G1" instead
+                        jsonPath: $.requestedEquipment.units
+                        property: units
                 dryConfirmedExample:
                   summary: |
                     Gets a confirmed Standard dry cargo Booking
@@ -695,8 +695,8 @@ paths:
                     incoTerms: EXW
                     isEquipmentSubstitutionAllowed: false
                     references:
-                    - type: CR
-                      value: KN-00103004
+                      - type: CR
+                        value: KN-00103004
                     documentParties:
                       bookingAgent:
                         partyName: KN Bremerhaven
@@ -707,63 +707,63 @@ paths:
                           city: Bremerhaven
                           countryCode: DE
                         partyContactDetails:
-                        - name: Export operations department
-                          phone: +49 471 945410
+                          - name: Export operations department
+                            phone: +49 471 945410
                     partyContactDetails:
-                    - name: Diane
-                      phone: +49 471 945410
+                      - name: Diane
+                        phone: +49 471 945410
                     shipmentLocations:
-                    - location:
-                        locationName: Bremerhaven
-                        UNLocationCode: DEBRV
-                      locationTypeCode: POL
-                    - location:
-                        locationName: Norfolk
-                        UNLocationCode: USORF
-                      locationTypeCode: POD
+                      - location:
+                          locationName: Bremerhaven
+                          UNLocationCode: DEBRV
+                        locationTypeCode: POL
+                      - location:
+                          locationName: Norfolk
+                          UNLocationCode: USORF
+                        locationTypeCode: POD
                     requestedEquipments:
-                    - isShipperOwned: false
-                      ISOEquipmentCode: 42G1
-                      units: 3
-                      commodities:
-                      - commodityType: "Dry cargo, Freight all kinds"
-                        cargoGrossWeight:
-                          value: 36000
-                          unit: KGM
+                      - isShipperOwned: false
+                        ISOEquipmentCode: 42G1
+                        units: 3
+                        commodities:
+                          - commodityType: "Dry cargo, Freight all kinds"
+                            cargoGrossWeight:
+                              value: 36000
+                              unit: KGM
                     confirmedEquipments:
-                    - ISOEquipmentCode: 42G1
-                      units: 3
+                      - ISOEquipmentCode: 42G1
+                        units: 3
                     transportPlan:
-                    - transportPlanStage: MNC
-                      transportPlanStageSequenceNumber: 1
-                      loadLocation:
-                        locationName: Bremerhaven
-                        UNLocationCode: DEBRV
-                      dischargeLocation:
-                        locationName: Norfolk
-                        UNLocationCode: USORF
-                      plannedDepartureDate: 2024-01-20
-                      plannedArrivalDate: 2024-01-31
-                      modeOfTransport: VESSEL
-                      vesselName: MAERSK IOWA
-                      vesselIMONumber: "9298686"
-                      carrierServiceCode: TA1
-                      carrierExportVoyageNumber: 403W
+                      - transportPlanStage: MNC
+                        transportPlanStageSequenceNumber: 1
+                        loadLocation:
+                          locationName: Bremerhaven
+                          UNLocationCode: DEBRV
+                        dischargeLocation:
+                          locationName: Norfolk
+                          UNLocationCode: USORF
+                        plannedDepartureDate: 2024-01-20
+                        plannedArrivalDate: 2024-01-31
+                        modeOfTransport: VESSEL
+                        vesselName: MAERSK IOWA
+                        vesselIMONumber: "9298686"
+                        carrierServiceCode: TA1
+                        carrierExportVoyageNumber: 403W
                     shipmentCutOffTimes:
-                    - cutOffDateTimeCode: DCO
-                      cutOffDateTime: 2024-01-17T22:30:00Z
-                    - cutOffDateTimeCode: VCO
-                      cutOffDateTime: 2024-01-18T22:30:00Z
-                    - cutOffDateTimeCode: FCO
-                      cutOffDateTime: 2024-01-19T13:30:00Z
+                      - cutOffDateTimeCode: DCO
+                        cutOffDateTime: 2024-01-17T22:30:00Z
+                      - cutOffDateTimeCode: VCO
+                        cutOffDateTime: 2024-01-18T22:30:00Z
+                      - cutOffDateTimeCode: FCO
+                        cutOffDateTime: 2024-01-19T13:30:00Z
                     advanceManifestFilings:
-                    - manifestTypeCode: ACE
-                      countryCode: US
+                      - manifestTypeCode: ACE
+                        countryCode: US
                     carrierClauses:
-                    - "The date of shipment, the carrying vessel and the schedule are not guaranteed and are always subject to changes."
-                    - "Operations such as lifting, stowage, drayage and customs declaration of containers are based on the description of the nature, quantity, measurement and weight declared by the Shipper. The Shipper shall be liable for any damage, loss, expense and fines incurred by Carrier XYZ or its agents due to incorrectness or incompleteness of such declaration."
-                    - "Warranted shipper must fulfill the requirements of SOLAS regulations and the IMO guidelines regarding the Verified Gross Mass (VGM) of container carrying cargo (msc.1/circ.1474, 9 June 2014)."
-                    - "In accordance with SOLAS regulations and IMO guidelines regarding the VGM (verified gross mass), any expenses incurred because the VGM was submitted late or was not submitted at all will be charged back to the customer with an additional administration fee."
+                      - "The date of shipment, the carrying vessel and the schedule are not guaranteed and are always subject to changes."
+                      - "Operations such as lifting, stowage, drayage and customs declaration of containers are based on the description of the nature, quantity, measurement and weight declared by the Shipper. The Shipper shall be liable for any damage, loss, expense and fines incurred by Carrier XYZ or its agents due to incorrectness or incompleteness of such declaration."
+                      - "Warranted shipper must fulfill the requirements of SOLAS regulations and the IMO guidelines regarding the Verified Gross Mass (VGM) of container carrying cargo (msc.1/circ.1474, 9 June 2014)."
+                      - "In accordance with SOLAS regulations and IMO guidelines regarding the VGM (verified gross mass), any expenses incurred because the VGM was submitted late or was not submitted at all will be charged back to the customer with an additional administration fee."
         "202":
           description: |
             The `Booking` is currently being processed by the provider. No payload is returned. A new `GET` request has to be made periodically to check if the provider has finished processing the `Booking`.
@@ -809,10 +809,10 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: bookingReference Not Found
-                      errorCodeMessage: |
-                        The Booking does not exist
+                      - errorCode: 7003
+                        errorCodeText: bookingReference Not Found
+                        errorCodeMessage: |
+                          The Booking does not exist
                 notFoundAmendmentExample:
                   summary: |
                     Missing amended Booking
@@ -829,9 +829,9 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: No amended booking
-                      errorCodeMessage: No amended booking available
+                      - errorCode: 7003
+                        errorCodeText: No amended booking
+                        errorCodeMessage: No amended booking available
         "409":
           description: |
             In case the provider is processing the `Booking request` - it is possible for the provider to reject new incoming requests by returning a `409` (Conflict)
@@ -861,10 +861,10 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Conflicting request is being processed
-                      errorCodeMessage: |
-                        The Booking cannot be updated/amended while it is being processed. Please try again later
+                      - errorCode: 7003
+                        errorCodeText: Conflicting request is being processed
+                        errorCodeMessage: |
+                          The Booking cannot be updated/amended while it is being processed. Please try again later
         "500":
           description: |
             In case a server error occurs in provider system a `500` (Internal Server Error) is returned
@@ -893,9 +893,9 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Internal Error occurred
-                      errorCodeMessage: Internal Error occurred
+                      - errorCode: 7003
+                        errorCodeText: Internal Error occurred
+                        errorCodeMessage: Internal Error occurred
         default:
           description: |
             Unexpected error
@@ -928,42 +928,42 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Non existent carrierBookingRequestReference
-                      errorCodeMessage: |
-                        carrierBookingRequestReference `cbrr-123` does not exist
+                      - errorCode: 7003
+                        errorCodeText: Non existent carrierBookingRequestReference
+                        errorCodeMessage: |
+                          carrierBookingRequestReference `cbrr-123` does not exist
     put:
       tags:
-      - Booking
+        - Booking
       summary: |
         Updates the Booking
       description: "Updates the `Booking Request` with the `bookingReference`. The path can contain either a `carrierBookingRequestReference` or a `carrierBookingReference`. Once a Booking has been `CONFIRMED` the `carrierBookingReference` **MUST** always be used. This endPoint corresponds with either\n- **UseCase 3 - Submit updated Booking request**\n- **UseCase 7 - Request amendments to confirmed Booking**\n\nThis endPoint is to be used in response to\n- **UseCase 2 - Request to update Booking request**\n- **UseCase 6 - Request to amend confirmed Booking**\n\nthe endPoint can also be used in case `bookingStatus='RECEIVED'` and the consumer has an update to the `Booking Request`.\n\n## Precondition\nIn order to update a `Booking Request`, the status of the `Booking Request` needs to be in state\n- `RECEIVED` in case the consumer has updated information for the `Booking Request`\n- `PENDING_UPDATE` in case the provider has requested the consumer to update the `Booking Request` (a result of **UseCase 2 - Request to update Booking request**)\n- `UPDATE_RECEIVED` in case the consumer has additional changes to an already sent update\n- `PENDING_AMENDMENT` in case the provider has requested the consumer to amend the `Booking Request` (a result of **UseCase 6 - Request to amend confirmed Booking**)\n- `CONFIRMED` in case the consumer has an amendment to the `Booking Request`\n\n## Postcondition\nThe provider has received an update (**UseCase 3 - Submit updated Booking request**) or an amendment (**UseCase 7 - Request amendments to confirmed Booking**) to the `Booking Request`.\n\nIn case an amendment was received to the `Booking Request` (**UseCase 7 - Request to amend confirmed Booking**) - the amendment will be called `Amended Booking`. The `Amended Booking` and the \"original\" `Booking Request` will **co-exist** until a new amendment is submitted by the consumer (via **UseCase 7: Request amendments to confirmed Booking**) or until the provider requests an update (sets the `bookingStatus='PENDING_AMENDMENT'` via **UseCase 6: Request to amend confirmed Booking**). If the `amendedBookingStatus` is present it always represents the latest version of an amendment received by the provider.\n\nThe consumer will receive a `202` (Accepted) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for the `202` (Accepted) response\nThe following occurs when a provider receives an **update** (or an **amendment**) to a `Booking Request`\n1. The payload (`Booking Request`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means\n   - all required properties are provided\n   - all values provided have correct data type\n3. An empty response along with `202` (Accepted) is returned and the consumer now awaits further processing by the provider.\n\nFor `PUT` `Booking Request` the process ends here. The Booking Request:\n  - is now accepted by the provider system\n  - the status of the `Booking Request` is unchanged.\n  - a `202` (Accepted) response is sent with an empty payload\n  - awaits further processing by the provider\n\nThe provider will now start asynchronous processing. Once processed, the state will change to one of the following values depending on the use case for calling the `PUT` endPoint:\n  - `UPDATE_RECEIVED` in case this endPoint has been used to:\n    - send an update to a newly created Booking (precondition: `bookingStatus='RECEIVED'`)\n    - send an update to a Booking because of a request from provider via **UseCase 2 - Request to update Booking request** (precondition: `bookingStatus='PENDING_UPDATE'`)\n    - send an additional update to a Booking that has already received an update  (precondition: `bookingStatus='UPDATE_RECEIVED'`)\n  - `bookingStatus` will stay as `PENDING_AMENDMENT` but `amendedBookingStatus` will change to `AMENDMENT_RECEIVED` in case this endPoint is being used in response to a request from provider via **UseCase 6 - Request to amend Confirmed Booking** (precondition: `bookingStatus='PENDING_AMENDMENT'`)\n  - `bookingStatus` will stay as `CONFIRMED` but `amendedBookingStatus` will change to `AMENDMENT_RECEIVED` in case this endPoint is being used to update an already confirmed Booking via  **UseCase 7 - Request Amendments to Confirmed Booking** (precondition: `bookingStatus='CONFIRMED'`)\n\nOnce processed, the new state will be communicated via a [Booking Notification](#/BookingNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the \n\n    GET /v2/bookings/{bookingReference}\n\nendPoint to check if the `bookingStatus` and `amendedBookingStatus` of the `Booking` has changed.\n\nIf the consumer wants to get the content of the `Amended Booking` provided via this `PUT` endPoint, the `GET` endPoint needs to be used in combination with the `?amendedContent=true` queryParameter:\n\n    GET /v2/bookings/{bookingReference}?amendedContent=true\n\nIt is possible to `GET` the content of the `Amended Booking` via the example above until either:\n\n- the provider requests for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the \"old update\" is no longer accessible\n- the consumer submits a new update (**UseCase 7: Request amendment to confirmed Booking**) in which case the \"new amendment\" provided **replaces** the \"old amendment\".\n- the provider re-confirms the `Booking` (**UseCase 5: Confirm booking request**) in which case the \"old update\" is no longer accessible.\n"
       operationId: update-bookings
       parameters:
-      - name: bookingReference
-        in: path
-        description: |
-          This can be one of:
-          - `carrierBookingRequestReference` (in case no carrierBookingReference has yet been appointed to the booking)
-          - `carrierBookingReference`
-        required: true
-        style: simple
-        explode: false
-        schema:
-          maxLength: 100
-          pattern: ^\S(?:.*\S)?$
-          type: string
-          example: CBR001
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
-        required: false
-        style: simple
-        explode: false
-        schema:
-          type: string
-          example: "2"
+        - name: bookingReference
+          in: path
+          description: |
+            This can be one of:
+            - `carrierBookingRequestReference` (in case no carrierBookingReference has yet been appointed to the booking)
+            - `carrierBookingReference`
+          required: true
+          style: simple
+          explode: false
+          schema:
+            maxLength: 100
+            pattern: ^\S(?:.*\S)?$
+            type: string
+            example: CBR001
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
+          required: false
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "2"
       requestBody:
         description: |
           Parameters used to update the `Booking request`
@@ -1004,8 +1004,8 @@ paths:
                   incoTerms: EXW
                   isEquipmentSubstitutionAllowed: false
                   references:
-                  - type: CR
-                    value: KN-00103004
+                    - type: CR
+                      value: KN-00103004
                   documentParties:
                     bookingAgent:
                       partyName: KN Bremerhaven
@@ -1016,29 +1016,29 @@ paths:
                         city: Bremerhaven
                         countryCode: DE
                       partyContactDetails:
-                      - name: Export operations department
-                        phone: +49 471 945410
+                        - name: Export operations department
+                          phone: +49 471 945410
                   partyContactDetails:
-                  - name: Diane
-                    phone: +49 471 945410
+                    - name: Diane
+                      phone: +49 471 945410
                   shipmentLocations:
-                  - location:
-                      locationName: Bremerhaven
-                      UNLocationCode: DEBRV
-                    locationTypeCode: POL
-                  - location:
-                      locationName: Norfolk
-                      UNLocationCode: USORF
-                    locationTypeCode: POD
+                    - location:
+                        locationName: Bremerhaven
+                        UNLocationCode: DEBRV
+                      locationTypeCode: POL
+                    - location:
+                        locationName: Norfolk
+                        UNLocationCode: USORF
+                      locationTypeCode: POD
                   requestedEquipments:
-                  - isShipperOwned: false
-                    ISOEquipmentCode: 42G1
-                    units: 3
-                    commodities:
-                    - commodityType: "Dry cargo, Freight all kinds"
-                      cargoGrossWeight:
-                        value: 36000
-                        unit: KGM
+                    - isShipperOwned: false
+                      ISOEquipmentCode: 42G1
+                      units: 3
+                      commodities:
+                        - commodityType: "Dry cargo, Freight all kinds"
+                          cargoGrossWeight:
+                            value: 36000
+                            unit: KGM
               reeferExample:
                 summary: |
                   Reefer cargo Booking (Apple Juice)
@@ -1072,8 +1072,8 @@ paths:
                   incoTerms: EXW
                   isEquipmentSubstitutionAllowed: false
                   references:
-                  - type: CR
-                    value: KN-00103004
+                    - type: CR
+                      value: KN-00103004
                   documentParties:
                     bookingAgent:
                       partyName: KN Bremerhaven
@@ -1084,38 +1084,38 @@ paths:
                         city: Bremerhaven
                         countryCode: DE
                       partyContactDetails:
-                      - name: Export operations department
-                        phone: +49 471 945410
+                        - name: Export operations department
+                          phone: +49 471 945410
                   partyContactDetails:
-                  - name: Diane
-                    phone: +49 471 945410
+                    - name: Diane
+                      phone: +49 471 945410
                   shipmentLocations:
-                  - location:
-                      locationName: Bremerhaven
-                      UNLocationCode: DEBRV
-                    locationTypeCode: POL
-                  - location:
-                      locationName: Norfolk
-                      UNLocationCode: USORF
-                    locationTypeCode: POD
+                    - location:
+                        locationName: Bremerhaven
+                        UNLocationCode: DEBRV
+                      locationTypeCode: POL
+                    - location:
+                        locationName: Norfolk
+                        UNLocationCode: USORF
+                      locationTypeCode: POD
                   requestedEquipments:
-                  - isShipperOwned: false
-                    ISOEquipmentCode: 45R1
-                    units: 3
-                    isNonOperatingReefer: false
-                    activeReeferSettings:
-                      temperatureSetpoint: 2
-                      temperatureUnit: CEL
-                      isVentilationOpen: true
-                      isDrainholesOpen: false
-                      isGeneratorSetRequired: true
-                    commodities:
-                    - commodityType: Apple juice
-                      HSCodes:
-                      - "20097919"
-                      cargoGrossWeight:
-                        value: 36000
-                        unit: KGM
+                    - isShipperOwned: false
+                      ISOEquipmentCode: 45R1
+                      units: 3
+                      isNonOperatingReefer: false
+                      activeReeferSettings:
+                        temperatureSetpoint: 2
+                        temperatureUnit: CEL
+                        isVentilationOpen: true
+                        isDrainholesOpen: false
+                        isGeneratorSetRequired: true
+                      commodities:
+                        - commodityType: Apple juice
+                          HSCodes:
+                            - "20097919"
+                          cargoGrossWeight:
+                            value: 36000
+                            unit: KGM
               norExample:
                 summary: |
                   Standard dry cargo Booking using a Reefer Container
@@ -1147,8 +1147,8 @@ paths:
                   incoTerms: EXW
                   isEquipmentSubstitutionAllowed: false
                   references:
-                  - type: CR
-                    value: KN-00103004
+                    - type: CR
+                      value: KN-00103004
                   documentParties:
                     bookingAgent:
                       partyName: KN Bremerhaven
@@ -1159,30 +1159,30 @@ paths:
                         city: Bremerhaven
                         countryCode: DE
                       partyContactDetails:
-                      - name: Export operations department
-                        phone: +49 471 945410
+                        - name: Export operations department
+                          phone: +49 471 945410
                   partyContactDetails:
-                  - name: Diane
-                    phone: +49 471 945410
+                    - name: Diane
+                      phone: +49 471 945410
                   shipmentLocations:
-                  - location:
-                      locationName: Bremerhaven
-                      UNLocationCode: DEBRV
-                    locationTypeCode: POL
-                  - location:
-                      locationName: Norfolk
-                      UNLocationCode: USORF
-                    locationTypeCode: POD
+                    - location:
+                        locationName: Bremerhaven
+                        UNLocationCode: DEBRV
+                      locationTypeCode: POL
+                    - location:
+                        locationName: Norfolk
+                        UNLocationCode: USORF
+                      locationTypeCode: POD
                   requestedEquipments:
-                  - isShipperOwned: false
-                    ISOEquipmentCode: 45R1
-                    isNonOperatingReefer: true
-                    units: 3
-                    commodities:
-                    - commodityType: "Dry cargo, Freight all kinds"
-                      cargoGrossWeight:
-                        value: 36000
-                        unit: KGM
+                    - isShipperOwned: false
+                      ISOEquipmentCode: 45R1
+                      isNonOperatingReefer: true
+                      units: 3
+                      commodities:
+                        - commodityType: "Dry cargo, Freight all kinds"
+                          cargoGrossWeight:
+                            value: 36000
+                            unit: KGM
               dgExample:
                 summary: |
                   Dangerous Goods (DG) cargo Booking
@@ -1216,8 +1216,8 @@ paths:
                   incoTerms: EXW
                   isEquipmentSubstitutionAllowed: false
                   references:
-                  - type: CR
-                    value: KN-00103004
+                    - type: CR
+                      value: KN-00103004
                   documentParties:
                     bookingAgent:
                       partyName: KN Bremerhaven
@@ -1228,57 +1228,57 @@ paths:
                         city: Bremerhaven
                         countryCode: DE
                       partyContactDetails:
-                      - name: Export operations department
-                        phone: +49 471 945410
+                        - name: Export operations department
+                          phone: +49 471 945410
                   partyContactDetails:
-                  - name: Diane
-                    phone: +49 471 945410
+                    - name: Diane
+                      phone: +49 471 945410
                   shipmentLocations:
-                  - location:
-                      locationName: Bremerhaven
-                      UNLocationCode: DEBRV
-                    locationTypeCode: POL
-                  - location:
-                      locationName: Norfolk
-                      UNLocationCode: USORF
-                    locationTypeCode: POD
+                    - location:
+                        locationName: Bremerhaven
+                        UNLocationCode: DEBRV
+                      locationTypeCode: POL
+                    - location:
+                        locationName: Norfolk
+                        UNLocationCode: USORF
+                      locationTypeCode: POD
                   requestedEquipments:
-                  - isShipperOwned: false
-                    ISOEquipmentCode: 42G1
-                    units: 3
-                    commodities:
-                    - commodityType: "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"
-                      HSCodes:
-                      - "293499"
-                      cargoGrossWeight:
-                        value: 36000
-                        unit: KGM
-                      outerPackaging:
-                        imoPackagingCode: 3A1
-                        numberOfPackages: 100
-                        description: "Jerrican, steel"
-                        dangerousGoods:
-                        - UNNumber: "3082"
-                          properShippingName: |
-                            Environmentally hazardous substance, liquid, N.O.S
-                          imoClass: "9"
-                          isMarinePollutant: false
-                          packingGroup: 3
-                          isLimitedQuantity: false
-                          isExceptedQuantity: false
-                          isSalvagePackings: false
-                          isEmptyUncleanedResidue: false
-                          isWaste: false
-                          isHot: false
-                          isCompetentAuthorityApprovalRequired: false
-                          emergencyContactDetails:
-                            contact: John Doe
-                            phone: +1 123062970
-                          EMSNumber: F-A S-F
-                          isReportableQuantity: false
-                          grossWeight:
-                            value: 12000
+                    - isShipperOwned: false
+                      ISOEquipmentCode: 42G1
+                      units: 3
+                      commodities:
+                        - commodityType: "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"
+                          HSCodes:
+                            - "293499"
+                          cargoGrossWeight:
+                            value: 36000
                             unit: KGM
+                          outerPackaging:
+                            imoPackagingCode: 3A1
+                            numberOfPackages: 100
+                            description: "Jerrican, steel"
+                            dangerousGoods:
+                              - UNNumber: "3082"
+                                properShippingName: |
+                                  Environmentally hazardous substance, liquid, N.O.S
+                                imoClass: "9"
+                                isMarinePollutant: false
+                                packingGroup: 3
+                                isLimitedQuantity: false
+                                isExceptedQuantity: false
+                                isSalvagePackings: false
+                                isEmptyUncleanedResidue: false
+                                isWaste: false
+                                isHot: false
+                                isCompetentAuthorityApprovalRequired: false
+                                emergencyContactDetails:
+                                  contact: John Doe
+                                  phone: +1 123062970
+                                EMSNumber: F-A S-F
+                                isReportableQuantity: false
+                                grossWeight:
+                                  value: 12000
+                                  unit: KGM
         required: true
       responses:
         "202":
@@ -1323,11 +1323,11 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      property: receiptTypeAtOrigin
-                      errorCodeText: mandatory property missing
-                      errorCodeMessage: |
-                        receiptTypeAtOrigin must be provided as part of a Booking request
+                      - errorCode: 7003
+                        property: receiptTypeAtOrigin
+                        errorCodeText: mandatory property missing
+                        errorCodeMessage: |
+                          receiptTypeAtOrigin must be provided as part of a Booking request
         "404":
           description: |
             In case the provider does not know of the `bookingReference` used in the request (this could be because of a `POST` request that has not finished processing or simply because the resource does not exist) - it is possible for the provider to reject the requests by returning a `404` (Not Found).
@@ -1356,10 +1356,10 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: bookingReference Not Found
-                      errorCodeMessage: |
-                        The Booking does not exist
+                      - errorCode: 7003
+                        errorCodeText: bookingReference Not Found
+                        errorCodeMessage: |
+                          The Booking does not exist
         "409":
           description: |
             In case the provider is processing the `Booking request` - it is possible for the provider to reject new incoming requests by returning a `409` (Conflict)
@@ -1389,10 +1389,10 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Conflicting request is being processed
-                      errorCodeMessage: |
-                        The Booking cannot be updated/amended while it is being processed. Please try again later
+                      - errorCode: 7003
+                        errorCodeText: Conflicting request is being processed
+                        errorCodeMessage: |
+                          The Booking cannot be updated/amended while it is being processed. Please try again later
         "500":
           description: |
             In case a server error occurs in provider system a `500` (Internal Server Error) is returned
@@ -1421,9 +1421,9 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Internal Error occurred
-                      errorCodeMessage: Internal Error occurred
+                      - errorCode: 7003
+                        errorCodeText: Internal Error occurred
+                        errorCodeMessage: Internal Error occurred
         default:
           description: |
             For other errors the error object should be populated with relevant information
@@ -1456,12 +1456,12 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Max Booking requests reached
-                      errorCodeMessage: A maximum of 10 Bookings can be updated per hour
+                      - errorCode: 7003
+                        errorCodeText: Max Booking requests reached
+                        errorCodeMessage: A maximum of 10 Bookings can be updated per hour
     patch:
       tags:
-      - Booking
+        - Booking
       summary: |
         Cancels the Booking or cancels an Amendment
       description: |
@@ -1498,30 +1498,30 @@ paths:
         Once processed, the `Booking` or `Amended Booking` is cancelled and a [Booking Notification](#/BookingNotification) is sent. In case of a Confirmed Booking - the provider has the opportunity to decline the Cancellation of the Booking (in which case the `bookingCancellationStatus='CANCELLATION_DECLINED'`).
       operationId: cancel-booking
       parameters:
-      - name: bookingReference
-        in: path
-        description: |
-          This can be one of:
-          - `carrierBookingRequestReference` (in case no carrierBookingReference has yet been appointed to the booking)
-          - `carrierBookingReference`
-        required: true
-        style: simple
-        explode: false
-        schema:
-          maxLength: 100
-          pattern: ^\S(?:.*\S)?$
-          type: string
-          example: CBR001
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
-        required: false
-        style: simple
-        explode: false
-        schema:
-          type: string
-          example: "2"
+        - name: bookingReference
+          in: path
+          description: |
+            This can be one of:
+            - `carrierBookingRequestReference` (in case no carrierBookingReference has yet been appointed to the booking)
+            - `carrierBookingReference`
+          required: true
+          style: simple
+          explode: false
+          schema:
+            maxLength: 100
+            pattern: ^\S(?:.*\S)?$
+            type: string
+            example: CBR001
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
+          required: false
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "2"
       requestBody:
         content:
           application/json:
@@ -1603,11 +1603,11 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      property: amendedBookingStatus
-                      value: APPROVE
-                      errorCodeText: incorrect value
-                      errorCodeMessage: "Only AMENDMENT_CANCELLED is an allowed value: APPROVE was inserted"
+                      - errorCode: 7003
+                        property: amendedBookingStatus
+                        value: APPROVE
+                        errorCodeText: incorrect value
+                        errorCodeMessage: "Only AMENDMENT_CANCELLED is an allowed value: APPROVE was inserted"
         "404":
           description: |
             In case the consumer is cancelling the `Amended Booking` by setting:
@@ -1647,10 +1647,10 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: bookingReference Not Found
-                      errorCodeMessage: |
-                        The Booking does not exist
+                      - errorCode: 7003
+                        errorCodeText: bookingReference Not Found
+                        errorCodeMessage: |
+                          The Booking does not exist
                 notFoundAmendmentExample:
                   summary: |
                     Missing amended Booking
@@ -1667,9 +1667,9 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: No amended booking
-                      errorCodeMessage: No amended booking available
+                      - errorCode: 7003
+                        errorCodeText: No amended booking
+                        errorCodeMessage: No amended booking available
         "409":
           description: |
             In case the provider is processing a `Booking request` - it is possible for the provider to reject the cancellation by returning a `409` (Conflict). This is also to be used in case a cancellation to a Confirmed Booking is done via the `carrierBookingRequestReference`.
@@ -1698,9 +1698,9 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Conflicting request is being processed
-                      errorCodeMessage: Conflicting request is being processed
+                      - errorCode: 7003
+                        errorCodeText: Conflicting request is being processed
+                        errorCodeMessage: Conflicting request is being processed
         "500":
           description: |
             In case a server error occurs in provider system a `500` (Internal Server Error) is returned
@@ -1729,9 +1729,9 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Internal Error occurred
-                      errorCodeMessage: Internal Error occurred
+                      - errorCode: 7003
+                        errorCodeText: Internal Error occurred
+                        errorCodeMessage: Internal Error occurred
         default:
           description: |
             For other errors the error object should be populated with relevant information
@@ -1764,13 +1764,13 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Max Booking requests reached
-                      errorCodeMessage: A maximum of 10 Bookings can be cancelled per hour
+                      - errorCode: 7003
+                        errorCodeText: Max Booking requests reached
+                        errorCodeMessage: A maximum of 10 Bookings can be cancelled per hour
   /v2/booking-notifications:
     post:
       tags:
-      - Notifications
+        - Notifications
       summary: Send a new Booking Notification
       description: |
         Creates a new [`Booking Notification`](#/BookingNotification). This endPoint is called whenever a `Booking` that a consumer has subscribed to changes state or is updated.
@@ -1778,16 +1778,16 @@ paths:
         **This endPoint is to be implemented by a consumer of the Booking API in order to receive Notifications**
       operationId: booking-notifications
       parameters:
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
-        required: false
-        style: simple
-        explode: false
-        schema:
-          type: string
-          example: "2"
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
+          required: false
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "2"
       requestBody:
         description: |
           The payload used to create a [`Booking Notification`](#/BookingNotification)
@@ -1856,8 +1856,8 @@ paths:
                       incoTerms: EXW
                       isEquipmentSubstitutionAllowed: false
                       references:
-                      - type: CR
-                        value: KN-00103004
+                        - type: CR
+                          value: KN-00103004
                       documentParties:
                         bookingAgent:
                           partyName: KN Bremerhaven
@@ -1868,29 +1868,29 @@ paths:
                             city: Bremerhaven
                             countryCode: DE
                           partyContactDetails:
-                          - name: Export operations department
-                            phone: +49 471 945410
+                            - name: Export operations department
+                              phone: +49 471 945410
                       partyContactDetails:
-                      - name: Diane
-                        phone: +49 471 945410
+                        - name: Diane
+                          phone: +49 471 945410
                       shipmentLocations:
-                      - location:
-                          locationName: Bremerhaven
-                          UNLocationCode: DEBRV
-                        locationTypeCode: POL
-                      - location:
-                          locationName: Norfolk
-                          UNLocationCode: USORF
-                        locationTypeCode: POD
+                        - location:
+                            locationName: Bremerhaven
+                            UNLocationCode: DEBRV
+                          locationTypeCode: POL
+                        - location:
+                            locationName: Norfolk
+                            UNLocationCode: USORF
+                          locationTypeCode: POD
                       requestedEquipments:
-                      - isShipperOwned: false
-                        ISOEquipmentCode: 42G1
-                        units: 3
-                        commodities:
-                        - commodityType: "Dry cargo, Freight all kinds"
-                          cargoGrossWeight:
-                            value: 36000
-                            unit: KGM
+                        - isShipperOwned: false
+                          ISOEquipmentCode: 42G1
+                          units: 3
+                          commodities:
+                            - commodityType: "Dry cargo, Freight all kinds"
+                              cargoGrossWeight:
+                                value: 36000
+                                unit: KGM
               declinedLightweightExample:
                 summary: |
                   Booking amendment declined (Lightweight)
@@ -1910,9 +1910,9 @@ paths:
                     carrierBookingRequestReference: 24595eb0-5cfc-4381-9c3a-cedc1975e9aa
                     carrierBookingReference: ABC709951
                     feedbacks:
-                    - severity: INFO
-                      code: INFORMATIONAL_MESSAGE
-                      message: Declined because of no equipment availability
+                      - severity: INFO
+                        code: INFORMATIONAL_MESSAGE
+                        message: Declined because of no equipment availability
               declinedFullStateTransferExample:
                 summary: |
                   Booking amendment declined (Full State Transfer)
@@ -1932,9 +1932,9 @@ paths:
                     carrierBookingRequestReference: 24595eb0-5cfc-4381-9c3a-cedc1975e9aa
                     carrierBookingReference: ABC709951
                     feedbacks:
-                    - severity: INFO
-                      code: INFORMATIONAL_MESSAGE
-                      message: Declined because of no equipment availability
+                      - severity: INFO
+                        code: INFORMATIONAL_MESSAGE
+                        message: Declined because of no equipment availability
                     booking:
                       carrierBookingRequestReference: 24595eb0-5cfc-4381-9c3a-cedc1975e9aa
                       carrierBookingReference: ABC709951
@@ -1966,8 +1966,8 @@ paths:
                       incoTerms: EXW
                       isEquipmentSubstitutionAllowed: false
                       references:
-                      - type: CR
-                        value: KN-00103004
+                        - type: CR
+                          value: KN-00103004
                       documentParties:
                         bookingAgent:
                           partyName: KN Bremerhaven
@@ -1978,63 +1978,63 @@ paths:
                             city: Bremerhaven
                             countryCode: DE
                           partyContactDetails:
-                          - name: Export operations department
-                            phone: +49 471 945410
+                            - name: Export operations department
+                              phone: +49 471 945410
                       partyContactDetails:
-                      - name: Diane
-                        phone: +49 471 945410
+                        - name: Diane
+                          phone: +49 471 945410
                       shipmentLocations:
-                      - location:
-                          locationName: Bremerhaven
-                          UNLocationCode: DEBRV
-                        locationTypeCode: POL
-                      - location:
-                          locationName: Norfolk
-                          UNLocationCode: USORF
-                        locationTypeCode: POD
+                        - location:
+                            locationName: Bremerhaven
+                            UNLocationCode: DEBRV
+                          locationTypeCode: POL
+                        - location:
+                            locationName: Norfolk
+                            UNLocationCode: USORF
+                          locationTypeCode: POD
                       requestedEquipments:
-                      - isShipperOwned: false
-                        ISOEquipmentCode: 42G1
-                        units: 3
-                        commodities:
-                        - commodityType: "Dry cargo, Freight all kinds"
-                          cargoGrossWeight:
-                            value: 36000
-                            unit: KGM
+                        - isShipperOwned: false
+                          ISOEquipmentCode: 42G1
+                          units: 3
+                          commodities:
+                            - commodityType: "Dry cargo, Freight all kinds"
+                              cargoGrossWeight:
+                                value: 36000
+                                unit: KGM
                       confirmedEquipments:
-                      - ISOEquipmentCode: 42G1
-                        units: 3
+                        - ISOEquipmentCode: 42G1
+                          units: 3
                       transportPlan:
-                      - transportPlanStage: MNC
-                        transportPlanStageSequenceNumber: 1
-                        loadLocation:
-                          locationName: Bremerhaven
-                          UNLocationCode: DEBRV
-                        dischargeLocation:
-                          locationName: Norfolk
-                          UNLocationCode: USORF
-                        plannedDepartureDate: 2024-01-20
-                        plannedArrivalDate: 2024-01-31
-                        modeOfTransport: VESSEL
-                        vesselName: MAERSK IOWA
-                        vesselIMONumber: "9298686"
-                        carrierServiceCode: TA1
-                        carrierExportVoyageNumber: 403W
+                        - transportPlanStage: MNC
+                          transportPlanStageSequenceNumber: 1
+                          loadLocation:
+                            locationName: Bremerhaven
+                            UNLocationCode: DEBRV
+                          dischargeLocation:
+                            locationName: Norfolk
+                            UNLocationCode: USORF
+                          plannedDepartureDate: 2024-01-20
+                          plannedArrivalDate: 2024-01-31
+                          modeOfTransport: VESSEL
+                          vesselName: MAERSK IOWA
+                          vesselIMONumber: "9298686"
+                          carrierServiceCode: TA1
+                          carrierExportVoyageNumber: 403W
                       shipmentCutOffTimes:
-                      - cutOffDateTimeCode: DCO
-                        cutOffDateTime: 2024-01-17T22:30:00Z
-                      - cutOffDateTimeCode: VCO
-                        cutOffDateTime: 2024-01-18T22:30:00Z
-                      - cutOffDateTimeCode: FCO
-                        cutOffDateTime: 2024-01-19T13:30:00Z
+                        - cutOffDateTimeCode: DCO
+                          cutOffDateTime: 2024-01-17T22:30:00Z
+                        - cutOffDateTimeCode: VCO
+                          cutOffDateTime: 2024-01-18T22:30:00Z
+                        - cutOffDateTimeCode: FCO
+                          cutOffDateTime: 2024-01-19T13:30:00Z
                       advanceManifestFilings:
-                      - manifestTypeCode: ACE
-                        countryCode: US
+                        - manifestTypeCode: ACE
+                          countryCode: US
                       carrierClauses:
-                      - "The date of shipment, the carrying vessel and the schedule are not guaranteed and are always subject to changes."
-                      - "Operations such as lifting, stowage, drayage and customs declaration of containers are based on the description of the nature, quantity, measurement and weight declared by the Shipper. The Shipper shall be liable for any damage, loss, expense and fines incurred by Carrier XYZ or its agents due to incorrectness or incompleteness of such declaration."
-                      - "Warranted shipper must fulfill the requirements of SOLAS regulations and the IMO guidelines regarding the Verified Gross Mass (VGM) of container carrying cargo (msc.1/circ.1474, 9 June 2014)."
-                      - "In accordance with SOLAS regulations and IMO guidelines regarding the VGM (verified gross mass), any expenses incurred because the VGM was submitted late or was not submitted at all will be charged back to the customer with an additional administration fee."
+                        - "The date of shipment, the carrying vessel and the schedule are not guaranteed and are always subject to changes."
+                        - "Operations such as lifting, stowage, drayage and customs declaration of containers are based on the description of the nature, quantity, measurement and weight declared by the Shipper. The Shipper shall be liable for any damage, loss, expense and fines incurred by Carrier XYZ or its agents due to incorrectness or incompleteness of such declaration."
+                        - "Warranted shipper must fulfill the requirements of SOLAS regulations and the IMO guidelines regarding the Verified Gross Mass (VGM) of container carrying cargo (msc.1/circ.1474, 9 June 2014)."
+                        - "In accordance with SOLAS regulations and IMO guidelines regarding the VGM (verified gross mass), any expenses incurred because the VGM was submitted late or was not submitted at all will be charged back to the customer with an additional administration fee."
                     amendedBooking:
                       carrierBookingRequestReference: 24595eb0-5cfc-4381-9c3a-cedc1975e9aa
                       carrierBookingReference: ABC709951
@@ -2066,8 +2066,8 @@ paths:
                       incoTerms: EXW
                       isEquipmentSubstitutionAllowed: false
                       references:
-                      - type: CR
-                        value: KN-00103004
+                        - type: CR
+                          value: KN-00103004
                       documentParties:
                         bookingAgent:
                           partyName: KN Bremerhaven
@@ -2078,29 +2078,29 @@ paths:
                             city: Bremerhaven
                             countryCode: DE
                           partyContactDetails:
-                          - name: Export operations department
-                            phone: +49 471 945410
+                            - name: Export operations department
+                              phone: +49 471 945410
                       partyContactDetails:
-                      - name: Diane
-                        phone: +49 471 945410
+                        - name: Diane
+                          phone: +49 471 945410
                       shipmentLocations:
-                      - location:
-                          locationName: Bremerhaven
-                          UNLocationCode: DEBRV
-                        locationTypeCode: POL
-                      - location:
-                          locationName: Norfolk
-                          UNLocationCode: USORF
-                        locationTypeCode: POD
+                        - location:
+                            locationName: Bremerhaven
+                            UNLocationCode: DEBRV
+                          locationTypeCode: POL
+                        - location:
+                            locationName: Norfolk
+                            UNLocationCode: USORF
+                          locationTypeCode: POD
                       requestedEquipments:
-                      - isShipperOwned: false
-                        ISOEquipmentCode: 42G1
-                        units: 30
-                        commodities:
-                        - commodityType: "Dry cargo, Freight all kinds"
-                          cargoGrossWeight:
-                            value: 36000
-                            unit: KGM
+                        - isShipperOwned: false
+                          ISOEquipmentCode: 42G1
+                          units: 30
+                          commodities:
+                            - commodityType: "Dry cargo, Freight all kinds"
+                              cargoGrossWeight:
+                                value: 36000
+                                unit: KGM
               cancelConfirmedBookingLightweightExample:
                 summary: |
                   Confirmed Booking cancelled (Lightweight)
@@ -2155,11 +2155,11 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      property: carrierBookingReference or carrierBookingRequestReference
-                      errorCodeText: mandatory property missing
-                      errorCodeMessage: |
-                        carrierBookingReference or carrierBookingRequestReference must be provided as part of a Notification
+                      - errorCode: 7003
+                        property: carrierBookingReference or carrierBookingRequestReference
+                        errorCodeText: mandatory property missing
+                        errorCodeMessage: |
+                          carrierBookingReference or carrierBookingRequestReference must be provided as part of a Notification
         "500":
           description: |
             In case a server error occurs in provider system a `500` (Internal Server Error) is returned
@@ -2188,9 +2188,9 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Internal Error occurred
-                      errorCodeMessage: Internal Error occurred
+                      - errorCode: 7003
+                        errorCodeText: Internal Error occurred
+                        errorCodeMessage: Internal Error occurred
         default:
           description: |
             For other errors the error object should be populated with relevant information
@@ -2223,15 +2223,15 @@ paths:
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: 2024-09-04T09:41:00Z
                     errors:
-                    - errorCode: 7003
-                      errorCodeText: Max Notifications reached
-                      errorCodeMessage: A maximum of 10 Notifications can be created per hour
+                      - errorCode: 7003
+                        errorCodeText: Max Notifications reached
+                        errorCodeMessage: A maximum of 10 Notifications can be created per hour
 components:
   schemas:
     CreateBookingResponse:
       title: Create Booking Response
       required:
-      - carrierBookingRequestReference
+        - carrierBookingRequestReference
       type: object
       properties:
         carrierBookingRequestReference:
@@ -2254,62 +2254,62 @@ components:
             An optional property where a reason for cancelling the booking or the amendment can be given.
           example: Booking cancelled due to internal problems
       oneOf:
-      - title: Cancel Booking Request (prior to Booking Confirmation)
-        required:
-        - bookingStatus
-        type: object
-        properties:
-          bookingStatus:
-            maxLength: 50
-            type: string
-            description: |
-              Setting the `bookingStatus` to `CANCELLED` cancels the `Booking Request` (only possible **before** it is `CONFIRMED` and using this property is only possible in combination with the `bookingReference` path-property being the `carrierBookingRequestReference`). The `Booking Request` will discontinue if the request is accepted by the provider.
-
-              **Condition:** It is a precondition that the `bookingStatus` **is NOT** `CONFIRMED` or `PENDING_AMENDMENT` in order to cancel it. If this is not the case a `409` (Conflict) error response should be returned.
-
-              Only possible value to set is `CANCELLED`.
-            example: CANCELLED
-      - title: Only cancel the amendment to a Confirmed Booking
-        required:
-        - amendedBookingStatus
-        type: object
-        properties:
-          amendedBookingStatus:
-            maxLength: 50
-            type: string
-            description: |
-              Setting the `amendedBookingStatus` to `AMENDMENT_CANCELLED` **only** cancels the amendment to a confirmed `Booking`. This is only possible in combination with the `bookingReference` path-property being the `carrierBookingReference`.
-
-              **Condition:** It is a precondition that the `amendedBookingStatus` **is** `AMENDMENT_RECEIVED` in order to cancel it. If this is not the case a `404` (Not Found) error response should be returned.
-
-              Only possible value to set is `AMENDMENT_CANCELLED`.
-            example: AMENDMENT_CANCELLED
-      - title: Request to cancel a Confirmed Booking
-        required:
-        - bookingCancellationStatus
-        type: object
-        properties:
-          bookingCancellationStatus:
-            maxLength: 50
-            type: string
-            description: |
-              Setting the `bookingCancellationStatus` to `CANCELLATION_RECEIVED` is a request to cancel a confirmed Booking (only possible **after** it is `CONFIRMED` and using this property is only possible in combination with the `bookingReference` path-property being the `carrierBookingReference`). Upon receiving this request the provider will check if it is possible to cancel the confirmed booking. Further processing is needed by the provider.
-
-              **Condition:** It is a precondition that the `bookingStatus` **is** `CONFIRMED` or `PENDING_AMENDMENT` in order to cancel it. If this is not the case a `409` (Conflict) error response should be returned.
-
-              Only possible value to set is `CANCELLATION_RECEIVED`.
-            example: CANCELLATION_RECEIVED
+        - title: Cancel Booking Request (prior to Booking Confirmation)
+          required:
+            - bookingStatus
+          type: object
+          properties:
+            bookingStatus:
+              maxLength: 50
+              type: string
+              description: |
+                Setting the `bookingStatus` to `CANCELLED` cancels the `Booking Request` (only possible **before** it is `CONFIRMED` and using this property is only possible in combination with the `bookingReference` path-property being the `carrierBookingRequestReference`). The `Booking Request` will discontinue if the request is accepted by the provider.
+                
+                **Condition:** It is a precondition that the `bookingStatus` **is NOT** `CONFIRMED` or `PENDING_AMENDMENT` in order to cancel it. If this is not the case a `409` (Conflict) error response should be returned.
+                
+                Only possible value to set is `CANCELLED`.
+              example: CANCELLED
+        - title: Only cancel the amendment to a Confirmed Booking
+          required:
+            - amendedBookingStatus
+          type: object
+          properties:
+            amendedBookingStatus:
+              maxLength: 50
+              type: string
+              description: |
+                Setting the `amendedBookingStatus` to `AMENDMENT_CANCELLED` **only** cancels the amendment to a confirmed `Booking`. This is only possible in combination with the `bookingReference` path-property being the `carrierBookingReference`.
+                
+                **Condition:** It is a precondition that the `amendedBookingStatus` **is** `AMENDMENT_RECEIVED` in order to cancel it. If this is not the case a `404` (Not Found) error response should be returned.
+                
+                Only possible value to set is `AMENDMENT_CANCELLED`.
+              example: AMENDMENT_CANCELLED
+        - title: Request to cancel a Confirmed Booking
+          required:
+            - bookingCancellationStatus
+          type: object
+          properties:
+            bookingCancellationStatus:
+              maxLength: 50
+              type: string
+              description: |
+                Setting the `bookingCancellationStatus` to `CANCELLATION_RECEIVED` is a request to cancel a confirmed Booking (only possible **after** it is `CONFIRMED` and using this property is only possible in combination with the `bookingReference` path-property being the `carrierBookingReference`). Upon receiving this request the provider will check if it is possible to cancel the confirmed booking. Further processing is needed by the provider.
+                
+                **Condition:** It is a precondition that the `bookingStatus` **is** `CONFIRMED` or `PENDING_AMENDMENT` in order to cancel it. If this is not the case a `409` (Conflict) error response should be returned.
+                
+                Only possible value to set is `CANCELLATION_RECEIVED`.
+              example: CANCELLATION_RECEIVED
     BookingNotification:
       title: Booking Notification
       required:
-      - data
-      - datacontenttype
-      - id
-      - source
-      - specversion
-      - subscriptionReference
-      - time
-      - type
+        - data
+        - datacontenttype
+        - id
+        - source
+        - specversion
+        - subscriptionReference
+        - time
+        - type
       type: object
       properties:
         specversion:
@@ -2320,7 +2320,7 @@ components:
             Currently, this attribute will only have the 'major' and 'minor' version numbers included in it. This allows for 'patch' changes to the specification to be made without changing this property's value in the serialization. Note: for 'release candidate' releases a suffix might be used for testing purposes.
           example: "1.0"
           enum:
-          - "1.0"
+            - "1.0"
         id:
           maxLength: 100
           type: string
@@ -2345,7 +2345,7 @@ components:
             This attribute contains a value describing the type of event related to the originating occurrence. Often this attribute is used for routing, observability, policy enforcement, etc. The format of this is producer defined and might include information such as the version of the type - see [Versioning of CloudEvents in the Primer](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/primer.md#versioning-of-cloudevents) for more information.
           example: org.dcsa.booking.v2
           enum:
-          - org.dcsa.booking.v2
+            - org.dcsa.booking.v2
         time:
           type: string
           description: |
@@ -2364,7 +2364,7 @@ components:
             When translating an event message with no `datacontenttype` attribute to a different format or protocol binding, the target `datacontenttype` SHOULD be set explicitly to the implied `datacontenttype` of the source.
           example: application/json
           enum:
-          - application/json
+            - application/json
         subscriptionReference:
           maxLength: 100
           pattern: ^\S(?:.*\S)?$
@@ -2379,7 +2379,7 @@ components:
     BookingNotificationData:
       title: Data
       required:
-      - bookingStatus
+        - bookingStatus
       type: object
       properties:
         bookingStatus:
@@ -2460,7 +2460,7 @@ components:
 
         In case the subscriber does not subscribe to the `Full State Transfer` of the Booking then the content in this property can be ignored.
       allOf:
-      - $ref: '#/components/schemas/Booking'
+        - $ref: '#/components/schemas/Booking'
     AmendedBookingFullNotification:
       title: Amended Booking
       type: object
@@ -2471,13 +2471,13 @@ components:
 
         In case the subscriber does not subscribe to the `Full State Transfer` of the Booking or no amendment is active - then the content in this property can be ignored.
       allOf:
-      - $ref: '#/components/schemas/Booking'
+        - $ref: '#/components/schemas/Booking'
     Feedback:
       title: Feedback
       required:
-      - code
-      - message
-      - severity
+        - code
+        - message
+        - severity
       type: object
       properties:
         severity:
@@ -2521,12 +2521,12 @@ components:
     ErrorResponse:
       title: Error Response
       required:
-      - errorDateTime
-      - errors
-      - httpMethod
-      - requestUri
-      - statusCode
-      - statusCodeText
+        - errorDateTime
+        - errors
+        - httpMethod
+        - requestUri
+        - statusCode
+        - statusCodeText
       type: object
       properties:
         httpMethod:
@@ -2535,13 +2535,13 @@ components:
             The HTTP method used to make the request e.g. `GET`, `POST`, etc
           example: POST
           enum:
-          - GET
-          - HEAD
-          - POST
-          - PUT
-          - DELETE
-          - OPTION
-          - PATCH
+            - GET
+            - HEAD
+            - POST
+            - PUT
+            - DELETE
+            - OPTION
+            - PATCH
         requestUri:
           type: string
           description: |
@@ -2588,8 +2588,8 @@ components:
     DetailedError:
       title: Detailed Error
       required:
-      - errorCodeMessage
-      - errorCodeText
+        - errorCodeMessage
+        - errorCodeText
       type: object
       properties:
         errorCode:
@@ -2634,9 +2634,9 @@ components:
     Address:
       title: Address
       required:
-      - city
-      - countryCode
-      - street
+        - city
+        - countryCode
+        - street
       type: object
       properties:
         street:
@@ -2691,8 +2691,8 @@ components:
     Facility:
       title: Facility
       required:
-      - facilityCode
-      - facilityCodeListProvider
+        - facilityCode
+        - facilityCodeListProvider
       type: object
       properties:
         facilityCode:
@@ -2715,15 +2715,15 @@ components:
             - `SMDG` (Requires a UN Location Code)
           example: SMDG
           enum:
-          - BIC
-          - SMDG
+            - BIC
+            - SMDG
       description: |
         An object used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.
     GeoCoordinate:
       title: Geo Coordinate
       required:
-      - latitude
-      - longitude
+        - latitude
+        - longitude
       type: object
       properties:
         latitude:
@@ -2741,14 +2741,14 @@ components:
     CreateBooking:
       title: Create Booking
       required:
-      - cargoMovementTypeAtDestination
-      - cargoMovementTypeAtOrigin
-      - deliveryTypeAtDestination
-      - documentParties
-      - isEquipmentSubstitutionAllowed
-      - receiptTypeAtOrigin
-      - requestedEquipments
-      - shipmentLocations
+        - cargoMovementTypeAtDestination
+        - cargoMovementTypeAtOrigin
+        - deliveryTypeAtDestination
+        - documentParties
+        - isEquipmentSubstitutionAllowed
+        - receiptTypeAtOrigin
+        - requestedEquipments
+        - shipmentLocations
       type: object
       properties:
         receiptTypeAtOrigin:
@@ -2761,9 +2761,9 @@ components:
             - `CFS` (Container Freight Station)
           example: CY
           enum:
-          - CY
-          - SD
-          - CFS
+            - CY
+            - SD
+            - CFS
         deliveryTypeAtDestination:
           maxLength: 3
           type: string
@@ -2774,9 +2774,9 @@ components:
             - `CFS` (Container Freight Station)
           example: CY
           enum:
-          - CY
-          - SD
-          - CFS
+            - CY
+            - SD
+            - CFS
         cargoMovementTypeAtOrigin:
           maxLength: 3
           type: string
@@ -2809,8 +2809,8 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
         originChargesPaymentTerm:
           $ref: '#/components/schemas/OriginChargesPaymentTerm'
         destinationChargesPaymentTerm:
@@ -2903,8 +2903,8 @@ components:
             - `NMFTA` (National Motor Freight Traffic Association)
           example: NMFTA
           enum:
-          - SMDG
-          - NMFTA
+            - SMDG
+            - NMFTA
         isPartialLoadAllowed:
           type: boolean
           description: |
@@ -2958,8 +2958,8 @@ components:
             - `SWB` (Sea Waybill)
           example: SWB
           enum:
-          - BOL
-          - SWB
+            - BOL
+            - SWB
         transportDocumentReference:
           maxLength: 20
           pattern: ^\S(?:.*\S)?$
@@ -3029,14 +3029,14 @@ components:
     UpdateBooking:
       title: Update Booking
       required:
-      - cargoMovementTypeAtDestination
-      - cargoMovementTypeAtOrigin
-      - deliveryTypeAtDestination
-      - documentParties
-      - isEquipmentSubstitutionAllowed
-      - receiptTypeAtOrigin
-      - requestedEquipments
-      - shipmentLocations
+        - cargoMovementTypeAtDestination
+        - cargoMovementTypeAtOrigin
+        - deliveryTypeAtDestination
+        - documentParties
+        - isEquipmentSubstitutionAllowed
+        - receiptTypeAtOrigin
+        - requestedEquipments
+        - shipmentLocations
       type: object
       properties:
         carrierBookingRequestReference:
@@ -3067,9 +3067,9 @@ components:
             - `CFS` (Container Freight Station)
           example: CY
           enum:
-          - CY
-          - SD
-          - CFS
+            - CY
+            - SD
+            - CFS
         deliveryTypeAtDestination:
           maxLength: 3
           type: string
@@ -3080,9 +3080,9 @@ components:
             - `CFS` (Container Freight Station)
           example: CY
           enum:
-          - CY
-          - SD
-          - CFS
+            - CY
+            - SD
+            - CFS
         cargoMovementTypeAtOrigin:
           maxLength: 3
           type: string
@@ -3115,8 +3115,8 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
         originChargesPaymentTerm:
           $ref: '#/components/schemas/OriginChargesPaymentTerm'
         destinationChargesPaymentTerm:
@@ -3208,8 +3208,8 @@ components:
             - `NMFTA` (National Motor Freight Traffic Association)
           example: NMFTA
           enum:
-          - SMDG
-          - NMFTA
+            - SMDG
+            - NMFTA
         isPartialLoadAllowed:
           type: boolean
           description: |
@@ -3263,8 +3263,8 @@ components:
             - `SWB` (Sea Waybill)
           example: SWB
           enum:
-          - BOL
-          - SWB
+            - BOL
+            - SWB
         transportDocumentReference:
           maxLength: 20
           pattern: ^\S(?:.*\S)?$
@@ -3334,7 +3334,7 @@ components:
     DocumentPartiesReq:
       title: Document Parties
       required:
-      - bookingAgent
+        - bookingAgent
       type: object
       properties:
         bookingAgent:
@@ -3357,15 +3357,15 @@ components:
     Booking:
       title: Booking
       required:
-      - bookingStatus
-      - cargoMovementTypeAtDestination
-      - cargoMovementTypeAtOrigin
-      - deliveryTypeAtDestination
-      - documentParties
-      - isEquipmentSubstitutionAllowed
-      - receiptTypeAtOrigin
-      - requestedEquipments
-      - shipmentLocations
+        - bookingStatus
+        - cargoMovementTypeAtDestination
+        - cargoMovementTypeAtOrigin
+        - deliveryTypeAtDestination
+        - documentParties
+        - isEquipmentSubstitutionAllowed
+        - receiptTypeAtOrigin
+        - requestedEquipments
+        - shipmentLocations
       type: object
       properties:
         carrierBookingRequestReference:
@@ -3430,9 +3430,9 @@ components:
             - `CFS` (Container Freight Station)
           example: CY
           enum:
-          - CY
-          - SD
-          - CFS
+            - CY
+            - SD
+            - CFS
         deliveryTypeAtDestination:
           maxLength: 3
           type: string
@@ -3443,9 +3443,9 @@ components:
             - `CFS` (Container Freight Station)
           example: CY
           enum:
-          - CY
-          - SD
-          - CFS
+            - CY
+            - SD
+            - CFS
         cargoMovementTypeAtOrigin:
           maxLength: 3
           type: string
@@ -3478,8 +3478,8 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
         originChargesPaymentTerm:
           $ref: '#/components/schemas/OriginChargesPaymentTerm'
         destinationChargesPaymentTerm:
@@ -3571,8 +3571,8 @@ components:
             - `NMFTA` (National Motor Freight Traffic Association)
           example: NMFTA
           enum:
-          - SMDG
-          - NMFTA
+            - SMDG
+            - NMFTA
         isPartialLoadAllowed:
           type: boolean
           description: |
@@ -3626,8 +3626,8 @@ components:
             - `SWB` (Sea Waybill)
           example: SWB
           enum:
-          - BOL
-          - SWB
+            - BOL
+            - SWB
         transportDocumentReference:
           maxLength: 20
           pattern: ^\S(?:.*\S)?$
@@ -3760,7 +3760,7 @@ components:
     InvoicePayableAt:
       title: Invoice Payable At
       required:
-      - UNLocationCode
+        - UNLocationCode
       type: object
       properties:
         UNLocationCode:
@@ -3795,37 +3795,37 @@ components:
 
         The location can be specified either as a `UN Location Code` or as a `CountryCode`.
       oneOf:
-      - title: UN Location Code
-        required:
-        - UNLocationCode
-        type: object
-        properties:
-          UNLocationCode:
-            maxLength: 5
-            minLength: 5
-            pattern: "^[A-Z]{2}[A-Z2-9]{3}$"
-            type: string
-            description: |
-              The UN Location code specifying where the place is located. The pattern used must be
-
-              - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-              - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
-
-              More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
-            example: NLAMS
-      - title: Country Code
-        required:
-        - countryCode
-        type: object
-        properties:
-          countryCode:
-            maxLength: 2
-            minLength: 2
-            pattern: "^[A-Z]{2}$"
-            type: string
-            description: |
-              The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-            example: DK
+        - title: UN Location Code
+          required:
+            - UNLocationCode
+          type: object
+          properties:
+            UNLocationCode:
+              maxLength: 5
+              minLength: 5
+              pattern: "^[A-Z]{2}[A-Z2-9]{3}$"
+              type: string
+              description: |
+                The UN Location code specifying where the place is located. The pattern used must be
+                
+                - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+                - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+                
+                More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
+              example: NLAMS
+        - title: Country Code
+          required:
+            - countryCode
+          type: object
+          properties:
+            countryCode:
+              maxLength: 2
+              minLength: 2
+              pattern: "^[A-Z]{2}$"
+              type: string
+              description: |
+                The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+              example: DK
     DocumentParties:
       title: Document Parties
       type: object
@@ -3850,8 +3850,8 @@ components:
     ActiveReeferSettings:
       title: Active Reefer Settings
       required:
-      - temperatureSetpoint
-      - temperatureUnit
+        - temperatureSetpoint
+        - temperatureUnit
       type: object
       properties:
         temperatureSetpoint:
@@ -3870,8 +3870,8 @@ components:
             **Condition:** Mandatory to provide if `temperatureSetpoint` is provided
           example: CEL
           enum:
-          - CEL
-          - FAH
+            - CEL
+            - FAH
         o2Setpoint:
           maximum: 100
           minimum: 0
@@ -3913,8 +3913,8 @@ components:
             **Condition:** Mandatory to provide if `airExchange` is provided
           example: MQH
           enum:
-          - MQH
-          - FQH
+            - MQH
+            - FQH
         isVentilationOpen:
           type: boolean
           description: |
@@ -3957,9 +3957,9 @@ components:
     PartyAddress:
       title: Party Address
       required:
-      - city
-      - countryCode
-      - street
+        - city
+        - countryCode
+        - street
       type: object
       properties:
         street:
@@ -4027,8 +4027,8 @@ components:
     OtherDocumentParty:
       title: Other Document Party
       required:
-      - party
-      - partyFunction
+        - party
+        - partyFunction
       type: object
       properties:
         party:
@@ -4052,7 +4052,7 @@ components:
     BookingAgent:
       title: Booking Agent
       required:
-      - partyName
+        - partyName
       type: object
       properties:
         partyName:
@@ -4093,7 +4093,7 @@ components:
     Shipper:
       title: Shipper
       required:
-      - partyName
+        - partyName
       type: object
       properties:
         partyName:
@@ -4145,7 +4145,7 @@ components:
     Consignee:
       title: Consignee
       required:
-      - partyName
+        - partyName
       type: object
       properties:
         partyName:
@@ -4197,7 +4197,7 @@ components:
     ServiceContractOwner:
       title: Service Contract Owner
       required:
-      - partyName
+        - partyName
       type: object
       properties:
         partyName:
@@ -4238,8 +4238,8 @@ components:
     CarrierBookingOffice:
       title: Carrier Booking Office
       required:
-      - UNLocationCode
-      - partyName
+        - UNLocationCode
+        - partyName
       type: object
       properties:
         partyName:
@@ -4276,7 +4276,7 @@ components:
     Party:
       title: Party
       required:
-      - partyName
+        - partyName
       type: object
       properties:
         partyName:
@@ -4317,7 +4317,7 @@ components:
     PartyContactDetail:
       title: Party Contact Detail
       required:
-      - name
+        - name
       type: object
       properties:
         name:
@@ -4333,39 +4333,39 @@ components:
         name: Henrik
         phone: +45 51801234
       anyOf:
-      - title: Phone required
-        required:
-        - phone
-        type: object
-        properties:
-          phone:
-            maxLength: 30
-            pattern: ^\S(?:.*\S)?$
-            type: string
-            description: |
-              Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
-            example: +45 70262970
-        description: |
-          `Phone` is mandatory to provide
-      - title: Email required
-        required:
-        - email
-        type: object
-        properties:
-          email:
-            maxLength: 100
-            pattern: ^.+@\S+$
-            type: string
-            description: |
-              `E-mail` address to be used
-            example: info@dcsa.org
-        description: |
-          `Email` is mandatory to provide
+        - title: Phone required
+          required:
+            - phone
+          type: object
+          properties:
+            phone:
+              maxLength: 30
+              pattern: ^\S(?:.*\S)?$
+              type: string
+              description: |
+                Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
+              example: +45 70262970
+          description: |
+            `Phone` is mandatory to provide
+        - title: Email required
+          required:
+            - email
+          type: object
+          properties:
+            email:
+              maxLength: 100
+              pattern: ^.+@\S+$
+              type: string
+              description: |
+                `E-mail` address to be used
+              example: info@dcsa.org
+          description: |
+            `Email` is mandatory to provide
     IdentifyingCode:
       title: Identifying Code
       required:
-      - codeListProvider
-      - partyCode
+        - codeListProvider
+        - partyCode
       type: object
       properties:
         codeListProvider:
@@ -4412,9 +4412,9 @@ components:
     TaxLegalReference:
       title: Tax & Legal Reference
       required:
-      - countryCode
-      - type
-      - value
+        - countryCode
+        - type
+        - value
       type: object
       properties:
         type:
@@ -4456,8 +4456,8 @@ components:
     ReferenceShipper:
       title: Reference (Shipper)
       required:
-      - type
-      - value
+        - type
+        - value
       type: object
       properties:
         type:
@@ -4480,8 +4480,8 @@ components:
     Reference:
       title: Reference
       required:
-      - type
-      - value
+        - type
+        - value
       type: object
       properties:
         type:
@@ -4505,9 +4505,9 @@ components:
     CustomsReference:
       title: Customs Reference
       required:
-      - countryCode
-      - type
-      - values
+        - countryCode
+        - type
+        - values
       type: object
       properties:
         type:
@@ -4550,8 +4550,8 @@ components:
     ShipmentLocation:
       title: Shipment Location
       required:
-      - location
-      - locationTypeCode
+        - location
+        - locationTypeCode
       type: object
       properties:
         location:
@@ -4621,9 +4621,9 @@ components:
     RequestedEquipment:
       title: Requested Equipment
       required:
-      - ISOEquipmentCode
-      - isShipperOwned
-      - units
+        - ISOEquipmentCode
+        - isShipperOwned
+        - units
       type: object
       properties:
         ISOEquipmentCode:
@@ -4703,9 +4703,9 @@ components:
     RequestedEquipmentShipper:
       title: Requested Equipment (Shipper)
       required:
-      - ISOEquipmentCode
-      - isShipperOwned
-      - units
+        - ISOEquipmentCode
+        - isShipperOwned
+        - units
       type: object
       properties:
         ISOEquipmentCode:
@@ -4785,8 +4785,8 @@ components:
     TareWeight:
       title: Tare Weight
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -4805,8 +4805,8 @@ components:
             - `LBR` (Pounds)
           example: KGM
           enum:
-          - KGM
-          - LBR
+            - KGM
+            - LBR
       description: |
         The weight of an empty container (gross container weight).
 
@@ -4814,7 +4814,7 @@ components:
     ContainerPositioning:
       title: Container Positioning
       required:
-      - location
+        - location
       type: object
       properties:
         dateTime:
@@ -4830,7 +4830,7 @@ components:
     ContainerPositioningEstimated:
       title: Container Positioning Estimated
       required:
-      - location
+        - location
       type: object
       properties:
         estimatedDateTime:
@@ -4936,7 +4936,7 @@ components:
     CommodityShipper:
       title: Commodity (Shipper)
       required:
-      - commodityType
+        - commodityType
       type: object
       properties:
         commodityType:
@@ -4997,7 +4997,7 @@ components:
     Commodity:
       title: Commodity
       required:
-      - commodityType
+        - commodityType
       type: object
       properties:
         commoditySubReference:
@@ -5125,8 +5125,8 @@ components:
     CargoGrossWeightReq:
       title: Cargo Gross Weight (Requested Equipment)
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -5145,8 +5145,8 @@ components:
             - `LBR` (Pounds)
           example: KGM
           enum:
-          - KGM
-          - LBR
+            - KGM
+            - LBR
       description: |
         The estimated grand total gross weight of the cargo, including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.
 
@@ -5154,8 +5154,8 @@ components:
     CargoGrossWeight:
       title: Cargo Gross Weight
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -5174,8 +5174,8 @@ components:
             - `LBR` (Pounds)
           example: KGM
           enum:
-          - KGM
-          - LBR
+            - KGM
+            - LBR
       description: |
         The estimated grand total gross weight of the cargo, including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.
 
@@ -5183,8 +5183,8 @@ components:
     CargoGrossVolume:
       title: Cargo Gross Volume
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -5204,15 +5204,15 @@ components:
             - `MTQ` (Cubic meter)
           example: MTQ
           enum:
-          - MTQ
-          - FTQ
+            - MTQ
+            - FTQ
       description: |
         The estimated grand total volume of the cargo.
     CargoNetWeight:
       title: Cargo Net Weight
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -5231,15 +5231,15 @@ components:
             - `LBR` (Pounds)
           example: KGM
           enum:
-          - KGM
-          - LBR
+            - KGM
+            - LBR
       description: |
         The estimated grand total net weight of the cargo, excluding packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.
     CargoNetVolume:
       title: Cargo Net Volume
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -5259,15 +5259,15 @@ components:
             - `MTQ` (Cubic meter)
           example: MTQ
           enum:
-          - MTQ
-          - FTQ
+            - MTQ
+            - FTQ
       description: |
         The estimated net total volume of the cargo.
     NationalCommodityCode:
       title: National Commodity Code
       required:
-      - type
-      - values
+        - type
+        - values
       type: object
       properties:
         type:
@@ -5297,10 +5297,10 @@ components:
           description: |
             A list of `national commodity codes` values.
           example:
-          - "1515"
-          - "2106"
-          - "2507"
-          - "2512"
+            - "1515"
+            - "2106"
+            - "2507"
+            - "2512"
           items:
             maxLength: 10
             pattern: ^\S(?:.*\S)?$
@@ -5369,19 +5369,19 @@ components:
     DangerousGoods:
       title: Dangerous Goods
       required:
-      - emergencyContactDetails
-      - grossWeight
-      - imoClass
-      - isCompetentAuthorityApprovalRequired
-      - isEmptyUncleanedResidue
-      - isExceptedQuantity
-      - isHot
-      - isLimitedQuantity
-      - isMarinePollutant
-      - isReportableQuantity
-      - isSalvagePackings
-      - isWaste
-      - properShippingName
+        - emergencyContactDetails
+        - grossWeight
+        - imoClass
+        - isCompetentAuthorityApprovalRequired
+        - isEmptyUncleanedResidue
+        - isExceptedQuantity
+        - isHot
+        - isLimitedQuantity
+        - isMarinePollutant
+        - isReportableQuantity
+        - isSalvagePackings
+        - isWaste
+        - properShippingName
       type: object
       properties:
         codedVariantList:
@@ -5588,37 +5588,37 @@ components:
       description: |
         Specification for `Dangerous Goods`. It is mandatory to either provide the `UNNumber` or the `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**.
       oneOf:
-      - title: UN Number
-        required:
-        - UNNumber
-        type: object
-        properties:
-          UNNumber:
-            maxLength: 4
-            minLength: 4
-            pattern: "^\\d{4}$"
-            type: string
-            description: |
-              United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.
-            example: "1463"
-      - title: NA Number
-        required:
-        - NANumber
-        type: object
-        properties:
-          NANumber:
-            maxLength: 4
-            minLength: 4
-            pattern: "^\\d{4}$"
-            type: string
-            description: |
-              Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.
-            example: "9037"
+        - title: UN Number
+          required:
+            - UNNumber
+          type: object
+          properties:
+            UNNumber:
+              maxLength: 4
+              minLength: 4
+              pattern: "^\\d{4}$"
+              type: string
+              description: |
+                United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.
+              example: "1463"
+        - title: NA Number
+          required:
+            - NANumber
+          type: object
+          properties:
+            NANumber:
+              maxLength: 4
+              minLength: 4
+              pattern: "^\\d{4}$"
+              type: string
+              description: |
+                Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.
+              example: "9037"
     GrossWeight:
       title: Gross Weight
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -5638,15 +5638,15 @@ components:
             - `LBR` (Pounds)
           example: KGM
           enum:
-          - KGM
-          - LBR
+            - KGM
+            - LBR
       description: |
         Total weight of the goods carried, including packaging.
     NetWeight:
       title: Net Weight
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -5666,15 +5666,15 @@ components:
             - `LBR` (Pounds)
           example: KGM
           enum:
-          - KGM
-          - LBR
+            - KGM
+            - LBR
       description: |
         Total weight of the goods carried, excluding packaging.
     NetExplosiveContent:
       title: Net Explosive Content
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -5696,17 +5696,17 @@ components:
             - `ONZ` (Ounce)
           example: KGM
           enum:
-          - KGM
-          - LBR
-          - GRM
-          - ONZ
+            - KGM
+            - LBR
+            - GRM
+            - ONZ
       description: |
         The total weight of the explosive substances, without the packaging’s, casings, etc.
     NetVolume:
       title: Net Volume
       required:
-      - unit
-      - value
+        - unit
+        - value
       type: object
       properties:
         value:
@@ -5727,9 +5727,9 @@ components:
             - `LTR` (Litre)
           example: MTQ
           enum:
-          - MTQ
-          - FTQ
-          - LTR
+            - MTQ
+            - FTQ
+            - LTR
       description: |
         The volume of the referenced dangerous goods.
 
@@ -5737,9 +5737,9 @@ components:
     InnerPackaging:
       title: Inner Packaging
       required:
-      - description
-      - material
-      - quantity
+        - description
+        - material
+        - quantity
       type: object
       properties:
         quantity:
@@ -5765,8 +5765,8 @@ components:
     EmergencyContactDetails:
       title: Emergency Contact Details
       required:
-      - contact
-      - phone
+        - contact
+        - phone
       type: object
       properties:
         contact:
@@ -5799,7 +5799,7 @@ components:
     Limits:
       title: Limits
       required:
-      - temperatureUnit
+        - temperatureUnit
       type: object
       properties:
         temperatureUnit:
@@ -5810,8 +5810,8 @@ components:
             - `FAH` (Fahrenheit)
           example: CEL
           enum:
-          - CEL
-          - FAH
+            - CEL
+            - FAH
         flashPoint:
           type: number
           description: |
@@ -5849,8 +5849,8 @@ components:
     ConfirmedEquipment:
       title: Confirmed Equipment
       required:
-      - ISOEquipmentCode
-      - units
+        - ISOEquipmentCode
+        - units
       type: object
       properties:
         ISOEquipmentCode:
@@ -5895,12 +5895,12 @@ components:
     Transport:
       title: Transport
       required:
-      - dischargeLocation
-      - loadLocation
-      - plannedArrivalDate
-      - plannedDepartureDate
-      - transportPlanStage
-      - transportPlanStageSequenceNumber
+        - dischargeLocation
+        - loadLocation
+        - plannedArrivalDate
+        - plannedDepartureDate
+        - transportPlanStage
+        - transportPlanStageSequenceNumber
       type: object
       properties:
         transportPlanStage:
@@ -5912,9 +5912,9 @@ components:
             - `ONC` (On-Carriage Transport)
           example: PRC
           enum:
-          - PRC
-          - MNC
-          - ONC
+            - PRC
+            - MNC
+            - ONC
         transportPlanStageSequenceNumber:
           type: integer
           description: |
@@ -6097,8 +6097,8 @@ components:
     ShipmentCutOffTime:
       title: Shipment Cut-Off Time
       required:
-      - cutOffDateTime
-      - cutOffDateTimeCode
+        - cutOffDateTime
+        - cutOffDateTimeCode
       type: object
       properties:
         cutOffDateTimeCode:
@@ -6123,7 +6123,7 @@ components:
     AdvanceManifestFiling:
       title: Advance Manifest Filing
       required:
-      - manifestTypeCode
+        - manifestTypeCode
       type: object
       properties:
         manifestTypeCode:
@@ -6157,13 +6157,13 @@ components:
     Charge:
       title: Charge
       required:
-      - calculationBasis
-      - chargeName
-      - currencyAmount
-      - currencyCode
-      - paymentTermCode
-      - quantity
-      - unitPrice
+        - calculationBasis
+        - chargeName
+        - currencyAmount
+        - currencyCode
+        - paymentTermCode
+        - quantity
+        - unitPrice
       type: object
       properties:
         chargeName:
@@ -6196,8 +6196,8 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
         calculationBasis:
           maxLength: 50
           pattern: ^\S(?:.*\S)?$
@@ -6234,8 +6234,8 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
         portChargesPaymentTermCode:
           type: string
           description: |
@@ -6245,8 +6245,8 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
         otherChargesPaymentTermCode:
           type: string
           description: |
@@ -6256,8 +6256,8 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
       description: |
         An indicator of whether origin charges are prepaid (`PRE`) or collect (`COL`). When prepaid, the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
     DestinationChargesPaymentTerm:
@@ -6273,8 +6273,8 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
         portChargesPaymentTermCode:
           type: string
           description: |
@@ -6284,8 +6284,8 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
         otherChargesPaymentTermCode:
           type: string
           description: |
@@ -6295,14 +6295,14 @@ components:
             - `COL` (Collect)
           example: PRE
           enum:
-          - PRE
-          - COL
+            - PRE
+            - COL
       description: |
         An indicator of whether destination charges are prepaid (`PRE`) or collect (`COL`). When prepaid, the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).
     Vessel:
       title: Vessel
       required:
-      - name
+        - name
       type: object
       properties:
         name:

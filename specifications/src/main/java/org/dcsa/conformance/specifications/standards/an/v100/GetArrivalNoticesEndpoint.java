@@ -71,7 +71,7 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .in("query")
           .name("universalImportVoyageReference")
           .description(
-              "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.")
+              "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA.")
           .example("2301W")
           .schema(new Schema<String>().type("string"));
 
@@ -89,7 +89,7 @@ public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint 
           .in("query")
           .name("universalServiceReference")
           .description(
-              "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service.")
+              "Unique identifier of a liner service, defined and distributed by DCSA to carriers.")
           .example("SR12345A")
           .schema(new Schema<String>().type("string"));
 

@@ -8,11 +8,11 @@ import lombok.Data;
 @Schema(
     description =
 """
-Error API response to a `POST VGMs` request.
+Error API response to a `POST VGM declarations` request.
 
-If some of the VGMs in the request were successfully processed,
-a regular `PostVGMsResponse` is expected to be used instead,
-with `feedbackElements` indicating which VGMs were not processed and why.
+If some of the VGM declarations in the request were successfully processed,
+a regular `PostVGMDeclarationsResponse` is expected to be used instead,
+with `feedbackElements` indicating which VGM declarations were not processed and why.
 """)
 public class PostVGMDeclarationsError {
 
@@ -24,9 +24,9 @@ Feedback elements indicating why request could not be processed.
 At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.
 
-When sent in response to a request that contains an array of VGMs,
-the order of the `feedbackElements` is not related to the list of request VGMs.
-Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.
+When sent in response to a request that contains an array of VGM declarations,
+the order of the `feedbackElements` is not related to the list of request VGM declarations.
+Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.
 """)
   private List<FeedbackElement> feedbackElements;
 }

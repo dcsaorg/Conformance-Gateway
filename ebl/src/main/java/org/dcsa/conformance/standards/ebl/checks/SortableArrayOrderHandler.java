@@ -18,7 +18,8 @@ public class SortableArrayOrderHandler implements ArrayOrderHandler {
 
   @Override
   public ArrayNode restoreOrder(ArrayNode array) {
-    var modifiableList = StreamSupport.stream(array.spliterator(), false).sorted(comparator).toList();
+    var modifiableList =
+        StreamSupport.stream(array.spliterator(), false).sorted(comparator).toList();
     var copy = array.deepCopy();
     copy.removeAll();
     copy.addAll(modifiableList);
@@ -27,7 +28,8 @@ public class SortableArrayOrderHandler implements ArrayOrderHandler {
 
   @Override
   public ArrayNode shuffle(ArrayNode array) {
-    var modifiableList = StreamSupport.stream(array.spliterator(), false).collect(Collectors.toList());
+    var modifiableList =
+        StreamSupport.stream(array.spliterator(), false).collect(Collectors.toList());
     Collections.shuffle(modifiableList);
     var copy = array.deepCopy();
     copy.removeAll();

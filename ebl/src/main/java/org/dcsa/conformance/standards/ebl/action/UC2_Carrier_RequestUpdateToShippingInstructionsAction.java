@@ -33,7 +33,7 @@ public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends State
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().shippingInstructionsReference());
+        .put("documentReference", getDspSupplier().get().shippingInstructionsReference());
   }
 
   @Override
@@ -42,12 +42,11 @@ public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends State
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getSINotificationChecks(
-          getMatchedExchangeUuid(),
-          expectedApiVersion,
-          requestSchemaValidator,
-          ShippingInstructionsStatus.SI_PENDING_UPDATE,
-          EblChecks.sirInNotificationMustMatchDSP(getDspSupplier())
-        );
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            requestSchemaValidator,
+            ShippingInstructionsStatus.SI_PENDING_UPDATE,
+            EblChecks.sirInNotificationMustMatchDSP(getDspSupplier()));
       }
     };
   }

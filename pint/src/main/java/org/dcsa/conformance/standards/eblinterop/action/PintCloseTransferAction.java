@@ -20,19 +20,17 @@ public class PintCloseTransferAction extends PintAction {
   private final JsonSchemaValidator responseSchemaValidator;
 
   public PintCloseTransferAction(
-    String receivingPlatform,
-    String sendingPlatform,
-    PintAction previousAction,
-    PintResponseCode pintResponseCode,
-    JsonSchemaValidator responseSchemaValidator
-    ) {
+      String receivingPlatform,
+      String sendingPlatform,
+      PintAction previousAction,
+      PintResponseCode pintResponseCode,
+      JsonSchemaValidator responseSchemaValidator) {
     super(
         sendingPlatform,
         receivingPlatform,
         previousAction,
         "FinishTransfer(%s)".formatted(pintResponseCode.name()),
-        pintResponseCode.getHttpResponseCode()
-    );
+        pintResponseCode.getHttpResponseCode());
     this.pintResponseCode = pintResponseCode;
     this.responseSchemaValidator = responseSchemaValidator;
   }
@@ -66,35 +64,33 @@ public class PintCloseTransferAction extends PintAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var envelopeReference = Objects.requireNonNullElse(getDsp().envelopeReference(), "<MISSING-REFERENCE>");
+        var envelopeReference =
+            Objects.requireNonNullElse(getDsp().envelopeReference(), "<MISSING-REFERENCE>");
 
         return Stream.of(
-                new UrlPathCheck(
-                    PintRole::isSendingPlatform, getMatchedExchangeUuid(), "/envelopes/%s/finish-transfer".formatted(envelopeReference)),
-                new ResponseStatusCheck(
-                    PintRole::isReceivingPlatform, getMatchedExchangeUuid(), expectedStatus),
-                new ApiHeaderCheck(
-                    PintRole::isSendingPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    expectedApiVersion),
-                new ApiHeaderCheck(
-                    PintRole::isReceivingPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    expectedApiVersion),
-                new JsonSchemaCheck(
-                  PintRole::isReceivingPlatform,
-                  getMatchedExchangeUuid(),
-                  HttpMessageType.RESPONSE,
-                  responseSchemaValidator
-                ),
-                validateSignedFinishResponse(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  pintResponseCode
-                )
-            );
+            new UrlPathCheck(
+                PintRole::isSendingPlatform,
+                getMatchedExchangeUuid(),
+                "/envelopes/%s/finish-transfer".formatted(envelopeReference)),
+            new ResponseStatusCheck(
+                PintRole::isReceivingPlatform, getMatchedExchangeUuid(), expectedStatus),
+            new ApiHeaderCheck(
+                PintRole::isSendingPlatform,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                PintRole::isReceivingPlatform,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            new JsonSchemaCheck(
+                PintRole::isReceivingPlatform,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            validateSignedFinishResponse(
+                getMatchedExchangeUuid(), expectedApiVersion, pintResponseCode));
       }
     };
   }

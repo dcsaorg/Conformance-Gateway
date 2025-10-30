@@ -20,31 +20,11 @@ Code identifying the party as per the `codeListProvider` and `codeListName`.
       description =
 """
 Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
 - `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).
 """,
       example = "W3C",
       maxLength = 100)
@@ -66,7 +46,7 @@ Name of the code list in which the `codeListProvider` defines the `partyCode`, i
       description =
 """
 Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.
 """,
       example = "CA",

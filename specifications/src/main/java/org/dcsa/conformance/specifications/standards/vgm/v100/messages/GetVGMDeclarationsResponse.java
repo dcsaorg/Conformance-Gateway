@@ -9,7 +9,7 @@ import org.dcsa.conformance.specifications.standards.vgm.v100.model.VGMDeclarati
 @Schema(
     description =
 """
-API response to a `GET VGMs` request
+API response to a `GET VGM declarations` request
 """)
 public class GetVGMDeclarationsResponse {
 

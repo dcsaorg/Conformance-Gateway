@@ -1,11 +1,10 @@
 package org.dcsa.conformance.standards.ebl.party;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum ShippingInstructionsStatus {

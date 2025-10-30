@@ -2,6 +2,7 @@ package org.dcsa.conformance.specifications.standards.core.v100.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.specifications.standards.core.v100.types.UniversalServiceReference;
 
 @Schema(description = "Carrier service code and/or universal service reference")
 @Data
@@ -13,9 +14,5 @@ public class ServiceCodeOrReference {
       description = "Carrier-specific identifier of a service.")
   private String carrierServiceCode;
 
-  @Schema(
-      type = "string",
-      example = "SR12345A",
-      description = "Reference of a service agreed between the VSA partners.")
-  private String universalServiceReference;
+  @Schema() private UniversalServiceReference universalServiceReference;
 }

@@ -1,5 +1,12 @@
 # Arrival Notice v1.0.0 Changelog
 
+## Snapshot v1.0.0-20251107-beta
+
+Updated the descriptions of `UniversalServiceReference` and `UniversalVoyageReference` attributes. (SD-2598)
+
+Updated in `Seal` the description of `source` mentioning the `VET`/`PHY` mapping to `AC`. (SD-2611)
+
+
 ## Snapshot v1.0.0-20251010-beta
 
 Added to type `ArrivalNotice` property `houseBillOfLadingReferences`. (SD-2508)

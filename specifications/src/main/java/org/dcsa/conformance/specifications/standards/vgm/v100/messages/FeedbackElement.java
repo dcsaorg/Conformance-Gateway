@@ -24,7 +24,7 @@ Human readable feedback message that can be programmatically relayed to a user o
 
   @Schema(
       maxLength = 1000,
-      example = "$.VGMs[2].location",
+      example = "$.VGMDeclarations[2].location",
       description =
 """
 [JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property

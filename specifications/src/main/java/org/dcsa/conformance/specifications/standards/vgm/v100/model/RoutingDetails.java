@@ -16,21 +16,21 @@ public class RoutingDetails {
   @Schema(
       description =
 """
-The initial party with which the event originated.
+The initial party with which the VGM declaration originated.
 """)
   private Party originatingParty;
 
   @Schema(
       description =
 """
-Ordered list of parties forwarding the event between the originating and destination party.
+Ordered list of parties forwarding the VGM declaration between the originating and destination party.
 """)
   private List<Party> forwardingParties;
 
   @Schema(
       description =
 """
-The final party intended as destination of the event.
+The final party intended as destination of the VGM declaration.
 """)
   private Party destinationParty;
 }

@@ -7,42 +7,10 @@ Address,postCode,string,,maxLength=10,,"1047 HM","The post code of the address."
 Address,stateRegion,string,,maxLength=65,,"North Holland","The name of the state/region.",
 Address,street,string,,maxLength=70,,Ruijggoordweg,"The name of the street.",
 Address,streetNumber,string,,maxLength=50,,100,"The number of the street.",
-ClassifiedDateTime,classifier,string,,maxLength=10,,EST,"Classifier denoting whether an event is planned, estimated or actual
-- `PLN` - Planned
-- `EST` - Estimated
-- `ACT` - Actual",
-ClassifiedDateTime,value,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)",
 ContactDetails,email,string,,maxLength=255,,jane.doe@example.com,"Contact email address",
 ContactDetails,name,string,,maxLength=255,,"Jane Doe","Contact name",
 ContactDetails,phone,string,,maxLength=30,,"+14155552671","Contact phone number, including an international phone number format
 as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).",
-DocumentReference,reference,string,,maxLength=100,,123e4567e89b,"Reference identifying the document",
-DocumentReference,typeCode,string,,,,BKG,"Code used to denote the type of a document reference
-- `AMF` - Advance Manifest Filing (of any subtype)
-- `ARN` - Arrival Notice
-- `BKG` - Booking
-- `CAS` - Cargo Survey
-- `CBR` - Carrier Booking Request
-- `CEA` - Certificate of Analysis
-- `CEO` - Certificate of Origin
-- `CQU` - Contract Quotation
-- `CRO` - Container Release Order
-- `CUC` - Customs Clearance
-- `DEI` - Delivery Instructions
-- `DEO` - Delivery Order
-- `DGD` - Dangerous Goods Declaration
-- `FCE` - Fumigation Certificate
-- `HCE` - Health Certificate
-- `ICE` - Inspection Certificate
-- `INV` - Invoice
-- `OOG` - Out of Gauge
-- `PCE` - Phytosanitary Certificate
-- `PFD` - Proof of Delivery
-- `SHI` - Shipping Instruction
-- `TRD` - Transport Document
-- `TRO` - Transport Order
-- `VCE` - Veterinary Certificate
-- `VGM` - Verified Gross Mass",
 EquipmentDetails,cargoGrossWeight,Weight,,,,,"Gross weight of the cargo item including packaging being carried in the container.
 Excludes the tare weight of the container.",
 EquipmentDetails,equipmentReference,string,,maxLength=11,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -64,7 +32,7 @@ Facility,facilityCodeListProvider,string,,maxLength=10,,SMDG,"Code list provider
 - `SMDG` (using [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/smdg-terminal-code-list/))
 - `BIC` (using [BIC Facility Codes](https://www.bic-code.org/facility-codes/))",
 FeedbackElement,message,string,,maxLength=5000,,"The facility SMDG code does not match the location UN/LOCODE","Human readable feedback message that can be programmatically relayed to a user of the VGM publishing organization",
-FeedbackElement,propertyPath,string,,maxLength=1000,,"$.VGMs[2].location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
+FeedbackElement,propertyPath,string,,maxLength=1000,,"$.VGMDeclarations[2].location","[JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
 about which the feedback is provided (if applicable)",
 FeedbackElement,severity,string,,maxLength=50,,ERROR,"Code denoting the severity of a `FeedbackElement`
 
@@ -100,39 +68,30 @@ Location,UNLocationCode,string,,maxLength=5,,NLAMS,"The UN Location code specify
 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
 
 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+OtherReference,reference,string,,maxLength=100,,A456C,"The actual reference value",
+OtherReference,typeCode,string,,,,SI,"Code qualifying a reference.
+
+In addition to the codes listed here, any other code as defined in
+[UN/EDIFACT 16A 1153](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred1153.htm)
+or a subsequent revision may also be used.
+
+- `AOW` - Transportation Control Number (TCN)
+- `SI` - Shipper's identifying number for shipment (SID)
+- `SQ` - Equipment sequence number
+- `VOR` - Transport equipment gross mass verification order reference",
 Party,codeListName,string,,maxLength=100,,DID,"Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
 - `DID` (Decentralized Identifier) for `codeListProvider` `W3C`
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 Party,codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 Party,partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 Party,partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 PartyDetails,address,Address,,,,,"An object for storing address-related information.",
 PartyDetails,contactDetails,ContactDetails,,,,,"The contact details of a person.",
@@ -143,49 +102,36 @@ PostVGMDeclarationsError,feedbackElements,"FeedbackElement list",,,,,"Feedback e
 At least one feedback element of severity `ERROR` is expected.
 Lower severity feedback elements may also be included.
 
-When sent in response to a request that contains an array of VGMs,
-the order of the `feedbackElements` is not related to the list of request VGMs.
-Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.",
+When sent in response to a request that contains an array of VGM declarations,
+the order of the `feedbackElements` is not related to the list of request VGM declarations.
+Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.",
 "PostVGMDeclarationsRequest",VGMDeclarations,"VGMDeclaration list",,,,,"List of VGM declarations.",
 "PostVGMDeclarationsResponse",feedbackElements,"FeedbackElement list",,,,,"Optional list of feedback elements indicating how the request was processed.
 
 There can be zero, one or more feedback elements per event in the request.
-The order of `feedbackElements` is not related to the order of VGMs in the request.
-Instead, the relevant request VGM is indicated by the `propertyPath` of each `FeedbackElement`.",
-RoutingDetails,destinationParty,Party,,,,,"The final party intended as destination of the event.",
-RoutingDetails,forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the event between the originating and destination party.",
-RoutingDetails,originatingParty,Party,,,,,"The initial party with which the event originated.",
+The order of `feedbackElements` is not related to the order of VGM declarations in the request.
+Instead, the relevant request VGM declaration is indicated by the `propertyPath` of each `FeedbackElement`.",
+RoutingDetails,destinationParty,Party,,,,,"The final party intended as destination of the VGM declaration.",
+RoutingDetails,forwardingParties,"Party list",,,,,"Ordered list of parties forwarding the VGM declaration between the originating and destination party.",
+RoutingDetails,originatingParty,Party,,,,,"The initial party with which the VGM declaration originated.",
 Seal,number,string,,maxLength=15,,VET123,"Identifies a seal affixed to the container.",
 Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the seal.
 - `CAR` (Carrier)
 - `SHI` (Shipper)
 - `PHY` (Phytosanitary)
 - `VET` (Veterinary)
-- `CUS` (Customs)",
+- `CUS` (Customs)
+
+In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).",
 Seal,type,string,,,,WIR,"The type of seal.
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
 - `WIR` (Wire)",
-ShipmentDetails,carrierBookingReference,string,,maxLength=35,,ABC709951,"The reference of the booking for which this VGM was created",
-ShipmentDetails,documentReferences,"DocumentReference list",,,,,"Additional list of document references related to this event",
-ShipmentDetails,shipmentReferences,"ShipmentReference list",,,,,"Additional list of shipment references related to this event",
-ShipmentDetails,"transportDocumentReference",string,,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM was created",
-ShipmentReference,reference,string,,maxLength=100,,123e4567e89b,"The actual reference value",
-ShipmentReference,typeCode,string,,,,FF,"Code used to denote the type of a shipment reference
-- `AAO` - Consignee’s Reference
-- `AES` - Automated Export System
-- `BID` - Booking Request ID
-- `BPR` - Booking party reference number
-- `CER` - Canadian Export Reporting System
-- `CR` - Customer’s Reference
-- `CSI` - Customer shipment ID
-- `DUE` - Declaração Única de Exportação
-- `ECR` - Empty container release reference
-- `EQ` - Equipment Reference
-- `FF` - Freight Forwarder’s Reference
-- `PO` - Purchase Order Reference
-- `RUC` - Registro Único del Contribuyente
-- `SI` - Shipper’s Reference",
+ShipmentDetails,carrierBookingReference,string,,maxLength=35,,ABC709951,"The reference of the booking for which this VGM declaration was created",
+ShipmentDetails,otherReferences,"OtherReference list",,,,,"List of additional references related to the VGM declaration,
+excluding the Carrier Booking Reference and the Transport Document Reference",
+ShipmentDetails,"transportDocumentReference",string,,maxLength=20,,HHL71800000,"The reference of the transport document for which this VGM declaration was created",
 VesselVoyageDetails,carrierCode,string,,maxLength=4,,MMCU,"The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
 [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
 
@@ -210,26 +156,32 @@ VGMDeclaration,authorizedParty,PartyDetails,,,,,"Party authorized to act on beha
 VGMDeclaration,"authorizedPersonSignatory",string,,maxLength=255,,"Jane Doe","Authorized person signatory",
 VGMDeclaration,declarationDateTime,"string(date-time)",,maxLength=30,,2025-01-23T01:23:45Z,"The date and time when the VGM declaration was last updated",
 VGMDeclaration,declarationReference,string,,maxLength=500,,"VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z","Reference of the VGM declaration",
-VGMDeclaration,equipmentDetails,EquipmentDetails,,,,,"VGM details specific to the equipment",
+VGMDeclaration,equipmentDetails,EquipmentDetails,,,,,"VGM declaration details specific to the equipment",
 VGMDeclaration,holdingParty,PartyDetails,,,,,"Information reference agency holding the VGM declaration.",
-VGMDeclaration,isRetracted,boolean,,,,,"Flag indicating that the VGM is retracted.
+VGMDeclaration,isRetracted,boolean,,,,,"Flag indicating that the `VGMDeclaration` with this `declarationReference` is retracted.
 
-The data in this and all previously transmitted VGMs with the same `VGMID` must be discarded or ignored.
+The data in all previously transmitted VGM declarations with the same `declarationReference` must be discarded or ignored.
 
-If this flag is set, any VGM data other than the `VGMID` is irrelevant (if present).",
+If this flag is set, any data in this `VGMDeclaration` object other than the `declarationReference` is irrelevant (if present).",
 VGMDeclaration,orderedByParty,PartyDetails,,,,,"Party that orders the weighing at the terminal or weighing station.",
 VGMDeclaration,responsibleParty,PartyDetails,,,,,"Party responsible for the VGM declaration.",
 VGMDeclaration,routingDetails,RoutingDetails,,,,,"Technical routing of a VGM declaration from the originating party, via forwarding parties, to the destination party.",
-VGMDeclaration,shipmentDetails,ShipmentDetails,,,,,"VGM details specific to the shipment",
+VGMDeclaration,shipmentDetails,ShipmentDetails,,,,,"VGM declaration details specific to the shipment",
 VGMDeclaration,submittingParty,PartyDetails,,,,,"Party that submits the VGM declaration.",
-VGMDeclaration,vesselVoyageDetails,VesselVoyageDetails,,,,,"VGM details specific to the vessel voyage",
+VGMDeclaration,vesselVoyageDetails,VesselVoyageDetails,,,,,"VGM declaration details specific to the vessel voyage",
 VGMDeclaration,VGM,VGM,,,,,"Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6",
 VGMDeclaration,weighingParty,PartyDetails,,,,,"Legally accepted party designated to perform the weighing.",
 VoyageNumberOrReference,carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-VoyageNumberOrReference,universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+VoyageNumberOrReference,universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",
 Weight,unit,string,,maxLength=10,,KGM,"Measurement unit in which the weight `value` is expressed:
 - `KGM` (Kilograms)
-- `LBR` (Pounds)
-- `GRM` (Grams)
-- `ONZ` (Ounce)",
+- `LBR` (Pounds)",
 Weight,value,number,,,,2.4,"Weight value expressed in the measurement `unit`",

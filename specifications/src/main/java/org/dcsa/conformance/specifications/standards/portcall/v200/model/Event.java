@@ -18,6 +18,16 @@ public class Event {
   @Schema(description = "Universal unique identifier of the event")
   private UniversallyUniqueID eventID;
 
+  @Schema(
+      description =
+"""
+ID of an earlier event to which this event is a reply.
+
+Used when sending a timestamp as a reply to another timestamp as part of
+[the "ERP" pattern defined by the IMO](https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf).
+""")
+  private UniversallyUniqueID replyToEventID;
+
   @Schema(description = "The date and time when the technical event was last updated.")
   private FormattedDateTime eventUpdatedDateTime;
 

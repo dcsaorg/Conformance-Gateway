@@ -9,7 +9,8 @@ public enum BookingCancellationState {
     try {
       return valueOf(bookingCancellationStateName);
     } catch (IllegalArgumentException | NullPointerException e) {
-      throw new IllegalArgumentException("Unknown booking cancellation state: " + bookingCancellationStateName);
+      throw new IllegalArgumentException(
+          "Unknown booking cancellation state: " + bookingCancellationStateName);
     }
   }
 }

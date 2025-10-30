@@ -33,7 +33,11 @@ public class CarrierSupplyPayloadAction extends EblAction {
   private final boolean isTd;
 
   public CarrierSupplyPayloadAction(
-      String carrierPartyName, @NonNull ScenarioType scenarioType, String standardVersion, JsonSchemaValidator requestSchemaValidator, boolean isTd) {
+      String carrierPartyName,
+      @NonNull ScenarioType scenarioType,
+      String standardVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isTd) {
     super(
         carrierPartyName,
         null,
@@ -87,7 +91,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (carrierPayload!= null) {
+    if (carrierPayload != null) {
       jsonState.set(CARRIER_PAYLOAD, carrierPayload);
     }
     return jsonState.put(SCENARIO_TYPE, scenarioType.name());
@@ -176,7 +180,8 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   private String getCbrValue() {
     return shouldIncludeCbr()
-        ? Optional.ofNullable(getBookingDspReference().get().carrierBookingReference()).orElse(DEFAULT_CBR)
+        ? Optional.ofNullable(getBookingDspReference().get().carrierBookingReference())
+            .orElse(DEFAULT_CBR)
         : DEFAULT_CBR;
   }
 }

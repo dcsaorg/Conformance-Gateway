@@ -11,8 +11,7 @@ import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParamete
 
 public class PlatformScenarioParametersAction extends IssuanceAction {
   private final EblType eblType;
-  @Getter
-  private IssuanceResponseCode responseCode;
+  @Getter private IssuanceResponseCode responseCode;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
 
   public PlatformScenarioParametersAction(
@@ -25,8 +24,7 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
         sourcePartyName,
         targetPartyName,
         previousAction,
-        "Platform scenario parameters [%s %s]"
-            .formatted(eblType.name(), code.standardCode),
+        "Platform scenario parameters [%s %s]".formatted(eblType.name(), code.standardCode),
         -1);
     this.eblType = eblType;
     this.responseCode = code;

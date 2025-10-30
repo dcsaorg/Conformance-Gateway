@@ -100,10 +100,10 @@ paths:
       parameters:
       - name: "carrierBookingReference"
         in: "query"
-        description: "Reference of the transport document for which to return the associated events"
+        description: "Reference of the booking for which to return the associated events"
         schema:
           type: "string"
-        example: "HHL71800000"
+        example: "ABC709951"
       - name: "transportDocumentReference"
         in: "query"
         description: "Reference of the transport document for which to return the associated events"
@@ -854,31 +854,11 @@ components:
           type: "string"
           description: |
             Code of the provider of a list of codes identifying a party, including but not limited to:
-            - `BOLE` (Bolero)
-            - `BRIT` (BRITC eBL)
-            - `CARX` (CargoX)
-            - `COVA` (Covantis)
-            - `CRED` (Credore)
-            - `DCSA` (Digital Container Shipping Association)
-            - `DNB` (Dun and Bradstreet)
-            - `ESSD` (EssDOCS)
-            - `ETEU` (eTEU)
-            - `ETIT` (e-title)
-            - `FMC` (Federal Maritime Commission)
-            - `GLEIF` (Global Legal Entity Identifier Foundation)
-            - `GSBN` (Global Shipping Business Network)
-            - `IDT` (ICE Digital Trade)
-            - `IQAX` (IQAX)
-            - `KTNE` (KTNET)
-            - `NMFTA` (National Motor Freight Traffic Association)
-            - `SECR` (Secro)
             - `SMDG` (Ship Message Design Group)
-            - `TRAC` (Enigio trace:original)
-            - `TRGO` (TradeGO)
-            - `W3C` (World Wide Web Consortium)
-            - `WAVE` (Wave)
-            - `WISE` (WiseTech)
             - `ZZZ` (Mutually defined)
+
+            or any other code as defined in the
+            [DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).
           example: "W3C"
         codeListName:
           maxLength: 100
@@ -894,7 +874,7 @@ components:
           type: "string"
           description: |
             Code identifying the function of the party, as defined in
-            [UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+            [UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
             or a subsequent revision.
           example: "CA"
       description: "Identification of a container shipping party"
@@ -993,6 +973,9 @@ components:
             - `PHY` (Phytosanitary)
             - `VET` (Veterinary)
             - `CUS` (Customs)
+
+            In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+            both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).
           example: "CUS"
         type:
           type: "string"
@@ -1014,8 +997,21 @@ components:
           description: "Carrier-specific identifier of a service."
           example: "FE1"
         universalServiceReference:
+          maxLength: 8
           type: "string"
-          description: "Reference of a service agreed between the VSA partners."
+          description: |
+            Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+            DCSA generates and distributes batches of Universal Service References (USRs)
+            to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+            A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+            or independently for one of its own non-VSA, non-Alliance services.
+
+            Every Universal Service Reference is an 8-character string with the following format:
+             * the prefix "SR"
+             * 5 digits
+             * 1 uppercase English letter (A-Z).
           example: "SR12345A"
       description: "Carrier service code and/or universal service reference"
     ShipmentDetails:
@@ -1156,8 +1152,8 @@ components:
             maxLength: 3
             type: "string"
             description: |
-              Code identifying the reason for a delay, as defined by SMDG here:
-              https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+              Code identifying the reason for a delay,
+              [as defined by SMDG](https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/).
             example: "STR"
         changeRemark:
           maxLength: 250
@@ -1255,9 +1251,19 @@ components:
           description: "Carrier-specific identifier of the voyage"
           example: "2103S"
         universalVoyageReference:
+          maxLength: 5
           type: "string"
-          description: "Reference of the voyage agreed between the VSA partners"
-          example: "SR12345A"
+          description: |
+            Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+            Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+            either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+            Every Universal Voyage Reference is a 5-character string with the following format:
+             * the last 2 digits of the year
+             * 2 alphanumeric characters for the sequence number of the voyage
+             * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).
+          example: "2301W"
       description: "Carrier voyage number and/or universal voyage reference"
   headers:
     API-Version:

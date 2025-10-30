@@ -3,9 +3,8 @@ package org.dcsa.conformance.standards.ebl.checks;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.experimental.UtilityClass;
-
 import java.util.function.Function;
+import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class ArrayOrderHelper {

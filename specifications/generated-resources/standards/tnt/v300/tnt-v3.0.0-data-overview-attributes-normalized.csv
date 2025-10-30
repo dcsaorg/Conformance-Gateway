@@ -242,34 +242,14 @@ Party,codeListName,string,,maxLength=100,,DID,"Name of the code list in which th
 - `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`
 - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`",
 Party,codeListProvider,string,,maxLength=100,,W3C,"Code of the provider of a list of codes identifying a party, including but not limited to:
-- `BOLE` (Bolero)
-- `BRIT` (BRITC eBL)
-- `CARX` (CargoX)
-- `COVA` (Covantis)
-- `CRED` (Credore)
-- `DCSA` (Digital Container Shipping Association)
-- `DNB` (Dun and Bradstreet)
-- `ESSD` (EssDOCS)
-- `ETEU` (eTEU)
-- `ETIT` (e-title)
-- `FMC` (Federal Maritime Commission)
-- `GLEIF` (Global Legal Entity Identifier Foundation)
-- `GSBN` (Global Shipping Business Network)
-- `IDT` (ICE Digital Trade)
-- `IQAX` (IQAX)
-- `KTNE` (KTNET)
-- `NMFTA` (National Motor Freight Traffic Association)
-- `SECR` (Secro)
 - `SMDG` (Ship Message Design Group)
-- `TRAC` (Enigio trace:original)
-- `TRGO` (TradeGO)
-- `W3C` (World Wide Web Consortium)
-- `WAVE` (Wave)
-- `WISE` (WiseTech)
-- `ZZZ` (Mutually defined)",
+- `ZZZ` (Mutually defined)
+
+or any other code as defined in the
+[DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).",
 Party,partyCode,string,,maxLength=150,,MSK,"Code identifying the party as per the `codeListProvider` and `codeListName`.",
 Party,partyFunction,string,,maxLength=3,,CA,"Code identifying the function of the party, as defined in
-[UN/CEFACT Revision 2004B](https://www.stylusstudio.com/edifact/D04B/3035.htm)
+[UN/EDIFACT 16A 3035](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred3035.htm)
 or a subsequent revision.",
 PostEventsError,feedbackElements,"FeedbackElement list",,,,,"Feedback elements indicating why request could not be processed.
 
@@ -297,13 +277,27 @@ Seal,source,string,,,,CUS,"The source of the seal, namely who has affixed the se
 - `SHI` (Shipper)
 - `PHY` (Phytosanitary)
 - `VET` (Veterinary)
-- `CUS` (Customs)",
+- `CUS` (Customs)
+
+In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
+both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).",
 Seal,type,string,,,,WIR,"The type of seal.
 - `KLP` (Keyless padlock)
 - `BLT` (Bolt)
 - `WIR` (Wire)",
 ServiceCodeOrReference,carrierServiceCode,string,,,,FE1,"Carrier-specific identifier of a service.",
-ServiceCodeOrReference,"universalServiceReference",string,,,,SR12345A,"Reference of a service agreed between the VSA partners.",
+ServiceCodeOrReference,"universalServiceReference",string,,maxLength=8,,SR12345A,"Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
+
+DCSA generates and distributes batches of Universal Service References (USRs)
+to member and non-member carriers upon request, for their own use or for their alliances and VSAs.
+
+A carrier can use each of its assigned USRs either in agreement with its partners for a service under a VSA or Alliance,
+or independently for one of its own non-VSA, non-Alliance services.
+
+Every Universal Service Reference is an 8-character string with the following format:
+ * the prefix ""SR""
+ * 5 digits
+ * 1 uppercase English letter (A-Z).",
 ShipmentDetails,documentReference,DocumentReference,,,,,"Referenced document",
 ShipmentDetails,priceCalculationDate,"string(date)",,,,2025-01-23,"Date taken in consideration for the tariff applicability, that differs depending on the trade.
 It can vary per carrier.",
@@ -350,8 +344,8 @@ TransportDetails,changeRemark,string,,maxLength=250,,"Bad weather","Free text in
 and/or plans to mitigate schedule slippage.",
 TransportDetails,delayReasonCodes,"string list",,maxLength=3,,,"Codes identifying the reasons for a delay
 Item description:
-Code identifying the reason for a delay, as defined by SMDG here:
-https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/
+Code identifying the reason for a delay,
+[as defined by SMDG](https://smdg.org/documents/smdg-code-lists/delay-reason-and-port-call-activity/).
 ",
 TransportDetails,transportCall,TransportCall,,,,,"Transport call information",
 TruckTransport,tractorDetails,VehicleDetails,,,,,"The license plate and VIN of the tractor of the truck used to transport the equipment.",
@@ -374,4 +368,12 @@ VesselTransport,vesselIMONumber,string,,maxLength=8,,9321483,"The unique referen
 The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.",
 VesselTransport,vesselName,string,,maxLength=50,,"King of the Seas","Vessel name",
 VoyageNumberOrReference,carrierVoyageNumber,string,,,,2103S,"Carrier-specific identifier of the voyage",
-VoyageNumberOrReference,universalVoyageReference,string,,,,SR12345A,"Reference of the voyage agreed between the VSA partners",
+VoyageNumberOrReference,universalVoyageReference,string,,maxLength=5,,2301W,"Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.
+
+Carriers assign a Universal Voyage Reference (UVR) to a voyage,
+either individually for non-VSA services or jointly for shared services under a VSA or Alliance.
+
+Every Universal Voyage Reference is a 5-character string with the following format:
+ * the last 2 digits of the year
+ * 2 alphanumeric characters for the sequence number of the voyage
+ * 1 character for the initial of the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).",

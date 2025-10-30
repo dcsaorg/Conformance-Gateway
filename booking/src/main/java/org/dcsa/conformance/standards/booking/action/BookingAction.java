@@ -88,7 +88,9 @@ public abstract class BookingAction extends BookingAndEblAction {
   }
 
   private <T> BookingDynamicScenarioParameters updateIfNotNull(
-          BookingDynamicScenarioParameters dsp, T value, Function<T, BookingDynamicScenarioParameters> with) {
+      BookingDynamicScenarioParameters dsp,
+      T value,
+      Function<T, BookingDynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }
@@ -192,7 +194,7 @@ public abstract class BookingAction extends BookingAndEblAction {
                 "/v2/booking-notifications"),
             new ResponseStatusCheck(
                     titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204)
-                .withApplicability(isWithNotifications),
+                .withRelevance(isWithNotifications),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedNotificationExchangeUuid(),
                 bookingState,
@@ -211,7 +213,7 @@ public abstract class BookingAction extends BookingAndEblAction {
                     getMatchedNotificationExchangeUuid(),
                     HttpMessageType.RESPONSE,
                     expectedApiVersion)
-                .withApplicability(isWithNotifications),
+                .withRelevance(isWithNotifications),
             new JsonSchemaCheck(
                 titlePrefix,
                 BookingRole::isCarrier,
@@ -266,12 +268,12 @@ public abstract class BookingAction extends BookingAndEblAction {
         .filter(Objects::nonNull);
   }
 
-
   protected Stream<ActionCheck> getSimpleNotificationChecks(
       String expectedApiVersion,
       JsonSchemaValidator requestSchemaValidator,
       BookingState bookingState) {
-    return getSimpleNotificationChecks(expectedApiVersion, requestSchemaValidator, bookingState, null, null);
+    return getSimpleNotificationChecks(
+        expectedApiVersion, requestSchemaValidator, bookingState, null, null);
   }
 
   protected Stream<ActionCheck> getSimpleNotificationChecks(
@@ -279,7 +281,8 @@ public abstract class BookingAction extends BookingAndEblAction {
       JsonSchemaValidator requestSchemaValidator,
       BookingState bookingState,
       BookingState amendedBookingState) {
-    return getSimpleNotificationChecks(expectedApiVersion, requestSchemaValidator, bookingState, amendedBookingState, null);
+    return getSimpleNotificationChecks(
+        expectedApiVersion, requestSchemaValidator, bookingState, amendedBookingState, null);
   }
 
   protected Stream<ActionCheck> getSimpleNotificationChecks(
@@ -293,7 +296,7 @@ public abstract class BookingAction extends BookingAndEblAction {
         new UrlPathCheck(
             BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
         new ResponseStatusCheck(BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
-            .withApplicability(isWithNotifications()),
+            .withRelevance(isWithNotifications()),
         new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
             getMatchedExchangeUuid(),
             bookingState,
@@ -310,7 +313,7 @@ public abstract class BookingAction extends BookingAndEblAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion)
-            .withApplicability(isWithNotifications()),
+            .withRelevance(isWithNotifications()),
         new JsonSchemaCheck(
             BookingRole::isCarrier,
             getMatchedExchangeUuid(),

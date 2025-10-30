@@ -363,24 +363,33 @@ public class BlueprintModule {
 
   private static void autoLayoutProcess(BpmnModelInstance model, Process process) {
     final double NODE_W = 150, NODE_H = 70;
-    final double COL_X = 350, ROW_Y = 150;
+    final double COL_X = 350, ROW_Y = 220; // vertical spread increased
     final double START_X = 200, START_Y = 160;
 
     BpmnDiagram diagram = getOrCreateDiagram(model);
     BpmnPlane plane = diagram.getBpmnPlane();
     plane.setBpmnElement(process);
 
-    // Build adjacency
+    // Build adjacency lists
     Map<String, FlowNode> nodes =
         process.getChildElementsByType(FlowNode.class).stream()
             .collect(Collectors.toMap(FlowNode::getId, n -> n));
     Collection<SequenceFlow> flows = process.getChildElementsByType(SequenceFlow.class);
 
     Map<FlowNode, List<FlowNode>> succ = new HashMap<>();
-    for (FlowNode n : nodes.values()) succ.put(n, new ArrayList<>());
-    for (SequenceFlow f : flows) succ.get((FlowNode) f.getSource()).add((FlowNode) f.getTarget());
+    Map<FlowNode, List<FlowNode>> pred = new HashMap<>();
+    for (FlowNode n : nodes.values()) {
+      succ.put(n, new ArrayList<>());
+      pred.put(n, new ArrayList<>());
+    }
+    for (SequenceFlow f : flows) {
+      FlowNode s = (FlowNode) f.getSource();
+      FlowNode t = (FlowNode) f.getTarget();
+      succ.get(s).add(t);
+      pred.get(t).add(s);
+    }
 
-    // BFS layering
+    // Layer assignment (BFS)
     Map<FlowNode, Integer> col = new HashMap<>();
     Queue<FlowNode> q = new ArrayDeque<>();
     for (StartEvent s : process.getChildElementsByType(StartEvent.class)) {
@@ -391,47 +400,58 @@ public class BlueprintModule {
       FlowNode u = q.remove();
       int c = col.get(u);
       for (FlowNode v : succ.get(u)) {
-        if (!col.containsKey(v)) {
-          col.put(v, c + 1);
+        int nv = Math.max(col.getOrDefault(v, 0), c + 1);
+        if (nv != col.getOrDefault(v, -1)) {
+          col.put(v, nv);
           q.add(v);
         }
       }
     }
 
-    // Row placement
+    // Group by columns
     Map<Integer, List<FlowNode>> cols = new HashMap<>();
     for (FlowNode n : nodes.values())
       cols.computeIfAbsent(col.getOrDefault(n, 0), k -> new ArrayList<>()).add(n);
 
     Map<FlowNode, Double> x = new HashMap<>(), y = new HashMap<>();
+
     for (Map.Entry<Integer, List<FlowNode>> e : cols.entrySet()) {
       int c = e.getKey();
       List<FlowNode> list = e.getValue();
       list.sort(Comparator.comparing(FlowNode::getId));
-      double top = START_Y - ((list.size() - 1) * ROW_Y) / 2.0;
-      for (int i = 0; i < list.size(); i++) {
+      int size = list.size();
+      double top = START_Y - ((size - 1) * ROW_Y) / 2.0;
+      for (int i = 0; i < size; i++) {
         FlowNode n = list.get(i);
         x.put(n, START_X + c * COL_X);
         y.put(n, top + i * ROW_Y);
       }
     }
 
-    // Clear old shapes/edges
-    for (BpmnEdge e : new ArrayList<>(plane.getChildElementsByType(BpmnEdge.class))) {
-      plane.removeChildElement(e);
+    // --- amplify vertical spread for readability ---
+    for (FlowNode n : nodes.values()) {
+      int outDeg = succ.get(n).size();
+      int inDeg = pred.get(n).size();
+      int depth = col.getOrDefault(n, 0);
+      double baseY = y.get(n);
+      double spreadFactor = 1.3 + (depth * 0.1);
+      double offset = 45 * (outDeg + inDeg - 1);
+      y.put(n, baseY * spreadFactor + offset);
     }
 
-    // Draw shapes
-    for (FlowNode n : nodes.values())
-      upsertShape(model, plane, n, x.get(n), y.get(n), NODE_W, NODE_H);
-
-    // Cache bounds
+    // write shapes
     Map<String, Bounds> bounds = new HashMap<>();
-    for (BpmnShape s : plane.getChildElementsByType(BpmnShape.class)) {
-      if (s.getBounds() != null) bounds.put(s.getBpmnElement().getId(), s.getBounds());
+    for (FlowNode n : nodes.values()) {
+      upsertShape(model, plane, n, x.get(n), y.get(n), NODE_W, NODE_H);
+      Bounds b = model.newInstance(Bounds.class);
+      b.setX(x.get(n));
+      b.setY(y.get(n));
+      b.setWidth(NODE_W);
+      b.setHeight(NODE_H);
+      bounds.put(n.getId(), b);
     }
 
-    // Rebuild edges
+    // --- Draw edges with adaptive multi-bend routing ---
     for (SequenceFlow f : flows) {
       FlowNode s = (FlowNode) f.getSource();
       FlowNode t = (FlowNode) f.getTarget();
@@ -444,19 +464,62 @@ public class BlueprintModule {
       double tx = tb.getX();
       double ty = tb.getY() + tb.getHeight() / 2;
 
-      BpmnEdge edge = model.newInstance(BpmnEdge.class);
-      edge.setBpmnElement(f);
+      List<Waypoint> waypoints = new ArrayList<>();
+
       Waypoint w1 = model.newInstance(Waypoint.class);
       w1.setX(sx);
       w1.setY(sy);
+      waypoints.add(w1);
+
+      double dx = tx - sx;
+      double dy = ty - sy;
+
+      // Backward link (loop or join)
+      if (dx < 0) {
+        double backX = sx + dx / 2 - 60;
+        Waypoint bend1 = model.newInstance(Waypoint.class);
+        bend1.setX(backX);
+        bend1.setY(sy - 50);
+        waypoints.add(bend1);
+
+        Waypoint bend2 = model.newInstance(Waypoint.class);
+        bend2.setX(backX);
+        bend2.setY(ty + 50);
+        waypoints.add(bend2);
+      }
+      // Strong vertical offset or same-column link
+      else if (Math.abs(dy) > ROW_Y * 0.6) {
+        double midX = sx + dx / 2;
+        Waypoint bend1 = model.newInstance(Waypoint.class);
+        bend1.setX(midX);
+        bend1.setY(sy + (dy > 0 ? 40 : -40));
+        waypoints.add(bend1);
+
+        Waypoint bend2 = model.newInstance(Waypoint.class);
+        bend2.setX(midX);
+        bend2.setY(ty - (dy > 0 ? 40 : -40));
+        waypoints.add(bend2);
+      }
+      // Fan-out smoothing
+      else if (succ.get(s).size() > 1) {
+        Waypoint bend = model.newInstance(Waypoint.class);
+        bend.setX(sx + COL_X / 2);
+        bend.setY(sy + (succ.get(s).indexOf(t) - succ.get(s).size() / 2.0) * 40);
+        waypoints.add(bend);
+      }
+
       Waypoint w2 = model.newInstance(Waypoint.class);
       w2.setX(tx);
       w2.setY(ty);
-      edge.addChildElement(w1);
-      edge.addChildElement(w2);
+      waypoints.add(w2);
+
+      BpmnEdge edge = model.newInstance(BpmnEdge.class);
+      edge.setBpmnElement(f);
+      waypoints.forEach(edge::addChildElement);
       plane.addChildElement(edge);
     }
 
+    // place data objects and stores
     placeArtifacts(model, plane, process);
   }
 

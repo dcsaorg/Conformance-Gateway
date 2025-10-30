@@ -11,3 +11,6 @@ FilterParameters,Required
 "transportDocumentReference, equipmentReference, eventUpdatedDateTimeMin",yes
 "transportDocumentReference, equipmentReference, eventUpdatedDateTimeMax",yes
 "transportDocumentReference, equipmentReference, eventUpdatedDateTimeMin, eventUpdatedDateTimeMax",yes
+"equipmentReference, eventUpdatedDateTimeMin",yes
+"equipmentReference, eventUpdatedDateTimeMax",yes
+"equipmentReference, eventUpdatedDateTimeMin, eventUpdatedDateTimeMax",yes

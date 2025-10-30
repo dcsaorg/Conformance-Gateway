@@ -19,7 +19,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SEND_TO_PLATFO
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALIDATE_DOCUMENT_PARTY;
-import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_CONSIGNMENT_ITEMS_REFERENCE_TYPES;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_PARTY_FUNCTION;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_PARTY_FUNCTION_HBL;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALID_REQUESTED_CARRIER_CLAUSES;
@@ -319,11 +319,11 @@ class EblChecksTest {
     references.addObject().put("type", "CR");
     references.addObject().put("type", "SPO");
     assertTrue(
-        VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES.validate(rootNode).getErrorMessages().isEmpty());
+        VALID_CONSIGNMENT_ITEMS_REFERENCE_TYPES.validate(rootNode).getErrorMessages().isEmpty());
 
     references.addObject().put("type", "CRR");
     assertFalse(
-        VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES.validate(rootNode).getErrorMessages().isEmpty());
+        VALID_CONSIGNMENT_ITEMS_REFERENCE_TYPES.validate(rootNode).getErrorMessages().isEmpty());
   }
 
   @Test

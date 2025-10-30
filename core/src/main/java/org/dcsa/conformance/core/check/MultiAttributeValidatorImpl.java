@@ -12,8 +12,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.dcsa.conformance.core.util.JsonUtil;
 
 @RequiredArgsConstructor
 class MultiAttributeValidatorImpl implements MultiAttributeValidator {
@@ -73,7 +71,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
       }
       matches.stream()
           .map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
-          .filter(s -> !s.getErrorMessages().isEmpty())
+          .filter(result -> !result.getErrorMessages().isEmpty())
           .forEach(validationIssues::add);
     }
   }

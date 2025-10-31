@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.ebl.models.TriConsumer;
 import org.dcsa.conformance.standards.ebl.party.*;
 import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
@@ -346,14 +347,14 @@ public class EblChecks {
         errorMessage,
         (node, contextPath) -> {
           JsonNode numberOfCopiesNode = node.path(fieldName);
-          if (IS_AN_EBL.test(node)) {
-            if (numberOfCopiesNode.isMissingNode() || numberOfCopiesNode.asText().equals(ZERO)) {
-              return ConformanceCheckResult.simple(Set.of());
-            }
-            String path = concatContextPath(contextPath, fieldName);
-            return ConformanceCheckResult.simple(Set.of("%s at %s.".formatted(errorMessage, path)));
+          if (!IS_AN_EBL.test(node)) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
           }
-          return ConformanceCheckResult.simple(Set.of());
+          if (numberOfCopiesNode.isMissingNode() || numberOfCopiesNode.asText().equals(ZERO)) {
+            return ConformanceCheckResult.simple(Set.of());
+          }
+          String path = concatContextPath(contextPath, fieldName);
+          return ConformanceCheckResult.simple(Set.of("%s at %s.".formatted(errorMessage, path)));
         });
   }
 
@@ -375,14 +376,14 @@ public class EblChecks {
         errorMessage,
         (node, contextPath) -> {
           JsonNode numberOfOriginalsNode = node.path(fieldName);
-          if (node.path(TRANSPORT_DOCUMENT_TYPE_CODE).asText("").equals(SWB)) {
-            if (numberOfOriginalsNode.isMissingNode()) {
-              return ConformanceCheckResult.simple(Set.of());
-            }
-            String path = concatContextPath(contextPath, fieldName);
-            return ConformanceCheckResult.simple(Set.of("%s at %s.".formatted(errorMessage, path)));
+          if (!node.path(TRANSPORT_DOCUMENT_TYPE_CODE).asText("").equals(SWB)) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
           }
-          return ConformanceCheckResult.simple(Set.of());
+          if (numberOfOriginalsNode.isMissingNode()) {
+            return ConformanceCheckResult.simple(Set.of());
+          }
+          String path = concatContextPath(contextPath, fieldName);
+          return ConformanceCheckResult.simple(Set.of("%s at %s.".formatted(errorMessage, path)));
         });
   }
 
@@ -415,12 +416,19 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALIDATE_DOCUMENT_PARTY =
       JsonAttribute.customValidator(
-          "Validate if '%s' or '%s' present in document parties - '%s', '%s', '%s', '%s' and '%s'."
+          "Validate that either '%s' or '%s' are present in the following '%s' - '%s', '%s', '%s', '%s' and '%s'."
               .formatted(
-                  ADDRESS, IDENTIFYING_CODES, SHIPPER, CONSIGNEE, ENDORSEE, NOTIFY_PARTIES, OTHER),
+                  ADDRESS,
+                  IDENTIFYING_CODES,
+                  DOCUMENT_PARTIES,
+                  SHIPPER,
+                  CONSIGNEE,
+                  ENDORSEE,
+                  NOTIFY_PARTIES,
+                  OTHER),
           (body, contextPath) -> {
             var documentParties = body.path(DOCUMENT_PARTIES);
-            var issues = new LinkedHashSet<String>();
+            var issues = new LinkedHashSet<ConformanceError>();
             Iterator<Map.Entry<String, JsonNode>> fields = documentParties.fields();
 
             while (fields.hasNext()) {
@@ -440,24 +448,23 @@ public class EblChecks {
                     issues.addAll(validateDocumentPartyFields(node, field.getKey()));
                   }
                 }
-                case BUYER, SELLER -> {
-                  // No validation needed for buyer and seller
-                }
+                case BUYER, SELLER -> issues.add(ConformanceError.irrelevant());
                 default -> issues.addAll(validateDocumentPartyFields(childNode, field.getKey()));
               }
             }
-            return ConformanceCheckResult.simple(issues);
+            return ConformanceCheckResult.withRelevance(issues);
           });
 
-  private static Set<String> validateDocumentPartyFields(
+  private static Set<ConformanceError> validateDocumentPartyFields(
       JsonNode documentPartyNode, String partyName) {
-    var issues = new LinkedHashSet<String>();
+    var issues = new LinkedHashSet<ConformanceError>();
     var address = documentPartyNode.path(ADDRESS);
     var identifyingCodes = documentPartyNode.path(IDENTIFYING_CODES);
     if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
       issues.add(
-          "'%s' or '%s' must be provided in party '%s'."
-              .formatted(ADDRESS, IDENTIFYING_CODES, partyName));
+          ConformanceError.error(
+              "'%s' or '%s' must be provided in party '%s'."
+                  .formatted(ADDRESS, IDENTIFYING_CODES, partyName)));
     }
     return issues;
   }
@@ -490,7 +497,6 @@ public class EblChecks {
             mav.submitAllMatching(
                 S_S_S_S_x_S.formatted(
                     DOCUMENT_PARTIES, OTHER, PARTY, IDENTIFYING_CODES, CODE_LIST_PROVIDER));
-
             mav.submitAllMatching(
                 S_x_S_S_S_x_S.formatted(
                     HOUSE_BILL_OF_LADINGS,
@@ -822,7 +828,10 @@ public class EblChecks {
           mav -> mav.submitAllMatching(S_x.formatted(HOUSE_BILL_OF_LADINGS)),
           (node, contextPath) -> {
             boolean isToOrder = node.path(IS_TO_ORDER).asBoolean(false);
-            if (isToOrder && node.path(DOCUMENT_PARTIES).path(NOTIFY_PARTY).isMissingNode()) {
+            if (!isToOrder) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            if (node.path(DOCUMENT_PARTIES).path(NOTIFY_PARTY).isMissingNode()) {
               return ConformanceCheckResult.simple(
                   Set.of(
                       "If '%s' is true in any '%s', then '%s' is required in '%s' of that '%s' at %s."
@@ -990,9 +999,8 @@ public class EblChecks {
           mav -> mav.submitAllMatching(S_x.formatted(HOUSE_BILL_OF_LADINGS)),
           (node, contextPath) -> {
             JsonNode routingOfConsignmentCountries = node.path(ROUTING_OF_CONSIGNMENT_COUNTRIES);
-            if (routingOfConsignmentCountries.isMissingNode()
-                || !routingOfConsignmentCountries.isArray()) {
-              return ConformanceCheckResult.simple(Set.of());
+            if (JsonUtil.isMissingOrEmpty(routingOfConsignmentCountries)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
             String placeOfAcceptanceCountry =
                 node.path(PLACE_OF_ACCEPTANCE).path(COUNTRY_CODE).asText(null);
@@ -1034,20 +1042,22 @@ public class EblChecks {
           (node, contextPath) -> {
             JsonNode houseBillOfLadings = node.path(HOUSE_BILL_OF_LADINGS);
             if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-              return ConformanceCheckResult.simple(Set.of());
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
             JsonNode advanceManifestFilings = node.path(ADVANCE_MANIFEST_FILINGS);
             if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
-              return ConformanceCheckResult.simple(Set.of());
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
             boolean isHouseBlsIssued = node.path(IS_HOUSE_BILL_OF_LADINGS_ISSUED).asBoolean(true);
+            if (isHouseBlsIssued) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
             int index = 0;
             for (JsonNode hbl : houseBillOfLadings) {
               if (hbl.path(IS_CARGO_DELIVERED_IN_ICS_2_ZONE).asBoolean(false)) {
                 for (JsonNode filing : advanceManifestFilings) {
                   if (CARRIER.equals(filing.path(AMF_HBL_PERFORMED_BY).asText())
                       && ENS.equals(filing.path(MANIFEST_TYPE_CODE).asText())
-                      && !isHouseBlsIssued
                       && (hbl.path(DOCUMENT_PARTIES).path(BUYER).isMissingNode()
                           || hbl.path(DOCUMENT_PARTIES).path(SELLER).isMissingNode())) {
                     String specificContextPath =
@@ -1071,6 +1081,8 @@ public class EblChecks {
                                     specificContextPath)));
                   }
                 }
+              } else {
+                return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
               }
               index++;
             }
@@ -1449,25 +1461,18 @@ public class EblChecks {
       String standardVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
-      boolean requestAmendedStatus,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
     var checks =
         getSiPayloadChecks(
-            standardVersion,
-            shippingInstructionsStatus,
-            updatedShippingInstructionsStatus,
-            dspSupplier,
-            requestAmendedStatus);
+            shippingInstructionsStatus, updatedShippingInstructionsStatus, dspSupplier);
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
   public static List<JsonContentCheck> getSiPayloadChecks(
-      String standardVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
-      Supplier<EblDynamicScenarioParameters> dspSupplier,
-      boolean requestedAmendment) {
+      Supplier<EblDynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
 
     checks.add(
@@ -1477,11 +1482,7 @@ public class EblChecks {
     checks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
-    if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
-      var updatedStatusCheck =
-          getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus);
-      checks.add(updatedStatusCheck);
-    }
+    checks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
 
     checks.addAll(STATIC_SI_CHECKS);
 
@@ -1496,8 +1497,11 @@ public class EblChecks {
   private static JsonRebasableContentCheck getUpdatedShippingInstructionsStatusCheck(
       ShippingInstructionsStatus updatedShippingInstructionsStatus) {
     return updatedShippingInstructionsStatus != null
-        ? JsonAttribute.mustEqual(
-            SI_REF_UPDATED_SI_STATUS_PTR, updatedShippingInstructionsStatus.wireName())
+        ? JsonAttribute.ifThen(
+            "Validate '%s'".formatted(UPDATED_SHIPPING_INSTRUCTIONS_STATUS),
+            unused -> updatedShippingInstructionsStatus.hasWireName(),
+            JsonAttribute.mustEqual(
+                SI_REF_UPDATED_SI_STATUS_PTR, updatedShippingInstructionsStatus.wireName()))
         : JsonAttribute.mustBeAbsent(SI_REF_UPDATED_SI_STATUS_PTR);
   }
 

@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.ebl.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -22,6 +23,8 @@ public class CarrierSupplyPayloadAction extends EblAction {
   public static final String CARRIER_PAYLOAD = "carrierPayload";
   private static final String SCENARIO_TYPE = "scenarioType";
   private static final String INPUT = "input";
+  private static final String CBR_PLACEHOLDER = "{CBR}";
+  private static final String DEFAULT_CBR = "BOOKING202507041234567890123456";
 
   private ScenarioType scenarioType;
   private JsonNode carrierPayload;
@@ -106,14 +109,19 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(
-        Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
+    return shouldIncludeCbr()
+        ? getMarkdownHumanReadablePrompt(
+            Map.of("SCENARIO_TYPE", scenarioType.name(), CBR_PLACEHOLDER, getCbrValue()),
+            "prompt-carrier-supply-csp-with-cbr.md")
+        : getMarkdownHumanReadablePrompt(
+            Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/ebl/messages/" + scenarioType.eblPayload(standardVersion), Map.of());
+        "/standards/ebl/messages/" + scenarioType.eblPayload(standardVersion),
+        Map.of(CBR_PLACEHOLDER, getCbrValue()));
   }
 
   @Override
@@ -164,5 +172,16 @@ public class CarrierSupplyPayloadAction extends EblAction {
   @Override
   protected Supplier<JsonNode> getCarrierPayloadSupplier() {
     return () -> carrierPayload;
+  }
+
+  private boolean shouldIncludeCbr() {
+    return !(previousAction instanceof EblAction);
+  }
+
+  private String getCbrValue() {
+    return shouldIncludeCbr()
+        ? Optional.ofNullable(getBookingDspReference().get().carrierBookingReference())
+            .orElse(DEFAULT_CBR)
+        : DEFAULT_CBR;
   }
 }

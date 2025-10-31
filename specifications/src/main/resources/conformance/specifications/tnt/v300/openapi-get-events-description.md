@@ -13,6 +13,9 @@ Every Event Producer must support the following combinations of query parameter 
 * `carrierBookingReference`, `equipmentReference`
 * `transportDocumentReference`
 * `transportDocumentReference`, `equipmentReference`
+* `equipmentReference`
+
+Every Event Producer must support combining any of the query parameter filters above with a list of `eventTypes`. By default, events of all `eventTypes` are expected to be returned if available and supported.
 
 Every Event Producer must support combining any of the query parameter filters above with all of these additional filters:
 * `eventUpdatedDateTimeMin`

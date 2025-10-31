@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 
-public class GetTransportDocumentEndpoint implements QueryParametersFilterEndpoint {
+public class GetTransportDocumentEndpoint extends QueryParametersFilterEndpoint {
 
   private final Parameter transportDocumentReference =
       new Parameter()

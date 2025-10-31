@@ -1,121 +1,83 @@
 package org.dcsa.conformance.specifications.standards.an.v100;
 
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 
-public class GetArrivalNoticesEndpoint implements QueryParametersFilterEndpoint {
+public class GetArrivalNoticesEndpoint extends QueryParametersFilterEndpoint {
 
   private final Parameter transportDocumentReferences =
-      new Parameter()
-          .in("query")
-          .name("transportDocumentReferences")
-          .schema(new ArraySchema().items(new StringSchema()))
-          .explode(Boolean.FALSE)
-          .description(
-              "Reference(s) of the transport document(s) for which to return the associated arrival notices")
-          .example("HHL71800000,HHL71800001");
+      createStringListQueryParameter(
+          "transportDocumentReferences",
+          List.of("HHL71800000", "HHL71800001"),
+          "Reference(s) of the transport document(s) for which to return the associated arrival notices");
 
   private final Parameter equipmentReferences =
-      new Parameter()
-          .in("query")
-          .name("equipmentReferences")
-          .schema(new ArraySchema().items(new StringSchema()))
-          .explode(Boolean.FALSE)
-          .description(
-              "Reference(s) of the equipment for which to return the associated arrival notices")
-          .example("APZU4812090,APZU4812091");
+      createStringListQueryParameter(
+          "equipmentReferences",
+          List.of("APZU4812090", "APZU4812091"),
+          "Reference(s) of the equipment for which to return the associated arrival notices");
 
   private final Parameter portOfDischarge =
-      new Parameter()
-          .in("query")
-          .name("portOfDischarge")
-          .description(
-              "UN location of the port of discharge for which to retrieve available arrival notices")
-          .example("NLRTM")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "portOfDischarge",
+          "NLRTM",
+          "UN location of the port of discharge for which to retrieve available arrival notices");
 
   private final Parameter vesselIMONumber =
-      new Parameter()
-          .in("query")
-          .name("vesselIMONumber")
-          .description("IMO number of the vessel for which to retrieve available arrival notices")
-          .example("9321483")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "vesselIMONumber",
+          "9321483",
+          "IMO number of the vessel for which to retrieve available arrival notices");
 
   private final Parameter vesselName =
-      new Parameter()
-          .in("query")
-          .name("vesselName")
-          .description("Name of the vessel for which to retrieve available arrival notices")
-          .example("King of the Seas")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "vesselName",
+          "King of the Seas",
+          "Name of the vessel for which to retrieve available arrival notices");
 
   private final Parameter carrierImportVoyageNumber =
-      new Parameter()
-          .in("query")
-          .name("carrierImportVoyageNumber")
-          .description(
-              "The identifier of an import voyage. The carrier-specific identifier of the import Voyage.")
-          .example("2208N")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "carrierImportVoyageNumber",
+          "2208N",
+          "The identifier of an import voyage. The carrier-specific identifier of the import Voyage.");
 
   private final Parameter universalImportVoyageReference =
-      new Parameter()
-          .in("query")
-          .name("universalImportVoyageReference")
-          .description(
-              "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA.")
-          .example("2301W")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "universalImportVoyageReference",
+          "2301W",
+          "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA.");
 
   private final Parameter carrierServiceCode =
-      new Parameter()
-          .in("query")
-          .name("carrierServiceCode")
-          .description(
-              "The carrier specific code of the service for which the schedule details are published.")
-          .example("FE1")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "carrierServiceCode",
+          "FE1",
+          "The carrier specific code of the service for which the schedule details are published.");
 
   private final Parameter universalServiceReference =
-      new Parameter()
-          .in("query")
-          .name("universalServiceReference")
-          .description(
-              "Unique identifier of a liner service, defined and distributed by DCSA to carriers.")
-          .example("SR12345A")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "universalServiceReference",
+          "SR12345A",
+          "Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.");
 
   private final Parameter portOfDischargeArrivalDateMin =
-      new Parameter()
-          .in("query")
-          .name("portOfDischargeArrivalDateMin")
-          .description(
-              "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date")
-          .example("2025-01-22")
-          .schema(new Schema<String>().type("string").format("date"));
+      createDateQueryParameter(
+          "portOfDischargeArrivalDateMin",
+          "2025-01-22",
+          "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date");
 
   private final Parameter portOfDischargeArrivalDateMax =
-      new Parameter()
-          .in("query")
-          .name("portOfDischargeArrivalDateMax")
-          .description(
-              "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date")
-          .example("2025-01-23")
-          .schema(new Schema<String>().type("string").format("date"));
+      createDateQueryParameter(
+          "portOfDischargeArrivalDateMax",
+          "2025-01-23",
+          "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date");
 
   private final Parameter removeCharges =
-      new Parameter()
-          .in("query")
-          .name("removeCharges")
-          .description(
+      createBooleanQueryParameter(
+          "removeCharges",
+          true,
 """
 Optional flag indicating whether the publisher should remove the charges from the PDF visualization
 of every returned arrival notice, and for consistency, also from the structured response data.
@@ -129,15 +91,12 @@ However, if the removal of charges (from the arrival notices that have them) res
 in which some become exact duplicates, publishers may choose to remove duplicates from the response.
 
 The default value is `false`, which leaves unchanged the presence or absence of charges in each returned arrival notice.
-""")
-          .example(true)
-          .schema(new Schema<Boolean>().type("boolean"));
+""");
 
   private final Parameter includeVisualization =
-      new Parameter()
-          .in("query")
-          .name("includeVisualization")
-          .description(
+      createBooleanQueryParameter(
+          "includeVisualization",
+          true,
 """
 Optional flag indicating whether the PDF `arrivalNoticeVisualization` should be included in each returned arrival notice.
 
@@ -149,26 +108,20 @@ the arrival notices), based on a variety of factors including:
 
 However, to support a future transition to fully automated processing of arrival notices by receivers,
 the publisher should **not** include the PDF visualization if this parameter is set to `false`.
-""")
-          .example(true)
-          .schema(new Schema<Boolean>().type("boolean"));
+""");
 
   private final Parameter limit =
-      new Parameter()
-          .in("query")
-          .name("limit")
-          .description("Maximum number of arrival notices to include in each page of the response.")
-          .example(10)
-          .schema(new Schema<Integer>().type("integer").format("int32").minimum(new BigDecimal(1)));
+      createIntegerQueryParameter(
+          "limit",
+          10,
+          "Maximum number of arrival notices to include in each page of the response.",
+          schema -> schema.minimum(new BigDecimal(1)));
 
   private final Parameter cursor =
-      new Parameter()
-          .in("query")
-          .name("cursor")
-          .description(
-              "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.")
-          .example("ExampleNextPageCursor")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "cursor",
+          "ExampleNextPageCursor",
+          "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.");
 
   @Override
   public List<Parameter> getQueryParameters() {

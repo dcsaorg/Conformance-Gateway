@@ -1,14 +1,12 @@
 package org.dcsa.conformance.specifications.standards.tnt.v300;
 
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
-
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
+import org.dcsa.conformance.specifications.standards.tnt.v300.types.EventTypeCode;
 
-public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
+public class GetEventsEndpoint extends QueryParametersFilterEndpoint {
 
   private final Parameter carrierBookingReference =
       createStringQueryParameter(
@@ -27,6 +25,15 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
           "equipmentReference",
           "APZU4812090",
           "Reference of the equipment for which to return the associated events");
+
+  private final Parameter eventTypes =
+      createStringListQueryParameter(
+          "eventTypes",
+          List.of(
+              EventTypeCode.EQUIPMENT.name(),
+              EventTypeCode.IOT.name(),
+              EventTypeCode.REEFER.name()),
+          "Retrieve only events whose `eventType` is in this list");
 
   private final Parameter eventUpdatedDateTimeMin =
       createDateTimeQueryParameter(
@@ -54,6 +61,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
         carrierBookingReference,
         transportDocumentReference,
         equipmentReference,
+        eventTypes,
         eventUpdatedDateTimeMin,
         eventUpdatedDateTimeMax,
         limit,
@@ -70,50 +78,15 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
                     List.of(carrierBookingReference),
                     List.of(carrierBookingReference, equipmentReference),
                     List.of(transportDocumentReference),
-                    List.of(transportDocumentReference, equipmentReference)),
-                List.of(
-                    List.of(eventUpdatedDateTimeMin),
-                    List.of(eventUpdatedDateTimeMax),
-                    List.of(eventUpdatedDateTimeMin, eventUpdatedDateTimeMax)))),
+                    List.of(transportDocumentReference, equipmentReference),
+                    List.of(equipmentReference)),
+                allCombinationsOf(
+                    List.of(List.of(), List.of(eventTypes)),
+                    List.of(
+                        List.of(),
+                        List.of(eventUpdatedDateTimeMin),
+                        List.of(eventUpdatedDateTimeMax),
+                        List.of(eventUpdatedDateTimeMin, eventUpdatedDateTimeMax))))),
         Map.entry(Boolean.FALSE, List.of()));
-  }
-
-  private static List<List<Parameter>> allCombinationsOf(
-      List<List<Parameter>> leftListList, List<List<Parameter>> rightListList) {
-    return leftListList.stream()
-        .flatMap(
-            leftList ->
-                rightListList.stream()
-                    .map(
-                        rightList -> Stream.concat(leftList.stream(), rightList.stream()).toList()))
-        .toList();
-  }
-
-  private static Parameter createStringQueryParameter(
-      String name, String example, String description) {
-    return new Parameter()
-        .in("query")
-        .name(name)
-        .example(example)
-        .description(description)
-        .schema(new Schema<String>().type("string"));
-  }
-
-  private Parameter createDateTimeQueryParameter(String name, String description) {
-    return new Parameter()
-        .in("query")
-        .name(name)
-        .description(description)
-        .example("2025-01-23T01:23:45Z")
-        .schema(new Schema<String>().type("string").format("date-time"));
-  }
-
-  private Parameter createIntegerQueryParameter(String name, int example, String description) {
-    return new Parameter()
-        .in("query")
-        .name(name)
-        .description(description)
-        .example(example)
-        .schema(new Schema<Integer>().type("integer").format("int32"));
   }
 }

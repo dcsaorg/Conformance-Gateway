@@ -16,7 +16,7 @@
   ],
   "consignmentItems": [
     {
-      "carrierBookingReference": "BOOK1234567890123456789012345",
+      "carrierBookingReference": "{CBR}",
       "descriptionOfGoods": [
         "Pharmaceutical Supplies"
       ],

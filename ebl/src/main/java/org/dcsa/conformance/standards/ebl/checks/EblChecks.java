@@ -5,7 +5,6 @@ import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATIO
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.EXEMPT_PACKAGE_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.FEEDBACKS_CODE;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.FEEDBACKS_SEVERITY;
-import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.METHOD_OF_PAYMENT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES_SET;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.PARTY_FUNCTION_CODE;
@@ -164,6 +163,7 @@ public class EblChecks {
   private static final String IS_CARRIERS_AGENT_AT_DESTINATION_REQUIRED =
       "isCarriersAgentAtDestinationRequired";
   private static final String IS_SHIPPER_OWNED = "isShipperOwned";
+  private static final String METHOD_OF_PAYMENT = "methodOfPayment";
 
   private static final String SWB = "SWB";
   private static final String BOL = "BOL";
@@ -576,7 +576,7 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_CONSIGNMENT_ITEMS_REFERENCE_TYPES =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "All '%s' reference '%s' fields must be valid.".formatted(CONSIGNMENT_ITEMS, TYPE),
+          "All '%s.*.%s.*.%s' fields must be valid.".formatted(CONSIGNMENT_ITEMS, REFERENCES, TYPE),
           mav -> mav.submitAllMatching(S_x_S_x_S.formatted(CONSIGNMENT_ITEMS, REFERENCES, TYPE)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
               EblDatasets.CONSIGNMENT_ITEMS_REFERENCE_TYPE));
@@ -850,19 +850,19 @@ public class EblChecks {
       JsonAttribute.allIndividualMatchesMustBeValid(
           "All '%s.*.%s' must be valid.".formatted(HOUSE_BILL_OF_LADINGS, METHOD_OF_PAYMENT),
           mav -> mav.submitAllMatching(S_x_S.formatted(HOUSE_BILL_OF_LADINGS, METHOD_OF_PAYMENT)),
-          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.METHOD_OF_PAYMENT));
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.METHOD_OF_PAYMENT_SET));
 
   private static final JsonRebasableContentCheck VALIDATE_CARRIER_CODE_AND_LIST_PROVIDER =
-      JsonAttribute.allIndividualMatchesMustBeValid(
+      JsonAttribute.customValidator(
           "If '%s' is present, then '%s' is required and vice versa."
               .formatted(CARRIER_CODE, CARRIER_CODE_LIST_PROVIDER),
-          mav -> {
-            mav.submitAllMatching(CARRIER_CODE);
-            mav.submitAllMatching(CARRIER_CODE_LIST_PROVIDER);
-          },
           (node, contextPath) -> {
             boolean hasCarrierCode = !node.path(CARRIER_CODE).isMissingNode();
             boolean hasProvider = !node.path(CARRIER_CODE_LIST_PROVIDER).isMissingNode();
+
+            if (!hasCarrierCode && !hasProvider) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
 
             if (hasCarrierCode && !hasProvider) {
               return ConformanceCheckResult.simple(
@@ -870,7 +870,7 @@ public class EblChecks {
                       "'%s' is required when '%s' is present at %s."
                           .formatted(CARRIER_CODE_LIST_PROVIDER, CARRIER_CODE, contextPath)));
             }
-            if (!hasCarrierCode && hasProvider) {
+            if (!hasCarrierCode) {
               return ConformanceCheckResult.simple(
                   Set.of(
                       "'%s' is required when '%s' is present at %s."
@@ -1513,7 +1513,10 @@ public class EblChecks {
             var siStatus = body.path(SHIPPING_INSTRUCTIONS_STATUS).asText("");
             var updatedSiStatus = body.path(UPDATED_SHIPPING_INSTRUCTIONS_STATUS).asText("");
             var issues = new LinkedHashSet<String>();
-            if (SI_PENDING_UPDATE.wireName().equals(siStatus) && updatedSiStatus.isEmpty()) {
+            if (!SI_PENDING_UPDATE.wireName().equals(siStatus) || !updatedSiStatus.isEmpty()) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            if (SI_PENDING_UPDATE.wireName().equals(siStatus)) {
               var feedbacks = body.get(FEEDBACKS);
               if (feedbacks == null || feedbacks.isEmpty()) {
                 issues.add(

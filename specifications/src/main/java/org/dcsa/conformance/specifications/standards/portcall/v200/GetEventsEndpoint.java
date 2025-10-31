@@ -24,7 +24,7 @@ public class GetEventsEndpoint extends QueryParametersFilterEndpoint {
       createStringQueryParameter(
           "universalServiceReference",
           "SR12345A",
-          "Unique identifier of a liner service, defined and distributed by DCSA to carriers.");
+          "Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.");
 
   private final Parameter terminalCallReference =
       createStringQueryParameter(

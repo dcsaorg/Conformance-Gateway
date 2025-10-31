@@ -3,7 +3,7 @@ UNLocationCode,string,"UN location code.",NLAMS
 portVisitReference,string,"Port visit reference.",NLAMS1234589
 carrierServiceName,string,"Carrier-specific service name.","Great Lion Service"
 carrierServiceCode,string,"Carrier-specific service code.",FE1
-"universalServiceReference",string,"Unique identifier of a liner service, defined and distributed by DCSA to carriers.",SR12345A
+"universalServiceReference",string,"Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.",SR12345A
 terminalCallReference,string,"The terminal call reference for which to retrieve available events.",15063401
 "carrierImportVoyageNumber",string,"The identifier of an import voyage. The carrier-specific identifier of the import Voyage.",1234N
 "universalImportVoyageReference",string,"Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA.",2301W

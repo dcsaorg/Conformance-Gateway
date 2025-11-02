@@ -54,7 +54,8 @@
 		<module>specifications</module>
 		<module>spring-boot</module>
 		<module>booking-and-ebl</module>
-        <module>standards-commons</module>
+		<module>standards-commons</module>
+		<module>port-call</module>
     </modules>
 
 	<dependencyManagement>

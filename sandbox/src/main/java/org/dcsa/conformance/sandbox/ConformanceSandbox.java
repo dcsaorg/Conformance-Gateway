@@ -44,6 +44,7 @@ import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.ovs.OvsStandard;
+import org.dcsa.conformance.standards.portcall.PortCallStandard;
 import org.dcsa.conformance.standards.tnt.TntStandard;
 
 @Slf4j
@@ -64,6 +65,7 @@ public class ConformanceSandbox {
     JitStandard.INSTANCE,
     OvsStandard.INSTANCE,
     PintStandard.INSTANCE,
+    PortCallStandard.INSTANCE,
     TntStandard.INSTANCE
   };
 

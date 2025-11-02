@@ -1,0 +1,67 @@
+package org.dcsa.conformance.standards.portcall.action;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
+import org.dcsa.conformance.core.check.ApiHeaderCheck;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.core.check.ResponseStatusCheck;
+import org.dcsa.conformance.core.check.UrlPathCheck;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.portcall.checks.PortCallChecks;
+import org.dcsa.conformance.standards.portcall.party.PortCallRole;
+
+public class PublisherPostPortCallEventsAction extends PortCallAction{
+
+  private final JsonSchemaValidator requestSchemaValidator;
+
+  public PublisherPostPortCallEventsAction(String publisherPartyName, String subscriberPartyName, PortCallAction previousAction, JsonSchemaValidator requestSchemaValidator) {
+    super(publisherPartyName, subscriberPartyName, previousAction, "POST Port Call Events");
+    this.requestSchemaValidator = requestSchemaValidator;
+  }
+
+  @Override
+  public String getHumanReadablePrompt() {
+    return "Have your application POST one or more Arrival Notices to its synthetic counterpart running in the sandbox";
+  }
+
+  @Override
+  public ObjectNode asJsonNode() {
+    return  super.asJsonNode();
+
+  }
+
+  @Override
+  public ConformanceCheck createCheck(String expectedApiVersion) {
+    return new ConformanceCheck(getActionTitle()) {
+      @Override
+      protected Stream<? extends ConformanceCheck> createSubChecks() {
+        return Stream.of(
+          new UrlPathCheck(PortCallRole::isPublisher, getMatchedExchangeUuid(), "/events"),
+          new ResponseStatusCheck(PortCallRole::isSubscriber, getMatchedExchangeUuid(), 200),
+          new ApiHeaderCheck(
+            PortCallRole::isSubscriber,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            expectedApiVersion),
+          new ApiHeaderCheck(
+            PortCallRole::isPublisher,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+          new JsonSchemaCheck(
+            PortCallRole::isPublisher,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            requestSchemaValidator),
+          new ApiHeaderCheck(
+            PortCallRole::isSubscriber,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            expectedApiVersion),
+          PortCallChecks.getPortCallPostPayloadChecks(getMatchedExchangeUuid(),expectedApiVersion));
+      }
+    };
+  }
+}

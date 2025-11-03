@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.portcall.action;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -24,6 +25,11 @@ public class SubscriberGetPortCallEventsAction extends PortCallAction{
   @Override
   public String getHumanReadablePrompt() {
     return "Have your application GET from its counterpart running in the sandbox the Events with the any of the following attributes: ";
+  }
+
+  @Override
+  public ObjectNode asJsonNode() {
+    return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
   }
 
   @Override

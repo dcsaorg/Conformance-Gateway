@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -63,7 +65,14 @@ public class PortCallSubscriber extends ConformanceParty {
   }
 
   private void getEvents(JsonNode actionPrompt) {
-    syncCounterpartGet("/events", Map.of());
+    SuppliedScenarioParameters ssp =
+        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+
+    syncCounterpartGet("/events", ssp.getMap().entrySet().stream()
+      .collect(
+        Collectors.toMap(
+          entry -> entry.getKey().getQueryParamName(),
+          entry -> Set.of(entry.getValue()))));
     addOperatorLogEntry("Sent a GET Events request");
   }
 }

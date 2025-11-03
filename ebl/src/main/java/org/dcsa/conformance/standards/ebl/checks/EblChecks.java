@@ -1235,7 +1235,8 @@ public class EblChecks {
               (nodeToValidate, contextPath) -> {
                 var dg = nodeToValidate.path(DANGEROUS_GOODS);
                 if (!dg.isArray() || dg.isEmpty()) {
-                  return ConformanceCheckResult.simple(Set.of());
+                  return ConformanceCheckResult.withRelevance(
+                      Set.of(ConformanceError.irrelevant()));
                 }
                 if (nodeToValidate.path(PACKAGE_CODE).isMissingNode()
                     && nodeToValidate.path(IMO_PACKAGING_CODE).isMissingNode()) {
@@ -1577,11 +1578,12 @@ public class EblChecks {
       List<? super JsonRebasableContentCheck> jsonContentChecks,
       Supplier<String> tdrSupplier,
       TransportDocumentStatus transportDocumentStatus) {
-    if (tdrSupplier != null) {
-      jsonContentChecks.add(JsonAttribute.mustEqual(TD_TDR, tdrSupplier));
-    }
+    jsonContentChecks.add(JsonAttribute.mustEqual(TD_TDR, tdrSupplier != null, tdrSupplier));
     jsonContentChecks.add(
-        JsonAttribute.mustEqual(TD_TRANSPORT_DOCUMENT_STATUS, transportDocumentStatus.wireName()));
+        JsonAttribute.mustEqual(
+            TD_TRANSPORT_DOCUMENT_STATUS,
+            transportDocumentStatus.hasWireName(),
+            transportDocumentStatus.wireName()));
     jsonContentChecks.addAll(STATIC_TD_CHECKS);
     jsonContentChecks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     jsonContentChecks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
@@ -1609,6 +1611,7 @@ public class EblChecks {
       TransportDocumentStatus transportDocumentStatus,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
 
+    var scenarioType = ScenarioType.valueOf(dspSupplier.get().scenarioType());
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
 
     genericTdContentChecks(
@@ -1621,61 +1624,63 @@ public class EblChecks {
             "[%s] Validate the containers reefer settings.".formatted(SCENARIO),
             mav -> mav.submitAllMatching(S_x.formatted(UTILIZED_TRANSPORT_EQUIPMENTS)),
             (nodeToValidate, contextPath) -> {
-              var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
-              var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
-              var issues = new LinkedHashSet<String>();
-              switch (ScenarioType.valueOf(dspSupplier.get().scenarioType())) {
+              var issues = new LinkedHashSet<ConformanceError>();
+
+              switch (scenarioType) {
                 case ACTIVE_REEFER -> {
-                  if (!activeReeferNode.isObject()) {
+                  if (!nodeToValidate.path(ACTIVE_REEFER_SETTINGS).isObject()) {
                     issues.add(
-                        "The scenario requires '%s' to have an active reefer"
-                            .formatted(contextPath));
+                        ConformanceError.error(
+                            "The scenario requires '%s' to have an active reefer"
+                                .formatted(contextPath)));
                   }
                 }
                 case NON_OPERATING_REEFER -> {
-                  if (!nonOperatingReeferNode.asBoolean(false)) {
+                  if (!nodeToValidate.path(IS_NON_OPERATING_REEFER).asBoolean(false)) {
                     issues.add(
-                        "The scenario requires '%s.%s' to be true"
-                            .formatted(contextPath, IS_NON_OPERATING_REEFER));
+                        ConformanceError.error(
+                            "The scenario requires '%s.%s' to be true"
+                                .formatted(contextPath, IS_NON_OPERATING_REEFER)));
                   }
                 }
+                default -> issues.add(ConformanceError.irrelevant());
               }
-              return ConformanceCheckResult.simple(issues);
+              return ConformanceCheckResult.withRelevance(issues);
             }));
+
     jsonContentChecks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
             "[%s] Whether the cargo should be DG.".formatted(SCENARIO),
+            ScenarioType.DG.equals(scenarioType),
             mav ->
                 mav.submitAllMatching(
                     S_x_S_x_S_x_S.formatted(
                         CONSIGNMENT_ITEMS, CARGO_ITEMS, OUTER_PACKAGING, DANGEROUS_GOODS)),
             (nodeToValidate, contextPath) -> {
-              if (ScenarioType.valueOf(dspSupplier.get().scenarioType()) == ScenarioType.DG) {
-                if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
-                  return ConformanceCheckResult.simple(
-                      Set.of(
-                          "The scenario requires '%s' to contain '%s'."
-                              .formatted(contextPath, DANGEROUS_GOODS)));
-                }
+              if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
+                return ConformanceCheckResult.simple(
+                    Set.of(
+                        "The scenario requires '%s' to contain '%s'."
+                            .formatted(contextPath, DANGEROUS_GOODS)));
               }
               return ConformanceCheckResult.simple(Set.of());
             }));
+
     jsonContentChecks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
             "[%s] The '%s' should be true for SOC scenarios.".formatted(SCENARIO, IS_SHIPPER_OWNED),
+            ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES.equals(scenarioType),
             mav -> mav.submitAllMatching(S_x.formatted(UTILIZED_TRANSPORT_EQUIPMENTS)),
             (nodeToValidate, contextPath) -> {
-              var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
-              if (scenario == ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES) {
-                if (!nodeToValidate.path(IS_SHIPPER_OWNED).asBoolean(false)) {
-                  return ConformanceCheckResult.simple(
-                      Set.of(
-                          "The scenario requires '%s.%s' to be true."
-                              .formatted(contextPath, IS_SHIPPER_OWNED)));
-                }
+              if (!nodeToValidate.path(IS_SHIPPER_OWNED).asBoolean(false)) {
+                return ConformanceCheckResult.simple(
+                    Set.of(
+                        "The scenario requires '%s.%s' to be true."
+                            .formatted(contextPath, IS_SHIPPER_OWNED)));
               }
               return ConformanceCheckResult.simple(Set.of());
             }));
+
     jsonContentChecks.addAll(
         generateScenarioRelatedChecks(
             ScenarioType.valueOf(dspSupplier.get().scenarioType()),

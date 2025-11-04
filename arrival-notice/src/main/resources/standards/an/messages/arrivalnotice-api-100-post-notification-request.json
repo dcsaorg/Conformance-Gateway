@@ -18,11 +18,7 @@
           "stateRegion": "Central Singapore",
           "countryCode": "SG"
         },
-        "UNLocationCode": "SGSIN",
-        "facility": {
-          "facilityCode": "PSAPPT",
-          "facilityCodeListProvider": "SMDG"
-        }
+        "UNLocationCode": "SGSIN"
       },
       "portOfDischargeArrivalDate": {
         "value": "2024-03-12",

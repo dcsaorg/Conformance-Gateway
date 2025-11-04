@@ -116,13 +116,8 @@ public class ANPublisher extends ConformanceParty {
     JsonNode payload = persistentMap.load("lastArrivalNoticePayload");
     JsonNode scenarioTypeNode = persistentMap.load("scenarioType");
 
-    // Build requested TDR set safely (empty if no param)
     Set<String> requestedTdrs =
-        tdrParamOpt
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .map(s -> Arrays.stream(s.split(",")))
-            .stream()
+        tdrParamOpt.map(s -> Arrays.stream(s.split(","))).stream()
             .flatMap(x -> x)
             .map(String::trim)
             .filter(s -> !s.isEmpty())
@@ -131,33 +126,30 @@ public class ANPublisher extends ConformanceParty {
     String chosenTdr = requestedTdrs.stream().findFirst().orElse("");
     Map<String, String> templateVars = Map.of("TRANSPORT_DOCUMENT_REFERENCE", chosenTdr);
 
-    if (scenarioTypeNode != null && scenarioTypeNode.asText().equals("Notification")) {
-
-      JsonNode response =
-          JsonToolkit.templateFileToJsonNode(
-              getAnResponseFilepath(ScenarioType.REGULAR),
-              Map.of("TRANSPORT_DOCUMENT_REFERENCE", chosenTdr));
-      return request.createResponse(
-          200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
-    }
-
-    if ((payload == null || payload.isEmpty()) && scenarioTypeNode != null) {
+    if (scenarioTypeNode != null) {
       ScenarioType scenarioType = ScenarioType.valueOf(scenarioTypeNode.asText());
-      String filePath = getAnResponseFilepath(scenarioType);
 
-      payload = JsonToolkit.templateFileToJsonNode(filePath, templateVars);
+      if (scenarioType.name().equals("Notification")) {
+        JsonNode response =
+            JsonToolkit.templateFileToJsonNode(
+                getAnResponseFilepath(ScenarioType.REGULAR), templateVars);
+        return request.createResponse(
+            200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
+      }
+
+      if (payload == null || payload.isEmpty()) {
+        String filePath = getAnResponseFilepath(scenarioType);
+        payload = JsonToolkit.templateFileToJsonNode(filePath, templateVars);
+      }
     }
 
-    // If no TDR param (missing or blank), return full (possibly generated) payload as-is
+
     if (tdrParamOpt.isEmpty() || tdrParamOpt.get().isBlank()) {
       return request.createResponse(
           200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(payload));
     }
 
-    // Otherwise, filter by requested TDRs
-    ObjectNode responseObject = JsonNodeFactory.instance.objectNode();
     ArrayNode arrivalNoticesNode = JsonNodeFactory.instance.arrayNode();
-
     if (payload != null
         && payload.has("arrivalNotices")
         && payload.get("arrivalNotices").isArray()) {
@@ -169,6 +161,7 @@ public class ANPublisher extends ConformanceParty {
       }
     }
 
+    ObjectNode responseObject = JsonNodeFactory.instance.objectNode();
     responseObject.set("arrivalNotices", arrivalNoticesNode);
 
     return request.createResponse(

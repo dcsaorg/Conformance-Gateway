@@ -390,14 +390,20 @@ class EblChecksTest {
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfCopiesWithCharges", 1);
-    assertTrue(
-        EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
+    ConformanceCheckResult.ErrorsWithRelevance irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     rootNode.put("numberOfCopiesWithCharges", 1);
-    assertTrue(
-        EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
+    irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
   }
 
   @Test
@@ -422,14 +428,20 @@ class EblChecksTest {
     rootNode.put("isElectronic", false);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfCopiesWithoutCharges", 1);
-    assertTrue(
-        EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
+    ConformanceCheckResult.ErrorsWithRelevance irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
 
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "SWB");
     rootNode.put("numberOfCopiesWithoutCharges", 1);
-    assertTrue(
-        EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
+    irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
   }
 
   @Test
@@ -453,8 +465,11 @@ class EblChecksTest {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithCharges", 1);
-    assertTrue(
-        SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
+    ConformanceCheckResult.ErrorsWithRelevance irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
   }
 
   @Test
@@ -478,8 +493,11 @@ class EblChecksTest {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfOriginalsWithoutCharges", 1);
-    assertTrue(
-        SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode).getErrorMessages().isEmpty());
+    ConformanceCheckResult.ErrorsWithRelevance irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
   }
 
   @Test
@@ -555,16 +573,28 @@ class EblChecksTest {
   void testValidateDocumentPartyBuyerAndSeller() {
     ObjectNode documentParties = rootNode.putObject("documentParties");
     ObjectNode buyer = documentParties.putObject("buyer");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
+    ConformanceCheckResult.ErrorsWithRelevance irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance) VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
 
     buyer.putObject("address").put("street", "Ruijggoordweg");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
+    irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance) VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
 
     ObjectNode seller = documentParties.putObject("seller");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
+    irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance) VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
 
     seller.putObject("address").put("street", "Ruijggoordweg");
-    assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).getErrorMessages().isEmpty());
+    irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance) VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
   }
 
   @Test
@@ -594,7 +624,12 @@ class EblChecksTest {
         "updatedShippingInstructionsStatus",
         ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
     rootNode.remove("feedbacks");
-    assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).getErrorMessages().isEmpty());
+
+    ConformanceCheckResult.ErrorsWithRelevance result =
+        (ConformanceCheckResult.ErrorsWithRelevance) FEEDBACKS_PRESENCE.validate(rootNode);
+
+    assertEquals(1, result.errors().size());
+    assertFalse(result.isRelevant());
   }
 
   @Test
@@ -672,10 +707,12 @@ class EblChecksTest {
 
   @Test
   void testUtilizedTransportEquipmentsScenarioSizeCheckNoConstraint() {
-    assertTrue(
-        EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.ACTIVE_REEFER)
-            .validate(rootNode, "")
-            .getErrorMessages()
-            .isEmpty());
+    ConformanceCheckResult.ErrorsWithRelevance result =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            EblChecks.utilizedTransportEquipmentsScenarioSizeCheck(ScenarioType.ACTIVE_REEFER)
+                .validate(rootNode, "");
+
+    assertEquals(1, result.errors().size());
+    assertFalse(result.isRelevant());
   }
 }

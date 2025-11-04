@@ -1483,7 +1483,11 @@ public class EblChecks {
     checks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
-    checks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+    if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
+      var updatedStatusCheck =
+          getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus);
+      checks.add(updatedStatusCheck);
+    }
 
     checks.addAll(STATIC_SI_CHECKS);
 
@@ -1498,11 +1502,8 @@ public class EblChecks {
   private static JsonRebasableContentCheck getUpdatedShippingInstructionsStatusCheck(
       ShippingInstructionsStatus updatedShippingInstructionsStatus) {
     return updatedShippingInstructionsStatus != null
-        ? JsonAttribute.ifThen(
-            "Validate '%s'".formatted(UPDATED_SHIPPING_INSTRUCTIONS_STATUS),
-            unused -> updatedShippingInstructionsStatus.hasWireName(),
-            JsonAttribute.mustEqual(
-                SI_REF_UPDATED_SI_STATUS_PTR, updatedShippingInstructionsStatus.wireName()))
+        ? JsonAttribute.mustEqual(
+            SI_REF_UPDATED_SI_STATUS_PTR, updatedShippingInstructionsStatus.wireName())
         : JsonAttribute.mustBeAbsent(SI_REF_UPDATED_SI_STATUS_PTR);
   }
 
@@ -1514,16 +1515,15 @@ public class EblChecks {
             var siStatus = body.path(SHIPPING_INSTRUCTIONS_STATUS).asText("");
             var updatedSiStatus = body.path(UPDATED_SHIPPING_INSTRUCTIONS_STATUS).asText("");
             var issues = new LinkedHashSet<String>();
-            if (!SI_PENDING_UPDATE.wireName().equals(siStatus) || !updatedSiStatus.isEmpty()) {
+            if (!Objects.equals(SI_PENDING_UPDATE.wireName(), siStatus)
+                || !updatedSiStatus.isEmpty()) {
               return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
-            if (SI_PENDING_UPDATE.wireName().equals(siStatus)) {
-              var feedbacks = body.get(FEEDBACKS);
-              if (feedbacks == null || feedbacks.isEmpty()) {
-                issues.add(
-                    "'%s' is missing for the si in status %s."
-                        .formatted(FEEDBACKS, SI_PENDING_UPDATE.wireName()));
-              }
+            var feedbacks = body.get(FEEDBACKS);
+            if (feedbacks == null || feedbacks.isEmpty()) {
+              issues.add(
+                  "'%s' is missing for the si in status %s."
+                      .formatted(FEEDBACKS, SI_PENDING_UPDATE.wireName()));
             }
             return ConformanceCheckResult.simple(issues);
           });
@@ -1578,7 +1578,9 @@ public class EblChecks {
       List<? super JsonRebasableContentCheck> jsonContentChecks,
       Supplier<String> tdrSupplier,
       TransportDocumentStatus transportDocumentStatus) {
-    jsonContentChecks.add(JsonAttribute.mustEqual(TD_TDR, tdrSupplier != null, tdrSupplier));
+    if (tdrSupplier != null) {
+      jsonContentChecks.add(JsonAttribute.mustEqual(TD_TDR, tdrSupplier));
+    }
     jsonContentChecks.add(
         JsonAttribute.mustEqual(
             TD_TRANSPORT_DOCUMENT_STATUS,

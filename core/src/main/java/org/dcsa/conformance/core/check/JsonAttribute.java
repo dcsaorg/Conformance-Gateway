@@ -439,7 +439,7 @@ public class JsonAttribute {
 
   public static JsonRebasableContentCheck mustEqual(
     JsonPointer jsonPointer,
-    Supplier<String> expectedValueSupplier) {
+    @NonNull Supplier<String> expectedValueSupplier) {
     return mustEqual(
       jsonCheckName(jsonPointer),
       jsonPointer,
@@ -450,7 +450,7 @@ public class JsonAttribute {
   public static JsonRebasableContentCheck mustEqual(
           JsonPointer jsonPointer,
           boolean isRelevant,
-          Supplier<String> expectedValueSupplier) {
+          @NonNull Supplier<String> expectedValueSupplier) {
     return mustEqual(
             jsonCheckName(jsonPointer),
             jsonPointer,
@@ -460,7 +460,7 @@ public class JsonAttribute {
   }
 
   public static JsonRebasableContentCheck mustEqual(
-      String name, JsonPointer jsonPointer, Supplier<String> expectedValueSupplier) {
+      String name, JsonPointer jsonPointer, @NonNull Supplier<String> expectedValueSupplier) {
     return mustEqual(name, jsonPointer, true, expectedValueSupplier);
   }
 
@@ -468,8 +468,9 @@ public class JsonAttribute {
           String name,
           JsonPointer jsonPointer,
           boolean isRelevant,
+          @NonNull
           Supplier<String> expectedValueSupplier) {
-    var v = expectedValueSupplier != null ? expectedValueSupplier.get() : null;
+    var v = expectedValueSupplier.get();
     var context = "";
     if (v != null) {
       context = ": Must equal '%s'".formatted(v);

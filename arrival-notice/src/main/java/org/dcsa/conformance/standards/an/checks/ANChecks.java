@@ -517,7 +517,6 @@ public class ANChecks {
             return ConformanceCheckResult.simple(messages);
           }
 
-          // No portOfDischarge object — no messages
           return ConformanceCheckResult.simple(Set.of());
         });
   }

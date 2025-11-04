@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -20,7 +21,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
   private final JsonNode body;
   private final JsonContentMatchedValidation validation;
 
-  @Getter private final Set<ConformanceCheckResult> validationIssues = new HashSet<>();
+  private final Set<ConformanceCheckResult> validationIssues = new HashSet<>();
 
   @Override
   public AttributePathBuilder at(JsonPointer pointer) {
@@ -35,6 +36,17 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
           "Segments cannot contain wildcards (a.foo*.c is not supported)");
     }
     return new AttributePathBuilderImpl(List.of(new Match(null, body.path(path), path, false)));
+  }
+
+  public Set<ConformanceCheckResult> getValidationIssues() {
+    boolean hasRelevantResults = validationIssues.stream().anyMatch(ConformanceCheckResult::isRelevant);
+    boolean allConformant = validationIssues.stream().allMatch(ConformanceCheckResult::isConformant);
+
+    if (hasRelevantResults && allConformant) {
+      return Set.of(ConformanceCheckResult.simple(Set.of()));
+    }
+
+    return validationIssues;
   }
 
   @RequiredArgsConstructor
@@ -71,7 +83,6 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
       }
       matches.stream()
           .map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
-          .filter(result -> !result.getErrorMessages().isEmpty())
           .forEach(validationIssues::add);
     }
   }

@@ -90,10 +90,11 @@ public class ANPublisher extends ConformanceParty {
         + scenarioType.arrivalNoticePayload(apiVersion.toLowerCase().replaceAll("[.-]", ""));
   }
 
-  private String getAnResponseFilepath(ScenarioType scenarioType) {
+  private String getAnRegularResponseFilepath() {
 
     return "/standards/an/messages/"
-        + scenarioType.arrivalNoticeResponse(apiVersion.toLowerCase().replaceAll("[.-]", ""));
+        + ScenarioType.REGULAR.arrivalNoticeResponse(
+            apiVersion.toLowerCase().replaceAll("[.-]", ""));
   }
 
   private void sendArrivalNoticeNotification(JsonNode actionPrompt) {
@@ -136,19 +137,16 @@ public class ANPublisher extends ConformanceParty {
 
       if (scenarioType.name().equals(ScenarioType.NOTIFICATION.name())) {
         JsonNode response =
-            JsonToolkit.templateFileToJsonNode(
-                getAnResponseFilepath(ScenarioType.REGULAR), templateVars);
+            JsonToolkit.templateFileToJsonNode(getAnRegularResponseFilepath(), templateVars);
         persistentMap.save("lastArrivalNoticePayload", JsonNodeFactory.instance.objectNode());
         return request.createResponse(
             200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
       }
-
-
     }
 
     // GET only scenario
     if (payload == null || payload.isEmpty()) {
-      String filePath = getAnResponseFilepath(ScenarioType.REGULAR);
+      String filePath = getAnRegularResponseFilepath();
       payload = JsonToolkit.templateFileToJsonNode(filePath, templateVars);
     }
 

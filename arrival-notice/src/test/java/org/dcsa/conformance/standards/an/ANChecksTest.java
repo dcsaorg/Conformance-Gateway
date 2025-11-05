@@ -66,7 +66,7 @@ class ANChecksTest {
   }
 
   @Test
-  void testValidateDocumentParties() {
+  void testInvalidDocumentParties() {
     ArrayNode parties = an.putArray("documentParties");
     ObjectNode p = parties.addObject();
     p.put("partyName", "Consignee LLC");
@@ -75,10 +75,34 @@ class ANChecksTest {
     addr.put("street", "Harbor Rd 1");
 
     Set<ConformanceError> errors =((ConformanceCheckResult.ErrorsWithRelevance) ANChecks.validateDocumentParties().validate(body)).errors();
+    assertEquals(1, errors.size());
+
+    p.put("partyFunction", "CN");
+    errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                ANChecks.validateDocumentParties().validate(body))
+            .errors();
     assertEquals(0, errors.size());
 
     p.remove("partyName");
     assertFalse(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());
+  }
+
+  @Test
+  void testValidDocumentParties() {
+    ArrayNode parties = an.putArray("documentParties");
+    ObjectNode p = parties.addObject();
+    p.put("partyName", "Consignee LLC");
+    p.put("partyContactDetails", "consignee@example.com");
+    ObjectNode addr = p.putObject("address");
+    addr.put("street", "Harbor Rd 1");
+    p.put("partyFunction", "CN");
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                ANChecks.validateDocumentParties().validate(body))
+            .errors();
+    assertEquals(0, errors.size());
   }
 
   @Test
@@ -167,12 +191,40 @@ class ANChecksTest {
     ft.putArray("ISOEquipmentCodes").add("22G1");
     ft.putArray("equipmentReferences").add("MSCU1234567");
     ft.put("duration", 5);
-    ft.put("timeUnit", "DAY");
+    ft.put("timeUnit", "HR");
 
     assertTrue(
         ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
 
     an.set("freeTimes", mapper.createArrayNode());
+    assertFalse(
+        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
+  }
+
+  @Test
+  void testValidateFreeTimeInvalidTimeUnit() {
+
+    ArrayNode freeTimes = an.putArray("freeTimes");
+    ObjectNode ft = freeTimes.addObject();
+    ft.putArray("typeCodes").add("DEM");
+    ft.putArray("ISOEquipmentCodes").add("22G1");
+    ft.putArray("equipmentReferences").add("MSCU1234567");
+    ft.put("duration", 5);
+    ft.put("timeUnit", "DAY");
+
+    assertFalse(
+        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
+  }
+
+  @Test
+  void testValidateFreeTimeMissingReqFields() {
+
+    ArrayNode freeTimes = an.putArray("freeTimes");
+    ObjectNode ft = freeTimes.addObject();
+    ft.putArray("equipmentReferences").add("MSCU1234567");
+    ft.put("duration", 5);
+    ft.put("timeUnit", "DAY");
+
     assertFalse(
         ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
   }

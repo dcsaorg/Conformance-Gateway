@@ -249,6 +249,19 @@ public class JsonAttribute {
         });
   }
 
+  public static JsonRebasableContentCheck allIndividualMatchesMustBeValidWithoutRelevance(
+      @NonNull String name,
+      @NonNull Consumer<MultiAttributeValidator> scanner,
+      @NonNull JsonContentMatchedValidation subvalidation) {
+    return JsonRebasableCheckImpl.of(
+        name,
+        (body, contextPath) -> {
+          var v = new MultiAttributeValidatorImplWithoutRelevance(contextPath, body, subvalidation);
+          scanner.accept(v);
+          return ConformanceCheckResult.from(v.getValidationIssues());
+        });
+  }
+
   public static JsonRebasableContentCheck allIndividualMatchesMustBeValid(
           @NonNull
           String name,

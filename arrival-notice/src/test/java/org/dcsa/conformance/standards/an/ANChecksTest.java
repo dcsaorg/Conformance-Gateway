@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceError;
-import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,8 +75,7 @@ class ANChecksTest {
     addr.put("street", "Harbor Rd 1");
 
     Set<ConformanceError> errors =((ConformanceCheckResult.ErrorsWithRelevance) ANChecks.validateDocumentParties().validate(body)).errors();
-    assertEquals(1, errors.size());
-    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+    assertEquals(0, errors.size());
 
     p.remove("partyName");
     assertFalse(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());

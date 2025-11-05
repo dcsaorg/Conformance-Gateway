@@ -70,11 +70,12 @@ public class SubscriberGetANAction extends ANAction {
     ObjectNode jsonNode = super.asJsonNode();
     List<String> references = getDspSupplier().get().transportDocumentReferences();
     ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
-    assert references != null;
+    if (references != null && !references.isEmpty()) {
     for (String ref : references) {
       arrayNode.add(ref);
     }
     jsonNode.set("references", arrayNode);
+    }
     return jsonNode;
   }
 }

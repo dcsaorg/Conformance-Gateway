@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.an.party.DynamicScenarioParameters;
 
 public class ANAction extends ConformanceAction {
@@ -68,17 +69,16 @@ public class ANAction extends ConformanceAction {
     } else {
       arrivalNotices = jsonBody.get("arrivalNotices");
     }
-    assert arrivalNotices != null;
-    for (JsonNode arrivalNotice : arrivalNotices) {
-      JsonNode tdr = arrivalNotice.get("transportDocumentReference");
+    if (!JsonUtil.isMissingOrEmpty(arrivalNotices)) {
+      for (JsonNode arrivalNotice : arrivalNotices) {
+        JsonNode tdr = arrivalNotice.get("transportDocumentReference");
         if (tdr != null && tdr.isTextual()) {
           transportDocumentReferences.add(tdr.asText());
         }
       }
-
     updatedDsp =
         getDspSupplier().get().withTransportDocumentReferences(transportDocumentReferences);
-
+    }
     if (!dspReference.equals(updatedDsp)) {
       dsp.set(updatedDsp);
     }

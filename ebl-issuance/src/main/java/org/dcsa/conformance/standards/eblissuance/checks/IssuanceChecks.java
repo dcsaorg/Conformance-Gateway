@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
@@ -20,29 +21,47 @@ import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standards.eblissuance.action.EblType;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
+@UtilityClass
 public class IssuanceChecks {
+
+  private static final String CODE_LIST_PROVIDER = "codeListProvider";
+  private static final String ISSUE_TO = "issueTo";
+  private static final String IDENTIFYING_CODES = "identifyingCodes";
+  private static final String ENDORSEE = "endorsee";
+  private static final String DOCUMENT = "document";
+  private static final String DOCUMENT_PARTIES = "documentParties";
+  private static final String IS_TO_ORDER = "isToOrder";
+  private static final String ISSUANCE_MANIFEST_SIGNED_CONTENT = "issuanceManifestSignedContent";
+  private static final String ISSUANCE_MANIFEST_SIGNED_MANIFEST = "issuanceManifestSignedManifest";
+  private static final String DOCUMENT_CHECKSUM = "documentChecksum";
+  private static final String ISSUE_TO_CHECKSUM = "issueToChecksum";
+  private static final String EBL_VISUALISATION_BY_CARRIER = "eBLVisualisationByCarrier";
+  private static final String EBL_VISUALISATION_BY_CARRIER_CHECKSUM =
+      "eBLVisualisationByCarrierChecksum";
 
   private static final JsonRebasableContentCheck ISSUE_TO_CODE_LIST_PROVIDER =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "The 'codeListProvider' is valid",
-          mav -> mav.submitAllMatching("issueTo.identifyingCodes.*.codeListProvider"),
+          "The '%s' is valid".formatted(CODE_LIST_PROVIDER),
+          mav ->
+              mav.submitAllMatching(
+                  "%s.%s.*.%s".formatted(ISSUE_TO, IDENTIFYING_CODES, CODE_LIST_PROVIDER)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
               DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES));
 
-  private static JsonRebasableContentCheck hasEndorseeScenarioCheck(
-      String standardsVersion, EblType eblType) {
+  private static JsonRebasableContentCheck hasEndorseeScenarioCheck(EblType eblType) {
     return JsonAttribute.customValidator(
-        "[Scenario] Validate endorsee party presence is correct",
+        "[Scenario] Validate '%s' party presence is correct".formatted(ENDORSEE),
         JsonAttribute.path(
-            "document",
+            DOCUMENT,
             JsonAttribute.path(
-                "documentParties",
+                DOCUMENT_PARTIES,
                 (documentParties, contextPath) -> {
                   if (!eblType.isToOrder()) {
-                    return ConformanceCheckResult.simple(Set.of());
+                    return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
                   }
-                  var hadEndorsee = documentParties.has("endorsee");
-                  var endorseePath = concatContextPath(contextPath, "documentParties.endorsee");
+                  var hadEndorsee = documentParties.has(ENDORSEE);
+                  var endorseePath =
+                      concatContextPath(contextPath, "%s.%s".formatted(DOCUMENT_PARTIES, ENDORSEE));
                   if (eblType.isBlankEbl() && hadEndorsee) {
                     return ConformanceCheckResult.simple(
                         Set.of(
@@ -69,11 +88,12 @@ public class IssuanceChecks {
         HttpMessageType.REQUEST,
         standardsVersion,
         JsonAttribute.mustEqual(
-            "[Scenario] The 'document.isToOrder' attribute must match the scenario requirements",
-            JsonPointer.compile("/document/isToOrder"),
+            "[Scenario] The '%s.%s' attribute must match the scenario requirements"
+                .formatted(DOCUMENT, IS_TO_ORDER),
+            JsonPointer.compile("/%s/%s".formatted(DOCUMENT, IS_TO_ORDER)),
             eblType.isToOrder()),
         ISSUE_TO_CODE_LIST_PROVIDER,
-        hasEndorseeScenarioCheck(standardsVersion, eblType));
+        hasEndorseeScenarioCheck(eblType));
   }
 
   public static ActionCheck issuanceRequestSignatureChecks(
@@ -89,28 +109,29 @@ public class IssuanceChecks {
         HttpMessageType.REQUEST,
         standardsVersion,
         JsonAttribute.customValidator(
-            "Signature of the issuanceManifestSignedContent is valid",
+            "Signature of the '%s' is valid".formatted(ISSUANCE_MANIFEST_SIGNED_CONTENT),
             path(
-                "issuanceManifestSignedContent",
+                ISSUANCE_MANIFEST_SIGNED_CONTENT,
                 SignatureChecks.signatureValidates(signatureVerifierSupplier))),
         JsonAttribute.customValidator(
-            "Schema validation of the payload of issuanceManifestSignedManifest",
+            "Schema validation of the payload of '%s'".formatted(ISSUANCE_MANIFEST_SIGNED_MANIFEST),
             path(
-                "issuanceManifestSignedContent",
+                ISSUANCE_MANIFEST_SIGNED_CONTENT,
                 SignatureChecks.signedContentSchemaValidation(issuanceManifestSchemaValidator))),
         JsonAttribute.customValidator(
             "Validate checksum of transportDocument vs. the checksum provided in the issuanceManifest",
             validateJsonNodeToChecksumAttribute(
-                "document", "documentChecksum", Checksums::sha256CanonicalJson)),
+                DOCUMENT, DOCUMENT_CHECKSUM, Checksums::sha256CanonicalJson)),
         JsonAttribute.customValidator(
             "Validate checksum of issueTo vs. the checksum provided in the issuanceManifest",
             validateJsonNodeToChecksumAttribute(
-                "issueTo", "issueToChecksum", Checksums::sha256CanonicalJson)),
+                ISSUE_TO, ISSUE_TO_CHECKSUM, Checksums::sha256CanonicalJson)),
         JsonAttribute.customValidator(
-            "Validate checksum of eBLVisualisationByCarrier vs. the checksum provided in the issuanceManifest",
+            "Validate checksum of '%s' vs. the checksum provided in the issuanceManifest"
+                .formatted(EBL_VISUALISATION_BY_CARRIER),
             validateJsonNodeToChecksumAttribute(
-                "eBLVisualisationByCarrier",
-                "eBLVisualisationByCarrierChecksum",
+                EBL_VISUALISATION_BY_CARRIER,
+                EBL_VISUALISATION_BY_CARRIER_CHECKSUM,
                 IssuanceChecks::checksumSupportingDocument)));
   }
 
@@ -137,7 +158,7 @@ public class IssuanceChecks {
       }
       var c =
           path(
-              "issuanceManifestSignedContent",
+              ISSUANCE_MANIFEST_SIGNED_CONTENT,
               SignatureChecks.signedContentValidation(
                   path(manifestChecksumAttribute, checksumValidator)));
       return c.validate(nodeToValidate, contextPath);
@@ -152,7 +173,7 @@ public class IssuanceChecks {
         matched,
         HttpMessageType.REQUEST,
         standardsVersion,
-        JsonContentCheckRebaser.of("document"),
+        JsonContentCheckRebaser.of(DOCUMENT),
         checks);
   }
 }

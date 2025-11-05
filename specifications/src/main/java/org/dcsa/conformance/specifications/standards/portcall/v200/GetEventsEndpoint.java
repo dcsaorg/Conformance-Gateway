@@ -1,13 +1,11 @@
 package org.dcsa.conformance.specifications.standards.portcall.v200;
 
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 
-public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
+public class GetEventsEndpoint extends QueryParametersFilterEndpoint {
 
   private final Parameter unLocationCode =
       createStringQueryParameter("UNLocationCode", "NLAMS", "UN location code.");
@@ -26,7 +24,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
       createStringQueryParameter(
           "universalServiceReference",
           "SR12345A",
-        "Unique identifier of a liner service, defined and distributed by DCSA to carriers.");
+          "Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.");
 
   private final Parameter terminalCallReference =
       createStringQueryParameter(
@@ -44,7 +42,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
       createStringQueryParameter(
           "universalImportVoyageReference",
           "2301W",
-        "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA.");
+          "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA.");
 
   private final Parameter carrierExportVoyageNumber =
       createStringQueryParameter(
@@ -56,7 +54,7 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
       createStringQueryParameter(
           "universalExportVoyageReference",
           "2301W",
-        "Unique identifier of the export voyage within the service, assigned by carriers as specified by DCSA.");
+          "Unique identifier of the export voyage within the service, assigned by carriers as specified by DCSA.");
 
   private final Parameter portCallServiceTypeCode =
       createStringQueryParameter("portCallServiceTypeCode", "BERTH", "Port call service type.");
@@ -97,37 +95,22 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
           "classifierCode", "ACT", "Classifier code (EST / REQ / PLN / ACT)");
 
   private final Parameter eventTimestampMin =
-      new Parameter()
-          .in("query")
-          .name("eventTimestampMin")
-          .description("Retrieve events with a timestamp at or after this date-time")
-          .example("2025-01-23T01:23:45Z")
-          .schema(new Schema<String>().type("string").format("date-time"));
+      createDateTimeQueryParameter(
+          "eventTimestampMin", "Retrieve events with a timestamp at or after this date-time");
 
   private final Parameter eventTimestampMax =
-      new Parameter()
-          .in("query")
-          .name("eventTimestampMax")
-          .description("Retrieve events with a timestamp at or before this date-time")
-          .example("2025-01-23T01:23:45Z")
-          .schema(new Schema<String>().type("string").format("date-time"));
+      createDateTimeQueryParameter(
+          "eventTimestampMax", "Retrieve events with a timestamp at or before this date-time");
 
   private final Parameter limit =
-      new Parameter()
-          .in("query")
-          .name("limit")
-          .description("Maximum number of events to include in each page of the response.")
-          .example(10)
-          .schema(new Schema<Integer>().type("integer").format("int32").minimum(new BigDecimal(1)));
+      createIntegerQueryParameter(
+          "limit", 10, "Maximum number of events to include in each page of the response.");
 
   private final Parameter cursor =
-      new Parameter()
-          .in("query")
-          .name("cursor")
-          .description(
-              "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.")
-          .example("ExampleNextPageCursor")
-          .schema(new Schema<String>().type("string"));
+      createStringQueryParameter(
+          "cursor",
+          "ExampleNextPageCursor",
+          "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page.");
 
   @Override
   public List<Parameter> getQueryParameters() {
@@ -151,8 +134,8 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
         portCallServiceID,
         timestampID,
         classifierCode,
-      eventTimestampMin,
-      eventTimestampMax,
+        eventTimestampMin,
+        eventTimestampMax,
         limit,
         cursor);
   }
@@ -160,15 +143,5 @@ public class GetEventsEndpoint implements QueryParametersFilterEndpoint {
   @Override
   public Map<Boolean, List<List<Parameter>>> getRequiredAndOptionalFilters() {
     return Map.ofEntries(Map.entry(Boolean.TRUE, List.of()), Map.entry(Boolean.FALSE, List.of()));
-  }
-
-  private static Parameter createStringQueryParameter(
-      String name, String example, String description) {
-    return new Parameter()
-        .in("query")
-        .name(name)
-        .example(example)
-        .description(description)
-        .schema(new Schema<String>().type("string"));
   }
 }

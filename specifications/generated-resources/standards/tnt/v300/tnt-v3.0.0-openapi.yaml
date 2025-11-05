@@ -55,6 +55,9 @@ paths:
         * `carrierBookingReference`, `equipmentReference`
         * `transportDocumentReference`
         * `transportDocumentReference`, `equipmentReference`
+        * `equipmentReference`
+
+        Every Event Producer must support combining any of the query parameter filters above with a list of `eventTypes`. By default, events of all `eventTypes` are expected to be returned if available and supported.
 
         Every Event Producer must support combining any of the query parameter filters above with all of these additional filters:
         * `eventUpdatedDateTimeMin`
@@ -116,6 +119,15 @@ paths:
         schema:
           type: "string"
         example: "APZU4812090"
+      - name: "eventTypes"
+        in: "query"
+        description: "Retrieve only events whose `eventType` is in this list"
+        explode: false
+        schema:
+          type: "array"
+          items:
+            type: "string"
+        example: "EQUIPMENT,IOT,REEFER"
       - name: "eventUpdatedDateTimeMin"
         in: "query"
         description: "Retrieve events with an `eventUpdatedDateTime` at or after this timestamp"

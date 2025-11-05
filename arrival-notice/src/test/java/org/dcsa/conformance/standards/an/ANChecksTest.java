@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Set;
-
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
@@ -173,17 +172,11 @@ class ANChecksTest {
     ft.put("timeUnit", "DAY");
 
     assertTrue(
-        ANChecks.validateFreeTimeObjectStructure("FREE_TIME")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
+        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
 
     an.set("freeTimes", mapper.createArrayNode());
     assertFalse(
-        ANChecks.validateFreeTimeObjectStructure("FREE_TIME")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
+        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
   }
 
   @Test
@@ -246,31 +239,120 @@ class ANChecksTest {
   }
 
   @Test
-  void testValidatePortOfDischargeFields() {
+  void testInvalidValidatePortOfDischargeLocationFields() {
+
+    ObjectNode transport = an.putObject("transport");
+    transport.putObject("portOfDischarge");
+
+    assertFalse(
+        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testIValidValidatePortOfDischargeFacilityFields() {
+
+    ObjectNode transport = an.putObject("transport");
+    ObjectNode pod = transport.putObject("portOfDischarge");
+    pod.putObject("facility");
+
+    assertFalse(
+        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testInvalidPortOfDischargeFacilityFields() {
+
+    ObjectNode transport = an.putObject("transport");
+    ObjectNode pod = transport.putObject("portOfDischarge");
+    pod.putObject("facility");
+
+    assertFalse(
+        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testvPortOfDischargeFacilityWithoutFacilityListProvider() {
 
     ObjectNode transport = an.putObject("transport");
     ObjectNode pod = transport.putObject("portOfDischarge");
     ObjectNode facility = pod.putObject("facility");
+    facility.put("facilityCode", "ADT");
 
     assertFalse(
-        ANChecks.validatePortOfDischargeFacilityFields(
-                "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
+        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
             .validate(body)
             .getErrorMessages()
             .isEmpty());
+  }
 
-    facility.put("facilityCode", "NLRTM");
-    assertTrue(
-        ANChecks.validatePortOfDischargeFacilityFields(
-                "facilityCode", "arrivalNotices.*.transport.portOfDischarge")
+  @Test
+  void testvPortOfDischargeFacilityWithInvalidFacilityListProvider() {
+
+    ObjectNode transport = an.putObject("transport");
+    ObjectNode pod = transport.putObject("portOfDischarge");
+    ObjectNode facility = pod.putObject("facility");
+    facility.put("facilityCode", "ADT");
+    facility.put("facilityCodeListProvider", "SMDG_INVALID");
+
+    assertFalse(
+        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
             .validate(body)
             .getErrorMessages()
             .isEmpty());
+  }
 
+  @Test
+  void testPortOfDischargeFacilityWithvalidFacilityListProvider() {
+
+    ObjectNode transport = an.putObject("transport");
+    ObjectNode pod = transport.putObject("portOfDischarge");
+    ObjectNode facility = pod.putObject("facility");
+    facility.put("facilityCode", "ADT");
     facility.put("facilityCodeListProvider", "SMDG");
+
     assertTrue(
-        ANChecks.validatePortOfDischargeFacilityFields(
-                "facilityCodeListProvider", "arrivalNotices.*.transport.portOfDischarge")
+        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testANNPortOfDischargeFacilityWithInvalidFacilityListProvider() {
+    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
+    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
+    ObjectNode pod = arrivalNotice.putObject("portOfDischarge");
+    ObjectNode facility = pod.putObject("facility");
+    facility.put("facilityCode", "ADT");
+    facility.put("facilityCodeListProvider", "SMDG_INVALID");
+
+    assertFalse(
+        ANChecks.validatePortOfDischargeLocation("arrivalNoticeNotifications.*")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testANNPortOfDischargeFacilityWithValidFacilityListProvider() {
+    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
+    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
+    ObjectNode pod = arrivalNotice.putObject("portOfDischarge");
+    ObjectNode facility = pod.putObject("facility");
+    facility.put("facilityCode", "ADT");
+    facility.put("facilityCodeListProvider", "SMDG");
+
+    assertTrue(
+        ANChecks.validatePortOfDischargeLocation("arrivalNoticeNotifications.*")
             .validate(body)
             .getErrorMessages()
             .isEmpty());

@@ -1,6 +1,6 @@
 # Track and Trace v3.0.0 Changelog
 
-## Snapshot v3.0.0-20251024-design
+## Snapshot v3.0.0-20251107-design
 
 Added the missing `EquipmentEventTypeCode` values. (SD-2514)
 
@@ -13,6 +13,10 @@ Aligned the actor names with the use cases and user stories. (SD-2531)
 Updated rail and truck attributes. (SD-263)
 
 Added support for multiple `delayReasonCodes`. (SD-2405)
+
+Added support for retrieving events by `equipmentReference` independently of a shipment. (SD-2580)
+
+Added support for filtering events using an `eventTypes` query parameter. (SD-2582)
 
 
 ## Snapshot v3.0.0-20250926-design

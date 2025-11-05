@@ -1,13 +1,11 @@
 package org.dcsa.conformance.specifications.standards.vgm.v100;
 
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import org.dcsa.conformance.specifications.generator.QueryParametersFilterEndpoint;
 
-public class GetVGMDeclarationsEndpoint implements QueryParametersFilterEndpoint {
+public class GetVGMDeclarationsEndpoint extends QueryParametersFilterEndpoint {
 
   private final Parameter carrierBookingReference =
       createStringQueryParameter(
@@ -39,7 +37,9 @@ public class GetVGMDeclarationsEndpoint implements QueryParametersFilterEndpoint
 
   private final Parameter limit =
       createIntegerQueryParameter(
-          "limit", 10, "Maximum number of VGM declarations to include in each page of the response.");
+          "limit",
+          10,
+          "Maximum number of VGM declarations to include in each page of the response.");
 
   private final Parameter cursor =
       createStringQueryParameter(
@@ -75,44 +75,5 @@ public class GetVGMDeclarationsEndpoint implements QueryParametersFilterEndpoint
                     List.of(declarationDateTimeMax),
                     List.of(declarationDateTimeMin, declarationDateTimeMax)))),
         Map.entry(Boolean.FALSE, List.of()));
-  }
-
-  private static List<List<Parameter>> allCombinationsOf(
-      List<List<Parameter>> leftListList, List<List<Parameter>> rightListList) {
-    return leftListList.stream()
-        .flatMap(
-            leftList ->
-                rightListList.stream()
-                    .map(
-                        rightList -> Stream.concat(leftList.stream(), rightList.stream()).toList()))
-        .toList();
-  }
-
-  private static Parameter createStringQueryParameter(
-      String name, String example, String description) {
-    return new Parameter()
-        .in("query")
-        .name(name)
-        .example(example)
-        .description(description)
-        .schema(new Schema<String>().type("string"));
-  }
-
-  private Parameter createDateTimeQueryParameter(String name, String description) {
-    return new Parameter()
-        .in("query")
-        .name(name)
-        .description(description)
-        .example("2025-01-23T01:23:45Z")
-        .schema(new Schema<String>().type("string").format("date-time"));
-  }
-
-  private Parameter createIntegerQueryParameter(String name, int example, String description) {
-    return new Parameter()
-        .in("query")
-        .name(name)
-        .description(description)
-        .example(example)
-        .schema(new Schema<Integer>().type("integer").format("int32"));
   }
 }

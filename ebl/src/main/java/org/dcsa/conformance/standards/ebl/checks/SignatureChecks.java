@@ -19,6 +19,9 @@ import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 @UtilityClass
 public class SignatureChecks {
 
+  private static final String THE_PATH_S_SHOULD_HAVE_BEEN_A_SIGNED_PAYLOAD_BUT_WAS_NOT =
+      "The path '%s' should have been a signed payload, but was not";
+
   private static final JsonContentCheckRebaser SIGNED_CONTENT_REBASER =
       delegate ->
           (nodeToValidate, contextPath) -> {
@@ -26,8 +29,8 @@ public class SignatureChecks {
             if (content == null || !content.contains(".")) {
               return ConformanceCheckResult.simple(
                   Set.of(
-                      "The path '%s' should have been a signed payload, but was not"
-                          .formatted(contextPath)));
+                      THE_PATH_S_SHOULD_HAVE_BEEN_A_SIGNED_PAYLOAD_BUT_WAS_NOT.formatted(
+                          contextPath)));
             }
             JWSObject jwsObject;
             try {
@@ -67,8 +70,7 @@ public class SignatureChecks {
       if (content == null || !content.contains(".")) {
         return ConformanceCheckResult.simple(
             Set.of(
-                "The path '%s' should have been a signed payload, but was not"
-                    .formatted(contextPath)));
+                THE_PATH_S_SHOULD_HAVE_BEEN_A_SIGNED_PAYLOAD_BUT_WAS_NOT.formatted(contextPath)));
       }
       JWSObject jwsObject;
       try {
@@ -99,8 +101,7 @@ public class SignatureChecks {
       if (content == null || !content.contains(".")) {
         return ConformanceCheckResult.simple(
             Set.of(
-                "The path '%s' should have been a signed payload, but was not"
-                    .formatted(contextPath)));
+                THE_PATH_S_SHOULD_HAVE_BEEN_A_SIGNED_PAYLOAD_BUT_WAS_NOT.formatted(contextPath)));
       }
       JWSObject jwsObject;
       try {

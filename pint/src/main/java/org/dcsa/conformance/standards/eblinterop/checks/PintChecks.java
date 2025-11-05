@@ -91,8 +91,7 @@ public class PintChecks {
                   "Expected '%s' to be an array with size %d, but it was not an array"
                       .formatted(contextPath, expectedSize)));
         }
-        // Schema validation error if anything
-        return ConformanceCheckResult.simple(Set.of());
+        return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
       }
       var size = nodeToValidate.size();
       var expectedSize = expectedSizeSupplier.getAsInt();
@@ -116,8 +115,7 @@ public class PintChecks {
       Supplier<DynamicScenarioParameters> dspSupplier) {
     return (nodeToValidate, contextPath) -> {
       if (!nodeToValidate.isArray()) {
-        // Schema validation will take care of this one.
-        return ConformanceCheckResult.simple(Set.of());
+        return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
       }
       var checksums = dspSupplier.get().documentChecksums();
       int idx = 0;
@@ -217,7 +215,8 @@ public class PintChecks {
                         (n, p) -> {
                           if (senderTransmissionClass
                               == SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM) {
-                            return ConformanceCheckResult.simple(Set.of());
+                            return ConformanceCheckResult.withRelevance(
+                                Set.of(ConformanceError.irrelevant()));
                           }
                           if (Objects.equals(rspSupplier.get().receiverParty(), n)) {
                             return ConformanceCheckResult.simple(Set.of());
@@ -432,7 +431,8 @@ public class PintChecks {
                   String expectedChecksum = null;
                   if (!etc.isArray()) {
                     // Leave that to schema validation
-                    return ConformanceCheckResult.simple(Set.of());
+                    return ConformanceCheckResult.withRelevance(
+                        Set.of(ConformanceError.irrelevant()));
                   }
                   var issues = new LinkedHashSet<String>();
                   for (int i = 0; i < etc.size(); i++) {
@@ -480,7 +480,10 @@ public class PintChecks {
                   break;
                 }
               }
-              if (hadIssuance && rootNode.path(ISSUANCE_MANIFEST_SIGNED_CONTENT).isMissingNode()) {
+              if (!hadIssuance) {
+                return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+              }
+              if (rootNode.path(ISSUANCE_MANIFEST_SIGNED_CONTENT).isMissingNode()) {
                 issues.add(
                     "Issuance transaction implies '%s' being present"
                         .formatted(ISSUANCE_MANIFEST_SIGNED_CONTENT));

@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.cs.party.CsRole;
 import org.dcsa.conformance.standards.cs.party.DynamicScenarioParameters;
 
@@ -53,7 +54,7 @@ public class CsChecks {
 
             var index = new AtomicInteger(0);
 
-            if (body == null || body.isMissingNode() || body.isEmpty()) {
+            if (JsonUtil.isMissingOrEmpty(body)) {
               errors.add(ConformanceError.irrelevant(0));
               return ConformanceCheckResult.withRelevance(errors);
             }
@@ -62,7 +63,7 @@ public class CsChecks {
               int currentIndex = index.getAndIncrement();
               JsonNode cutOffTimes = routing.path("cutOffTimes");
 
-              if (cutOffTimes.isMissingNode() || cutOffTimes.isEmpty()) {
+              if (JsonUtil.isMissingOrEmpty(cutOffTimes)) {
                 errors.add(ConformanceError.irrelevant(currentIndex));
                 continue;
               }
@@ -83,12 +84,12 @@ public class CsChecks {
 
   static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP =
       JsonAttribute.customValidator(
-          "Validate cutOffDateTimeCode and receiptTypeAtOrigin",
+          "Validate 'cutOffDateTimeCode' and 'receiptTypeAtOrigin'",
           body -> {
             var errors = new LinkedHashSet<ConformanceError>();
             var index = new AtomicInteger(0);
 
-            if (body == null || body.isMissingNode() || body.isEmpty()) {
+            if (JsonUtil.isMissingOrEmpty(body)) {
               errors.add(ConformanceError.irrelevant(0));
               return ConformanceCheckResult.withRelevance(errors);
             }
@@ -103,7 +104,7 @@ public class CsChecks {
                 continue;
               }
 
-              if (shipmentCutOffTimes.isMissingNode() || shipmentCutOffTimes.isEmpty()) {
+              if (JsonUtil.isMissingOrEmpty(shipmentCutOffTimes)) {
                 errors.add(ConformanceError.irrelevant(currentIndex));
                 continue;
               }
@@ -139,7 +140,7 @@ public class CsChecks {
             var errors = new LinkedHashSet<ConformanceError>();
             var index = new AtomicInteger(0);
 
-            if (body == null || body.isMissingNode() || body.isEmpty()) {
+            if (JsonUtil.isMissingOrEmpty(body)) {
               errors.add(ConformanceError.irrelevant(0));
               return ConformanceCheckResult.withRelevance(errors);
             }
@@ -148,7 +149,7 @@ public class CsChecks {
               int currentIndex = index.getAndIncrement();
               var vesselSchedules = schedule.path("vesselSchedules");
 
-              if (vesselSchedules.isMissingNode() || vesselSchedules.isEmpty()) {
+              if (JsonUtil.isMissingOrEmpty(vesselSchedules)) {
                 errors.add(ConformanceError.irrelevant(currentIndex));
                 continue;
               }
@@ -158,7 +159,7 @@ public class CsChecks {
               for (JsonNode vesselSchedule : vesselSchedules) {
                 var cutOffTimes = vesselSchedule.path("cutOffTimes");
 
-                if (cutOffTimes.isMissingNode() || cutOffTimes.isEmpty()) {
+                if (JsonUtil.isMissingOrEmpty(cutOffTimes)) {
                   continue;
                 }
 
@@ -171,7 +172,7 @@ public class CsChecks {
                           cutOffDateTimeCode.asText())) {
                         errors.add(
                             ConformanceError.error(
-                                "Invalid cutOffDateTimeCode '%s' found at vesselSchedules[%d]"
+                                "Invalid cutOffDateTimeCode with value '%s' found at vesselSchedules[%d]"
                                     .formatted(cutOffDateTimeCode.asText(), currentIndex)));
                       }
                     });
@@ -198,7 +199,7 @@ public class CsChecks {
         body -> {
           var issues = new LinkedHashSet<ConformanceError>();
 
-          if (body == null || body.isMissingNode() || body.isEmpty()) {
+          if (JsonUtil.isMissingOrEmpty(body)) {
             issues.add(ConformanceError.irrelevant());
             return ConformanceCheckResult.withRelevance(issues);
           }

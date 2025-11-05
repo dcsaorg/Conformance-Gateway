@@ -25,6 +25,15 @@ class CsChecksTest {
   @Test
   void testValidateCutoffTimeCodePtp() {
     ArrayNode cutOffTimes = routing.putArray("cutOffTimes");
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                VALIDATE_CUTOFF_TIME_CODE.validate(rootNodeArray))
+            .errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+
     ObjectNode cutOffTime = cutOffTimes.addObject();
     cutOffTime.put("cutOffDateTimeCode", "LCO");
     rootNodeArray.add(routing);
@@ -66,8 +75,26 @@ class CsChecksTest {
   @Test
   void testValidateCutoffTimeCodePs() {
     ObjectNode schedule =  objectMapper.createObjectNode();
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray))
+            .errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+
     ArrayNode vesselSchedules = schedule.putArray("vesselSchedules");
     ObjectNode vesselSchedule = vesselSchedules.addObject();
+
+    errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray))
+            .errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+
     ArrayNode cutOffTimes = vesselSchedule.putArray("cutOffTimes");
     ObjectNode cutOffTime = cutOffTimes.addObject();
     cutOffTime.put("cutOffDateTimeCode", "LCO");

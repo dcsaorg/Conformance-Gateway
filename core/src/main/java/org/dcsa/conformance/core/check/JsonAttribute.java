@@ -243,7 +243,7 @@ public class JsonAttribute {
     return JsonRebasableCheckImpl.of(
         name,
         (body, contextPath) -> {
-          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
+          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation, true);
           scanner.accept(v);
           return ConformanceCheckResult.from(v.getValidationIssues());
         });
@@ -256,7 +256,7 @@ public class JsonAttribute {
     return JsonRebasableCheckImpl.of(
         name,
         (body, contextPath) -> {
-          var v = new MultiAttributeValidatorImplWithoutRelevance(contextPath, body, subvalidation);
+          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation, false);
           scanner.accept(v);
           return ConformanceCheckResult.from(v.getValidationIssues());
         });
@@ -275,7 +275,7 @@ public class JsonAttribute {
         name,
         isRelevant,
         (body, contextPath) -> {
-          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
+          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation, true);
           scanner.accept(v);
           return ConformanceCheckResult.from(v.getValidationIssues());
         });

@@ -12,8 +12,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.dcsa.conformance.core.util.JsonUtil;
 
 @RequiredArgsConstructor
 class MultiAttributeValidatorImpl implements MultiAttributeValidator {
@@ -21,6 +19,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
   private final String contextPath;
   private final JsonNode body;
   private final JsonContentMatchedValidation validation;
+  private final boolean withRelevance;
 
   @Getter private final Set<ConformanceCheckResult> validationIssues = new HashSet<>();
 
@@ -67,7 +66,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     }
 
     private void validateAll(List<Match> matches) {
-      if (matches.isEmpty()) {
+      if (matches.isEmpty() && withRelevance) {
         validationIssues.add(
             ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant())));
       }

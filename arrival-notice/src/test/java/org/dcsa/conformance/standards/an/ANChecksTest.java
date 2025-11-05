@@ -45,9 +45,15 @@ class ANChecksTest {
     assertFalse(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
 
     an.put("carrierCode", "MAEU");
-    an.put("carrierCodeListProvider", "SMDG");
-    an.put("deliveryTypeAtDestination", "CY");
-    an.put("transportDocumentReference", "HHL123");
+    an.put("transportDocumentReference", "test1234");
+    an.putArray("carrierContactInformation").addObject().put("name", "test");
+    an.putObject("transport").put("portOfDischargeArrivalDate", "2025-10-01T10:00:00Z");
+    an.putArray("documentParties").addObject().put("partyFunction", "CN");
+    an.putArray("utilizedTransportEquipments")
+        .addObject()
+        .putObject("seals")
+        .put("number", "ABC123");
+    an.putArray("consignmentItems").addObject().putArray("descriptionOfGoods").add("Widgets");
     assertTrue(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
   }
 

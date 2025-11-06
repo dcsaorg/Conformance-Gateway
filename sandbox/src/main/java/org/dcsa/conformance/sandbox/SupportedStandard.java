@@ -11,7 +11,6 @@ import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
-import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.ovs.OvsStandard;
 import org.dcsa.conformance.standards.portcall.PortCallStandard;
 import org.dcsa.conformance.standards.tnt.TntStandard;
@@ -25,7 +24,6 @@ public enum SupportedStandard {
   EBL_ISSUANCE(EblIssuanceStandard.INSTANCE),
   EBL_SURRENDER(EblSurrenderStandard.INSTANCE),
   BOOKING_AND_EBL(BookingAndEblStandard.INSTANCE),
-  JIT(JitStandard.INSTANCE),
   OVS(OvsStandard.INSTANCE),
   PINT(PintStandard.INSTANCE),
   PORT_CALL(PortCallStandard.INSTANCE),

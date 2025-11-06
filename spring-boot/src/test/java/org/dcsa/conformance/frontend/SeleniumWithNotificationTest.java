@@ -47,8 +47,7 @@ class SeleniumWithNotificationTest extends SeleniumTestBase {
         "Ebl", // 37:09 minutes
         "eBL Issuance", // 6:03 minutes
         "eBL Surrender", // 7:59 minutes
-        // TODO re-enable after SD-2491
-        // "JIT", // 1:14 minutes
+        "PortCall",
         "OVS", // 3:34 minutes
         "PINT", // 6:10 minutes
         "TnT", // 6:20 minutes

@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.ovs.checks;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -34,45 +33,6 @@ public class OvsChecks {
                   "CheckServiceSchedules failed: %s".formatted(validationError)));
           return ConformanceCheckResult.simple(validationErrors);
         }));
-
-    checks.add(
-      JsonAttribute.customValidator(
-        "If present, at least one schedule attribute must match the corresponding query parameters",
-        body -> {
-          Set<String> validationErrors = new LinkedHashSet<>();
-          checkThatScheduleValuesMatchParamValues(body, filterParametersMap)
-            .forEach(
-              validationError ->
-                validationErrors.add(
-                  "Schedule Param Value Validation failed: %s"
-                    .formatted(validationError)));
-          return ConformanceCheckResult.simple(validationErrors);
-        }));
-
-    checks.add(
-      JsonAttribute.customValidator(
-        "Check transportCallReference is unique across each service schedules",
-              body -> ConformanceCheckResult.simple(validateUniqueTransportCallReference(body))));
-
-    checks.add(
-      JsonAttribute.customValidator(
-        "Validate limit exists and the number of schedules does not exceed the limit",
-        body -> {
-          Optional<Map.Entry<OvsFilterParameter, String>> limitParam =
-            filterParametersMap.entrySet().stream()
-              .filter(e -> e.getKey().equals(OvsFilterParameter.LIMIT))
-              .findFirst();
-
-          if (limitParam.isPresent()) {
-            int expectedLimit = Integer.parseInt(limitParam.get().getValue().trim());
-            if (body.size() > expectedLimit) {
-              return ConformanceCheckResult.simple(Set.of(
-                "The number of service schedules exceeds the limit parameter: "
-                  + expectedLimit));
-            }
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        }));
     return checks;
   }
 
@@ -86,88 +46,8 @@ public class OvsChecks {
         OvsRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
-  public Set<String> checkThatScheduleValuesMatchParamValues(
-      JsonNode schedulesNode, Map<OvsFilterParameter, String> filterParametersMap) {
-    Set<String> validationErrors = new LinkedHashSet<>();
-    Arrays.stream(OvsFilterParameter.values())
-        .filter(param -> !param.getJsonPaths().isEmpty())
-        .filter(param -> !param.isSeparateCheckRequired())
-        .filter(filterParametersMap::containsKey)
-        .forEach(
-            filterParameter -> {
-              Set<String> parameterValues =
-                  Arrays.stream(filterParametersMap.get(filterParameter).split(","))
-                      .collect(Collectors.toSet());
-              Set<Map.Entry<String, JsonNode>> attributeValues = new HashSet<>();
-              Set<String> jsonPaths = filterParameter.getJsonPaths();
-              jsonPaths.forEach(
-                  jsonPathExpression -> {
-                    findMatchingNodes(schedulesNode, jsonPathExpression)
-                        .forEach(
-                            result -> {
-                              if (!result.getValue().isMissingNode()
-                                  && !result.getValue().isNull()) {
-                                attributeValues.add(result);
-                              }
-                            });
-                  });
-              if (!attributeValues.isEmpty()
-                  && parameterValues.stream()
-                      .noneMatch(
-                          parameterValue ->
-                              attributeValues.stream()
-                                  .anyMatch(
-                                      entry ->
-                                          entry
-                                              .getValue()
-                                              .asText()
-                                              .trim()
-                                              .equals(
-                                                  parameterValue.trim())))) { // Trim and compare
-
-                String errorMessage =
-                    String.format(
-                        "Value%s '%s' at path%s '%s' do%s not match value%s '%s' of query parameter '%s'",
-                        attributeValues.size() > 1 ? "s" : "",
-                        attributeValues.stream()
-                            .map(e -> e.getValue().asText())
-                            .collect(Collectors.joining(", ")),
-                        attributeValues.size() > 1 ? "s" : "",
-                        attributeValues.stream()
-                            .map(Map.Entry::getKey)
-                            .collect(Collectors.joining(", ")), // Get keys here
-                        attributeValues.size() > 1 ? "" : "es",
-                        parameterValues.size() > 1 ? "s" : "",
-                        String.join(", ", parameterValues),
-                        filterParameter.getQueryParamName());
-
-                validationErrors.add(errorMessage);
-              }
-            });
-
-    return validationErrors;
-  }
 
 
-  public Set<String> validateUniqueTransportCallReference(JsonNode body) {
-    Set<String> errors = new HashSet<>();
-    // Iterate over each service schedule in the response body
-    for (JsonNode node : body) {
-      Set<String> transportCallReferences = new HashSet<>();
-      findMatchingNodes(node, "vesselSchedules/*/transportCalls/*/transportCallReference")
-          .filter(tcrNode -> !tcrNode.getValue().isMissingNode() && !tcrNode.getValue().isNull())
-          .forEach(
-              transportCallReferenceNode -> {
-                String transportCallReference = transportCallReferenceNode.getValue().asText();
-                if (!transportCallReferences.add(transportCallReference)) {
-                  errors.add(
-                      ("Duplicate transportCallReference %s " + "found at %s")
-                          .formatted(transportCallReference, transportCallReferenceNode.getKey()));
-                }
-              });
-    }
-    return errors;
-  }
 
   public Stream<Map.Entry<String, JsonNode>> findMatchingNodes(JsonNode node, String jsonPath) {
     return findMatchingNodes(node, jsonPath, "");

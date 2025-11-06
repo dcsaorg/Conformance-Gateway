@@ -24,7 +24,8 @@ public class SubscriberGetPortCallEventsAction extends PortCallAction{
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Have your application GET from its counterpart running in the sandbox the Events with the any of the following attributes: ";
+    return "Have your application GET from its counterpart running in the sandbox the Port Call Events with the any of the following attributes: \n\n"
+        + sspSupplier.get().toJson();
   }
 
   @Override

@@ -23,7 +23,7 @@ public class PublisherPostPortCallEventsAction extends PortCallAction{
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Have your application POST one or more Arrival Notices to its synthetic counterpart running in the sandbox";
+    return "Have your application POST one or more Port Call Events to its synthetic counterpart running in the sandbox";
   }
 
   @Override

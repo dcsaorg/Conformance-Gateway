@@ -57,8 +57,6 @@ public class SuppliedScenarioParameters {
       throw new IllegalArgumentException(
           "Invalid query parameter(s): " + String.join(", ", invalidFields));
     }
-
-    // Build map with only valid parameters
     Map<PortCallFilterParameter, String> result =
         Arrays.stream(PortCallFilterParameter.values())
             .filter(param -> jsonNode.has(param.getQueryParamName()))

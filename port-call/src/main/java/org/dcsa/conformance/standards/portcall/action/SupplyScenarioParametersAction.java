@@ -22,7 +22,7 @@ public class SupplyScenarioParametersAction extends PortCallAction {
   @Override
   public String getHumanReadablePrompt() {
     return "Using the example format below, provide one or more query parameters"
-        + " for which the internal sandbox can GET port call events from your system";
+        + " for which the internal sandbox can GET Port Call Events from your system";
   }
 
   @Override

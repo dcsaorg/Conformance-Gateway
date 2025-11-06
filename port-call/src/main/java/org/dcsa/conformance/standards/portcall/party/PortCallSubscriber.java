@@ -60,19 +60,21 @@ public class PortCallSubscriber extends ConformanceParty {
         new ConformanceMessageBody(responseNode));
 
     addOperatorLogEntry(
-      "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
+        "Handled Port Call Events POST: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
 
   private void getEvents(JsonNode actionPrompt) {
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+    Map<String, Set<String>> queryParams =
+        ssp.getMap().entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> entry.getKey().getQueryParamName(),
+                    entry -> Set.of(entry.getValue())));
 
-    syncCounterpartGet("/events", ssp.getMap().entrySet().stream()
-      .collect(
-        Collectors.toMap(
-          entry -> entry.getKey().getQueryParamName(),
-          entry -> Set.of(entry.getValue()))));
-    addOperatorLogEntry("Sent a GET Events request");
+    syncCounterpartGet("/events", queryParams);
+    addOperatorLogEntry("Sent a GET Events request with query params." + queryParams);
   }
 }

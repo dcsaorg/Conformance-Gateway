@@ -94,9 +94,11 @@ public class PortCallPublisher extends ConformanceParty {
           .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
         Map.of());
 
+    addOperatorLogEntry("Handled request: %s".formatted(request.toString()));
     return request.createResponse(
       200,
       Map.of(API_VERSION, List.of(apiVersion)),
       new ConformanceMessageBody(jsonResponseBody));
+
   }
 }

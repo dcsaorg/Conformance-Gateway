@@ -80,6 +80,9 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     SandboxConfig sandBox2 = createSandbox(standard, version, suiteName, role, 1);
     updateSandboxConfigBeforeStarting(sandBox1, sandBox2);
 
+    createdSandboxes.add(sandBox1);
+    createdSandboxes.add(sandBox2);
+
     runScenarios(readableStandardSpec);
     log.info("Finished with standard: {}", readableStandardSpec);
 
@@ -391,24 +394,29 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     driver.findElement(By.id("createSandboxButton")).click();
 
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[testId='sandboxNameInput']")));
+
+    String currentUrl = driver.getCurrentUrl();
+    assert currentUrl != null;
+
+    String sandboxId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
     boolean noSandboxUrlInput = driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();
     String sandboxURL = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxUrlInput']")).getDomProperty("value");
     String sandboxAuthHeaderName = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderNameInput']")).getDomProperty("value");
     String sandboxAuthHeaderValue = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderValueInput']")).getDomProperty("value");
     return new SandboxConfig(
-      null,
-      sandboxName,
-      sandboxURL,
-      sandboxAuthHeaderName,
-      sandboxAuthHeaderValue,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null);
+        sandboxId,
+        sandboxName,
+        sandboxURL,
+        sandboxAuthHeaderName,
+        sandboxAuthHeaderValue,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
   }
 
   private static void selectAndPickOption(String selectBoxName, String itemToUse) {

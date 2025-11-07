@@ -42,8 +42,6 @@ public abstract class ManualTestBase {
   protected final ObjectMapper mapper = OBJECT_MAPPER;
   protected long lambdaDelay = 0L;
 
-  protected SandboxConfig sandboxOne;
-  protected SandboxConfig sandboxTwo;
   protected Set<SandboxConfig> createdSandboxes = new HashSet<>();
 
   @Autowired protected ConformanceApplication app;
@@ -55,7 +53,7 @@ public abstract class ManualTestBase {
   }
 
   @AfterEach
-  public void reset() {
+  public void cleanUp() {
     deleteSandboxes();
   }
 

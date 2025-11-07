@@ -74,14 +74,14 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     String readableStandardSpec = "%s, version: %s, suite: %s, role: %s".formatted(standard.name(), version, suiteName, role);
     log.info("Starting standard: {}", readableStandardSpec);
     switchToTab(0);
-    SandboxConfig sandBox1 = createSandbox(standard, version, suiteName, role, 0);
+    SandboxConfig sandbox1 = createSandbox(standard, version, suiteName, role, 0);
     openNewTab();
     switchToTab(1);
-    SandboxConfig sandBox2 = createSandbox(standard, version, suiteName, role, 1);
-    updateSandboxConfigBeforeStarting(sandBox1, sandBox2);
+    SandboxConfig sandbox2 = createSandbox(standard, version, suiteName, role, 1);
+    updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
 
-    createdSandboxes.add(sandBox1);
-    createdSandboxes.add(sandBox2);
+    createdSandboxes.add(sandbox1);
+    createdSandboxes.add(sandbox2);
 
     runScenarios(readableStandardSpec);
     log.info("Finished with standard: {}", readableStandardSpec);

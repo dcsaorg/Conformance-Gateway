@@ -396,7 +396,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[testId='sandboxNameInput']")));
 
     String currentUrl = driver.getCurrentUrl();
-    assert currentUrl != null;
+    assertNotNull(currentUrl);
 
     String sandboxId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
     boolean noSandboxUrlInput = driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();

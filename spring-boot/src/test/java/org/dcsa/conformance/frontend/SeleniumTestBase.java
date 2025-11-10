@@ -62,6 +62,9 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       .ignoring(NoSuchElementException.class);
   }
 
+  @Override
+  public void cleanUp() {}
+
   @AfterAll
   static void tearDown() {
     if (driver != null) {
@@ -86,9 +89,46 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     runScenarios(readableStandardSpec);
     log.info("Finished with standard: {}", readableStandardSpec);
 
+    deleteSandbox(sandbox1, sandbox2);
+
     // Close tab and switch back to first tab.
     driver.close();
     driver.switchTo().window(driver.getWindowHandles().iterator().next());
+  }
+
+  void deleteSandbox(SandboxConfig sandbox1, SandboxConfig sandbox2) {
+    log.info("Deleting sandboxes");
+    switchToTab(0);
+    driver.get(baseUrl + "/sandbox/" + sandbox1.sandboxId());
+    waitForUIReadiness();
+    driver.findElement(By.cssSelector("[testId='deleteSandboxButton']")).click();
+
+    // Confirm deletion in the confirmation dialog
+    WebElement confirmDeleteButton =
+        driver
+            .findElement(By.cssSelector("app-confirmation-dialog"))
+            .findElements(By.tagName("button"))
+            .getFirst(); // Equivalent to YES button in the dialogue box
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmDeleteButton);
+
+    waitForUIReadiness();
+    log.info("Deleted sandbox: {}", sandbox1.sandboxName());
+
+    switchToTab(1);
+    driver.get(baseUrl + "/sandbox/" + sandbox2.sandboxId());
+    waitForUIReadiness();
+    driver.findElement(By.cssSelector("[testId='deleteSandboxButton']")).click();
+
+    // Confirm deletion in the confirmation dialog
+    confirmDeleteButton =
+        driver
+            .findElement(By.cssSelector("app-confirmation-dialog"))
+            .findElements(By.tagName("button"))
+            .getFirst(); // Equivalent to YES button in the dialogue box
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmDeleteButton);
+
+    waitForUIReadiness();
+    log.info("Deleted sandbox: {}", sandbox2.sandboxName());
   }
 
   void runScenarios(String name) {

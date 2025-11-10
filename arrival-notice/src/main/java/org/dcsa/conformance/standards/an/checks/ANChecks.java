@@ -203,7 +203,7 @@ public class ANChecks {
         mav -> mav.submitAllMatching("arrivalNoticeNotifications.*"),
         (notifications, contextPath) -> {
           var node = notifications.get("equipmentReferences");
-          if (node == null || !node.isArray() || node.isEmpty()) {
+          if (JsonUtil.isMissingOrEmpty(node)) {
             return ConformanceCheckResult.simple(
                 Set.of(
                     contextPath

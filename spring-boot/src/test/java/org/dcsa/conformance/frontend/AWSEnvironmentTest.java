@@ -20,6 +20,7 @@ class AWSEnvironmentTest extends SeleniumTestBase {
   @Override
   @BeforeEach
   public void setUp() {
+    super.setUp();
     // Browsing in AWS is slow, so we need to increase the timeouts
     driver.manage().timeouts().implicitlyWait(Duration.ofMillis(WAIT_BEFORE_TIMEOUT_IN_MILLIS * 6));
     wait.withTimeout(Duration.ofSeconds(20L));

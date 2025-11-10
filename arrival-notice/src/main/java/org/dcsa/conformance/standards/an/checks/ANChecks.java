@@ -13,6 +13,7 @@ import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.KeywordDataset;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.an.party.ANRole;
 import org.dcsa.conformance.standards.an.party.DynamicScenarioParameters;
 
@@ -111,7 +112,21 @@ public class ANChecks {
   public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
       JsonAttribute.customValidator(
           "Every response received during a conformance test must not be empty",
-          body -> ConformanceCheckResult.simple(body.isEmpty() ? Set.of("The response body must not be empty") : Set.of()));
+          body ->
+              ConformanceCheckResult.simple(
+                  (body.isEmpty() || JsonUtil.isMissingOrEmpty(body.get("arrivalNotices"))
+                      ? Set.of("The response body must not be empty")
+                      : Set.of())));
+
+  public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION =
+      JsonAttribute.customValidator(
+          "Every response received during a conformance test must not be empty",
+          body ->
+              ConformanceCheckResult.simple(
+                  (body.isEmpty()
+                          || JsonUtil.isMissingOrEmpty(body.get("arrivalNoticeNotifications"))
+                      ? Set.of("The response body must not be empty")
+                      : Set.of())));
 
   public static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
@@ -151,15 +166,13 @@ public class ANChecks {
   public static ActionCheck getANNPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION);
     checks.add(
         validateBasicFieldWithLabel("transportDocumentReference", "arrivalNoticeNotifications.*"));
     checks.add(validateANNEquipmentReference());
     checks.add(validateTransportETA("arrivalNoticeNotifications.*"));
     checks.add(validatePODAdrressANN());
     checks.add(validatePortOfDischargeLocation("arrivalNoticeNotifications.*"));
-
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,

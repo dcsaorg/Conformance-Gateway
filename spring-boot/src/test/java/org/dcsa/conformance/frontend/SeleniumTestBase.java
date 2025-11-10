@@ -74,11 +74,14 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     String readableStandardSpec = "%s, version: %s, suite: %s, role: %s".formatted(standard.name(), version, suiteName, role);
     log.info("Starting standard: {}", readableStandardSpec);
     switchToTab(0);
-    SandboxConfig sandBox1 = createSandbox(standard, version, suiteName, role, 0);
+    SandboxConfig sandbox1 = createSandbox(standard, version, suiteName, role, 0);
     openNewTab();
     switchToTab(1);
-    SandboxConfig sandBox2 = createSandbox(standard, version, suiteName, role, 1);
-    updateSandboxConfigBeforeStarting(sandBox1, sandBox2);
+    SandboxConfig sandbox2 = createSandbox(standard, version, suiteName, role, 1);
+    updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
+
+    createdSandboxes.add(sandbox1);
+    createdSandboxes.add(sandbox2);
 
     runScenarios(readableStandardSpec);
     log.info("Finished with standard: {}", readableStandardSpec);
@@ -391,24 +394,29 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     driver.findElement(By.id("createSandboxButton")).click();
 
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[testId='sandboxNameInput']")));
+
+    String currentUrl = driver.getCurrentUrl();
+    assertNotNull(currentUrl);
+
+    String sandboxId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
     boolean noSandboxUrlInput = driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();
     String sandboxURL = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxUrlInput']")).getDomProperty("value");
     String sandboxAuthHeaderName = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderNameInput']")).getDomProperty("value");
     String sandboxAuthHeaderValue = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderValueInput']")).getDomProperty("value");
     return new SandboxConfig(
-      null,
-      sandboxName,
-      sandboxURL,
-      sandboxAuthHeaderName,
-      sandboxAuthHeaderValue,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null);
+        sandboxId,
+        sandboxName,
+        sandboxURL,
+        sandboxAuthHeaderName,
+        sandboxAuthHeaderValue,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
   }
 
   private static void selectAndPickOption(String selectBoxName, String itemToUse) {

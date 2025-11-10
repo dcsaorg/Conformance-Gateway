@@ -10,9 +10,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.HashSet;
 import java.util.List;
-
-import lombok.Getter;
+import java.util.Objects;
+import java.util.Set;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.EndpointUriOverrideConfiguration;
@@ -29,6 +30,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,12 +42,19 @@ public abstract class ManualTestBase {
   protected final ObjectMapper mapper = OBJECT_MAPPER;
   protected long lambdaDelay = 0L;
 
+  protected Set<SandboxConfig> createdSandboxes = new HashSet<>();
+
   @Autowired protected ConformanceApplication app;
   protected ConformanceWebuiHandler webuiHandler;
 
   @BeforeEach
   public void setUp() {
     webuiHandler = app.getWebuiHandler();
+  }
+
+  @AfterEach
+  public void cleanUp() {
+    deleteSandboxes();
   }
 
   protected void runManualTests(
@@ -91,6 +100,9 @@ public abstract class ManualTestBase {
           roleName);
       resetSandbox(
           sandbox2); // Make sure the sandbox does not keep an optional state from the first run
+
+      createdSandboxes.add(sandbox1);
+      createdSandboxes.add(sandbox2);
     }
 
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
@@ -244,6 +256,21 @@ public abstract class ManualTestBase {
     waitForCleanSandboxStatus(sandbox);
     waitForAsyncCalls(50L);
     if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 4);
+  }
+
+  private void deleteSandboxes() {
+    createdSandboxes.stream()
+        .filter(Objects::nonNull)
+        .forEach(
+            sandbox -> {
+              JsonNode node =
+                  mapper
+                      .createObjectNode()
+                      .put("operation", "deleteSandbox")
+                      .put("sandboxId", sandbox.sandboxId());
+              webuiHandler.handleRequest(USER_ID, node);
+              log.info("Deleted sandbox: {}", sandbox.sandboxName());
+            });
   }
 
   private void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
@@ -578,7 +605,8 @@ public abstract class ManualTestBase {
       String testedPartyRole,
       boolean isDefault,
       List<String> operatorLog,
-      boolean canNotifyParty) {}
+      boolean canNotifyParty,
+      boolean deleted) {}
 
   public record EndpointUriMethod(
     String endpointUri,
@@ -598,7 +626,21 @@ public abstract class ManualTestBase {
     EndpointUriMethod[] sandboxEndpointUriMethods,
     EndpointUriMethod[] externalPartyEndpointUriMethods,
     EndpointUriOverrideConfiguration[] externalPartyEndpointUriOverrides,
-    String outboundApiCallsSourceIpAddress) {}
+    String outboundApiCallsSourceIpAddress) {
+    
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj == null || getClass() != obj.getClass()) return false;
+      SandboxConfig that = (SandboxConfig) obj;
+      return java.util.Objects.equals(sandboxId, that.sandboxId);
+    }
+    
+    @Override
+    public int hashCode() {
+      return java.util.Objects.hash(sandboxId);
+    }
+  }
 
   record ScenarioDigest(String moduleName, List<Scenario> scenarios) {}
 

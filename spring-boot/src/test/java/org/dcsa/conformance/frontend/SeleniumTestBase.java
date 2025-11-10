@@ -62,6 +62,9 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       .ignoring(NoSuchElementException.class);
   }
 
+  @Override
+  public void cleanUp() {}
+
   @AfterAll
   static void tearDown() {
     if (driver != null) {
@@ -74,18 +77,58 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     String readableStandardSpec = "%s, version: %s, suite: %s, role: %s".formatted(standard.name(), version, suiteName, role);
     log.info("Starting standard: {}", readableStandardSpec);
     switchToTab(0);
-    SandboxConfig sandBox1 = createSandbox(standard, version, suiteName, role, 0);
+    SandboxConfig sandbox1 = createSandbox(standard, version, suiteName, role, 0);
     openNewTab();
     switchToTab(1);
-    SandboxConfig sandBox2 = createSandbox(standard, version, suiteName, role, 1);
-    updateSandboxConfigBeforeStarting(sandBox1, sandBox2);
+    SandboxConfig sandbox2 = createSandbox(standard, version, suiteName, role, 1);
+    updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
+
+    createdSandboxes.add(sandbox1);
+    createdSandboxes.add(sandbox2);
 
     runScenarios(readableStandardSpec);
     log.info("Finished with standard: {}", readableStandardSpec);
 
+    deleteSandbox(sandbox1, sandbox2);
+
     // Close tab and switch back to first tab.
     driver.close();
     driver.switchTo().window(driver.getWindowHandles().iterator().next());
+  }
+
+  void deleteSandbox(SandboxConfig sandbox1, SandboxConfig sandbox2) {
+    log.info("Deleting sandboxes");
+    switchToTab(0);
+    driver.get(baseUrl + "/sandbox/" + sandbox1.sandboxId());
+    waitForUIReadiness();
+    driver.findElement(By.cssSelector("[testId='deleteSandboxButton']")).click();
+
+    // Confirm deletion in the confirmation dialog
+    WebElement confirmDeleteButton =
+        driver
+            .findElement(By.cssSelector("app-confirmation-dialog"))
+            .findElements(By.tagName("button"))
+            .getFirst(); // Equivalent to YES button in the dialogue box
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmDeleteButton);
+
+    waitForUIReadiness();
+    log.info("Deleted sandbox: {}", sandbox1.sandboxName());
+
+    switchToTab(1);
+    driver.get(baseUrl + "/sandbox/" + sandbox2.sandboxId());
+    waitForUIReadiness();
+    driver.findElement(By.cssSelector("[testId='deleteSandboxButton']")).click();
+
+    // Confirm deletion in the confirmation dialog
+    confirmDeleteButton =
+        driver
+            .findElement(By.cssSelector("app-confirmation-dialog"))
+            .findElements(By.tagName("button"))
+            .getFirst(); // Equivalent to YES button in the dialogue box
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmDeleteButton);
+
+    waitForUIReadiness();
+    log.info("Deleted sandbox: {}", sandbox2.sandboxName());
   }
 
   void runScenarios(String name) {
@@ -391,24 +434,29 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     driver.findElement(By.id("createSandboxButton")).click();
 
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[testId='sandboxNameInput']")));
+
+    String currentUrl = driver.getCurrentUrl();
+    assertNotNull(currentUrl);
+
+    String sandboxId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
     boolean noSandboxUrlInput = driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();
     String sandboxURL = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxUrlInput']")).getDomProperty("value");
     String sandboxAuthHeaderName = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderNameInput']")).getDomProperty("value");
     String sandboxAuthHeaderValue = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderValueInput']")).getDomProperty("value");
     return new SandboxConfig(
-      null,
-      sandboxName,
-      sandboxURL,
-      sandboxAuthHeaderName,
-      sandboxAuthHeaderValue,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null);
+        sandboxId,
+        sandboxName,
+        sandboxURL,
+        sandboxAuthHeaderName,
+        sandboxAuthHeaderValue,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
   }
 
   private static void selectAndPickOption(String selectBoxName, String itemToUse) {

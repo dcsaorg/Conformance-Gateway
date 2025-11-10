@@ -3,12 +3,17 @@ package org.dcsa.conformance.standards.cs.checks;
 import static org.dcsa.conformance.standards.cs.checks.CsChecks.VALIDATE_CUTOFF_TIME_CODE;
 import static org.dcsa.conformance.standards.cs.checks.CsChecks.VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP;
 import static org.dcsa.conformance.standards.cs.checks.CsChecks.VALIDATE_CUTOFF_TIME_CODE_PS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Set;
+import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
+import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.junit.jupiter.api.Test;
 
 class CsChecksTest {
@@ -20,6 +25,15 @@ class CsChecksTest {
   @Test
   void testValidateCutoffTimeCodePtp() {
     ArrayNode cutOffTimes = routing.putArray("cutOffTimes");
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                VALIDATE_CUTOFF_TIME_CODE.validate(rootNodeArray))
+            .errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+
     ObjectNode cutOffTime = cutOffTimes.addObject();
     cutOffTime.put("cutOffDateTimeCode", "LCO");
     rootNodeArray.add(routing);
@@ -37,7 +51,14 @@ class CsChecksTest {
     cutOffTime.put("cutOffDateTimeCode", "LCO");
     routing.put("receiptTypeAtOrigin", "CFS");
     rootNodeArray.add(routing);
-    assertTrue(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray).getErrorMessages().isEmpty());
+
+
+    Set<ConformanceError> errors =
+      ((ConformanceCheckResult.ErrorsWithRelevance) VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray)).errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+
 
     cutOffTime.put("cutOffDateTimeCode", "LCO");
     routing.put("receiptTypeAtOrigin", "CO");
@@ -45,14 +66,35 @@ class CsChecksTest {
 
     cutOffTime.put("cutOffDateTimeCode", "PCO");
     routing.put("receiptTypeAtOrigin", "CO");
-    assertTrue(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray).getErrorMessages().isEmpty());
+
+    errors = ((ConformanceCheckResult.ErrorsWithRelevance) VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray)).errors();
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
   }
 
   @Test
   void testValidateCutoffTimeCodePs() {
     ObjectNode schedule =  objectMapper.createObjectNode();
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray))
+            .errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+
     ArrayNode vesselSchedules = schedule.putArray("vesselSchedules");
     ObjectNode vesselSchedule = vesselSchedules.addObject();
+
+    errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray))
+            .errors();
+
+    assertEquals(1, errors.size());
+    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+
     ArrayNode cutOffTimes = vesselSchedule.putArray("cutOffTimes");
     ObjectNode cutOffTime = cutOffTimes.addObject();
     cutOffTime.put("cutOffDateTimeCode", "LCO");

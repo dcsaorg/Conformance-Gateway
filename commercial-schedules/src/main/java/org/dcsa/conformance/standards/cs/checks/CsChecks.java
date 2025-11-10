@@ -7,15 +7,18 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.cs.party.CsRole;
 import org.dcsa.conformance.standards.cs.party.DynamicScenarioParameters;
 
@@ -46,88 +49,167 @@ public class CsChecks {
       JsonAttribute.customValidator(
           "Validate allowed cutoff codes",
           body -> {
-            var issues = new LinkedHashSet<String>();
-            for (JsonNode routings : body) {
-              routings
-                  .at("/cutOffTimes")
-                  .forEach(
-                      cutOffTime -> {
-                        JsonNode cutOffDateTimeCode = cutOffTime.at("/cutOffDateTimeCode");
-                        if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(
-                            cutOffDateTimeCode.asText())) {
-                          issues.add(
-                              "Invalid cutOffDateTimeCode: %s"
-                                  .formatted(cutOffDateTimeCode.asText()));
-                        }
-                      });
+            var errors = new LinkedHashSet<ConformanceError>();
+            var routings = body;
+
+            var index = new AtomicInteger(0);
+
+            if (JsonUtil.isMissingOrEmpty(body)) {
+              errors.add(ConformanceError.irrelevant(0));
+              return ConformanceCheckResult.withRelevance(errors);
             }
-            return ConformanceCheckResult.simple(issues);
+
+            for (JsonNode routing : routings) {
+              int currentIndex = index.getAndIncrement();
+              JsonNode cutOffTimes = routing.path("cutOffTimes");
+
+              if (JsonUtil.isMissingOrEmpty(cutOffTimes)) {
+                errors.add(ConformanceError.irrelevant(currentIndex));
+                continue;
+              }
+
+              cutOffTimes.forEach(
+                  cutOffTime -> {
+                    JsonNode cutOffDateTimeCode = cutOffTime.path("cutOffDateTimeCode");
+                    if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(cutOffDateTimeCode.asText())) {
+                      errors.add(
+                          ConformanceError.error(
+                              "Invalid cutOffDateTimeCode '%s' at routings[%d]"
+                                  .formatted(cutOffDateTimeCode.asText(), currentIndex)));
+                    }
+                  });
+            }
+            return ConformanceCheckResult.withRelevance(errors);
           });
 
   static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP =
       JsonAttribute.customValidator(
-          "Validate cutOff Date time code and receiptTypeAtOrigin",
+          "Validate 'cutOffDateTimeCode' and 'receiptTypeAtOrigin'",
           body -> {
-            var issues = new LinkedHashSet<String>();
+            var errors = new LinkedHashSet<ConformanceError>();
+            var index = new AtomicInteger(0);
+
+            if (JsonUtil.isMissingOrEmpty(body)) {
+              errors.add(ConformanceError.irrelevant(0));
+              return ConformanceCheckResult.withRelevance(errors);
+            }
+
             for (JsonNode routing : body) {
-              var shipmentCutOffTimes = routing.path("cutOffTimes");
+              int currentIndex = index.getAndIncrement();
               var receiptTypeAtOrigin = routing.path("receiptTypeAtOrigin").asText("");
+              var shipmentCutOffTimes = routing.path("cutOffTimes");
+
+              if ("CFS".equalsIgnoreCase(receiptTypeAtOrigin)) {
+                errors.add(ConformanceError.irrelevant(currentIndex));
+                continue;
+              }
+
+              if (JsonUtil.isMissingOrEmpty(shipmentCutOffTimes)) {
+                errors.add(ConformanceError.irrelevant(currentIndex));
+                continue;
+              }
+
               var cutOffDateTimeCodes =
                   StreamSupport.stream(shipmentCutOffTimes.spliterator(), false)
                       .map(p -> p.path("cutOffDateTimeCode"))
                       .filter(JsonNode::isTextual)
-                      .map(n -> n.asText(""))
+                      .map(JsonNode::asText)
                       .collect(Collectors.toSet());
-              if (!receiptTypeAtOrigin.equals("CFS") && cutOffDateTimeCodes.contains("LCO")) {
-                issues.add(
-                    "cutOffDateTimeCode 'LCO' must not be present when receiptTypeAtOrigin is not CFS");
+
+              if (!cutOffDateTimeCodes.contains("LCO")) {
+                errors.add(ConformanceError.irrelevant(currentIndex));
+                continue;
+              }
+
+              if (!"CFS".equalsIgnoreCase(receiptTypeAtOrigin)
+                  && cutOffDateTimeCodes.contains("LCO")) {
+                errors.add(
+                    ConformanceError.error(
+                        "cutOffDateTimeCode 'LCO' must not be present when receiptTypeAtOrigin is not 'CFS' "
+                            + "(at routing index %d)".formatted(currentIndex)));
               }
             }
-            return ConformanceCheckResult.simple(issues);
+
+            return ConformanceCheckResult.withRelevance(errors);
           });
+
   static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE_PS =
       JsonAttribute.customValidator(
-          "Validate allowed cutoff codes",
+          "Validate allowed cutoff codes in vessel schedules",
           body -> {
-            var issues = new LinkedHashSet<String>();
-            for (JsonNode schedule : body) {
-              schedule
-                  .at("/vesselSchedules")
-                  .forEach(
-                      vesselSchedule ->
-                          vesselSchedule
-                              .at("/cutOffTimes")
-                              .forEach(
-                                  cutOffTime -> {
-                                    JsonNode cutOffDateTimeCode =
-                                        cutOffTime.at("/cutOffDateTimeCode");
-                                    if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(
-                                        cutOffDateTimeCode.asText())) {
-                                      issues.add(
-                                          "Invalid cutOffDateTimeCode: %s"
-                                              .formatted(cutOffDateTimeCode.asText()));
-                                    }
-                                  }));
+            var errors = new LinkedHashSet<ConformanceError>();
+            var index = new AtomicInteger(0);
+
+            if (JsonUtil.isMissingOrEmpty(body)) {
+              errors.add(ConformanceError.irrelevant(0));
+              return ConformanceCheckResult.withRelevance(errors);
             }
-            return ConformanceCheckResult.simple(issues);
+
+            for (JsonNode schedule : body) {
+              int currentIndex = index.getAndIncrement();
+              var vesselSchedules = schedule.path("vesselSchedules");
+
+              if (JsonUtil.isMissingOrEmpty(vesselSchedules)) {
+                errors.add(ConformanceError.irrelevant(currentIndex));
+                continue;
+              }
+
+              boolean hasCutOffTimes = false;
+
+              for (JsonNode vesselSchedule : vesselSchedules) {
+                var cutOffTimes = vesselSchedule.path("cutOffTimes");
+
+                if (JsonUtil.isMissingOrEmpty(cutOffTimes)) {
+                  continue;
+                }
+
+                hasCutOffTimes = true;
+
+                cutOffTimes.forEach(
+                    cutOffTime -> {
+                      JsonNode cutOffDateTimeCode = cutOffTime.path("cutOffDateTimeCode");
+                      if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(
+                          cutOffDateTimeCode.asText())) {
+                        errors.add(
+                            ConformanceError.error(
+                                "Invalid cutOffDateTimeCode with value '%s' found at vesselSchedules[%d]"
+                                    .formatted(cutOffDateTimeCode.asText(), currentIndex)));
+                      }
+                    });
+              }
+
+              if (!hasCutOffTimes) {
+                errors.add(ConformanceError.irrelevant(currentIndex));
+              }
+            }
+
+            return ConformanceCheckResult.withRelevance(errors);
           });
 
   static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
       JsonAttribute.customValidator(
           "Every response received during a conformance test must not be empty",
-          body -> ConformanceCheckResult.simple(body.isEmpty() ? Set.of("The response body must not be empty") : Set.of()));
+          body ->
+              ConformanceCheckResult.simple(
+                  body.isEmpty() ? Set.of("The response body must not be empty") : Set.of()));
 
   private static JsonContentCheck paginationCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
         "Check the response is paginated correctly",
         body -> {
-          var issues = new LinkedHashSet<String>();
+          var issues = new LinkedHashSet<ConformanceError>();
+
+          if (JsonUtil.isMissingOrEmpty(body)) {
+            issues.add(ConformanceError.irrelevant());
+            return ConformanceCheckResult.withRelevance(issues);
+          }
+
           String firstPageHash = dspSupplier.get().firstPage();
           String secondPageHash = dspSupplier.get().secondPage();
           if (Objects.equals(firstPageHash, secondPageHash)) {
-            issues.add("The second page must be different from the first page");
+            ConformanceError.error("The second page must be different from the first page");
           }
-          return ConformanceCheckResult.simple(issues);
+          return ConformanceCheckResult.withRelevance(issues);
         });
   }
 

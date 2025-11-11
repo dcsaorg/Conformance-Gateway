@@ -19,7 +19,7 @@ class MultiAttributeValidatorImplTest {
     String contextPath = "test.context";
     JsonContentMatchedValidation simpleValidation =
         (node, path) -> ConformanceCheckResult.simple(Set.of());
-    validator = new MultiAttributeValidatorImpl(contextPath, testNode, simpleValidation);
+    validator = new MultiAttributeValidatorImpl(contextPath, testNode, simpleValidation, true);
   }
 
   @Test

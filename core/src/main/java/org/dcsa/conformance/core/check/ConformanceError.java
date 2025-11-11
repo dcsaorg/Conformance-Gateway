@@ -23,4 +23,8 @@ public record ConformanceError(String message, ConformanceErrorSeverity severity
         String.format(IRRELEVANT_CHECK_FOR_ELEMENT_IN_POSITION, position),
         ConformanceErrorSeverity.IRRELEVANT);
   }
+
+  public boolean isConformant() {
+    return severity.isConformant();
+  }
 }

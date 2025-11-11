@@ -63,12 +63,16 @@ public class ANSubscriber extends ConformanceParty {
   }
 
   private void getArrivalNotices(JsonNode actionPrompt) {
-    ArrayNode tdrs = (ArrayNode) actionPrompt.required("references");
-    List<String> references = new ArrayList<>();
-    for (JsonNode node : tdrs) {
-      references.add(node.asText());
+    if (actionPrompt.has("references")) {
+      ArrayNode tdrs = (ArrayNode) actionPrompt.required("references");
+      List<String> references = new ArrayList<>();
+      for (JsonNode node : tdrs) {
+        references.add(node.asText());
+      }
+      syncCounterpartGet("/arrival-notices", Map.of("transportDocumentReferences", references));
+    } else {
+      syncCounterpartGet("/arrival-notices", Map.of());
     }
-    syncCounterpartGet("/arrival-notices", Map.of("transportDocumentReferences", references));
     addOperatorLogEntry("Sent a GET Arrival Notices request");
   }
 }

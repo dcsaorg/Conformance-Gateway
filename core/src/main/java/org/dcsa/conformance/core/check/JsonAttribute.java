@@ -386,29 +386,34 @@ public class JsonAttribute {
         });
   }
 
+  public static JsonRebasableContentCheck mustEqual(JsonPointer jsonPointer, String expectedValue) {
+    return mustEqual(jsonPointer, true, expectedValue);
+  }
 
   public static JsonRebasableContentCheck mustEqual(
-      JsonPointer jsonPointer,
-      String expectedValue) {
+          JsonPointer jsonPointer,
+          boolean isRelevant,
+          String expectedValue) {
     Objects.requireNonNull(
-      expectedValue,
-      "expectedValue cannot be null; Note: Use `() -> getDspSupplier().get().foo()` (or similar) when testing a value against a dynamic scenario property"
+            expectedValue,
+            "expectedValue cannot be null; Note: Use `() -> getDspSupplier().get().foo()` (or similar) when testing a value against a dynamic scenario property"
     );
     return  JsonRebasableCheckImpl.of(
-        "%s: Must equal '%s'".formatted(jsonCheckName(jsonPointer), expectedValue),
-        (body, contextPath) -> {
-          var node = body.at(jsonPointer);
-          var actualValue = node.asText(null);
-          if (!Objects.equals(expectedValue, actualValue)) {
-            return ConformanceCheckResult.simple(Set.of(
-                VALUE_WARNING
-                    .formatted(
-                        renderJsonPointer(jsonPointer, contextPath),
-                        renderValue(node),
-                        renderValue(expectedValue))));
-          }
-          return ConformanceCheckResult.simple(Collections.emptySet());
-        });
+            "%s: Must equal '%s'".formatted(jsonCheckName(jsonPointer), expectedValue),
+            isRelevant,
+            (body, contextPath) -> {
+              var node = body.at(jsonPointer);
+              var actualValue = node.asText(null);
+              if (!Objects.equals(expectedValue, actualValue)) {
+                return ConformanceCheckResult.simple(Set.of(
+                        VALUE_WARNING
+                                .formatted(
+                                        renderJsonPointer(jsonPointer, contextPath),
+                                        renderValue(node),
+                                        renderValue(expectedValue))));
+              }
+              return ConformanceCheckResult.simple(Collections.emptySet());
+            });
   }
 
 
@@ -434,8 +439,7 @@ public class JsonAttribute {
 
   public static JsonRebasableContentCheck mustEqual(
     JsonPointer jsonPointer,
-    @NonNull
-    Supplier<String> expectedValueSupplier) {
+    @NonNull Supplier<String> expectedValueSupplier) {
     return mustEqual(
       jsonCheckName(jsonPointer),
       jsonPointer,
@@ -443,36 +447,54 @@ public class JsonAttribute {
     );
   }
 
+  public static JsonRebasableContentCheck mustEqual(
+          JsonPointer jsonPointer,
+          boolean isRelevant,
+          @NonNull Supplier<String> expectedValueSupplier) {
+    return mustEqual(
+            jsonCheckName(jsonPointer),
+            jsonPointer,
+            isRelevant,
+            expectedValueSupplier
+    );
+  }
 
   public static JsonRebasableContentCheck mustEqual(
-    String name,
-    JsonPointer jsonPointer,
-    @NonNull
-    Supplier<String> expectedValueSupplier) {
+      String name, JsonPointer jsonPointer, @NonNull Supplier<String> expectedValueSupplier) {
+    return mustEqual(name, jsonPointer, true, expectedValueSupplier);
+  }
+
+  public static JsonRebasableContentCheck mustEqual(
+          String name,
+          JsonPointer jsonPointer,
+          boolean isRelevant,
+          @NonNull
+          Supplier<String> expectedValueSupplier) {
     var v = expectedValueSupplier.get();
     var context = "";
     if (v != null) {
       context = ": Must equal '%s'".formatted(v);
     }
     return JsonRebasableCheckImpl.of(
-      name + context,
-      (body, contextPath) -> {
-          var node = body.at(jsonPointer);
-          var actualValue = node.asText(null);
-          var expectedValue = expectedValueSupplier.get();
-          if (expectedValue == null) {
-            throw new IllegalStateException("The supplier of the expected value for " + renderJsonPointer(jsonPointer)
-              + " returned `null` and `null` is not supported for equals. Usually this indicates that the dynamic"
-              + " scenario property was not properly recorded at this stage.");
-          }
-          if (!Objects.equals(expectedValue, actualValue)) {
-            return ConformanceCheckResult.simple(Set.of(
-              VALUE_WARNING
-                .formatted(renderJsonPointer(jsonPointer, contextPath), renderValue(node), renderValue(expectedValue))));
-          }
-          return ConformanceCheckResult.simple(Collections.emptySet());
-        }
-      );
+            name + context,
+            isRelevant,
+            (body, contextPath) -> {
+              var node = body.at(jsonPointer);
+              var actualValue = node.asText(null);
+              var expectedValue = expectedValueSupplier.get();
+              if (expectedValue == null) {
+                throw new IllegalStateException("The supplier of the expected value for " + renderJsonPointer(jsonPointer)
+                        + " returned `null` and `null` is not supported for equals. Usually this indicates that the dynamic"
+                        + " scenario property was not properly recorded at this stage.");
+              }
+              if (!Objects.equals(expectedValue, actualValue)) {
+                return ConformanceCheckResult.simple(Set.of(
+                        VALUE_WARNING
+                                .formatted(renderJsonPointer(jsonPointer, contextPath), renderValue(node), renderValue(expectedValue))));
+              }
+              return ConformanceCheckResult.simple(Collections.emptySet());
+            }
+    );
   }
 
 
@@ -645,22 +667,23 @@ public class JsonAttribute {
         .collect(Collectors.joining(", "))
     );
     return JsonRebasableCheckImpl.of(
-      name,
-      (body, contextPath) -> {
-        var present = Arrays.stream(ptrs)
-          .filter(p -> isJsonNodePresent(body.at(p)))
-          .toList();
-        if (present.size() < 2) {
-          return ConformanceCheckResult.simple(Set.of());
-        }
-        return ConformanceCheckResult.simple(Set.of(
-          "At most one of the following can be present: %s".formatted(
-            present.stream()
-              .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
-              .collect(Collectors.joining(", "
-              ))
-        )));
-      });
+        name,
+        (body, contextPath) -> {
+          var present = Arrays.stream(ptrs).filter(p -> isJsonNodePresent(body.at(p))).toList();
+          if (present.isEmpty()) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+          }
+          if (present.size() < 2) {
+            return ConformanceCheckResult.simple(Set.of());
+          }
+          return ConformanceCheckResult.simple(
+              Set.of(
+                  "At most one of the following can be present: %s"
+                      .formatted(
+                          present.stream()
+                              .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
+                              .collect(Collectors.joining(", ")))));
+        });
   }
 
   public static JsonRebasableContentCheck atLeastOneOf(

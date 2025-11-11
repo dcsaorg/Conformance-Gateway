@@ -295,7 +295,7 @@ class JsonAttributeTest {
               "array.*.element",
               "array.*.otherElement",
       })
-  void testAllIndividualMatchesMustBeIrrelevant_(String path) {
+  void testAllIndividualMatchesMustBeIrrelevant(String path) {
     objectNode.set("array", arrayNode);
 
     String name = "test";
@@ -376,6 +376,45 @@ class JsonAttributeTest {
     assertFalse(result.getErrorMessages().isEmpty());
     assertEquals(1, result.getErrorMessages().size());
     assertEquals(ConformanceErrorSeverity.ERROR, result.errors().iterator().next().severity());
+  }
+
+  @Test
+  void testAllIndividualMatchesMustBeValid_withMultiplePaths() {
+    var path1 = "shipper.identifyingCodes.*.codeListProvider";
+    var path2 = "endorsee.identifyingCodes.*.codeListProvider";
+    var path3 = "issueTo.identifyingCodes.*.codeListProvider";
+
+    var codeListProvider = JsonNodeFactory.instance.objectNode();
+
+    var identifyingCodes = JsonNodeFactory.instance.arrayNode();
+
+    var endorsee = JsonNodeFactory.instance.objectNode();
+    var shipper = JsonNodeFactory.instance.objectNode();
+
+    identifyingCodes.add(codeListProvider);
+
+    endorsee.set("identifyingCodes", identifyingCodes);
+    shipper.set("identifyingCodes", identifyingCodes);
+
+    objectNode.set("endorsee", endorsee);
+    objectNode.set("shipper", shipper);
+
+    String name = "test";
+
+    Consumer<MultiAttributeValidator> consumer =
+        multiAttributeValidator -> {
+          multiAttributeValidator.submitAllMatching(path1);
+          multiAttributeValidator.submitAllMatching(path2);
+          multiAttributeValidator.submitAllMatching(path3);
+        };
+
+    JsonContentMatchedValidation subValidation = (a, b) -> ConformanceCheckResult.simple(Set.of());
+
+    assertTrue(
+            JsonAttribute.allIndividualMatchesMustBeValid(name, consumer, subValidation)
+                    .validate(objectNode, "")
+                    .getErrorMessages()
+                    .isEmpty());
   }
 
   @Test

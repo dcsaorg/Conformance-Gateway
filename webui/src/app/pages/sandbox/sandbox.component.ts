@@ -149,6 +149,20 @@ export class SandboxComponent implements OnInit, OnDestroy {
     ]);
   }
 
+  async onClickDeleteSandbox() {
+    if (
+        await ConfirmationDialog.open(
+            this.dialog,
+            "Delete sandbox",
+            "Are you sure you want to delete this sandbox? You cannot undo this operation.")
+    ) {
+      await this.conformanceService.deleteSandbox(this.sandbox!.id);
+      await this.router.navigate([
+        '/'
+      ]);
+    }
+  }
+
   onClickNotifyParty() {
     this.conformanceService.notifyParty(this.sandbox!.id);
   }

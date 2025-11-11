@@ -114,9 +114,7 @@ public class ANChecks {
           "Every response received during a conformance test must not be empty",
           body ->
               ConformanceCheckResult.simple(
-                  (body.isEmpty() || JsonUtil.isMissingOrEmpty(body.get("arrivalNotices"))
-                      ? Set.of("The response body must not be empty")
-                      : Set.of())));
+                  body.isEmpty() ? Set.of("The response body must not be empty") : Set.of()));
 
   public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION =
       JsonAttribute.customValidator(

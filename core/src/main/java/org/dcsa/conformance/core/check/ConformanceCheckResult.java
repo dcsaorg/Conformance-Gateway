@@ -1,17 +1,32 @@
 package org.dcsa.conformance.core.check;
 
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public sealed interface ConformanceCheckResult {
 
   Set<String> getErrorMessages();
 
+  boolean isConformant();
+
+  boolean isRelevant();
+
   record SimpleErrors(Set<String> errors) implements ConformanceCheckResult {
 
     @Override
     public Set<String> getErrorMessages() {
       return errors;
+    }
+
+    @Override
+    public boolean isConformant() {
+      return errors.isEmpty();
+    }
+
+    @Override
+    public boolean isRelevant() {
+      return true;
     }
   }
 
@@ -20,6 +35,19 @@ public sealed interface ConformanceCheckResult {
     @Override
     public Set<String> getErrorMessages() {
       return errors.stream().map(ConformanceError::message).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean isConformant() {
+      return errors.stream()
+          .filter(Predicate.not(ConformanceError::isConformant))
+          .toList()
+          .isEmpty();
+    }
+
+    @Override
+    public boolean isRelevant() {
+      return errors.stream().noneMatch(conformanceError -> ConformanceErrorSeverity.IRRELEVANT.equals(conformanceError.severity()));
     }
   }
 

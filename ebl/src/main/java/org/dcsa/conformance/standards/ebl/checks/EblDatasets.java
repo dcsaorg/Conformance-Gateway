@@ -18,7 +18,7 @@ public class EblDatasets {
   public static final KeywordDataset CONSIGNMENT_ITEMS_REFERENCE_TYPE =
       KeywordDataset.staticDataset("CR", "AKG", "SPO", "CPO");
 
-  public static final KeywordDataset METHOD_OF_PAYMENT =
+  public static final KeywordDataset METHOD_OF_PAYMENT_SET =
       KeywordDataset.staticDataset("A", "B", "C", "D", "H", "Y", "Z");
 
   public static final KeywordDataset TYPE_OF_PERSON_SET =

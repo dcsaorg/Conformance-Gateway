@@ -12,6 +12,15 @@
             (click)="onClickSettings()"
             ><mat-icon>settings</mat-icon></button>
         </span>
+        <span style="vertical-align: middle;">
+            <button
+                    testId="deleteSandboxButton"
+                    mat-icon-button
+                    color="primary"
+                    title="Delete Sandbox"
+                    (click)="onClickDeleteSandbox()"
+            ><mat-icon>delete</mat-icon></button>
+        </span>
     </div>
     <div class="paragraph">
         <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>

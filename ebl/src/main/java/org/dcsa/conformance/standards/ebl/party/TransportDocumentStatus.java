@@ -33,7 +33,7 @@ public enum TransportDocumentStatus {
     return wireName;
   }
 
-  private boolean hasWireName() {
+  public boolean hasWireName() {
     return wireName != null;
   }
 

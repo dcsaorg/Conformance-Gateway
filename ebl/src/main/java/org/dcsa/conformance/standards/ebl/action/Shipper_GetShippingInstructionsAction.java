@@ -141,7 +141,6 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                 expectedApiVersion,
                 expectedSiStatus,
                 expectedAmendedSiStatus,
-                requestAmendedStatus,
                 getDspSupplier()));
       }
     };

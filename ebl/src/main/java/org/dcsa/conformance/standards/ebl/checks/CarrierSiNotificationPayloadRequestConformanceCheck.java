@@ -25,7 +25,6 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
   private static final String UPDATED_SHIPPING_INSTRUCTIONS_LABEL =
       "[Updated Shipping Instructions] ";
 
-  private final String standardsVersion;
   private final ShippingInstructionsStatus shippingInstructionsStatus;
   private final ShippingInstructionsStatus updatedShippingInstructionsStatus;
   private final Supplier<EblDynamicScenarioParameters> dspSupplier;
@@ -33,13 +32,11 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
 
   public CarrierSiNotificationPayloadRequestConformanceCheck(
       UUID matchedExchangeUuid,
-      String standardsVersion,
       ShippingInstructionsStatus shippingInstructionsStatus,
       ShippingInstructionsStatus updatedShippingInstructionsStatus,
       Supplier<EblDynamicScenarioParameters> dspSupplier,
       JsonContentCheck... extraChecks) {
     super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
-    this.standardsVersion = standardsVersion;
     this.shippingInstructionsStatus = shippingInstructionsStatus;
     this.updatedShippingInstructionsStatus = updatedShippingInstructionsStatus;
     this.dspSupplier = dspSupplier;
@@ -62,22 +59,18 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
                 SHIPPING_INSTRUCTIONS_PATH,
                 () ->
                     EblChecks.getSiPayloadChecks(
-                        standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
-                        dspSupplier,
-                        false)),
+                        dspSupplier)),
             buildChecksWithCondition(
                 UPDATED_SHIPPING_INSTRUCTIONS_LABEL,
                 UPDATED_SHIPPING_INSTRUCTIONS_PATH,
                 updatedShippingInstructionsStatus != null,
                 () ->
                     EblChecks.getSiPayloadChecks(
-                        standardsVersion,
                         shippingInstructionsStatus,
                         updatedShippingInstructionsStatus,
-                        dspSupplier,
-                        false)))
+                        dspSupplier)))
         .flatMap(Function.identity());
   }
 

@@ -216,7 +216,6 @@ public abstract class EblAction extends BookingAndEblAction {
             notificationSchemaValidator),
         new CarrierSiNotificationPayloadRequestConformanceCheck(
             notificationExchangeUuid,
-            expectedApiVersion,
             expectedStatus,
             expectedUpdatedStatus,
             getDspSupplier(),

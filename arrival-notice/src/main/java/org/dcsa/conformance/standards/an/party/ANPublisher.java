@@ -91,6 +91,20 @@ public class ANPublisher extends ConformanceParty {
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
+    String templateFilePath =
+        "/standards/an/messages/arrivalnotice-api-%s-get-response.json"
+            .formatted(apiVersion.toLowerCase().replaceAll("[.-]", ""));
+
+    if (request.queryParams().get("transportDocumentReferences") == null) {
+      JsonNode jsonResponseBody =
+          JsonToolkit.templateFileToJsonNode(
+              templateFilePath, Map.of("TRANSPORT_DOCUMENT_REFERENCE", ""));
+
+      return request.createResponse(
+          200,
+          Map.of(API_VERSION, List.of(apiVersion)),
+          new ConformanceMessageBody(jsonResponseBody));
+    }
     Optional<String> tdr =
         request.queryParams().get("transportDocumentReferences").stream().findFirst();
 
@@ -102,9 +116,7 @@ public class ANPublisher extends ConformanceParty {
 
     JsonNode jsonResponseBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards/an/messages/arrivalnotice-api-%s-get-response.json"
-                .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
-            Map.of("TRANSPORT_DOCUMENT_REFERENCE", transportDocumentReference));
+            templateFilePath, Map.of("TRANSPORT_DOCUMENT_REFERENCE", transportDocumentReference));
 
     return request.createResponse(
         200,

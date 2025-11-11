@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceError;
-import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,9 +45,15 @@ class ANChecksTest {
     assertFalse(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
 
     an.put("carrierCode", "MAEU");
-    an.put("carrierCodeListProvider", "SMDG");
-    an.put("deliveryTypeAtDestination", "CY");
-    an.put("transportDocumentReference", "HHL123");
+    an.put("transportDocumentReference", "test1234");
+    an.putArray("carrierContactInformation").addObject().put("name", "test");
+    an.putObject("transport").put("portOfDischargeArrivalDate", "2025-10-01T10:00:00Z");
+    an.putArray("documentParties").addObject().put("partyFunction", "CN");
+    an.putArray("utilizedTransportEquipments")
+        .addObject()
+        .putObject("seals")
+        .put("number", "ABC123");
+    an.putArray("consignmentItems").addObject().putArray("descriptionOfGoods").add("Widgets");
     assertTrue(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
   }
 
@@ -67,7 +72,7 @@ class ANChecksTest {
   }
 
   @Test
-  void testValidateDocumentParties() {
+  void testInvalidDocumentParties() {
     ArrayNode parties = an.putArray("documentParties");
     ObjectNode p = parties.addObject();
     p.put("partyName", "Consignee LLC");
@@ -77,10 +82,33 @@ class ANChecksTest {
 
     Set<ConformanceError> errors =((ConformanceCheckResult.ErrorsWithRelevance) ANChecks.validateDocumentParties().validate(body)).errors();
     assertEquals(1, errors.size());
-    assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
+
+    p.put("partyFunction", "CN");
+    errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                ANChecks.validateDocumentParties().validate(body))
+            .errors();
+    assertEquals(0, errors.size());
 
     p.remove("partyName");
     assertFalse(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());
+  }
+
+  @Test
+  void testValidDocumentParties() {
+    ArrayNode parties = an.putArray("documentParties");
+    ObjectNode p = parties.addObject();
+    p.put("partyName", "Consignee LLC");
+    p.put("partyContactDetails", "consignee@example.com");
+    ObjectNode addr = p.putObject("address");
+    addr.put("street", "Harbor Rd 1");
+    p.put("partyFunction", "CN");
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                ANChecks.validateDocumentParties().validate(body))
+            .errors();
+    assertEquals(0, errors.size());
   }
 
   @Test
@@ -169,12 +197,40 @@ class ANChecksTest {
     ft.putArray("ISOEquipmentCodes").add("22G1");
     ft.putArray("equipmentReferences").add("MSCU1234567");
     ft.put("duration", 5);
-    ft.put("timeUnit", "DAY");
+    ft.put("timeUnit", "HR");
 
     assertTrue(
         ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
 
     an.set("freeTimes", mapper.createArrayNode());
+    assertFalse(
+        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
+  }
+
+  @Test
+  void testValidateFreeTimeInvalidTimeUnit() {
+
+    ArrayNode freeTimes = an.putArray("freeTimes");
+    ObjectNode ft = freeTimes.addObject();
+    ft.putArray("typeCodes").add("DEM");
+    ft.putArray("ISOEquipmentCodes").add("22G1");
+    ft.putArray("equipmentReferences").add("MSCU1234567");
+    ft.put("duration", 5);
+    ft.put("timeUnit", "DAY");
+
+    assertFalse(
+        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
+  }
+
+  @Test
+  void testValidateFreeTimeMissingReqFields() {
+
+    ArrayNode freeTimes = an.putArray("freeTimes");
+    ObjectNode ft = freeTimes.addObject();
+    ft.putArray("equipmentReferences").add("MSCU1234567");
+    ft.put("duration", 5);
+    ft.put("timeUnit", "DAY");
+
     assertFalse(
         ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
   }

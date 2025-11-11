@@ -20,6 +20,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
   private final String contextPath;
   private final JsonNode body;
   private final JsonContentMatchedValidation validation;
+  private final boolean withRelevance;
 
   private final Set<ConformanceCheckResult> validationIssues = new HashSet<>();
 
@@ -77,7 +78,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     }
 
     private void validateAll(List<Match> matches) {
-      if (matches.isEmpty()) {
+      if (matches.isEmpty() && withRelevance) {
         validationIssues.add(
             ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant())));
       }

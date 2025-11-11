@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.AbstractStandard;
+import org.dcsa.conformance.standards.vgm.party.VgmRole;
 
 public class VgmStandard extends AbstractStandard {
 
@@ -27,17 +28,27 @@ public class VgmStandard extends AbstractStandard {
   @Override
   public Map<String, Map<String, SortedMap<String, SortedSet<String>>>>
       getEndpointUrisAndMethodsByScenarioSuiteAndRoleName() {
-    return Map.of();
+    Map<String, SortedMap<String, SortedSet<String>>> endpointUrisAndMethodsByRoleName =
+        Map.ofEntries(
+            Map.entry(
+                VgmRole.PRODUCER.getConfigName(),
+                new TreeMap<>(
+                    Map.ofEntries(Map.entry("/vgm-declarations", new TreeSet<>(Set.of("GET")))))),
+            Map.entry(
+                VgmRole.CONSUMER.getConfigName(),
+                new TreeMap<>(
+                    Map.ofEntries(Map.entry("/vgm-declarations", new TreeSet<>(Set.of("POST")))))));
+    return Map.ofEntries(Map.entry(SCENARIO_SUITE_CONFORMANCE, endpointUrisAndMethodsByRoleName));
   }
 
   @Override
   protected AbstractComponentFactory doCreateComponentFactory(
       String standardVersion, String scenarioSuite) {
-    return null;
+    return new VgmComponentFactory(getName(), standardVersion, scenarioSuite);
   }
 
   @Override
   protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
-    return Set.of();
+    return Set.of(VgmRole.CONSUMER.getConfigName());
   }
 }

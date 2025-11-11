@@ -1053,6 +1053,7 @@ public class EblChecks {
               return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
             int index = 0;
+            Set<ConformanceError> issues = new LinkedHashSet<>();
             for (JsonNode hbl : houseBillOfLadings) {
               if (hbl.path(IS_CARGO_DELIVERED_IN_ICS_2_ZONE).asBoolean(false)) {
                 for (JsonNode filing : advanceManifestFilings) {
@@ -1082,11 +1083,11 @@ public class EblChecks {
                   }
                 }
               } else {
-                return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+                issues.add(ConformanceError.irrelevant());
               }
               index++;
             }
-            return ConformanceCheckResult.simple(Set.of());
+            return ConformanceCheckResult.withRelevance(issues);
           });
 
   static final JsonRebasableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =

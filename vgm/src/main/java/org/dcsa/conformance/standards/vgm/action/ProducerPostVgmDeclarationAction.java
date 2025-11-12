@@ -8,6 +8,7 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.vgm.checks.VgmChecks;
 import org.dcsa.conformance.standards.vgm.party.VgmRole;
 
 public class ProducerPostVgmDeclarationAction extends VgmAction {
@@ -50,7 +51,8 @@ public class ProducerPostVgmDeclarationAction extends VgmAction {
                 VgmRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator));
+                requestSchemaValidator),
+            VgmChecks.getVGMPostPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

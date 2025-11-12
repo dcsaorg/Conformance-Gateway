@@ -9,6 +9,7 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.vgm.checks.VgmChecks;
 import org.dcsa.conformance.standards.vgm.party.VgmRole;
 
 public class ConsumerGetVgmDeclarationAction extends VgmAction {
@@ -56,7 +57,8 @@ public class ConsumerGetVgmDeclarationAction extends VgmAction {
                 VgmRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                expectedApiVersion));
+                expectedApiVersion),
+            VgmChecks.getVGMGetPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

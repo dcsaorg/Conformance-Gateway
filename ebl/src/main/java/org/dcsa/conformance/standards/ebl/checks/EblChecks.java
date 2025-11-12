@@ -1323,7 +1323,7 @@ public class EblChecks {
 
     checks.add(
         JsonAttribute.mustEqual(
-            "[%s] Verify that the correct '%s' is used."
+            "[%s] Verify that the correct '%s' is used"
                 .formatted(SCENARIO, TRANSPORT_DOCUMENT_TYPE_CODE),
             TRANSPORT_DOCUMENT_TYPE_CODE,
             scenarioType::transportDocumentTypeCode));

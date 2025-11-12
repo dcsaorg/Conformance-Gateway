@@ -2,41 +2,7 @@
   {
     "carrierServiceName": "Great Lion Service",
     "carrierServiceCode": "FE1",
-    "universalServiceReference": "SR12345A",
-    "vesselSchedules": [
-      {
-        "vesselOperatorSMDGLinerCode": "HLC",
-        "vesselIMONumber": "9321483",
-        "vesselName": "King of the Seas",
-        "vesselCallSign": "NCVV",
-        "isDummyVessel": true,
-        "transportCalls": [
-          {
-            "portVisitReference": "NLAMS1234589",
-            "transportCallReference": "SR12345X-9321483-2107W-NLAMS-ACT-1-1",
-            "carrierImportVoyageNumber": "2103N",
-            "carrierExportVoyageNumber": "2103S",
-            "universalImportVoyageReference": "2103N",
-            "universalExportVoyageReference": "2103S",
-            "location": {
-              "locationName": "Port of Amsterdam",
-              "locationType": "UNLO",
-              "UNLocationCode": "NLAMS"
-            },
-            "statusCode": "OMIT",
-            "timestamps": [
-              {
-                "eventTypeCode": "ARRI",
-                "eventClassifierCode": "PLN",
-                "eventDateTime": "2024-01-14T09:21:00+01:00",
-                "delayReasonCode": "WEA",
-                "changeRemark": "Bad weather"
-              }
-            ]
-          }
-        ]
-      }
-    ]
+    "universalServiceReference": "SR12345A"
   },
   {
     "carrierServiceName": "Blue Whale Service",
@@ -62,7 +28,7 @@
               "locationType": "UNLO",
               "UNLocationCode": "SGSIN"
             },
-            "statusCode": "ARRI",
+            "statusCode": "BLNK",
             "timestamps": [
               {
                 "eventTypeCode": "DEPA",
@@ -101,7 +67,7 @@
               "locationType": "UNLO",
               "UNLocationCode": "USNYC"
             },
-            "statusCode": "ARRI",
+            "statusCode": "OMIT",
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",
@@ -140,7 +106,7 @@
               "UNLocationCode": "USNYC",
               "facilitySMDGCode": "APM"
             },
-            "statusCode": "ARRI",
+            "statusCode": "OMIT",
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",
@@ -179,7 +145,7 @@
               "UNLocationCode": "NLAMS",
               "facilitySMDGCode": "APM"
             },
-            "statusCode": "ARRI",
+            "statusCode": "BLNK",
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",

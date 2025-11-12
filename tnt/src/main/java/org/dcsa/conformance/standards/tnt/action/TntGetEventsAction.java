@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.tnt.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.*;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -48,20 +47,17 @@ public class TntGetEventsAction extends TntAction {
             new UrlPathCheck(TntRole::isSubscriber, getMatchedExchangeUuid(), "/events"),
             new ResponseStatusCheck(TntRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
-              TntRole::isSubscriber,
-              getMatchedExchangeUuid(),
-              HttpMessageType.REQUEST,
-              expectedApiVersion),
+                TntRole::isSubscriber,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
             new ApiHeaderCheck(
-              TntRole::isPublisher,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-            expectedApiVersion),
-            new TntSchemaConformanceCheck(
-              getMatchedExchangeUuid(),
-              eventSchemaValidators
-            ),
-          TntChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
+                TntRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            new TntSchemaConformanceCheck(getMatchedExchangeUuid(), eventSchemaValidators),
+            TntChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

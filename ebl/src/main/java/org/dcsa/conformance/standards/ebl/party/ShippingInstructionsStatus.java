@@ -32,7 +32,7 @@ public enum ShippingInstructionsStatus {
     return wireName;
   }
 
-  private boolean hasWireName() {
+  public boolean hasWireName() {
     return wireName != null;
   }
 

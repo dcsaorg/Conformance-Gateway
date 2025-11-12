@@ -25,6 +25,14 @@ public class SupplyScenarioParametersAction extends ANAction {
   }
 
   @Override
+  public void reset() {
+    super.reset();
+    if (scenarioType != null) {
+      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+    }
+  }
+
+  @Override
   public String getHumanReadablePrompt() {
     return "Using the example format below, provide one or more transport document references"
         + " for which the sandbox can GET arrival notices from your system";

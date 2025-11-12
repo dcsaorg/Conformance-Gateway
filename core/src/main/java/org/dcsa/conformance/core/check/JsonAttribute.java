@@ -243,7 +243,20 @@ public class JsonAttribute {
     return JsonRebasableCheckImpl.of(
         name,
         (body, contextPath) -> {
-          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
+          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation, true);
+          scanner.accept(v);
+          return ConformanceCheckResult.from(v.getValidationIssues());
+        });
+  }
+
+  public static JsonRebasableContentCheck allIndividualMatchesMustBeValidWithoutRelevance(
+      @NonNull String name,
+      @NonNull Consumer<MultiAttributeValidator> scanner,
+      @NonNull JsonContentMatchedValidation subvalidation) {
+    return JsonRebasableCheckImpl.of(
+        name,
+        (body, contextPath) -> {
+          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation, false);
           scanner.accept(v);
           return ConformanceCheckResult.from(v.getValidationIssues());
         });
@@ -262,7 +275,7 @@ public class JsonAttribute {
         name,
         isRelevant,
         (body, contextPath) -> {
-          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
+          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation, true);
           scanner.accept(v);
           return ConformanceCheckResult.from(v.getValidationIssues());
         });

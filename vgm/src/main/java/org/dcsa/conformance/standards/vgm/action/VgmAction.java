@@ -1,8 +1,13 @@
 package org.dcsa.conformance.standards.vgm.action;
 
+import java.util.Map;
+import java.util.function.Supplier;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.standards.vgm.party.SuppliedScenarioParameters;
 
-public class VgmAction extends ConformanceAction {
+public abstract class VgmAction extends ConformanceAction {
+
+  protected final Supplier<SuppliedScenarioParameters> sspSupplier;
 
   protected VgmAction(
       String sourcePartyName,
@@ -10,10 +15,15 @@ public class VgmAction extends ConformanceAction {
       VgmAction previousAction,
       String actionTitle) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
+    this.sspSupplier = getSspSupplier(previousAction);
   }
 
-  @Override
-  public String getHumanReadablePrompt() {
-    return "";
+  private Supplier<SuppliedScenarioParameters> getSspSupplier(ConformanceAction previousAction) {
+    return previousAction
+            instanceof SupplyScenarioParametersAction supplyScenarioParametersActionAction
+        ? supplyScenarioParametersActionAction::getSuppliedScenarioParameters
+        : previousAction == null
+            ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
+            : getSspSupplier(previousAction.getPreviousAction());
   }
 }

@@ -12,11 +12,13 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.dcsa.conformance.core.AbstractComponentFactory;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.standards.vgm.party.VgmConsumer;
 import org.dcsa.conformance.standards.vgm.party.VgmProducer;
 import org.dcsa.conformance.standards.vgm.party.VgmRole;
 
@@ -64,7 +66,7 @@ public class VgmComponentFactory extends AbstractComponentFactory {
         partyConfigurationsByRoleName.get(VgmRole.CONSUMER.getConfigName());
     if (consumerConfiguration != null) {
       parties.add(
-          new VgmProducer(
+          new VgmConsumer(
               standardVersion,
               consumerConfiguration,
               counterpartConfigurationsByRoleName.get(VgmRole.PRODUCER.getConfigName()),
@@ -109,5 +111,10 @@ public class VgmComponentFactory extends AbstractComponentFactory {
                             .map(PartyConfiguration::getRole)
                             .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
         .collect(Collectors.toSet());
+  }
+
+  public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {
+    String schemaFilePath = "/standards/vgm/schemas/VGM_v%s.yaml".formatted(standardVersion);
+    return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 }

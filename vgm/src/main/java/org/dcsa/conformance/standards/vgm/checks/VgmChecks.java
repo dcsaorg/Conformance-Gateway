@@ -69,6 +69,10 @@ public class VgmChecks {
 
           var vgmDeclarations = body.path(VGM_DECLARATIONS);
 
+          if (JsonUtil.isMissingOrEmpty(vgmDeclarations)){
+            allValidationIssues.add("No VGM Declarations found in the message");
+          }
+
           for (var declaration : vgmDeclarations) {
             var validationErrors = validateVgmObject(declaration);
 

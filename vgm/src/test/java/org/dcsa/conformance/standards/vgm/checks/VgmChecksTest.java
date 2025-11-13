@@ -121,6 +121,44 @@ class VgmChecksTest {
     private final JsonContentCheck check = VgmChecks.atLeastOneVgmDeclarationWithVgmObjectCheck();
 
     @Test
+    void testInvalidVgmDeclaration_WithMissingVgmDeclarationsArray() {
+      // Arrange
+      ObjectNode body = MAPPER.createObjectNode();
+
+      // Act
+      var result = check.validate(body);
+
+      // Assert
+      assertFalse(result.isConformant(), "Missing VGMDeclarations array should fail");
+    }
+
+    @Test
+    void testInvalidVgmDeclaration_WithEmptyVgmDeclarationsArray() {
+      // Arrange
+      ObjectNode body = MAPPER.createObjectNode();
+      body.putArray("VGMDeclarations");
+
+      // Act
+      var result = check.validate(body);
+
+      // Assert
+      assertFalse(result.isConformant(), "Empty VGMDeclarations array should fail");
+    }
+
+    @Test
+    void testInvalidVgmDeclaration_WithNullVgmDeclarationsArray() {
+      // Arrange
+      ObjectNode body = MAPPER.createObjectNode();
+      body.putNull("VGMDeclarations");
+
+      // Act
+      var result = check.validate(body);
+
+      // Assert
+      assertFalse(result.isConformant(), "Null VGMDeclarations array should fail");
+    }
+
+    @Test
     void testValidVgmDeclaration_WithAllRequiredFields() {
       // Arrange
       JsonNode body = createVgmDeclaration(createValidVgm());

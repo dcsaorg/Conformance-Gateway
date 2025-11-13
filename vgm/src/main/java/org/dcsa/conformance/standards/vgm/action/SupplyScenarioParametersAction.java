@@ -63,10 +63,39 @@ public class SupplyScenarioParametersAction extends VgmAction {
 
   @Override
   public String getHumanReadablePrompt() {
+    Set<VgmQueryParameters> parametersToDisplay = vgmQueryParameters.isEmpty()
+        ? new LinkedHashSet<>(Arrays.asList(VgmQueryParameters.values()))
+        : vgmQueryParameters;
+
+    String parametersList =
+        parametersToDisplay.stream()
+            .map(param -> "  - " + param.getParameterName() + " (" + param.name() + ")")
+            .collect(Collectors.joining(System.lineSeparator()));
+
+    if (vgmQueryParameters.isEmpty()) {
+      return "Specify any combination of query parameters that the sandbox can use in a GET request to fetch VGM declarations from your system."
+          + " The synthetic VGM Consumer running in the sandbox will send a GET request built using the query parameters you provide."
+          + "%n%nThe available query parameters are:%n%s"
+              .formatted(parametersList);
+    }
+
+    // Create readable parameter names list for the prompt
+    String parameterNames =
+        vgmQueryParameters.stream()
+            .map(param -> "'" + param.getParameterName() + "'")
+            .collect(Collectors.joining(" and "));
+
+    // Create parameter codes list for the action title example
+    String parameterCodes =
+        vgmQueryParameters.stream()
+            .map(VgmQueryParameters::name)
+            .collect(Collectors.joining(", "));
+
     return "Using the example format below, provide the query parameter filter(s) specified in the action title"
         + " that the sandbox can use in a GET request to fetch VGM declarations from your system."
-        + " For example, if the action is 'Supply parameters (CBR+ER)', provide values for 'carrierBookingReference'"
-        + " and 'equipmentReference' query parameters.";
+        + " The action 'Supply parameters (%s)' requires you to provide values for the %s query parameter%s."
+            .formatted(parameterCodes, parameterNames, vgmQueryParameters.size() > 1 ? "s" : "")
+        + "%n%nThe required query parameters are:%n%s".formatted(parametersList);
   }
 
   @Override

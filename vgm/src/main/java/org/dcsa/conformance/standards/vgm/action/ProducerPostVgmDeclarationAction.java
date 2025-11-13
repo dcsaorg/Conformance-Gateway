@@ -26,7 +26,7 @@ public class ProducerPostVgmDeclarationAction extends VgmAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "";
+    return "Send a POST request to the sandbox endpoint '/vgm-declarations' with one or more VGM declarations in the request body. The VGM declarations must comply with the VGM API specification and demonstrate the correct use of required objects and attributes as defined in the conformance checks.";
   }
 
   @Override

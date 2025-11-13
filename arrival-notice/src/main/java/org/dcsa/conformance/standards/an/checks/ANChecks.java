@@ -27,7 +27,7 @@ public class ANChecks {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
     var payloadChecks = payloadChecks(scenarioType);
-    checks.addAll(guardEachWithBodyPresent(payloadChecks));
+    checks.addAll(guardEachWithBodyPresent(payloadChecks, "arrivalNotices"));
     return JsonAttribute.contentChecks(
         "",
         "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
@@ -56,12 +56,7 @@ public class ANChecks {
   public static List<JsonContentCheck> validateBasicFields() {
     return List.of(
         validateBasicFieldWithLabel("carrierCode", "arrivalNotices.*"),
-        validateBasicFieldWithLabel("transportDocumentReference", "arrivalNotices.*"),
-        validateBasicFieldWithLabel("carrierContactInformation", "arrivalNotices.*"),
-        validateBasicFieldWithLabel("transport", "arrivalNotices.*"),
-        validateBasicFieldWithLabel("documentParties", "arrivalNotices.*"),
-        validateBasicFieldWithLabel("utilizedTransportEquipments", "arrivalNotices.*"),
-        validateBasicFieldWithLabel("consignmentItems", "arrivalNotices.*"));
+        validateBasicFieldWithLabel("transportDocumentReference", "arrivalNotices.*"));
   }
 
   private static JsonContentCheck validateBasicFieldWithLabel(String field, String path) {
@@ -134,7 +129,20 @@ public class ANChecks {
   public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
       JsonAttribute.customValidator(
           "Every response received during a conformance test must not be empty",
-          body -> ConformanceCheckResult.simple(body.isEmpty() ? Set.of("The response body must not be empty") : Set.of()));
+          body ->
+              ConformanceCheckResult.simple(
+                  (body.path("arrivalNotices").isEmpty())
+                      ? Set.of("The response body must not be empty")
+                      : Set.of()));
+
+  public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION =
+      JsonAttribute.customValidator(
+          "Every response received during a conformance test must not be empty",
+          body ->
+              ConformanceCheckResult.simple(
+                  (body.path("arrivalNoticeNotifications").isEmpty())
+                      ? Set.of("The response body must not be empty")
+                      : Set.of()));
 
   public static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
@@ -155,7 +163,7 @@ public class ANChecks {
       Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE);
-    checks.addAll(guardEachWithBodyPresent(getResponseChecks(dspSupplier)));
+    checks.addAll(guardEachWithBodyPresent(getResponseChecks(dspSupplier), "arrivalNotices"));
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,
@@ -175,9 +183,10 @@ public class ANChecks {
   public static ActionCheck getANNPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION);
     var notificationPayloadChecks = notificationPayloadChecks();
-    checks.addAll(guardEachWithBodyPresent(notificationPayloadChecks));
+    checks.addAll(
+        guardEachWithBodyPresent(notificationPayloadChecks, "arrivalNoticeNotifications"));
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,
@@ -288,6 +297,12 @@ public class ANChecks {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the 'carrierContactInformation' object",
         body -> {
+          var basicResult =
+              validateBasicFieldWithLabel("carrierContactInformation", "arrivalNotices.*")
+                  .validate(body);
+          if (!basicResult.getErrorMessages().isEmpty()) {
+            return basicResult;
+          }
           var issues = new LinkedHashSet<String>();
           issues.addAll(validateCarrierContactName().validate(body).getErrorMessages());
           issues.addAll(validateCarrierContactEmailOrPhone().validate(body).getErrorMessages());
@@ -337,6 +352,11 @@ public class ANChecks {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the 'documentParties' object",
         body -> {
+          var basicResult =
+              validateBasicFieldWithLabel("documentParties", "arrivalNotices.*").validate(body);
+          if (!basicResult.getErrorMessages().isEmpty()) {
+            return basicResult;
+          }
           var results = new LinkedHashSet<ConformanceCheckResult>();
           results.add(validateDocumentPartyField("partyFunction").validate(body));
           results.add(validateDocumentPartyField("partyName").validate(body));
@@ -456,6 +476,11 @@ public class ANChecks {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the 'transport' object",
         body -> {
+          var basicResult =
+              validateBasicFieldWithLabel("transport", "arrivalNotices.*").validate(body);
+          if (!basicResult.getErrorMessages().isEmpty()) {
+            return basicResult;
+          }
           var checkResults = new LinkedHashSet<ConformanceCheckResult>();
           checkResults.add(validateTransportETA("arrivalNotices.*.transport").validate(body));
           checkResults.add(validatePortOfDischargePresence().validate(body));
@@ -657,7 +682,7 @@ public class ANChecks {
           var voyage = node.get("vesselVoyage");
           if (voyage == null || voyage.isEmpty()) {
             return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".vesselVoyage must be functionally present"));
+                Set.of(contextPath + ".vesselVoyage must be functionally present and not empty"));
           }
           return ConformanceCheckResult.simple(Set.of());
         });
@@ -837,11 +862,18 @@ public class ANChecks {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the 'utilizedTransportEquipments' object",
         body -> {
+          var basicResult =
+              validateBasicFieldWithLabel("utilizedTransportEquipments", "arrivalNotices.*")
+                  .validate(body);
+          if (!basicResult.getErrorMessages().isEmpty()) {
+            return basicResult;
+          }
           var issues = new LinkedHashSet<String>();
-
           issues.addAll(validateUTEEquipmentPresence().validate(body).getErrorMessages());
-          issues.addAll(validateUTEEquipmentField("equipmentReference").validate(body).getErrorMessages());
-          issues.addAll(validateUTEEquipmentField("ISOEquipmentCode").validate(body).getErrorMessages());
+          issues.addAll(
+              validateUTEEquipmentField("equipmentReference").validate(body).getErrorMessages());
+          issues.addAll(
+              validateUTEEquipmentField("ISOEquipmentCode").validate(body).getErrorMessages());
           issues.addAll(validateUTESealsPresence().validate(body).getErrorMessages());
           issues.addAll(validateUTESealNumber().validate(body).getErrorMessages());
 
@@ -925,12 +957,19 @@ public class ANChecks {
     return JsonAttribute.customValidator(
         "The publisher has demonstrated the correct use of the 'consignmentItem' object",
         body -> {
+          var basicResult =
+              validateBasicFieldWithLabel("consignmentItems", "arrivalNotices.*").validate(body);
+          if (!basicResult.getErrorMessages().isEmpty()) {
+            return basicResult;
+          }
           var issues = new LinkedHashSet<String>();
-
-          issues.addAll(validateConsignmentItemsDescriptionOfGoods().validate(body).getErrorMessages());
+          issues.addAll(
+              validateConsignmentItemsDescriptionOfGoods().validate(body).getErrorMessages());
           issues.addAll(validateCargoItemPresence().validate(body).getErrorMessages());
-          issues.addAll(validateCargoItemField("equipmentReference").validate(body).getErrorMessages());
-          issues.addAll(validateCargoItemField("cargoGrossWeight").validate(body).getErrorMessages());
+          issues.addAll(
+              validateCargoItemField("equipmentReference").validate(body).getErrorMessages());
+          issues.addAll(
+              validateCargoItemField("cargoGrossWeight").validate(body).getErrorMessages());
           issues.addAll(validateCargoGrossWeightField("value").validate(body).getErrorMessages());
           issues.addAll(validateCargoGrossWeightField("unit").validate(body).getErrorMessages());
           issues.addAll(validateOuterPackagingStructure().validate(body).getErrorMessages());
@@ -1081,9 +1120,9 @@ public class ANChecks {
   }
 
   public static List<JsonRebasableContentCheck> guardEachWithBodyPresent(
-      List<JsonContentCheck> checks) {
+      List<JsonContentCheck> checks, String payload) {
 
-    Predicate<JsonNode> bodyPresent = body -> !JsonUtil.isMissingOrEmpty(body);
+    Predicate<JsonNode> bodyPresent = body -> !JsonUtil.isMissingOrEmpty(body.path(payload));
 
     return checks.stream()
         .map(

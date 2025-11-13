@@ -55,13 +55,13 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
     app.setSimulatedLambdaDelay(lambdaDelay);
     getAllSandboxes();
     List<Standard> availableStandards = getAvailableStandards();
-    Standard standard1 =
+    Standard testingStandard =
         availableStandards.stream()
             .filter(standard -> standard.name().equals(standardName))
             .findFirst()
             .orElseThrow();
 
-    standard1
+    testingStandard
         .versions()
         .forEach(
             version ->
@@ -74,7 +74,7 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
                                 .forEach(
                                     role ->
                                         runManualTests(
-                                            standard1.name(),
+                                            testingStandard.name(),
                                             version.number(),
                                             suite,
                                             role.name(),

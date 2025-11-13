@@ -45,9 +45,13 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   protected abstract Stream<? extends ConformanceCheck> createSubChecks();
 
   protected ConformanceCheck createSubCheck(
-      String prefix, String subtitle, Function<JsonNode, ConformanceCheckResult> subCheck) {
+      String prefix,
+      String subtitle,
+      boolean isRelevant,
+      Function<JsonNode, ConformanceCheckResult> subCheck) {
     return new ActionCheck(
         prefix, subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
+
       @Override
       protected ConformanceCheckResult performCheck(
           Function<UUID, ConformanceExchange> getExchangeByUuid) {
@@ -58,6 +62,7 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
                 ? exchange.getResponse().message()
                 : exchange.getRequest().message();
         var payload = conformanceMessage.body().getJsonBody();
+        this.setRelevant(isRelevant);
         return subCheck.apply(payload);
       }
     };
@@ -78,6 +83,7 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
     return createSubCheck(
         label,
         check.description(),
+        check.isRelevant(),
         at(
             path,
             jsonNode -> {

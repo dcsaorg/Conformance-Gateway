@@ -26,6 +26,7 @@ public class SandboxConfiguration {
   private OrchestratorConfiguration orchestrator;
   private PartyConfiguration[] parties;
   private CounterpartConfiguration[] counterparts;
+  private boolean deleted = false;
 
   public JsonNode toJsonNode() {
     return OBJECT_MAPPER.valueToTree(this);

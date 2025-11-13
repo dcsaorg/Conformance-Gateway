@@ -29,6 +29,7 @@ import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 public class ConformanceWebuiHandler {
   private static final String SANDBOX_ID = "sandboxId";
   private static final String SKIP_ACTION = "skip";
+  private static final String DELETED = "deleted";
 
   private final ConformanceAccessChecker accessChecker;
   private final String environmentBaseUrl;
@@ -95,6 +96,7 @@ public class ConformanceWebuiHandler {
           case "startOrStopScenario" -> _startOrStopScenario(userId, requestNode);
           case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
           case "getCurrentActionExchanges" -> _getCurrentActionExchanges(userId, requestNode);
+          case "deleteSandbox" -> deleteSandbox(userId, requestNode);
           default -> throw new UnsupportedOperationException(operation);
         };
     log.debug("ConformanceWebuiHandler.handleRequest() returning: {}", resultNode.toPrettyString());
@@ -293,6 +295,23 @@ public class ConformanceWebuiHandler {
     return ConformanceSandbox.getSandboxStatus(persistenceProvider, sandboxId);
   }
 
+  private JsonNode deleteSandbox(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    SandboxConfiguration sandboxConfiguration =
+        ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
+
+    log.info("Deleting sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
+
+    sandboxConfiguration.setDeleted(true);
+
+    ConformanceSandbox.saveSandboxConfiguration(persistenceProvider, userId, sandboxConfiguration);
+
+    log.info("Deleted sandbox: {}", sandboxConfiguration.toJsonNode().toPrettyString());
+
+    return OBJECT_MAPPER.createObjectNode();
+  }
+
   private JsonNode _updateSandboxConfig(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
@@ -464,7 +483,9 @@ public class ConformanceWebuiHandler {
                     _loadSandbox(userId, key.substring("sandbox#".length()), false)));
     ArrayNode sandboxesNode = OBJECT_MAPPER.createArrayNode();
     sortedSandboxesByLowercaseName.values().stream()
-        .filter(sandboxNode -> !sandboxNode.path("isAuto").asBoolean())
+        .filter(
+            sandboxNode ->
+                !sandboxNode.path("isAuto").asBoolean() && !sandboxNode.path(DELETED).asBoolean())
         .forEach(sandboxesNode::add);
     return sandboxesNode;
   }
@@ -485,9 +506,13 @@ public class ConformanceWebuiHandler {
     if (Arrays.stream(sandboxConfiguration.getCounterparts())
         .noneMatch(CounterpartConfiguration::isInManualMode)) {
       // just a flag to filter them out of the "all sandboxes" list
-      return OBJECT_MAPPER.createObjectNode().put("isAuto", true);
+      return OBJECT_MAPPER
+          .createObjectNode()
+          .put("isAuto", true)
+          .put(DELETED, sandboxConfiguration.isDeleted());
     }
 
+    sandboxNode.put(DELETED, sandboxConfiguration.isDeleted());
     sandboxNode.put("standardName", sandboxConfiguration.getStandard().getName());
     sandboxNode.put("standardVersion", sandboxConfiguration.getStandard().getVersion());
     sandboxNode.put("scenarioSuite", sandboxConfiguration.getScenarioSuite());

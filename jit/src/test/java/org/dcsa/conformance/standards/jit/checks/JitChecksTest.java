@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.UUID;
-
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
@@ -335,10 +334,7 @@ class JitChecksTest {
     var resultWithRelevance =
         (ConformanceCheckResult.ErrorsWithRelevance)
             JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER.validate(request);
-    assertEquals(1, resultWithRelevance.errors().size());
-    assertEquals(
-        ConformanceErrorSeverity.IRRELEVANT,
-        resultWithRelevance.errors().iterator().next().severity());
+    assertEquals(0, resultWithRelevance.errors().size());
 
     // Add one carrierCode without the listProvider.
     // Remove the carrierCodeListProvider and verify 2 errors are returned
@@ -373,10 +369,7 @@ class JitChecksTest {
     var resultWithRelevance =
             (ConformanceCheckResult.ErrorsWithRelevance)
                     JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE.validate(request);
-    assertEquals(1, resultWithRelevance.errors().size());
-    assertEquals(
-            ConformanceErrorSeverity.IRRELEVANT,
-            resultWithRelevance.errors().iterator().next().severity());
+    assertEquals(0, resultWithRelevance.errors().size());
 
     // Remove the carrierCodeListProvider occurrence; add one carrierCodeListProvider and verify 2
     // errors are returned

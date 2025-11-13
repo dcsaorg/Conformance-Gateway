@@ -45,6 +45,7 @@ import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.ovs.OvsStandard;
 import org.dcsa.conformance.standards.tnt.TntStandard;
+import org.dcsa.conformance.standards.vgm.VgmStandard;
 
 @Slf4j
 public class ConformanceSandbox {
@@ -64,7 +65,8 @@ public class ConformanceSandbox {
     JitStandard.INSTANCE,
     OvsStandard.INSTANCE,
     PintStandard.INSTANCE,
-    TntStandard.INSTANCE
+    TntStandard.INSTANCE,
+    VgmStandard.INSTANCE,
   };
 
   private record OrchestratorTask(

@@ -2,7 +2,9 @@ package org.dcsa.conformance.standards.vgm.checks;
 
 import static org.dcsa.conformance.standards.vgm.checks.VgmAttributes.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -15,6 +17,10 @@ import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.vgm.party.VgmRole;
 
 public class VgmChecks {
+
+  private static final String
+      AT_LEAST_ONE_VGM_DECLARATION_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_THE_S_OBJECT =
+          "At least one VGM Declaration must demonstrate the correct use of the '%s' object";
 
   private VgmChecks() {}
 
@@ -55,73 +61,95 @@ public class VgmChecks {
 
   public static JsonContentCheck atLeastOneVgmDeclarationWithVgmObjectCheck() {
     return JsonAttribute.customValidator(
-        "At least one VGM Declaration must demonstrate the correct use of the '%s' object"
-            .formatted(VGM),
+        AT_LEAST_ONE_VGM_DECLARATION_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_THE_S_OBJECT.formatted(
+            VGM),
         (body, contextPath) -> {
-          var vgmDeclarations = body.path(VGM_DECLARATIONS);
-          var allValidationIssues = new ArrayList<String>();
+          Set<String> allValidationIssues = new LinkedHashSet<>();
           int declarationIndex = 0;
 
+          var vgmDeclarations = body.path(VGM_DECLARATIONS);
+
           for (var declaration : vgmDeclarations) {
-            var validationErrors = new ArrayList<String>();
-            var vgm = declaration.path(VGM);
-
-            // Check if VGM object exists
-            if (JsonUtil.isMissingOrEmpty(vgm)) {
-              validationErrors.add("'%s' object is missing or null".formatted(VGM));
-            } else {
-              // Check weight object exists
-              var weight = vgm.path(WEIGHT);
-              if (JsonUtil.isMissingOrEmpty(weight)) {
-                validationErrors.add("'%s' object is missing or null".formatted(WEIGHT));
-              } else {
-                // Check weight.value is a positive number
-                var weightValue = weight.path(VALUE);
-                if (weightValue.isMissingNode()) {
-                  validationErrors.add("'%s.%s' is missing".formatted(WEIGHT, VALUE));
-                } else if (!weightValue.isNumber()) {
-                  validationErrors.add("'%s.%s' is not a number".formatted(WEIGHT, VALUE));
-                } else if (weightValue.asDouble() <= 0) {
-                  validationErrors.add("'%s.%s' must be positive".formatted(WEIGHT, VALUE));
-                }
-
-                // Check weight.unit is 'KGM' or 'LBR'
-                var weightUnit = weight.path(UNIT).asText("");
-                if (weightUnit.isBlank()) {
-                  validationErrors.add("'%s.%s' is missing or blank".formatted(WEIGHT, UNIT));
-                } else if (!VgmDataSets.VGM_WEIGHT_UNIT.contains(weightUnit)) {
-                  validationErrors.add("'%s.%s' must be 'KGM' or 'LBR'".formatted(WEIGHT, UNIT));
-                }
-              }
-
-              // Check method is 'SM1' or 'SM2'
-              var method = vgm.path(METHOD).asText("");
-              if (method.isBlank()) {
-                validationErrors.add("'%s' is missing or blank".formatted(METHOD));
-              } else if (!VgmDataSets.VGM_METHOD.contains(method)) {
-                validationErrors.add("'%s' must be 'SM1' or 'SM2'".formatted(METHOD));
-              }
-            }
+            var validationErrors = validateVgmObject(declaration);
 
             if (validationErrors.isEmpty()) {
               return ConformanceCheckResult.simple(Set.of());
             }
 
-            // Add each validation error with declaration index
             for (var error : validationErrors) {
-              allValidationIssues.add("VGM Declaration [%d]: %s".formatted(declarationIndex, error));
+              allValidationIssues.add(
+                  "VGM Declaration [%d]: %s".formatted(declarationIndex, error));
             }
             declarationIndex++;
           }
 
-          return ConformanceCheckResult.simple(Set.copyOf(allValidationIssues));
+          return ConformanceCheckResult.simple(allValidationIssues);
         });
+  }
+
+  private static List<String> validateVgmObject(JsonNode declaration) {
+    var validationErrors = new ArrayList<String>();
+    var vgm = declaration.path(VGM);
+
+    if (JsonUtil.isMissingOrEmpty(vgm)) {
+      validationErrors.add("'%s' object is missing or null".formatted(VGM));
+      return validationErrors;
+    }
+
+    validateWeightObject(vgm, validationErrors);
+    validateMethod(vgm, validationErrors);
+
+    return validationErrors;
+  }
+
+  private static void validateWeightObject(JsonNode vgm, List<String> validationErrors) {
+    var weight = vgm.path(WEIGHT);
+
+    if (JsonUtil.isMissingOrEmpty(weight)) {
+      validationErrors.add("'%s' object is missing or null".formatted(WEIGHT));
+      return;
+    }
+
+    validateWeightValue(weight, validationErrors);
+    validateWeightUnit(weight, validationErrors);
+  }
+
+  private static void validateWeightValue(JsonNode weight, List<String> validationErrors) {
+    var weightValue = weight.path(VALUE);
+
+    if (weightValue.isMissingNode()) {
+      validationErrors.add("'%s.%s' is missing".formatted(WEIGHT, VALUE));
+    } else if (!weightValue.isNumber()) {
+      validationErrors.add("'%s.%s' is not a number".formatted(WEIGHT, VALUE));
+    } else if (weightValue.asDouble() <= 0) {
+      validationErrors.add("'%s.%s' must be positive".formatted(WEIGHT, VALUE));
+    }
+  }
+
+  private static void validateWeightUnit(JsonNode weight, List<String> validationErrors) {
+    var weightUnit = weight.path(UNIT).asText("");
+
+    if (weightUnit.isBlank()) {
+      validationErrors.add("'%s.%s' is missing or blank".formatted(WEIGHT, UNIT));
+    } else if (!VgmDataSets.VGM_WEIGHT_UNIT.contains(weightUnit)) {
+      validationErrors.add("'%s.%s' must be 'KGM' or 'LBR'".formatted(WEIGHT, UNIT));
+    }
+  }
+
+  private static void validateMethod(JsonNode vgm, List<String> validationErrors) {
+    var method = vgm.path(METHOD).asText("");
+
+    if (method.isBlank()) {
+      validationErrors.add("'%s' is missing or blank".formatted(METHOD));
+    } else if (!VgmDataSets.VGM_METHOD.contains(method)) {
+      validationErrors.add("'%s' must be 'SM1' or 'SM2'".formatted(METHOD));
+    }
   }
 
   public static JsonContentCheck atLeastOneVgmDeclarationWithEquipmentDetailsCheck() {
     return JsonAttribute.customValidator(
-        "At least one VGM Declaration must demonstrate the correct use of the '%s' object"
-            .formatted(EQUIPMENT_DETAILS),
+        AT_LEAST_ONE_VGM_DECLARATION_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_THE_S_OBJECT.formatted(
+            EQUIPMENT_DETAILS),
         (body, contextPath) -> {
           var vgmDeclarations = body.path(VGM_DECLARATIONS);
 
@@ -143,8 +171,8 @@ public class VgmChecks {
 
   public static JsonContentCheck atLeastOneVgmDeclarationWithShipmentDetailsCheck() {
     return JsonAttribute.customValidator(
-        "At least one VGM Declaration must demonstrate the correct use of the '%s' object"
-            .formatted(SHIPMENT_DETAILS),
+        AT_LEAST_ONE_VGM_DECLARATION_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_THE_S_OBJECT.formatted(
+            SHIPMENT_DETAILS),
         (body, contextPath) -> {
           var vgmDeclarations = body.path(VGM_DECLARATIONS);
 
@@ -171,8 +199,8 @@ public class VgmChecks {
 
   public static JsonContentCheck atLeastOneVgmDeclarationWithResponsiblePartyCheck() {
     return JsonAttribute.customValidator(
-        "At least one VGM Declaration must demonstrate the correct use of the '%s' object"
-            .formatted(RESPONSIBLE_PARTY),
+        AT_LEAST_ONE_VGM_DECLARATION_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_THE_S_OBJECT.formatted(
+            RESPONSIBLE_PARTY),
         (body, contextPath) -> {
           var vgmDeclarations = body.path(VGM_DECLARATIONS);
 

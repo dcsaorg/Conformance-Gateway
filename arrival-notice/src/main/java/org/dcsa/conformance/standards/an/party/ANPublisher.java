@@ -1,8 +1,6 @@
 package org.dcsa.conformance.standards.an.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,8 +62,7 @@ public class ANPublisher extends ConformanceParty {
         "{}.supplyScenarioParameters({})",
         getClass().getSimpleName(),
         actionPrompt.toPrettyString());
-    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    persistentMap.save("scenarioType", JsonNodeFactory.instance.textNode(scenarioType.name()));
+
     ObjectNode ssp = SupplyScenarioParametersAction.examplePrompt();
     asyncOrchestratorPostPartyInput(actionPrompt.required("actionId").asText(), ssp);
 
@@ -77,9 +74,6 @@ public class ANPublisher extends ConformanceParty {
     String filePath = getAnPayloadFilepath(scenarioType);
 
     JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath, Map.ofEntries());
-    persistentMap.save("lastArrivalNoticePayload", jsonRequestBody);
-    persistentMap.save("scenarioType", JsonNodeFactory.instance.textNode(scenarioType.name()));
-
     syncCounterpartPost("/arrival-notices", jsonRequestBody);
     addOperatorLogEntry("Sent Arrival Notices ");
   }
@@ -104,10 +98,6 @@ public class ANPublisher extends ConformanceParty {
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
             Map.ofEntries());
 
-    persistentMap.save(
-        "scenarioType", JsonNodeFactory.instance.textNode(ScenarioType.NOTIFICATION.name()));
-    persistentMap.save("lastArrivalNoticePayload", JsonNodeFactory.instance.objectNode());
-
     syncCounterpartPost("/arrival-notice-notifications", jsonRequestBody);
     addOperatorLogEntry("Sent Arrival Notice Notifications");
   }
@@ -119,9 +109,6 @@ public class ANPublisher extends ConformanceParty {
     Optional<String> tdrParam =
         (tdrValues == null ? Collections.<String>emptyList() : tdrValues).stream().findFirst();
 
-    JsonNode payload = persistentMap.load("lastArrivalNoticePayload");
-    JsonNode scenarioTypeNode = persistentMap.load("scenarioType");
-
     Set<String> requestedTdrs =
         tdrParam.stream()
             .flatMap(s -> Arrays.stream(s.split(",")))
@@ -132,45 +119,8 @@ public class ANPublisher extends ConformanceParty {
     String chosenTdr = requestedTdrs.stream().findFirst().orElse("");
     Map<String, String> templateVars = Map.of("TRANSPORT_DOCUMENT_REFERENCE", chosenTdr);
 
-    if (scenarioTypeNode != null) {
-      ScenarioType scenarioType = ScenarioType.valueOf(scenarioTypeNode.asText());
-
-      if (scenarioType.name().equals(ScenarioType.NOTIFICATION.name())) {
-        JsonNode response =
-            JsonToolkit.templateFileToJsonNode(getAnRegularResponseFilepath(), templateVars);
-        persistentMap.save("lastArrivalNoticePayload", JsonNodeFactory.instance.objectNode());
-        return request.createResponse(
-            200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
-      }
-    }
-
-    // GET only scenario
-    if (payload == null || payload.isEmpty()) {
-      String filePath = getAnRegularResponseFilepath();
-      payload = JsonToolkit.templateFileToJsonNode(filePath, templateVars);
-    }
-
-    if (tdrParam.isEmpty() || tdrParam.get().isBlank()) {
-      persistentMap.save("lastArrivalNoticePayload", JsonNodeFactory.instance.objectNode());
-      return request.createResponse(
-          200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(payload));
-    }
-
-    ArrayNode arrivalNoticesNode = JsonNodeFactory.instance.arrayNode();
-    if (payload != null
-        && payload.has("arrivalNotices")
-        && payload.get("arrivalNotices").isArray()) {
-      for (JsonNode notice : payload.get("arrivalNotices")) {
-        String tdr = notice.path("transportDocumentReference").asText(null);
-        if (tdr != null && requestedTdrs.contains(tdr)) {
-          arrivalNoticesNode.add(notice);
-        }
-      }
-    }
-
-    ObjectNode responseObject = JsonNodeFactory.instance.objectNode();
-    responseObject.set("arrivalNotices", arrivalNoticesNode);
-    persistentMap.save("lastArrivalNoticePayload", JsonNodeFactory.instance.objectNode());
+    String filePath = getAnRegularResponseFilepath();
+    JsonNode responseObject = JsonToolkit.templateFileToJsonNode(filePath, templateVars);
     return request.createResponse(
         200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(responseObject));
   }

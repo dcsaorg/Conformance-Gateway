@@ -36,14 +36,6 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
 
     return Stream.of(
             Map.entry(
-                "POST+GET scenarios (for adopters supporting GET and POST)",
-                noAction()
-                    .thenEither(
-                        postArrivalNotices(ScenarioType.REGULAR).then(getArrivalNotices()),
-                        postArrivalNotices(ScenarioType.FREIGHTED).then(getArrivalNotices()),
-                        postArrivalNotices(ScenarioType.FREE_TIME).then(getArrivalNotices()),
-                        postArrivalNoticesNotification().then(getArrivalNotices()))),
-            Map.entry(
                 "GET-only scenarios (for adopters only supporting GET)",
                 noAction()
                     .thenEither(

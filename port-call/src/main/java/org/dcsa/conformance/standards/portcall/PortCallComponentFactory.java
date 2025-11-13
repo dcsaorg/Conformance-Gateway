@@ -1,5 +1,4 @@
-package org.dcsa.conformance.standards.an;
-
+package org.dcsa.conformance.standards.portcall;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,19 +18,19 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.an.party.ANPublisher;
-import org.dcsa.conformance.standards.an.party.ANRole;
-import org.dcsa.conformance.standards.an.party.ANSubscriber;
+import org.dcsa.conformance.standards.portcall.party.PortCallPublisher;
+import org.dcsa.conformance.standards.portcall.party.PortCallRole;
+import org.dcsa.conformance.standards.portcall.party.PortCallSubscriber;
 
-public class ANComponentFactory extends AbstractComponentFactory {
+public class PortCallComponentFactory extends AbstractComponentFactory {
 
-  public ANComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
+  public PortCallComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
     super(
-        standardName,
-        standardVersion,
-        scenarioSuite,
-        ANRole.PUBLISHER.getConfigName(),
-        ANRole.SUBSCRIBER.getConfigName());
+      standardName,
+      standardVersion,
+      scenarioSuite,
+      PortCallRole.PUBLISHER.getConfigName(),
+      PortCallRole.SUBSCRIBER.getConfigName());
   }
 
   @Override
@@ -46,70 +45,70 @@ public class ANComponentFactory extends AbstractComponentFactory {
     List<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration publisherConfiguration =
-      partyConfigurationsByRoleName.get(ANRole.PUBLISHER.getConfigName());
+      partyConfigurationsByRoleName.get(PortCallRole.PUBLISHER.getConfigName());
     if (publisherConfiguration != null) {
       parties.add(
-        new ANPublisher(
+        new PortCallPublisher(
           standardVersion,
           publisherConfiguration,
-          counterpartConfigurationsByRoleName.get(ANRole.SUBSCRIBER.getConfigName()),
+          counterpartConfigurationsByRoleName.get(PortCallRole.SUBSCRIBER.getConfigName()),
           persistentMap,
           webClient,
           orchestratorAuthHeader));
     }
 
     PartyConfiguration consumerConfiguration =
-      partyConfigurationsByRoleName.get(ANRole.SUBSCRIBER.getConfigName());
+      partyConfigurationsByRoleName.get(PortCallRole.SUBSCRIBER.getConfigName());
     if (consumerConfiguration != null) {
       parties.add(
-        new ANSubscriber(
-          standardVersion,
-          consumerConfiguration,
-          counterpartConfigurationsByRoleName.get(ANRole.PUBLISHER.getConfigName()),
-          persistentMap,
-          webClient,
-          orchestratorAuthHeader));
+          new PortCallSubscriber(
+              standardVersion,
+              consumerConfiguration,
+              counterpartConfigurationsByRoleName.get(PortCallRole.PUBLISHER.getConfigName()),
+              persistentMap,
+              webClient,
+              orchestratorAuthHeader));
     }
     return parties;
   }
 
   @Override
-  protected Map<String, ANScenarioListBuilder> createModuleScenarioListBuilders(
-      PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations,
-      boolean isWithNotifications) {
+  protected Map<String, PortCallScenarioListBuilder> createModuleScenarioListBuilders(
+    PartyConfiguration[] partyConfigurations,
+    CounterpartConfiguration[] counterpartConfigurations,
+    boolean isWithNotifications) {
 
-    return ANScenarioListBuilder.createModuleScenarioListBuilders(
+    return PortCallScenarioListBuilder.createModuleScenarioListBuilders(
       this,
       _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, ANRole::isPublisher),
+        partyConfigurations, counterpartConfigurations, PortCallRole::isPublisher),
       _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, ANRole::isSubscriber));
+        partyConfigurations, counterpartConfigurations, PortCallRole::isSubscriber));
   }
 
   @Override
   public SortedSet<String> getRoleNames() {
-    return Arrays.stream(ANRole.values())
-      .map(ANRole::getConfigName)
+    return Arrays.stream(PortCallRole.values())
+      .map(PortCallRole::getConfigName)
       .collect(Collectors.toCollection(TreeSet::new));
   }
 
   @Override
   public Set<String> getReportRoleNames(PartyConfiguration[] partyConfigurations, CounterpartConfiguration[] counterpartConfigurations) {
-    return (partyConfigurations.length == ANRole.values().length
-            ? Arrays.stream(ANRole.values()).map(ANRole::getConfigName)
-            : Arrays.stream(counterpartConfigurations)
-                .map(CounterpartConfiguration::getRole)
-                .filter(
-                    counterpartRole ->
-                        Arrays.stream(partyConfigurations)
-                            .map(PartyConfiguration::getRole)
-                            .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
-        .collect(Collectors.toSet());
+    return (partyConfigurations.length == PortCallRole.values().length
+      ? Arrays.stream(PortCallRole.values()).map(PortCallRole::getConfigName)
+      : Arrays.stream(counterpartConfigurations)
+      .map(CounterpartConfiguration::getRole)
+      .filter(
+        counterpartRole ->
+          Arrays.stream(partyConfigurations)
+            .map(PartyConfiguration::getRole)
+            .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
+      .collect(Collectors.toSet());
   }
 
   public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {
-    String schemaFilePath = "/standards/an/v100/an-v%s-openapi.yaml".formatted(standardVersion);
+    String schemaFilePath = "/standards/portcall/v200/port-call-v%s-openapi.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 }

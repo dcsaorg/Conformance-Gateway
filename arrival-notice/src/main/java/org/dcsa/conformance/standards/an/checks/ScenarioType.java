@@ -3,8 +3,7 @@ package org.dcsa.conformance.standards.an.checks;
 public enum ScenarioType {
   REGULAR,
   FREIGHTED,
-  FREE_TIME,
-  NOTIFICATION;
+  FREE_TIME;
 
   public String arrivalNoticePayload(String version) {
     String suffix =

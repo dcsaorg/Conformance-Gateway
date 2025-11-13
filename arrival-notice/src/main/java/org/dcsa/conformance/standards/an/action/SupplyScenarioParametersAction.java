@@ -39,11 +39,6 @@ public class SupplyScenarioParametersAction extends ANAction {
   }
 
   @Override
-  public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("scenarioType", scenarioType.name());
-  }
-
-  @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return examplePrompt();
   }

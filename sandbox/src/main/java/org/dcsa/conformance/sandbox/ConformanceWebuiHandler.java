@@ -315,6 +315,13 @@ public class ConformanceWebuiHandler {
   private JsonNode _updateSandboxConfig(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
+
+    String sandboxName = requestNode.get("sandboxName").asText();
+    if (StreamSupport.stream(_getAllSandboxes(userId).spliterator(), false)
+            .anyMatch(existingSandbox -> sandboxName.equals(existingSandbox.get("name").asText())))
+      throw new IllegalArgumentException(
+              "A sandbox named '%s' already exists".formatted(sandboxName));
+
     SandboxConfiguration sandboxConfiguration =
         ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
 

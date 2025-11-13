@@ -115,17 +115,17 @@ export class EditSandboxComponent {
       await MessageDialog.open(
         this.dialog,
         "Error completing action",
-        response.error);
+        response.message);
       this.updatingSandbox = false;
     } else {
-      this.router.navigate([
+      await this.router.navigate([
         "/sandbox", this.sandboxId
       ]);
     }
   }
 
-  onCancel() {
-    this.router.navigate([
+  async onCancel() {
+    await this.router.navigate([
       "/sandbox", this.sandboxId
     ]);
   }

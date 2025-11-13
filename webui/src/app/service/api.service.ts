@@ -1,18 +1,19 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { firstValueFrom } from "rxjs";
-import { environment } from "src/environments/environment";
-import { AuthService } from "../auth/auth.service";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {Injectable, Injector} from "@angular/core";
+import {firstValueFrom} from "rxjs";
+import {environment} from "src/environments/environment";
+import {AuthService} from "../auth/auth.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl: string = environment.apiBaseUrl + 'conformance/webui';
+
+  private readonly apiUrl: string = environment.apiBaseUrl + 'conformance/webui';
 
   constructor(
-    private authService: AuthService,
-    private httpClient: HttpClient,
+    private readonly authService: AuthService,
+    private readonly httpClient: HttpClient,
   ) {
   }
 
@@ -28,19 +29,14 @@ export class ApiService {
       : undefined
     );
 
-    const response: any = await firstValueFrom(
-      this.httpClient.post<any>(
-        this.apiUrl,
-        request,
-        {
-          headers,
-        },
-      )
+    return await firstValueFrom(
+        this.httpClient.post<any>(
+            this.apiUrl,
+            request,
+            {
+              headers,
+            },
+        )
     );
-
-    if (response.isError) {
-      throw new Error(response);
-    }
-    return response;
   }
 }

@@ -14,6 +14,7 @@ import { ConfirmationDialog } from "src/app/dialogs/confirmation/confirmation-di
 import { MatDialog } from "@angular/material/dialog";
 import {StandardModule} from "../../model/standard-module";
 import {ReportDigest} from "../../model/report-digest";
+import {MessageDialog} from "../../dialogs/message/message-dialog.component";
 
 @Component({
     selector: 'app-sandbox',
@@ -125,12 +126,19 @@ export class SandboxComponent implements OnInit, OnDestroy {
                 : "All current scenario status and traffic will be lost."))
     ) {
       this.startingOrStoppingScenario = true;
-      await this.conformanceService.startOrStopScenario(this.sandbox!.id, scenario.id);
+      const response: any = await this.conformanceService.startOrStopScenario(this.sandbox!.id, scenario.id);
+      if (response?.error) {
+        await MessageDialog.open(
+            this.dialog,
+            "Error performing action",
+            response.message);
+        return
+      }
       this.startingOrStoppingScenario = false;
       if (action === "Stop") {
         await this._loadData();
       } else {
-        this.router.navigate([
+        await this.router.navigate([
           '/scenario', this.sandbox!.id, scenario.id
         ]);
       }
@@ -163,8 +171,14 @@ export class SandboxComponent implements OnInit, OnDestroy {
     }
   }
 
-  onClickNotifyParty() {
-    this.conformanceService.notifyParty(this.sandbox!.id);
+  async onClickNotifyParty() {
+    const response: any = await this.conformanceService.notifyParty(this.sandbox!.id);
+    if (response?.error) {
+      await MessageDialog.open(
+          this.dialog,
+          "Error notifying party",
+          response.message);
+    }
   }
 
   async onClickResetParty() {
@@ -175,7 +189,13 @@ export class SandboxComponent implements OnInit, OnDestroy {
         "Are you sure you want to reset the party? "
         + "All current party data will be lost.")
     ) {
-      this.conformanceService.resetParty(this.sandbox!.id);
+      const response: any = await this.conformanceService.resetParty(this.sandbox!.id);
+      if (response?.error) {
+        await MessageDialog.open(
+            this.dialog,
+            "Error reseting party",
+            response.message);
+      }
     }
   }
 

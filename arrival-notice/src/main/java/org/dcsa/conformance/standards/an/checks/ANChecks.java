@@ -131,7 +131,7 @@ public class ANChecks {
           "Every response received during a conformance test must not be empty",
           body ->
               ConformanceCheckResult.simple(
-                  (body.isEmpty() || body.get("arrivalNotices").isEmpty())
+                  (body.path("arrivalNotices").isEmpty())
                       ? Set.of("The response body must not be empty")
                       : Set.of()));
 
@@ -140,7 +140,7 @@ public class ANChecks {
           "Every response received during a conformance test must not be empty",
           body ->
               ConformanceCheckResult.simple(
-                  (body.isEmpty() || body.get("arrivalNoticeNotifications").isEmpty())
+                  (body.path("arrivalNoticeNotifications").isEmpty())
                       ? Set.of("The response body must not be empty")
                       : Set.of()));
 
@@ -1122,8 +1122,7 @@ public class ANChecks {
   public static List<JsonRebasableContentCheck> guardEachWithBodyPresent(
       List<JsonContentCheck> checks, String payload) {
 
-    Predicate<JsonNode> bodyPresent =
-        body -> !JsonUtil.isMissingOrEmpty(body) && !JsonUtil.isMissingOrEmpty(body.get(payload));
+    Predicate<JsonNode> bodyPresent = body -> !JsonUtil.isMissingOrEmpty(body.path(payload));
 
     return checks.stream()
         .map(

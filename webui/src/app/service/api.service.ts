@@ -6,17 +6,17 @@ import {AuthService} from "../auth/auth.service";
 import {handleApiCall} from "../helpers/api-error-handler";
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class ApiService {
 
-  private readonly apiUrl: string = environment.apiBaseUrl + 'conformance/webui';
+    private readonly apiUrl: string = environment.apiBaseUrl + 'conformance/webui';
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly httpClient: HttpClient,
-  ) {
-  }
+    constructor(
+        private readonly authService: AuthService,
+        private readonly httpClient: HttpClient,
+    ) {
+    }
 
     async call(
         request: any,
@@ -30,16 +30,19 @@ export class ApiService {
                 : undefined
         );
 
-        const response: any = await firstValueFrom(
-            this.httpClient.post<any>(
-                this.apiUrl,
-                request,
-                {
-                    headers,
-                },
-            )
-        );
-
-       return handleApiCall(response);
+        try {
+            const response: any = await firstValueFrom(
+                this.httpClient.post<any>(
+                    this.apiUrl,
+                    request,
+                    {
+                        headers,
+                    },
+                )
+            );
+            return handleApiCall(response);
+        } catch (e: any) {
+            return handleApiCall(e.error);
+        }
     }
 }

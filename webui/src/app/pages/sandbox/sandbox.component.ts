@@ -130,7 +130,7 @@ export class SandboxComponent implements OnInit, OnDestroy {
       if (response?.error) {
         await MessageDialog.open(
             this.dialog,
-            "Error starting/stoping scenario",
+            "Error starting/stopping scenario",
             response.error);
         return
       }

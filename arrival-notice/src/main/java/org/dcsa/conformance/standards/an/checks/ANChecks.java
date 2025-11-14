@@ -428,14 +428,10 @@ public class ANChecks {
           }
 
           if (field.equals("partyFunction")) {
-            if (value.asText().isBlank()) {
-              return ConformanceCheckResult.simple(
-                  Set.of(fieldPath + " must not be empty or blank in the payload"));
-            } else {
               var validator =
                   JsonAttribute.matchedMustBeDatasetKeywordIfPresent(ANDatasets.PARTY_FUNCTION);
               return validator.validate(value, fieldPath);
-            }
+
           }
 
           return ConformanceCheckResult.simple(Set.of());

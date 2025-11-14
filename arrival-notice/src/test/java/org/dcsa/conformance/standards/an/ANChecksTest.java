@@ -87,6 +87,29 @@ class ANChecksTest {
   }
 
   @Test
+  void testInvalidDocumentPartyPartyFunction() {
+    ArrayNode parties = an.putArray("documentParties");
+    ObjectNode p = parties.addObject();
+    p.put("partyName", "Consignee LLC");
+    p.put("partyContactDetails", "consignee@example.com");
+    ObjectNode addr = p.putObject("address");
+    addr.put("street", "Harbor Rd 1");
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                ANChecks.validateDocumentParties().validate(body))
+            .errors();
+    assertEquals(1, errors.size());
+
+    p.put("partyFunction", "CNB");
+    errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                ANChecks.validateDocumentParties().validate(body))
+            .errors();
+    assertEquals(1, errors.size());
+  }
+
+  @Test
   void testValidDocumentParties() {
     ArrayNode parties = an.putArray("documentParties");
     ObjectNode p = parties.addObject();

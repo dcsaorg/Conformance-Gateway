@@ -1,8 +1,9 @@
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {Injectable, Injector} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {firstValueFrom} from "rxjs";
 import {environment} from "src/environments/environment";
 import {AuthService} from "../auth/auth.service";
+import {handleApiCall} from "../helpers/api-error-handler";
 
 @Injectable({
   providedIn: 'root'
@@ -17,26 +18,28 @@ export class ApiService {
   ) {
   }
 
-  async call(
-    request: any,
-  ): Promise<any> {
-    const userIdToken: string | null = await this.authService.getUserIdToken();
-    const headers: HttpHeaders | undefined = (
-      userIdToken
-      ? new HttpHeaders({
-        'Authorization': userIdToken,
-      })
-      : undefined
-    );
+    async call(
+        request: any,
+    ): Promise<any> {
+        const userIdToken: string | null = await this.authService.getUserIdToken();
+        const headers: HttpHeaders | undefined = (
+            userIdToken
+                ? new HttpHeaders({
+                    'Authorization': userIdToken,
+                })
+                : undefined
+        );
 
-    return await firstValueFrom(
-        this.httpClient.post<any>(
-            this.apiUrl,
-            request,
-            {
-              headers,
-            },
-        )
-    );
-  }
+        const response: any = await firstValueFrom(
+            this.httpClient.post<any>(
+                this.apiUrl,
+                request,
+                {
+                    headers,
+                },
+            )
+        );
+
+       return handleApiCall(response);
+    }
 }

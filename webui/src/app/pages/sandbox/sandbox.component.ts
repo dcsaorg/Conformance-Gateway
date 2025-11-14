@@ -130,8 +130,8 @@ export class SandboxComponent implements OnInit, OnDestroy {
       if (response?.error) {
         await MessageDialog.open(
             this.dialog,
-            "Error performing action",
-            response.message);
+            "Error starting/stoping scenario",
+            response.error);
         return
       }
       this.startingOrStoppingScenario = false;
@@ -164,7 +164,14 @@ export class SandboxComponent implements OnInit, OnDestroy {
             "Delete sandbox",
             "Are you sure you want to delete this sandbox? You cannot undo this operation.")
     ) {
-      await this.conformanceService.deleteSandbox(this.sandbox!.id);
+      const response: any = await this.conformanceService.deleteSandbox(this.sandbox!.id);
+      if (response?.error) {
+        await MessageDialog.open(
+            this.dialog,
+            "Error deleting sandbox",
+            response.error);
+        return
+      }
       await this.router.navigate([
         '/'
       ]);
@@ -177,7 +184,7 @@ export class SandboxComponent implements OnInit, OnDestroy {
       await MessageDialog.open(
           this.dialog,
           "Error notifying party",
-          response.message);
+          response.error);
     }
   }
 
@@ -194,7 +201,7 @@ export class SandboxComponent implements OnInit, OnDestroy {
         await MessageDialog.open(
             this.dialog,
             "Error reseting party",
-            response.message);
+            response.error);
       }
     }
   }
@@ -205,13 +212,29 @@ export class SandboxComponent implements OnInit, OnDestroy {
   }
 
   async onClickCreateReport() {
-    await this.conformanceService.createReport(this.sandbox!.id, this.newReportTitle);
+    const response: any = await this.conformanceService.createReport(this.sandbox!.id, this.newReportTitle);
+    if (response?.error) {
+      await MessageDialog.open(
+          this.dialog,
+          "Error creating report",
+          response.error);
+      this.newReportTitle = "";
+      return
+    }
     this.reportDigests = await this.conformanceService.getReportDigests(this.sandbox!.id);
     this.newReportTitle = "";
   }
 
   async onReportClick(reportDigest: ReportDigest) {
-    this.displayedReportContent = await this.conformanceService.getReportContent(this.sandbox!.id, reportDigest.isoTimestamp);
+    const response: any = await this.conformanceService.getReportContent(this.sandbox!.id, reportDigest.isoTimestamp);
+    if (response?.error) {
+      await MessageDialog.open(
+          this.dialog,
+          "Error retrieving report content",
+          response.error);
+      return;
+    }
+    this.displayedReportContent = response;
     this.displayedReportDigest = reportDigest;
   }
 

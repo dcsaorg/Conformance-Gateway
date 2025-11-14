@@ -18,15 +18,18 @@ public class TntChecks {
       UUID matched, String standardVersion) {
     var checks = new ArrayList<JsonContentCheck>();
 
-    checks.add(
-        JsonAttribute.customValidator(
-            "Every response received during a conformance test must contain events",
-            body ->
-                    ConformanceCheckResult.simple(TntSchemaConformanceCheck.findEventNodes(body).isEmpty()
-                    ? Set.of("No events found in response")
-                    : Set.of())));
+    checks.add(VALIDATE_NON_EMPTY_EVENTS);
 
     return JsonAttribute.contentChecks(
         TntRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
+
+  public JsonContentCheck VALIDATE_NON_EMPTY_EVENTS =
+      JsonAttribute.customValidator(
+          "Every response received during a conformance test must contain events",
+          body ->
+              ConformanceCheckResult.simple(
+                  TntSchemaConformanceCheck.findEventNodes(body).isEmpty()
+                      ? Set.of("No events found in response")
+                      : Set.of()));
 }

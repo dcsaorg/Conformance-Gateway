@@ -200,7 +200,7 @@ export class SandboxComponent implements OnInit, OnDestroy {
       if (response?.error) {
         await MessageDialog.open(
             this.dialog,
-            "Error reseting party",
+            "Error resetting party",
             response.error);
       }
     }

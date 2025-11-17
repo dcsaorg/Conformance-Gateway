@@ -87,6 +87,29 @@ class ANChecksTest {
   }
 
   @Test
+  void testInvalidDocumentPartyPartyFunction() {
+    ArrayNode parties = an.putArray("documentParties");
+    ObjectNode p = parties.addObject();
+    p.put("partyName", "Consignee LLC");
+    p.put("partyContactDetails", "consignee@example.com");
+    ObjectNode addr = p.putObject("address");
+    addr.put("street", "Harbor Rd 1");
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                ANChecks.validateDocumentParties().validate(body))
+            .errors();
+    assertEquals(1, errors.size());
+
+    p.put("partyFunction", "CNB");
+    errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance)
+                ANChecks.validateDocumentParties().validate(body))
+            .errors();
+    assertEquals(1, errors.size());
+  }
+
+  @Test
   void testValidDocumentParties() {
     ArrayNode parties = an.putArray("documentParties");
     ObjectNode p = parties.addObject();
@@ -259,6 +282,18 @@ class ANChecksTest {
   }
 
   @Test
+  void testInvalidPartyContactDetails() {
+
+    ArrayNode documentParties = an.putArray("documentParties");
+    ObjectNode documentParty = documentParties.addObject();
+    assertFalse(
+        ANChecks.validateDocumentPartyField("partyContactDetails")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
   void testValidatePartyContactDetailsName() {
 
     ArrayNode documentParties = an.putArray("documentParties");
@@ -287,13 +322,99 @@ class ANChecksTest {
   }
 
   @Test
+  void testInvalidPortOfDischarge() {
+    assertFalse(
+        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testInvalidPortOfDischargeANN() {
+
+    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
+    arrivalNoticeNotifications.addObject();
+    assertFalse(
+        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testInValidPortOfDischargeAnnEmpty() {
+
+    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
+    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
+    arrivalNotice.putObject("portOfDischarge");
+    assertFalse(
+        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testValidPortOfDischargeAnn() {
+
+    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
+    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
+    arrivalNotice.putObject("portOfDischarge").put("UNLocationCode", "NLRTM");
+    assertTrue(
+        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testInValidAddressPortOfDischargeAnn() {
+
+    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
+    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
+    arrivalNotice.putObject("portOfDischarge").putObject("address");
+    assertFalse(
+        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testInValidAddressBlankPortOfDischargeAnn() {
+
+    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
+    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
+    arrivalNotice.putObject("portOfDischarge").putObject("address").put("street", "");
+    assertFalse(
+        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void testValidAddressPortOfDischargeAnn() {
+
+    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
+    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
+    arrivalNotice.putObject("portOfDischarge").putObject("address").put("street", "street2");
+    assertTrue(
+        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
+            .validate(body)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
   void testInvalidValidatePortOfDischargeLocationFields() {
 
     ObjectNode transport = an.putObject("transport");
     transport.putObject("portOfDischarge");
 
     assertFalse(
-        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
             .validate(body)
             .getErrorMessages()
             .isEmpty());
@@ -307,7 +428,7 @@ class ANChecksTest {
     pod.putObject("facility");
 
     assertFalse(
-        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
             .validate(body)
             .getErrorMessages()
             .isEmpty());
@@ -321,7 +442,7 @@ class ANChecksTest {
     pod.putObject("facility");
 
     assertFalse(
-        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
             .validate(body)
             .getErrorMessages()
             .isEmpty());
@@ -336,7 +457,7 @@ class ANChecksTest {
     facility.put("facilityCode", "ADT");
 
     assertFalse(
-        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
             .validate(body)
             .getErrorMessages()
             .isEmpty());
@@ -352,7 +473,7 @@ class ANChecksTest {
     facility.put("facilityCodeListProvider", "SMDG_INVALID");
 
     assertFalse(
-        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
             .validate(body)
             .getErrorMessages()
             .isEmpty());
@@ -368,7 +489,7 @@ class ANChecksTest {
     facility.put("facilityCodeListProvider", "SMDG");
 
     assertTrue(
-        ANChecks.validatePortOfDischargeLocation("arrivalNotices.*.transport")
+        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
             .validate(body)
             .getErrorMessages()
             .isEmpty());
@@ -384,7 +505,7 @@ class ANChecksTest {
     facility.put("facilityCodeListProvider", "SMDG_INVALID");
 
     assertFalse(
-        ANChecks.validatePortOfDischargeLocation("arrivalNoticeNotifications.*")
+        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
             .validate(body)
             .getErrorMessages()
             .isEmpty());
@@ -400,7 +521,7 @@ class ANChecksTest {
     facility.put("facilityCodeListProvider", "SMDG");
 
     assertTrue(
-        ANChecks.validatePortOfDischargeLocation("arrivalNoticeNotifications.*")
+        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
             .validate(body)
             .getErrorMessages()
             .isEmpty());

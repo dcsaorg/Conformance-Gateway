@@ -11,6 +11,7 @@ import org.dcsa.conformance.standards.portcall.action.PortCallAction;
 import org.dcsa.conformance.standards.portcall.action.PublisherPostPortCallEventsAction;
 import org.dcsa.conformance.standards.portcall.action.SubscriberGetPortCallEventsAction;
 import org.dcsa.conformance.standards.portcall.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.portcall.party.ScenarioType;
 
 public class PortCallScenarioListBuilder extends ScenarioListBuilder<PortCallScenarioListBuilder> {
 
@@ -30,30 +31,31 @@ public class PortCallScenarioListBuilder extends ScenarioListBuilder<PortCallSce
     threadLocalSubscriberPartyName.set(subscriberPartyName);
 
     return Stream.of(
-        Map.entry(
-          "POST-only scenarios (for adopters only supporting POST)",
-          noAction()
-            .then(
-              postPortCallEvents())),
-        Map.entry(
-          "GET-only scenarios (for adopters only supporting GET)",
-          noAction()
-            .then(
-              supplyScenarioParameters().then(getPortCallEvents()))))
-      .collect(
-        Collectors.toMap(
-          Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-
-
+            Map.entry(
+                "POST-only scenarios (for adopters only supporting POST)",
+                noAction()
+                    .thenEither(
+                        postPortCallEvents(ScenarioType.TIMESTAMP),
+                        postPortCallEvents(ScenarioType.MOVE_FORECAST))),
+            Map.entry(
+                "GET-only scenarios (for adopters only supporting GET)",
+                noAction()
+                    .thenEither(
+                        supplyScenarioParameters(ScenarioType.TIMESTAMP).then(getPortCallEvents()),
+                        supplyScenarioParameters(ScenarioType.MOVE_FORECAST)
+                            .then(getPortCallEvents()))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  private static PortCallScenarioListBuilder supplyScenarioParameters() {
+  private static PortCallScenarioListBuilder supplyScenarioParameters(ScenarioType scenarioType) {
     String publisherPartyName = threadLocalPublisherPartyName.get();
     return new PortCallScenarioListBuilder(
-      previousAction -> new SupplyScenarioParametersAction(publisherPartyName));
+        previousAction -> new SupplyScenarioParametersAction(publisherPartyName, scenarioType));
   }
 
-  private static PortCallScenarioListBuilder postPortCallEvents() {
+  private static PortCallScenarioListBuilder postPortCallEvents(ScenarioType scenarioType) {
     PortCallComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();
     String subscriberPartyName = threadLocalSubscriberPartyName.get();
@@ -63,6 +65,7 @@ public class PortCallScenarioListBuilder extends ScenarioListBuilder<PortCallSce
                 publisherPartyName,
                 subscriberPartyName,
                 (PortCallAction) previousAction,
+                scenarioType,
                 componentFactory.getMessageSchemaValidator("PostEventsRequest")));
   }
 

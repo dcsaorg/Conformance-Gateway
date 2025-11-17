@@ -11,14 +11,23 @@ import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.portcall.checks.PortCallChecks;
 import org.dcsa.conformance.standards.portcall.party.PortCallRole;
+import org.dcsa.conformance.standards.portcall.party.ScenarioType;
 
 public class PublisherPostPortCallEventsAction extends PortCallAction{
 
   private final JsonSchemaValidator requestSchemaValidator;
+  private final ScenarioType scenarioType;
 
-  public PublisherPostPortCallEventsAction(String publisherPartyName, String subscriberPartyName, PortCallAction previousAction, JsonSchemaValidator requestSchemaValidator) {
+  public PublisherPostPortCallEventsAction(
+      String publisherPartyName,
+      String subscriberPartyName,
+      PortCallAction previousAction,
+      ScenarioType scenarioType,
+      JsonSchemaValidator requestSchemaValidator) {
     super(publisherPartyName, subscriberPartyName, previousAction, "POST Port Call Events");
+    this.scenarioType = scenarioType;
     this.requestSchemaValidator = requestSchemaValidator;
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
   @Override
@@ -28,8 +37,7 @@ public class PublisherPostPortCallEventsAction extends PortCallAction{
 
   @Override
   public ObjectNode asJsonNode() {
-    return  super.asJsonNode();
-
+    return super.asJsonNode().put("scenarioType", scenarioType.name());
   }
 
   @Override
@@ -38,29 +46,30 @@ public class PublisherPostPortCallEventsAction extends PortCallAction{
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-          new UrlPathCheck(PortCallRole::isPublisher, getMatchedExchangeUuid(), "/events"),
-          new ResponseStatusCheck(PortCallRole::isSubscriber, getMatchedExchangeUuid(), 200),
-          new ApiHeaderCheck(
-            PortCallRole::isSubscriber,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            expectedApiVersion),
-          new ApiHeaderCheck(
-            PortCallRole::isPublisher,
-            getMatchedExchangeUuid(),
-            HttpMessageType.REQUEST,
-            expectedApiVersion),
-          new JsonSchemaCheck(
-            PortCallRole::isPublisher,
-            getMatchedExchangeUuid(),
-            HttpMessageType.REQUEST,
-            requestSchemaValidator),
-          new ApiHeaderCheck(
-            PortCallRole::isSubscriber,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            expectedApiVersion),
-          PortCallChecks.getPortCallPostPayloadChecks(getMatchedExchangeUuid(),expectedApiVersion));
+            new UrlPathCheck(PortCallRole::isPublisher, getMatchedExchangeUuid(), "/events"),
+            new ResponseStatusCheck(PortCallRole::isSubscriber, getMatchedExchangeUuid(), 200),
+            new ApiHeaderCheck(
+                PortCallRole::isSubscriber,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                PortCallRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new JsonSchemaCheck(
+                PortCallRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                requestSchemaValidator),
+            new ApiHeaderCheck(
+                PortCallRole::isSubscriber,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            PortCallChecks.getPortCallPostPayloadChecks(
+                getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()));
       }
     };
   }

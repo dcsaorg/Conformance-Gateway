@@ -39,24 +39,25 @@ public class SubscriberGetPortCallEventsAction extends PortCallAction{
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-          new UrlPathCheck(PortCallRole::isSubscriber, getMatchedExchangeUuid(), "/events"),
-          new ResponseStatusCheck(PortCallRole::isPublisher, getMatchedExchangeUuid(), 200),
-          new JsonSchemaCheck(
-            PortCallRole::isPublisher,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            responseSchemaValidator),
-          new ApiHeaderCheck(
-            PortCallRole::isSubscriber,
-            getMatchedExchangeUuid(),
-            HttpMessageType.REQUEST,
-            expectedApiVersion),
-          new ApiHeaderCheck(
-            PortCallRole::isPublisher,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            expectedApiVersion),
-          PortCallChecks.getGetResponsePayloadChecks(getMatchedExchangeUuid(),expectedApiVersion));
+            new UrlPathCheck(PortCallRole::isSubscriber, getMatchedExchangeUuid(), "/events"),
+            new ResponseStatusCheck(PortCallRole::isPublisher, getMatchedExchangeUuid(), 200),
+            new JsonSchemaCheck(
+                PortCallRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            new ApiHeaderCheck(
+                PortCallRole::isSubscriber,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                PortCallRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            PortCallChecks.getGetResponsePayloadChecks(
+                getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()));
       }
     };
   }

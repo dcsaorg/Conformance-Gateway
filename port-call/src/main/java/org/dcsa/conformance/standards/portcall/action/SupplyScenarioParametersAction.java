@@ -4,19 +4,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.standards.portcall.party.ScenarioType;
 import org.dcsa.conformance.standards.portcall.party.SuppliedScenarioParameters;
 
 @Getter
 public class SupplyScenarioParametersAction extends PortCallAction {
 
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
+  private final ScenarioType scenarioType;
 
-  public SupplyScenarioParametersAction(String publisherPartyName) {
+  public SupplyScenarioParametersAction(String publisherPartyName, ScenarioType scenarioType) {
     super(
       publisherPartyName,
       null,
       null,
       "SupplyScenarioParameters");
+    this.scenarioType = scenarioType;
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
   @Override
@@ -36,6 +40,11 @@ public class SupplyScenarioParametersAction extends PortCallAction {
     if (partyInputNode != null && !partyInputNode.isNull()) {
       suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInputNode);
     }
+  }
+
+  @Override
+  public ObjectNode asJsonNode() {
+    return super.asJsonNode().put("scenarioType", scenarioType.name());
   }
 
   @Override

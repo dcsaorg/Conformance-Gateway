@@ -25,8 +25,8 @@ export class EditSandboxComponent {
     public activatedRoute: ActivatedRoute,
     public authService: AuthService,
     public conformanceService: ConformanceService,
-    private router: Router,
-    private dialog: MatDialog,
+    private readonly router: Router,
+    private readonly dialog: MatDialog,
   ) {}
 
   async ngOnInit() {
@@ -114,18 +114,18 @@ export class EditSandboxComponent {
     if (response?.error) {
       await MessageDialog.open(
         this.dialog,
-        "Error completing action",
+        "Error updating sandbox",
         response.error);
       this.updatingSandbox = false;
-    } else {
-      this.router.navigate([
-        "/sandbox", this.sandboxId
-      ]);
+      return
     }
+    await this.router.navigate([
+      "/sandbox", this.sandboxId
+    ]);
   }
 
-  onCancel() {
-    this.router.navigate([
+  async onCancel() {
+    await this.router.navigate([
       "/sandbox", this.sandboxId
     ]);
   }

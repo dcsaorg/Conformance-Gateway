@@ -45,14 +45,14 @@ export class ConformanceService {
     });
   }
 
-  async notifyParty(sandboxId: string): Promise<Sandbox> {
+  async notifyParty(sandboxId: string): Promise<any> {
     return await this.apiService.call({
       operation: "notifyParty",
       sandboxId,
     });
   }
 
-  async resetParty(sandboxId: string): Promise<Sandbox> {
+  async resetParty(sandboxId: string): Promise<any> {
     return await this.apiService.call({
       operation: "resetParty",
       sandboxId,
@@ -138,8 +138,8 @@ export class ConformanceService {
     testedPartyRole: string,
     isDefaultType: boolean,
     sandboxName: string
-  ): Promise<string> {
-    const reply: { sandboxId: string } = await this.apiService.call({
+  ): Promise<any> {
+    return await this.apiService.call({
       operation: "createSandbox",
       standardName,
       versionNumber,
@@ -148,7 +148,6 @@ export class ConformanceService {
       isDefaultType,
       sandboxName,
     });
-    return reply.sandboxId;
   }
 
   async getSandboxConfig(sandboxId: string): Promise<SandboxConfig> {

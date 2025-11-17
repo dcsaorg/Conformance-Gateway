@@ -3,6 +3,8 @@ import { ConformanceService } from "../../service/conformance.service";
 import { Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
 import { Standard, StandardVersion } from "src/app/model/standard";
+import {MessageDialog} from "../../dialogs/message/message-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
     selector: 'app-create-sandbox',
@@ -28,7 +30,8 @@ export class CreateSandboxComponent {
   constructor(
     public authService: AuthService,
     public conformanceService: ConformanceService,
-    private router: Router,
+    private readonly router: Router,
+    private readonly dialog: MatDialog,
   ) {}
 
   async ngOnInit() {
@@ -74,16 +77,24 @@ export class CreateSandboxComponent {
   async onCreate() {
     if (this.cannotCreate()) return;
     this.creatingSandbox = true;
-    const sandboxId: string = await this.conformanceService.createSandbox(
-      this.selectedStandard!.name,
-      this.selectedVersion!.number,
-      this.selectedSuite!,
-      this.selectedRole!,
-      this.selectedSandboxType === this.SANDBOX_TYPES[0],
-      this.newSandboxName
+    const response: any = await this.conformanceService.createSandbox(
+        this.selectedStandard!.name,
+        this.selectedVersion!.number,
+        this.selectedSuite!,
+        this.selectedRole!,
+        this.selectedSandboxType === this.SANDBOX_TYPES[0],
+        this.newSandboxName
     );
-    this.router.navigate([
-      "/edit-sandbox", sandboxId
+    if (response?.error) {
+      await MessageDialog.open(
+          this.dialog,
+          "Error creating sandbox",
+          response.error);
+      this.creatingSandbox = false;
+      return
+    }
+    await this.router.navigate([
+      "/edit-sandbox", response.sandboxId
     ]);
   }
 

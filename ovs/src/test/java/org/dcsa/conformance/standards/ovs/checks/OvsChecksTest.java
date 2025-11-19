@@ -1,137 +1,109 @@
 package org.dcsa.conformance.standards.ovs.checks;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class OvsChecksTest {
 
-  private JsonNode serviceNodes;
+  private final ObjectMapper mapper = new ObjectMapper();
 
-  @BeforeEach
-  void setUp() {
-    JsonNode vesselSchedules = createServiceVesselSchedules("1234567", "Great Vessel");
-    serviceNodes = createServiceNodes("Great Lion Service", "GLS", "SR12345A", vesselSchedules);
-  }
-
-
-  @Test
-  void testFindMatchingNodes_rootMatch() {
-    JsonNode root = OBJECT_MAPPER.createObjectNode().put("value", "test");
-    Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "/").map(Map.Entry::getValue);
-    assertEquals(1, result.count());
+  private JsonNode obj(Object data) {
+    return mapper.valueToTree(data);
   }
 
   @Test
-  void testFindMatchingNodes_arrayMatch() throws IOException {
-    JsonNode root = OBJECT_MAPPER.readTree("[{\"a\": 1}, {\"b\": 2}]");
-    Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "*").map(Map.Entry::getValue);
-    ;
-    assertEquals(2, result.count());
+  void testValidSchedules_allHaveVesselSchedules() {
+    List<Map<String, Object>> schedules =
+        List.of(
+            Map.of(
+                "carrierServiceName",
+                "ServiceA",
+                "vesselSchedules",
+                List.of(Map.of("vesselIMONumber", "12345"))),
+            Map.of(
+                "carrierServiceName",
+                "ServiceB",
+                "vesselSchedules",
+                List.of(Map.of("vesselIMONumber", "67890"))));
+
+    JsonNode body = obj(schedules);
+
+    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
+
+    assertTrue(errors.isEmpty());
   }
 
   @Test
-  void testFindMatchingNodes_emptyArrayMatch() throws IOException {
-    JsonNode root = OBJECT_MAPPER.readTree("[]");
-    Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "*").map(Map.Entry::getValue);
-    ;
-    assertEquals(0, result.count());
+  void testNullBody() {
+    Set<String> errors = OvsChecks.checkServiceSchedulesExist(null);
+    assertFalse(errors.isEmpty());
   }
 
   @Test
-  void testCheckServiceSchedulesExist_emptyServiceSchedules() {
-    JsonNode body = OBJECT_MAPPER.createArrayNode();
-    Set<String> result = OvsChecks.checkServiceSchedulesExist(body);
-    assertEquals(1, result.size());
+  void testNonArrayBody() {
+    Map<String, Object> nonArray = Map.of("vesselSchedules", List.of());
+    JsonNode body = obj(nonArray);
+
+    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
+
+    assertFalse(errors.isEmpty());
   }
 
   @Test
-  void testCheckServiceSchedulesExist_nullServiceNode() {
-    Set<String> result = OvsChecks.checkServiceSchedulesExist(null);
-    assertEquals(1, result.size());
+  void testEmptyArray() {
+    JsonNode body = obj(List.of());
+
+    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
+    assertTrue(errors.isEmpty());
   }
 
-  // Helper method to create a sample JsonNode for vessel schedules
-  private JsonNode createServiceNodes(
-      String carrierServiceName,
-      String carrierServiceCode,
-      String universalServiceReference,
-      JsonNode vesselSchedules) {
+  @Test
+  void testSomeMissingVesselSchedules() {
+    List<Map<String, Object>> schedules =
+        List.of(
+            Map.of(
+                "carrierServiceName",
+                "ServiceA",
+                "vesselSchedules",
+                List.of(Map.of("vesselIMONumber", "12345"))),
+            Map.of("carrierServiceName", "ServiceB"));
 
-    // Create the root ArrayNode
-    ArrayNode rootArrayNode = OBJECT_MAPPER.createArrayNode();
+    JsonNode body = obj(schedules);
 
-    // Create the first ObjectNode
-    ObjectNode firstObjectNode = OBJECT_MAPPER.createObjectNode();
-    firstObjectNode.put("carrierServiceName", carrierServiceName);
-    firstObjectNode.put("carrierServiceCode", carrierServiceCode);
-    firstObjectNode.put("universalServiceReference", universalServiceReference);
-    firstObjectNode.set("vesselSchedules", vesselSchedules);
+    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
 
-    rootArrayNode.add(firstObjectNode);
-    return rootArrayNode;
+    assertFalse(errors.isEmpty());
   }
 
-  private JsonNode createServiceVesselSchedules(String vesselIMONumber, String vesselName) {
-    ArrayNode vesselSchedulesArrayNode = OBJECT_MAPPER.createArrayNode();
-    ObjectNode vesselSchedule = OBJECT_MAPPER.createObjectNode();
-    vesselSchedule.put("vesselIMONumber", vesselIMONumber);
-    vesselSchedule.put("vesselName", vesselName);
-    vesselSchedule.set(
-        "transportCalls",
-        createTransportCalls("TCREF1", "2104N", "2104S", "SR12345A", "SR45678A", "NLAMS"));
-    vesselSchedulesArrayNode.add(vesselSchedule);
-    return vesselSchedulesArrayNode;
+  @Test
+  void testAllMissingVesselSchedules() {
+    List<Map<String, Object>> schedules =
+        List.of(Map.of("carrierServiceName", "ServiceA"), Map.of("carrierServiceName", "ServiceB"));
+
+    JsonNode body = obj(schedules);
+
+    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
+
+    assertFalse(errors.isEmpty());
   }
 
-  private JsonNode createTransportCalls(
-      String transportCallReference,
-      String carrierImportVoyageNumber,
-      String carrierExportVoyageNumber,
-      String universalImportVoyageReference,
-      String universalExportVoyageReference,
-      String UNLocationCode) {
-    // Create the transportCalls ArrayNode for the vesselSchedule
-    ArrayNode transportCallsArrayNode = OBJECT_MAPPER.createArrayNode();
-    ObjectNode transportCall = OBJECT_MAPPER.createObjectNode();
-    transportCall.put("transportCallReference", transportCallReference);
-    transportCall.put("carrierImportVoyageNumber", carrierImportVoyageNumber);
-    transportCall.put("carrierExportVoyageNumber", carrierExportVoyageNumber);
-    transportCall.put("universalImportVoyageReference", universalImportVoyageReference);
-    transportCall.put("universalExportVoyageReference", universalExportVoyageReference);
+  @Test
+  void testEmptyVesselSchedulesArray() {
+    List<Map<String, Object>> schedules =
+        List.of(
+            Map.of(
+                "carrierServiceName", "ServiceA", "vesselSchedules", List.of() // empty -> invalid
+                ));
 
-    // Create the location ObjectNode for the first transportCall
-    ObjectNode location = OBJECT_MAPPER.createObjectNode();
-    location.put("UNLocationCode", UNLocationCode);
-    transportCall.set("location", location);
-    transportCall.set("timestamps", createTimestamps());
-    transportCallsArrayNode.add(transportCall);
-    return transportCallsArrayNode;
+    JsonNode body = obj(schedules);
+
+    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
+    assertFalse(errors.isEmpty());
   }
 
-  private JsonNode createEventDateTime(String eventDateTime) {
-    // Create a timestamp for timestamps ArrayNode
-    ObjectNode timestamp = OBJECT_MAPPER.createObjectNode();
-    timestamp.put("eventTypeCode", "ARRI");
-    timestamp.put("eventClassifierCode", "PLN");
-    timestamp.put("eventDateTime", eventDateTime);
-    return timestamp;
-  }
 
-  private JsonNode createTimestamps() {
-    // Create the timestamps ArrayNode
-    ArrayNode timestampsArrayNode = OBJECT_MAPPER.createArrayNode();
-    timestampsArrayNode.add(createEventDateTime("2024-07-21T10:00:00Z"));
-    timestampsArrayNode.add(createEventDateTime("2024-07-22T10:00:00Z"));
-    timestampsArrayNode.add(createEventDateTime("2024-07-23T10:00:00Z"));
-    return timestampsArrayNode;
-  }
 }

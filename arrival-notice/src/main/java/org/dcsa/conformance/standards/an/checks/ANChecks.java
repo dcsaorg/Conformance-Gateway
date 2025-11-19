@@ -23,6 +23,20 @@ public class ANChecks {
   private static final String S_MUST_BE_PRESENT_AND_NON_EMPTY = "%s must be present and non-empty";
   private static final String ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT =
       "At least one Arrival Notice must demonstrate the correct use of a '%s' object";
+  private static final String ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_ATTRIBUTE =
+      "At least one Arrival Notice must demonstrate the correct use of a '%s' attribute";
+
+  private static final String CARRIER_CODE_LIST_PROVIDER = "carrierCodeListProvider";
+  private static final String CARRIER_CODE = "carrierCode";
+  private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
+  private static final String CARRIER_CONTACT_INFORMATION = "carrierContactInformation";
+  private static final String DELIVERY_TYPE_AT_DESTINATION = "deliveryTypeAtDestination";
+  private static final String DOCUMENT_PARTIES = "documentParties";
+  private static final String TRANSPORT = "transport";
+  private static final String UTILIZED_TRANSPORT_EQUIPMENTS = "utilizedTransportEquipments";
+  private static final String CONSIGNMENT_ITEMS = "consignmentItems";
+  private static final String FREE_TIMES = "freeTimes";
+  private static final String CHARGES = "charges";
 
   public static ActionCheck getANPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion, String scenarioType) {
@@ -79,7 +93,7 @@ public class ANChecks {
 
   public static JsonContentCheck atLeastOneCarrierCodeCorrect() {
     return JsonAttribute.customValidator(
-        "At least one Arrival Notice must demonstrate the correct use of the 'carrierCode' attribute",
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_ATTRIBUTE.formatted(CARRIER_CODE),
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
@@ -99,16 +113,17 @@ public class ANChecks {
 
   private static List<String> validateCarrierCode(JsonNode an) {
     List<String> issues = new ArrayList<>();
-    var v = an.path("carrierCode");
+    var v = an.path(CARRIER_CODE);
     if (JsonUtil.isMissingOrEmpty(v)) {
-      issues.add("carrierCode must functionally be present and non-empty");
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CARRIER_CODE));
     }
     return issues;
   }
 
   public static JsonContentCheck atLeastOneTransportDocumentReferenceCorrect() {
     return JsonAttribute.customValidator(
-        "At least one Arrival Notice must demonstrate the correct use of the 'transportDocumentReference' attribute",
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_ATTRIBUTE.formatted(
+            TRANSPORT_DOCUMENT_REFERENCE),
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
@@ -127,16 +142,17 @@ public class ANChecks {
 
   private static List<String> validateTDR(JsonNode an) {
     List<String> issues = new ArrayList<>();
-    var v = an.path("transportDocumentReference");
+    var v = an.path(TRANSPORT_DOCUMENT_REFERENCE);
     if (JsonUtil.isMissingOrEmpty(v)) {
-      issues.add("transportDocumentReference must be non-empty");
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(TRANSPORT_DOCUMENT_REFERENCE));
     }
     return issues;
   }
 
   public static JsonContentCheck atLeastOneCarrierCodeListProviderCorrect() {
     return JsonAttribute.customValidator(
-        "At least one Arrival Notice must demonstrate the correct use of the 'carrierCodeListProvider' attribute",
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_ATTRIBUTE.formatted(
+            CARRIER_CODE_LIST_PROVIDER),
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
@@ -155,10 +171,10 @@ public class ANChecks {
 
   private static List<String> validateCarrierCodeListProvider(JsonNode an) {
     List<String> issues = new ArrayList<>();
-    var v = an.path("carrierCodeListProvider");
+    var v = an.path(CARRIER_CODE_LIST_PROVIDER);
 
     if (JsonUtil.isMissingOrEmpty(v)) {
-      issues.add("carrierCodeListProvider must functionally be non-empty");
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CARRIER_CODE_LIST_PROVIDER));
       return issues;
     }
 
@@ -172,7 +188,8 @@ public class ANChecks {
 
   public static JsonContentCheck atLeastOneCarrierContactInformationCorrect() {
     return JsonAttribute.customValidator(
-        "At least one Arrival Notice must demonstrate the correct use of the 'carrierContactInformation' object",
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(
+            CARRIER_CONTACT_INFORMATION),
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
@@ -190,11 +207,11 @@ public class ANChecks {
   }
 
   private static List<String> validateCarrierContactInformation(JsonNode an) {
-    var ccis = an.path("carrierContactInformation");
+    var ccis = an.path(CARRIER_CONTACT_INFORMATION);
     List<String> errors = new ArrayList<>();
 
     if (!ccis.isArray() || ccis.isEmpty()) {
-      errors.add("carrierContactInformation must be a non-empty array");
+      errors.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CARRIER_CONTACT_INFORMATION));
       return errors;
     }
 
@@ -205,7 +222,8 @@ public class ANChecks {
       List<String> local = new ArrayList<>();
 
       if (cci.path("name").asText().isBlank()) {
-        local.add("carrierContactInformation[" + idx + "].name must functionally be non-empty");
+        local.add(
+            CARRIER_CONTACT_INFORMATION + "[" + idx + "].name must functionally be non-empty");
       }
 
       boolean hasEmailOrPhone =
@@ -213,7 +231,8 @@ public class ANChecks {
 
       if (!hasEmailOrPhone) {
         local.add(
-            "carrierContactInformation["
+            CARRIER_CONTACT_INFORMATION
+                + "["
                 + idx
                 + "] must functionally contain either email or phone");
       }
@@ -236,7 +255,8 @@ public class ANChecks {
 
   public static JsonContentCheck atLeastOneDeliveryTypeAtDestination() {
     return JsonAttribute.customValidator(
-        "At least one Arrival Notice must demonstrate the correct use of the 'deliveryTypeAtDestination' object",
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(
+            DELIVERY_TYPE_AT_DESTINATION),
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
@@ -255,16 +275,17 @@ public class ANChecks {
 
   private static List<String> validateDeliveryTypeAtDestination(JsonNode an) {
     List<String> issues = new ArrayList<>();
-    var v = an.path("deliveryTypeAtDestination");
+    var v = an.path(DELIVERY_TYPE_AT_DESTINATION);
 
     if (JsonUtil.isMissingOrEmpty(v)) {
-      issues.add("deliveryTypeAtDestination must functionally be present and non-empty");
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(DELIVERY_TYPE_AT_DESTINATION));
       return issues;
     }
 
     String val = v.asText();
     if (!ANDatasets.DELIVERY_TYPE_AT_DESTINATION.contains(val)) {
-      issues.add("Invalid deliveryTypeAtDestination, must be one of CY', 'SD', or 'CFS'");
+      issues.add(
+          "Invalid " + DELIVERY_TYPE_AT_DESTINATION + ", must be one of CY', 'SD', or 'CFS'");
     }
 
     return issues;
@@ -272,7 +293,7 @@ public class ANChecks {
 
   public static JsonContentCheck atLeastOneDocumentPartiesCorrect() {
     return JsonAttribute.customValidator(
-        "At least one Arrival Notice must demonstrate the correct use of the 'documentParties' object",
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(DOCUMENT_PARTIES),
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
@@ -292,19 +313,16 @@ public class ANChecks {
   private static List<String> validateDocumentParties(JsonNode an) {
     List<String> issues = new ArrayList<>();
 
-    var documentParties = an.path("documentParties");
+    var documentParties = an.path(DOCUMENT_PARTIES);
     if (!documentParties.isArray() || documentParties.isEmpty()) {
-      issues.add("documentParties must be a non-empty array");
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(DOCUMENT_PARTIES));
       return issues;
     }
 
     int i = 0;
     for (JsonNode documentParty : documentParties) {
-      String base = "documentParties[" + i + "]";
+      String base = DOCUMENT_PARTIES + "[" + i + "]";
 
-      // -----------------------------
-      // partyFunction
-      // -----------------------------
       var partyFunction = documentParty.path("partyFunction");
 
       if (partyFunction.isMissingNode() || partyFunction.asText().isBlank()) {
@@ -388,7 +406,7 @@ public class ANChecks {
 
   public static JsonContentCheck atLeastOneTransportCorrect() {
     return JsonAttribute.customValidator(
-        "At least one Arrival Notice must demonstrate the correct use of the 'transport' object",
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(TRANSPORT),
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
@@ -408,10 +426,10 @@ public class ANChecks {
 
   private static List<String> validateTransport(JsonNode an) {
     List<String> issues = new ArrayList<>();
-    var t = an.path("transport");
+    var t = an.path(TRANSPORT);
 
     if (JsonUtil.isMissingOrEmpty(t)) {
-      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted("transport"));
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(TRANSPORT));
       return issues;
     }
 
@@ -523,7 +541,7 @@ public class ANChecks {
   public static JsonContentCheck atLeastOneUtilizedTransportEquipmentsCorrect() {
     return JsonAttribute.customValidator(
         ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(
-            "utilizedTransportEquipments"),
+            UTILIZED_TRANSPORT_EQUIPMENTS),
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
@@ -544,63 +562,78 @@ public class ANChecks {
   private static List<String> validateUTE(JsonNode an) {
     List<String> issues = new ArrayList<>();
 
-    var arr = an.path("utilizedTransportEquipments");
+    var arr = an.path(UTILIZED_TRANSPORT_EQUIPMENTS);
     if (!arr.isArray() || arr.isEmpty()) {
-      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted("utilizedTransportEquipments"));
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(UTILIZED_TRANSPORT_EQUIPMENTS));
       return issues;
     }
 
+    boolean foundValidEquipmentRef = false;
+    boolean foundValidISOCode = false;
+    boolean foundValidSeal = false;
+
     int i = 0;
     for (var ute : arr) {
-      String base = "utilizedTransportEquipments[" + i + "]";
+      String base = UTILIZED_TRANSPORT_EQUIPMENTS + "[" + i + "]";
 
       var eq = ute.path("equipment");
-      if (JsonUtil.isMissingOrEmpty(eq)) {
-        issues.add(base + ".equipment must be present and non-empty");
+      if (eq.isObject()) {
+
+        String eqRef = eq.path("equipmentReference").asText("");
+        if (!eqRef.isBlank()) {
+          foundValidEquipmentRef = true;
+        }
+
+        String iso = eq.path("ISOEquipmentCode").asText("");
+        if (!iso.isBlank()) {
+          foundValidISOCode = true;
+        }
+
       } else {
-        if (eq.path("equipmentReference").asText().isBlank()) {
-          issues.add(base + ".equipment.equipmentReference must be non-empty");
-        }
-        if (eq.path("ISOEquipmentCode").asText().isBlank()) {
-          issues.add(base + ".equipment.ISOEquipmentCode must be non-empty");
-        }
+        issues.add(base + ".equipment must be present and non-empty");
       }
 
       var seals = ute.path("seals");
+      if (seals.isArray() && !seals.isEmpty()) {
 
-      if (!seals.isArray() || seals.isEmpty()) {
-        issues.add(base + ".seals must be a non-empty array");
-      } else {
-        boolean hasValidSeal = false;
-
-        int s = 0;
         for (var seal : seals) {
-          String sealPath = base + ".seals[" + s + "]";
-          var numNode = seal.path("number");
-
-          if (numNode != null && !numNode.asText().isBlank()) {
-            hasValidSeal = true;
-          } else {
-            issues.add(sealPath + ".number must be non-empty");
+          String val = seal.path("number").asText("");
+          if (!val.isBlank()) {
+            foundValidSeal = true;
+            break;
           }
-
-          s++;
         }
 
-        if (!hasValidSeal) {
-          issues.add(base + ".seals must contain at least one seal with a non-empty number");
-        }
+      } else {
+        issues.add(base + ".seals must be a non-empty array");
       }
 
       i++;
     }
 
+    if (!foundValidEquipmentRef) {
+      issues.add(
+          UTILIZED_TRANSPORT_EQUIPMENTS
+              + " must contain at least one item with a valid equipmentReference");
+    }
+    if (!foundValidISOCode) {
+      issues.add(
+          UTILIZED_TRANSPORT_EQUIPMENTS
+              + " must contain at least one item with a valid ISOEquipmentCode");
+    }
+    if (!foundValidSeal) {
+      issues.add(
+          UTILIZED_TRANSPORT_EQUIPMENTS
+              + " must contain at least one seal entry with a non-empty number");
+    }
+
     return issues;
   }
 
+
   public static JsonContentCheck atLeastOneConsignmentItemsCorrect() {
     return JsonAttribute.customValidator(
-        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted("consignmentItems"),
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(CONSIGNMENT_ITEMS),
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
@@ -621,15 +654,15 @@ public class ANChecks {
   private static List<String> validateConsignmentItems(JsonNode an) {
     List<String> issues = new ArrayList<>();
 
-    var arr = an.path("consignmentItems");
+    var arr = an.path(CONSIGNMENT_ITEMS);
     if (!arr.isArray() || arr.isEmpty()) {
-      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted("consignmentItems"));
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CONSIGNMENT_ITEMS));
       return issues;
     }
 
     int i = 0;
     for (var item : arr) {
-      String base = "consignmentItems[" + i + "]";
+      String base = CONSIGNMENT_ITEMS + "[" + i + "]";
 
       var descriptionOfGoods = item.path("descriptionOfGoods");
       if (!descriptionOfGoods.isArray() || descriptionOfGoods.isEmpty()) {
@@ -647,44 +680,27 @@ public class ANChecks {
         boolean foundValidOuterPkg = false;
         boolean foundValidNumPackages = false;
 
-        int c = 0;
         for (var cItem : cargo) {
-          String cargoBase = base + ".cargoItems[" + c + "]";
 
-          var eqRef = cItem.path("equipmentReference").asText("");
-          if (eqRef.isBlank()) {
-            issues.add(cargoBase + ".equipmentReference must be non-empty");
-          } else {
+          String eqRef = cItem.path("equipmentReference").asText("");
+          if (!eqRef.isBlank()) {
             foundValidEquipmentRef = true;
           }
 
           var gw = cItem.path("cargoGrossWeight");
-          if (JsonUtil.isMissingOrEmpty(gw)) {
-            issues.add(cargoBase + ".cargoGrossWeight must be present");
-          } else {
-            var valueNode = gw.path("value");
-            if (!valueNode.isNumber()) {
-              issues.add(cargoBase + ".cargoGrossWeight.value must be a number");
-            } else if (valueNode.asDouble() <= 0) {
-              issues.add(cargoBase + ".cargoGrossWeight.value must be positive");
-            } else {
+          if (gw.isObject()) {
+            var val = gw.path("value");
+            if (val.isNumber() && val.asDouble() > 0) {
               foundValidWeightValue = true;
             }
 
             var unit = gw.path("unit").asText("");
-            if (unit.isBlank()) {
-              issues.add(cargoBase + ".cargoGrossWeight.unit must be non-empty");
-            } else if (!ANDatasets.CARGO_GROSS_WEIGHT_UNIT.contains(unit)) {
-              issues.add(cargoBase + ".cargoGrossWeight.unit must be one of KGM, LBR, GRM, ONZ");
-            } else {
+            if (!unit.isBlank() && ANDatasets.CARGO_GROSS_WEIGHT_UNIT.contains(unit)) {
               foundValidWeightUnit = true;
             }
           }
-
           var op = cItem.path("outerPackaging");
-          if (JsonUtil.isMissingOrEmpty(op)) {
-            issues.add(cargoBase + ".outerPackaging must be present and non-empty");
-          } else {
+          if (op.isObject()) {
 
             boolean hasField =
                 (op.hasNonNull("packageCode") && !op.path("packageCode").asText().isBlank())
@@ -692,27 +708,13 @@ public class ANChecks {
                         && !op.path("IMOPackagingCode").asText().isBlank())
                     || (op.hasNonNull("description") && !op.path("description").asText().isBlank());
 
-            if (!hasField) {
-              issues.add(
-                  cargoBase
-                      + ".outerPackaging must contain at least one of: "
-                      + "packageCode, IMOPackagingCode, or description");
-            } else {
-              foundValidOuterPkg = true;
-            }
+            if (hasField) foundValidOuterPkg = true;
 
-            // numberOfPackages
             var numPkgsNode = op.path("numberOfPackages");
-            if (!numPkgsNode.isNumber()) {
-              issues.add(cargoBase + ".outerPackaging.numberOfPackages must be a number");
-            } else if (numPkgsNode.asInt() <= 0) {
-              issues.add(cargoBase + ".outerPackaging.numberOfPackages must be positive");
-            } else {
+            if (numPkgsNode.isNumber() && numPkgsNode.asInt() > 0) {
               foundValidNumPackages = true;
             }
           }
-
-          c++;
         }
 
         if (!foundValidEquipmentRef) {
@@ -749,7 +751,7 @@ public class ANChecks {
 
   public static JsonContentCheck atLeastOneANFreeTimeCorrect() {
     return JsonAttribute.customValidator(
-        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted("freeTimes"),
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(FREE_TIMES),
         (body, contextPath) -> {
           Set<String> allIssues = new LinkedHashSet<>();
           var ans = body.path("arrivalNotices");
@@ -782,9 +784,9 @@ public class ANChecks {
   private static List<String> validateFreeTimes(JsonNode an) {
     List<String> issues = new ArrayList<>();
 
-    var freeTimes = an.path("freeTimes");
+    var freeTimes = an.path(FREE_TIMES);
     if (!freeTimes.isArray() || freeTimes.isEmpty()) {
-      issues.add("freeTimes must be a non-empty array");
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(FREE_TIMES));
       return issues;
     }
 
@@ -796,99 +798,79 @@ public class ANChecks {
 
     int i = 0;
     for (var ft : freeTimes) {
-      String base = "freeTimes[" + i + "]";
 
       var typeCodes = ft.path("typeCodes");
-      if (!typeCodes.isArray() || typeCodes.isEmpty()) {
-        issues.add(base + ".typeCodes must be a non-empty array");
-      } else {
+      if (typeCodes.isArray() && !typeCodes.isEmpty()) {
         boolean valid = false;
-        int t = 0;
         for (var tc : typeCodes) {
           String val = tc.asText("");
-          if (ANDatasets.FREE_TIME_TYPE_CODES.contains(val)) valid = true;
-          if (val.isBlank()) {
-            issues.add(base + ".typeCodes[" + t + "] must be non-empty");
+          if (ANDatasets.FREE_TIME_TYPE_CODES.contains(val)) {
+            valid = true;
           }
-          t++;
         }
         if (valid) foundValidTypeCodes = true;
       }
 
       var isoCodes = ft.path("ISOEquipmentCodes");
-      if (!isoCodes.isArray() || isoCodes.isEmpty()) {
-        issues.add(base + ".ISOEquipmentCodes must be a non-empty array");
-      } else {
+      if (isoCodes.isArray() && !isoCodes.isEmpty()) {
         boolean valid = false;
-        int j = 0;
         for (var iso : isoCodes) {
           String val = iso.asText("");
           if (!val.isBlank()) valid = true;
-          else issues.add(base + ".ISOEquipmentCodes[" + j + "] must be non-empty");
-          j++;
         }
         if (valid) foundValidISOEquipment = true;
       }
 
       var eqRefs = ft.path("equipmentReferences");
-      if (!eqRefs.isArray() || eqRefs.isEmpty()) {
-        issues.add(base + ".equipmentReferences must be a non-empty array");
-      } else {
+      if (eqRefs.isArray() && !eqRefs.isEmpty()) {
         boolean valid = false;
-        int k = 0;
         for (var ref : eqRefs) {
           String val = ref.asText("");
           if (!val.isBlank()) valid = true;
-          else issues.add(base + ".equipmentReferences[" + k + "] must be non-empty");
-          k++;
         }
         if (valid) foundValidEquipRefs = true;
       }
 
       var dur = ft.path("duration");
-      if (!dur.isNumber()) {
-        issues.add(base + ".duration must be a positive number");
-      } else if (dur.asDouble() > 0) {
+      if (dur.isNumber() && dur.asDouble() > 0) {
         foundValidDuration = true;
-      } else {
-        issues.add(base + ".duration must be positive");
       }
 
-      var timeUnit = ft.path("timeUnit").asText("");
-      if (timeUnit.isBlank()) {
-        issues.add(base + ".timeUnit must be non-empty");
-      } else if (!ANDatasets.FREE_TIME_TIME_UNIT.contains(timeUnit)) {
-        issues.add(base + ".timeUnit must be one of CD, WD, or HR");
-      } else {
+      String timeUnit = ft.path("timeUnit").asText("");
+      if (!timeUnit.isBlank() && ANDatasets.FREE_TIME_TIME_UNIT.contains(timeUnit)) {
         foundValidTimeUnit = true;
       }
 
       i++;
     }
 
+
     if (!foundValidTypeCodes) {
       issues.add(
-          "freeTimes must contain at least one item with a valid typeCodes entry (DEM/DET/STO)");
+          FREE_TIMES
+              + " must contain at least one item with a valid typeCodes entry (DEM/DET/STO)");
     }
     if (!foundValidISOEquipment) {
-      issues.add("freeTimes must contain at least one item with a valid ISOEquipmentCodes value");
+      issues.add(
+          FREE_TIMES + " must contain at least one item with a valid ISOEquipmentCodes value");
     }
     if (!foundValidEquipRefs) {
-      issues.add("freeTimes must contain at least one item with a valid equipmentReference");
+      issues.add(FREE_TIMES + " must contain at least one item with a valid equipmentReference");
     }
     if (!foundValidDuration) {
-      issues.add("freeTimes must contain at least one item with a positive duration");
+      issues.add(FREE_TIMES + " must contain at least one item with a positive duration");
     }
     if (!foundValidTimeUnit) {
-      issues.add("freeTimes must contain at least one item with a valid timeUnit (CD/WD/HR)");
+      issues.add(FREE_TIMES + " must contain at least one item with a valid timeUnit (CD/WD/HR)");
     }
 
     return issues;
   }
 
+
   public static JsonContentCheck atLeastOneANChargesCorrect() {
     return JsonAttribute.customValidator(
-        "At least one Arrival Notice must demonstrate the correct use of the 'charges' object",
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(CHARGES),
         (body, contextPath) -> {
           Set<String> allIssues = new LinkedHashSet<>();
           var ans = body.path("arrivalNotices");
@@ -921,9 +903,9 @@ public class ANChecks {
   private static List<String> validateCharges(JsonNode an) {
     List<String> issues = new ArrayList<>();
 
-    var arr = an.path("charges");
+    var arr = an.path(CHARGES);
     if (!arr.isArray() || arr.isEmpty()) {
-      issues.add("charges must be a non-empty array");
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CHARGES));
       return issues;
     }
 
@@ -934,84 +916,62 @@ public class ANChecks {
     boolean foundValidUnitPrice = false;
     boolean foundValidQuantity = false;
 
-    int i = 0;
-    for (var charge : arr) {
-      String base = "charges[" + i + "]";
+    for (JsonNode charge : arr) {
 
       String name = charge.path("chargeName").asText("");
-      if (name.isBlank()) {
-        issues.add(base + ".chargeName must be non-empty");
-      } else {
+      if (!name.isBlank()) {
         foundValidChargeName = true;
       }
 
       var ca = charge.path("currencyAmount");
-      if (!ca.isNumber()) {
-        issues.add(base + ".currencyAmount must be a positive number");
-      } else if (ca.asDouble() <= 0) {
-        issues.add(base + ".currencyAmount must be positive");
-      } else {
+      if (ca.isNumber() && ca.asDouble() > 0) {
         foundValidCurrencyAmount = true;
       }
 
       String currencyCode = charge.path("currencyCode").asText("");
-      if (currencyCode.isBlank()) {
-        issues.add(base + ".currencyCode must be non-empty");
-      } else {
+      if (!currencyCode.isBlank()) {
         foundValidCurrencyCode = true;
       }
 
       var unitPrice = charge.path("unitPrice");
-      if (!unitPrice.isNumber()) {
-        issues.add(base + ".unitPrice must be a positive number");
-      } else if (unitPrice.asDouble() <= 0) {
-        issues.add(base + ".unitPrice must be positive");
-      } else {
+      if (unitPrice.isNumber() && unitPrice.asDouble() > 0) {
         foundValidUnitPrice = true;
       }
 
       var qty = charge.path("quantity");
-      if (!qty.isNumber()) {
-        issues.add(base + ".quantity must be a positive number");
-      } else if (qty.asDouble() <= 0) {
-        issues.add(base + ".quantity must be positive");
-      } else {
+      if (qty.isNumber() && qty.asDouble() > 0) {
         foundValidQuantity = true;
       }
 
       String pt = charge.path("paymentTermCode").asText("");
-      if (pt.isBlank()) {
-        issues.add(base + ".paymentTermCode must be non-empty");
-      } else if (!ANDatasets.PAYMENT_TERM_CODE.contains(pt)) {
-        issues.add(base + ".paymentTermCode must be one of PRE or COL");
-      } else {
+      if (!pt.isBlank() && ANDatasets.PAYMENT_TERM_CODE.contains(pt)) {
         foundValidPaymentTerm = true;
       }
-
-      i++;
     }
 
     if (!foundValidChargeName) {
-      issues.add("At least one charges item must contain a valid non-empty 'chargeName'");
+      issues.add("At least one" + CHARGES + " item must contain a valid non-empty 'chargeName'");
     }
     if (!foundValidCurrencyAmount) {
-      issues.add("At least one charges item must contain a positive 'currencyAmount'");
+      issues.add("At least one" + CHARGES + " item must contain a positive 'currencyAmount'");
     }
     if (!foundValidCurrencyCode) {
-      issues.add("At least one charges item must contain a valid non-empty 'currencyCode'");
+      issues.add("At least one" + CHARGES + " item must contain a valid non-empty 'currencyCode'");
     }
     if (!foundValidPaymentTerm) {
-      issues.add("At least one charges item must contain a valid 'paymentTermCode' (PRE or COL)");
+      issues.add(
+          "At least one" + CHARGES + " item must contain a valid 'paymentTermCode' (PRE or COL)");
     }
     if (!foundValidUnitPrice) {
-      issues.add("At least one charges item must contain a positive 'unitPrice'");
+      issues.add("At least one" + CHARGES + " item must contain a positive 'unitPrice'");
     }
     if (!foundValidQuantity) {
-      issues.add("At least one charges item must contain a positive 'quantity'");
+      issues.add("At least one" + CHARGES + " item must contain a positive 'quantity'");
     }
 
     return issues;
   }
+
 
   private static final List<String> ADDRESS_FIELDS =
       List.of(
@@ -1052,6 +1012,25 @@ public class ANChecks {
         HttpMessageType.REQUEST,
         expectedApiVersion,
         checks);
+  }
+
+  public static JsonContentCheck atLeastOneTransportDocumentReferenceCorrectANN() {
+    return JsonAttribute.customValidator(
+        "At least one Arrival Notice Notification must demonstrate the correct use of the 'transportDocumentReference' attribute",
+        (body, ctx) -> {
+          var ans = body.path("arrivalNoticeNotifications");
+          Set<String> errors = new LinkedHashSet<>();
+          int i = 0;
+
+          for (var an : ans) {
+            List<String> local = validateTDR(an);
+            final int idx = i;
+            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
+            local.forEach(e -> errors.add("arrivalNoticeNotifications[" + idx + "]." + e));
+            i++;
+          }
+          return ConformanceCheckResult.simple(errors);
+        });
   }
 
   public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION =

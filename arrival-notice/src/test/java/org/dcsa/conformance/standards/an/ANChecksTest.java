@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.List;
-import java.util.Set;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
-import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,242 +15,367 @@ class ANChecksTest {
 
   private ObjectMapper mapper;
   private ObjectNode body;
-  private ArrayNode arrivalNotices;
   private ObjectNode an;
 
   @BeforeEach
   void setUp() {
     mapper = new ObjectMapper();
     body = mapper.createObjectNode();
-    arrivalNotices = body.putArray("arrivalNotices");
+    ArrayNode arrivalNotices = body.putArray("arrivalNotices");
     an = arrivalNotices.addObject();
   }
 
-  @Test
-  void testValidateNonEmptyResponse() {
-    an.put("carrierCode", "MAEU");
-    assertTrue(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(body).getErrorMessages().isEmpty());
+  private static boolean isOk(JsonContentCheck check, ObjectNode body) {
+    ConformanceCheckResult r = check.validate(body);
+    return r.getErrorMessages().isEmpty();
+  }
 
+  private static boolean isFail(JsonContentCheck check, ObjectNode body) {
+    return !isOk(check, body);
+  }
+
+  @Test
+  void nonEmptyArrivalNotices_fails_when_missing_array() {
     ObjectNode empty = mapper.createObjectNode();
-    assertFalse(ANChecks.VALIDATE_NON_EMPTY_RESPONSE.validate(empty).getErrorMessages().isEmpty());
-  }
-
-  @Test
-  void testValidateBasicFields() {
-    List<JsonContentCheck> checks = ANChecks.validateBasicFields();
-
-    assertFalse(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
-
-    an.put("carrierCode", "MAEU");
-    an.put("transportDocumentReference", "test1234");
-    assertTrue(checks.stream().allMatch(c -> c.validate(body).getErrorMessages().isEmpty()));
-  }
-
-  @Test
-  void testValidateCarrierContactInformation() {
-
-    ArrayNode carrierContactInfos = an.putArray("carrierContactInformation");
-    ObjectNode contactInfo = carrierContactInfos.addObject();
-    contactInfo.put("name", "Ops Desk");
-    assertFalse(
-        ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
-
-    contactInfo.put("email", "ops@example.com");
     assertTrue(
-        ANChecks.validateCarrierContactInformation().validate(body).getErrorMessages().isEmpty());
+        ANChecks.nonEmptyArrivalNotices()
+            .validate(empty)
+            .getErrorMessages()
+            .contains("arrivalNotices must be a non-empty array"));
   }
 
   @Test
-  void testInvalidDocumentParties() {
-    ArrayNode parties = an.putArray("documentParties");
-    ObjectNode p = parties.addObject();
-    p.put("partyName", "Consignee LLC");
-    p.put("partyContactDetails", "consignee@example.com");
-    ObjectNode addr = p.putObject("address");
-    addr.put("street", "Harbor Rd 1");
+  void nonEmptyArrivalNotices_passes_when_array_has_one_AN() {
+    assertTrue(isOk(ANChecks.nonEmptyArrivalNotices(), body));
+  }
 
-    Set<ConformanceError> errors =((ConformanceCheckResult.ErrorsWithRelevance) ANChecks.validateDocumentParties().validate(body)).errors();
-    assertEquals(1, errors.size());
+  @Test
+  void atLeastOneCarrierCodeCorrect_fails_when_all_missing() {
+    assertTrue(isFail(ANChecks.atLeastOneCarrierCodeCorrect(), body));
+  }
 
+  @Test
+  void atLeastOneCarrierCodeCorrect_passes_when_one_AN_has_carrierCode() {
+    an.put("carrierCode", "MAEU");
+    assertTrue(isOk(ANChecks.atLeastOneCarrierCodeCorrect(), body));
+  }
+
+  // ---------------------------------------------------------------------------
+  // transportDocumentReference
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneTransportDocumentReferenceCorrect_fails_when_all_missing() {
+    assertTrue(isFail(ANChecks.atLeastOneTransportDocumentReferenceCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneTransportDocumentReferenceCorrect_passes_when_one_AN_has_TDR() {
+    an.put("transportDocumentReference", "TDR12345");
+    assertTrue(isOk(ANChecks.atLeastOneTransportDocumentReferenceCorrect(), body));
+  }
+
+  // ---------------------------------------------------------------------------
+  // carrierCodeListProvider
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneCarrierCodeListProviderCorrect_fails_when_missing() {
+    assertTrue(isFail(ANChecks.atLeastOneCarrierCodeListProviderCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneCarrierCodeListProviderCorrect_fails_when_invalid_value() {
+    an.put("carrierCodeListProvider", "FOO");
+    assertTrue(isFail(ANChecks.atLeastOneCarrierCodeListProviderCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneCarrierCodeListProviderCorrect_passes_when_NMFTA() {
+    an.put("carrierCodeListProvider", "NMFTA");
+    assertTrue(isOk(ANChecks.atLeastOneCarrierCodeListProviderCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneCarrierCodeListProviderCorrect_passes_when_SMDG() {
+    an.put("carrierCodeListProvider", "SMDG");
+    assertTrue(isOk(ANChecks.atLeastOneCarrierCodeListProviderCorrect(), body));
+  }
+
+  // ---------------------------------------------------------------------------
+  // carrierContactInformation
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneCarrierContactInformationCorrect_fails_when_array_missing() {
+    assertTrue(isFail(ANChecks.atLeastOneCarrierContactInformationCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneCarrierContactInformationCorrect_fails_when_all_invalid() {
+    ArrayNode ccis = an.putArray("carrierContactInformation");
+    ccis.addObject(); // name/email/phone all blank/missing
+    assertTrue(isFail(ANChecks.atLeastOneCarrierContactInformationCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneCarrierContactInformationCorrect_passes_when_one_valid_entry() {
+    ArrayNode ccis = an.putArray("carrierContactInformation");
+    ccis.addObject().put("name", "Ops Desk").put("email", "ops@example.com");
+    assertTrue(isOk(ANChecks.atLeastOneCarrierContactInformationCorrect(), body));
+  }
+
+  // ---------------------------------------------------------------------------
+  // deliveryTypeAtDestination
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneDeliveryTypeAtDestination_fails_when_missing() {
+    assertTrue(isFail(ANChecks.atLeastOneDeliveryTypeAtDestination(), body));
+  }
+
+  @Test
+  void atLeastOneDeliveryTypeAtDestination_fails_when_invalid() {
+    an.put("deliveryTypeAtDestination", "FOO");
+    assertTrue(isFail(ANChecks.atLeastOneDeliveryTypeAtDestination(), body));
+  }
+
+  @Test
+  void atLeastOneDeliveryTypeAtDestination_passes_when_valid() {
+    // Based on message in ANChecks: CY / SD / CFS
+    an.put("deliveryTypeAtDestination", "CY");
+    assertTrue(isOk(ANChecks.atLeastOneDeliveryTypeAtDestination(), body));
+  }
+
+  // ---------------------------------------------------------------------------
+  // documentParties
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneDocumentPartiesCorrect_fails_when_missing_array() {
+    assertTrue(isFail(ANChecks.atLeastOneDocumentPartiesCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneDocumentPartiesCorrect_fails_when_party_incomplete() {
+    var parties = an.putArray("documentParties");
+    var p = parties.addObject();
+    // Missing function, name, contactDetails, address -> errors
+    ConformanceCheckResult r = ANChecks.atLeastOneDocumentPartiesCorrect().validate(body);
+    assertFalse(r.getErrorMessages().isEmpty());
+  }
+
+  @Test
+  void atLeastOneDocumentPartiesCorrect_passes_when_one_party_is_valid() {
+    var parties = an.putArray("documentParties");
+    var p = parties.addObject();
     p.put("partyFunction", "CN");
-    errors =
-        ((ConformanceCheckResult.ErrorsWithRelevance)
-                ANChecks.validateDocumentParties().validate(body))
-            .errors();
-    assertEquals(0, errors.size());
-
-    p.remove("partyName");
-    assertFalse(ANChecks.validateDocumentParties().validate(body).getErrorMessages().isEmpty());
-  }
-
-  @Test
-  void testInvalidDocumentPartyPartyFunction() {
-    ArrayNode parties = an.putArray("documentParties");
-    ObjectNode p = parties.addObject();
     p.put("partyName", "Consignee LLC");
-    p.put("partyContactDetails", "consignee@example.com");
-    ObjectNode addr = p.putObject("address");
+
+    var cds = p.putArray("partyContactDetails");
+    cds.addObject().put("name", "Ops Desk").put("email", "ops@example.com");
+
+    var addr = p.putObject("address");
     addr.put("street", "Harbor Rd 1");
+    addr.put("city", "Rotterdam");
 
-    Set<ConformanceError> errors =
-        ((ConformanceCheckResult.ErrorsWithRelevance)
-                ANChecks.validateDocumentParties().validate(body))
-            .errors();
-    assertEquals(1, errors.size());
+    ConformanceCheckResult r = ANChecks.atLeastOneDocumentPartiesCorrect().validate(body);
+    assertTrue(r.getErrorMessages().isEmpty());
+  }
 
-    p.put("partyFunction", "CNB");
-    errors =
-        ((ConformanceCheckResult.ErrorsWithRelevance)
-                ANChecks.validateDocumentParties().validate(body))
-            .errors();
-    assertEquals(1, errors.size());
+  // ---------------------------------------------------------------------------
+  // transport
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneTransportCorrect_fails_when_transport_missing() {
+    assertTrue(isFail(ANChecks.atLeastOneTransportCorrect(), body));
   }
 
   @Test
-  void testValidDocumentParties() {
-    ArrayNode parties = an.putArray("documentParties");
-    ObjectNode p = parties.addObject();
-    p.put("partyName", "Consignee LLC");
-    p.put("partyContactDetails", "consignee@example.com");
-    ObjectNode addr = p.putObject("address");
-    addr.put("street", "Harbor Rd 1");
-    p.put("partyFunction", "CN");
-
-    Set<ConformanceError> errors =
-        ((ConformanceCheckResult.ErrorsWithRelevance)
-                ANChecks.validateDocumentParties().validate(body))
-            .errors();
-    assertEquals(0, errors.size());
-  }
-
-  @Test
-  void testValidateTransport() {
-    assertFalse(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
-
-    ObjectNode transport = an.putObject("transport");
+  void atLeastOneTransportCorrect_passes_with_minimal_valid_transport() {
+    var transport = an.putObject("transport");
     transport.putObject("portOfDischargeArrivalDate").put("value", "2025-10-01T10:00:00Z");
 
-    ObjectNode pod = transport.putObject("portOfDischarge");
-    pod.put("UNLocationCode", "NLRTM");
+    var pod = transport.putObject("portOfDischarge");
+    pod.put("UNLocationCode", "NLRTM"); // valid UNLoc
 
-    ArrayNode legs = transport.putArray("legs");
-    ObjectNode leg = legs.addObject();
-    ObjectNode voyage = leg.putObject("vesselVoyage");
-    voyage.put("vesselName", "MSC Example");
-    voyage.put("carrierImportVoyageNumber", "0123W");
+    var legs = transport.putArray("legs");
+    var leg = legs.addObject();
+    var vv = leg.putObject("vesselVoyage");
+    vv.put("vesselName", "MSC Example");
+    vv.put("carrierImportVoyageNumber", "0123W");
 
-    assertTrue(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
-
-    voyage.remove("vesselName");
-    assertFalse(ANChecks.validateTransport().validate(body).getErrorMessages().isEmpty());
+    ConformanceCheckResult r = ANChecks.atLeastOneTransportCorrect().validate(body);
+    assertTrue(r.getErrorMessages().isEmpty());
   }
 
   @Test
-  void testValidateUtilizedTransportEquipments() {
+  void atLeastOneTransportCorrect_fails_when_facility_present_but_incomplete() {
+    var transport = an.putObject("transport");
+    transport.putObject("portOfDischargeArrivalDate").put("value", "2025-10-01T10:00:00Z");
 
-    ArrayNode utes = an.putArray("utilizedTransportEquipments");
-    ObjectNode ute = utes.addObject();
+    var pod = transport.putObject("portOfDischarge");
+    var facility = pod.putObject("facility");
+    // facilityCode present but facilityCodeListProvider missing
+    facility.put("facilityCode", "ADT");
 
-    ObjectNode eq = ute.putObject("equipment");
+    var legs = transport.putArray("legs");
+    var leg = legs.addObject();
+    var vv = leg.putObject("vesselVoyage");
+    vv.put("vesselName", "MSC Example");
+    vv.put("carrierImportVoyageNumber", "0123W");
+
+    ConformanceCheckResult r = ANChecks.atLeastOneTransportCorrect().validate(body);
+    assertFalse(r.getErrorMessages().isEmpty());
+  }
+
+  // ---------------------------------------------------------------------------
+  // utilizedTransportEquipments
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneUtilizedTransportEquipmentsCorrect_fails_when_missing_array() {
+    assertTrue(isFail(ANChecks.atLeastOneUtilizedTransportEquipmentsCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneUtilizedTransportEquipmentsCorrect_passes_with_valid_UTE() {
+    var utes = an.putArray("utilizedTransportEquipments");
+    var ute = utes.addObject();
+
+    var eq = ute.putObject("equipment");
     eq.put("equipmentReference", "MSCU1234567");
     eq.put("ISOEquipmentCode", "22G1");
 
-    ArrayNode seals = ute.putArray("seals");
-    ObjectNode seal = seals.addObject();
-    seal.put("number", "ABC123");
+    var seals = ute.putArray("seals");
+    seals.addObject().put("number", "ABC123");
 
-    assertTrue(
-        ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
-
-    ute.set("seals", mapper.createArrayNode());
-    assertFalse(
-        ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
-
-    ute.remove("equipment");
-    assertFalse(
-        ANChecks.validateUtilizedTransportEquipments().validate(body).getErrorMessages().isEmpty());
+    ConformanceCheckResult r =
+        ANChecks.atLeastOneUtilizedTransportEquipmentsCorrect().validate(body);
+    assertTrue(r.getErrorMessages().isEmpty());
   }
 
   @Test
-  void testValidateConsignmentItems() {
+  void atLeastOneUtilizedTransportEquipmentsCorrect_fails_when_all_seals_empty() {
+    var utes = an.putArray("utilizedTransportEquipments");
+    var ute = utes.addObject();
 
-    ArrayNode consignmentItems = an.putArray("consignmentItems");
-    ObjectNode ci = consignmentItems.addObject();
-    assertFalse(ANChecks.validateConsignmentItems().validate(body).getErrorMessages().isEmpty());
+    var eq = ute.putObject("equipment");
+    eq.put("equipmentReference", "MSCU1234567");
+    eq.put("ISOEquipmentCode", "22G1");
 
-    ArrayNode dog = ci.putArray("descriptionOfGoods");
+    var seals = ute.putArray("seals");
+    seals.addObject().put("number", "");
+
+    ConformanceCheckResult r =
+        ANChecks.atLeastOneUtilizedTransportEquipmentsCorrect().validate(body);
+    assertFalse(r.getErrorMessages().isEmpty());
+  }
+
+  // ---------------------------------------------------------------------------
+  // consignmentItems
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneConsignmentItemsCorrect_fails_when_missing_array() {
+    assertTrue(isFail(ANChecks.atLeastOneConsignmentItemsCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneConsignmentItemsCorrect_passes_with_valid_structure() {
+    var consignmentItems = an.putArray("consignmentItems");
+    var ci = consignmentItems.addObject();
+
+    var dog = ci.putArray("descriptionOfGoods");
     dog.add("Widgets");
 
-    ArrayNode cargoItems = ci.putArray("cargoItems");
-    ObjectNode item = cargoItems.addObject();
+    var cargoItems = ci.putArray("cargoItems");
+    var item = cargoItems.addObject();
     item.put("equipmentReference", "MSCU1234567");
-    ObjectNode cgw = item.putObject("cargoGrossWeight");
+
+    var cgw = item.putObject("cargoGrossWeight");
     cgw.put("value", 1234.5);
     cgw.put("unit", "KGM");
 
-    ObjectNode op = item.putObject("outerPackaging");
+    var op = item.putObject("outerPackaging");
     op.put("packageCode", "CT");
     op.put("numberOfPackages", 10);
 
-    assertTrue(ANChecks.validateConsignmentItems().validate(body).getErrorMessages().isEmpty());
-
-    op.remove("packageCode");
-    op.remove("IMOPackagingCode");
-    op.remove("description");
-    assertFalse(ANChecks.validateConsignmentItems().validate(body).getErrorMessages().isEmpty());
+    ConformanceCheckResult r = ANChecks.atLeastOneConsignmentItemsCorrect().validate(body);
+    assertTrue(r.getErrorMessages().isEmpty());
   }
 
   @Test
-  void testValidateFreeTimeObjectStructure() {
+  void atLeastOneConsignmentItemsCorrect_fails_when_no_valid_cargo_item() {
+    var consignmentItems = an.putArray("consignmentItems");
+    var ci = consignmentItems.addObject();
 
-    ArrayNode freeTimes = an.putArray("freeTimes");
-    ObjectNode ft = freeTimes.addObject();
+    var dog = ci.putArray("descriptionOfGoods");
+    dog.add("Widgets");
+
+    var cargoItems = ci.putArray("cargoItems");
+    var item = cargoItems.addObject();
+    // All invalid / empty
+    item.put("equipmentReference", "");
+
+    ConformanceCheckResult r = ANChecks.atLeastOneConsignmentItemsCorrect().validate(body);
+    assertFalse(r.getErrorMessages().isEmpty());
+  }
+
+  // ---------------------------------------------------------------------------
+  // FREE_TIME scenario: atLeastOneANFreeTimeCorrect
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneANFreeTimeCorrect_fails_when_no_freeTimes() {
+    // arrivalNotices[0] exists but no freeTimes
+    assertTrue(isFail(ANChecks.atLeastOneANFreeTimeCorrect(), body));
+  }
+
+  @Test
+  void atLeastOneANFreeTimeCorrect_passes_with_valid_freeTime_item() {
+    var freeTimes = an.putArray("freeTimes");
+    var ft = freeTimes.addObject();
+
     ft.putArray("typeCodes").add("DEM");
     ft.putArray("ISOEquipmentCodes").add("22G1");
     ft.putArray("equipmentReferences").add("MSCU1234567");
     ft.put("duration", 5);
     ft.put("timeUnit", "HR");
 
-    assertTrue(
-        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
-
-    an.set("freeTimes", mapper.createArrayNode());
-    assertFalse(
-        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
+    ConformanceCheckResult r = ANChecks.atLeastOneANFreeTimeCorrect().validate(body);
+    assertTrue(r.getErrorMessages().isEmpty());
   }
 
   @Test
-  void testValidateFreeTimeInvalidTimeUnit() {
+  void atLeastOneANFreeTimeCorrect_fails_with_invalid_timeUnit() {
+    var freeTimes = an.putArray("freeTimes");
+    var ft = freeTimes.addObject();
 
-    ArrayNode freeTimes = an.putArray("freeTimes");
-    ObjectNode ft = freeTimes.addObject();
     ft.putArray("typeCodes").add("DEM");
     ft.putArray("ISOEquipmentCodes").add("22G1");
     ft.putArray("equipmentReferences").add("MSCU1234567");
     ft.put("duration", 5);
-    ft.put("timeUnit", "DAY");
+    ft.put("timeUnit", "DAY"); // invalid
 
-    assertFalse(
-        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
+    ConformanceCheckResult r = ANChecks.atLeastOneANFreeTimeCorrect().validate(body);
+    assertFalse(r.getErrorMessages().isEmpty());
+  }
+
+  // ---------------------------------------------------------------------------
+  // FREIGHTED scenario: atLeastOneANChargesCorrect
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void atLeastOneANChargesCorrect_fails_when_no_charges() {
+    assertTrue(isFail(ANChecks.atLeastOneANChargesCorrect(), body));
   }
 
   @Test
-  void testValidateFreeTimeMissingReqFields() {
-
-    ArrayNode freeTimes = an.putArray("freeTimes");
-    ObjectNode ft = freeTimes.addObject();
-    ft.putArray("equipmentReferences").add("MSCU1234567");
-    ft.put("duration", 5);
-    ft.put("timeUnit", "DAY");
-
-    assertFalse(
-        ANChecks.validateFreeTimeObjectStructure().validate(body).getErrorMessages().isEmpty());
-  }
-
-  @Test
-  void testValidateChargesStructure() {
-    ArrayNode charges = an.putArray("charges");
-    ObjectNode ch = charges.addObject();
+  void atLeastOneANChargesCorrect_passes_with_valid_charge_item() {
+    var charges = an.putArray("charges");
+    var ch = charges.addObject();
     ch.put("chargeName", "Arrival Notice Fee");
     ch.put("currencyAmount", 50.0);
     ch.put("currencyCode", "EUR");
@@ -261,307 +383,25 @@ class ANChecksTest {
     ch.put("unitPrice", 50.0);
     ch.put("quantity", 1);
 
-    assertTrue(ANChecks.validateChargesStructure().validate(body).getErrorMessages().isEmpty());
-
-    ch.remove("currencyCode");
-    assertFalse(ANChecks.validateChargesStructure().validate(body).getErrorMessages().isEmpty());
+    ConformanceCheckResult r = ANChecks.atLeastOneANChargesCorrect().validate(body);
+    assertTrue(r.getErrorMessages().isEmpty());
   }
 
   @Test
-  void testGetFreeTimeScenarioRelatedChecks_FREE_TIME() {
+  void atLeastOneANChargesCorrect_fails_when_all_charges_invalid() {
+    var charges = an.putArray("charges");
+    var ch = charges.addObject();
+    // everything missing / invalid
+    ch.put("chargeName", "");
+    ch.put("currencyAmount", -5.0);
+    ch.put("currencyCode", "");
+    ch.put("unitPrice", 0.0);
+    ch.put("quantity", 0.0);
+    ch.put("paymentTermCode", "XXX");
 
-    var checks = ANChecks.getScenarioRelatedChecks("FREE_TIME");
-    assertFalse(checks.isEmpty());
+    ConformanceCheckResult r = ANChecks.atLeastOneANChargesCorrect().validate(body);
+    assertFalse(r.getErrorMessages().isEmpty());
   }
 
-  @Test
-  void testGetFreightedScenarioRelatedChecks() {
 
-    var checks = ANChecks.getScenarioRelatedChecks("FREIGHTED");
-    assertFalse(checks.isEmpty());
-  }
-
-  @Test
-  void testInvalidPartyContactDetails() {
-
-    ArrayNode documentParties = an.putArray("documentParties");
-    ObjectNode documentParty = documentParties.addObject();
-    assertFalse(
-        ANChecks.validateDocumentPartyField("partyContactDetails")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testValidatePartyContactDetailsName() {
-
-    ArrayNode documentParties = an.putArray("documentParties");
-    ObjectNode documentParty = documentParties.addObject();
-    ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
-    ObjectNode partyContactDetail = partyContactDetails.addObject();
-    assertFalse(ANChecks.validatePartyContactName().validate(body).getErrorMessages().isEmpty());
-    partyContactDetail.put("name", "Ops Desk");
-    assertTrue(ANChecks.validatePartyContactName().validate(body).getErrorMessages().isEmpty());
-  }
-
-  @Test
-  void testValidatePartyContactDetailsEmailOrPhone() {
-
-    ArrayNode documentParties = an.putArray("documentParties");
-    ObjectNode documentParty = documentParties.addObject();
-    ArrayNode partyContactDetails = documentParty.putArray("partyContactDetails");
-    ObjectNode partyContactDetail = partyContactDetails.addObject();
-
-    assertFalse(
-        ANChecks.validatePartyContactEmailOrPhone().validate(body).getErrorMessages().isEmpty());
-
-    partyContactDetail.put("email", "ops@example.com");
-    assertTrue(
-        ANChecks.validatePartyContactEmailOrPhone().validate(body).getErrorMessages().isEmpty());
-  }
-
-  @Test
-  void testInvalidPortOfDischarge() {
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testInvalidPortOfDischargeANN() {
-
-    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
-    arrivalNoticeNotifications.addObject();
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testInValidPortOfDischargeAnnEmpty() {
-
-    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
-    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
-    arrivalNotice.putObject("portOfDischarge");
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testValidPortOfDischargeAnn() {
-
-    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
-    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
-    arrivalNotice.putObject("portOfDischarge").put("UNLocationCode", "NLRTM");
-    assertTrue(
-        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testInValidAddressPortOfDischargeAnn() {
-
-    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
-    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
-    arrivalNotice.putObject("portOfDischarge").putObject("address");
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testInValidAddressBlankPortOfDischargeAnn() {
-
-    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
-    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
-    arrivalNotice.putObject("portOfDischarge").putObject("address").put("street", "");
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testValidAddressPortOfDischargeAnn() {
-
-    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
-    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
-    arrivalNotice.putObject("portOfDischarge").putObject("address").put("street", "street2");
-    assertTrue(
-        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testInvalidValidatePortOfDischargeLocationFields() {
-
-    ObjectNode transport = an.putObject("transport");
-    transport.putObject("portOfDischarge");
-
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testIValidValidatePortOfDischargeFacilityFields() {
-
-    ObjectNode transport = an.putObject("transport");
-    ObjectNode pod = transport.putObject("portOfDischarge");
-    pod.putObject("facility");
-
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testInvalidPortOfDischargeFacilityFields() {
-
-    ObjectNode transport = an.putObject("transport");
-    ObjectNode pod = transport.putObject("portOfDischarge");
-    pod.putObject("facility");
-
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testvPortOfDischargeFacilityWithoutFacilityListProvider() {
-
-    ObjectNode transport = an.putObject("transport");
-    ObjectNode pod = transport.putObject("portOfDischarge");
-    ObjectNode facility = pod.putObject("facility");
-    facility.put("facilityCode", "ADT");
-
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testvPortOfDischargeFacilityWithInvalidFacilityListProvider() {
-
-    ObjectNode transport = an.putObject("transport");
-    ObjectNode pod = transport.putObject("portOfDischarge");
-    ObjectNode facility = pod.putObject("facility");
-    facility.put("facilityCode", "ADT");
-    facility.put("facilityCodeListProvider", "SMDG_INVALID");
-
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testPortOfDischargeFacilityWithvalidFacilityListProvider() {
-
-    ObjectNode transport = an.putObject("transport");
-    ObjectNode pod = transport.putObject("portOfDischarge");
-    ObjectNode facility = pod.putObject("facility");
-    facility.put("facilityCode", "ADT");
-    facility.put("facilityCodeListProvider", "SMDG");
-
-    assertTrue(
-        ANChecks.validatePortOfDischarge("arrivalNotices.*.transport")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testANNPortOfDischargeFacilityWithInvalidFacilityListProvider() {
-    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
-    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
-    ObjectNode pod = arrivalNotice.putObject("portOfDischarge");
-    ObjectNode facility = pod.putObject("facility");
-    facility.put("facilityCode", "ADT");
-    facility.put("facilityCodeListProvider", "SMDG_INVALID");
-
-    assertFalse(
-        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testANNPortOfDischargeFacilityWithValidFacilityListProvider() {
-    ArrayNode arrivalNoticeNotifications = body.putArray("arrivalNoticeNotifications");
-    ObjectNode arrivalNotice = arrivalNoticeNotifications.addObject();
-    ObjectNode pod = arrivalNotice.putObject("portOfDischarge");
-    ObjectNode facility = pod.putObject("facility");
-    facility.put("facilityCode", "ADT");
-    facility.put("facilityCodeListProvider", "SMDG");
-
-    assertTrue(
-        ANChecks.validatePortOfDischarge("arrivalNoticeNotifications.*")
-            .validate(body)
-            .getErrorMessages()
-            .isEmpty());
-  }
-
-  @Test
-  void testValidatePortOfDischargeAddress() {
-
-    ObjectNode transport = an.putObject("transport");
-    ObjectNode pod = transport.putObject("portOfDischarge");
-    ObjectNode address = pod.putObject("address");
-    address.put("street", "");
-
-    assertFalse(ANChecks.validatePODAdrressAN().validate(body).getErrorMessages().isEmpty());
-
-    address.put("street", "Harbor Rd 1");
-    address.put("city", "Rotterdam");
-    assertTrue(ANChecks.validatePODAdrressAN().validate(body).getErrorMessages().isEmpty());
-
-    pod.remove("address");
-    pod.put("UNLocationCode", "NLRTM");
-    assertTrue(ANChecks.validatePODAdrressAN().validate(body).getErrorMessages().isEmpty());
-  }
-
-  @Test
-  void testValidateDocumentPartyAddress() {
-
-    ArrayNode documentParties = an.putArray("documentParties");
-    ObjectNode documentParty = documentParties.addObject();
-    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).getErrorMessages().isEmpty());
-
-    ObjectNode address = documentParty.putObject("address");
-    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).getErrorMessages().isEmpty());
-
-    address.put("street", "");
-
-    assertFalse(ANChecks.validateDocumentPartyAddress().validate(body).getErrorMessages().isEmpty());
-
-    address.put("street", "Harbor Rd 1");
-    address.put("city", "Rotterdam");
-    assertTrue(ANChecks.validatePODAdrressAN().validate(body).getErrorMessages().isEmpty());
-  }
 }

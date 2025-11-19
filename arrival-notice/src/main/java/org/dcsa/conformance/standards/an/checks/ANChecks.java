@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.an.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,7 +13,6 @@ import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonRebasableContentCheck;
-import org.dcsa.conformance.core.check.KeywordDataset;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.an.party.ANRole;
@@ -22,12 +20,33 @@ import org.dcsa.conformance.standards.an.party.DynamicScenarioParameters;
 
 public class ANChecks {
 
+  private static final String S_MUST_BE_PRESENT_AND_NON_EMPTY =
+      "%s must functionally be present and non-empty";
+  private static final String ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT =
+      "At least one Arrival Notice must demonstrate the correct use of a '%s' object";
+  private static final String ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_ATTRIBUTE =
+      "At least one Arrival Notice must demonstrate the correct use of a '%s' attribute";
+
+  private static final String CARRIER_CODE_LIST_PROVIDER = "carrierCodeListProvider";
+  private static final String CARRIER_CODE = "carrierCode";
+  private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
+  private static final String CARRIER_CONTACT_INFORMATION = "carrierContactInformation";
+  private static final String DELIVERY_TYPE_AT_DESTINATION = "deliveryTypeAtDestination";
+  private static final String DOCUMENT_PARTIES = "documentParties";
+  private static final String TRANSPORT = "transport";
+  private static final String UTILIZED_TRANSPORT_EQUIPMENTS = "utilizedTransportEquipments";
+  private static final String CONSIGNMENT_ITEMS = "consignmentItems";
+  private static final String FREE_TIMES = "freeTimes";
+  private static final String CHARGES = "charges";
+
   public static ActionCheck getANPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion, String scenarioType) {
+
     var checks = new ArrayList<JsonContentCheck>();
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
-    var payloadChecks = payloadChecks(scenarioType);
-    checks.addAll(guardEachWithBodyPresent(payloadChecks, "arrivalNotices"));
+
+    checks.add(nonEmptyArrivalNotices());
+    checks.addAll(guardEachWithBodyPresent(getPayloadChecks(scenarioType), "arrivalNotices"));
+
     return JsonAttribute.contentChecks(
         "",
         "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
@@ -38,27 +57,15 @@ public class ANChecks {
         checks);
   }
 
-  private static List<JsonContentCheck> payloadChecks(String scenarioType) {
-    var checks = new ArrayList<>(validateBasicFields());
-    checks.add(validateCarrierContactInformation());
-    checks.add(validateDocumentParties());
-    checks.addAll(validateDataSetFields());
-    checks.add(validateTransport());
-    checks.add(validateUtilizedTransportEquipments());
-    checks.add(validateConsignmentItems());
-    if (scenarioType != null) {
-      checks.addAll(getScenarioRelatedChecks(scenarioType));
-    }
-    return checks;
-  }
-
   public static ActionCheck getANGetResponseChecks(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
-    checks.addAll(guardEachWithBodyPresent(getResponseChecks(dspSupplier), "arrivalNotices"));
+    checks.add(nonEmptyArrivalNotices());
+    checks.addAll(
+        guardEachWithBodyPresent(
+            getPayloadChecks(dspSupplier.get().scenarioType()), "arrivalNotices"));
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,
@@ -67,21 +74,14 @@ public class ANChecks {
         checks);
   }
 
-  private static List<JsonContentCheck> getResponseChecks(
-      Supplier<DynamicScenarioParameters> dspSupplier) {
-    var checks = new ArrayList<JsonContentCheck>();
-    checks.addAll(validateTransportDocumentReferences(dspSupplier));
-    checks.addAll(payloadChecks(dspSupplier.get().scenarioType()));
-    return checks;
-  }
-
   public static ActionCheck getANNPostPayloadChecks(
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION);
-    var notificationPayloadChecks = notificationPayloadChecks();
-    checks.addAll(
-        guardEachWithBodyPresent(notificationPayloadChecks, "arrivalNoticeNotifications"));
+
+    var checksANN = new ArrayList<JsonContentCheck>();
+    checksANN.add(atLeastOneTransportDocumentReferenceCorrectANN());
+    checks.addAll(guardEachWithBodyPresent(checksANN, "arrivalNoticeNotifications"));
     return JsonAttribute.contentChecks(
         ANRole::isPublisher,
         matchedExchangeUuid,
@@ -90,382 +90,926 @@ public class ANChecks {
         checks);
   }
 
-  private static List<JsonContentCheck> notificationPayloadChecks() {
-    var checks = new ArrayList<JsonContentCheck>();
-    checks.add(
-        validateBasicFieldWithLabel("transportDocumentReference", "arrivalNoticeNotifications.*"));
-    checks.add(validateANNEquipmentReference());
-    checks.add(validateTransportETA("arrivalNoticeNotifications.*"));
-    checks.add(validatePortOfDischarge("arrivalNoticeNotifications.*"));
-    return checks;
-  }
-
-  public static List<JsonContentCheck> validateBasicFields() {
-    return List.of(
-        validateBasicFieldWithLabel("carrierCode", "arrivalNotices.*"),
-        validateBasicFieldWithLabel("transportDocumentReference", "arrivalNotices.*"));
-  }
-
-  private static JsonContentCheck validateBasicFieldWithLabel(String field, String path) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the '" + field + "' attribute",
-        mav -> mav.submitAllMatching(path),
-        (node, contextPath) -> {
-          var fieldNode = node.get(field);
-
-          if (JsonUtil.isMissingOrEmpty(fieldNode)) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must be functionally present in the payload"));
-          }
-
-          if (fieldNode.isArray()) {
-            if (fieldNode.isEmpty()) {
-              return ConformanceCheckResult.simple(
-                  Set.of(contextPath + "." + field + " must not be an empty array in the payload"));
-            }
-            return ConformanceCheckResult.simple(Set.of());
-          }
-
-          if (fieldNode.isTextual() && fieldNode.asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
-          }
-
-          if (fieldNode.isObject() && JsonUtil.isMissingOrEmpty(fieldNode)) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must not be empty in the payload"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-
-  public static List<JsonContentCheck> validateDataSetFields() {
-    return List.of(
-        validateDataSetFields(
-            "carrierCodeListProvider", ANDatasets.CARRIER_CODE_LIST_PROVIDER, "arrivalNotices.*"),
-        validateDataSetFields(
-            "deliveryTypeAtDestination",
-            ANDatasets.DELIVERY_TYPE_AT_DESTINATION,
-            "arrivalNotices.*"));
-  }
-
-  public static JsonContentCheck validateDataSetFields(
-      String attribute, KeywordDataset dataset, String path) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the '" + attribute + "' attribute",
-        mav -> mav.submitAllMatching(path),
-        (node, contextPath) -> {
-          final var fieldNode = node.path(attribute);
-          final String fieldPath = contextPath + "." + attribute;
-
-          if (fieldNode.isMissingNode() || fieldNode.isNull()) {
-            return ConformanceCheckResult.simple(
-                Set.of(fieldPath + " must be functionally present in the payload"));
-          }
-          if (fieldNode.asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(fieldPath + " must not be empty or blank in the payload"));
-          }
-          var validator = JsonAttribute.matchedMustBeDatasetKeywordIfPresent(dataset);
-
-          return validator.validate(fieldNode, fieldPath);
-        });
-  }
-
-  public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
-      JsonAttribute.customValidator(
-          "Every response received during a conformance test must not be empty",
-          body ->
-              ConformanceCheckResult.simple(
-                  (body.path("arrivalNotices").isEmpty())
-                      ? Set.of("The response body must not be empty")
-                      : Set.of()));
-
-  public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION =
-      JsonAttribute.customValidator(
-          "Every response received during a conformance test must not be empty",
-          body ->
-              ConformanceCheckResult.simple(
-                  (body.path("arrivalNoticeNotifications").isEmpty())
-                      ? Set.of("The response body must not be empty")
-                      : Set.of()));
-
-  public static List<JsonContentCheck> getScenarioRelatedChecks(String scenarioType) {
+  private static ArrayList<JsonContentCheck> getPayloadChecks(String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
 
-    if (scenarioType.equals(ScenarioType.FREE_TIME.name())) {
-      checks.add(validateFreeTimeObjectStructure());
+    checks.add(atLeastOneTransportDocumentReferenceCorrect());
+    checks.add(atLeastOneCarrierCodeCorrect());
+    checks.add(atLeastOneCarrierCodeListProviderCorrect());
+    checks.add(atLeastOneCarrierContactInformationCorrect());
+    checks.add(atLeastOneDeliveryTypeAtDestination());
+    checks.add(atLeastOneDocumentPartiesCorrect());
+    checks.add(atLeastOneTransportCorrect());
+    checks.add(atLeastOneUtilizedTransportEquipmentsCorrect());
+    checks.add(atLeastOneConsignmentItemsCorrect());
+
+    if ("FREE_TIME".equals(scenarioType)) {
+      checks.add(atLeastOneANFreeTimeCorrect());
     }
-
-    if (scenarioType.equals(ScenarioType.FREIGHTED.name())) {
-      checks.add(validateChargesStructure());
+    if ("FREIGHTED".equals(scenarioType)) {
+      checks.add(atLeastOneANChargesCorrect());
     }
     return checks;
   }
 
-
-
-  private static JsonContentCheck validateANNEquipmentReference() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'equipmentReferences' field",
-        mav -> mav.submitAllMatching("arrivalNoticeNotifications.*"),
-        (notifications, contextPath) -> {
-          var node = notifications.get("equipmentReferences");
-          if (JsonUtil.isMissingOrEmpty(node)) {
+  public static JsonContentCheck nonEmptyArrivalNotices() {
+    return JsonAttribute.customValidator(
+        "At least one Arrival Notice must be included in a message sent during conformance testing",
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          if (!ans.isArray() || ans.isEmpty()) {
             return ConformanceCheckResult.simple(
-                Set.of(
-                    contextPath
-                        + ".equipmentReferences must functionally be present and a non-empty array of strings"));
+                Set.of("arrivalNotices must be a non-empty array"));
           }
-          boolean allEmpty = true;
-          for (var item : node) {
-            if (item != null && item.isTextual() && !item.asText().trim().isEmpty()) {
-              allEmpty = false;
-              break;
+          return ConformanceCheckResult.simple(Set.of());
+        });
+  }
+
+  public static JsonContentCheck atLeastOneCarrierCodeCorrect() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_ATTRIBUTE.formatted(CARRIER_CODE),
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          Set<String> errors = new LinkedHashSet<>();
+
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateCarrierCode(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
             }
           }
 
-          if (allEmpty) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    contextPath
-                        + ".equipmentReferences must contain at least one non-empty string value"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
+          return ConformanceCheckResult.simple(errors);
         });
   }
 
-  public static List<JsonContentCheck> validateTransportDocumentReferences(
-      Supplier<DynamicScenarioParameters> dsp) {
-    return List.of(
-        JsonAttribute.customValidator(
-            "Validate that all 'transportDocumentReference's in the response match the query parameters, and none are missing",
-            body -> {
-              var issues = new LinkedHashSet<String>();
-              var arrivalNotices = body.get("arrivalNotices");
-
-              if (arrivalNotices == null || !arrivalNotices.isArray()) {
-                issues.add("Missing or invalid 'arrivalNotices' array in payload.");
-                return ConformanceCheckResult.simple(issues);
-              }
-
-              if (dsp.get().transportDocumentReferences() == null
-                  || dsp.get().transportDocumentReferences().isEmpty()) {
-                issues.add("No 'transportDocumentReferences' were specified in the payload");
-                return ConformanceCheckResult.simple(issues);
-              }
-
-              Set<String> expectedTDRs = new HashSet<>(dsp.get().transportDocumentReferences());
-              Set<String> foundTDRs = new HashSet<>();
-
-              for (int i = 0; i < arrivalNotices.size(); i++) {
-                var notice = arrivalNotices.get(i);
-                var tdrNode = notice.get("transportDocumentReference");
-
-                if (tdrNode == null || !tdrNode.isTextual()) {
-                  issues.add(
-                      String.format("ArrivalNotice %d: missing 'transportDocumentReference'", i));
-                  continue;
-                }
-
-                String tdr = tdrNode.asText();
-                foundTDRs.add(tdr);
-
-                if (!expectedTDRs.contains(tdr)) {
-                  issues.add(
-                      String.format(
-                          "ArrivalNotice %d: transportDocumentReference '%s' was not requested in query parameters",
-                          i, tdr));
-                }
-              }
-
-              Set<String> missingTDRs = new HashSet<>(expectedTDRs);
-              missingTDRs.removeAll(foundTDRs);
-              for (String missingTdr : missingTDRs) {
-                issues.add(
-                    String.format(
-                        "No ArrivalNotice was returned for transportDocumentReference '%s' specified in query parameters",
-                        missingTdr));
-              }
-
-              return ConformanceCheckResult.simple(issues);
-            }));
+  private static List<String> validateCarrierCode(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+    var v = an.path(CARRIER_CODE);
+    if (JsonUtil.isMissingOrEmpty(v)) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CARRIER_CODE));
+    }
+    return issues;
   }
 
-  public static JsonContentCheck validateCarrierContactInformation() {
+  public static JsonContentCheck atLeastOneTransportDocumentReferenceCorrect() {
     return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the 'carrierContactInformation' object",
-        body -> {
-          var basicResult =
-              validateBasicFieldWithLabel("carrierContactInformation", "arrivalNotices.*")
-                  .validate(body);
-          if (!basicResult.getErrorMessages().isEmpty()) {
-            return basicResult;
-          }
-          var issues = new LinkedHashSet<String>();
-          issues.addAll(validateCarrierContactName().validate(body).getErrorMessages());
-          issues.addAll(validateCarrierContactEmailOrPhone().validate(body).getErrorMessages());
-          return ConformanceCheckResult.simple(issues);
-        });
-  }
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_ATTRIBUTE.formatted(
+            TRANSPORT_DOCUMENT_REFERENCE),
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          Set<String> errors = new LinkedHashSet<>();
 
-  private static JsonContentCheck validateCarrierContactName() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'name' attribute in 'carrierContactInformation'",
-        mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
-        (node, contextPath) -> {
-          if (!node.hasNonNull("name")) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".name must be functionally present"));
-          } else if (node.get("name").asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".name must not be empty or blank in the payload"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateTDR(ans.get(i));
 
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
 
-  private static JsonContentCheck validateCarrierContactEmailOrPhone() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of either the 'email' or 'phone' attribute in 'carrierContactInformation'",
-        mav -> mav.submitAllMatching("arrivalNotices.*.carrierContactInformation.*"),
-        (node, contextPath) -> {
-          if (!node.hasNonNull("email") && !node.hasNonNull("phone")) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + " must functionally include either 'email' or 'phone'"));
-          }
-          if (node.hasNonNull("email") && node.get("email").asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".'email' must not be empty or blank in the payload"));
-          }
-          if (node.hasNonNull("phone") && node.get("phone").asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".'phone' must not be empty or blank in the payload"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  public static JsonContentCheck validateDocumentParties() {
-    return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the 'documentParties' object",
-        body -> {
-          var basicResult =
-              validateBasicFieldWithLabel("documentParties", "arrivalNotices.*").validate(body);
-          if (!basicResult.getErrorMessages().isEmpty()) {
-            return basicResult;
-          }
-          var results = new LinkedHashSet<ConformanceCheckResult>();
-          results.add(validateDocumentPartyField("partyFunction").validate(body));
-          results.add(validateDocumentPartyField("partyName").validate(body));
-          results.add(validateDocumentPartyField("partyContactDetails").validate(body));
-          results.add(validatePartyContactName().validate(body));
-          results.add(validatePartyContactEmailOrPhone().validate(body));
-          results.add(validateDocumentPartyAddress().validate(body));
-          return ConformanceCheckResult.from(results);
-        });
-  }
-
-  public static JsonContentCheck validatePartyContactName() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the '"
-            + "name"
-            + "' attribute in 'carrierContactInformation'",
-        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*.partyContactDetails.*"),
-        (node, contextPath) -> {
-          if (!node.hasNonNull("name")) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ". 'name' must be functionally present"));
-          } else if (node.get("name").asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ". 'name' must not be empty or blank in the payload"));
-          }
-
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  public static JsonContentCheck validatePartyContactEmailOrPhone() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of either the 'email' or 'phone' attribute in 'partyContactDetails'",
-        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*.partyContactDetails.*"),
-        (node, contextPath) -> {
-          if (!node.hasNonNull("email") && !node.hasNonNull("phone")) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + " must functionally include either 'email' or 'phone'"));
-          }
-          if (node.hasNonNull("email") && node.get("email").asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ". 'email' must not be empty or blank in the payload"));
-          }
-          if (node.hasNonNull("phone") && node.get("phone").asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ". 'phone' must not be empty or blank in the payload"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  public static JsonContentCheck validateDocumentPartyField(String field) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the '"
-            + field
-            + "' attribute in 'documentParties'",
-        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
-        (node, contextPath) -> {
-          var value = node.get(field);
-          var fieldPath = contextPath + "." + field;
-
-          if (value == null || value.isNull()) {
-            return ConformanceCheckResult.simple(
-                Set.of(fieldPath + " must be functionally present"));
-          }
-          if (JsonUtil.isMissingOrEmpty(value)) {
-            return ConformanceCheckResult.simple(
-                Set.of(fieldPath + " must not be empty in the payload"));
-          }
-
-          if (field.equals("partyFunction")) {
-              var validator =
-                  JsonAttribute.matchedMustBeDatasetKeywordIfPresent(ANDatasets.PARTY_FUNCTION);
-              return validator.validate(value, fieldPath);
-
-          }
-
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  public static JsonContentCheck validateAddress(String field, String path) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'address' object in " + field,
-        mav -> mav.submitAllMatching(path),
-        (node, contextPath) -> {
-          var address = node.get("address");
-          if (address != null && !address.isEmpty()) {
-            boolean hasNonEmpty =
-                ADDRESS_FIELDS.stream()
-                    .anyMatch(
-                        f -> {
-                          var fieldNode = address.get(f);
-                          return fieldNode != null
-                              && fieldNode.isTextual()
-                              && !fieldNode.asText().isBlank();
-                        });
-
-            if (!hasNonEmpty) {
-              return ConformanceCheckResult.simple(
-                  Set.of(
-                      contextPath
-                          + ".address must contain at least one non-empty value among: "
-                          + String.join(", ", ADDRESS_FIELDS)));
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
             }
           }
-          return ConformanceCheckResult.simple(Set.of());
+          return ConformanceCheckResult.simple(errors);
         });
   }
+
+  private static List<String> validateTDR(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+    var v = an.path(TRANSPORT_DOCUMENT_REFERENCE);
+    if (JsonUtil.isMissingOrEmpty(v)) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(TRANSPORT_DOCUMENT_REFERENCE));
+    }
+    return issues;
+  }
+
+  public static JsonContentCheck atLeastOneCarrierCodeListProviderCorrect() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_ATTRIBUTE.formatted(
+            CARRIER_CODE_LIST_PROVIDER),
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          Set<String> errors = new LinkedHashSet<>();
+
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateCarrierCodeListProvider(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
+          }
+          return ConformanceCheckResult.simple(errors);
+        });
+  }
+
+  private static List<String> validateCarrierCodeListProvider(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+    var v = an.path(CARRIER_CODE_LIST_PROVIDER);
+
+    if (JsonUtil.isMissingOrEmpty(v)) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CARRIER_CODE_LIST_PROVIDER));
+      return issues;
+    }
+
+    String val = v.asText();
+    if (!ANDatasets.CARRIER_CODE_LIST_PROVIDER.contains(val)) {
+      issues.add("Invalid carrierCodeListProvider, must functionally be either 'NMFTA' or 'SMDG'");
+    }
+
+    return issues;
+  }
+
+  public static JsonContentCheck atLeastOneCarrierContactInformationCorrect() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(
+            CARRIER_CONTACT_INFORMATION),
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          Set<String> errors = new LinkedHashSet<>();
+
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateCarrierContactInformation(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
+          }
+
+          return ConformanceCheckResult.simple(errors);
+        });
+  }
+
+  private static List<String> validateCarrierContactInformation(JsonNode an) {
+    var ccis = an.path(CARRIER_CONTACT_INFORMATION);
+    List<String> errors = new ArrayList<>();
+
+    if (!ccis.isArray() || ccis.isEmpty()) {
+      errors.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CARRIER_CONTACT_INFORMATION));
+      return errors;
+    }
+
+    for (int i = 0; i < ccis.size(); i++) {
+      List<String> local = new ArrayList<>();
+      var cci = ccis.get(i);
+
+      if (cci.path("name").asText().isBlank()) {
+        local.add(CARRIER_CONTACT_INFORMATION + "[" + i + "].name must functionally be non-empty");
+      }
+
+      boolean hasEmailOrPhone =
+          !cci.path("email").asText().isBlank() || !cci.path("phone").asText().isBlank();
+
+      if (!hasEmailOrPhone) {
+        local.add(
+            CARRIER_CONTACT_INFORMATION
+                + "["
+                + i
+                + "] must functionally contain either email or phone");
+      }
+
+      if (local.isEmpty()) {
+        return List.of();
+      }
+
+      errors.addAll(local);
+    }
+
+    return errors;
+  }
+
+  public static JsonContentCheck atLeastOneDeliveryTypeAtDestination() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(
+            DELIVERY_TYPE_AT_DESTINATION),
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          Set<String> errors = new LinkedHashSet<>();
+
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateDeliveryTypeAtDestination(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
+          }
+          return ConformanceCheckResult.simple(errors);
+        });
+  }
+
+  private static List<String> validateDeliveryTypeAtDestination(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+    var v = an.path(DELIVERY_TYPE_AT_DESTINATION);
+
+    if (JsonUtil.isMissingOrEmpty(v)) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(DELIVERY_TYPE_AT_DESTINATION));
+      return issues;
+    }
+
+    String val = v.asText();
+    if (!ANDatasets.DELIVERY_TYPE_AT_DESTINATION.contains(val)) {
+      issues.add(
+          "Invalid " + DELIVERY_TYPE_AT_DESTINATION + ", must be one of CY', 'SD', or 'CFS'");
+    }
+
+    return issues;
+  }
+
+  public static JsonContentCheck atLeastOneDocumentPartiesCorrect() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(DOCUMENT_PARTIES),
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          Set<String> errors = new LinkedHashSet<>();
+
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateDocumentParties(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
+          }
+          return ConformanceCheckResult.simple(errors);
+        });
+  }
+
+  private static List<String> validateDocumentParties(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+
+    var documentParties = an.path(DOCUMENT_PARTIES);
+    if (!documentParties.isArray() || documentParties.isEmpty()) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(DOCUMENT_PARTIES));
+      return issues;
+    }
+
+    for (int i = 0; i < documentParties.size(); i++) {
+      String base = DOCUMENT_PARTIES + "[" + i + "]";
+
+      JsonNode documentParty = documentParties.get(i);
+      var partyFunction = documentParty.path("partyFunction");
+
+      if (partyFunction.isMissingNode() || partyFunction.asText().isBlank()) {
+        issues.add(base + ".partyFunction must functionally be present and non-empty");
+      } else {
+        String pf = partyFunction.asText();
+        if (!ANDatasets.PARTY_FUNCTION.contains(pf)) {
+          issues.add(
+              base
+                  + ".partyFunction must be one of: OS, CN, END, RW, CG, N1, N2, NI, SCO, DDR, DDS, COW, COX, CS, MF, WH");
+        }
+      }
+
+      var partyName = documentParty.path("partyName");
+      if (partyName.isMissingNode() || partyName.asText().isBlank()) {
+        issues.add(base + ".partyName must functionally be present and non-empty");
+      }
+
+      var contactDetails = documentParty.path("partyContactDetails");
+      issues.addAll(validatePartyContactDetails(contactDetails, base));
+
+      var address = documentParty.path("address");
+      if (JsonUtil.isMissingOrEmpty(address)) {
+        issues.add(base + ".address must functionally be present and non-empty");
+      } else {
+        boolean hasNonEmptyField =
+            ADDRESS_FIELDS.stream()
+                .anyMatch(f -> address.hasNonNull(f) && !address.get(f).asText().isBlank());
+
+        if (!hasNonEmptyField) {
+          issues.add(
+              base
+                  + ".address must contain at least one non-empty value among: "
+                  + String.join(", ", ADDRESS_FIELDS));
+        }
+      }
+    }
+
+    return issues;
+  }
+
+  private static List<String> validatePartyContactDetails(JsonNode contactArr, String base) {
+    List<String> errors = new ArrayList<>();
+
+    if (!contactArr.isArray() || contactArr.isEmpty()) {
+      errors.add(base + ".partyContactDetails must functionally be present and a non-empty array");
+      return errors;
+    }
+
+    for (int i = 0; i < contactArr.size(); i++) {
+      JsonNode contact = contactArr.get(i);
+      boolean nameOk = contact.hasNonNull("name") && !contact.get("name").asText().isBlank();
+      boolean emailOk = contact.hasNonNull("email") && !contact.get("email").asText().isBlank();
+      boolean phoneOk = contact.hasNonNull("phone") && !contact.get("phone").asText().isBlank();
+
+      if (nameOk && (emailOk || phoneOk)) {
+        return List.of();
+      }
+
+      if (!nameOk) {
+        errors.add(base + ".partyContactDetails[" + i + "].name must be non-empty");
+      }
+      if (!emailOk && !phoneOk) {
+        errors.add(base + ".partyContactDetails[" + i + "] must contain email or phone");
+      }
+    }
+
+    return errors;
+  }
+
+  public static JsonContentCheck atLeastOneTransportCorrect() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(TRANSPORT),
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          Set<String> errors = new LinkedHashSet<>();
+
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateTransport(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
+          }
+          return ConformanceCheckResult.simple(errors);
+        });
+  }
+
+  private static List<String> validateTransport(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+    var t = an.path(TRANSPORT);
+
+    if (JsonUtil.isMissingOrEmpty(t)) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(TRANSPORT));
+      return issues;
+    }
+
+    boolean hasPODvalue =
+        t.hasNonNull("portOfDischargeArrivalDate")
+            && t.path("portOfDischargeArrivalDate").hasNonNull("value");
+
+    boolean hasPODelValue =
+        t.hasNonNull("placeOfDeliveryArrivalDate")
+            && t.path("placeOfDeliveryArrivalDate").hasNonNull("value");
+
+    if (!hasPODvalue && !hasPODelValue) {
+      issues.add(
+          "transport must functionally contain either portOfDischargeArrivalDate.value or placeOfDeliveryArrivalDate.value");
+    }
+
+    var pod = t.path("portOfDischarge");
+    if (JsonUtil.isMissingOrEmpty(pod)) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted("transport.portOfDischarge"));
+      return issues;
+    }
+
+    boolean hasUNLoc =
+        pod.hasNonNull("UNLocationCode") && !pod.path("UNLocationCode").asText().isBlank();
+
+    boolean hasAddress = false;
+    if (pod.hasNonNull("address") && pod.path("address").isObject()) {
+      JsonNode addr = pod.path("address");
+      hasAddress =
+          ADDRESS_FIELDS.stream()
+              .anyMatch(f -> addr.hasNonNull(f) && !addr.get(f).asText().isBlank());
+
+      if (addr.isObject() && !hasAddress) {
+        issues.add(
+            "transport.portOfDischarge.address must contain at least one non-empty field: "
+                + String.join(", ", ADDRESS_FIELDS));
+      }
+    }
+
+    boolean hasFacility = false;
+    if (pod.hasNonNull("facility") && pod.path("facility").isObject()) {
+      var facility = pod.path("facility");
+
+      boolean hasCode =
+          facility.hasNonNull("facilityCode") && !facility.get("facilityCode").asText().isBlank();
+
+      boolean hasProvider =
+          facility.hasNonNull("facilityCodeListProvider")
+              && !facility.get("facilityCodeListProvider").asText().isBlank();
+
+      if (hasProvider) {
+        String provider = facility.get("facilityCodeListProvider").asText();
+        if (!ANDatasets.FACILITY_CODE_LIST_PROVIDER.contains(provider)) {
+          issues.add(
+              "transport.portOfDischarge.facility.facilityCodeListProvider must be one of: SMDG or BIC");
+        }
+      }
+
+      hasFacility = hasCode && hasProvider;
+
+      if (facility.isObject() && !hasFacility) {
+        if (!hasCode) {
+          issues.add(
+              S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(
+                  "transport.portOfDischarge.facility.facilityCode"));
+        }
+        if (!hasProvider) {
+          issues.add(
+              S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(
+                  "transport.portOfDischarge.facility.facilityCodeListProvider"));
+        }
+      }
+    }
+
+    if (!hasUNLoc && !hasAddress && !hasFacility) {
+      issues.add(
+          "transport.portOfDischarge must contain at least one of: UNLocationCode (non empty), a non empty address, or a facility with both facilityCode and facilityCodeListProvider");
+    }
+
+    var legs = t.path("legs");
+    if (!legs.isArray() || legs.isEmpty()) {
+      issues.add("transport.legs must functionally be present and a non-empty array");
+    } else {
+      for (int i = 0; i < legs.size(); i++) {
+        var leg = legs.get(i);
+        var vv = leg.path("vesselVoyage");
+        if (JsonUtil.isMissingOrEmpty(vv)) {
+          issues.add(
+              S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted("transport.legs[" + i + "].vesselVoyage"));
+        } else {
+          if (vv.path("vesselName").asText().isBlank()) {
+            issues.add(
+                S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(
+                    "transport.legs[" + i + "].vesselVoyage.vesselName"));
+          }
+          if (vv.path("carrierImportVoyageNumber").asText().isBlank()) {
+            issues.add(
+                S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(
+                    "transport.legs[" + i + "].vesselVoyage.carrierImportVoyageNumber"));
+          }
+        }
+      }
+    }
+
+    return issues;
+  }
+
+  public static JsonContentCheck atLeastOneUtilizedTransportEquipmentsCorrect() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(
+            UTILIZED_TRANSPORT_EQUIPMENTS),
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          Set<String> errors = new LinkedHashSet<>();
+
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateUTE(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
+          }
+          return ConformanceCheckResult.simple(errors);
+        });
+  }
+
+  private static List<String> validateUTE(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+
+    var utilizedTransporEquipments = an.path(UTILIZED_TRANSPORT_EQUIPMENTS);
+    if (!utilizedTransporEquipments.isArray() || utilizedTransporEquipments.isEmpty()) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(UTILIZED_TRANSPORT_EQUIPMENTS));
+      return issues;
+    }
+
+    boolean foundValidEquipmentRef = false;
+    boolean foundValidISOCode = false;
+    boolean foundValidSeal = false;
+
+    for (int i = 0; i < utilizedTransporEquipments.size(); i++) {
+      var ute = utilizedTransporEquipments.get(i);
+      String base = UTILIZED_TRANSPORT_EQUIPMENTS + "[" + i + "]";
+
+      var eq = ute.path("equipment");
+      if (eq.isObject()) {
+
+        String eqRef = eq.path("equipmentReference").asText("");
+        if (!eqRef.isBlank()) {
+          foundValidEquipmentRef = true;
+        }
+
+        String iso = eq.path("ISOEquipmentCode").asText("");
+        if (!iso.isBlank()) {
+          foundValidISOCode = true;
+        }
+
+      } else {
+        issues.add(base + ".equipment must be present and non-empty");
+      }
+
+      var seals = ute.path("seals");
+      if (seals.isArray() && !seals.isEmpty()) {
+
+        for (var seal : seals) {
+          String val = seal.path("number").asText("");
+          if (!val.isBlank()) {
+            foundValidSeal = true;
+            break;
+          }
+        }
+
+      } else {
+        issues.add(base + ".seals must be a non-empty array");
+      }
+    }
+
+    if (!foundValidEquipmentRef) {
+      issues.add(
+          UTILIZED_TRANSPORT_EQUIPMENTS
+              + " must contain at least one item with a valid equipmentReference");
+    }
+    if (!foundValidISOCode) {
+      issues.add(
+          UTILIZED_TRANSPORT_EQUIPMENTS
+              + " must contain at least one item with a valid ISOEquipmentCode");
+    }
+    if (!foundValidSeal) {
+      issues.add(
+          UTILIZED_TRANSPORT_EQUIPMENTS
+              + " must contain at least one seal entry with a non-empty number");
+    }
+
+    return issues;
+  }
+
+
+  public static JsonContentCheck atLeastOneConsignmentItemsCorrect() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(CONSIGNMENT_ITEMS),
+        (body, ctx) -> {
+          var ans = body.path("arrivalNotices");
+          Set<String> errors = new LinkedHashSet<>();
+
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateConsignmentItems(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
+          }
+
+          return ConformanceCheckResult.simple(errors);
+        });
+  }
+
+  private static List<String> validateConsignmentItems(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+
+    var items = an.path(CONSIGNMENT_ITEMS);
+    if (!items.isArray() || items.isEmpty()) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CONSIGNMENT_ITEMS));
+      return issues;
+    }
+
+    for (int i = 0; i < items.size(); i++) {
+      var item = items.get(i);
+      String base = CONSIGNMENT_ITEMS + "[" + i + "]";
+
+      var descriptionOfGoods = item.path("descriptionOfGoods");
+
+      if (!descriptionOfGoods.isArray() || descriptionOfGoods.isEmpty()) {
+        issues.add(base + ".descriptionOfGoods must be a non-empty array");
+      } else {
+        boolean hasNonBlank = false;
+
+        for (int d = 0; d < descriptionOfGoods.size(); d++) {
+          String txt = descriptionOfGoods.get(d).asText("");
+          if (!txt.isBlank()) {
+            hasNonBlank = true;
+            break;
+          }
+        }
+
+        if (!hasNonBlank) {
+          issues.add(base + ".descriptionOfGoods must contain at least one non-empty entry");
+        }
+      }
+
+      var cargo = item.path("cargoItems");
+      if (!cargo.isArray() || cargo.isEmpty()) {
+        issues.add(base + ".cargoItems must be a non-empty array");
+      } else {
+
+        boolean foundValidEquipmentRef = false;
+        boolean foundValidWeightValue = false;
+        boolean foundValidWeightUnit = false;
+        boolean foundValidOuterPkg = false;
+        boolean foundValidNumPackages = false;
+
+        for (var cItem : cargo) {
+
+          String eqRef = cItem.path("equipmentReference").asText("");
+          if (!eqRef.isBlank()) {
+            foundValidEquipmentRef = true;
+          }
+
+          var gw = cItem.path("cargoGrossWeight");
+          if (gw.isObject()) {
+            var val = gw.path("value");
+            if (val.isNumber() && val.asDouble() > 0) {
+              foundValidWeightValue = true;
+            }
+
+            var unit = gw.path("unit").asText("");
+            if (!unit.isBlank() && ANDatasets.CARGO_GROSS_WEIGHT_UNIT.contains(unit)) {
+              foundValidWeightUnit = true;
+            }
+          }
+          var op = cItem.path("outerPackaging");
+          if (op.isObject()) {
+
+            boolean hasField =
+                (op.hasNonNull("packageCode") && !op.path("packageCode").asText().isBlank())
+                    || (op.hasNonNull("IMOPackagingCode")
+                        && !op.path("IMOPackagingCode").asText().isBlank())
+                    || (op.hasNonNull("description") && !op.path("description").asText().isBlank());
+
+            if (hasField) foundValidOuterPkg = true;
+
+            var numPkgsNode = op.path("numberOfPackages");
+            if (numPkgsNode.isNumber() && numPkgsNode.asInt() > 0) {
+              foundValidNumPackages = true;
+            }
+          }
+        }
+
+        if (!foundValidEquipmentRef) {
+          issues.add(
+              base
+                  + ".cargoItems must contain at least one item with a non empty equipmentReference");
+        }
+        if (!foundValidWeightValue) {
+          issues.add(
+              base
+                  + ".cargoItems must contain at least one item with a positive cargoGrossWeight.value");
+        }
+        if (!foundValidWeightUnit) {
+          issues.add(
+              base
+                  + ".cargoItems must contain at least one item with a valid cargoGrossWeight.unit (KGM/LBR/GRM/ONZ)");
+        }
+        if (!foundValidOuterPkg) {
+          issues.add(
+              base
+                  + ".cargoItems must contain at least one item with a non-empty (either packageCode,IMOPackagingCode or description needs to be present) outerPackaging object");
+        }
+        if (!foundValidNumPackages) {
+          issues.add(
+              base
+                  + ".cargoItems must contain at least one item with a positive outerPackaging.numberOfPackages");
+        }
+      }
+    }
+
+    return issues;
+  }
+
+  public static JsonContentCheck atLeastOneANFreeTimeCorrect() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(FREE_TIMES),
+        (body, contextPath) -> {
+          Set<String> allIssues = new LinkedHashSet<>();
+          var ans = body.path("arrivalNotices");
+
+          if (!ans.isArray() || ans.isEmpty()) {
+            allIssues.add("No Arrival Notices found in the payload");
+            return ConformanceCheckResult.simple(allIssues);
+          }
+
+          for (int i = 0; i < ans.size(); i++) {
+            var an = ans.get(i);
+            List<String> errors = validateFreeTimes(an);
+
+            if (errors.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String e : errors) {
+              allIssues.add("arrivalNotices[" + i + "]." + e);
+            }
+          }
+
+          return ConformanceCheckResult.simple(allIssues);
+        });
+  }
+
+  private static List<String> validateFreeTimes(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+
+    var freeTimes = an.path(FREE_TIMES);
+    if (!freeTimes.isArray() || freeTimes.isEmpty()) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(FREE_TIMES));
+      return issues;
+    }
+
+    boolean foundValidTypeCodes = false;
+    boolean foundValidISOEquipment = false;
+    boolean foundValidEquipRefs = false;
+    boolean foundValidDuration = false;
+    boolean foundValidTimeUnit = false;
+
+    for (int i = 0; i < freeTimes.size(); i++) {
+      var ft = freeTimes.get(i);
+      var typeCodes = ft.path("typeCodes");
+      if (typeCodes.isArray() && !typeCodes.isEmpty()) {
+        boolean valid = false;
+        for (var tc : typeCodes) {
+          String val = tc.asText("");
+          if (ANDatasets.FREE_TIME_TYPE_CODES.contains(val)) {
+            valid = true;
+          }
+        }
+        if (valid) foundValidTypeCodes = true;
+      }
+
+      var isoCodes = ft.path("ISOEquipmentCodes");
+      if (isoCodes.isArray() && !isoCodes.isEmpty()) {
+        boolean valid = false;
+        for (var iso : isoCodes) {
+          String val = iso.asText("");
+          if (!val.isBlank()) valid = true;
+        }
+        if (valid) foundValidISOEquipment = true;
+      }
+
+      var eqRefs = ft.path("equipmentReferences");
+      if (eqRefs.isArray() && !eqRefs.isEmpty()) {
+        boolean valid = false;
+        for (var ref : eqRefs) {
+          String val = ref.asText("");
+          if (!val.isBlank()) valid = true;
+        }
+        if (valid) foundValidEquipRefs = true;
+      }
+
+      var dur = ft.path("duration");
+      if (dur.isNumber() && dur.asDouble() > 0) {
+        foundValidDuration = true;
+      }
+
+      String timeUnit = ft.path("timeUnit").asText("");
+      if (!timeUnit.isBlank() && ANDatasets.FREE_TIME_TIME_UNIT.contains(timeUnit)) {
+        foundValidTimeUnit = true;
+      }
+    }
+
+
+    if (!foundValidTypeCodes) {
+      issues.add(FREE_TIMES + " must functionally contain a valid typeCodes entry (DEM/DET/STO)");
+    }
+    if (!foundValidISOEquipment) {
+      issues.add(FREE_TIMES + " must functionally contain a valid ISOEquipmentCodes value");
+    }
+    if (!foundValidEquipRefs) {
+      issues.add(
+          FREE_TIMES + " must functionally contain atleast one non empty equipmentReference");
+    }
+    if (!foundValidDuration) {
+      issues.add(FREE_TIMES + " must functionally contain a positive duration");
+    }
+    if (!foundValidTimeUnit) {
+      issues.add(FREE_TIMES + " must functionally contain a valid timeUnit (CD/WD/HR)");
+    }
+
+    return issues;
+  }
+
+
+  public static JsonContentCheck atLeastOneANChargesCorrect() {
+    return JsonAttribute.customValidator(
+        ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT.formatted(CHARGES),
+        (body, contextPath) -> {
+          Set<String> allIssues = new LinkedHashSet<>();
+          var ans = body.path("arrivalNotices");
+
+          if (!ans.isArray() || ans.isEmpty()) {
+            allIssues.add("No Arrival Notices found in the payload");
+            return ConformanceCheckResult.simple(allIssues);
+          }
+
+          for (int i = 0; i < ans.size(); i++) {
+            var an = ans.get(i);
+            List<String> errors = validateCharges(an);
+
+            if (errors.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String e : errors) {
+              allIssues.add("arrivalNotices[" + i + "]." + e);
+            }
+          }
+
+          return ConformanceCheckResult.simple(allIssues);
+        });
+  }
+
+  private static List<String> validateCharges(JsonNode an) {
+    List<String> issues = new ArrayList<>();
+
+    var arr = an.path(CHARGES);
+    if (!arr.isArray() || arr.isEmpty()) {
+      issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CHARGES));
+      return issues;
+    }
+
+    boolean foundValidChargeName = false;
+    boolean foundValidCurrencyAmount = false;
+    boolean foundValidCurrencyCode = false;
+    boolean foundValidPaymentTerm = false;
+    boolean foundValidUnitPrice = false;
+    boolean foundValidQuantity = false;
+
+    for (JsonNode charge : arr) {
+
+      String name = charge.path("chargeName").asText("");
+      if (!name.isBlank()) {
+        foundValidChargeName = true;
+      }
+
+      var ca = charge.path("currencyAmount");
+      if (ca.isNumber() && ca.asDouble() > 0) {
+        foundValidCurrencyAmount = true;
+      }
+
+      String currencyCode = charge.path("currencyCode").asText("");
+      if (!currencyCode.isBlank()) {
+        foundValidCurrencyCode = true;
+      }
+
+      var unitPrice = charge.path("unitPrice");
+      if (unitPrice.isNumber() && unitPrice.asDouble() > 0) {
+        foundValidUnitPrice = true;
+      }
+
+      var qty = charge.path("quantity");
+      if (qty.isNumber() && qty.asDouble() > 0) {
+        foundValidQuantity = true;
+      }
+
+      String pt = charge.path("paymentTermCode").asText("");
+      if (!pt.isBlank() && ANDatasets.PAYMENT_TERM_CODE.contains(pt)) {
+        foundValidPaymentTerm = true;
+      }
+    }
+
+    if (!foundValidChargeName) {
+      issues.add(CHARGES + " must contain functionally contain a valid non-empty 'chargeName'");
+    }
+    if (!foundValidCurrencyAmount) {
+      issues.add(CHARGES + " item must functionally contain a positive 'currencyAmount'");
+    }
+    if (!foundValidCurrencyCode) {
+      issues.add(CHARGES + " item must functionally contain a valid non-empty 'currencyCode'");
+    }
+    if (!foundValidPaymentTerm) {
+      issues.add(
+          CHARGES
+              + " item must contain functionally contain a valid 'paymentTermCode' (PRE or COL)");
+    }
+    if (!foundValidUnitPrice) {
+      issues.add(CHARGES + " item must functionally contain a positive 'unitPrice'");
+    }
+    if (!foundValidQuantity) {
+      issues.add(CHARGES + " item must functionally contain a positive 'quantity'");
+    }
+
+    return issues;
+  }
+
 
   private static final List<String> ADDRESS_FIELDS =
       List.of(
@@ -478,661 +1022,39 @@ public class ANChecks {
           "stateRegion",
           "countryCode");
 
-  public static JsonContentCheck validateTransport() {
+
+
+  public static JsonContentCheck atLeastOneTransportDocumentReferenceCorrectANN() {
     return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the 'transport' object",
-        body -> {
-          var basicResult =
-              validateBasicFieldWithLabel("transport", "arrivalNotices.*").validate(body);
-          if (!basicResult.getErrorMessages().isEmpty()) {
-            return basicResult;
-          }
-          var checkResults = new LinkedHashSet<ConformanceCheckResult>();
-          checkResults.add(validateTransportETA("arrivalNotices.*.transport").validate(body));
-          checkResults.add(validatePortOfDischarge("arrivalNotices.*.transport").validate(body));
-          checkResults.add(validatePODAdrressAN().validate(body));
-          checkResults.add(validateLegs().validate(body));
-          checkResults.add(validateVesselVoyage().validate(body));
-          checkResults.add(validateVesselVoyageField("vesselName").validate(body));
-          checkResults.add(validateVesselVoyageField("carrierImportVoyageNumber").validate(body));
-          return ConformanceCheckResult.from(checkResults);
-        });
-  }
+        "At least one Arrival Notice Notification must demonstrate the correct use of the 'transportDocumentReference' attribute",
+        (body, ctx) -> {
+          var ans = body.path("arrivalNoticeNotifications");
+          Set<String> allIssues = new LinkedHashSet<>();
 
-  private static JsonContentCheck validateLegs() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of transport 'Legs' array",
-        mav -> mav.submitAllMatching("arrivalNotices.*.transport"),
-        (node, contextPath) -> {
-          node.get("legs");
-          if (JsonUtil.isMissingOrEmpty(node.get("legs"))) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    contextPath + ".legs must be functionally present and be a non-empty array"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
+          for (int i = 0; i < ans.size(); i++) {
+            var an = ans.get(i);
+            List<String> errors = validateTDR(an);
 
-  private static JsonContentCheck validateTransportETA(String path) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of transport ETA fields",
-        mav -> mav.submitAllMatching(path),
-        (node, contextPath) -> {
-          boolean hasPortOfDischargeValue =
-              node.hasNonNull("portOfDischargeArrivalDate")
-                  && node.path("portOfDischargeArrivalDate").hasNonNull("value");
+            if (errors.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
 
-          boolean hasPlaceOfDeliveryValue =
-              node.hasNonNull("placeOfDeliveryArrivalDate")
-                  && node.path("placeOfDeliveryArrivalDate").hasNonNull("value");
-
-          if (!hasPortOfDischargeValue && !hasPlaceOfDeliveryValue) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    contextPath
-                        + ": must functionally include either 'portOfDischargeArrivalDate.value' "
-                        + "or 'placeOfDeliveryArrivalDate.value'"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  public static JsonContentCheck validatePortOfDischarge(String path) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated correct use of 'portOfDischarge' and its location fields",
-        mav -> mav.submitAllMatching(path),
-        (node, contextPath) -> {
-          var pod = node.get("portOfDischarge");
-
-          if (JsonUtil.isMissingOrEmpty(pod)) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".portOfDischarge must be functionally present"));
-          }
-
-          Set<String> messages = new HashSet<>();
-
-          boolean hasAddress = pod.hasNonNull("address");
-          boolean hasUNLocationCode = pod.hasNonNull("UNLocationCode");
-          boolean hasFacility = pod.hasNonNull("facility");
-
-          if (!hasAddress && !hasUNLocationCode && !hasFacility) {
-            messages.add(
-                contextPath
-                    + ".portOfDischarge must contain at least one of 'address', 'UNLocationCode', or 'facility'");
-          }
-
-          if (hasUNLocationCode) {
-            var unLoc = pod.get("UNLocationCode");
-            if (unLoc.asText().isBlank()) {
-              messages.add(
-                  contextPath + ".portOfDischarge.UNLocationCode must not be empty or blank");
+            for (String e : errors) {
+              allIssues.add("arrivalNotices[" + i + "]." + e);
             }
           }
-
-          if (hasAddress) {
-            var address = pod.get("address");
-
-            if (address.isObject() && address.isEmpty()) {
-              messages.add(
-                  contextPath
-                      + ".portOfDischarge.address if present must contain at least one field");
-            } else {
-              boolean hasNonEmptyField =
-                  ADDRESS_FIELDS.stream()
-                      .anyMatch(
-                          f -> {
-                            var v = address.get(f);
-                            return v != null && v.isTextual() && !v.asText().isBlank();
-                          });
-
-              if (!hasNonEmptyField) {
-                messages.add(
-                    contextPath
-                        + ".portOfDischarge.address must contain at least one non-empty field among: "
-                        + String.join(", ", ADDRESS_FIELDS));
-              }
-            }
-          }
-
-          if (hasFacility) {
-            var facility = pod.get("facility");
-
-            if (facility.isObject()) {
-
-              boolean hasCode = facility.hasNonNull("facilityCode");
-              boolean hasListProvider = facility.hasNonNull("facilityCodeListProvider");
-
-              if (!hasCode) {
-                messages.add(contextPath + ".portOfDischarge.facility must contain 'facilityCode'");
-              } else if (facility.get("facilityCode").asText().isBlank()) {
-                messages.add(
-                    contextPath
-                        + ".portOfDischarge.facility.facilityCode must not be empty or blank");
-              }
-
-              if (!hasListProvider) {
-                messages.add(
-                    contextPath
-                        + ".portOfDischarge.facility must contain 'facilityCodeListProvider'");
-              } else {
-                var providerNode = facility.get("facilityCodeListProvider");
-                var providerValue = providerNode.asText();
-
-                if (providerValue.isBlank()) {
-                  messages.add(
-                      contextPath
-                          + ".portOfDischarge.facility.facilityCodeListProvider must not be empty or blank");
-                } else {
-                  var datasetCheck =
-                      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
-                              ANDatasets.FACILITY_CODE_LIST_PROVIDER)
-                          .validate(
-                              providerNode,
-                              contextPath + ".portOfDischarge.facility.facilityCodeListProvider");
-
-                  messages.addAll(datasetCheck.getErrorMessages());
-                }
-              }
-            }
-          }
-
-          return ConformanceCheckResult.simple(messages);
+          return ConformanceCheckResult.simple(allIssues);
         });
   }
 
-
-  public static JsonContentCheck validateDocumentPartyAddress() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of location information in 'portOfDischarge'",
-        mav -> mav.submitAllMatching("arrivalNotices.*.documentParties.*"),
-        (node, contextPath) -> {
-          if (node.get("address") == null) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".address must be functionally present"));
-          }
-          if (node.hasNonNull("address")
-              && node.get("address").isObject()
-              && node.get("address").isEmpty()) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    contextPath
-                        + ".address must be functionally present and contain at least one field"));
-          } else {
-            boolean hasNonEmpty =
-                ADDRESS_FIELDS.stream()
-                    .anyMatch(
-                        f -> {
-                          var fieldNode = node.get("address").get(f);
-                          return fieldNode != null
-                              && fieldNode.isTextual()
-                              && !fieldNode.asText().isBlank();
-                        });
-
-            if (!hasNonEmpty) {
-              return ConformanceCheckResult.simple(
-                  Set.of(
-                      contextPath
-                          + ".address must contain at least one non-empty value among: "
-                          + String.join(", ", ADDRESS_FIELDS)));
-            }
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  public static JsonContentCheck validatePODAdrressAN() {
-    return validateAddress("portOfDischarge", "arrivalNotices.*.transport.portOfDischarge");
-  }
-
-  public static JsonContentCheck validatePODAdrressANN() {
-    return validateAddress("portOfDischarge", "arrivalNoticeNotifications.*.portOfDischarge");
-  }
-
-  private static JsonContentCheck validateVesselVoyage() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'vesselVoyages' array",
-        mav -> mav.submitAllMatching("arrivalNotices.*.transport.legs.*"),
-        (node, contextPath) -> {
-          var voyage = node.get("vesselVoyage");
-          if (voyage == null || voyage.isEmpty()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".vesselVoyage must be functionally present and not empty"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateVesselVoyageField(String field) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of '" + field + "' in vesselVoyages",
-        mav -> mav.submitAllMatching("arrivalNotices.*.transport.legs.*.vesselVoyage"),
-        (node, contextPath) -> {
-          if (!node.hasNonNull(field)) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must be functionally present"));
-          } else if (node.get(field).asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateFreeTimeAttribute(String attributeName) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'freeTime' '"
-            + attributeName
-            + "' attribute",
-        mav -> mav.submitAllMatching("arrivalNotices.*.freeTimes.*"),
-        (node, contextPath) -> {
-          if (!node.hasNonNull(attributeName)) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    String.format(
-                        "%s.%s must be functionally present", contextPath, attributeName)));
-          } else if (node.get(attributeName).asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    String.format(
-                        "%s.%s must not be empty or blank in the payload",
-                        contextPath, attributeName)));
-          }
-          if (attributeName.equals("timeUnit")) {
-            var validator =
-                JsonAttribute.matchedMustBeDatasetKeywordIfPresent(ANDatasets.FREE_TIME_TIME_UNIT);
-            return validator.validate(node.get(attributeName), contextPath + "." + attributeName);
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  public static JsonContentCheck validateFreeTimeObjectStructure() {
-    return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the 'freeTime' object",
-        body -> {
-          var issues = new LinkedHashSet<String>();
-          var arrivalNotices = body.path("arrivalNotices");
-          for (int i = 0; i < arrivalNotices.size(); i++) {
-            var freeTimes = arrivalNotices.get(i).path("freeTimes");
-            if (!freeTimes.isArray() || freeTimes.isEmpty()) {
-              issues.add(
-                  "ArrivalNotice "
-                      + i
-                      + ": 'freeTimes' must be functionally present and contain at least one item for FREE_TIME scenario");
-            }
-          }
-          issues.addAll(validateFreeTimeArrayAttribute("typeCodes").validate(body).getErrorMessages());
-          issues.addAll(validateFreeTimeArrayAttribute("ISOEquipmentCodes").validate(body).getErrorMessages());
-          issues.addAll(validateFreeTimeArrayAttribute("equipmentReferences").validate(body).getErrorMessages());
-          issues.addAll(validateFreeTimeAttribute("duration").validate(body).getErrorMessages());
-          issues.addAll(validateFreeTimeAttribute("timeUnit").validate(body).getErrorMessages());
-
-          return ConformanceCheckResult.simple(issues);
-        });
-  }
-
-
-  private static JsonContentCheck validateFreeTimeArrayAttribute(String attributeName) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'freeTime' '"
-            + attributeName
-            + "' attribute",
-        mav -> mav.submitAllMatching("arrivalNotices.*.freeTimes.*"),
-        (node, contextPath) -> {
-          var arrayNode = node.get(attributeName);
-          if (arrayNode == null || !arrayNode.isArray() || arrayNode.isEmpty()) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    String.format(
-                        "%s.%s must be functionally present and be a non-empty array",
-                        contextPath, attributeName)));
-          }
-
-          boolean allEmpty = true;
-          for (var element : arrayNode) {
-            if (element != null && element.isTextual() && !element.asText().trim().isEmpty()) {
-              allEmpty = false;
-              break;
-            }
-          }
-          if (allEmpty) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    String.format(
-                        "%s.%s must contain at least one non-empty value",
-                        contextPath, attributeName)));
-          }
-
-          if (attributeName.equals("typeCodes")) {
-            var results = new LinkedHashSet<ConformanceCheckResult>();
-            for (var element : arrayNode) {
-              var validator =
-                  JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
-                      ANDatasets.FREE_TIME_TYPE_CODES);
-              results.add(validator.validate(element, contextPath + "." + attributeName));
-            }
-            return ConformanceCheckResult.from(results);
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateChargeAttribute(String attributeName) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'charges' '"
-            + attributeName
-            + "' attribute",
-        mav -> mav.submitAllMatching("arrivalNotices.*.charges.*"),
-        (node, contextPath) -> {
-          if (!node.hasNonNull(attributeName)) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    String.format(
-                        "%s.%s must be functionally present", contextPath, attributeName)));
-          } else if (node.get(attributeName).asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    String.format(
-                        "%s.%s must not be empty or blank in the payload",
-                        contextPath, attributeName)));
-          }
-          if (attributeName.equals("paymentTermCode")) {
-            var validator =
-                JsonAttribute.matchedMustBeDatasetKeywordIfPresent(ANDatasets.PAYMENT_TERM_CODE);
-            return validator.validate(node.get(attributeName), contextPath + "." + attributeName);
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  public static JsonContentCheck validateChargesStructure() {
-    return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the 'charges' object",
-        body -> {
-          var results = new LinkedHashSet<ConformanceCheckResult>();
-          var arrivalNotices = body.path("arrivalNotices");
-          for (int i = 0; i < arrivalNotices.size(); i++) {
-            var freeTimes = arrivalNotices.get(i).path("charges");
-            if (freeTimes == null || !freeTimes.isArray() || freeTimes.isEmpty()) {
-              results.add(
-                  ConformanceCheckResult.simple(
-                      Set.of(
-                          "ArrivalNotice "
-                              + i
-                              + ": 'charges' must be functionally present and contain at least one item for FREIGHTED scenario")));
-            }
-          }
-          results.add(validateChargeAttribute("chargeName").validate(body));
-          results.add(validateChargeAttribute("currencyAmount").validate(body));
-          results.add(validateChargeAttribute("currencyCode").validate(body));
-          results.add(validateChargeAttribute("unitPrice").validate(body));
-          results.add(validateChargeAttribute("quantity").validate(body));
-          results.add(validateChargeAttribute("paymentTermCode").validate(body));
-          return ConformanceCheckResult.from(results);
-        });
-  }
-
-  public static JsonContentCheck validateUtilizedTransportEquipments() {
-    return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the 'utilizedTransportEquipments' object",
-        body -> {
-          var basicResult =
-              validateBasicFieldWithLabel("utilizedTransportEquipments", "arrivalNotices.*")
-                  .validate(body);
-          if (!basicResult.getErrorMessages().isEmpty()) {
-            return basicResult;
-          }
-          var issues = new LinkedHashSet<String>();
-          issues.addAll(validateUTEEquipmentPresence().validate(body).getErrorMessages());
-          issues.addAll(
-              validateUTEEquipmentField("equipmentReference").validate(body).getErrorMessages());
-          issues.addAll(
-              validateUTEEquipmentField("ISOEquipmentCode").validate(body).getErrorMessages());
-          issues.addAll(validateUTESealsPresence().validate(body).getErrorMessages());
-          issues.addAll(validateUTESealNumber().validate(body).getErrorMessages());
-
-          return ConformanceCheckResult.simple(issues);
-        });
-  }
-
-  private static JsonContentCheck validateUTEEquipmentField(String field) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'utilizedTransportEquipments.equipment."
-            + field
-            + "' attribute",
-        mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*.equipment"),
-        (node, contextPath) -> {
-          if (!node.hasNonNull(field)) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must be functionally present"));
-          } else if (node.get(field).asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateUTEEquipmentPresence() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'utilizedTransportEquipments.equipment' object",
-        mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*"),
-        (ute, contextPath) -> {
-          if (ute.get("equipment") == null || ute.get("equipment").isNull()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".equipment must be functionally present"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateUTESealsPresence() {
-    return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the 'utilizedTransportEquipments.seals' array",
-        body -> {
-          var issues = new LinkedHashSet<String>();
-          var arrivalNotices = body.path("arrivalNotices");
-
-          for (int i = 0; i < arrivalNotices.size(); i++) {
-            var utes = arrivalNotices.get(i).path("utilizedTransportEquipments");
-            for (int j = 0; j < utes.size(); j++) {
-              var seals = utes.get(j).path("seals");
-              if (!seals.isArray() || seals.isEmpty()) {
-                issues.add(
-                    String.format(
-                        "arrivalNotices[%d].utilizedTransportEquipments[%d].seals must functionally be a non-empty array",
-                        i, j));
-              }
-            }
-          }
-
-          return ConformanceCheckResult.simple(issues);
-        });
-  }
-
-  private static JsonContentCheck validateUTESealNumber() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'utilizedTransportEquipments.seals.number' attribute",
-        mav -> mav.submitAllMatching("arrivalNotices.*.utilizedTransportEquipments.*.seals.*"),
-        (seal, contextPath) -> {
-          if (!seal.hasNonNull("number")) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".number must be functionally present"));
-          } else if (seal.get("number").asText().isBlank())
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".number must not be empty or blank in the payload"));
-          {
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  public static JsonContentCheck validateConsignmentItems() {
-    return JsonAttribute.customValidator(
-        "The publisher has demonstrated the correct use of the 'consignmentItem' object",
-        body -> {
-          var basicResult =
-              validateBasicFieldWithLabel("consignmentItems", "arrivalNotices.*").validate(body);
-          if (!basicResult.getErrorMessages().isEmpty()) {
-            return basicResult;
-          }
-          var issues = new LinkedHashSet<String>();
-          issues.addAll(
-              validateConsignmentItemsDescriptionOfGoods().validate(body).getErrorMessages());
-          issues.addAll(validateCargoItemPresence().validate(body).getErrorMessages());
-          issues.addAll(
-              validateCargoItemField("equipmentReference").validate(body).getErrorMessages());
-          issues.addAll(
-              validateCargoItemField("cargoGrossWeight").validate(body).getErrorMessages());
-          issues.addAll(validateCargoGrossWeightField("value").validate(body).getErrorMessages());
-          issues.addAll(validateCargoGrossWeightField("unit").validate(body).getErrorMessages());
-          issues.addAll(validateOuterPackagingStructure().validate(body).getErrorMessages());
-          issues.addAll(validateOuterPackagingFields().validate(body).getErrorMessages());
-
-          return ConformanceCheckResult.simple(issues);
-        });
-  }
-  private static JsonContentCheck validateConsignmentItemsDescriptionOfGoods() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'descriptionOfGoods' field",
-        mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*"),
-        (ci, contextPath) -> {
-          var node = ci.get("descriptionOfGoods");
-          if (node == null || !node.isArray() || node.isEmpty()) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    contextPath
-                        + ".descriptionOfGoods must functionally be a non-empty array of strings"));
-          }
-          boolean allEmpty = true;
-          for (var item : node) {
-            if (item != null && item.isTextual() && !item.asText().trim().isEmpty()) {
-              allEmpty = false;
-              break;
-            }
-          }
-
-          if (allEmpty) {
-            return ConformanceCheckResult.simple(
-                Set.of(
-                    contextPath
-                        + ".descriptionOfGoods must contain at least one non-empty string value"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateCargoItemPresence() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'cargoItems' array",
-        mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*"),
-        (ci, contextPath) -> {
-          var items = ci.get("cargoItems");
-          if (items == null || !items.isArray() || items.isEmpty()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".cargoItems must functionally be a non-empty array"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateCargoItemField(String field) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'cargoItems."
-            + field
-            + "' attribute",
-        mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*.cargoItems.*"),
-        (item, contextPath) -> {
-          if (!item.hasNonNull(field)) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must be functionally present"));
-          } else if (!field.equals("cargoGrossWeight") && item.get(field).asText().isBlank()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateCargoGrossWeightField(String field) {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'cargoGrossWeight."
-            + field
-            + "' attribute",
-        mav ->
-            mav.submitAllMatching(
-                "arrivalNotices.*.consignmentItems.*.cargoItems.*.cargoGrossWeight"),
-        (item, contextPath) -> {
-          if (!item.hasNonNull(field)) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + "." + field + " must be functionally present"));
-          }
-          if (field.equals("unit")) {
-            if (item.get(field).asText().isBlank()) {
-              return ConformanceCheckResult.simple(
-                  Set.of(contextPath + "." + field + " must not be empty or blank in the payload"));
-            } else {
-              final var fieldNode = item.path(field);
-              final String fieldPath = contextPath + "." + field;
-              var validator =
-                  JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
-                      ANDatasets.CARGO_GROSS_WEIGHT_UNIT);
-
-              return validator.validate(fieldNode, fieldPath);
-            }
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateOuterPackagingStructure() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'outerPackaging' object",
-        mav -> mav.submitAllMatching("arrivalNotices.*.consignmentItems.*.cargoItems.*"),
-        (item, contextPath) -> {
-          var op = item.get("outerPackaging");
-          if (op == null || !op.isObject() || op.isEmpty()) {
-            return ConformanceCheckResult.simple(
-                Set.of(contextPath + ".outerPackaging must functionally be a non-empty object"));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        });
-  }
-
-  private static JsonContentCheck validateOuterPackagingFields() {
-    return JsonAttribute.allIndividualMatchesMustBeValidWithoutRelevance(
-        "The publisher has demonstrated the correct use of the 'outerPackaging' required fields",
-        mav ->
-            mav.submitAllMatching(
-                "arrivalNotices.*.consignmentItems.*.cargoItems.*.outerPackaging."),
-        (op, contextPath) -> {
-          var issues = new LinkedHashSet<String>();
-
-          if (!op.hasNonNull("packageCode")
-              && !op.hasNonNull("IMOPackagingCode")
-              && !op.hasNonNull("description")) {
-            issues.add(
-                contextPath
-                    + " must contain at least one of 'packageCode', 'IMOPackagingCode', or 'description'");
-          }
-
-          if (op.get("description") != null && op.get("description").asText().isBlank()) {
-            issues.add(contextPath + ".description must not be empty or blank in the payload");
-          }
-          if (op.get("packageCode") != null && op.get("packageCode").asText().isBlank()) {
-            issues.add(contextPath + ".packageCode must not be empty or blank in the payload");
-          }
-          if (op.get("IMOPackagingCode") != null && op.get("IMOPackagingCode").asText().isBlank()) {
-            issues.add(contextPath + ".IMOPackagingCode must not be empty or blank in the payload");
-          }
-          if (!op.hasNonNull("numberOfPackages")) {
-            issues.add(contextPath + ".numberOfPackages must be functionally present");
-          }
-
-          return ConformanceCheckResult.simple(issues);
-        });
-  }
+  public static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION =
+      JsonAttribute.customValidator(
+          "At least one Arrival Notice Notification must be included in a message sent to the sandbox during conformance testing",
+          body ->
+              ConformanceCheckResult.simple(
+                  (body.path("arrivalNoticeNotifications").isEmpty())
+                      ? Set.of("The response body must not be empty")
+                      : Set.of()));
 
   public static List<JsonRebasableContentCheck> guardEachWithBodyPresent(
       List<JsonContentCheck> checks, String payload) {

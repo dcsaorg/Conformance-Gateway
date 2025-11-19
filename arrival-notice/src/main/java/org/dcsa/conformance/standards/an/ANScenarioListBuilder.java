@@ -39,7 +39,7 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
                 "GET-only scenarios (for adopters only supporting GET)",
                 noAction()
                     .thenEither(
-                        supplyScenarioParameters(ScenarioType.REGULAR).then(getArrivalNotices()),
+                        supplyScenarioParameters(ScenarioType.BASIC).then(getArrivalNotices()),
                         supplyScenarioParameters(ScenarioType.FREIGHTED).then(getArrivalNotices()),
                         supplyScenarioParameters(ScenarioType.FREE_TIME)
                             .then(getArrivalNotices()))),
@@ -47,7 +47,7 @@ public class ANScenarioListBuilder extends ScenarioListBuilder<ANScenarioListBui
                 "POST-only scenarios (for adopters only supporting POST)",
                 noAction()
                     .thenEither(
-                        postArrivalNotices(ScenarioType.REGULAR),
+                        postArrivalNotices(ScenarioType.BASIC),
                         postArrivalNotices(ScenarioType.FREIGHTED),
                         postArrivalNotices(ScenarioType.FREE_TIME),
                         postArrivalNoticesNotification())))

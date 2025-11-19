@@ -56,6 +56,39 @@ public class ANChecks {
         checks);
   }
 
+  public static ActionCheck getANGetResponseChecks(
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      Supplier<DynamicScenarioParameters> dspSupplier) {
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(nonEmptyArrivalNotices());
+    checks.addAll(
+        guardEachWithBodyPresent(
+            getPayloadChecks(dspSupplier.get().scenarioType()), "arrivalNotices"));
+    return JsonAttribute.contentChecks(
+        ANRole::isPublisher,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion,
+        checks);
+  }
+
+  public static ActionCheck getANNPostPayloadChecks(
+      UUID matchedExchangeUuid, String expectedApiVersion) {
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION);
+
+    var checksANN = new ArrayList<JsonContentCheck>();
+    checksANN.add(atLeastOneTransportDocumentReferenceCorrectANN());
+    checks.addAll(guardEachWithBodyPresent(checksANN, "arrivalNoticeNotifications"));
+    return JsonAttribute.contentChecks(
+        ANRole::isPublisher,
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST,
+        expectedApiVersion,
+        checks);
+  }
+
   private static ArrayList<JsonContentCheck> getPayloadChecks(String scenarioType) {
     var checks = new ArrayList<JsonContentCheck>();
 
@@ -1000,35 +1033,7 @@ public class ANChecks {
           "stateRegion",
           "countryCode");
 
-  public static ActionCheck getANGetResponseChecks(
-      UUID matchedExchangeUuid,
-      String expectedApiVersion,
-      Supplier<DynamicScenarioParameters> dspSupplier) {
-    var checks = new ArrayList<JsonContentCheck>();
-    checks.add(nonEmptyArrivalNotices());
-    checks.addAll(
-        guardEachWithBodyPresent(
-            getPayloadChecks(dspSupplier.get().scenarioType()), "arrivalNotices"));
-    return JsonAttribute.contentChecks(
-        ANRole::isPublisher,
-        matchedExchangeUuid,
-        HttpMessageType.RESPONSE,
-        expectedApiVersion,
-        checks);
-  }
 
-
-  public static ActionCheck getANNPostPayloadChecks(
-      UUID matchedExchangeUuid, String expectedApiVersion) {
-    var checks = new ArrayList<JsonContentCheck>();
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE_NOTIFICATION);
-    return JsonAttribute.contentChecks(
-        ANRole::isPublisher,
-        matchedExchangeUuid,
-        HttpMessageType.REQUEST,
-        expectedApiVersion,
-        checks);
-  }
 
   public static JsonContentCheck atLeastOneTransportDocumentReferenceCorrectANN() {
     return JsonAttribute.customValidator(

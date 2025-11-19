@@ -20,7 +20,8 @@ import org.dcsa.conformance.standards.an.party.DynamicScenarioParameters;
 
 public class ANChecks {
 
-  private static final String S_MUST_BE_PRESENT_AND_NON_EMPTY = "%s must be present and non-empty";
+  private static final String S_MUST_BE_PRESENT_AND_NON_EMPTY =
+      "%s must functionally be present and non-empty";
   private static final String ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_OBJECT =
       "At least one Arrival Notice must demonstrate the correct use of a '%s' object";
   private static final String ATLEAST_ONE_AN_MUST_DEMONSTRATE_THE_CORRECT_USE_OF_S_ATTRIBUTE =
@@ -130,14 +131,17 @@ public class ANChecks {
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
 
-          for (var an : ans) {
-            List<String> local = validateCarrierCode(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNotices[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateCarrierCode(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
           }
 
           return ConformanceCheckResult.simple(errors);
@@ -160,14 +164,17 @@ public class ANChecks {
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
 
-          for (var an : ans) {
-            List<String> local = validateTDR(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNotices[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateTDR(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
           }
           return ConformanceCheckResult.simple(errors);
         });
@@ -189,14 +196,17 @@ public class ANChecks {
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
 
-          for (var an : ans) {
-            List<String> local = validateCarrierCodeListProvider(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNotices[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateCarrierCodeListProvider(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
           }
           return ConformanceCheckResult.simple(errors);
         });
@@ -226,15 +236,19 @@ public class ANChecks {
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
 
-          for (var an : ans) {
-            List<String> local = validateCarrierContactInformation(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNotices[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateCarrierContactInformation(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
           }
+
           return ConformanceCheckResult.simple(errors);
         });
   }
@@ -248,15 +262,12 @@ public class ANChecks {
       return errors;
     }
 
-    boolean anyValid = false;
-    int idx = 0;
-
-    for (JsonNode cci : ccis) {
+    for (int i = 0; i < ccis.size(); i++) {
       List<String> local = new ArrayList<>();
+      var cci = ccis.get(i);
 
       if (cci.path("name").asText().isBlank()) {
-        local.add(
-            CARRIER_CONTACT_INFORMATION + "[" + idx + "].name must functionally be non-empty");
+        local.add(CARRIER_CONTACT_INFORMATION + "[" + i + "].name must functionally be non-empty");
       }
 
       boolean hasEmailOrPhone =
@@ -266,21 +277,15 @@ public class ANChecks {
         local.add(
             CARRIER_CONTACT_INFORMATION
                 + "["
-                + idx
+                + i
                 + "] must functionally contain either email or phone");
       }
 
       if (local.isEmpty()) {
-        anyValid = true;
-        break;
+        return List.of();
       }
 
       errors.addAll(local);
-      idx++;
-    }
-
-    if (anyValid) {
-      return List.of();
     }
 
     return errors;
@@ -293,14 +298,17 @@ public class ANChecks {
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
 
-          for (var an : ans) {
-            List<String> local = validateDeliveryTypeAtDestination(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNotices[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateDeliveryTypeAtDestination(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
           }
           return ConformanceCheckResult.simple(errors);
         });
@@ -330,14 +338,17 @@ public class ANChecks {
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
 
-          for (var an : ans) {
-            List<String> local = validateDocumentParties(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNotices[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateDocumentParties(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
           }
           return ConformanceCheckResult.simple(errors);
         });
@@ -352,10 +363,10 @@ public class ANChecks {
       return issues;
     }
 
-    int i = 0;
-    for (JsonNode documentParty : documentParties) {
+    for (int i = 0; i < documentParties.size(); i++) {
       String base = DOCUMENT_PARTIES + "[" + i + "]";
 
+      JsonNode documentParty = documentParties.get(i);
       var partyFunction = documentParty.path("partyFunction");
 
       if (partyFunction.isMissingNode() || partyFunction.asText().isBlank()) {
@@ -392,8 +403,6 @@ public class ANChecks {
                   + String.join(", ", ADDRESS_FIELDS));
         }
       }
-
-      i++;
     }
 
     return issues;
@@ -407,31 +416,22 @@ public class ANChecks {
       return errors;
     }
 
-    boolean anyValid = false;
-    int idx = 0;
-
-    for (JsonNode contact : contactArr) {
+    for (int i = 0; i < contactArr.size(); i++) {
+      JsonNode contact = contactArr.get(i);
       boolean nameOk = contact.hasNonNull("name") && !contact.get("name").asText().isBlank();
       boolean emailOk = contact.hasNonNull("email") && !contact.get("email").asText().isBlank();
       boolean phoneOk = contact.hasNonNull("phone") && !contact.get("phone").asText().isBlank();
 
       if (nameOk && (emailOk || phoneOk)) {
-        anyValid = true;
-        break;
+        return List.of();
       }
 
       if (!nameOk) {
-        errors.add(base + ".partyContactDetails[" + idx + "].name must be non-empty");
+        errors.add(base + ".partyContactDetails[" + i + "].name must be non-empty");
       }
       if (!emailOk && !phoneOk) {
-        errors.add(base + ".partyContactDetails[" + idx + "] must contain email or phone");
+        errors.add(base + ".partyContactDetails[" + i + "] must contain email or phone");
       }
-
-      idx++;
-    }
-
-    if (anyValid) {
-      return List.of();
     }
 
     return errors;
@@ -443,16 +443,17 @@ public class ANChecks {
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
 
-          for (var an : ans) {
-            List<String> local = validateTransport(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNotices[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateTransport(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
           }
-
           return ConformanceCheckResult.simple(errors);
         });
   }
@@ -544,10 +545,10 @@ public class ANChecks {
 
     var legs = t.path("legs");
     if (!legs.isArray() || legs.isEmpty()) {
-      issues.add("transport.legs must be present and a non-empty array");
+      issues.add("transport.legs must functionally be present and a non-empty array");
     } else {
-      int i = 0;
-      for (var leg : legs) {
+      for (int i = 0; i < legs.size(); i++) {
+        var leg = legs.get(i);
         var vv = leg.path("vesselVoyage");
         if (JsonUtil.isMissingOrEmpty(vv)) {
           issues.add(
@@ -564,7 +565,6 @@ public class ANChecks {
                     "transport.legs[" + i + "].vesselVoyage.carrierImportVoyageNumber"));
           }
         }
-        i++;
       }
     }
 
@@ -578,16 +578,17 @@ public class ANChecks {
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
 
-          for (var an : ans) {
-            List<String> local = validateUTE(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNotices[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateUTE(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
           }
-
           return ConformanceCheckResult.simple(errors);
         });
   }
@@ -595,8 +596,8 @@ public class ANChecks {
   private static List<String> validateUTE(JsonNode an) {
     List<String> issues = new ArrayList<>();
 
-    var arr = an.path(UTILIZED_TRANSPORT_EQUIPMENTS);
-    if (!arr.isArray() || arr.isEmpty()) {
+    var utilizedTransporEquipments = an.path(UTILIZED_TRANSPORT_EQUIPMENTS);
+    if (!utilizedTransporEquipments.isArray() || utilizedTransporEquipments.isEmpty()) {
       issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(UTILIZED_TRANSPORT_EQUIPMENTS));
       return issues;
     }
@@ -605,8 +606,8 @@ public class ANChecks {
     boolean foundValidISOCode = false;
     boolean foundValidSeal = false;
 
-    int i = 0;
-    for (var ute : arr) {
+    for (int i = 0; i < utilizedTransporEquipments.size(); i++) {
+      var ute = utilizedTransporEquipments.get(i);
       String base = UTILIZED_TRANSPORT_EQUIPMENTS + "[" + i + "]";
 
       var eq = ute.path("equipment");
@@ -640,8 +641,6 @@ public class ANChecks {
       } else {
         issues.add(base + ".seals must be a non-empty array");
       }
-
-      i++;
     }
 
     if (!foundValidEquipmentRef) {
@@ -670,14 +669,16 @@ public class ANChecks {
         (body, ctx) -> {
           var ans = body.path("arrivalNotices");
           Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
 
-          for (var an : ans) {
-            List<String> local = validateConsignmentItems(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNotices[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var errorsAtIndex = validateConsignmentItems(ans.get(i));
+
+            if (errorsAtIndex.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+            for (String err : errorsAtIndex) {
+              errors.add("arrivalNotices[" + i + "]." + err);
+            }
           }
 
           return ConformanceCheckResult.simple(errors);
@@ -687,14 +688,14 @@ public class ANChecks {
   private static List<String> validateConsignmentItems(JsonNode an) {
     List<String> issues = new ArrayList<>();
 
-    var arr = an.path(CONSIGNMENT_ITEMS);
-    if (!arr.isArray() || arr.isEmpty()) {
+    var items = an.path(CONSIGNMENT_ITEMS);
+    if (!items.isArray() || items.isEmpty()) {
       issues.add(S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(CONSIGNMENT_ITEMS));
       return issues;
     }
 
-    int i = 0;
-    for (var item : arr) {
+    for (int i = 0; i < items.size(); i++) {
+      var item = items.get(i);
       String base = CONSIGNMENT_ITEMS + "[" + i + "]";
 
       var descriptionOfGoods = item.path("descriptionOfGoods");
@@ -791,8 +792,6 @@ public class ANChecks {
                   + ".cargoItems must contain at least one item with a positive outerPackaging.numberOfPackages");
         }
       }
-
-      i++;
     }
 
     return issues;
@@ -810,9 +809,8 @@ public class ANChecks {
             return ConformanceCheckResult.simple(allIssues);
           }
 
-          int anIndex = 0;
-
-          for (var an : ans) {
+          for (int i = 0; i < ans.size(); i++) {
+            var an = ans.get(i);
             List<String> errors = validateFreeTimes(an);
 
             if (errors.isEmpty()) {
@@ -820,10 +818,8 @@ public class ANChecks {
             }
 
             for (String e : errors) {
-              allIssues.add("arrivalNotices[" + anIndex + "]." + e);
+              allIssues.add("arrivalNotices[" + i + "]." + e);
             }
-
-            anIndex++;
           }
 
           return ConformanceCheckResult.simple(allIssues);
@@ -845,9 +841,8 @@ public class ANChecks {
     boolean foundValidDuration = false;
     boolean foundValidTimeUnit = false;
 
-    int i = 0;
-    for (var ft : freeTimes) {
-
+    for (int i = 0; i < freeTimes.size(); i++) {
+      var ft = freeTimes.get(i);
       var typeCodes = ft.path("typeCodes");
       if (typeCodes.isArray() && !typeCodes.isEmpty()) {
         boolean valid = false;
@@ -889,8 +884,6 @@ public class ANChecks {
       if (!timeUnit.isBlank() && ANDatasets.FREE_TIME_TIME_UNIT.contains(timeUnit)) {
         foundValidTimeUnit = true;
       }
-
-      i++;
     }
 
 
@@ -929,9 +922,8 @@ public class ANChecks {
             return ConformanceCheckResult.simple(allIssues);
           }
 
-          int anIndex = 0;
-
-          for (var an : ans) {
+          for (int i = 0; i < ans.size(); i++) {
+            var an = ans.get(i);
             List<String> errors = validateCharges(an);
 
             if (errors.isEmpty()) {
@@ -939,10 +931,8 @@ public class ANChecks {
             }
 
             for (String e : errors) {
-              allIssues.add("arrivalNotices[" + anIndex + "]." + e);
+              allIssues.add("arrivalNotices[" + i + "]." + e);
             }
-
-            anIndex++;
           }
 
           return ConformanceCheckResult.simple(allIssues);
@@ -1040,17 +1030,21 @@ public class ANChecks {
         "At least one Arrival Notice Notification must demonstrate the correct use of the 'transportDocumentReference' attribute",
         (body, ctx) -> {
           var ans = body.path("arrivalNoticeNotifications");
-          Set<String> errors = new LinkedHashSet<>();
-          int i = 0;
+          Set<String> allIssues = new LinkedHashSet<>();
 
-          for (var an : ans) {
-            List<String> local = validateTDR(an);
-            final int idx = i;
-            if (local.isEmpty()) return ConformanceCheckResult.simple(Set.of());
-            local.forEach(e -> errors.add("arrivalNoticeNotifications[" + idx + "]." + e));
-            i++;
+          for (int i = 0; i < ans.size(); i++) {
+            var an = ans.get(i);
+            List<String> errors = validateTDR(an);
+
+            if (errors.isEmpty()) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+
+            for (String e : errors) {
+              allIssues.add("arrivalNotices[" + i + "]." + e);
+            }
           }
-          return ConformanceCheckResult.simple(errors);
+          return ConformanceCheckResult.simple(allIssues);
         });
   }
 

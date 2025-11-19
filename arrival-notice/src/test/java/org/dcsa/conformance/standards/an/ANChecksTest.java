@@ -60,9 +60,6 @@ class ANChecksTest {
     assertTrue(isOk(ANChecks.atLeastOneCarrierCodeCorrect(), body));
   }
 
-  // ---------------------------------------------------------------------------
-  // transportDocumentReference
-  // ---------------------------------------------------------------------------
 
   @Test
   void atLeastOneTransportDocumentReferenceCorrect_fails_when_all_missing() {
@@ -74,10 +71,6 @@ class ANChecksTest {
     an.put("transportDocumentReference", "TDR12345");
     assertTrue(isOk(ANChecks.atLeastOneTransportDocumentReferenceCorrect(), body));
   }
-
-  // ---------------------------------------------------------------------------
-  // carrierCodeListProvider
-  // ---------------------------------------------------------------------------
 
   @Test
   void atLeastOneCarrierCodeListProviderCorrect_fails_when_missing() {
@@ -102,9 +95,7 @@ class ANChecksTest {
     assertTrue(isOk(ANChecks.atLeastOneCarrierCodeListProviderCorrect(), body));
   }
 
-  // ---------------------------------------------------------------------------
-  // carrierContactInformation
-  // ---------------------------------------------------------------------------
+
 
   @Test
   void atLeastOneCarrierContactInformationCorrect_fails_when_array_missing() {
@@ -114,7 +105,7 @@ class ANChecksTest {
   @Test
   void atLeastOneCarrierContactInformationCorrect_fails_when_all_invalid() {
     ArrayNode ccis = an.putArray("carrierContactInformation");
-    ccis.addObject(); // name/email/phone all blank/missing
+    ccis.addObject();
     assertTrue(isFail(ANChecks.atLeastOneCarrierContactInformationCorrect(), body));
   }
 
@@ -125,9 +116,6 @@ class ANChecksTest {
     assertTrue(isOk(ANChecks.atLeastOneCarrierContactInformationCorrect(), body));
   }
 
-  // ---------------------------------------------------------------------------
-  // deliveryTypeAtDestination
-  // ---------------------------------------------------------------------------
 
   @Test
   void atLeastOneDeliveryTypeAtDestination_fails_when_missing() {
@@ -142,14 +130,11 @@ class ANChecksTest {
 
   @Test
   void atLeastOneDeliveryTypeAtDestination_passes_when_valid() {
-    // Based on message in ANChecks: CY / SD / CFS
+
     an.put("deliveryTypeAtDestination", "CY");
     assertTrue(isOk(ANChecks.atLeastOneDeliveryTypeAtDestination(), body));
   }
 
-  // ---------------------------------------------------------------------------
-  // documentParties
-  // ---------------------------------------------------------------------------
 
   @Test
   void atLeastOneDocumentPartiesCorrect_fails_when_missing_array() {
@@ -160,7 +145,6 @@ class ANChecksTest {
   void atLeastOneDocumentPartiesCorrect_fails_when_party_incomplete() {
     var parties = an.putArray("documentParties");
     var p = parties.addObject();
-    // Missing function, name, contactDetails, address -> errors
     ConformanceCheckResult r = ANChecks.atLeastOneDocumentPartiesCorrect().validate(body);
     assertFalse(r.getErrorMessages().isEmpty());
   }
@@ -183,9 +167,6 @@ class ANChecksTest {
     assertTrue(r.getErrorMessages().isEmpty());
   }
 
-  // ---------------------------------------------------------------------------
-  // transport
-  // ---------------------------------------------------------------------------
 
   @Test
   void atLeastOneTransportCorrect_fails_when_transport_missing() {
@@ -217,7 +198,6 @@ class ANChecksTest {
 
     var pod = transport.putObject("portOfDischarge");
     var facility = pod.putObject("facility");
-    // facilityCode present but facilityCodeListProvider missing
     facility.put("facilityCode", "ADT");
 
     var legs = transport.putArray("legs");
@@ -230,9 +210,6 @@ class ANChecksTest {
     assertFalse(r.getErrorMessages().isEmpty());
   }
 
-  // ---------------------------------------------------------------------------
-  // utilizedTransportEquipments
-  // ---------------------------------------------------------------------------
 
   @Test
   void atLeastOneUtilizedTransportEquipmentsCorrect_fails_when_missing_array() {
@@ -273,9 +250,6 @@ class ANChecksTest {
     assertFalse(r.getErrorMessages().isEmpty());
   }
 
-  // ---------------------------------------------------------------------------
-  // consignmentItems
-  // ---------------------------------------------------------------------------
 
   @Test
   void atLeastOneConsignmentItemsCorrect_fails_when_missing_array() {
@@ -323,13 +297,9 @@ class ANChecksTest {
     assertFalse(r.getErrorMessages().isEmpty());
   }
 
-  // ---------------------------------------------------------------------------
-  // FREE_TIME scenario: atLeastOneANFreeTimeCorrect
-  // ---------------------------------------------------------------------------
 
   @Test
   void atLeastOneANFreeTimeCorrect_fails_when_no_freeTimes() {
-    // arrivalNotices[0] exists but no freeTimes
     assertTrue(isFail(ANChecks.atLeastOneANFreeTimeCorrect(), body));
   }
 
@@ -357,15 +327,12 @@ class ANChecksTest {
     ft.putArray("ISOEquipmentCodes").add("22G1");
     ft.putArray("equipmentReferences").add("MSCU1234567");
     ft.put("duration", 5);
-    ft.put("timeUnit", "DAY"); // invalid
+    ft.put("timeUnit", "DAY");
 
     ConformanceCheckResult r = ANChecks.atLeastOneANFreeTimeCorrect().validate(body);
     assertFalse(r.getErrorMessages().isEmpty());
   }
 
-  // ---------------------------------------------------------------------------
-  // FREIGHTED scenario: atLeastOneANChargesCorrect
-  // ---------------------------------------------------------------------------
 
   @Test
   void atLeastOneANChargesCorrect_fails_when_no_charges() {
@@ -391,7 +358,6 @@ class ANChecksTest {
   void atLeastOneANChargesCorrect_fails_when_all_charges_invalid() {
     var charges = an.putArray("charges");
     var ch = charges.addObject();
-    // everything missing / invalid
     ch.put("chargeName", "");
     ch.put("currencyAmount", -5.0);
     ch.put("currencyCode", "");

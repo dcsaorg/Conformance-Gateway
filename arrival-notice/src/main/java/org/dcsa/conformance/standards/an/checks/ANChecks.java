@@ -665,8 +665,23 @@ public class ANChecks {
       String base = CONSIGNMENT_ITEMS + "[" + i + "]";
 
       var descriptionOfGoods = item.path("descriptionOfGoods");
+
       if (!descriptionOfGoods.isArray() || descriptionOfGoods.isEmpty()) {
         issues.add(base + ".descriptionOfGoods must be a non-empty array");
+      } else {
+        boolean hasNonBlank = false;
+
+        for (int d = 0; d < descriptionOfGoods.size(); d++) {
+          String txt = descriptionOfGoods.get(d).asText("");
+          if (!txt.isBlank()) {
+            hasNonBlank = true;
+            break;
+          }
+        }
+
+        if (!hasNonBlank) {
+          issues.add(base + ".descriptionOfGoods must contain at least one non-empty entry");
+        }
       }
 
       var cargo = item.path("cargoItems");
@@ -719,7 +734,8 @@ public class ANChecks {
 
         if (!foundValidEquipmentRef) {
           issues.add(
-              base + ".cargoItems must contain at least one item with a valid equipmentReference");
+              base
+                  + ".cargoItems must contain at least one item with a non empty equipmentReference");
         }
         if (!foundValidWeightValue) {
           issues.add(
@@ -734,7 +750,7 @@ public class ANChecks {
         if (!foundValidOuterPkg) {
           issues.add(
               base
-                  + ".cargoItems must contain at least one item with a valid outerPackaging field");
+                  + ".cargoItems must contain at least one item with a non-empty (either packageCode,IMOPackagingCode or description needs to be present) outerPackaging object");
         }
         if (!foundValidNumPackages) {
           issues.add(

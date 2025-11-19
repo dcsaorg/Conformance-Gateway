@@ -540,7 +540,7 @@ public class ANChecks {
 
     if (!hasUNLoc && !hasAddress && !hasFacility) {
       issues.add(
-          "transport.portOfDischarge must contain at least one of: UNLocationCode (non empty), a valid address, or a facility with both facilityCode and facilityCodeListProvider");
+          "transport.portOfDischarge must contain at least one of: UNLocationCode (non empty), a non empty address, or a facility with both facilityCode and facilityCodeListProvider");
     }
 
     var legs = t.path("legs");
@@ -888,22 +888,19 @@ public class ANChecks {
 
 
     if (!foundValidTypeCodes) {
-      issues.add(
-          FREE_TIMES
-              + " must contain at least one item with a valid typeCodes entry (DEM/DET/STO)");
+      issues.add(FREE_TIMES + " must functionally contain a valid typeCodes entry (DEM/DET/STO)");
     }
     if (!foundValidISOEquipment) {
-      issues.add(
-          FREE_TIMES + " must contain at least one item with a valid ISOEquipmentCodes value");
+      issues.add(FREE_TIMES + " must functionally contain a valid ISOEquipmentCodes value");
     }
     if (!foundValidEquipRefs) {
-      issues.add(FREE_TIMES + " must contain at least one item with a valid equipmentReference");
+      issues.add(FREE_TIMES + " must functionally contain a valid equipmentReference");
     }
     if (!foundValidDuration) {
-      issues.add(FREE_TIMES + " must contain at least one item with a positive duration");
+      issues.add(FREE_TIMES + " must functionally contain a positive duration");
     }
     if (!foundValidTimeUnit) {
-      issues.add(FREE_TIMES + " must contain at least one item with a valid timeUnit (CD/WD/HR)");
+      issues.add(FREE_TIMES + " must functionally contain a valid timeUnit (CD/WD/HR)");
     }
 
     return issues;
@@ -989,23 +986,24 @@ public class ANChecks {
     }
 
     if (!foundValidChargeName) {
-      issues.add("At least one" + CHARGES + " item must contain a valid non-empty 'chargeName'");
+      issues.add(CHARGES + " must contain functionally contain a valid non-empty 'chargeName'");
     }
     if (!foundValidCurrencyAmount) {
-      issues.add("At least one" + CHARGES + " item must contain a positive 'currencyAmount'");
+      issues.add(CHARGES + " item must functionally contain a positive 'currencyAmount'");
     }
     if (!foundValidCurrencyCode) {
-      issues.add("At least one" + CHARGES + " item must contain a valid non-empty 'currencyCode'");
+      issues.add(CHARGES + " item must functionally contain a valid non-empty 'currencyCode'");
     }
     if (!foundValidPaymentTerm) {
       issues.add(
-          "At least one" + CHARGES + " item must contain a valid 'paymentTermCode' (PRE or COL)");
+          CHARGES
+              + " item must contain functionally contain a valid 'paymentTermCode' (PRE or COL)");
     }
     if (!foundValidUnitPrice) {
-      issues.add("At least one" + CHARGES + " item must contain a positive 'unitPrice'");
+      issues.add(CHARGES + " item must functionally contain a positive 'unitPrice'");
     }
     if (!foundValidQuantity) {
-      issues.add("At least one" + CHARGES + " item must contain a positive 'quantity'");
+      issues.add(CHARGES + " item must functionally contain a positive 'quantity'");
     }
 
     return issues;

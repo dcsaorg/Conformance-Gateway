@@ -118,16 +118,13 @@ public class OvsChecks {
     }
 
     Set<String> errors = new LinkedHashSet<>();
-    int index = 0;
-
-    for (JsonNode schedule : body) {
-      JsonNode vesselSchedules = schedule.path("vesselSchedules");
+    for (int i = 0; i < body.size(); i++) {
+      JsonNode vesselSchedules = body.get(i).path("vesselSchedules");
 
       if (!vesselSchedules.isArray() || vesselSchedules.isEmpty()) {
-        errors.add("Schedule at index %d does not contain vesselSchedules.".formatted(index));
+        errors.add("Schedule at index %d does not contain vesselSchedules.".formatted(i));
       }
 
-      index++;
     }
 
     return errors.isEmpty() ? Set.of() : errors;

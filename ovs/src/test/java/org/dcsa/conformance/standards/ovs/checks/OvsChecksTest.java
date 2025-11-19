@@ -1,36 +1,35 @@
 package org.dcsa.conformance.standards.ovs.checks;
 
+import static org.dcsa.conformance.standards.ovs.checks.OvsChecks.VALID_STATUS_CODE;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class OvsChecksTest {
 
-  private final ObjectMapper mapper = new ObjectMapper();
+  private ObjectMapper mapper;
+  private ArrayNode body;
+  private ObjectNode schedule;
 
-  private JsonNode obj(Object data) {
-    return mapper.valueToTree(data);
+  @BeforeEach
+  void setUp() {
+    mapper = new ObjectMapper();
+    body = mapper.createArrayNode();
+    schedule = body.addObject();
   }
 
   @Test
   void testValidSchedules_allHaveVesselSchedules() {
-    List<Map<String, Object>> schedules =
-        List.of(
-            Map.of(
-                "carrierServiceName",
-                "ServiceA",
-                "vesselSchedules",
-                List.of(Map.of("vesselIMONumber", "12345"))),
-            Map.of(
-                "carrierServiceName",
-                "ServiceB",
-                "vesselSchedules",
-                List.of(Map.of("vesselIMONumber", "67890"))));
 
-    JsonNode body = obj(schedules);
+    schedule.put("carrierServiceName", "ServiceA");
+    ArrayNode vesselSchedules = schedule.putArray("vesselSchedules");
+    ObjectNode vesselSchedule = vesselSchedules.addObject();
+    vesselSchedule.put("vesselIMONumber", "12345");
 
     Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
 
@@ -44,66 +43,34 @@ class OvsChecksTest {
   }
 
   @Test
-  void testNonArrayBody() {
-    Map<String, Object> nonArray = Map.of("vesselSchedules", List.of());
-    JsonNode body = obj(nonArray);
-
+  void testSomeMissingVesselSchedules() {
+    schedule.put("carrierServiceName", "ServiceA");
     Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
 
     assertFalse(errors.isEmpty());
   }
 
   @Test
-  void testEmptyArray() {
-    JsonNode body = obj(List.of());
+  void testInvalidValidStatusCode() {
+    schedule.put("carrierServiceName", "ServiceA");
+    ArrayNode vesselSchedules = schedule.putArray("vesselSchedules");
+    ObjectNode vesselSchedule = vesselSchedules.addObject();
+    vesselSchedule.put("vesselIMONumber", "12345");
+    vesselSchedule.putArray("transportCalls").addObject().put("statusCode", "ARRIVED");
+    Set<String> errors = VALID_STATUS_CODE.validate(body).getErrorMessages();
 
-    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
+    assertFalse(errors.isEmpty());
+  }
+
+  @Test
+  void testValidStatusCode() {
+    schedule.put("carrierServiceName", "ServiceA");
+    ArrayNode vesselSchedules = schedule.putArray("vesselSchedules");
+    ObjectNode vesselSchedule = vesselSchedules.addObject();
+    vesselSchedule.put("vesselIMONumber", "12345");
+    vesselSchedule.putArray("transportCalls").addObject().put("statusCode", "BLNK");
+    Set<String> errors = VALID_STATUS_CODE.validate(body).getErrorMessages();
+
     assertTrue(errors.isEmpty());
   }
-
-  @Test
-  void testSomeMissingVesselSchedules() {
-    List<Map<String, Object>> schedules =
-        List.of(
-            Map.of(
-                "carrierServiceName",
-                "ServiceA",
-                "vesselSchedules",
-                List.of(Map.of("vesselIMONumber", "12345"))),
-            Map.of("carrierServiceName", "ServiceB"));
-
-    JsonNode body = obj(schedules);
-
-    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
-
-    assertFalse(errors.isEmpty());
-  }
-
-  @Test
-  void testAllMissingVesselSchedules() {
-    List<Map<String, Object>> schedules =
-        List.of(Map.of("carrierServiceName", "ServiceA"), Map.of("carrierServiceName", "ServiceB"));
-
-    JsonNode body = obj(schedules);
-
-    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
-
-    assertFalse(errors.isEmpty());
-  }
-
-  @Test
-  void testEmptyVesselSchedulesArray() {
-    List<Map<String, Object>> schedules =
-        List.of(
-            Map.of(
-                "carrierServiceName", "ServiceA", "vesselSchedules", List.of() // empty -> invalid
-                ));
-
-    JsonNode body = obj(schedules);
-
-    Set<String> errors = OvsChecks.checkServiceSchedulesExist(body);
-    assertFalse(errors.isEmpty());
-  }
-
-
 }

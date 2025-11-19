@@ -894,7 +894,8 @@ public class ANChecks {
       issues.add(FREE_TIMES + " must functionally contain a valid ISOEquipmentCodes value");
     }
     if (!foundValidEquipRefs) {
-      issues.add(FREE_TIMES + " must functionally contain a valid equipmentReference");
+      issues.add(
+          FREE_TIMES + " must functionally contain atleast one non empty equipmentReference");
     }
     if (!foundValidDuration) {
       issues.add(FREE_TIMES + " must functionally contain a positive duration");

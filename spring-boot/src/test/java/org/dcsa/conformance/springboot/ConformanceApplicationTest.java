@@ -45,7 +45,8 @@ class ConformanceApplicationTest {
         // "jit-200-conformance-auto-all-in-one",
         "ovs-300-conformance-auto-all-in-one",
         "pint-300-conformance-auto-all-in-one",
-        "tnt-220-conformance-auto-all-in-one"
+        "tnt-220-conformance-auto-all-in-one",
+        "vgm-100-conformance-auto-all-in-one"
       })
   void testEachSuite(final String sandboxId) throws InterruptedException {
     log.info("Starting scenario suite: {}", sandboxId);

@@ -2,9 +2,8 @@ package org.dcsa.conformance.standards.an.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import java.util.ArrayList;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
 import lombok.Getter;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -13,13 +12,24 @@ import org.dcsa.conformance.standards.an.checks.ScenarioType;
 @Getter
 public class SupplyScenarioParametersAction extends ANAction {
 
+  private final ScenarioType scenarioType;
+
   public SupplyScenarioParametersAction(String publisherPartyName, ScenarioType scenarioType) {
     super(
         publisherPartyName,
         null,
         null,
         "SupplyScenarioParameters [%s]".formatted(scenarioType.name()));
+    this.scenarioType = scenarioType;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+  }
+
+  @Override
+  public void reset() {
+    super.reset();
+    if (scenarioType != null) {
+      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+    }
   }
 
   @Override

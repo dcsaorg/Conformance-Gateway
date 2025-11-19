@@ -14,6 +14,7 @@ import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.ovs.OvsStandard;
 import org.dcsa.conformance.standards.tnt.TntStandard;
+import org.dcsa.conformance.standards.vgm.VgmStandard;
 
 public enum SupportedStandard {
   ADOPTION(AdoptionStandard.INSTANCE),
@@ -27,7 +28,8 @@ public enum SupportedStandard {
   JIT(JitStandard.INSTANCE),
   OVS(OvsStandard.INSTANCE),
   PINT(PintStandard.INSTANCE),
-  TNT(TntStandard.INSTANCE);
+  TNT(TntStandard.INSTANCE),
+  VGM(VgmStandard.INSTANCE);
 
   public final AbstractStandard standard;
 

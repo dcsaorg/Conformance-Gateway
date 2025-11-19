@@ -2,12 +2,16 @@ package org.dcsa.conformance.standards.an.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -68,6 +72,7 @@ public class ANPublisher extends ConformanceParty {
   private void sendArrivalNotices(JsonNode actionPrompt) {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     String filePath = getAnPayloadFilepath(scenarioType);
+
     JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath, Map.ofEntries());
     syncCounterpartPost("/arrival-notices", jsonRequestBody);
     addOperatorLogEntry("Sent Arrival Notices ");
@@ -79,48 +84,44 @@ public class ANPublisher extends ConformanceParty {
         + scenarioType.arrivalNoticePayload(apiVersion.toLowerCase().replaceAll("[.-]", ""));
   }
 
+  private String getAnRegularResponseFilepath() {
+
+    return "/standards/an/messages/"
+        + ScenarioType.REGULAR.arrivalNoticeResponse(
+            apiVersion.toLowerCase().replaceAll("[.-]", ""));
+  }
+
   private void sendArrivalNoticeNotification(JsonNode actionPrompt) {
     JsonNode jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
             "/standards/an/messages/arrivalnotice-api-%s-post-notification-request.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
             Map.ofEntries());
+
     syncCounterpartPost("/arrival-notice-notifications", jsonRequestBody);
     addOperatorLogEntry("Sent Arrival Notice Notifications");
   }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    String templateFilePath =
-        "/standards/an/messages/arrivalnotice-api-%s-get-response.json"
-            .formatted(apiVersion.toLowerCase().replaceAll("[.-]", ""));
 
-    if (request.queryParams().get("transportDocumentReferences") == null) {
-      JsonNode jsonResponseBody =
-          JsonToolkit.templateFileToJsonNode(
-              templateFilePath, Map.of("TRANSPORT_DOCUMENT_REFERENCE", ""));
+    Collection<String> tdrValues = request.queryParams().get("transportDocumentReferences");
+    Optional<String> tdrParam =
+        (tdrValues == null ? Collections.<String>emptyList() : tdrValues).stream().findFirst();
 
-      return request.createResponse(
-          200,
-          Map.of(API_VERSION, List.of(apiVersion)),
-          new ConformanceMessageBody(jsonResponseBody));
-    }
-    Optional<String> tdr =
-        request.queryParams().get("transportDocumentReferences").stream().findFirst();
+    Set<String> requestedTdrs =
+        tdrParam.stream()
+            .flatMap(s -> Arrays.stream(s.split(",")))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
-    String transportDocumentReference =
-        tdr.orElseThrow(
-            () ->
-                new NoSuchElementException(
-                    "No transportDocumentReferences present in the query param"));
+    String chosenTdr = requestedTdrs.stream().findFirst().orElse("");
+    Map<String, String> templateVars = Map.of("TRANSPORT_DOCUMENT_REFERENCE", chosenTdr);
 
-    JsonNode jsonResponseBody =
-        JsonToolkit.templateFileToJsonNode(
-            templateFilePath, Map.of("TRANSPORT_DOCUMENT_REFERENCE", transportDocumentReference));
-
+    String filePath = getAnRegularResponseFilepath();
+    JsonNode responseObject = JsonToolkit.templateFileToJsonNode(filePath, templateVars);
     return request.createResponse(
-        200,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(jsonResponseBody));
+        200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(responseObject));
   }
 }

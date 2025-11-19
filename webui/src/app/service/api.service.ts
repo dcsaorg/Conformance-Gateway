@@ -1,46 +1,48 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { firstValueFrom } from "rxjs";
-import { environment } from "src/environments/environment";
-import { AuthService } from "../auth/auth.service";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {Injectable} from "@angular/core";
+import {firstValueFrom} from "rxjs";
+import {environment} from "src/environments/environment";
+import {AuthService} from "../auth/auth.service";
+import {handleApiCall} from "../helpers/api-error-handler";
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl: string = environment.apiBaseUrl + 'conformance/webui';
 
-  constructor(
-    private authService: AuthService,
-    private httpClient: HttpClient,
-  ) {
-  }
+    private readonly apiUrl: string = environment.apiBaseUrl + 'conformance/webui';
 
-  async call(
-    request: any,
-  ): Promise<any> {
-    const userIdToken: string | null = await this.authService.getUserIdToken();
-    const headers: HttpHeaders | undefined = (
-      userIdToken
-      ? new HttpHeaders({
-        'Authorization': userIdToken,
-      })
-      : undefined
-    );
-
-    const response: any = await firstValueFrom(
-      this.httpClient.post<any>(
-        this.apiUrl,
-        request,
-        {
-          headers,
-        },
-      )
-    );
-
-    if (response.isError) {
-      throw new Error(response);
+    constructor(
+        private readonly authService: AuthService,
+        private readonly httpClient: HttpClient,
+    ) {
     }
-    return response;
-  }
+
+    async call(
+        request: any,
+    ): Promise<any> {
+        const userIdToken: string | null = await this.authService.getUserIdToken();
+        const headers: HttpHeaders | undefined = (
+            userIdToken
+                ? new HttpHeaders({
+                    'Authorization': userIdToken,
+                })
+                : undefined
+        );
+
+        try {
+            const response: any = await firstValueFrom(
+                this.httpClient.post<any>(
+                    this.apiUrl,
+                    request,
+                    {
+                        headers,
+                    },
+                )
+            );
+            return handleApiCall(response);
+        } catch (e: any) {
+            return handleApiCall(e.error);
+        }
+    }
 }

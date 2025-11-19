@@ -621,6 +621,22 @@ public class JsonAttribute {
     };
   }
 
+  public static JsonContentMatchedValidation matchedMinLength(int length) {
+    return (node, context) -> {
+      if (!node.isArray()) {
+        return ConformanceCheckResult.simple(
+            Set.of("The attribute '%s' is not an array".formatted(context)));
+      }
+      if (node.size() < length) {
+        return ConformanceCheckResult.simple(
+            Set.of(
+                "The array '%s' had %d elements, which is less than the required of %d"
+                    .formatted(context, node.size(), length)));
+      }
+      return ConformanceCheckResult.simple(Collections.emptySet());
+    };
+  }
+
   public static JsonRebasableContentCheck mustBeAbsent(
     JsonPointer jsonPointer
   ) {

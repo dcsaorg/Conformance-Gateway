@@ -55,7 +55,7 @@
 		<module>booking-and-ebl</module>
 		<module>standards-commons</module>
 		<module>port-call</module>
-        <module>vgm</module>
+		<module>vgm</module>
     </modules>
 
 	<dependencyManagement>

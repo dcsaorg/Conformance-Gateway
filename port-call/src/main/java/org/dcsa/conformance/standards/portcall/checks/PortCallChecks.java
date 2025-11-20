@@ -76,8 +76,8 @@ public class PortCallChecks {
             if (local.isEmpty()) {
               return ConformanceCheckResult.simple(Set.of());
             }
-
-            local.forEach(m -> allIssues.add("events[" + i + "]." + m));
+            final int idx = i;
+            local.forEach(m -> allIssues.add("events[" + idx + "]." + m));
           }
 
           return ConformanceCheckResult.simple(allIssues);

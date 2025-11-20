@@ -71,15 +71,15 @@ public class PortCallChecks {
 
           for (int i = 0; i < events.size(); i++) {
             var event = events.get(i);
-            List<String> local = validateTimestampClassifierCode(event);
+            List<String> errorsAtIndex = validateTimestampClassifierCode(event);
 
-            if (local.isEmpty()) {
+            if (errorsAtIndex.isEmpty()) {
               return ConformanceCheckResult.simple(Set.of());
             }
-            final int idx = i;
-            local.forEach(m -> allIssues.add("events[" + idx + "]." + m));
+            for (String err : errorsAtIndex) {
+              allIssues.add("events[" + i + "]." + err);
+            }
           }
-
           return ConformanceCheckResult.simple(allIssues);
         });
   }
@@ -113,19 +113,17 @@ public class PortCallChecks {
             return ConformanceCheckResult.simple(allIssues);
           }
 
-          int i = 0;
-          for (var event : events) {
-            List<String> local = validateTimestampServiceDateTime(event);
+          for (int i = 0; i < events.size(); i++) {
+            var event = events.get(i);
+            List<String> errorsAtIndex = validateTimestampServiceDateTime(event);
 
-            if (local.isEmpty()) {
+            if (errorsAtIndex.isEmpty()) {
               return ConformanceCheckResult.simple(Set.of());
             }
-
-            final int idx = i;
-            local.forEach(m -> allIssues.add("events[" + idx + "]." + m));
-            i++;
+            for (String err : errorsAtIndex) {
+              allIssues.add("events[" + i + "]." + err);
+            }
           }
-
           return ConformanceCheckResult.simple(allIssues);
         });
   }
@@ -159,17 +157,16 @@ public class PortCallChecks {
             return ConformanceCheckResult.simple(allIssues);
           }
 
-          int i = 0;
-          for (var event : events) {
-            List<String> local = validateMovesForecastsTopLevel(event);
+          for (int i = 0; i < events.size(); i++) {
+            var event = events.get(i);
+            List<String> errorsAtIndex = validateMovesForecastsTopLevel(event);
 
-            if (local.isEmpty()) {
+            if (errorsAtIndex.isEmpty()) {
               return ConformanceCheckResult.simple(Set.of());
             }
-
-            final int idx = i;
-            local.forEach(m -> allIssues.add("events[" + idx + "]." + m));
-            i++;
+            for (String err : errorsAtIndex) {
+              allIssues.add("events[" + i + "]." + err);
+            }
           }
 
           return ConformanceCheckResult.simple(allIssues);
@@ -179,32 +176,25 @@ public class PortCallChecks {
   private static List<String> validateMovesForecastsTopLevel(JsonNode event) {
     List<String> issues = new ArrayList<>();
 
-    var mfArr = event.path("movesForecasts");
-    if (!mfArr.isArray() || mfArr.isEmpty()) {
+    var mfarray = event.path("movesForecasts");
+    if (!mfarray.isArray() || mfarray.isEmpty()) {
       issues.add("movesForecasts must be a non-empty array");
       return issues;
     }
 
-    boolean hasAnyUnits = false;
-
-    int j = 0;
-    for (var mf : mfArr) {
-      boolean hasRestow = !JsonUtil.isMissingOrEmpty(mf.path("restowUnits"));
-      boolean hasLoad = !JsonUtil.isMissingOrEmpty(mf.path("loadUnits"));
-      boolean hasDischarge = !JsonUtil.isMissingOrEmpty(mf.path("dischargeUnits"));
+    for (int i = 0; i < mfarray.size(); i++) {
+      var movesForecast = mfarray.get(i);
+      boolean hasRestow = !JsonUtil.isMissingOrEmpty(movesForecast.path("restowUnits"));
+      boolean hasLoad = !JsonUtil.isMissingOrEmpty(movesForecast.path("loadUnits"));
+      boolean hasDischarge = !JsonUtil.isMissingOrEmpty(movesForecast.path("dischargeUnits"));
 
       if (hasRestow || hasLoad || hasDischarge) {
-        hasAnyUnits = true;
-        break;
+        return List.of();
       }
 
-      j++;
     }
-
-    if (!hasAnyUnits) {
       issues.add(
           "movesForecasts must contain at least one of 'restowUnits', 'loadUnits', or 'dischargeUnits'");
-    }
 
     return issues;
   }

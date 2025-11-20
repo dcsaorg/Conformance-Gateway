@@ -87,8 +87,7 @@ public class ANPublisher extends ConformanceParty {
   private String getAnRegularResponseFilepath() {
 
     return "/standards/an/messages/"
-        + ScenarioType.REGULAR.arrivalNoticeResponse(
-            apiVersion.toLowerCase().replaceAll("[.-]", ""));
+        + ScenarioType.BASIC.arrivalNoticeResponse(apiVersion.toLowerCase().replaceAll("[.-]", ""));
   }
 
   private void sendArrivalNoticeNotification(JsonNode actionPrompt) {

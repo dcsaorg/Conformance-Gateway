@@ -20,8 +20,6 @@ import org.dcsa.conformance.standards.portcall.party.PortCallRole;
 
 public class PortCallChecks {
 
-  private static final String EVENTS = "events";
-
   public static ActionCheck getPortCallPostPayloadChecks(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
@@ -71,17 +69,15 @@ public class PortCallChecks {
             return ConformanceCheckResult.simple(allIssues);
           }
 
-          int i = 0;
-          for (var event : events) {
+          for (int i = 0; i < events.size(); i++) {
+            var event = events.get(i);
             List<String> local = validateTimestampClassifierCode(event);
 
             if (local.isEmpty()) {
               return ConformanceCheckResult.simple(Set.of());
             }
 
-            final int idx = i;
-            local.forEach(m -> allIssues.add("events[" + idx + "]." + m));
-            i++;
+            local.forEach(m -> allIssues.add("events[" + i + "]." + m));
           }
 
           return ConformanceCheckResult.simple(allIssues);

@@ -14,6 +14,7 @@ import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
 import org.dcsa.conformance.standards.ovs.OvsStandard;
 import org.dcsa.conformance.standards.portcall.PortCallStandard;
 import org.dcsa.conformance.standards.tnt.TntStandard;
+import org.dcsa.conformance.standards.vgm.VgmStandard;
 
 public enum SupportedStandard {
   ADOPTION(AdoptionStandard.INSTANCE),
@@ -27,7 +28,8 @@ public enum SupportedStandard {
   OVS(OvsStandard.INSTANCE),
   PINT(PintStandard.INSTANCE),
   PORT_CALL(PortCallStandard.INSTANCE),
-  TNT(TntStandard.INSTANCE);
+  TNT(TntStandard.INSTANCE),
+  VGM(VgmStandard.INSTANCE);
 
   public final AbstractStandard standard;
 

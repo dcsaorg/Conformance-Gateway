@@ -1,0 +1,298 @@
+{
+  "VGMDeclarations": [
+    {
+      "routingDetails": {
+        "originatingParty": {
+          "partyCode": "MSK",
+          "codeListProvider": "W3C",
+          "codeListName": "DID",
+          "partyFunction": "CA"
+        },
+        "forwardingParties": [
+          {
+            "partyCode": "MSK",
+            "codeListProvider": "W3C",
+            "codeListName": "DID",
+            "partyFunction": "CA"
+          }
+        ],
+        "destinationParty": {
+          "partyCode": "MSK",
+          "codeListProvider": "W3C",
+          "codeListName": "DID",
+          "partyFunction": "CA"
+        }
+      },
+      "declarationReference": "VGM-HHL71800000-APZU4812090-2025-01-23T01:23:45Z",
+      "isRetracted": true,
+      "declarationDateTime": "2025-01-23T01:23:45Z",
+      "VGM": {
+        "weight": {
+          "value": 2.4,
+          "unit": "KGM"
+        },
+        "method": "SM1",
+        "dateTime": "2025-01-23T01:23:45Z",
+        "location": {
+          "locationName": "Port of Amsterdam",
+          "facilityTypeCode": "RAMP",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "certificationReference": "W42-23110812",
+        "certificationDateTime": "2025-01-23T01:23:45Z"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "22GP",
+        "isShipperOwned": true,
+        "seals": [
+          {
+            "number": "VET123",
+            "source": "CUS",
+            "type": "WIR"
+          }
+        ],
+        "cargoGrossWeight": {
+          "value": 2.4,
+          "unit": "KGM"
+        },
+        "tareWeight": {
+          "value": 2.4,
+          "unit": "KGM"
+        }
+      },
+      "shipmentDetails": {
+        "carrierBookingReference": "ABC709951",
+        "transportDocumentReference": "HHL71800000",
+        "otherReferences": [
+          {
+            "typeCode": "SI",
+            "reference": "A456C"
+          }
+        ]
+      },
+      "vesselVoyageDetails": {
+        "carrierCode": "MMCU",
+        "carrierCodeListProvider": "NMFTA",
+        "exportVoyageNumberOrReference": {
+          "carrierVoyageNumber": "2103S",
+          "universalVoyageReference": "2301W"
+        },
+        "importVoyageNumberOrReference": {
+          "carrierVoyageNumber": "2103S",
+          "universalVoyageReference": "2301W"
+        },
+        "portOfLoading": {
+          "locationName": "Port of Amsterdam",
+          "facilityTypeCode": "RAMP",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "portOfDischarge": {
+          "locationName": "Port of Amsterdam",
+          "facilityTypeCode": "RAMP",
+          "address": {
+            "street": "Ruijggoordweg",
+            "streetNumber": "100",
+            "floor": "N/A",
+            "postCode": "1047 HM",
+            "POBox": "123",
+            "city": "Amsterdam",
+            "stateRegion": "North Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLAMS",
+          "facility": {
+            "facilityCode": "ADT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "48.85855",
+            "longitude": "2.294492036"
+          }
+        },
+        "vesselName": "King of the Seas"
+      },
+      "responsibleParty": {
+        "partyName": "Acme Inc.",
+        "party": {
+          "partyCode": "MSK",
+          "codeListProvider": "W3C",
+          "codeListName": "DID",
+          "partyFunction": "CA"
+        },
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "contactDetails": {
+          "name": "Jane Doe",
+          "phone": "+14155552671",
+          "email": "jane.doe@example.com"
+        }
+      },
+      "authorizedParty": {
+        "partyName": "Acme Inc.",
+        "party": {
+          "partyCode": "MSK",
+          "codeListProvider": "W3C",
+          "codeListName": "DID",
+          "partyFunction": "CA"
+        },
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "contactDetails": {
+          "name": "Jane Doe",
+          "phone": "+14155552671",
+          "email": "jane.doe@example.com"
+        }
+      },
+      "authorizedPersonSignatory": "Jane Doe",
+      "weighingParty": {
+        "partyName": "Acme Inc.",
+        "party": {
+          "partyCode": "MSK",
+          "codeListProvider": "W3C",
+          "codeListName": "DID",
+          "partyFunction": "CA"
+        },
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "contactDetails": {
+          "name": "Jane Doe",
+          "phone": "+14155552671",
+          "email": "jane.doe@example.com"
+        }
+      },
+      "submittingParty": {
+        "partyName": "Acme Inc.",
+        "party": {
+          "partyCode": "MSK",
+          "codeListProvider": "W3C",
+          "codeListName": "DID",
+          "partyFunction": "CA"
+        },
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "contactDetails": {
+          "name": "Jane Doe",
+          "phone": "+14155552671",
+          "email": "jane.doe@example.com"
+        }
+      },
+      "orderedByParty": {
+        "partyName": "Acme Inc.",
+        "party": {
+          "partyCode": "MSK",
+          "codeListProvider": "W3C",
+          "codeListName": "DID",
+          "partyFunction": "CA"
+        },
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "contactDetails": {
+          "name": "Jane Doe",
+          "phone": "+14155552671",
+          "email": "jane.doe@example.com"
+        }
+      },
+      "holdingParty": {
+        "partyName": "Acme Inc.",
+        "party": {
+          "partyCode": "MSK",
+          "codeListProvider": "W3C",
+          "codeListName": "DID",
+          "partyFunction": "CA"
+        },
+        "address": {
+          "street": "Ruijggoordweg",
+          "streetNumber": "100",
+          "floor": "N/A",
+          "postCode": "1047 HM",
+          "POBox": "123",
+          "city": "Amsterdam",
+          "stateRegion": "North Holland",
+          "countryCode": "NL"
+        },
+        "contactDetails": {
+          "name": "Jane Doe",
+          "phone": "+14155552671",
+          "email": "jane.doe@example.com"
+        }
+      }
+    }
+  ]
+}

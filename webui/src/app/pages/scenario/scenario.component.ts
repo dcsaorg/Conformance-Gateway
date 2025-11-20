@@ -36,8 +36,8 @@ export class ScenarioComponent implements OnInit, OnDestroy {
     public activatedRoute: ActivatedRoute,
     public authService: AuthService,
     public conformanceService: ConformanceService,
-    private router: Router,
-    private dialog: MatDialog,
+    private readonly router: Router,
+    private readonly dialog: MatDialog,
   ) {}
 
   async ngOnInit() {
@@ -95,9 +95,11 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, false);
       if (response?.error) {
         await MessageDialog.open(
-          this.dialog,
-          "Error completing action",
-          response.error)
+            this.dialog,
+            "Error completing action",
+            response.error)
+        this.performingAction = "";
+        return
       }
       this.performingAction = "";
       await this.loadScenarioStatus();
@@ -105,27 +107,37 @@ export class ScenarioComponent implements OnInit, OnDestroy {
   }
 
   async skipCurrentAction() {
-        this.performingAction = "Marking current action as skipped...";
-        const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, true);
-        if (response?.error) {
-          await MessageDialog.open(
-            this.dialog,
-            "Error skipping action",
-            response.error)
-        }
-        this.performingAction = "";
-        await this.loadScenarioStatus();
+    this.performingAction = "Marking current action as skipped...";
+    const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, true);
+    if (response?.error) {
+      await MessageDialog.open(
+          this.dialog,
+          "Error skipping action",
+          response.error)
+      this.performingAction = "";
+      return
     }
+    this.performingAction = "";
+    await this.loadScenarioStatus();
+  }
 
   async viewHttpExchanges() {
-    const exchanges = await this.conformanceService.getCurrentActionExchanges(
+    const response = await this.conformanceService.getCurrentActionExchanges(
       this.sandbox!.id,
       this.scenario!.id
     );
+
+    if (response?.error) {
+      await MessageDialog.open(
+          this.dialog,
+          "Error retrieving http exchanges",
+          response.error);
+      return
+    }
     await TextDialog.open(
-      this.dialog,
-      "Current action HTTP exchanges",
-      JSON.stringify(exchanges, null, 4)
+        this.dialog,
+        "Current action HTTP exchanges",
+        JSON.stringify(response, null, 4)
     );
   }
 

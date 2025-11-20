@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.an.checks;
 
 public enum ScenarioType {
-  REGULAR,
+  BASIC,
   FREIGHTED,
   FREE_TIME;
 
@@ -10,7 +10,7 @@ public enum ScenarioType {
         switch (this) {
           case FREIGHTED -> "freighted";
           case FREE_TIME -> "freetime";
-          default -> "regular";
+          default -> "basic";
         };
     return "arrivalnotice-api-" + version + "-post-" + suffix + "-request.json";
   }
@@ -20,7 +20,7 @@ public enum ScenarioType {
         switch (this) {
           case FREIGHTED -> "freighted";
           case FREE_TIME -> "freetime";
-          default -> "regular";
+          default -> "basic";
         };
     return "arrivalnotice-api-" + version + "-get-" + suffix + "-response.json";
   }

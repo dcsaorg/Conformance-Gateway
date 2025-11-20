@@ -51,7 +51,8 @@ class SeleniumWithNotificationTest extends SeleniumTestBase {
         "OVS", // 3:34 minutes
         "PINT", // 6:10 minutes
         "TnT", // 6:20 minutes
-        "Booking + eBL" // 10:40 minutes
+        "Booking + eBL", // 10:40 minutes
+        "VGM"
       })
   void testStandardWithAllVersions(String standardName) {
     app.setSimulatedLambdaDelay(lambdaDelay);

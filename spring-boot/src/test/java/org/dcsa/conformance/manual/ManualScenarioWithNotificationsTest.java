@@ -46,7 +46,9 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
         Arguments.of("eBL Surrender", false),
         Arguments.of("eBL Surrender", true),
         Arguments.of("Booking + eBL", false),
-        Arguments.of("Booking + eBL", true));
+        Arguments.of("Booking + eBL", true),
+        Arguments.of("VGM", false),
+        Arguments.of("VGM", true));
   }
 
   @ParameterizedTest(name = "Standard: {0} - 2nd run: {1}")

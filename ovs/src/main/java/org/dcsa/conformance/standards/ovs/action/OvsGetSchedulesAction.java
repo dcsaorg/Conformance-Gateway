@@ -61,8 +61,7 @@ public class OvsGetSchedulesAction extends OvsAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            OvsChecks.responseContentChecks(
-                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
+            OvsChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

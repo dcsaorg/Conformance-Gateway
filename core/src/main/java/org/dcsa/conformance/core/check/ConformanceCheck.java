@@ -3,6 +3,7 @@ package org.dcsa.conformance.core.check;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -45,6 +46,9 @@ public abstract class ConformanceCheck {
       this.doCheck(getExchangeByUuid);
     } else {
       conformanceChecks.forEach(subCheck -> subCheck.check(getExchangeByUuid));
+      Optional.of(conformanceChecks.stream().noneMatch(ConformanceCheck::isApplicable))
+          .filter(Boolean::booleanValue)
+          .ifPresent(ignored -> this.setApplicable(false));
     }
   }
 

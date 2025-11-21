@@ -340,6 +340,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
     }
 
     currentScenario.popNextAction();
+    if (skipAction
+        && currentScenario.hasNextAction()
+        && "GET".equals(currentScenario.peekNextAction().getActionTitle())) {
+      currentScenario.popNextAction();
+    }
+
     notifyNextActionParty();
   }
 

@@ -46,9 +46,8 @@ public abstract class ConformanceCheck {
       this.doCheck(getExchangeByUuid);
     } else {
       conformanceChecks.forEach(subCheck -> subCheck.check(getExchangeByUuid));
-      Optional.of(conformanceChecks.stream().noneMatch(ConformanceCheck::isApplicable))
-          .filter(Boolean::booleanValue)
-          .ifPresent(ignored -> this.setApplicable(false));
+      if (conformanceChecks.stream().noneMatch(ConformanceCheck::isApplicable))
+        this.setApplicable(false);
     }
   }
 

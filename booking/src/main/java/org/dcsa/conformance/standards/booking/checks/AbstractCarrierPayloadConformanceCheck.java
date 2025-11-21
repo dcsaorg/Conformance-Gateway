@@ -23,13 +23,12 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected final BookingState expectedBookingStatus;
   protected final BookingState expectedAmendedBookingStatus;
   protected final BookingCancellationState expectedBookingCancellationStatus;
-  protected final boolean amendedContent;
 
   protected static final String FEEDBACKS = "feedbacks";
 
   protected AbstractCarrierPayloadConformanceCheck(
       UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
-    this(matchedExchangeUuid, httpMessageType, bookingState, null, null, false);
+    this(matchedExchangeUuid, httpMessageType, bookingState, null, null);
   }
 
   protected AbstractCarrierPayloadConformanceCheck(
@@ -42,8 +41,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
         httpMessageType,
         bookingState,
         expectedAmendedBookingStatus,
-        null,
-        false);
+        null);
   }
 
   protected AbstractCarrierPayloadConformanceCheck(
@@ -51,8 +49,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
       HttpMessageType httpMessageType,
       BookingState bookingState,
       BookingState expectedAmendedBookingStatus,
-      BookingCancellationState expectedBookingCancellationStatus,
-      boolean amendedContent) {
+      BookingCancellationState expectedBookingCancellationStatus) {
     super(
         "Validate the carrier payload",
         BookingRole::isCarrier,
@@ -61,7 +58,6 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     this.expectedBookingStatus = bookingState;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
     this.expectedBookingCancellationStatus = expectedBookingCancellationStatus;
-    this.amendedContent = amendedContent;
   }
 
   protected ConformanceCheckResult ensureCarrierBookingReferenceCompliance(
@@ -92,8 +88,11 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     String actualState = responsePayload.path("amendedBookingStatus").asText(null);
     String expectedState =
         expectedAmendedBookingStatus != null ? expectedAmendedBookingStatus.name() : null;
-    if (expectedState == null && actualState == null) {
-      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    if (expectedState == null && actualState != null) {
+      return ConformanceCheckResult.simple(
+          Set.of(
+              "The '%s' should not be present, but response contains value '%s'"
+                  .formatted("amendedBookingStatus", actualState)));
     }
     if (Objects.equals(actualState, expectedState)) {
       return ConformanceCheckResult.simple(Collections.emptySet());
@@ -101,9 +100,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     return ConformanceCheckResult.simple(
         Set.of(
             "Expected amendedBookingStatus '%s' but found '%s'"
-                .formatted(
-                    Objects.requireNonNullElse(expectedState, UNSET_MARKER),
-                    Objects.requireNonNullElse(actualState, UNSET_MARKER))));
+                .formatted(expectedState, Objects.requireNonNullElse(actualState, UNSET_MARKER))));
   }
 
   protected ConformanceCheckResult ensureBookingCancellationStatusIsCorrect(
@@ -111,8 +108,11 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     String actualState = responsePayload.path("bookingCancellationStatus").asText(null);
     String expectedState =
         expectedBookingCancellationStatus != null ? expectedBookingCancellationStatus.name() : null;
-    if (expectedState == null && actualState == null) {
-      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    if (expectedState == null && actualState != null) {
+      return ConformanceCheckResult.simple(
+          Set.of(
+              "The '%s' should not be present, but response contains value '%s'"
+                  .formatted("bookingCancellationStatus", actualState)));
     }
     if (Objects.equals(actualState, expectedState)) {
       return ConformanceCheckResult.simple(Collections.emptySet());
@@ -120,9 +120,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     return ConformanceCheckResult.simple(
         Set.of(
             "Expected bookingCancellationStatus '%s' but found '%s'"
-                .formatted(
-                    Objects.requireNonNullElse(expectedState, UNSET_MARKER),
-                    Objects.requireNonNullElse(actualState, UNSET_MARKER))));
+                .formatted(expectedState, Objects.requireNonNullElse(actualState, UNSET_MARKER))));
   }
 
   protected ConformanceCheckResult ensureFeedbacksIsPresent(JsonNode responsePayload) {

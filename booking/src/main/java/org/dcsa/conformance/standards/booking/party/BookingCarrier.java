@@ -183,6 +183,7 @@ public class BookingCarrier extends ConformanceParty {
           .put("importLicenseReference", "importLicenseRefUpdate");
     }
     persistableCarrierBooking.confirmBooking(cbrr, () -> generateAndAssociateCBR(cbrr));
+    persistableCarrierBooking.resetCancellationBookingState();
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
     var cbr = persistableCarrierBooking.getCarrierBookingReference();
@@ -454,6 +455,11 @@ public class BookingCarrier extends ConformanceParty {
       return return409(request, "Invalid state");
     }
     // readTree(json.toString()) because we want a deep copy
+    var amendedContent=request.queryParams().get("amendedContent");
+    if (amendedContent != null && !amendedContent.isEmpty()) {
+      persistableCarrierBooking.resetCancellationBookingState();
+    }
+    persistableCarrierBooking.resetCancellationBookingState();
     persistableCarrierBooking.save(persistentMap);
     var booking = persistableCarrierBooking.getBooking();
 

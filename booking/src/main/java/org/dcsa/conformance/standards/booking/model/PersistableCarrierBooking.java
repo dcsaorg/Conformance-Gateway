@@ -129,7 +129,7 @@ public class PersistableCarrierBooking {
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
   }
 
-  private void resetCancellationBookingState() {
+  public void resetCancellationBookingState() {
     mutateBookingAndAmendment(b -> b.remove(CANCELLATION_BOOKING_STATUS));
   }
 
@@ -191,6 +191,7 @@ public class PersistableCarrierBooking {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(PENDING_AMENDMENT);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, PENDING_AMENDMENT);
+    resetCancellationBookingState();
     mutateBookingAndAmendment(bookingMutator);
     if (resetAmendedBooking) {
       resetAmendedBookingState();

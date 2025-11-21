@@ -204,7 +204,75 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                                                         uc10CarrierDeclineBooking()
                                                             .then(shipperGetBooking(DECLINED)),
                                                         uc12CarrierConfirmBookingCompleted()
-                                                            .then(shipperGetBooking(COMPLETED)))),
+                                                            .then(shipperGetBooking(COMPLETED)),
+                                                        uc13ShipperCancelConfirmedBooking()
+                                                            .then(
+                                                                shipperGetBooking(
+                                                                        CONFIRMED,
+                                                                        null,
+                                                                        CANCELLATION_RECEIVED,
+                                                                        false)
+                                                                    .then(
+                                                                        uc14bCarrierBookingCancellationDeclined()
+                                                                            .then(
+                                                                                shipperGetBooking(
+                                                                                        CONFIRMED,
+                                                                                        null,
+                                                                                        CANCELLATION_DECLINED,
+                                                                                        false)
+                                                                                    .thenEither(
+                                                                                        uc5CarrierConfirmBookingRequest()
+                                                                                            .then(
+                                                                                                shipperGetBooking(
+                                                                                                        CONFIRMED)
+                                                                                                    .then(
+                                                                                                        uc12CarrierConfirmBookingCompleted()
+                                                                                                            .then(
+                                                                                                                shipperGetBooking(
+                                                                                                                    COMPLETED)))),
+                                                                                        uc6CarrierRequestToAmendConfirmedBooking()
+                                                                                            .then(
+                                                                                                shipperGetBooking(
+                                                                                                        PENDING_AMENDMENT)
+                                                                                                    .then(
+                                                                                                        uc7ShipperSubmitBookingAmendment(
+                                                                                                                PENDING_AMENDMENT)
+                                                                                                            .then(
+                                                                                                                shipperGetBooking(
+                                                                                                                        PENDING_AMENDMENT,
+                                                                                                                        AMENDMENT_RECEIVED,
+                                                                                                                        null,
+                                                                                                                        true)
+                                                                                                                    .then(
+                                                                                                                        uc8aCarrierApproveBookingAmendment()
+                                                                                                                            .then(
+                                                                                                                                shipperGetBooking(
+                                                                                                                                        CONFIRMED,
+                                                                                                                                        AMENDMENT_CONFIRMED)
+                                                                                                                                    .then(
+                                                                                                                                        uc12CarrierConfirmBookingCompleted()
+                                                                                                                                            .then(
+                                                                                                                                                shipperGetBooking(
+                                                                                                                                                    COMPLETED)))))))),
+                                                                                        uc7ShipperSubmitBookingAmendment(
+                                                                                                CONFIRMED)
+                                                                                            .then(
+                                                                                                shipperGetBooking(
+                                                                                                        CONFIRMED,
+                                                                                                        AMENDMENT_RECEIVED,
+                                                                                                        null,
+                                                                                                        true)
+                                                                                                    .then(
+                                                                                                        uc8aCarrierApproveBookingAmendment()
+                                                                                                            .then(
+                                                                                                                shipperGetBooking(
+                                                                                                                        CONFIRMED,
+                                                                                                                        AMENDMENT_CONFIRMED)
+                                                                                                                    .then(
+                                                                                                                        uc12CarrierConfirmBookingCompleted()
+                                                                                                                            .then(
+                                                                                                                                shipperGetBooking(
+                                                                                                                                    COMPLETED)))))))))))),
                                         uc11ShipperCancelBooking()
                                             .then(shipperGetBooking(CANCELLED)))))),
             Map.entry(

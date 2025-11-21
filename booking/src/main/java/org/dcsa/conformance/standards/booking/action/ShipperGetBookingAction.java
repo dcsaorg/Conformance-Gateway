@@ -97,8 +97,7 @@ public class ShipperGetBookingAction extends BookingAction {
                 getDspSupplier(),
                 expectedBookingStatus,
                 expectedAmendedBookingStatus,
-                expectedCancelledBookingStatus,
-                requestAmendedContent));
+                expectedCancelledBookingStatus));
       }
     };
   }

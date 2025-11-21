@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: 2.0.2
+  version: 2.0.3
   title: DCSA Booking API
   description: |
     <h1>DCSA OpenAPI specification for the Booking process</h1>
@@ -43,7 +43,7 @@ info:
     This API follows the guidelines defined in version 2.0 of the API Design & Implementation Principles which can be found on the [DCSA Developer Portal](https://developer.dcsa.org/api_design)
 
     ### Changelog and GitHub
-    For a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v202). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
+    For a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v203). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
 
     API specification issued by [DCSA.org](https://dcsa.org/).
   license:
@@ -2246,7 +2246,7 @@ components:
     API-Version:
       schema:
         type: string
-        example: 2.0.2
+        example: 2.0.3
       description: |
         SemVer used to indicate the version of the contract (API version) returned.
   parameters:
@@ -2314,6 +2314,11 @@ components:
     CancelBookingRequest:
       type: object
       title: Cancel Booking Request
+      description: |
+        Cancels one of the following things:
+        - A booking request (prior to a Confirmed Booking)
+        - An amendment to a Confirmed Booking
+        - A Confirmed Booking
       oneOf:
         - type: object
           title: Cancel Booking Request (prior to Booking Confirmation)
@@ -2848,12 +2853,14 @@ components:
       properties:
         latitude:
           type: string
-          description: Geographic coordinate that specifies the north–south position of a point on the Earth's surface.
+          description: |
+            Latitude expressed as decimal degrees using the ISO 6709 data interchange numeric format.
           maxLength: 10
           example: '48.8585500'
         longitude:
           type: string
-          description: Geographic coordinate that specifies the east–west position of a point on the Earth's surface.
+          description: |
+            Longitude expressed as decimal degrees using the ISO 6709 data interchange numeric format.
           maxLength: 11
           example: '2.294492036'
       required:
@@ -2866,6 +2873,8 @@ components:
     CreateBooking:
       type: object
       title: Create Booking
+      description: |
+        Creates a new Booking request.
       required:
         - receiptTypeAtOrigin
         - deliveryTypeAtDestination
@@ -3023,6 +3032,8 @@ components:
                 - `POL` (Port of Loading)
                 - `POD` (Port of Discharge)
                 - `PDE` (Place of Delivery)
+            
+            **Note:** `ROU` (Routing Reference) can be used as a `shipmentLocation` in order to comply with `shipmentLocation` being a mandatory field.
           example: Route123
         declaredValue:
           type: number
@@ -3244,6 +3255,8 @@ components:
     UpdateBooking:
       type: object
       title: Update Booking
+      description: |
+        Updates a booking request or creates a Booking amendment for a Confirmed Booking
       properties:
         carrierBookingRequestReference:
           type: string
@@ -3649,6 +3662,8 @@ components:
           $ref: '#/components/schemas/ServiceContractOwner'
         carrierBookingOffice:
           $ref: '#/components/schemas/CarrierBookingOffice'
+        issueTo:
+          $ref: '#/components/schemas/IssueToParty'
         other:
           type: array
           description: 'A list of document parties that can be optionally provided at booking stage.'
@@ -3663,6 +3678,8 @@ components:
     Booking:
       type: object
       title: Booking
+      description: |
+        The Booking - it can be a Booking request or a Confirmed Booking, defined by the `bookingStatus` property.
       properties:
         carrierBookingRequestReference:
           type: string
@@ -4238,6 +4255,8 @@ components:
           $ref: '#/components/schemas/ServiceContractOwner'
         carrierBookingOffice:
           $ref: '#/components/schemas/CarrierBookingOffice'
+        issueTo:
+          $ref: '#/components/schemas/IssueToParty'
         other:
           type: array
           description: 'A list of document parties that can be optionally provided at booking stage.'
@@ -4686,6 +4705,59 @@ components:
         - partyName
         - UNLocationCode
 
+    IssueToParty:
+      type: object
+      title: Issue To Party
+      description: |
+        The party that receives **possession** of the original Bill of Lading upon issuance.
+      properties:
+        partyName:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 70
+          description: |
+            Name of the party.
+          example: Globeteam
+        sendToPlatform:
+          type: string
+          pattern: ^\S+$
+          maxLength: 4
+          description: |
+            The eBL platform of the transaction party. 
+            The value **MUST** be one of:
+            - `WAVE` (Wave)
+            - `CARX` (CargoX)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
+            - `IDT` (ICE Digital Trade)
+            - `BOLE` (Bolero)
+            - `EDOX` (EdoxOnline)
+            - `IQAX` (IQAX)
+            - `SECR` (Secro)
+            - `TRGO` (TradeGO)
+            - `ETEU` (eTEU)
+            - `TRAC` (Enigio trace:original)
+            - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
+
+            **Condition:** Only applicable when `isElectronic=true` and `transportDocumentTypeCode=BOL`. The property **MUST** be absent for paper B/Ls (`isElectronic=false`)
+          example: BOLE
+        identifyingCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifyingCode'
+        taxLegalReferences:
+          description: |
+            A list of `Tax References` for a `Party`
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxLegalReference'
+      required:
+        - partyName
+
     Party:
       type: object
       title: Party
@@ -4778,6 +4850,8 @@ components:
     IdentifyingCode:
       type: object
       title: Identifying Code
+      description: |
+        A code and value that uniquely identifies a party.
       properties:
         codeListProvider:
           type: string
@@ -4786,7 +4860,7 @@ components:
             A list of codes identifying a party. Possible values are:
             - `WAVE` (Wave)
             - `CARX` (CargoX)
-            - `ESSD` (EssDOCS)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
             - `IDT` (ICE Digital Trade)
             - `BOLE` (Bolero)
             - `EDOX` (EdoxOnline)
@@ -4800,6 +4874,7 @@ components:
             - `ETIT` (e-title)
             - `KTNE` (KTNET)
             - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
             - `GSBN` (Global Shipping Business Network)
             - `WISE` (WiseTech)
             - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -5010,6 +5085,9 @@ components:
             - `PTP` (Prohibited transshipment port)
             - `RTP` (Requested transshipment port)
             - `FCD` (Full container drop-off location)
+            - `ROU` (Routing Reference)
+
+            **Note:** Use `ROU` when `routingReference` is used in order to comply with the need to add at least 1 `shipmentLocation` to a Booking request.
           example: PRE
       required:
         - location

@@ -151,7 +151,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
                     Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
                     Map.entry(
                         "SEND_TO_PLATFORM_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.sendToPlatform(), "")),
+                        Objects.requireNonNullElse(ssp.issueToSendToPlatform(), "")),
                     Map.entry(
                         "ISSUE_TO_LEGAL_NAME_PLACEHOLDER",
                         Objects.requireNonNullElse(ssp.issueToPartyName(), "")),

@@ -154,7 +154,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
                         Objects.requireNonNullElse(ssp.sendToPlatform(), "")),
                     Map.entry(
                         "ISSUE_TO_LEGAL_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.issueToLegalName(), "")),
+                        Objects.requireNonNullElse(ssp.issueToPartyName(), "")),
                     Map.entry(
                         "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
                         Objects.requireNonNullElse(ssp.issueToPartyCode(), "")),

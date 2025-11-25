@@ -7,7 +7,7 @@ import org.dcsa.conformance.core.party.ScenarioParameters;
 
 public record SuppliedScenarioParameters(
     String sendToPlatform,
-    String issueToLegalName,
+    String issueToPartyName,
     String issueToPartyCode,
     String issueToCodeListName,
     String consigneeOrEndorseeLegalName,

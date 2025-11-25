@@ -2,228 +2,132 @@ package org.dcsa.conformance.standards.ovs.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
-import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
 
 @Slf4j
 @UtilityClass
 public class OvsChecks {
 
-  public List<JsonContentCheck> buildResponseContentChecks(Map<OvsFilterParameter, String> filterParametersMap) {
+  public List<JsonContentCheck> buildResponseContentChecks() {
     var checks = new ArrayList<JsonContentCheck>();
-    checks.add(
-      JsonAttribute.customValidator(
-        "Every response received during a conformance test must contain schedules",
-        body -> {
-          Set<String> validationErrors = new LinkedHashSet<>();
-          checkServiceSchedulesExist(body)
-            .forEach(
-              validationError ->
-                validationErrors.add(
-                  "CheckServiceSchedules failed: %s".formatted(validationError)));
-          return ConformanceCheckResult.simple(validationErrors);
-        }));
 
     checks.add(
-      JsonAttribute.customValidator(
-        "If present, at least one schedule attribute must match the corresponding query parameters",
-        body -> {
-          Set<String> validationErrors = new LinkedHashSet<>();
-          checkThatScheduleValuesMatchParamValues(body, filterParametersMap)
-            .forEach(
-              validationError ->
-                validationErrors.add(
-                  "Schedule Param Value Validation failed: %s"
-                    .formatted(validationError)));
-          return ConformanceCheckResult.simple(validationErrors);
-        }));
+        JsonAttribute.customValidator(
+            "Every response received during a conformance test must contain schedules",
+            body -> {
+              Set<String> validationErrors = new LinkedHashSet<>();
+              checkServiceSchedulesExist(body)
+                  .forEach(
+                      validationError ->
+                          validationErrors.add(
+                              "CheckServiceSchedules failed: %s".formatted(validationError)));
+              return ConformanceCheckResult.simple(validationErrors);
+            }));
 
     checks.add(
-      JsonAttribute.customValidator(
-        "Check transportCallReference is unique across each service schedules",
-              body -> ConformanceCheckResult.simple(validateUniqueTransportCallReference(body))));
+        JsonAttribute.customValidator(
+            "Validate statusCodes in transport calls",
+            body -> {
+              Set<String> errors = new LinkedHashSet<>();
+              Set<String> scheduleErrors = checkServiceSchedulesExist(body);
+              if (!scheduleErrors.isEmpty()) {
+                return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+              }
 
-    checks.add(
-      JsonAttribute.customValidator(
-        "Validate limit exists and the number of schedules does not exceed the limit",
-        body -> {
-          Optional<Map.Entry<OvsFilterParameter, String>> limitParam =
-            filterParametersMap.entrySet().stream()
-              .filter(e -> e.getKey().equals(OvsFilterParameter.LIMIT))
-              .findFirst();
+              var result = VALID_STATUS_CODE.validate(body);
+              if (!result.getErrorMessages().isEmpty()) {
+                errors.addAll(result.getErrorMessages());
+              }
+              return ConformanceCheckResult.simple(errors);
+            }));
 
-          if (limitParam.isPresent()) {
-            int expectedLimit = Integer.parseInt(limitParam.get().getValue().trim());
-            if (body.size() > expectedLimit) {
-              return ConformanceCheckResult.simple(Set.of(
-                "The number of service schedules exceeds the limit parameter: "
-                  + expectedLimit));
-            }
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        }));
     return checks;
   }
 
-  public static ActionCheck responseContentChecks(
-      UUID matched, String standardVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
-    Map<OvsFilterParameter, String> filterParametersMap = sspSupplier.get() != null
-      ? sspSupplier.get().getMap()
-      : Map.of();
-    var checks = buildResponseContentChecks(filterParametersMap);
+  public static ActionCheck responseContentChecks(UUID matched, String standardVersion) {
+
+    var checks = buildResponseContentChecks();
     return JsonAttribute.contentChecks(
         OvsRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
-  public Set<String> checkThatScheduleValuesMatchParamValues(
-      JsonNode schedulesNode, Map<OvsFilterParameter, String> filterParametersMap) {
-    Set<String> validationErrors = new LinkedHashSet<>();
-    Arrays.stream(OvsFilterParameter.values())
-        .filter(param -> !param.getJsonPaths().isEmpty())
-        .filter(param -> !param.isSeparateCheckRequired())
-        .filter(filterParametersMap::containsKey)
-        .forEach(
-            filterParameter -> {
-              Set<String> parameterValues =
-                  Arrays.stream(filterParametersMap.get(filterParameter).split(","))
-                      .collect(Collectors.toSet());
-              Set<Map.Entry<String, JsonNode>> attributeValues = new HashSet<>();
-              Set<String> jsonPaths = filterParameter.getJsonPaths();
-              jsonPaths.forEach(
-                  jsonPathExpression -> {
-                    findMatchingNodes(schedulesNode, jsonPathExpression)
-                        .forEach(
-                            result -> {
-                              if (!result.getValue().isMissingNode()
-                                  && !result.getValue().isNull()) {
-                                attributeValues.add(result);
-                              }
-                            });
-                  });
-              if (!attributeValues.isEmpty()
-                  && parameterValues.stream()
-                      .noneMatch(
-                          parameterValue ->
-                              attributeValues.stream()
-                                  .anyMatch(
-                                      entry ->
-                                          entry
-                                              .getValue()
-                                              .asText()
-                                              .trim()
-                                              .equals(
-                                                  parameterValue.trim())))) { // Trim and compare
+  static final JsonContentCheck VALID_STATUS_CODE =
+      JsonAttribute.customValidator(
+          "Validate allowed status codes",
+          body -> {
+            var errors = new LinkedHashSet<ConformanceError>();
 
-                String errorMessage =
-                    String.format(
-                        "Value%s '%s' at path%s '%s' do%s not match value%s '%s' of query parameter '%s'",
-                        attributeValues.size() > 1 ? "s" : "",
-                        attributeValues.stream()
-                            .map(e -> e.getValue().asText())
-                            .collect(Collectors.joining(", ")),
-                        attributeValues.size() > 1 ? "s" : "",
-                        attributeValues.stream()
-                            .map(Map.Entry::getKey)
-                            .collect(Collectors.joining(", ")), // Get keys here
-                        attributeValues.size() > 1 ? "" : "es",
-                        parameterValues.size() > 1 ? "s" : "",
-                        String.join(", ", parameterValues),
-                        filterParameter.getQueryParamName());
+            var index = new AtomicInteger(0);
 
-                validationErrors.add(errorMessage);
+            if (JsonUtil.isMissingOrEmpty(body)) {
+              errors.add(ConformanceError.irrelevant(0));
+              return ConformanceCheckResult.withRelevance(errors);
+            }
+
+            for (JsonNode schedule : body) {
+              int currentIndex = index.getAndIncrement();
+              JsonNode vesselSchedules = schedule.get("vesselSchedules");
+
+              if (JsonUtil.isMissingOrEmpty(vesselSchedules)) {
+                errors.add(ConformanceError.irrelevant(currentIndex));
+                continue;
               }
-            });
 
-    return validationErrors;
-  }
-
-
-  public Set<String> validateUniqueTransportCallReference(JsonNode body) {
-    Set<String> errors = new HashSet<>();
-    // Iterate over each service schedule in the response body
-    for (JsonNode node : body) {
-      Set<String> transportCallReferences = new HashSet<>();
-      findMatchingNodes(node, "vesselSchedules/*/transportCalls/*/transportCallReference")
-          .filter(tcrNode -> !tcrNode.getValue().isMissingNode() && !tcrNode.getValue().isNull())
-          .forEach(
-              transportCallReferenceNode -> {
-                String transportCallReference = transportCallReferenceNode.getValue().asText();
-                if (!transportCallReferences.add(transportCallReference)) {
-                  errors.add(
-                      ("Duplicate transportCallReference %s " + "found at %s")
-                          .formatted(transportCallReference, transportCallReferenceNode.getKey()));
+              for (JsonNode vesselSchedule : vesselSchedules) {
+                JsonNode transportCalls = vesselSchedule.get("transportCalls");
+                if (JsonUtil.isMissingOrEmpty(transportCalls)) {
+                  errors.add(ConformanceError.irrelevant(currentIndex));
+                  continue;
                 }
-              });
-    }
-    return errors;
-  }
 
-  public Stream<Map.Entry<String, JsonNode>> findMatchingNodes(JsonNode node, String jsonPath) {
-    return findMatchingNodes(node, jsonPath, "");
-  }
+                transportCalls.forEach(
+                    transportCall -> {
+                      JsonNode statusCode = transportCall.path("statusCode");
+                      if (!OVSDataSets.STATUS_CODE.contains(statusCode.asText())) {
+                        errors.add(
+                            ConformanceError.error(
+                                "Invalid status '%s' at [%d]"
+                                    .formatted(statusCode.asText(), currentIndex)));
+                      }
+                    });
+              }
+            }
+            return ConformanceCheckResult.withRelevance(errors);
+          });
 
-  private Stream<Map.Entry<String, JsonNode>> findMatchingNodes(
-      JsonNode node, String jsonPath, String currentPath) {
-    if (jsonPath.isEmpty() || jsonPath.equals("/")) {
-      return Stream.of(Map.entry(currentPath, node));
-    }
 
-    String[] pathSegments = jsonPath.split("/", 2);
-    String segment = pathSegments[0];
-    String remainingPath = pathSegments.length > 1 ? pathSegments[1] : "";
-
-    if (segment.equals("*")) {
-      if (node.isArray()) {
-        List<Map.Entry<String, JsonNode>> results = new ArrayList<>();
-        for (int i = 0; i < node.size(); i++) {
-          JsonNode childNode = node.get(i);
-          String newPath = currentPath.isEmpty() ? String.valueOf(i) : currentPath + "/" + i;
-          results.addAll(findMatchingNodes(childNode, remainingPath, newPath).toList());
-        }
-        return results.stream();
-      } else if (node.isObject()) {
-        return findMatchingNodes(node, remainingPath, currentPath);
-      } else {
-        return Stream.of();
-      }
-    } else {
-      JsonNode childNode = node.path(segment);
-      if (!childNode.isMissingNode()) {
-        String newPath = currentPath.isEmpty() ? segment : currentPath + "/" + segment;
-        return findMatchingNodes(childNode, remainingPath, newPath);
-      } else {
-        return Stream.of();
-      }
-    }
-  }
 
   public Set<String> checkServiceSchedulesExist(JsonNode body) {
 
     if (body == null || body.isMissingNode() || body.isNull()) {
       return Set.of("Response body is missing or null.");
-    } else {
-      boolean hasVesselSchedules =
-          findMatchingNodes(body, "*/vesselSchedules")
-              .anyMatch(
-                  node ->
-                      !node.getValue().isMissingNode()
-                          && node.getValue().isArray()
-                          && !node.getValue().isEmpty());
-      if (!hasVesselSchedules) {
-        return Set.of("Response doesn't have schedules.");
-      }
     }
-    return Set.of();
+
+    if (!body.isArray()) {
+      return Set.of("Response must be an array of schedules.");
+    }
+
+    Set<String> errors = new LinkedHashSet<>();
+    for (int i = 0; i < body.size(); i++) {
+      JsonNode vesselSchedules = body.get(i).path("vesselSchedules");
+
+      if (!vesselSchedules.isArray() || vesselSchedules.isEmpty()) {
+        errors.add("Schedule at index %d does not contain vesselSchedules.".formatted(i));
+      }
+
+    }
+
+    return errors.isEmpty() ? Set.of() : errors;
   }
+
 }

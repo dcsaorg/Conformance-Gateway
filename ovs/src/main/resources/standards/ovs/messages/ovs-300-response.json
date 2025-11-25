@@ -62,7 +62,7 @@
               "locationType": "UNLO",
               "UNLocationCode": "SGSIN"
             },
-            "statusCode": "ARRI",
+            "statusCode": "BLNK",
             "timestamps": [
               {
                 "eventTypeCode": "DEPA",
@@ -101,7 +101,7 @@
               "locationType": "UNLO",
               "UNLocationCode": "USNYC"
             },
-            "statusCode": "ARRI",
+            "statusCode": "OMIT",
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",
@@ -140,7 +140,7 @@
               "UNLocationCode": "USNYC",
               "facilitySMDGCode": "APM"
             },
-            "statusCode": "ARRI",
+            "statusCode": "OMIT",
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",
@@ -179,7 +179,7 @@
               "UNLocationCode": "NLAMS",
               "facilitySMDGCode": "APM"
             },
-            "statusCode": "ARRI",
+            "statusCode": "BLNK",
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",

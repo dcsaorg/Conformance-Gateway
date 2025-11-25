@@ -8,7 +8,7 @@ Supply the following parameters that the DCSA synthetic carrier should use when 
 that when your platform system receives the issuance request, it sends back an asynchronous response with the code
 RESPONSE_CODE:
 
-* `sendToPlatform` (mandatory): copied into the element of the `/issueTo` object as the value of attribute
+* `issueToSendToPlatform` (mandatory): copied into the element of the `/issueTo` object as the value of attribute
   `issueTo/sendToPlatform`
 * `issueToPartyName` (mandatory): copied into the element of the `/issueTo` object as the value of
   attribute `issueTo/partyName`

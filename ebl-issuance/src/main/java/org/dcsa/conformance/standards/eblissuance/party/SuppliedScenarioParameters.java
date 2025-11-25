@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.core.party.ScenarioParameters;
 
 public record SuppliedScenarioParameters(
-    String sendToPlatform,
+    String issueToSendToPlatform,
     String issueToPartyName,
     String issueToPartyCode,
     String issueToCodeListName,

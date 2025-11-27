@@ -35,8 +35,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
         HttpMessageType.REQUEST,
         bookingStatus,
         expectedAmendedBookingStatus,
-        expectedBookingCancellationStatus,
-        false);
+        expectedBookingCancellationStatus);
     this.dspSupplier = dspSupplier;
   }
 
@@ -84,8 +83,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
             dspSupplier,
             expectedBookingStatus,
             expectedAmendedBookingStatus,
-            expectedBookingCancellationStatus,
-            amendedContent)
+            expectedBookingCancellationStatus)
         .stream()
         .map(
             jsonContentCheck ->

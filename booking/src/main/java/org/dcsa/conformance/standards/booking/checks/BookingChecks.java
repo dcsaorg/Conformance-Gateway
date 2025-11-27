@@ -1053,15 +1053,13 @@ public class BookingChecks {
       Supplier<BookingDynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
-      BookingCancellationState expectedCancelledBookingStatus,
-      Boolean requestAmendedContent) {
+      BookingCancellationState expectedCancelledBookingStatus) {
     var checks =
         fullPayloadChecks(
             dspSupplier,
             bookingStatus,
             expectedAmendedBookingStatus,
-            expectedCancelledBookingStatus,
-            requestAmendedContent);
+            expectedCancelledBookingStatus);
 
     return JsonAttribute.contentChecks(
         BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
@@ -1071,8 +1069,7 @@ public class BookingChecks {
       Supplier<BookingDynamicScenarioParameters> dspSupplier,
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
-      BookingCancellationState expectedCancelledBookingStatus,
-      Boolean requestAmendedContent) {
+      BookingCancellationState expectedCancelledBookingStatus) {
 
     var checks = new ArrayList<JsonContentCheck>();
 
@@ -1087,11 +1084,19 @@ public class BookingChecks {
         JsonAttribute.customValidator(
             "Validate '%s'".formatted(ATTR_AMENDED_BOOKING_STATUS),
             body -> {
-              String amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
+              JsonNode amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
               if (expectedAmendedBookingStatus == null) {
-                return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+                if (!JsonUtil.isMissingOrEmpty(amendedBookingStatus)) {
+                  return ConformanceCheckResult.simple(
+                      Set.of(
+                          "The '%s' should not be present, but response contains value '%s'"
+                              .formatted(
+                                  ATTR_AMENDED_BOOKING_STATUS, amendedBookingStatus.asText())));
+                }
+                return ConformanceCheckResult.simple(Set.of());
               }
-              if (!expectedAmendedBookingStatus.name().equals(amendedBookingStatus)) {
+              String amendedBookingStatusValue = amendedBookingStatus.asText("");
+              if (!expectedAmendedBookingStatus.name().equals(amendedBookingStatusValue)) {
                 return ConformanceCheckResult.simple(
                     Set.of(
                         "The expected '%s' %s is not equal to response '%s' %s"
@@ -1099,7 +1104,7 @@ public class BookingChecks {
                                 ATTR_AMENDED_BOOKING_STATUS,
                                 expectedAmendedBookingStatus.name(),
                                 ATTR_AMENDED_BOOKING_STATUS,
-                                amendedBookingStatus)));
+                                amendedBookingStatusValue)));
               }
               return ConformanceCheckResult.simple(Set.of());
             }));
@@ -1108,12 +1113,20 @@ public class BookingChecks {
         JsonAttribute.customValidator(
             "Validate '%s'".formatted(ATTR_BOOKING_CANCELLATION_STATUS),
             body -> {
-              String bookingCancellationStatus =
-                  body.path(ATTR_BOOKING_CANCELLATION_STATUS).asText("");
+              JsonNode bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
               if (expectedCancelledBookingStatus == null) {
-                return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+                if (!JsonUtil.isMissingOrEmpty(bookingCancellationStatus)) {
+                  return ConformanceCheckResult.simple(
+                      Set.of(
+                          "The '%s' should not be present, but response contains value '%s'"
+                              .formatted(
+                                  ATTR_BOOKING_CANCELLATION_STATUS,
+                                  bookingCancellationStatus.asText())));
+                }
+                return ConformanceCheckResult.simple(Set.of());
               }
-              if (!expectedCancelledBookingStatus.name().equals(bookingCancellationStatus)) {
+              String bookingCancellationStatusValue = bookingCancellationStatus.asText("");
+              if (!expectedCancelledBookingStatus.name().equals(bookingCancellationStatusValue)) {
                 return ConformanceCheckResult.simple(
                     Set.of(
                         "The expected '%s' %s is not equal to response '%s' %s"
@@ -1121,7 +1134,7 @@ public class BookingChecks {
                                 ATTR_BOOKING_CANCELLATION_STATUS,
                                 expectedCancelledBookingStatus.name(),
                                 ATTR_BOOKING_CANCELLATION_STATUS,
-                                bookingCancellationStatus)));
+                                bookingCancellationStatusValue)));
               }
               return ConformanceCheckResult.simple(Set.of());
             }));

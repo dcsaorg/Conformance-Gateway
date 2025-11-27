@@ -15,10 +15,10 @@ public class SupplyScenarioParametersAction extends PortCallAction {
 
   public SupplyScenarioParametersAction(String publisherPartyName, ScenarioType scenarioType) {
     super(
-      publisherPartyName,
-      null,
-      null,
-      "SupplyScenarioParameters");
+        publisherPartyName,
+        null,
+        null,
+        "SupplyScenarioParameters(%s)".formatted(scenarioType.name()));
     this.scenarioType = scenarioType;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }

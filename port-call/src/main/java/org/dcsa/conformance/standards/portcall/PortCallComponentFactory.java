@@ -108,7 +108,8 @@ public class PortCallComponentFactory extends AbstractComponentFactory {
   }
 
   public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {
-    String schemaFilePath = "/standards/portcall/v200/port-call-v%s-openapi.yaml".formatted(standardVersion);
+    String schemaFilePath =
+        "/standards/portcall/schemas/port-call-v%s-openapi.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 }

@@ -24,7 +24,11 @@ public class PublisherPostPortCallEventsAction extends PortCallAction{
       PortCallAction previousAction,
       ScenarioType scenarioType,
       JsonSchemaValidator requestSchemaValidator) {
-    super(publisherPartyName, subscriberPartyName, previousAction, "POST Port Call Events");
+    super(
+        publisherPartyName,
+        subscriberPartyName,
+        previousAction,
+        "POST Port Call Events(%s)".formatted(scenarioType.name()));
     this.scenarioType = scenarioType;
     this.requestSchemaValidator = requestSchemaValidator;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));

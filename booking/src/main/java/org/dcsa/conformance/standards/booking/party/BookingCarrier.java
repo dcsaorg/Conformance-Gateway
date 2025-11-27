@@ -459,7 +459,6 @@ public class BookingCarrier extends ConformanceParty {
     if (amendedContent != null && !amendedContent.isEmpty()) {
       persistableCarrierBooking.resetCancellationBookingState();
     }
-    persistableCarrierBooking.resetCancellationBookingState();
     persistableCarrierBooking.save(persistentMap);
     var booking = persistableCarrierBooking.getBooking();
 

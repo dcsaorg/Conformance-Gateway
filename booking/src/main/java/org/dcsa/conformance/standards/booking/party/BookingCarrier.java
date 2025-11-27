@@ -454,11 +454,6 @@ public class BookingCarrier extends ConformanceParty {
     } catch (IllegalStateException e) {
       return return409(request, "Invalid state");
     }
-    // readTree(json.toString()) because we want a deep copy
-    var amendedContent=request.queryParams().get("amendedContent");
-    if (amendedContent != null && !amendedContent.isEmpty()) {
-      persistableCarrierBooking.resetCancellationBookingState();
-    }
     persistableCarrierBooking.save(persistentMap);
     var booking = persistableCarrierBooking.getBooking();
 

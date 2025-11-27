@@ -28,7 +28,7 @@ public class SupplyScenarioParametersAction extends OvsAction {
         "SupplyScenarioParameters(%s)"
             .formatted(
                 parameters.entrySet().stream()
-                    .map(entry -> entry.getKey().getQueryParamName() + "=" + entry.getValue())
+                    .map(entry -> entry.getKey().getQueryParamName())
                     .collect(Collectors.joining(", "))),
         -1);
     this.ovsFilterParameterMap = parameters;

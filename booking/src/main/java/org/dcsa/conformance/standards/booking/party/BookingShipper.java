@@ -170,7 +170,8 @@ public class BookingShipper extends ConformanceParty {
     String reference = getBookingReference(actionPrompt);
     String cbrr = actionPrompt.path("cbrr").asText();
     var bookingData = persistentMap.load(cbrr);
-    ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
+    ((ObjectNode) bookingData)
+        .put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
     syncCounterpartPut("/v2/bookings/%s".formatted(reference), bookingData);
 
     addOperatorLogEntry(

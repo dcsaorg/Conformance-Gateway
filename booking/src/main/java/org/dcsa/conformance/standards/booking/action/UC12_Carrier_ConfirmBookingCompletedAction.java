@@ -1,9 +1,12 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
@@ -33,6 +36,11 @@ public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
     return jsonNode
         .put("cbrr", dsp.carrierBookingRequestReference())
         .put("cbr", dsp.carrierBookingReference());
+  }
+
+  @Override
+  public Set<String> skippableForRoles() {
+    return Set.of(BookingRole.CARRIER.getConfigName());
   }
 
   @Override

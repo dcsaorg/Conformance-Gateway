@@ -69,13 +69,16 @@ public class ShipperGetBookingAction extends BookingAction {
         var dsp = getDspSupplier().get();
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
+        Set<Integer> expectedStatuses = BookingState.PENDING_AMENDMENT.equals(expectedBookingStatus)
+            ? Set.of(expectedStatus, 202)
+            : Set.of(expectedStatus);
         return Stream.of(
             new UrlPathCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 buildFullUris("/v2/bookings/", cbrr, cbr)),
             new ResponseStatusCheck(
-                BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+                BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatuses),
             new ApiHeaderCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -97,8 +100,7 @@ public class ShipperGetBookingAction extends BookingAction {
                 getDspSupplier(),
                 expectedBookingStatus,
                 expectedAmendedBookingStatus,
-                expectedCancelledBookingStatus,
-                requestAmendedContent));
+                expectedCancelledBookingStatus));
       }
     };
   }

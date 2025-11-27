@@ -3,6 +3,7 @@ package org.dcsa.conformance.core.check;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -65,6 +66,7 @@ class JsonRebasableAttributeBasedCheck extends ActionCheck {
     protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
       ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
       if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
+      if (exchange.getResponse().statusCode() == 202) this.setApplicable(false);
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
       return VersionedKeywordDataset.withVersion(standardsVersion, () -> validator.validate(jsonBody));
     }

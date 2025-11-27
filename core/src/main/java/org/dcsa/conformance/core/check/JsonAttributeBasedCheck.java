@@ -78,6 +78,7 @@ class JsonAttributeBasedCheck extends ActionCheck {
         Function<UUID, ConformanceExchange> getExchangeByUuid) {
       ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
       if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
+      if (exchange.getResponse().statusCode() == 202) this.setApplicable(false);
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
       return VersionedKeywordDataset.withVersion(
           standardsVersion, () -> this.validator.validate(jsonBody));

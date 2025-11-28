@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: 3.0.1
+  version: 3.0.2
   title: DCSA Shipping Instructions and Transport Document API
   description: |
     <h1>DCSA OpenAPI specification for the Shipping Instructions and Transport Document process</h1>
@@ -44,7 +44,7 @@ info:
     This API follows the guidelines defined in version 2.0 of the API Design & Implementation Principles which can be found on the [DCSA Developer Portal](https://developer.dcsa.org/api_design)
 
     ### Changelog and GitHub
-    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v301). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
+    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v302). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
 
     API specification issued by [DCSA.org](https://dcsa.org/).
   license:
@@ -2374,6 +2374,7 @@ paths:
                   data:
                     transportDocumentStatus: ISSUED
                     transportDocumentReference: HHL71800000
+                    transportDocumentSubReference: v2
               issuedFullStateTransferExample:
                 summary: |
                   Transport Document has been issued (Full State Transfer)
@@ -2390,8 +2391,10 @@ paths:
                   data:
                     transportDocumentStatus: ISSUED
                     transportDocumentReference: HHL71800000
+                    transportDocumentSubReference: v2
                     transportDocument:
                       transportDocumentReference: HHL71800000
+                      transportDocumentSubReference: v2
                       shippingInstructionsReference: fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9
                       transportDocumentStatus: ISSUED
                       transportDocumentTypeCode: BOL
@@ -2605,7 +2608,7 @@ components:
     API-Version:
       schema:
         type: string
-        example: 3.0.1
+        example: 3.0.2
       description: |
         SemVer used to indicate the version of the contract (API version) returned.
   parameters:
@@ -2671,6 +2674,8 @@ components:
     CancelShippingInstructionsUpdate:
       type: object
       title: Cancel Shipping Instructions Update
+      description: |
+        Cancel the `Shipping Instructions` update
       properties:
         updatedShippingInstructionsStatus:
           type: string
@@ -2687,6 +2692,8 @@ components:
     ApproveTransportDocument:
       type: object
       title: Approve Transport Document
+      description: |
+        Approves the Draft Transport Document
       properties:
         transportDocumentStatus:
           type: string
@@ -2826,6 +2833,13 @@ components:
 
             **Condition:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide
           example: HHL71800000
+        transportDocumentSubReference:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 100
+          description: |
+            Additional reference that can be optionally used alongside the `transportDocumentReference` in order to distinguish between versions of the same `Transport Document`.
+          example: Version_1
         feedbacks:
           type: array
           description: |
@@ -2990,6 +3004,13 @@ components:
           description: |
             A unique number allocated by the shipping line to the `Transport Document` and the main number used for the tracking of the status of the shipment.
           example: HHL71800000
+        transportDocumentSubReference:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 100
+          description: |
+            Additional reference that can be optionally used alongside the `transportDocumentReference` in order to distinguish between versions of the same `Transport Document`.
+          example: Version_1
         feedbacks:
           type: array
           description: |
@@ -3120,7 +3141,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         numberOfOriginalsWithoutCharges:
           type: integer
@@ -3129,7 +3150,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         displayedNameForPlaceOfReceipt:
           description: |
@@ -3436,7 +3457,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         numberOfOriginalsWithoutCharges:
           type: integer
@@ -3445,7 +3466,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         displayedNameForPlaceOfReceipt:
           description: |
@@ -3772,7 +3793,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         numberOfOriginalsWithoutCharges:
           type: integer
@@ -3781,7 +3802,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         displayedNameForPlaceOfReceipt:
           description: |
@@ -4236,6 +4257,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: NL
       required:
         - street
@@ -4271,6 +4294,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: NL
       required:
         - city
@@ -4320,12 +4345,14 @@ components:
       properties:
         latitude:
           type: string
-          description: Geographic coordinate that specifies the north–south position of a point on the Earth's surface.
+          description: |
+            Latitude expressed as decimal degrees using the ISO 6709 data interchange numeric format.
           maxLength: 10
           example: '48.8585500'
         longitude:
           type: string
-          description: Geographic coordinate that specifies the east–west position of a point on the Earth's surface.
+          description: |
+            Longitude expressed as decimal degrees using the ISO 6709 data interchange numeric format.
           maxLength: 11
           example: '2.294492036'
       required:
@@ -4470,6 +4497,8 @@ components:
           type: string
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           pattern: ^[A-Z]{2}$
           minLength: 2
           maxLength: 2
@@ -4559,6 +4588,32 @@ components:
             description: |
               A purchase order reference linked to the `Shipper`.
             example: HHL007
+      required:
+        - partyName
+
+    OnBehalfOfShipper:
+      type: object
+      title: On Behalf of Shipper
+      description: |
+        The party allowed to act on behalf of the shipper for documentation purposes.
+
+        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`.
+      properties:
+        partyName:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 70
+          description: |
+            Name of the party.
+          example: IKEA Denmark
+        address:
+          $ref: '#/components/schemas/PartyAddress'
+        identifyingCodes:
+          type: array
+          description: |
+            **Condition:** Either the `address` or a party `identifyingCode` must be provided.
+          items:
+            $ref: '#/components/schemas/IdentifyingCode'
       required:
         - partyName
 
@@ -4691,6 +4746,31 @@ components:
       required:
         - partyName
         - identifyingCodes
+
+    OnBehalfOfConsignee:
+      type: object
+      title: On Behalf of Consignee
+      description: |
+        The party allowed to act on behalf of the consignee for documentation purposes.
+
+        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`.
+      properties:
+        partyName:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 70
+          description: |
+            Name of the party.
+          example: IKEA Denmark
+        address:
+          $ref: '#/components/schemas/PartyAddress'
+        identifyingCodes:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/IdentifyingCode'
+      required:
+        - partyName
 
     ConsigneeShipper:
       type: object
@@ -4966,7 +5046,7 @@ components:
       type: object
       title: Issue To Party
       description: |
-        The party to whom the `Bill of Lading` must be issued.
+        The party that receives **possession** of the original Bill of Lading upon issuance.
       properties:
         partyName:
           type: string
@@ -4984,7 +5064,7 @@ components:
             The value **MUST** be one of:
             - `WAVE` (Wave)
             - `CARX` (CargoX)
-            - `ESSD` (EssDOCS)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
             - `IDT` (ICE Digital Trade)
             - `BOLE` (Bolero)
             - `EDOX` (EdoxOnline)
@@ -4998,6 +5078,7 @@ components:
             - `ETIT` (e-title)
             - `KTNE` (KTNET)
             - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
 
             **Condition:** Only applicable when `isElectronic=true` and `transportDocumentTypeCode=BOL`. The property **MUST** be absent for paper B/Ls (`isElectronic=false`)
           example: BOLE
@@ -5621,6 +5702,8 @@ components:
     IdentifyingCode:
       type: object
       title: Identifying Code
+      description: |
+        A code and value that uniquely identifies a party.
       properties:
         codeListProvider:
           type: string
@@ -5629,7 +5712,7 @@ components:
             A list of codes identifying a party. Possible values are:
             - `WAVE` (Wave)
             - `CARX` (CargoX)
-            - `ESSD` (EssDOCS)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
             - `IDT` (ICE Digital Trade)
             - `BOLE` (Bolero)
             - `EDOX` (EdoxOnline)
@@ -5643,6 +5726,7 @@ components:
             - `ETIT` (e-title)
             - `KTNE` (KTNET)
             - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
             - `GSBN` (Global Shipping Business Network)
             - `WISE` (WiseTech)
             - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -5703,6 +5787,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: IN
         value:
           type: string
@@ -6031,6 +6117,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: BR
         values:
           type: array
@@ -6092,6 +6180,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: NL
         values:
           type: array
@@ -7436,6 +7526,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: NL
         advanceManifestFilingsHouseBLPerformedBy:
           type: string
@@ -7597,6 +7689,8 @@ components:
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
             **Condition:** Mandatory to provide in case `UN Location Code` is not provided
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: NL
         UNLocationCode:
           type: string
@@ -7643,6 +7737,8 @@ components:
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
 
             **Condition:** Mandatory to provide in case `UN Location Code` is not provided
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: NL
         UNLocationCode:
           type: string
@@ -7779,7 +7875,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         numberOfOriginalsWithoutCharges:
           type: integer
@@ -7788,7 +7884,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         displayedNameForPlaceOfReceipt:
           description: |
@@ -8048,6 +8144,16 @@ components:
             A list of `Customs references`
           items:
             $ref: '#/components/schemas/CustomsReference'
+        feedbacks:
+          type: array
+          description: |
+            Feedback that can be provided includes, but is not limited to:
+            - unsupported properties
+            - changed values
+            - removed properties
+            - general information
+          items:
+            $ref: '#/components/schemas/Feedback'
       required:
         - transportDocumentReference
         - transportDocumentStatus
@@ -8075,6 +8181,8 @@ components:
     Transports:
       type: object
       title: Transports
+      description: |
+        This object consolidates information related to dates, origin and destination points, pre- and on-carriage mode of transport and vessel details.
       properties:
         plannedArrivalDate:
           type: string
@@ -8556,6 +8664,8 @@ components:
               maxLength: 2
               description: |
                 The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+                **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
               example: NL
           required:
             - countryCode
@@ -8641,8 +8751,12 @@ components:
       properties:
         shipper:
           $ref: '#/components/schemas/Shipper'
+        onBehalfOfShipper:
+          $ref: '#/components/schemas/OnBehalfOfShipper'
         consignee:
           $ref: '#/components/schemas/ConsigneeShipper'
+        onBehalfOfConsignee:
+          $ref: '#/components/schemas/OnBehalfOfConsignee'
         endorsee:
           $ref: '#/components/schemas/EndorseeShipper'
         issueTo:
@@ -8712,8 +8826,12 @@ components:
       properties:
         shipper:
           $ref: '#/components/schemas/Shipper'
+        onBehalfOfShipper:
+          $ref: '#/components/schemas/OnBehalfOfShipper'
         consignee:
           $ref: '#/components/schemas/Consignee'
+        onBehalfOfConsignee:
+          $ref: '#/components/schemas/OnBehalfOfConsignee'
         endorsee:
           $ref: '#/components/schemas/Endorsee'
         issuingParty:

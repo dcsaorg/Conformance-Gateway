@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: 3.0.1
+  version: 3.0.2
   title: DCSA eBL Issuance API
   description: |
     <h1>DCSA OpenAPI specification for the issuance of an electronic Bill of Lading (referred to as eBL) via an eBL Solution Provider</h1>
@@ -17,7 +17,7 @@ info:
 
     for the eBL Solution Provider to call.
 
-    When the document is to be surrendered, it should happen via a version of the [DCSA eBL Surrender](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.1) API.
+    When the document is to be surrendered, it should happen via a version of the [DCSA eBL Surrender](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.2) API.
 
     ### API Design & Implementation Principles
     This API follows the guidelines defined in version 2.0 of the API Design & Implementation Principles which can be found on the [DCSA Developer Portal](https://developer.dcsa.org/api_design)
@@ -26,7 +26,7 @@ info:
     Please look at the following implementation guide for how to create [Digital Signatures](https://developer.dcsa.org/implementing-digital-signatures-for-transport-documents).
 
     ### Changelog and GitHub
-    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/issuance#v301). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
+    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/issuance#v302). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
 
     API specification issued by [DCSA.org](https://dcsa.org/).
   license:
@@ -160,7 +160,7 @@ components:
     API-Version:
       schema:
         type: string
-        example: 3.0.1
+        example: 3.0.2
       description: |
         SemVer used to indicate the version of the contract (API version) returned.
   parameters:
@@ -312,10 +312,7 @@ components:
           type: string
           pattern: ^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$
           description: |
-            JWS content with compact serialization according to [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515#section-7.1). JWS-signed payload is defined in schema [IssuanceManifest](#/IssuanceManifest).
-            This attribute is used to provide integrity of various parts of the payload that enable parties to
-            validate whether a payload matches what the carrier issued originally. Accordingly, the payload is
-            signed by the carrier.
+            JWS content with compact serialization according to [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515#section-7.1). JWS-signed payload is defined in schema [IssuanceManifest](#/IssuanceManifest). This attribute is used to provide integrity of various parts of the payload that enable parties to validate whether a payload matches what the carrier issued originally. Accordingly, the payload is signed by the carrier or a party (typically an agent) acting on behalf of the carrier.
           # TODO: Update example
           example: eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJkb2N1bWVudENoZWNrc3VtIjogIjhkYzk5ZDhhYzkyMjI0MGM1NWMwMzg0NWY0OWRlZjY0MTg3MTQ2NjUxYmFlNGY5YTYzMTMxMjc3Y2YwMGQ5ZGYiLCJlQkxWaXN1YWxpc2F0aW9uQnlDYXJyaWVyQ2hlY2tzdW0iOiAiNzZhN2QxNGM4M2Q3MjY4ZDY0M2FlNzM0NWM0NDhkZTYwNzAxZjk1NWQyNjRhNzQzZTY5MjhhMGI4MjY4YjI0ZiIsImlzc3VlVG9DaGVja3N1bSI6ICI3NmE3ZDE0YzgzZDcyNjhkNjQzYWU3MzQ1YzQ0OGRlNjA3MDFmOTU1ZDI2NGE3NDNlNjkyOGEwYjgyNjhiMjRmIn0.c4SJ9-61fE6RmeIuZ3EI-TSM0M6qXuOudtr3YhpDjqVMaYk_RYpaWYvw75ssTbjgGFKTBKCy5lpmOfb8Fq--Qu2k0MWbH6qdX5jTYwl0DX946RQg-hnmVTg9np3bmqVeKqKURyV-UUdG-KK_XCGzPZ-lZkeUlpMcIthQFs0pCODR9GPytv7ZXLPZFOmHM9fn3FD2yRqVhQzcs7HdcxMjCx6hkBW8Z-jW4qteVy2_E9uqjkKwlu_cQLoY83Z0mcjn0PZNQvKF10x7q1_Jjf_Su19UigTUu3pFMrzo4iPS_jcrFoIb3TSZNSzbgAwtujSBFOufPDyEmxlx1sH0ZowMvA
       required:
@@ -325,10 +322,14 @@ components:
     SupportingDocument:
       type: object
       title: Supporting Document
+      description: |
+        A binary document representing the visualisation of the eBL.
       properties:
         name:
           type: string
           maxLength: 100
+          description: |
+            Name of the Supporting Document
           example: Carrier rendered copy of the EBL.pdf
         content:
           type: string
@@ -385,7 +386,7 @@ components:
       type: object
       title: Issue To Party
       description: |
-        The party to whom the electronic Bill of Lading (eBL) must be issued.
+        The party that receives **possession** of the eBL upon issuance.
       properties:
         partyName:
           type: string
@@ -403,7 +404,7 @@ components:
             The value **MUST** be one of:
             - `WAVE` (Wave)
             - `CARX` (CargoX)
-            - `ESSD` (EssDOCS)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
             - `IDT` (ICE Digital Trade)
             - `BOLE` (Bolero)
             - `EDOX` (EdoxOnline)
@@ -417,6 +418,7 @@ components:
             - `ETIT` (e-title)
             - `KTNE` (KTNET)
             - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
           example: BOLE
         identifyingCodes:
           type: array
@@ -437,6 +439,8 @@ components:
     IdentifyingCode:
       type: object
       title: Identifying Code
+      description: |
+        A code and value that uniquely identifies a party.
       properties:
         codeListProvider:
           type: string
@@ -446,7 +450,7 @@ components:
 
             - `WAVE` (Wave)
             - `CARX` (CargoX)
-            - `ESSD` (EssDOCS)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
             - `IDT` (ICE Digital Trade)
             - `BOLE` (Bolero)
             - `EDOX` (EdoxOnline)
@@ -460,6 +464,7 @@ components:
             - `ETIT` (e-title)
             - `KTNE` (KTNET)
             - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
             - `GSBN` (Global Shipping Business Network)
             - `WISE` (WiseTech)
             - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -523,6 +528,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: IN
         value:
           type: string
@@ -657,7 +664,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         numberOfOriginalsWithoutCharges:
           type: integer
@@ -666,7 +673,7 @@ components:
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
 
-            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
+            **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
         displayedNameForPlaceOfReceipt:
           description: |
@@ -1186,6 +1193,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: BR
         values:
           type: array
@@ -1247,6 +1256,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: NL
         values:
           type: array
@@ -2205,6 +2216,8 @@ components:
     Transports:
       type: object
       title: Transports
+      description: |
+        This object consolidates information related to dates, origin and destination points, pre- and on-carriage mode of transport and vessel details.
       properties:
         plannedArrivalDate:
           type: string
@@ -2609,6 +2622,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: NL
       required:
         - street
@@ -2644,6 +2659,8 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           example: NL
       required:
         - city
@@ -2693,12 +2710,14 @@ components:
       properties:
         latitude:
           type: string
-          description: Geographic coordinate that specifies the north–south position of a point on the Earth's surface.
+          description: |
+            Latitude expressed as decimal degrees using the ISO 6709 data interchange numeric format.
           maxLength: 10
           example: '48.8585500'
         longitude:
           type: string
-          description: Geographic coordinate that specifies the east–west position of a point on the Earth's surface.
+          description: |
+            Longitude expressed as decimal degrees using the ISO 6709 data interchange numeric format.
           maxLength: 11
           example: '2.294492036'
       required:
@@ -2792,6 +2811,8 @@ components:
           type: string
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
           pattern: ^[A-Z]{2}$
           minLength: 2
           maxLength: 2
@@ -2882,6 +2903,32 @@ components:
       required:
         - partyName
 
+    OnBehalfOfShipper:
+      type: object
+      title: On Behalf of Shipper
+      description: |
+        The party allowed to act on behalf of the shipper for documentation purposes.
+
+        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`.
+      properties:
+        partyName:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 70
+          description: |
+            Name of the party.
+          example: IKEA Denmark
+        address:
+          $ref: '#/components/schemas/PartyAddress'
+        identifyingCodes:
+          type: array
+          description: |
+            **Condition:** Either the `address` or a party `identifyingCode` must be provided.
+          items:
+            $ref: '#/components/schemas/IdentifyingCode'
+      required:
+        - partyName
+
     Consignee:
       type: object
       title: Consignee
@@ -2966,6 +3013,31 @@ components:
       required:
         - partyName
         - identifyingCodes
+
+    OnBehalfOfConsignee:
+      type: object
+      title: On Behalf of Consignee
+      description: |
+        The party allowed to act on behalf of the consignee for documentation purposes.
+
+        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`.
+      properties:
+        partyName:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 70
+          description: |
+            Name of the party.
+          example: IKEA Denmark
+        address:
+          $ref: '#/components/schemas/PartyAddress'
+        identifyingCodes:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/IdentifyingCode'
+      required:
+        - partyName
 
     Endorsee:
       type: object
@@ -3199,6 +3271,8 @@ components:
     IssuanceError:
       type: object
       title: Issuance Error
+      description: |
+        A detailed description of why the Issuance failed
       properties:
         reason:
           type: string
@@ -3222,6 +3296,8 @@ components:
     IssuanceResponse:
       type: object
       title: Issuance Response
+      description: |
+        Response from the eBL Solution Provider back to the Issuing party.
       properties:
         transportDocumentReference:
           type: string
@@ -3316,6 +3392,8 @@ components:
               maxLength: 2
               description: |
                 The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+                **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
               example: NL
           required:
             - countryCode
@@ -3366,8 +3444,12 @@ components:
       properties:
         shipper:
           $ref: '#/components/schemas/Shipper'
+        onBehalfOfShipper:
+          $ref: '#/components/schemas/OnBehalfOfShipper'
         consignee:
           $ref: '#/components/schemas/Consignee'
+        onBehalfOfConsignee:
+          $ref: '#/components/schemas/OnBehalfOfConsignee'
         endorsee:
           $ref: '#/components/schemas/Endorsee'
         issuingParty:
@@ -3469,7 +3551,3 @@ components:
           description: |
             Expiry date of the `Import License`.
           example: '2024-09-21'
-servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_ISS/3.0.1

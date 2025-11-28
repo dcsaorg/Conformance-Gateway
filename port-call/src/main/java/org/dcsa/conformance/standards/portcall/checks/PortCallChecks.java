@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Spliterators;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.StreamSupport;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonAttribute;
@@ -24,15 +23,17 @@ public class PortCallChecks {
       UUID matchedExchangeUuid,
       String expectedApiVersion,
       Supplier<DynamicScenarioParameters> dsp) {
+
     List<JsonContentCheck> checks = new ArrayList<>();
     String scenarioType = dsp.get().scenarioType();
-    checks.add(PortCallChecks.nonEmptyEvents());
+
+    checks.add(nonEmptyEvents());
 
     if ("TIMESTAMP".equals(scenarioType)) {
-      checks.addAll(PortCallChecks.timestampScenarioChecks());
+      checks.addAll(timestampScenarioChecks());
     }
     if ("MOVES_FORECASTS".equals(scenarioType)) {
-      checks.addAll(PortCallChecks.movesForecastsScenarioChecks());
+      checks.addAll(movesForecastsScenarioChecks());
     }
 
     return JsonAttribute.contentChecks(
@@ -41,6 +42,21 @@ public class PortCallChecks {
         (role) -> true,
         matchedExchangeUuid,
         HttpMessageType.REQUEST,
+        expectedApiVersion,
+        checks);
+  }
+
+  public static ActionCheck getGetResponsePayloadChecks(
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      Supplier<DynamicScenarioParameters> dsp) {
+    var checks = new ArrayList<JsonContentCheck>();
+    return JsonAttribute.contentChecks(
+        "",
+        "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
+        PortCallRole::isPublisher,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
         expectedApiVersion,
         checks);
   }
@@ -57,47 +73,52 @@ public class PortCallChecks {
         });
   }
 
+  public static List<JsonContentCheck> timestampScenarioChecks() {
+    List<JsonContentCheck> checks = new ArrayList<>();
+    checks.add(atLeastOneTimestampClassifierCodeCorrect());
+    checks.add(atLeastOneTimestampServiceDateTimeCorrect());
+    return checks;
+  }
+
   public static JsonContentCheck atLeastOneTimestampClassifierCodeCorrect() {
     return JsonAttribute.customValidator(
         "At least one event must demonstrate the correct use of the 'timestamp/classifierCode' attribute",
         (body, ctx) -> {
           var events = body.path("events");
-          Set<String> allIssues = new LinkedHashSet<>();
+          Set<String> errors = new LinkedHashSet<>();
 
           if (!events.isArray() || events.isEmpty()) {
-            allIssues.add("events must be a non-empty array");
-            return ConformanceCheckResult.simple(allIssues);
+            errors.add("events must be a non-empty array");
+            return ConformanceCheckResult.simple(errors);
           }
 
           for (int i = 0; i < events.size(); i++) {
             var event = events.get(i);
-            List<String> errorsAtIndex = validateTimestampClassifierCode(event);
-
-            if (errorsAtIndex.isEmpty()) {
+            List<String> problems = validateTimestampClassifierCode(event);
+            if (problems.isEmpty()) {
               return ConformanceCheckResult.simple(Set.of());
             }
-            for (String err : errorsAtIndex) {
-              allIssues.add("events[" + i + "]." + err);
+            for (String err : problems) {
+              errors.add("arrivalNotices[" + i + "]." + err);
             }
           }
-          return ConformanceCheckResult.simple(allIssues);
+
+          return ConformanceCheckResult.simple(errors);
         });
   }
 
   private static List<String> validateTimestampClassifierCode(JsonNode event) {
     List<String> issues = new ArrayList<>();
-
     var ts = event.path("timestamp");
+
     if (JsonUtil.isMissingOrEmpty(ts)) {
       issues.add("timestamp.classifierCode must be functionally present and non-empty");
       return issues;
     }
 
-    String classifier = ts.path("classifierCode").asText("");
-    if (classifier.isBlank()) {
+    if (ts.path("classifierCode").asText("").isBlank()) {
       issues.add("timestamp.classifierCode must be functionally present and non-empty");
     }
-
     return issues;
   }
 
@@ -106,395 +127,311 @@ public class PortCallChecks {
         "At least one event must demonstrate the correct use of the 'timestamp/serviceDateTime' attribute",
         (body, ctx) -> {
           var events = body.path("events");
-          Set<String> allIssues = new LinkedHashSet<>();
+          Set<String> errors = new LinkedHashSet<>();
 
           if (!events.isArray() || events.isEmpty()) {
-            allIssues.add("events must be a non-empty array");
-            return ConformanceCheckResult.simple(allIssues);
+            errors.add("events must be a non-empty array");
+            return ConformanceCheckResult.simple(errors);
           }
 
           for (int i = 0; i < events.size(); i++) {
             var event = events.get(i);
-            List<String> errorsAtIndex = validateTimestampServiceDateTime(event);
-
-            if (errorsAtIndex.isEmpty()) {
+            List<String> problems = validateTimestampServiceDateTime(event);
+            if (problems.isEmpty()) {
               return ConformanceCheckResult.simple(Set.of());
             }
-            for (String err : errorsAtIndex) {
-              allIssues.add("events[" + i + "]." + err);
+            for (String err : problems) {
+              errors.add("arrivalNotices[" + i + "]." + err);
             }
           }
-          return ConformanceCheckResult.simple(allIssues);
+
+          return ConformanceCheckResult.simple(errors);
         });
   }
 
   private static List<String> validateTimestampServiceDateTime(JsonNode event) {
     List<String> issues = new ArrayList<>();
-
     var ts = event.path("timestamp");
+
     if (JsonUtil.isMissingOrEmpty(ts)) {
       issues.add("timestamp.serviceDateTime must be functionally present and non-empty");
       return issues;
     }
 
-    String svc = ts.path("serviceDateTime").asText("");
-    if (svc.isBlank()) {
+    if (ts.path("serviceDateTime").asText("").isBlank()) {
       issues.add("timestamp.serviceDateTime must be functionally present and non-empty");
     }
-
     return issues;
   }
 
-  public static JsonContentCheck atLeastOneMovesForecastsUnitsBlockPresent() {
-    return JsonAttribute.customValidator(
-        "At least one event must demonstrate the correct use within the 'movesForecasts' object of at least one of the 'restowUnits', 'loadUnits' or 'dischargeUnits' sub-objects",
-        (body, ctx) -> {
-          var events = body.path("events");
-          Set<String> allIssues = new LinkedHashSet<>();
-
-          if (!events.isArray() || events.isEmpty()) {
-            allIssues.add("events must be a non-empty array");
-            return ConformanceCheckResult.simple(allIssues);
-          }
-
-          for (int i = 0; i < events.size(); i++) {
-            var event = events.get(i);
-            List<String> errorsAtIndex = validateMovesForecastsTopLevel(event);
-
-            if (errorsAtIndex.isEmpty()) {
-              return ConformanceCheckResult.simple(Set.of());
-            }
-            for (String err : errorsAtIndex) {
-              allIssues.add("events[" + i + "]." + err);
-            }
-          }
-
-          return ConformanceCheckResult.simple(allIssues);
-        });
-  }
-
-  private static List<String> validateMovesForecastsTopLevel(JsonNode event) {
-    List<String> issues = new ArrayList<>();
-
-    var mfarray = event.path("movesForecasts");
-    if (!mfarray.isArray() || mfarray.isEmpty()) {
-      issues.add("movesForecasts must be a non-empty array");
-      return issues;
-    }
-
-    for (int i = 0; i < mfarray.size(); i++) {
-      var movesForecast = mfarray.get(i);
-      boolean hasRestow = !JsonUtil.isMissingOrEmpty(movesForecast.path("restowUnits"));
-      boolean hasLoad = !JsonUtil.isMissingOrEmpty(movesForecast.path("loadUnits"));
-      boolean hasDischarge = !JsonUtil.isMissingOrEmpty(movesForecast.path("dischargeUnits"));
-
-      if (hasRestow || hasLoad || hasDischarge) {
-        return List.of();
-      }
-
-    }
-      issues.add(
-          "movesForecasts must contain at least one of 'restowUnits', 'loadUnits', or 'dischargeUnits'");
-
-    return issues;
-  }
-
-  public static JsonContentCheck atLeastOneLoadUnitsCategoryBlockCorrect() {
-    return buildUnitsCategoryCheck("movesForecasts/loadUnits");
-  }
-
-  public static JsonContentCheck atLeastOneDischargeUnitsCategoryBlockCorrect() {
-    return buildUnitsCategoryCheck("movesForecasts/dischargeUnits");
-  }
-
-  private static JsonContentCheck buildUnitsCategoryCheck(String baseObjectPath) {
-    String description =
-        "At least one event including the '"
-            + baseObjectPath
-            + "' object must demonstrate the correct use within it of the 'totalUnits' sub-object or of at least one of the 'ladenUnits', 'emptyUnits', 'pluggedReeferUnits' or 'outOfGaugeUnits' sub-object";
-
-    return JsonAttribute.customValidator(
-        description,
-        (body, ctx) -> {
-          var events = body.path("events");
-          Set<String> allIssues = new LinkedHashSet<>();
-
-          if (!events.isArray() || events.isEmpty()) {
-            allIssues.add("events must be a non-empty array");
-            return ConformanceCheckResult.simple(allIssues);
-          }
-
-          boolean foundAnyBaseObject = false;
-
-          int ei = 0;
-          for (var event : events) {
-            var mfArr = event.path("movesForecasts");
-            if (!mfArr.isArray() || mfArr.isEmpty()) {
-              ei++;
-              continue;
-            }
-
-            int mi = 0;
-            for (var mf : mfArr) {
-              JsonNode base = resolveMovesForecastsBase(mf, baseObjectPath);
-              if (JsonUtil.isMissingOrEmpty(base)) {
-                mi++;
-                continue;
-              }
-
-              foundAnyBaseObject = true;
-              String basePathWithIndex =
-                  "events[" + ei + "].movesForecasts[" + mi + "]." + tailOf(baseObjectPath);
-
-              List<String> local = validateUnitsCategoryBlock(base, basePathWithIndex);
-
-              if (local.isEmpty()) {
-                return ConformanceCheckResult.simple(Set.of());
-              }
-
-              local.forEach(allIssues::add);
-              mi++;
-            }
-
-            ei++;
-          }
-
-          if (!foundAnyBaseObject) {
-            return ConformanceCheckResult.simple(Set.of());
-          }
-
-          return ConformanceCheckResult.simple(allIssues);
-        });
-  }
-
-  private static List<String> validateUnitsCategoryBlock(JsonNode base, String basePath) {
-    List<String> issues = new ArrayList<>();
-
-    boolean hasTotal = !JsonUtil.isMissingOrEmpty(base.path("totalUnits"));
-    boolean hasLaden = !JsonUtil.isMissingOrEmpty(base.path("ladenUnits"));
-    boolean hasEmpty = !JsonUtil.isMissingOrEmpty(base.path("emptyUnits"));
-    boolean hasPlugged = !JsonUtil.isMissingOrEmpty(base.path("pluggedReeferUnits"));
-    boolean hasOog = !JsonUtil.isMissingOrEmpty(base.path("outOfGaugeUnits"));
-
-    if (!hasTotal && !hasLaden && !hasEmpty && !hasPlugged && !hasOog) {
-      issues.add(
-          basePath
-              + " must contain 'totalUnits' or at least one of 'ladenUnits', 'emptyUnits', 'pluggedReeferUnits' or 'outOfGaugeUnits'");
-    }
-
-    return issues;
-  }
-
-  public static List<JsonContentCheck> moveForecastsUnitSizeChecks() {
+  public static List<JsonContentCheck> movesForecastsScenarioChecks() {
     List<JsonContentCheck> checks = new ArrayList<>();
+    checks.add(nonEmptyEvents());
+    checks.add(movesForecastsPresenceCheck());
+    checks.add(loadUnitsCategoryCheck());
+    checks.add(dischargeUnitsCategoryCheck());
 
-    checks.add(buildUnitsSizeCheck("movesForecasts/restowUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/loadUnits/totalUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/loadUnits/ladenUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/loadUnits/emptyUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/loadUnits/pluggedReeferUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/loadUnits/outOfGaugeUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/dischargeUnits/totalUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/dischargeUnits/ladenUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/dischargeUnits/emptyUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/dischargeUnits/pluggedReeferUnits"));
-    checks.add(buildUnitsSizeCheck("movesForecasts/dischargeUnits/outOfGaugeUnits"));
+    checks.add(restowUnitsSizeCheck());
+    checks.add(loadUnitsTotalUnitsSizeCheck());
+    checks.add(loadUnitsLadenUnitsSizeCheck());
+    checks.add(loadUnitsEmptyUnitsSizeCheck());
+    checks.add(loadUnitsPluggedReeferUnitsSizeCheck());
+    checks.add(loadUnitsOutOfGaugeUnitsSizeCheck());
+
+    checks.add(dischargeUnitsTotalUnitsSizeCheck());
+    checks.add(dischargeUnitsLadenUnitsSizeCheck());
+    checks.add(dischargeUnitsEmptyUnitsSizeCheck());
+    checks.add(dischargeUnitsPluggedReeferUnitsSizeCheck());
+    checks.add(dischargeUnitsOutOfGaugeUnitsSizeCheck());
 
     return checks;
   }
 
-  private static JsonContentCheck buildUnitsSizeCheck(String baseObjectPath) {
+  public static JsonContentCheck movesForecastsPresenceCheck() {
+    return JsonAttribute.customValidator(
+        "At least one event must demonstrate the correct use within the 'movesForecasts' object...",
+        (body, ctx) -> {
+          var events = body.path("events");
+
+          if (!events.isArray() || events.isEmpty()) {
+            return ConformanceCheckResult.simple(Set.of("events must be a non-empty array"));
+          }
+
+          boolean seenMF = false;
+          boolean seenUnitObject = false;
+
+          for (JsonNode event : events) {
+            var mfArr = event.path("movesForecasts");
+
+            if (mfArr.isArray() && !mfArr.isEmpty()) {
+              seenMF = true;
+
+              for (JsonNode mf : mfArr) {
+                if (!JsonUtil.isMissingOrEmpty(mf.path("restowUnits"))
+                    || !JsonUtil.isMissingOrEmpty(mf.path("loadUnits"))
+                    || !JsonUtil.isMissingOrEmpty(mf.path("dischargeUnits"))) {
+                  seenUnitObject = true;
+                  break;
+                }
+              }
+            }
+
+            if (seenMF && seenUnitObject) {
+              return ConformanceCheckResult.simple(Set.of());
+            }
+          }
+
+          Set<String> issues = new LinkedHashSet<>();
+          if (!seenMF) {
+            issues.add("At least one event must include a non-empty movesForecasts array");
+          } else if (!seenUnitObject) {
+            issues.add(
+                "At least one movesForecasts entry must contain restowUnits/loadUnits/dischargeUnits");
+          }
+          return ConformanceCheckResult.simple(issues);
+        });
+  }
+
+  public static JsonContentCheck loadUnitsCategoryCheck() {
+    return buildUnitsCategoryCheck("movesForecasts/loadUnits", mf -> mf.path("loadUnits"));
+  }
+
+  public static JsonContentCheck dischargeUnitsCategoryCheck() {
+    return buildUnitsCategoryCheck(
+        "movesForecasts/dischargeUnits", mf -> mf.path("dischargeUnits"));
+  }
+
+  private static JsonContentCheck buildUnitsCategoryCheck(
+      String label, Function<JsonNode, JsonNode> extractor) {
+
     String description =
-        "At least one event including the '"
-            + baseObjectPath
-            + "' object must demonstrate the correct use within it of the 'totalUnits' attribute or of at least one of the 'size20Units', 'size40Units' or 'size45Units' attribute";
+        "At least one event including '"
+            + label
+            + "' must have totalUnits or laden/empty/plugged/oog units";
 
     return JsonAttribute.customValidator(
         description,
         (body, ctx) -> {
           var events = body.path("events");
-          Set<String> allIssues = new LinkedHashSet<>();
-
           if (!events.isArray() || events.isEmpty()) {
-            allIssues.add("events must be a non-empty array");
-            return ConformanceCheckResult.simple(allIssues);
+            return ConformanceCheckResult.simple(Set.of("events must be a non-empty array"));
           }
 
-          boolean foundAnyBaseObject = false;
+          boolean seenBase = false;
+          boolean validFound = false;
+          Set<String> errors = new LinkedHashSet<>();
 
-          int ei = 0;
-          for (var event : events) {
-            var mfArr = event.path("movesForecasts");
-            if (!mfArr.isArray() || mfArr.isEmpty()) {
-              ei++;
-              continue;
-            }
+          for (int e = 0; e < events.size(); e++) {
+            var mfArr = events.get(e).path("movesForecasts");
+            if (!mfArr.isArray() || mfArr.isEmpty()) continue;
 
-            int mi = 0;
-            for (var mf : mfArr) {
-              JsonNode base = resolveMovesForecastsBase(mf, baseObjectPath);
-              if (JsonUtil.isMissingOrEmpty(base)) {
-                mi++;
+            for (int m = 0; m < mfArr.size(); m++) {
+              JsonNode mf = mfArr.get(m);
+              JsonNode base = extractor.apply(mf);
+
+              if (base.isMissingNode() || base.isNull()) {
                 continue;
               }
 
-              foundAnyBaseObject = true;
-              String basePathWithIndex =
-                  "events[" + ei + "].movesForecasts[" + mi + "]." + tailOf(baseObjectPath);
+              seenBase = true;
 
-              List<String> local = validateUnitsSizeBlock(base, basePathWithIndex);
+              boolean ok =
+                  !JsonUtil.isMissingOrEmpty(base.path("totalUnits"))
+                      || !JsonUtil.isMissingOrEmpty(base.path("ladenUnits"))
+                      || !JsonUtil.isMissingOrEmpty(base.path("emptyUnits"))
+                      || !JsonUtil.isMissingOrEmpty(base.path("pluggedReeferUnits"))
+                      || !JsonUtil.isMissingOrEmpty(base.path("outOfGaugeUnits"));
 
-              if (local.isEmpty()) {
-                return ConformanceCheckResult.simple(Set.of());
+              if (ok) {
+                validFound = true;
+              } else {
+                errors.add(
+                    "events["
+                        + e
+                        + "].movesForecasts["
+                        + m
+                        + "]."
+                        + label.substring("movesForecasts/".length())
+                        + " must contain 'totalUnits' or at least one of "
+                        + "'ladenUnits', 'emptyUnits', 'pluggedReeferUnits', 'outOfGaugeUnits'");
               }
+            }
+          }
 
-              local.forEach(allIssues::add);
-              mi++;
+          // Case 1: base never appears → PASS (not applicable)
+          if (!seenBase) return ConformanceCheckResult.simple(Set.of());
+
+          // Case 2: base appears but no valid examples
+          if (!validFound) return ConformanceCheckResult.simple(errors);
+
+          // Case 3: at least one valid example
+          return ConformanceCheckResult.simple(Set.of());
+        });
+  }
+
+  public static JsonContentCheck restowUnitsSizeCheck() {
+    return buildUnitsSizeCheck("movesForecasts/restowUnits", mf -> mf.path("restowUnits"));
+  }
+
+  public static JsonContentCheck loadUnitsTotalUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/loadUnits/totalUnits", mf -> mf.path("loadUnits").path("totalUnits"));
+  }
+
+  public static JsonContentCheck loadUnitsLadenUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/loadUnits/ladenUnits", mf -> mf.path("loadUnits").path("ladenUnits"));
+  }
+
+  public static JsonContentCheck loadUnitsEmptyUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/loadUnits/emptyUnits", mf -> mf.path("loadUnits").path("emptyUnits"));
+  }
+
+  public static JsonContentCheck loadUnitsPluggedReeferUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/loadUnits/pluggedReeferUnits",
+        mf -> mf.path("loadUnits").path("pluggedReeferUnits"));
+  }
+
+  public static JsonContentCheck loadUnitsOutOfGaugeUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/loadUnits/outOfGaugeUnits",
+        mf -> mf.path("loadUnits").path("outOfGaugeUnits"));
+  }
+
+  public static JsonContentCheck dischargeUnitsTotalUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/dischargeUnits/totalUnits",
+        mf -> mf.path("dischargeUnits").path("totalUnits"));
+  }
+
+  public static JsonContentCheck dischargeUnitsLadenUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/dischargeUnits/ladenUnits",
+        mf -> mf.path("dischargeUnits").path("ladenUnits"));
+  }
+
+  public static JsonContentCheck dischargeUnitsEmptyUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/dischargeUnits/emptyUnits",
+        mf -> mf.path("dischargeUnits").path("emptyUnits"));
+  }
+
+  public static JsonContentCheck dischargeUnitsPluggedReeferUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/dischargeUnits/pluggedReeferUnits",
+        mf -> mf.path("dischargeUnits").path("pluggedReeferUnits"));
+  }
+
+  public static JsonContentCheck dischargeUnitsOutOfGaugeUnitsSizeCheck() {
+    return buildUnitsSizeCheck(
+        "movesForecasts/dischargeUnits/outOfGaugeUnits",
+        mf -> mf.path("dischargeUnits").path("outOfGaugeUnits"));
+  }
+
+  private static JsonContentCheck buildUnitsSizeCheck(
+      String label, Function<JsonNode, JsonNode> extractor) {
+
+    return JsonAttribute.customValidator(
+        "At least one event including '" + label + "' must demonstrate correct size attributes",
+        (body, ctx) -> {
+          var events = body.path("events");
+
+          if (!events.isArray() || events.isEmpty()) {
+            return ConformanceCheckResult.simple(Set.of("events must be a non-empty array"));
+          }
+
+          boolean seenBase = false;
+          boolean valid = false;
+          Set<String> errors = new LinkedHashSet<>();
+
+          for (int e = 0; e < events.size(); e++) {
+            var mfArr = events.get(e).path("movesForecasts");
+            if (!mfArr.isArray()) continue;
+
+            for (int m = 0; m < mfArr.size(); m++) {
+              JsonNode base = extractor.apply(mfArr.get(m));
+              if (base.isMissingNode() || base.isNull()) {
+                continue;
+              }
+              seenBase = true;
+
+              String suffix = label.substring("movesForecasts/".length());
+              String basePath = "events[" + e + "].movesForecasts[" + m + "]." + suffix;
+
+              List<String> local = validateUnitsSizeBlock(base, basePath);
+              if (local.isEmpty()) {
+                valid = true;
+                break;
+              } else {
+                errors.addAll(local);
+              }
             }
 
-            ei++;
+            if (valid) return ConformanceCheckResult.simple(Set.of());
           }
 
-          if (!foundAnyBaseObject) {
-            return ConformanceCheckResult.simple(Set.of());
-          }
+          if (!seenBase) return ConformanceCheckResult.simple(Set.of());
 
-          return ConformanceCheckResult.simple(allIssues);
+          return ConformanceCheckResult.simple(errors);
         });
   }
 
   private static List<String> validateUnitsSizeBlock(JsonNode units, String basePath) {
     List<String> issues = new ArrayList<>();
 
-    boolean hasValidTotal = false;
-    boolean hasValid20 = false;
-    boolean hasValid40 = false;
-    boolean hasValid45 = false;
+    boolean hasTotal = units.path("totalUnits").isNumber();
+    boolean has20 = units.path("size20Units").isNumber();
+    boolean has40 = units.path("size40Units").isNumber();
+    boolean has45 = units.path("size45Units").isNumber();
 
-    var total = units.path("totalUnits");
-    if (total.isNumber()) {
-      hasValidTotal = true;
-    } else if (!total.isMissingNode() && !total.isNull()) {
-      issues.add(basePath + ".totalUnits must be a number if present");
-    }
-
-    var s20 = units.path("size20Units");
-    if (s20.isNumber()) {
-      hasValid20 = true;
-    } else if (!s20.isMissingNode() && !s20.isNull()) {
-      issues.add(basePath + ".size20Units must be a number if present");
-    }
-
-    var s40 = units.path("size40Units");
-    if (s40.isNumber()) {
-      hasValid40 = true;
-    } else if (!s40.isMissingNode() && !s40.isNull()) {
-      issues.add(basePath + ".size40Units must be a number if present");
-    }
-
-    var s45 = units.path("size45Units");
-    if (s45.isNumber()) {
-      hasValid45 = true;
-    } else if (!s45.isMissingNode() && !s45.isNull()) {
-      issues.add(basePath + ".size45Units must be a number if present");
-    }
-
-    if (!hasValidTotal && !hasValid20 && !hasValid40 && !hasValid45) {
+    if (!hasTotal && !has20 && !has40 && !has45) {
       issues.add(
           basePath
-              + " must contain a numeric 'totalUnits' or at least one numeric 'size20Units', 'size40Units' or 'size45Units'");
+              + " must contain numeric totalUnits or size20Units or size40Units or size45Units");
     }
 
     return issues;
   }
-
-  private static JsonNode resolveMovesForecastsBase(JsonNode mf, String baseObjectPath) {
-    String[] parts = baseObjectPath.split("/");
-    int start = 0;
-    if ("movesForecasts".equals(parts[0])) {
-      start = 1;
-    }
-
-    JsonNode current = mf;
-    for (int i = start; i < parts.length; i++) {
-      current = current.path(parts[i]);
-    }
-    return current;
-  }
-
-  private static String tailOf(String baseObjectPath) {
-    if (!baseObjectPath.startsWith("movesForecasts/")) return baseObjectPath;
-    return baseObjectPath.substring("movesForecasts/".length());
-  }
-
-  public static List<JsonContentCheck> timestampScenarioChecks() {
-    List<JsonContentCheck> checks = new ArrayList<>();
-    checks.add(nonEmptyEvents());
-    checks.add(atLeastOneTimestampClassifierCodeCorrect());
-    checks.add(atLeastOneTimestampServiceDateTimeCorrect());
-    return checks;
-  }
-
-  public static List<JsonContentCheck> movesForecastsScenarioChecks() {
-    List<JsonContentCheck> checks = new ArrayList<>();
-    checks.add(nonEmptyEvents());
-    checks.add(atLeastOneMovesForecastsUnitsBlockPresent());
-    checks.add(atLeastOneLoadUnitsCategoryBlockCorrect());
-    checks.add(atLeastOneDischargeUnitsCategoryBlockCorrect());
-    checks.addAll(moveForecastsUnitSizeChecks());
-    return checks;
-  }
-
-  private static final JsonContentCheck VALIDATE_NON_EMPTY_RESPONSE =
-      JsonAttribute.customValidator(
-          "At least one event must be included in a message sent to the sandbox during conformance testing",
-          body -> {
-            var eventsNode = body.get("events");
-
-            if (eventsNode == null || !eventsNode.isArray() || eventsNode.isEmpty()) {
-              return ConformanceCheckResult.simple(
-                  Set.of(
-                      "'events' must functionally contain at least one event when sending data to the sandbox"));
-            }
-
-            boolean hasNonEmptyEvent =
-                StreamSupport.stream(eventsNode.spliterator(), false)
-                    .filter(JsonNode::isObject)
-                    .anyMatch(
-                        eventObj ->
-                            eventObj.fieldNames().hasNext()
-                                && StreamSupport.stream(
-                                        Spliterators.spliteratorUnknownSize(
-                                            eventObj.fieldNames(), 0),
-                                        false)
-                                    .map(eventObj::get)
-                                    .anyMatch(
-                                        field ->
-                                            (field.isValueNode() && !field.asText().isBlank())
-                                                || (field.isContainerNode() && !field.isEmpty())));
-
-            if (!hasNonEmptyEvent) {
-              return ConformanceCheckResult.simple(
-                  Set.of(
-                      "At least one non empty event must be included in a message sent to the sandbox during conformance testing"));
-            }
-            return ConformanceCheckResult.simple(Set.of());
-          });
-
-  public static ActionCheck getGetResponsePayloadChecks(
-      UUID matchedExchangeUuid,
-      String expectedApiVersion,
-      Supplier<DynamicScenarioParameters> dsp) {
-    var checks = new ArrayList<JsonContentCheck>();
-    checks.add(VALIDATE_NON_EMPTY_RESPONSE);
-    return JsonAttribute.contentChecks(
-      "",
-      "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
-      PortCallRole::isPublisher,
-      matchedExchangeUuid,
-      HttpMessageType.RESPONSE,
-      expectedApiVersion,
-      checks);
-  }
-
 }

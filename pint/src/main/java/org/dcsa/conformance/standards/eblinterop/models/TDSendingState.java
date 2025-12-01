@@ -129,7 +129,8 @@ public class TDSendingState {
         OBJECT_MAPPER
             .createObjectNode()
             .put("action", action)
-            .put("timestamp", Instant.now().toEpochMilli());
+            .put("actionDateTime", Instant.now().toString())
+            .put("actionCode", "ISSUE");
     transaction.set("actor", actor);
     transaction.set("recipient", receiverParty);
     return transaction;

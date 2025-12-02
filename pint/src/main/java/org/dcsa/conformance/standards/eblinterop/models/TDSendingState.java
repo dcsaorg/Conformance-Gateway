@@ -149,10 +149,13 @@ public class TDSendingState {
         OBJECT_MAPPER
             .createObjectNode()
             .put("eblPlatform", sendingPlatform)
-            .put("transportDocumentChecksum", tdChecksum)
-            .put(
-                "previousEnvelopeTransferChainEntrySignedContentChecksum",
-                previousEnvelopeTransferChainEntrySignedContentChecksum);
+            .put("transportDocumentChecksum", tdChecksum);
+
+    if (previousEnvelopeTransferChainEntrySignedContentChecksum != null) {
+      latestEnvelopeTransferChainUnsigned.put(
+          "previousEnvelopeTransferChainEntrySignedContentChecksum",
+          previousEnvelopeTransferChainEntrySignedContentChecksum);
+    }
 
     latestEnvelopeTransferChainUnsigned
         .putArray("transactions")

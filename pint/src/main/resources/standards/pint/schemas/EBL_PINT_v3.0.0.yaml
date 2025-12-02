@@ -678,7 +678,6 @@ components:
           minLength: 64
           maxLength: 64
           pattern: ^[0-9a-f]+$
-          nullable: true
           # TODO: Verify and if necessary update the example, or remove it altogether
           example: 20a0257b313ae08417e07f6555c4ec829a512c083f3ead16b41158018a22abe9
           description: |

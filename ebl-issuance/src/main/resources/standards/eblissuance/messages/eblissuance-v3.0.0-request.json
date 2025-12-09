@@ -128,7 +128,12 @@
             "partyCode": "ISSUING_PARTY_PARTY_CODE_PLACEHOLDER",
             "codeListName": "ISSUING_PARTY_CODE_LIST_NAME_PLACEHOLDER"
           }
-        ]
+        ],
+        "address": {
+          "street": "Ruijggoordweg",
+          "city": "Amsterdam",
+          "countryCode": "NL"
+        }
       },
       "notifyParties": [
         {

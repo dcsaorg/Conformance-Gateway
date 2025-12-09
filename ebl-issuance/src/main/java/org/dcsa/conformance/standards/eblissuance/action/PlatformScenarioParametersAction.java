@@ -97,8 +97,8 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
             : new SuppliedScenarioParameters(
                 sendToPlatform,
                 "Legal name of issue to party",
-                "Party code of issue to party",
                 "Code list provider of issue to party",
+                "Party code of issue to party",
                 "DCSA (code list name for issue to party)",
                 "Legal name of shipper",
                 "Code list provider of shipper",

@@ -8,11 +8,21 @@ import org.dcsa.conformance.core.party.ScenarioParameters;
 public record SuppliedScenarioParameters(
     String issueToSendToPlatform,
     String issueToPartyName,
+    String issueToCodeListProvider,
     String issueToPartyCode,
     String issueToCodeListName,
+    String shipperLegalName,
+    String shipperCodeListProvider,
+    String shipperPartyCode,
+    String shipperCodeListName,
     String consigneeOrEndorseeLegalName,
+    String consigneeOrEndorseeCodeListProvider,
     String consigneeOrEndorseePartyCode,
-    String consigneeOrEndorseeCodeListName)
+    String consigneeOrEndorseeCodeListName,
+    String issuingPartyLegalName,
+    String issuingPartyCodeListProvider,
+    String issuingPartyPartyCode,
+    String issuingPartyCodeListName)
     implements ScenarioParameters {
 
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {

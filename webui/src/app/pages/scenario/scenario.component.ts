@@ -156,6 +156,8 @@ export class ScenarioComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit(withInput: boolean) {
+    const scrollPosition = window.scrollY;
+
     this.performingAction = "Processing action input...";
     this.submitAttempted = true;
     this.inlineErrorMessage = '';
@@ -169,8 +171,14 @@ export class ScenarioComponent implements OnInit, OnDestroy {
           : this.actionInput.trim()
         : undefined;
     } catch (e) {
-      this.inlineErrorMessage = e instanceof Error ? e.message : "Unknown error parsing JSON";
+      const errorMsg = e instanceof Error ? e.message : "Unknown error";
+      if (errorMsg.includes("control character")) {
+        this.inlineErrorMessage = String.raw`Invalid JSON: The input contains unescaped special characters (such as newlines or tabs). Please ensure all special characters are properly removed or escaped (e.g., use \n instead of actual line breaks).`;
+      } else {
+        this.inlineErrorMessage = `Error parsing input: ${errorMsg}`;
+      }
       this.performingAction = "";
+      this.restoreScrollPosition(scrollPosition)
       return;
     }
 
@@ -184,10 +192,21 @@ export class ScenarioComponent implements OnInit, OnDestroy {
     if (response?.error) {
       this.inlineErrorMessage = response.error;
       this.performingAction = "";
+
+      this.restoreScrollPosition(scrollPosition)
       return;
     }
 
     this.performingAction = "";
     await this.loadScenarioStatus();
+  }
+
+  /* Restore scroll position after Angular re-renders */
+  private restoreScrollPosition(scrollPosition: number) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollPosition);
+      });
+    });
   }
 }

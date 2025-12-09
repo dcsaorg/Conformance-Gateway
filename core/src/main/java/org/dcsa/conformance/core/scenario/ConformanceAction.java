@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Spliterator;
@@ -103,6 +103,18 @@ public abstract class ConformanceAction implements StatefulEntity {
 
   public JsonNode getJsonForHumanReadablePrompt() {
     return null;
+  }
+
+  public Map<String, Boolean> getExpectedInputAttributes() {
+    JsonNode jsonForHumanReadablePrompt = getJsonForHumanReadablePrompt();
+    if (jsonForHumanReadablePrompt != null) {
+      return StreamSupport.stream(
+              Spliterators.spliteratorUnknownSize(
+                  jsonForHumanReadablePrompt.fieldNames(), Spliterator.ORDERED),
+              false)
+          .collect(Collectors.toMap(fieldName -> fieldName, fieldName -> true));
+    }
+    return Map.of();
   }
 
   public boolean isConfirmationRequired() {
@@ -237,36 +249,54 @@ public abstract class ConformanceAction implements StatefulEntity {
   }
 
   public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
-    JsonNode jsonForHumanReadablePrompt = getJsonForHumanReadablePrompt();
-    if (jsonForHumanReadablePrompt != null) {
-      Set<String> expectedAttributes =
-          StreamSupport.stream(
-                  Spliterators.spliteratorUnknownSize(
-                      jsonForHumanReadablePrompt.fieldNames(), Spliterator.ORDERED),
-                  false)
-              .collect(Collectors.toSet());
-      if (!expectedAttributes.isEmpty()) { // because "empty" means "any input is allowed"
-        Set<String> providedAttributes =
-            StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(
-                        partyInput.get("input").fieldNames(), Spliterator.ORDERED),
-                    false)
-                .collect(Collectors.toSet());
-        Set<String> missingAttributes = new HashSet<>(expectedAttributes);
-        missingAttributes.removeAll(providedAttributes);
-        if (!missingAttributes.isEmpty()) {
-          throw new UserFacingException(
-            "The input must contain: %s".formatted(String.join(", ", missingAttributes)));
-        }
-        Set<String> unexpectedAttributes = new HashSet<>(providedAttributes);
-        unexpectedAttributes.removeAll(expectedAttributes);
-        if (!unexpectedAttributes.isEmpty()) {
-          throw new UserFacingException(
-            "The input may not contain: %s".formatted(String.join(", ", unexpectedAttributes)));
-        }
-      }
+    Map<String, Boolean> expectedAttributes = getExpectedInputAttributes();
+    if (expectedAttributes.isEmpty()) {
+      doHandlePartyInput(partyInput);
+      return;
     }
+
+    Set<String> providedAttributes = extractFieldNames(partyInput.get("input"));
+    validateMandatoryAttributes(expectedAttributes, providedAttributes);
+    validateUnexpectedAttributes(expectedAttributes.keySet(), providedAttributes);
+
     doHandlePartyInput(partyInput);
+  }
+
+  private Set<String> extractFieldNames(JsonNode inputNode) {
+    return StreamSupport.stream(
+            Spliterators.spliteratorUnknownSize(inputNode.fieldNames(), Spliterator.ORDERED),
+            false)
+        .collect(Collectors.toSet());
+  }
+
+  private void validateMandatoryAttributes(
+      Map<String, Boolean> expectedAttributes, Set<String> providedAttributes)
+      throws UserFacingException {
+    Set<String> missingAttributes =
+        expectedAttributes.entrySet().stream()
+            .filter(Map.Entry::getValue)
+            .map(Map.Entry::getKey)
+            .filter(attr -> !providedAttributes.contains(attr))
+            .collect(Collectors.toSet());
+
+    if (!missingAttributes.isEmpty()) {
+      throw new UserFacingException(
+          "The input must contain: %s".formatted(String.join(", ", missingAttributes)));
+    }
+  }
+
+  private void validateUnexpectedAttributes(
+      Set<String> allExpectedAttributes, Set<String> providedAttributes)
+      throws UserFacingException {
+    Set<String> unexpectedAttributes =
+        providedAttributes.stream()
+            .filter(attr -> !allExpectedAttributes.contains(attr))
+            .collect(Collectors.toSet());
+
+    if (!unexpectedAttributes.isEmpty()) {
+      throw new UserFacingException(
+          "The input may not contain: %s".formatted(String.join(", ", unexpectedAttributes)));
+    }
   }
 
   protected void doHandlePartyInput(JsonNode partyInput) throws UserFacingException {}

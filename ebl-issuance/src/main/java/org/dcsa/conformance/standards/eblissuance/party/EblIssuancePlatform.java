@@ -108,11 +108,20 @@ public class EblIssuancePlatform extends ConformanceParty {
         new SuppliedScenarioParameters(
             IssuanceResponseCode.forStandardCode(scenarioResponseCode).sendToPlatform,
             "DCSA issue to party",
+            "W3C",
             "1234-issue-to",
             "DCSA",
-            // These are ignored for blank ones, so we can provide them unconditionally.
+            "DCSA Shipper",
+            "W3C",
+            "5677-cn-or-end",
+            "DCSA",
             "DCSA Consignee/Endorsee",
+            "W3C",
             "5678-cn-or-end",
+            "DCSA",
+            "DCSA Issuing Party",
+            "W3C",
+            "5679-cn-or-end",
             "DCSA");
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), suppliedScenarioParameters.toJson());

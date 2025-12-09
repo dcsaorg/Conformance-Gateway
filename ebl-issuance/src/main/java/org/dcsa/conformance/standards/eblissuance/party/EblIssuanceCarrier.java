@@ -27,6 +27,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestErrorResponseAction;
@@ -38,7 +39,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
   private final Map<String, EblIssuanceState> eblStatesByTdr = new HashMap<>();
   private final Map<String, String> sirsByTdr = new HashMap<>();
   private final Map<String, String> brsByTdr = new HashMap<>();
-  private final PayloadSignerWithKey payloadSigner;
+  private static final PayloadSignerWithKey PAYLOAD_SIGNER =PayloadSignerFactory.carrierPayloadSigner();
 
   public EblIssuanceCarrier(
       String apiVersion,
@@ -46,8 +47,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
       PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader,
-      PayloadSignerWithKey payloadSigner) {
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
         partyConfiguration,
@@ -55,7 +55,6 @@ public class EblIssuanceCarrier extends ConformanceParty {
         persistentMap,
         webClient,
         orchestratorAuthHeader);
-    this.payloadSigner = payloadSigner;
   }
 
   private static byte[] generateDocument() {
@@ -117,7 +116,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     log.info(
         "EblIssuanceCarrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var carrierScenarioParameters =
-        new CarrierScenarioParameters(payloadSigner.getPublicKeyInPemFormat());
+        new CarrierScenarioParameters(PAYLOAD_SIGNER.getPublicKeyInPemFormat());
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
@@ -156,20 +155,50 @@ public class EblIssuanceCarrier extends ConformanceParty {
                         "ISSUE_TO_LEGAL_NAME_PLACEHOLDER",
                         Objects.requireNonNullElse(ssp.issueToPartyName(), "")),
                     Map.entry(
+                        "ISSUE_TO_CODE_LIST_PROVIDER",
+                        Objects.requireNonNullElse(ssp.issueToCodeListProvider(), "")),
+                    Map.entry(
                         "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
                         Objects.requireNonNullElse(ssp.issueToPartyCode(), "")),
                     Map.entry(
                         "ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER",
                         Objects.requireNonNullElse(ssp.issueToCodeListName(), "")),
                     Map.entry(
+                        "SHIPPER_LEGAL_NAME_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.shipperLegalName(), "")),
+                    Map.entry(
+                        "SHIPPER_CODE_LIST_PROVIDER",
+                        Objects.requireNonNullElse(ssp.shipperCodeListProvider(), "")),
+                    Map.entry(
+                        "SHIPPER_PARTY_CODE_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.shipperPartyCode(), "")),
+                    Map.entry(
+                        "SHIPPER_CODE_LIST_NAME_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.shipperCodeListName(), "")),
+                    Map.entry(
                         "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
                         Objects.requireNonNullElse(ssp.consigneeOrEndorseeLegalName(), "")),
+                    Map.entry(
+                        "CONSIGNEE_CODE_LIST_PROVIDER",
+                        Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListProvider(), "")),
                     Map.entry(
                         "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
                         Objects.requireNonNullElse(ssp.consigneeOrEndorseePartyCode(), "")),
                     Map.entry(
                         "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListName(), ""))));
+                        Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListName(), "")),
+                    Map.entry(
+                        "ISSUING_PARTY_LEGAL_NAME_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.issuingPartyLegalName(), "")),
+                    Map.entry(
+                        "ISSUING_PARTY_CODE_LIST_PROVIDER",
+                        Objects.requireNonNullElse(ssp.issuingPartyCodeListProvider(), "")),
+                    Map.entry(
+                        "ISSUING_PARTY_PARTY_CODE_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.issuingPartyPartyCode(), "")),
+                    Map.entry(
+                        "ISSUING_PARTY_CODE_LIST_NAME_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.issuingPartyCodeListName(), ""))));
 
     boolean errorScenario =
         actionPrompt
@@ -223,7 +252,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
             .put("eBLVisualisationByCarrierChecksum", eBLVisualisationByCarrierChecksum);
 
     jsonRequestBody.put(
-        "issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
+        "issuanceManifestSignedContent", PAYLOAD_SIGNER.sign(issuanceManifest.toString()));
 
     syncCounterpartPut(
         "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)), jsonRequestBody);
@@ -271,5 +300,9 @@ public class EblIssuanceCarrier extends ConformanceParty {
                       "Rejecting '%s' for eBL '%s' because it is in state '%s'"
                           .formatted(irc, tdr, eblStatesByTdr.get(tdr)))));
     }
+  }
+
+  public static String getCarrierPublicKey() {
+    return PAYLOAD_SIGNER.getPublicKeyInPemFormat();
   }
 }

@@ -2,6 +2,7 @@
   "events": [
     {
       "eventID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
+      "replyToEventID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
       "eventUpdatedDateTime": "2025-01-23T01:23:45Z",
       "isFYI": false,
       "portCall": {
@@ -15,16 +16,22 @@
         "terminalCallReference": "15063401",
         "sequenceNumber": 2,
         "carrierServiceName": "Great Lion Service",
-        "carrierServiceCode": "FE1",
-        "universalServiceReference": "SR12345A",
-        "carrierImportVoyageNumber": "2208N",
-        "universalImportVoyageReference": "2301W",
-        "carrierExportVoyageNumber": "2208N",
-        "universalExportVoyageReference": "2301W",
+        "serviceCodeOrReference": {
+          "carrierServiceCode": "FE1",
+          "universalServiceReference": "SR12345A"
+        },
+        "exportVoyageNumberOrReference": {
+          "carrierVoyageNumber": "2103S",
+          "universalVoyageReference": "2301W"
+        },
+        "importVoyageNumberOrReference": {
+          "carrierVoyageNumber": "2103S",
+          "universalVoyageReference": "2301W"
+        },
         "isOmitted": false
       },
       "portCallService": {
-        "portCallID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
+        "portCallServiceID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
         "portCallServiceTypeCode": "BERTH",
         "portCallServiceEventTypeCode": "STRT",
         "portCallPhaseTypeCode": "ALGS",
@@ -48,8 +55,8 @@
             "facilityCodeListProvider": "SMDG"
           },
           "geoCoordinate": {
-            "latitude": "48.85855",
-            "longitude": "2.294492036"
+            "latitude": "33.629152",
+            "longitude": "-118.587187"
           }
         },
         "isCanceled": false,
@@ -80,8 +87,8 @@
             "facilityCodeListProvider": "SMDG"
           },
           "geoCoordinate": {
-            "latitude": "48.85855",
-            "longitude": "2.294492036"
+            "latitude": "33.629152",
+            "longitude": "-118.587187"
           }
         },
         "milesToDestinationPort": 245.45,
@@ -95,11 +102,11 @@
         "forwardDraft": 35
       },
       "timestamp": {
-        "timestampID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
-        "replyToTimestampID": "3910eb91-8791-4699-8029-8bba8cedb6f5",
         "classifierCode": "EST",
         "serviceDateTime": "2025-01-23T01:23:45Z",
-        "delayReasonCode": "STR",
+        "delayReasonCodes": [
+          "STR"
+        ],
         "remark": "Port closed due to strike"
       },
       "movesForecasts": [

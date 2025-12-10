@@ -32,7 +32,7 @@ public class PortCallChecks {
     if ("TIMESTAMP".equals(scenarioType)) {
       checks.addAll(timestampScenarioChecks());
     }
-    if ("MOVES_FORECASTS".equals(scenarioType)) {
+    if ("MOVE_FORECAST".equals(scenarioType)) {
       checks.addAll(movesForecastsScenarioChecks());
     }
 
@@ -50,7 +50,17 @@ public class PortCallChecks {
       UUID matchedExchangeUuid,
       String expectedApiVersion,
       Supplier<DynamicScenarioParameters> dsp) {
-    var checks = new ArrayList<JsonContentCheck>();
+    List<JsonContentCheck> checks = new ArrayList<>();
+    String scenarioType = dsp.get().scenarioType();
+
+    checks.add(nonEmptyEvents());
+
+    if ("TIMESTAMP".equals(scenarioType)) {
+      checks.addAll(timestampScenarioChecks());
+    }
+    if ("MOVE_FORECAST".equals(scenarioType)) {
+      checks.addAll(movesForecastsScenarioChecks());
+    }
     return JsonAttribute.contentChecks(
         "",
         "The Publisher has correctly demonstrated the use of functionally required attributes in the payload",
@@ -166,7 +176,6 @@ public class PortCallChecks {
 
   public static List<JsonContentCheck> movesForecastsScenarioChecks() {
     List<JsonContentCheck> checks = new ArrayList<>();
-    checks.add(nonEmptyEvents());
     checks.add(movesForecastsPresenceCheck());
     checks.add(loadUnitsCategoryCheck());
     checks.add(dischargeUnitsCategoryCheck());
@@ -189,7 +198,7 @@ public class PortCallChecks {
 
   public static JsonContentCheck movesForecastsPresenceCheck() {
     return JsonAttribute.customValidator(
-        "At least one event must demonstrate the correct use within the 'movesForecasts' object...",
+        "At least one event must demonstrate the correct use within the 'movesForecasts' object",
         (body, ctx) -> {
           var events = body.path("events");
 
@@ -224,7 +233,7 @@ public class PortCallChecks {
           Set<String> issues = new LinkedHashSet<>();
           if (!seenMF) {
             issues.add("At least one event must include a non-empty movesForecasts array");
-          } else if (!seenUnitObject) {
+          } else {
             issues.add(
                 "At least one movesForecasts entry must contain restowUnits/loadUnits/dischargeUnits");
           }
@@ -257,7 +266,6 @@ public class PortCallChecks {
             return ConformanceCheckResult.simple(Set.of("events must be a non-empty array"));
           }
 
-          boolean seenBase = false;
           boolean validFound = false;
           Set<String> errors = new LinkedHashSet<>();
 
@@ -272,8 +280,6 @@ public class PortCallChecks {
               if (base.isMissingNode() || base.isNull()) {
                 continue;
               }
-
-              seenBase = true;
 
               boolean ok =
                   !JsonUtil.isMissingOrEmpty(base.path("totalUnits"))
@@ -298,8 +304,6 @@ public class PortCallChecks {
             }
           }
 
-          // Case 1: base never appears → PASS (not applicable)
-          if (!seenBase) return ConformanceCheckResult.simple(Set.of());
 
           // Case 2: base appears but no valid examples
           if (!validFound) return ConformanceCheckResult.simple(errors);
@@ -411,8 +415,6 @@ public class PortCallChecks {
 
             if (valid) return ConformanceCheckResult.simple(Set.of());
           }
-
-          if (!seenBase) return ConformanceCheckResult.simple(Set.of());
 
           return ConformanceCheckResult.simple(errors);
         });

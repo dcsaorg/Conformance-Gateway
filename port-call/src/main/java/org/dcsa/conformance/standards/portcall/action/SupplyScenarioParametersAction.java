@@ -51,6 +51,9 @@ public class SupplyScenarioParametersAction extends PortCallAction {
   public void reset() {
     super.reset();
     suppliedScenarioParameters = null;
+    if (scenarioType != null) {
+      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+    }
   }
 
   @Override

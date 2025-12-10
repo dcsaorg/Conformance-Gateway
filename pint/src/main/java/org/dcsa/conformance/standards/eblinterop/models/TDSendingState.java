@@ -129,7 +129,8 @@ public class TDSendingState {
         OBJECT_MAPPER
             .createObjectNode()
             .put("action", action)
-            .put("timestamp", Instant.now().toEpochMilli());
+            .put("actionDateTime", Instant.now().toString())
+            .put("actionCode", "ISSUE");
     transaction.set("actor", actor);
     transaction.set("recipient", receiverParty);
     return transaction;
@@ -148,10 +149,13 @@ public class TDSendingState {
         OBJECT_MAPPER
             .createObjectNode()
             .put("eblPlatform", sendingPlatform)
-            .put("transportDocumentChecksum", tdChecksum)
-            .put(
-                "previousEnvelopeTransferChainEntrySignedContentChecksum",
-                previousEnvelopeTransferChainEntrySignedContentChecksum);
+            .put("transportDocumentChecksum", tdChecksum);
+
+    if (previousEnvelopeTransferChainEntrySignedContentChecksum != null) {
+      latestEnvelopeTransferChainUnsigned.put(
+          "previousEnvelopeTransferChainEntrySignedContentChecksum",
+          previousEnvelopeTransferChainEntrySignedContentChecksum);
+    }
 
     latestEnvelopeTransferChainUnsigned
         .putArray("transactions")

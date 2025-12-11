@@ -1,10 +1,12 @@
 package org.dcsa.conformance.core.check;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
@@ -30,7 +32,7 @@ public class UrlPathCheck extends ActionCheck {
         isRelevantForRoleName,
         matchedExchangeUuid,
         HttpMessageType.REQUEST);
-    this.expectedUrlPathEnd = Set.of(expectedUrlPathEnd);
+    this.expectedUrlPathEnd = Arrays.stream(expectedUrlPathEnd).collect(Collectors.toSet());
   }
 
   @Override

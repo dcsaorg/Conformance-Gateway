@@ -39,7 +39,7 @@ public class PortCallChecks {
     return JsonAttribute.contentChecks(
         "",
         "The Publisher has correctly demonstrated the use of functionally required attributes in the Port Call payload",
-        (role) -> true,
+        PortCallRole::isPublisher,
         matchedExchangeUuid,
         HttpMessageType.REQUEST,
         expectedApiVersion,
@@ -207,7 +207,6 @@ public class PortCallChecks {
           }
 
           boolean seenMF = false;
-          boolean seenUnitObject = false;
 
           for (JsonNode event : events) {
             var mfArr = event.path("movesForecasts");
@@ -219,23 +218,15 @@ public class PortCallChecks {
                 if (!JsonUtil.isMissingOrEmpty(mf.path("restowUnits"))
                     || !JsonUtil.isMissingOrEmpty(mf.path("loadUnits"))
                     || !JsonUtil.isMissingOrEmpty(mf.path("dischargeUnits"))) {
-                  seenUnitObject = true;
-                  break;
+                  return ConformanceCheckResult.simple(Set.of());
                 }
               }
-            }
-
-            if (seenMF && seenUnitObject) {
-              return ConformanceCheckResult.simple(Set.of());
             }
           }
 
           Set<String> issues = new LinkedHashSet<>();
           if (!seenMF) {
             issues.add("At least one event must include a non-empty movesForecasts array");
-          } else {
-            issues.add(
-                "At least one movesForecasts entry must contain restowUnits/loadUnits/dischargeUnits");
           }
           return ConformanceCheckResult.simple(issues);
         });
@@ -266,12 +257,14 @@ public class PortCallChecks {
             return ConformanceCheckResult.simple(Set.of("events must be a non-empty array"));
           }
 
-          boolean validFound = false;
+          boolean seenMovesForecasts = false;
           Set<String> errors = new LinkedHashSet<>();
 
           for (int e = 0; e < events.size(); e++) {
             var mfArr = events.get(e).path("movesForecasts");
             if (!mfArr.isArray() || mfArr.isEmpty()) continue;
+
+            seenMovesForecasts = true;
 
             for (int m = 0; m < mfArr.size(); m++) {
               JsonNode mf = mfArr.get(m);
@@ -281,15 +274,12 @@ public class PortCallChecks {
                 continue;
               }
 
-              boolean ok =
-                  !JsonUtil.isMissingOrEmpty(base.path("totalUnits"))
-                      || !JsonUtil.isMissingOrEmpty(base.path("ladenUnits"))
-                      || !JsonUtil.isMissingOrEmpty(base.path("emptyUnits"))
-                      || !JsonUtil.isMissingOrEmpty(base.path("pluggedReeferUnits"))
-                      || !JsonUtil.isMissingOrEmpty(base.path("outOfGaugeUnits"));
-
-              if (ok) {
-                validFound = true;
+              if (!JsonUtil.isMissingOrEmpty(base.path("totalUnits"))
+                  || !JsonUtil.isMissingOrEmpty(base.path("ladenUnits"))
+                  || !JsonUtil.isMissingOrEmpty(base.path("emptyUnits"))
+                  || !JsonUtil.isMissingOrEmpty(base.path("pluggedReeferUnits"))
+                  || !JsonUtil.isMissingOrEmpty(base.path("outOfGaugeUnits"))) {
+                return ConformanceCheckResult.simple(Set.of());
               } else {
                 errors.add(
                     "events["
@@ -298,18 +288,18 @@ public class PortCallChecks {
                         + m
                         + "]."
                         + label.substring("movesForecasts/".length())
-                        + " must contain 'totalUnits' or at least one of "
+                        + " must be non empty and must contain 'totalUnits' or at least one of "
                         + "'ladenUnits', 'emptyUnits', 'pluggedReeferUnits', 'outOfGaugeUnits'");
               }
             }
           }
 
+          if (!seenMovesForecasts) {
+            return ConformanceCheckResult.simple(
+                Set.of("At least one event must include a non-empty movesForecasts array"));
+          }
 
-          // Case 2: base appears but no valid examples
-          if (!validFound) return ConformanceCheckResult.simple(errors);
-
-          // Case 3: at least one valid example
-          return ConformanceCheckResult.simple(Set.of());
+          return ConformanceCheckResult.simple(errors);
         });
   }
 
@@ -386,34 +376,36 @@ public class PortCallChecks {
             return ConformanceCheckResult.simple(Set.of("events must be a non-empty array"));
           }
 
-          boolean seenBase = false;
-          boolean valid = false;
+          boolean seenMovesForecasts = false;
           Set<String> errors = new LinkedHashSet<>();
 
           for (int e = 0; e < events.size(); e++) {
             var mfArr = events.get(e).path("movesForecasts");
             if (!mfArr.isArray()) continue;
 
+            seenMovesForecasts = true;
+
             for (int m = 0; m < mfArr.size(); m++) {
               JsonNode base = extractor.apply(mfArr.get(m));
               if (base.isMissingNode() || base.isNull()) {
                 continue;
               }
-              seenBase = true;
 
               String suffix = label.substring("movesForecasts/".length());
               String basePath = "events[" + e + "].movesForecasts[" + m + "]." + suffix;
 
               List<String> local = validateUnitsSizeBlock(base, basePath);
               if (local.isEmpty()) {
-                valid = true;
-                break;
+                return ConformanceCheckResult.simple(Set.of());
               } else {
                 errors.addAll(local);
               }
             }
+          }
 
-            if (valid) return ConformanceCheckResult.simple(Set.of());
+          if (!seenMovesForecasts) {
+            return ConformanceCheckResult.simple(
+                Set.of("At least one event must include a non-empty movesForecasts array"));
           }
 
           return ConformanceCheckResult.simple(errors);

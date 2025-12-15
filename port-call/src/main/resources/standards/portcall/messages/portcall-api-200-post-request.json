@@ -100,7 +100,25 @@
         "draft": 12.5,
         "aftDraft": 37,
         "forwardDraft": 35
-      }
+      },
+      "timestamp": {
+        "classifierCode": "EST",
+        "serviceDateTime": "2025-01-23T01:23:45Z",
+        "delayReasonCodes": [
+          "STR"
+        ],
+        "remark": "Port closed due to strike"
+      },
+      "movesForecasts": [
+        {
+          "carrierCode": "MAEU",
+          "carrierCodeListProvider": "SMDG",
+          "dischargeUnits": {
+            "totalUnits": {
+            }
+          }
+        }
+      ]
     }
   ]
 }

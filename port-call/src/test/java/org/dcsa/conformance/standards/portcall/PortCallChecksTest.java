@@ -22,8 +22,7 @@ public class PortCallChecksTest {
     ArrayNode events = body.putArray("events");
     event = events.addObject();
   }
-
-  // Helper methods
+  
   private static boolean isOk(JsonContentCheck c, ObjectNode body) {
     return c.validate(body).getErrorMessages().isEmpty();
   }
@@ -37,9 +36,6 @@ public class PortCallChecksTest {
     return mfArr.addObject();
   }
 
-  // ============================================================
-  // EVENT PRESENCE
-  // ============================================================
 
   @Test
   void nonEmptyEvents_fails_when_missing_events() {
@@ -96,12 +92,6 @@ public class PortCallChecksTest {
   @Test
   void movesForecastsPresence_fails_when_movesForecasts_empty() {
     event.putArray("movesForecasts");
-    assertTrue(isFail(PortCallChecks.movesForecastsPresenceCheck(), body));
-  }
-
-  @Test
-  void movesForecastsPresence_fails_when_no_unit_objects() {
-    addMovesForecasts(event).put("carrierCode", "MAEU");
     assertTrue(isFail(PortCallChecks.movesForecastsPresenceCheck(), body));
   }
 

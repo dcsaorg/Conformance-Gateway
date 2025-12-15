@@ -113,8 +113,74 @@
         {
           "carrierCode": "MAEU",
           "carrierCodeListProvider": "SMDG",
+          "restowUnits": {
+            "totalUnits": 123,
+            "size20Units": 123,
+            "size40Units": 123,
+            "size45Units": 123
+          },
+          "loadUnits": {
+            "totalUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
+            },
+            "ladenUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
+            },
+            "emptyUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
+            },
+            "pluggedReeferUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
+            },
+            "outOfGaugeUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
+            }
+          },
           "dischargeUnits": {
             "totalUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
+            },
+            "ladenUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
+            },
+            "emptyUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
+            },
+            "pluggedReeferUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
+            },
+            "outOfGaugeUnits": {
+              "totalUnits": 123,
+              "size20Units": 123,
+              "size40Units": 123,
+              "size45Units": 123
             }
           }
         }

@@ -189,6 +189,7 @@ public class EblIssuancePlatform extends ConformanceParty {
             .put("transportDocumentReference", tdr)
             .put("issuanceResponseCode", scenarioResponseCode);
     if (scenarioResponseCode.equals("BREQ") || scenarioResponseCode.equals("REFU")) {
+      platformResponse.put("reason", "Rejected as required by the conformance scenario");
       platformResponse
           .putArray("errors")
           .addObject()

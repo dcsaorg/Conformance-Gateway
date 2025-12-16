@@ -133,10 +133,10 @@
           </div>
       </div>
 
-      <div *ngIf="scenario && scenarioStatus?.conformanceSubReport">
+      <div *ngIf="scenario && scenarioStatus.conformanceSubReport">
           <div class="pageSubtitle">Conformance status</div>
           <app-report
-          *ngIf="scenario && scenarioStatus?.conformanceSubReport"
+          *ngIf="scenario && scenarioStatus.conformanceSubReport"
           [unfoldedLevels]="1"
           [report]="scenarioStatus.conformanceSubReport"
           ></app-report>

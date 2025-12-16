@@ -115,7 +115,7 @@
           </div>
           <div *ngIf="updatedSandboxConfig.externalPartyEndpointUriOverrides.length == 0">
             <div style="margin-top: 1em; margin-bottom: .5em;">The sandbox will make all API requests for each endpoint to these URLs:</div>
-            <div *ngFor="let endpointUriAndMethods of originalSandboxConfig?.externalPartyEndpointUriMethods">
+            <div *ngFor="let endpointUriAndMethods of originalSandboxConfig.externalPartyEndpointUriMethods">
               <div *ngFor="let method of endpointUriAndMethods.methods">
                 <div class="paragraph" style="margin-bottom: .5em;">
                   {{ method }} {{ endpointUriAndMethods.endpointUri }}

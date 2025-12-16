@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -46,6 +46,7 @@ export class SandboxComponent implements OnInit, OnDestroy {
     public conformanceService: ConformanceService,
     private router: Router,
     private dialog: MatDialog,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit() {
@@ -75,6 +76,8 @@ export class SandboxComponent implements OnInit, OnDestroy {
     ).length > 0;
     this.reportDigests = await this.conformanceService.getReportDigests(this.sandboxId);
     this.isLoading = false;
+    // Manually trigger change detection to update the view
+    this.cdr.detectChanges();
   }
 
   async ngOnDestroy() {

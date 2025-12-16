@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -38,6 +38,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
     public conformanceService: ConformanceService,
     private readonly router: Router,
     private readonly dialog: MatDialog,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit() {
@@ -54,6 +55,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
         this.sandbox = await this.conformanceService.getSandbox(sandboxId, false);
         this.scenario = await this.conformanceService.getScenario(sandboxId, scenarioId);
         await this.loadScenarioStatus();
+        this.cdr.detectChanges();
       });
   }
 
@@ -71,6 +73,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       }
       console.log("loadScenarioStatus() sandbox waiting: " + JSON.stringify(this.sandboxStatus.waiting, null, 4));
       await sleep(1000);
+      this.cdr.detectChanges(); // Update UI during polling
     }
 
     this.scenarioStatus = await this.conformanceService.getScenarioStatus(
@@ -78,6 +81,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       this.scenario!.id
     );
     this.actionInput = JSON.stringify(this.scenarioStatus?.jsonForPromptText, null, 4);
+    this.cdr.detectChanges();
   }
 
   formattedSandboxWaiting(sandboxWaiting: SandboxWaiting): string {

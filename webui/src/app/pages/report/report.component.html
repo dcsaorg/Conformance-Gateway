@@ -1,13 +1,16 @@
 <div style="margin-top: 1em">
-    <div *ngIf="!report.errorMessages.length && !report.subReports.length" style="margin-left: 1em">
+    @if (!report.errorMessages.length && !report.subReports.length) {
+      <div style="margin-left: 1em">
         <span
           class="conformanceStatus"
           [title]="getConformanceStatusTitle(report.status)"
         >{{getConformanceStatusEmoji(report.status)}}</span>
         <span>{{report.title}}</span>
-    </div>
+      </div>
+    }
 
-    <details [attr.open]="unfoldedLevels > 0 ? '' : null" *ngIf="report.errorMessages.length || report.subReports.length">
+    @if (report.errorMessages.length || report.subReports.length) {
+      <details [attr.open]="unfoldedLevels > 0 ? '' : null">
         <summary>
             <span
               class="conformanceStatus"
@@ -16,20 +19,24 @@
            <span>{{report.title}}</span>
         </summary>
 
-
-        <div *ngFor="let errorMessage of report.errorMessages.sort()" style="margin-left: 2em">
+        @for (errorMessage of report.errorMessages.sort(); track errorMessage) {
+          <div style="margin-left: 2em">
             <span
               class="conformanceStatus"
               title="Non-conformant"
             >🚫</span>
             <span>{{errorMessage}}</span>
-        </div>
+          </div>
+        }
 
         <div style="margin-left: 2em">
-          <app-report *ngFor="let subReport of report.subReports"
-                      [unfoldedLevels]="unfoldedLevels - 1"
-                      [report]="subReport"
-          ></app-report>
+          @for (subReport of report.subReports; track subReport) {
+            <app-report
+              [unfoldedLevels]="unfoldedLevels - 1"
+              [report]="subReport"
+            ></app-report>
+          }
         </div>
-    </details>
+      </details>
+    }
 </div>

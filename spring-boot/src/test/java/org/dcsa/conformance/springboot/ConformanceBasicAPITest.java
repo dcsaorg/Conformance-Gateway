@@ -1,13 +1,15 @@
 package org.dcsa.conformance.springboot;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,14 +21,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Does not run the actual conformance tests, because Tomcat is not started, so no actual endpoints are reachable by a httpClient.
  */
 @SpringBootTest
-@AutoConfigureMockMvc
 class ConformanceBasicAPITest {
 
   @Autowired
+  private WebApplicationContext webApplicationContext;
+
   private MockMvc mockMvc;
 
   @Autowired
   private ConformanceApplication app;
+
+  @BeforeEach
+  void setUp() {
+    mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+  }
 
   private static final String SANDBOX_ID = "booking-200-conformance-auto-all-in-one";
 

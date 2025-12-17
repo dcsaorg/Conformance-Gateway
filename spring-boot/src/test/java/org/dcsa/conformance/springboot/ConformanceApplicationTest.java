@@ -5,12 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.web.client.RestClient;
 
 @Slf4j
 @SpringBootTest(
@@ -24,8 +25,14 @@ class ConformanceApplicationTest {
   @LocalServerPort
   private int port;
 
-  @Autowired
-  private TestRestTemplate restTemplate;
+  private RestClient restClient;
+
+  @BeforeEach
+  void setUp() {
+    restClient = RestClient.builder()
+        .baseUrl("http://localhost:" + port)
+        .build();
+  }
 
   @ParameterizedTest
   @ValueSource(
@@ -51,18 +58,27 @@ class ConformanceApplicationTest {
   void testEachSuite(final String sandboxId) throws InterruptedException {
     log.info("Starting scenario suite: {}", sandboxId);
     // validate if scenario is listed
-    String rootURL = restTemplate.getForObject("http://localhost:" + port + "/", String.class);
+    String rootURL = restClient.get()
+        .uri("/")
+        .retrieve()
+        .body(String.class);
     assertTrue(rootURL.contains(sandboxId), sandboxId + " not found in root URL, skipping in this branch!");
 
     // Start the scenario
-    String value = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "reset"), String.class);
+    String value = restClient.get()
+        .uri(getAppURL(sandboxId, "reset"))
+        .retrieve()
+        .body(String.class);
     assertEquals("{}", value);
 
     // Wait for the scenario to finish
     checkUntilScenariosAreReady(sandboxId);
 
     // Get the report and validate it. Should have 2 times "✅ CONFORMANT" in the report.
-    String report = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "report"), String.class);
+    String report = restClient.get()
+        .uri(getAppURL(sandboxId, "report"))
+        .retrieve()
+        .body(String.class);
     int firstFound = report.indexOf("conformance</h2><details open><summary>✅ CONFORMANT");
     int secondFound = report.indexOf("conformance</h2><details open><summary>✅ CONFORMANT", firstFound + 50);
     if (firstFound == -1 || secondFound == -1) { // Report current situation for debugging
@@ -76,10 +92,16 @@ class ConformanceApplicationTest {
     StopWatch stopWatch = StopWatch.createStarted();
     String status;
     String previousStatus = "";
-    String startStatus = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
+    String startStatus = restClient.get()
+        .uri(getAppURL(sandboxId, "status"))
+        .retrieve()
+        .body(String.class);
     do {
       Thread.sleep(500L);
-      status = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
+      status = restClient.get()
+          .uri(getAppURL(sandboxId, "status"))
+          .retrieve()
+          .body(String.class);
       if (status.equals(previousStatus)) { // Detection of a stuck scenario, prevent waiting forever. Note: turn off while debugging!
         log.error("Status did not change: {}. Originally started at: {}", status, startStatus);
         break;

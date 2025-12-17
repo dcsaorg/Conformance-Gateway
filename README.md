@@ -11,8 +11,8 @@ DCSA developers can run the Conformance Framework locally, using Spring Boot and
 Adopters use an AWS deployment of the Conformance Framework managed by DCSA.
 
 ## Prerequisites
-- Java 21 or higher
-- Maven 3.8 or higher
+- Java 25 or higher
+- Maven 3.9 or higher (Maven wrapper included)
 - Node.js and npm; works with v20 or higher
 
 ## Build and Run

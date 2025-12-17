@@ -8,19 +8,19 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<java.version>21</java.version>
+		<java.version>25</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<spring.boot.version>3.4.4</spring.boot.version>
-		<jackson.version>2.18.3</jackson.version>
-		<lombok.version>1.18.36</lombok.version>
-		<log4j.version>2.24.3</log4j.version>
-		<slf4j.version>2.0.16</slf4j.version>
-		<junit.version>5.12.0</junit.version>
-		<mockito.version>5.16.1</mockito.version>
+		<spring.boot.version>4.0.0</spring.boot.version>
+		<jackson.version>2.20.0</jackson.version>
+		<lombok.version>1.18.42</lombok.version>
+		<log4j.version>2.25.2</log4j.version>
+		<slf4j.version>2.0.17</slf4j.version>
+		<junit.version>6.0.1</junit.version>
+		<mockito.version>5.21.0</mockito.version>
 
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>dcsaorg</sonar.organization>
@@ -178,7 +178,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.18.0</version>
+				<version>1.20.0</version>
 			</dependency>
 
 			<dependency>
@@ -242,7 +242,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.14.0</version>
+				<version>3.14.1</version>
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
@@ -259,7 +259,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
+				<version>0.8.14</version>
 				<executions>
 					<execution>
 						<id>prepare-jacoco</id>
@@ -280,7 +280,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.6.2</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
@@ -290,7 +290,7 @@
 						<configuration>
 							<rules>
 								<requireMavenVersion>
-									<version>3.8</version>
+									<version>3.9</version>
 								</requireMavenVersion>
 							</rules>
 						</configuration>
@@ -328,7 +328,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.5.2</version>
+					<version>3.5.4</version>
 					<configuration>
 						<groups>${junit.includedTags}</groups>
 						<excludedGroups>${junit.excludedTags}</excludedGroups>

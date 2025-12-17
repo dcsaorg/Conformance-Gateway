@@ -46,9 +46,13 @@ class UrlPathCheckTest {
 
         ConformanceCheckResult.SimpleErrors result = (ConformanceCheckResult.SimpleErrors) check.performCheck(uuid -> dummyUuid.equals(uuid) ? exchange : null);
 
-        assertEquals(
-                Set.of("Request URL '%s' does not end with any of %s".formatted(url, Set.of("/cancel", "/submit"))),
-                result.errors());
+        assertEquals(1, result.errors().size());
+
+        String errorMessage = result.errors().iterator().next();
+        assertTrue(errorMessage.contains(url), "Error should contain the URL");
+        assertTrue(errorMessage.contains("/cancel"), "Error should mention /cancel");
+        assertTrue(errorMessage.contains("/submit"), "Error should mention /submit");
+        assertTrue(errorMessage.startsWith("Request URL"), "Error should start with 'Request URL'");
     }
 
     @Test

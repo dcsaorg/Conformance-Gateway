@@ -46,8 +46,7 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
               counterpartConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName()),
               persistentMap,
               webClient,
-              orchestratorAuthHeader,
-              PayloadSignerFactory.carrierPayloadSigner()));
+              orchestratorAuthHeader));
     }
 
     PartyConfiguration platformConfiguration =

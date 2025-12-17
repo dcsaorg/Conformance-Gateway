@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.Getter;
+import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceCarrier;
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
 public class PlatformScenarioParametersAction extends IssuanceAction {
@@ -63,7 +64,12 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of("RESPONSE_CODE", responseCode.standardCode), "prompt-platform-psp.md");
+        Map.of(
+            "RESPONSE_CODE",
+            responseCode.standardCode,
+            "PUBLIC_KEY",
+            EblIssuanceCarrier.getCarrierPublicKey()),
+        "prompt-platform-psp.md");
   }
 
   @Override
@@ -73,20 +79,59 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
             ? new SuppliedScenarioParameters(
                 sendToPlatform,
                 "Legal name of issueTo party",
+                "Code list provider of issue to party",
                 "Party code of issueTo party",
                 "DCSA (code list name for issueTo party)",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
                 null,
                 null,
                 null)
             : new SuppliedScenarioParameters(
                 sendToPlatform,
                 "Legal name of issue to party",
+                "Code list provider of issue to party",
                 "Party code of issue to party",
                 "DCSA (code list name for issue to party)",
+                "Legal name of shipper",
+                "Code list provider of shipper",
+                "Party code of shipper",
+                "DCSA (code list name for shipper)",
                 "Legal name of consignee/endorsee",
+                "Code list provider of consignee/endorsee",
                 "Party code of consignee/endorsee",
-                "DCSA (code list name for consignee/endorsee)"))
+                "DCSA (code list name for consignee/endorsee)",
+                "Legal name of issuing party",
+                "Code list provider of issuing party",
+                "Party code of issuing party",
+                "DCSA (code list name for issuing party)"))
         .toJson();
+  }
+
+  @Override
+  public Map<String, Boolean> getExpectedInputAttributes() {
+    Map<String, Boolean> expectedAttributes = super.getExpectedInputAttributes();
+    expectedAttributes.put("issueToCodeListName", false);
+    expectedAttributes.put("shipperLegalName", false);
+    expectedAttributes.put("shipperCodeListProvider", false);
+    expectedAttributes.put("shipperPartyCode", false);
+    expectedAttributes.put("shipperCodeListName", false);
+    expectedAttributes.put("consigneeOrEndorseeLegalName", false);
+    expectedAttributes.put("consigneeOrEndorseeCodeListProvider", false);
+    expectedAttributes.put("consigneeOrEndorseePartyCode", false);
+    expectedAttributes.put("consigneeOrEndorseeCodeListName", false);
+    expectedAttributes.put("issuingPartyLegalName", false);
+    expectedAttributes.put("issuingPartyCodeListProvider", false);
+    expectedAttributes.put("issuingPartyPartyCode", false);
+    expectedAttributes.put("issuingPartyCodeListName", false);
+    return expectedAttributes;
   }
 
   @Override

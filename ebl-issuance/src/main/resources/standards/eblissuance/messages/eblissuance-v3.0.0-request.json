@@ -101,15 +101,32 @@
     ],
     "documentParties": {
       "shipper": {
-        "partyName": "IKEA Denmark",
-        "partyContactDetails": [
+        "partyName": "SHIPPER_LEGAL_NAME_PLACEHOLDER",
+        "identifyingCodes": [
           {
-            "name": "Henrik",
-            "phone": "+45 51801234"
-          },
+            "codeListProvider": "SHIPPER_CODE_LIST_PROVIDER",
+            "partyCode": "SHIPPER_PARTY_CODE_PLACEHOLDER",
+            "codeListName": "SHIPPER_CODE_LIST_NAME_PLACEHOLDER"
+          }
+        ]
+      },
+      "consignee": {
+        "partyName": "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
+        "identifyingCodes": [
           {
-            "name": "Henrik",
-            "phone": "+45 51801234"
+            "codeListProvider": "CONSIGNEE_CODE_LIST_PROVIDER",
+            "partyCode": "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
+            "codeListName": "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER"
+          }
+        ]
+      },
+      "issuingParty": {
+        "partyName": "ISSUING_PARTY_LEGAL_NAME_PLACEHOLDER",
+        "identifyingCodes": [
+          {
+            "codeListProvider": "ISSUING_PARTY_CODE_LIST_PROVIDER",
+            "partyCode": "ISSUING_PARTY_PARTY_CODE_PLACEHOLDER",
+            "codeListName": "ISSUING_PARTY_CODE_LIST_NAME_PLACEHOLDER"
           }
         ],
         "address": {
@@ -117,41 +134,6 @@
           "city": "Amsterdam",
           "countryCode": "NL"
         }
-      },
-      "consignee": {
-        "partyName": "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
-        "identifyingCodes": [
-          {
-            "codeListProvider": "W3C",
-            "partyCode": "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
-            "codeListName": "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER"
-          }
-        ],
-        "partyContactDetails": [
-          {
-            "name": "Henrik",
-            "phone": "+45 51801234"
-          },
-          {
-            "name": "Henrik",
-            "phone": "+45 51801234"
-          }
-        ]
-      },
-      "issuingParty": {
-        "partyName": "Hyundai",
-        "address": {
-          "street": "Ruijggoordweg",
-          "city": "Amsterdam",
-          "countryCode": "NL"
-        },
-        "identifyingCodes": [
-          {
-            "codeListProvider": "W3C",
-            "partyCode": "MSK",
-            "codeListName": "DID"
-          }
-        ]
       },
       "notifyParties": [
         {
@@ -232,7 +214,7 @@
     "sendToPlatform": "SEND_TO_PLATFORM_PLACEHOLDER",
     "identifyingCodes": [
       {
-        "codeListProvider": "W3C",
+        "codeListProvider": "ISSUE_TO_CODE_LIST_PROVIDER",
         "partyCode": "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
         "codeListName": "ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER"
       }

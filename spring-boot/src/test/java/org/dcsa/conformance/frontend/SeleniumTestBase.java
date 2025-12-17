@@ -157,15 +157,21 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       waitForUIReadiness();
 
       do {
-        // Wait for the current action element to be present before accessing it
-        WebElement currentActionElement = wait.until(
-            ExpectedConditions.presenceOfElementLocated(By.cssSelector("[testId='currentAction']")));
-        log.info("Current action: {}", currentActionElement.getText());
+        // Check if currentAction element exists, if not wait for it or check if scenario is complete
+        if (hasNoMoreActionsDisplayed(name)) {
+          break; // Scenario complete, exit loop
+        }
+
+        // Additional wait to ensure currentAction appears after action completion
+        waitForUIReadiness();
+
+        String currentActionText = safeGetText(By.cssSelector("[testId='currentAction']"));
+        log.info("Current action: {}", currentActionText);
 
         if (handleJsonPromptForText()) continue;
         handlePromptText();
         completeAction();
-      } while (!hasNoMoreActionsDisplayed(name));
+      } while (true);
       if (stopAfterFirstScenarioGroup) {
         log.info("Stopping after first scenario group");
         break;
@@ -299,9 +305,13 @@ public abstract class SeleniumTestBase extends ManualTestBase {
         waitForUIReadiness();
 
         switchToTab(0);
-        // refresh page 1
-        safeClick(By.id("refreshStatusButton"));
-        waitForUIReadiness();
+        // refresh page 1 - only if button exists
+        if (!driver.findElements(By.id("refreshStatusButton")).isEmpty()) {
+          safeClick(By.id("refreshStatusButton"));
+          waitForUIReadiness();
+        } else {
+          log.debug("refreshStatusButton not found, skipping refresh");
+        }
       }
     } catch (org.openqa.selenium.NoSuchElementException ignored) {
       // No prompt text, is fine.
@@ -388,6 +398,49 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
   protected String getTestedPartyApiUrl(SandboxConfig sandbox2) {
     return sandbox2.sandboxUrl();
+  }
+
+  /**
+   * Safely gets element text with retry logic to handle StaleElementReferenceException.
+   * This is necessary because Angular may re-render the DOM between finding an element and getting its text.
+   *
+   * @param by The locator to find the element
+   * @param retries Maximum number of retry attempts
+   * @return The text content of the element
+   */
+  protected String safeGetText(By by, int retries) {
+    for (int i = 0; i < retries; i++) {
+      try {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(by));
+        return element.getText();
+      } catch (org.openqa.selenium.StaleElementReferenceException e) {
+        if (i == retries - 1) {
+          log.error("Failed to get text from element {} after {} retries", by, retries);
+          throw e; // Rethrow on last retry
+        }
+        log.warn(
+            "StaleElementReferenceException caught for element {}, retrying... (attempt {}/{})",
+            by,
+            i + 1,
+            retries);
+        try {
+          Thread.sleep(200); // Brief wait before retry
+        } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+        }
+      }
+    }
+    return ""; // Should never reach here
+  }
+
+  /**
+   * Safely gets element text with default 3 retries.
+   *
+   * @param by The locator to find the element
+   * @return The text content of the element
+   */
+  protected String safeGetText(By by) {
+    return safeGetText(by, 3);
   }
 
   /**

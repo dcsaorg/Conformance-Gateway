@@ -63,6 +63,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
     this.actionInput = '';
     this.sandboxStatus = undefined;
     this.scenarioStatus = undefined;
+    this.cdr.detectChanges(); // Immediately update UI to show loading state
 
     const sandboxStatusCheckStartTime = new Date().getTime();
     while (true) {
@@ -72,8 +73,8 @@ export class ScenarioComponent implements OnInit, OnDestroy {
         break;
       }
       console.log("loadScenarioStatus() sandbox waiting: " + JSON.stringify(this.sandboxStatus.waiting, null, 4));
-      await sleep(1000);
-      this.cdr.detectChanges(); // Update UI during polling
+      this.cdr.detectChanges(); // Update UI to show waiting status immediately
+      await sleep(500); // Reduced from 1000ms to 500ms for more responsive polling
     }
 
     this.scenarioStatus = await this.conformanceService.getScenarioStatus(
@@ -96,13 +97,16 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       + "You cannot go back to a previous action without restarting the scenario.")
     ) {
       this.performingAction = "Marking current action as completed...";
+      this.cdr.detectChanges(); // Immediately show the "performing action" message
+
       const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, false);
       if (response?.error) {
+        this.performingAction = "";
+        this.cdr.detectChanges();
         await MessageDialog.open(
             this.dialog,
             "Error completing action",
             response.error)
-        this.performingAction = "";
         return
       }
       this.performingAction = "";
@@ -112,13 +116,16 @@ export class ScenarioComponent implements OnInit, OnDestroy {
 
   async skipCurrentAction() {
     this.performingAction = "Marking current action as skipped...";
+    this.cdr.detectChanges(); // Immediately show the "performing action" message
+
     const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, true);
     if (response?.error) {
+      this.performingAction = "";
+      this.cdr.detectChanges();
       await MessageDialog.open(
           this.dialog,
           "Error skipping action",
           response.error)
-      this.performingAction = "";
       return
     }
     this.performingAction = "";

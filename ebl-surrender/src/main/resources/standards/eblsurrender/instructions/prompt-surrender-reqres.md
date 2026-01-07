@@ -1,4 +1,4 @@
-Send a surrender request for SURRENDER_TYPE for the eBL with the transport document reference REFERENCE
+Send a surrender request for SURRENDER_TYPE.
 
 Process an automatic response from the carrier.
 

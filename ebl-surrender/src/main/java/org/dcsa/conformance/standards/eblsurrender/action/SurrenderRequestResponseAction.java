@@ -71,11 +71,7 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of(
-            "SURRENDER_TYPE",
-            forAmendment ? "amendment" : "delivery",
-            "REFERENCE",
-            sspSupplier.get().transportDocumentReference()),
+        Map.of("SURRENDER_TYPE", forAmendment ? "amendment" : "delivery"),
         "prompt-surrender-reqres.md");
   }
 

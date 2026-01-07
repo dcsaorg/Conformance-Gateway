@@ -136,12 +136,6 @@ public class EblSurrenderCarrier extends ConformanceParty {
       action = persistentMap.load("response").asText();
     }
 
-
-    if (EblSurrenderPlatform.INVALID_TDR.equals(tdr)) {
-      eblStatesById.put(
-          EblSurrenderPlatform.INVALID_TDR, EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED);
-    }
-
       eblStatesById.put(
           tdr,
           Objects.equals("AREQ", src)

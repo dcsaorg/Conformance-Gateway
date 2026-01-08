@@ -155,7 +155,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
 
     if (errorScenario || tdr.equals(EblSurrenderPlatform.INVALID_TDR)) {
       return return409(
-          request, "Simulated error scenario for surrender request reference '%s'".formatted(srr));
+          request, "Simulated error response for surrender request reference '%s'".formatted(srr));
     }
 
       return request.createResponse(

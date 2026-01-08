@@ -67,11 +67,14 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public String getHumanReadablePrompt() {
     String responseAction = response.equals("SURR") ? "accept" : "reject";
-    return EblSurrenderAction.getMarkdownHumanReadablePrompt(
-        Map.of(
-            "EBL_TYPE", eblType,
-            "RESPONSE", responseAction),
-        "prompt-surrender-ssp.md");
+    return isErrorScenario
+        ? EblSurrenderAction.getMarkdownHumanReadablePrompt(
+            Map.of("EBL_TYPE", eblType), "prompt-surrender-error-ssp.md")
+        : EblSurrenderAction.getMarkdownHumanReadablePrompt(
+            Map.of(
+                "EBL_TYPE", eblType,
+                "RESPONSE", responseAction),
+            "prompt-surrender-ssp.md");
   }
 
   @Override

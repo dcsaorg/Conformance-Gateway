@@ -90,6 +90,9 @@ import software.amazon.awscdk.services.s3.deployment.Source;
 import software.constructs.Construct;
 
 public class ConformanceStack extends Stack {
+
+  private static final Runtime JAVA_RUNTIME = Runtime.JAVA_25;
+
   public ConformanceStack(
       Construct parent,
       StackProps stackProps,
@@ -166,7 +169,7 @@ public class ConformanceStack extends Stack {
                                 "/bin/sh",
                                 "-c",
                                 "cp /asset-input/target/conformance-lambda.jar /asset-output/"))
-                        .image(Runtime.JAVA_21.getBundlingImage())
+                        .image(JAVA_RUNTIME.getBundlingImage())
                         .volumes(
                             singletonList(
                                 // Mount local .m2 repo to avoid download all the
@@ -428,7 +431,7 @@ public class ConformanceStack extends Stack {
     FunctionProps.Builder functionPropsBuilder =
         FunctionProps.builder()
             .functionName(name)
-            .runtime(Runtime.JAVA_21)
+            .runtime(JAVA_RUNTIME)
             .code(assetCode)
             .handler(handler)
             .memorySize(2048)

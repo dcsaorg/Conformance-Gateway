@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { ChangeDetectorRef, Component } from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -27,6 +27,7 @@ export class EditSandboxComponent {
     public conformanceService: ConformanceService,
     private readonly router: Router,
     private readonly dialog: MatDialog,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit() {
@@ -41,6 +42,7 @@ export class EditSandboxComponent {
         this.sandboxId = params['sandboxId'];
         this.originalSandboxConfig = await this.conformanceService.getSandboxConfig(this.sandboxId);
         this.updatedSandboxConfig = JSON.parse(JSON.stringify(this.originalSandboxConfig));
+        this.cdr.detectChanges();
       });
   }
 

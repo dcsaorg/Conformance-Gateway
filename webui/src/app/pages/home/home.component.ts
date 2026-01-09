@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
 
@@ -15,6 +15,7 @@ export class HomeComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit() {
@@ -29,5 +30,6 @@ export class HomeComponent implements OnInit {
       ]);
     }
     this.isLoading = false;
+    this.cdr.detectChanges();
   }
 }

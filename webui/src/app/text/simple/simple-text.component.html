@@ -1,7 +1,14 @@
-<span
-class="simpleText"
-*ngFor="let segment of getSegments()">
-  <br *ngIf="isLineBreak(segment)"/>
-  <a *ngIf="isUrl(segment)" target="_blank" [href]="segment">{{segment}}</a>
-  <span *ngIf="isPlainText(segment)">{{segment}}</span>
-</span>
+@for (segment of getSegments(); track segment) {
+  <span class="simpleText">
+    @if (isLineBreak(segment)) {
+      <br/>
+    }
+    @if (isUrl(segment)) {
+      <a target="_blank" [href]="segment">{{segment}}</a>
+    }
+    @if (isPlainText(segment)) {
+      <span>{{segment}}</span>
+    }
+  </span>
+}
+

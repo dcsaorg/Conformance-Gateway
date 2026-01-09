@@ -10,14 +10,17 @@
         >Create sandbox</button>
 </div>
 
-<app-text-waiting *ngIf="isLoading" text="Retrieving existing sandboxes..."></app-text-waiting>
+@if (isLoading) {
+  <app-text-waiting text="Retrieving existing sandboxes..."></app-text-waiting>
+}
 
-<mat-card
-*ngFor="let sandbox of sandboxes"
-[ngClass]="'entityCard withContentPadding withPointerCursor'"
-(click)="onSandboxClick(sandbox)">
+@for (sandbox of sandboxes; track sandbox.id) {
+  <mat-card
+  [ngClass]="'entityCard withContentPadding withPointerCursor'"
+  (click)="onSandboxClick(sandbox)">
     <div>
       <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>
     </div>
     <div class="wrappingText" style="color: grey">{{sandbox.name}}</div>
-</mat-card>
+  </mat-card>
+}

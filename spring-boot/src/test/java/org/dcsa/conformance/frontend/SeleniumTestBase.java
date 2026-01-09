@@ -56,10 +56,11 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     driver = new ChromeDriver(options);
     driver.manage().timeouts().implicitlyWait(Duration.ofMillis(WAIT_BEFORE_TIMEOUT_IN_MILLIS));
 
-    wait = new FluentWait<>(driver)
-      .withTimeout(Duration.ofSeconds(5L))
-      .pollingEvery(Duration.ofMillis(100L))
-      .ignoring(NoSuchElementException.class);
+    wait =
+        new FluentWait<>(driver)
+            .withTimeout(Duration.ofSeconds(5L))
+            .pollingEvery(Duration.ofMillis(100L))
+            .ignoring(NoSuchElementException.class);
   }
 
   @Override
@@ -73,8 +74,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     alreadyLoggedIn = false;
   }
 
-  protected void createSandboxesAndRunGroups(Standard standard, String version, String suiteName, String role) {
-    String readableStandardSpec = "%s, version: %s, suite: %s, role: %s".formatted(standard.name(), version, suiteName, role);
+  protected void createSandboxesAndRunGroups(
+      Standard standard, String version, String suiteName, String role) {
+    String readableStandardSpec =
+        "%s, version: %s, suite: %s, role: %s".formatted(standard.name(), version, suiteName, role);
     log.info("Starting standard: {}", readableStandardSpec);
     switchToTab(0);
     SandboxConfig sandbox1 = createSandbox(standard, version, suiteName, role, 0);
@@ -101,15 +104,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     switchToTab(0);
     driver.get(baseUrl + "/sandbox/" + sandbox1.sandboxId());
     waitForUIReadiness();
-    driver.findElement(By.cssSelector("[testId='deleteSandboxButton']")).click();
+    safeClick(By.cssSelector("[testId='deleteSandboxButton']"));
 
-    // Confirm deletion in the confirmation dialog
-    WebElement confirmDeleteButton =
-        driver
-            .findElement(By.cssSelector("app-confirmation-dialog"))
-            .findElements(By.tagName("button"))
-            .getFirst(); // Equivalent to YES button in the dialogue box
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmDeleteButton);
+    // Confirm deletion in the confirmation dialog using helper method
+    safeClickConfirmationButton(By.cssSelector("app-confirmation-dialog"));
 
     waitForUIReadiness();
     log.info("Deleted sandbox: {}", sandbox1.sandboxName());
@@ -117,15 +115,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     switchToTab(1);
     driver.get(baseUrl + "/sandbox/" + sandbox2.sandboxId());
     waitForUIReadiness();
-    driver.findElement(By.cssSelector("[testId='deleteSandboxButton']")).click();
+    safeClick(By.cssSelector("[testId='deleteSandboxButton']"));
 
-    // Confirm deletion in the confirmation dialog
-    confirmDeleteButton =
-        driver
-            .findElement(By.cssSelector("app-confirmation-dialog"))
-            .findElements(By.tagName("button"))
-            .getFirst(); // Equivalent to YES button in the dialogue box
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmDeleteButton);
+    // Confirm deletion in the confirmation dialog using helper method
+    safeClickConfirmationButton(By.cssSelector("app-confirmation-dialog"));
 
     waitForUIReadiness();
     log.info("Deleted sandbox: {}", sandbox2.sandboxName());
@@ -133,12 +126,13 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
   void runScenarios(String name) {
     waitForUIReadiness();
-    // WebElement can not be reused after the page is refreshed. Therefore, using the index to get the button.
+    // WebElement can not be reused after the page is refreshed. Therefore, using the index to get
+    // the button.
     int scenarioCount =
-      driver
-        .findElement(By.tagName("app-sandbox"))
-        .findElements(By.className(("scenarioActionButton")))
-        .size();
+        driver
+            .findElement(By.tagName("app-sandbox"))
+            .findElements(By.className(("scenarioActionButton")))
+            .size();
 
     String storedBaseSandboxURL = driver.getCurrentUrl();
     assertNotNull(storedBaseSandboxURL);
@@ -156,18 +150,28 @@ public abstract class SeleniumTestBase extends ManualTestBase {
               .getText());
       resetInternalParty();
       driver
-        .findElement(By.tagName("app-sandbox"))
-        .findElements(By.className(("scenarioActionButton")))
-        .get(scenarioIndex)
-        .click();
+          .findElement(By.tagName("app-sandbox"))
+          .findElements(By.className(("scenarioActionButton")))
+          .get(scenarioIndex)
+          .click();
       waitForUIReadiness();
 
       do {
-        log.info("Current action: {}", driver.findElement(By.cssSelector("[testId='currentAction']")).getText());
+        // Check if currentAction element exists, if not wait for it or check if scenario is complete
+        if (hasNoMoreActionsDisplayed(name)) {
+          break; // Scenario complete, exit loop
+        }
+
+        // Additional wait to ensure currentAction appears after action completion
+        waitForUIReadiness();
+
+        String currentActionText = safeGetText(By.cssSelector("[testId='currentAction']"));
+        log.info("Current action: {}", currentActionText);
+
         if (handleJsonPromptForText()) continue;
         handlePromptText();
         completeAction();
-      } while (!hasNoMoreActionsDisplayed(name));
+      } while (true);
       if (stopAfterFirstScenarioGroup) {
         log.info("Stopping after first scenario group");
         break;
@@ -183,20 +187,15 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     By resetBtn = By.cssSelector("button[testId='resetPartyButton']");
     wait.until(ExpectedConditions.elementToBeClickable(resetBtn)).click();
 
-    WebElement confirmResetButton =
-        driver
-            .findElement(By.cssSelector("app-confirmation-dialog"))
-            .findElements(By.tagName("button"))
-            .getFirst(); // Equivalent to YES button in the dialogue box
-
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmResetButton);
-
+    // Confirm reset in the confirmation dialog using helper method
     By confirmationDialog = By.cssSelector("app-confirmation-dialog");
+    safeClickConfirmationButton(confirmationDialog);
+
     wait.until(ExpectedConditions.invisibilityOfElementLocated(confirmationDialog));
     waitForUIReadiness();
     waitForAsyncCalls(lambdaDelay);
 
-    driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
+    safeClick(By.cssSelector("[testId='refreshButton']"));
     waitForUIReadiness();
     waitForAsyncCalls(lambdaDelay);
 
@@ -219,10 +218,12 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       return false;
     }
 
-    String standardName = driver.findElement(By.cssSelector("[testId='standardName']")).getText();
-    String testedPartyRole =
-        driver.findElement(By.cssSelector("[testId='testedPartyRole']")).getText();
-    String currentAction = driver.findElement(By.cssSelector("[testId='currentAction']")).getText();
+    String standardName = wait.until(
+        ExpectedConditions.presenceOfElementLocated(By.cssSelector("[testId='standardName']"))).getText();
+    String testedPartyRole = wait.until(
+        ExpectedConditions.presenceOfElementLocated(By.cssSelector("[testId='testedPartyRole']"))).getText();
+    String currentAction = wait.until(
+        ExpectedConditions.presenceOfElementLocated(By.cssSelector("[testId='currentAction']"))).getText();
 
     if (standardName.equals(EblStandard.INSTANCE.getName())) {
       if (testedPartyRole.equals(EblRole.CARRIER.getConfigName())
@@ -248,7 +249,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
     jsonPromptTextElement.clear();
     jsonPromptTextElement.sendKeys(jsonForPrompt);
-    driver.findElement(By.id("submitActionButton")).click();
+    safeClick(By.id("submitActionButton"));
     waitForUIReadiness();
     waitForAsyncCalls(lambdaDelay * 2); // Extra delay for the async calls to finish.
     return true;
@@ -258,7 +259,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     handlePromptText();
     switchToTab(1);
 
-    driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
+    safeClick(By.cssSelector("[testId='refreshButton']"));
     waitForUIReadiness();
     waitForAsyncCalls(lambdaDelay);
 
@@ -279,11 +280,12 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     handlePromptText();
     switchToTab(1);
 
-    driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
+    safeClick(By.cssSelector("[testId='refreshButton']"));
     waitForUIReadiness();
     waitForAsyncCalls(lambdaDelay);
 
-    String operatorLog = driver.findElement(By.cssSelector("[testId='operatorLog']")).getText();
+    String operatorLog = wait.until(
+        ExpectedConditions.presenceOfElementLocated(By.cssSelector("[testId='operatorLog']"))).getText();
     String reference = extractTransportDocumentReference(operatorLog);
     switchToTab(0);
     return promptText.replace("Insert TDR here", reference);
@@ -295,17 +297,21 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       if (promptTextElement.isDisplayed() && promptTextElement.isEnabled()) {
         // notify tab 2.
         switchToTab(1);
-        driver.findElement(By.id("notifyPartyButton")).click();
+        safeClick(By.id("notifyPartyButton"));
         log.debug("Notify party");
         waitForAsyncCalls(lambdaDelay);
 
-        driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
+        safeClick(By.cssSelector("[testId='refreshButton']"));
         waitForUIReadiness();
 
         switchToTab(0);
-        // refresh page 1
-        driver.findElement(By.id("refreshStatusButton")).click();
-        waitForUIReadiness();
+        // refresh page 1 - only if button exists
+        if (!driver.findElements(By.id("refreshStatusButton")).isEmpty()) {
+          safeClick(By.id("refreshStatusButton"));
+          waitForUIReadiness();
+        } else {
+          log.debug("refreshStatusButton not found, skipping refresh");
+        }
       }
     } catch (org.openqa.selenium.NoSuchElementException ignored) {
       // No prompt text, is fine.
@@ -315,9 +321,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   // If there are no more actions, the scenario is finished and should be conformant.
   private boolean hasNoMoreActionsDisplayed(String name) {
     if (driver.findElements(By.id("nextActions")).isEmpty()
-      && driver.findElements(By.cssSelector("app-text-waiting")).isEmpty()) {
-      String titleValue =
-        driver.findElement(By.className("conformanceStatus")).getDomProperty("title");
+        && driver.findElements(By.cssSelector("app-text-waiting")).isEmpty()) {
+      String titleValue = wait.until(
+          ExpectedConditions.presenceOfElementLocated(By.className("conformanceStatus")))
+          .getDomProperty("title");
       assertEquals(
           "Conformant",
           titleValue,
@@ -331,7 +338,8 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   protected static void waitForUIReadiness() {
     if (!driver.findElements(By.cssSelector("app-text-waiting")).isEmpty()) {
       StopWatch stopWatch = StopWatch.createStarted();
-      wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("app-text-waiting")));
+      wait.until(
+          ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("app-text-waiting")));
       log.debug("Waited for UI readiness: {}", stopWatch);
       waitForUIReadiness();
     }
@@ -341,17 +349,13 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     log.debug("Completing action");
     waitForUIReadiness();
 
-    wait.until(
-      ExpectedConditions.visibilityOfElementLocated(By.id("completeCurrentActionButton")));
-    driver.findElement(By.id("completeCurrentActionButton")).click();
+    // Use safeClick to handle the completeCurrentActionButton with retry logic
+    safeClick(By.id("completeCurrentActionButton"));
 
-    // Avoid ElementClickInterceptedException by using JavascriptExecutor to click the button.
-    WebElement button = driver
-      .findElement(By.cssSelector("app-confirmation-dialog"))
-      .findElements(By.tagName("button"))
-      .getFirst();
-    JavascriptExecutor js = (JavascriptExecutor) driver;
-    js.executeScript("arguments[0].click();", button);
+    // Wait for confirmation dialog to appear and click the first button with retry logic
+    wait.until(
+        ExpectedConditions.visibilityOfElementLocated(By.cssSelector("app-confirmation-dialog")));
+    safeClickConfirmationButton(By.cssSelector("app-confirmation-dialog"));
 
     waitForUIReadiness();
   }
@@ -360,32 +364,166 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     log.info("Updating both sandbox configs before starting");
     // Starts in the 2nd tab
     if (sandbox1.sandboxUrl() != null) {
-      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(sandbox1.sandboxUrl());
-      driver.findElement(By.name("externalPartyAuthHeaderNameTextField")).sendKeys(sandbox1.sandboxAuthHeaderName());
-      driver.findElement(By.name("externalPartyAuthHeaderValueTextField")).sendKeys(sandbox1.sandboxAuthHeaderValue());
-      driver.findElement(By.cssSelector("[testId='updateSandboxButton']")).click();
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.name("externalPartyUrlTextField")))
+          .sendKeys(sandbox1.sandboxUrl());
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.name("externalPartyAuthHeaderNameTextField")))
+          .sendKeys(sandbox1.sandboxAuthHeaderName());
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.name("externalPartyAuthHeaderValueTextField")))
+          .sendKeys(sandbox1.sandboxAuthHeaderValue());
+      safeClick(By.cssSelector("[testId='updateSandboxButton']"));
     } else {
-      driver.findElement(By.cssSelector("[testId='cancelUpdateSandboxButton']")).click();
+      safeClick(By.cssSelector("[testId='cancelUpdateSandboxButton']"));
     }
     waitForUIReadiness();
-    assertTrue(driver.findElement(By.className("pageTitle")).getText().startsWith("Sandbox: "));
+    assertTrue(wait.until(ExpectedConditions.presenceOfElementLocated(By.className("pageTitle")))
+        .getText().startsWith("Sandbox: "));
 
     // Starts in the 1st tab
     switchToTab(0);
     if (sandbox2.sandboxUrl() != null) {
-      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(getTestedPartyApiUrl(sandbox2));
-      driver.findElement(By.name("externalPartyAuthHeaderNameTextField")).sendKeys(sandbox2.sandboxAuthHeaderName());
-      driver.findElement(By.name("externalPartyAuthHeaderValueTextField")).sendKeys(sandbox2.sandboxAuthHeaderValue());
-      driver.findElement(By.cssSelector("[testId='updateSandboxButton']")).click();
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.name("externalPartyUrlTextField")))
+          .sendKeys(getTestedPartyApiUrl(sandbox2));
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.name("externalPartyAuthHeaderNameTextField")))
+          .sendKeys(sandbox2.sandboxAuthHeaderName());
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.name("externalPartyAuthHeaderValueTextField")))
+          .sendKeys(sandbox2.sandboxAuthHeaderValue());
+      safeClick(By.cssSelector("[testId='updateSandboxButton']"));
     } else {
-      driver.findElement(By.cssSelector("[testId='cancelUpdateSandboxButton']")).click();
+      safeClick(By.cssSelector("[testId='cancelUpdateSandboxButton']"));
     }
     waitForUIReadiness();
-    assertTrue(driver.findElement(By.className("pageTitle")).getText().startsWith("Sandbox: "));
+    assertTrue(wait.until(ExpectedConditions.presenceOfElementLocated(By.className("pageTitle")))
+        .getText().startsWith("Sandbox: "));
   }
 
   protected String getTestedPartyApiUrl(SandboxConfig sandbox2) {
     return sandbox2.sandboxUrl();
+  }
+
+  /**
+   * Safely gets element text with retry logic to handle StaleElementReferenceException.
+   * This is necessary because Angular may re-render the DOM between finding an element and getting its text.
+   *
+   * @param by The locator to find the element
+   * @param retries Maximum number of retry attempts
+   * @return The text content of the element
+   */
+  protected String safeGetText(By by, int retries) {
+    for (int i = 0; i < retries; i++) {
+      try {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(by));
+        return element.getText();
+      } catch (org.openqa.selenium.StaleElementReferenceException e) {
+        if (i == retries - 1) {
+          log.error("Failed to get text from element {} after {} retries", by, retries);
+          throw e; // Rethrow on last retry
+        }
+        log.warn(
+            "StaleElementReferenceException caught for element {}, retrying... (attempt {}/{})",
+            by,
+            i + 1,
+            retries);
+        try {
+          Thread.sleep(200); // Brief wait before retry
+        } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+        }
+      }
+    }
+    return ""; // Should never reach here
+  }
+
+  /**
+   * Safely gets element text with default 3 retries.
+   *
+   * @param by The locator to find the element
+   * @return The text content of the element
+   */
+  protected String safeGetText(By by) {
+    return safeGetText(by, 3);
+  }
+
+  /**
+   * Safely clicks an element with retry logic to handle StaleElementReferenceException. This is
+   * necessary because Angular may re-render the DOM between finding and clicking an element.
+   *
+   * @param by The locator to find the element
+   * @param retries Maximum number of retry attempts (default 3)
+   */
+  protected void safeClick(By by, int retries) {
+    for (int i = 0; i < retries; i++) {
+      try {
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(by));
+        element.click();
+        return; // Success, exit
+      } catch (org.openqa.selenium.StaleElementReferenceException e) {
+        if (i == retries - 1) {
+          log.error("Failed to click element {} after {} retries", by, retries);
+          throw e; // Rethrow on last retry
+        }
+        log.warn(
+            "StaleElementReferenceException caught for element {}, retrying... (attempt {}/{})",
+            by,
+            i + 1,
+            retries);
+        try {
+          Thread.sleep(200); // Brief wait before retry
+        } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+        }
+      }
+    }
+  }
+
+  /**
+   * Safely clicks an element with default 3 retries.
+   *
+   * @param by The locator to find the element
+   */
+  protected void safeClick(By by) {
+    safeClick(by, 3);
+  }
+
+  /**
+   * Safely clicks the first button in a confirmation dialog using JavaScript executor with retry
+   * logic. This is more reliable for overlay dialogs in Angular applications.
+   *
+   * @param dialogSelector The selector for the confirmation dialog
+   * @param retries Maximum number of retry attempts
+   */
+  protected void safeClickConfirmationButton(By dialogSelector, int retries) {
+    for (int i = 0; i < retries; i++) {
+      try {
+        WebElement confirmationDialog = driver.findElement(dialogSelector);
+        WebElement button = confirmationDialog.findElements(By.tagName("button")).getFirst();
+
+        // Use JavascriptExecutor to click the button - more reliable with Angular overlays
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].click();", button);
+        return; // Success, exit retry loop
+      } catch (org.openqa.selenium.StaleElementReferenceException e) {
+        if (i == retries - 1) {
+          log.error("Failed to click confirmation button after {} retries", retries);
+          throw e; // Rethrow on last retry
+        }
+        log.warn(
+            "StaleElementReferenceException caught, retrying... (attempt {}/{})", i + 1, retries);
+        try {
+          Thread.sleep(200); // Brief wait before retry
+        } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+        }
+      }
+    }
+  }
+
+  /**
+   * Safely clicks the first button in a confirmation dialog with default 3 retries.
+   *
+   * @param dialogSelector The selector for the confirmation dialog
+   */
+  protected void safeClickConfirmationButton(By dialogSelector) {
+    safeClickConfirmationButton(dialogSelector, 3);
   }
 
   protected void loginUser() {
@@ -394,23 +532,25 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     waitForAsyncCalls(lambdaDelay); // First redirect might be slow
     assertEquals(baseUrl + "/login", driver.getCurrentUrl());
 
-    WebElement textBoxEmail = driver.findElement(By.id("login_email"));
-    WebElement textBoxPassword = driver.findElement(By.id("login_password"));
+    WebElement textBoxEmail = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login_email")));
+    WebElement textBoxPassword = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login_password")));
     textBoxEmail.sendKeys(loginEmail);
     textBoxPassword.sendKeys(loginPassword);
 
     log.info("Logging in user into environment: {}", baseUrl);
-    WebElement submitButton = driver.findElement(By.id("login_button"));
+    WebElement submitButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("login_button")));
     submitButton.click();
     waitForAsyncCalls(lambdaDelay * 3); // First login is slow in AWS, so wait a bit longer.
     waitForUIReadiness();
 
-    assertEquals("Sandboxes", driver.findElement(By.className("pageTitle")).getText());
+    assertEquals("Sandboxes", wait.until(
+        ExpectedConditions.presenceOfElementLocated(By.className("pageTitle"))).getText());
     assertEquals(baseUrl + "/environment", driver.getCurrentUrl());
     alreadyLoggedIn = true;
   }
 
-  SandboxConfig createSandbox(Standard standard, String version, String suiteName, String roleName, int sandboxType) {
+  SandboxConfig createSandbox(
+      Standard standard, String version, String suiteName, String roleName, int sandboxType) {
     loginUser();
     driver.get(baseUrl + "/create-sandbox");
     assertEquals(baseUrl + "/create-sandbox", driver.getCurrentUrl());
@@ -421,28 +561,47 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     selectAndPickOption("suiteSelect", suiteName);
     selectAndPickOption("roleSelect", roleName);
 
-    driver.findElement(By.id("sandboxTypeSelect")).click();
-    List<WebElement> typeOptions = driver.findElement(By.id("sandboxTypeSelect-panel"))
-      .findElements(By.tagName("mat-option"));
+    wait.until(ExpectedConditions.elementToBeClickable(By.id("sandboxTypeSelect"))).click();
+    wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("sandboxTypeSelect-panel")));
+    List<WebElement> typeOptions =
+        driver.findElement(By.id("sandboxTypeSelect-panel")).findElements(By.tagName("mat-option"));
     assertFalse(typeOptions.isEmpty());
     typeOptions.get(sandboxType).click();
 
     String sandboxName = getSandboxName(standard.name(), version, suiteName, roleName, sandboxType);
     log.info("Creating Sandbox: {}", sandboxName);
 
-    driver.findElement(By.id("mat-input-0")).sendKeys(sandboxName);
-    driver.findElement(By.id("createSandboxButton")).click();
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.id("mat-input-0"))).sendKeys(sandboxName);
+    safeClick(By.id("createSandboxButton"));
 
-    wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[testId='sandboxNameInput']")));
+    wait.until(
+        ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("[testId='sandboxNameInput']")));
 
     String currentUrl = driver.getCurrentUrl();
     assertNotNull(currentUrl);
 
     String sandboxId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
-    boolean noSandboxUrlInput = driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();
-    String sandboxURL = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxUrlInput']")).getDomProperty("value");
-    String sandboxAuthHeaderName = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderNameInput']")).getDomProperty("value");
-    String sandboxAuthHeaderValue = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderValueInput']")).getDomProperty("value");
+    boolean noSandboxUrlInput =
+        driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();
+    String sandboxURL =
+        noSandboxUrlInput
+            ? null
+            : driver
+                .findElement(By.cssSelector("[testId='sandboxUrlInput']"))
+                .getDomProperty("value");
+    String sandboxAuthHeaderName =
+        noSandboxUrlInput
+            ? null
+            : driver
+                .findElement(By.cssSelector("[testId='sandboxAuthHeaderNameInput']"))
+                .getDomProperty("value");
+    String sandboxAuthHeaderValue =
+        noSandboxUrlInput
+            ? null
+            : driver
+                .findElement(By.cssSelector("[testId='sandboxAuthHeaderValueInput']"))
+                .getDomProperty("value");
     return new SandboxConfig(
         sandboxId,
         sandboxName,
@@ -467,15 +626,19 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(selectBoxName + "-panel")));
 
     // Re-find the options AFTER the panel is visible to avoid stale elements
-    List<WebElement> selectBoxOptions = driver.findElement(By.id(selectBoxName + "-panel"))
-      .findElements(By.tagName("mat-option"));
+    List<WebElement> selectBoxOptions =
+        driver.findElement(By.id(selectBoxName + "-panel")).findElements(By.tagName("mat-option"));
     assertFalse(selectBoxOptions.isEmpty(), "No options found for " + selectBoxName);
 
     // Find the matching option
-    WebElement targetOption = selectBoxOptions.stream()
-      .filter(option -> option.getText().equals(itemToUse))
-      .findFirst()
-      .orElseThrow(() -> new RuntimeException("Option '" + itemToUse + "' not found in " + selectBoxName));
+    WebElement targetOption =
+        selectBoxOptions.stream()
+            .filter(option -> option.getText().equals(itemToUse))
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new RuntimeException(
+                        "Option '" + itemToUse + "' not found in " + selectBoxName));
 
     // Use JavaScript click to avoid ElementClickInterceptedException
     wait.until(ExpectedConditions.elementToBeClickable(targetOption));
@@ -483,7 +646,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     js.executeScript("arguments[0].click();", targetOption);
   }
 
-  private void openNewTab(){
+  private void openNewTab() {
     ((JavascriptExecutor) driver).executeScript("window.open();");
 
     Set<String> windows = driver.getWindowHandles();
@@ -496,9 +659,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     }
   }
 
-  private void switchToTab(int tabIndex){
+  private void switchToTab(int tabIndex) {
     driver.switchTo().window(driver.getWindowHandles().toArray(new String[0])[tabIndex]);
   }
-
-
 }

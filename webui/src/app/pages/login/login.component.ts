@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { NgForm } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
@@ -18,6 +18,7 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private dialog: MatDialog,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit() {
@@ -26,6 +27,7 @@ export class LoginComponent implements OnInit {
       return;
     }
     this.isLoading = false;
+    this.cdr.detectChanges();
   }
 
   async onLogin(form: NgForm) {
@@ -44,6 +46,7 @@ export class LoginComponent implements OnInit {
       );
     } catch (error) {
       this.isLoading = false;
+      this.cdr.detectChanges();
       await MessageDialog.open(
         this.dialog,
         'Login failed',
@@ -54,6 +57,7 @@ export class LoginComponent implements OnInit {
     }
 
     this.isLoading = false;
+    this.cdr.detectChanges();
     this.router.navigate(['/']);
   }
 }

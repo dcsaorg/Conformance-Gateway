@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -38,6 +38,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
     public conformanceService: ConformanceService,
     private readonly router: Router,
     private readonly dialog: MatDialog,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit() {
@@ -54,6 +55,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
         this.sandbox = await this.conformanceService.getSandbox(sandboxId, false);
         this.scenario = await this.conformanceService.getScenario(sandboxId, scenarioId);
         await this.loadScenarioStatus();
+        this.cdr.detectChanges();
       });
   }
 
@@ -61,6 +63,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
     this.actionInput = '';
     this.sandboxStatus = undefined;
     this.scenarioStatus = undefined;
+    this.cdr.detectChanges(); // Immediately update UI to show loading state
 
     const sandboxStatusCheckStartTime = new Date().getTime();
     while (true) {
@@ -70,7 +73,8 @@ export class ScenarioComponent implements OnInit, OnDestroy {
         break;
       }
       console.log("loadScenarioStatus() sandbox waiting: " + JSON.stringify(this.sandboxStatus.waiting, null, 4));
-      await sleep(1000);
+      this.cdr.detectChanges(); // Update UI to show waiting status immediately
+      await sleep(500); // Reduced from 1000ms to 500ms for more responsive polling
     }
 
     this.scenarioStatus = await this.conformanceService.getScenarioStatus(
@@ -78,6 +82,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       this.scenario!.id
     );
     this.actionInput = JSON.stringify(this.scenarioStatus?.jsonForPromptText, null, 4);
+    this.cdr.detectChanges();
   }
 
   formattedSandboxWaiting(sandboxWaiting: SandboxWaiting): string {
@@ -92,13 +97,16 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       + "You cannot go back to a previous action without restarting the scenario.")
     ) {
       this.performingAction = "Marking current action as completed...";
+      this.cdr.detectChanges(); // Immediately show the "performing action" message
+
       const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, false);
       if (response?.error) {
+        this.performingAction = "";
+        this.cdr.detectChanges();
         await MessageDialog.open(
             this.dialog,
             "Error completing action",
             response.error)
-        this.performingAction = "";
         return
       }
       this.performingAction = "";
@@ -108,13 +116,16 @@ export class ScenarioComponent implements OnInit, OnDestroy {
 
   async skipCurrentAction() {
     this.performingAction = "Marking current action as skipped...";
+    this.cdr.detectChanges(); // Immediately show the "performing action" message
+
     const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, true);
     if (response?.error) {
+      this.performingAction = "";
+      this.cdr.detectChanges();
       await MessageDialog.open(
           this.dialog,
           "Error skipping action",
           response.error)
-      this.performingAction = "";
       return
     }
     this.performingAction = "";

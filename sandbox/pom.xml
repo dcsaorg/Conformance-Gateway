@@ -66,6 +66,10 @@
 			<groupId>org.dcsa.conformance</groupId>
 			<artifactId>vgm</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.dcsa.conformance</groupId>
+            <artifactId>port-call</artifactId>
+        </dependency>
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -74,8 +78,9 @@
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>dynamodb</artifactId>
-			<version>2.31.9</version>
+			<version>2.40.9</version>
 		</dependency>
+
 		<!-- Test scoped dependencies -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -86,10 +91,6 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.dcsa.conformance</groupId>
-			<artifactId>port-call</artifactId>
 		</dependency>
 	</dependencies>
 </project>

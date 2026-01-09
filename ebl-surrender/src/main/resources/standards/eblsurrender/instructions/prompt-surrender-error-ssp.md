@@ -1,4 +1,4 @@
-Please provide the transport document reference and additional info that are required of a EBL_TYPE for which your part
+Please provide the transport document reference and additional info that are required of a EBL_TYPE for which your party
 can respond to a surrender request with an error response.
 
 Send an automatically processed response to the platform.

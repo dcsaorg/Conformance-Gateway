@@ -15,12 +15,25 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private String response;
   private String eblType;
+  private boolean isErrorScenario = false;
 
   public SupplyScenarioParametersAction(
       String carrierPartyName, ConformanceAction previousAction, String response, String eblType) {
     super(carrierPartyName, null, previousAction, "SupplyTDR[%s]".formatted(eblType));
     this.response = response;
     this.eblType = eblType;
+  }
+
+  public SupplyScenarioParametersAction(
+      String carrierPartyName,
+      ConformanceAction previousAction,
+      String response,
+      String eblType,
+      boolean errorScenario) {
+    super(carrierPartyName, null, previousAction, "SupplyTDR[%s]".formatted(eblType));
+    this.response = response;
+    this.eblType = eblType;
+    this.isErrorScenario = errorScenario;
   }
 
   @Override
@@ -54,11 +67,14 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public String getHumanReadablePrompt() {
     String responseAction = response.equals("SURR") ? "accept" : "reject";
-    return EblSurrenderAction.getMarkdownHumanReadablePrompt(
-        Map.of(
-            "EBL_TYPE", eblType,
-            "RESPONSE", responseAction),
-        "prompt-surrender-ssp.md");
+    return isErrorScenario
+        ? EblSurrenderAction.getMarkdownHumanReadablePrompt(
+            Map.of("EBL_TYPE", eblType), "prompt-surrender-error-ssp.md")
+        : EblSurrenderAction.getMarkdownHumanReadablePrompt(
+            Map.of(
+                "EBL_TYPE", eblType,
+                "RESPONSE", responseAction),
+            "prompt-surrender-ssp.md");
   }
 
   @Override
@@ -91,6 +107,9 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("eblType", eblType).put("response", response);
+    return super.asJsonNode()
+        .put("eblType", eblType)
+        .put("response", response)
+        .put("isErrorScenario", isErrorScenario);
   }
 }

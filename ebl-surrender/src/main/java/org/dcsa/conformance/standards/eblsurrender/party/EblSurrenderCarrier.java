@@ -25,6 +25,7 @@ import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParamete
 @Slf4j
 public class EblSurrenderCarrier extends ConformanceParty {
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
+  private boolean errorScenario = false;
 
   public EblSurrenderCarrier(
       String apiVersion,
@@ -82,6 +83,8 @@ public class EblSurrenderCarrier extends ConformanceParty {
             .formatted(actionPrompt.toPrettyString()));
 
     String tdr = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
+    errorScenario =
+        actionPrompt.has("errorScenario") && actionPrompt.get("errorScenario").asBoolean();
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     persistentMap.save("response", actionPrompt.get("response"));
 
@@ -133,6 +136,12 @@ public class EblSurrenderCarrier extends ConformanceParty {
       action = persistentMap.load("response").asText();
     }
 
+      eblStatesById.put(
+          tdr,
+          Objects.equals("AREQ", src)
+              ? EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED
+              : EblSurrenderState.DELIVERY_SURRENDER_REQUESTED);
+
     var carrierResponse =
         OBJECT_MAPPER
             .createObjectNode()
@@ -140,29 +149,14 @@ public class EblSurrenderCarrier extends ConformanceParty {
             .put("action", action);
     asyncCounterpartNotification(null, "/v3/ebl-surrender-responses", carrierResponse);
 
-    if (EblSurrenderPlatform.INVALID_TDR.equals(tdr)) {
-      eblStatesById.put(
-          EblSurrenderPlatform.INVALID_TDR, EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED);
-    }
-
-    if (Objects.equals(
-        EblSurrenderState.AVAILABLE_FOR_SURRENDER,
-        eblStatesById.getOrDefault(
-            tdr,
-            // workaround for supplyScenarioParameters() not getting called on parties in manual
-            // mode
-            this.partyConfiguration.isInManualMode()
-                ? EblSurrenderState.AVAILABLE_FOR_SURRENDER
-                : null))) {
-      eblStatesById.put(
-          tdr,
-          Objects.equals("AREQ", src)
-              ? EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED
-              : EblSurrenderState.DELIVERY_SURRENDER_REQUESTED);
-
       addOperatorLogEntry(
           "Handling surrender request with surrenderRequestCode '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
               .formatted(src, srr, tdr, eblStatesById.get(tdr)));
+
+    if (errorScenario || tdr.equals(EblSurrenderPlatform.INVALID_TDR)) {
+      return return409(
+          request, "Simulated error response for surrender request reference '%s'".formatted(srr));
+    }
 
       return request.createResponse(
           204,
@@ -172,12 +166,6 @@ public class EblSurrenderCarrier extends ConformanceParty {
                   .createObjectNode()
                   .put("surrenderRequestReference", srr)
                   .put("transportDocumentReference", tdr)));
-    } else {
-      return return409(
-          request,
-          "Rejecting '%s' for document '%s' because it is in state '%s'"
-              .formatted(src, tdr, eblStatesById.get(tdr)));
-    }
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {

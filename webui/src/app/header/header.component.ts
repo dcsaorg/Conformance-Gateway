@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { environment } from "src/environments/environment";
@@ -21,16 +21,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {
   }
 
   async ngOnInit(): Promise<void> {
     this.isAuthenticated = await this.authService.initializeAuthentication();
+    this.cdr.detectChanges();
 
     this.authStatusSubscription = this.authService.getAuthStatusObservable().subscribe(
       async (authenticated) => {
         if (authenticated !== this.isAuthenticated) {
           this.isAuthenticated = authenticated;
+          this.cdr.detectChanges();
           if (!this.isAuthenticated) {
             this.router.navigate(['/login']);
           }

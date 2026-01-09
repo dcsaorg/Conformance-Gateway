@@ -1,74 +1,73 @@
-<mat-spinner
-*ngIf="isLoading"
->
-</mat-spinner>
+@if (isLoading) {
+  <mat-spinner></mat-spinner>
+}
 
-<div
-*ngIf="!isLoading"
->
-  <div
-  class="loginPage">
-    <mat-card>
-      <div class="editCardContent">
-        <h3 class="mat-h3">
-          Login
-        </h3>
+@if (!isLoading) {
+  <div>
+    <div
+    class="loginPage">
+      <mat-card>
+        <div class="editCardContent">
+          <h3 class="mat-h3">
+            Login
+          </h3>
 
-        <form
-        (submit)="onLogin(loginForm)"
-        #loginForm="ngForm"
-        >
-          <mat-form-field>
-            <input
-            id="login_email"
-            matInput
-            type="email"
-            placeholder="Email"
-            autocomplete="off"
-            ngModel name="email"
-            #email="ngModel"
-            required
-            email
-            >
-            <mat-error
-            *ngIf="email.invalid"
-            >
-              Enter your email address
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field>
-            <input
-            id="login_password"
-            matInput
-            type="password"
-            placeholder="Password"
-            autocomplete="off"
-            ngModel
-            name="password"
-            #password="ngModel"
-            required
-            >
-            <mat-error
-            *ngIf="password.invalid"
-            >
-              Enter your password
-            </mat-error>
-          </mat-form-field>
+          <form
+          (submit)="onLogin(loginForm)"
+          #loginForm="ngForm"
+          >
+            <mat-form-field>
+              <input
+              id="login_email"
+              matInput
+              type="email"
+              placeholder="Email"
+              autocomplete="off"
+              ngModel name="email"
+              #email="ngModel"
+              required
+              email
+              >
+              @if (email.invalid) {
+                <mat-error>
+                  Enter your email address
+                </mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field>
+              <input
+              id="login_password"
+              matInput
+              type="password"
+              placeholder="Password"
+              autocomplete="off"
+              ngModel
+              name="password"
+              #password="ngModel"
+              required
+              >
+              @if (password.invalid) {
+                <mat-error>
+                  Enter your password
+                </mat-error>
+              }
+            </mat-form-field>
 
-          <div class="fullWidth">
-            <span class="spacer"></span>
+            <div class="fullWidth">
+              <span class="spacer"></span>
 
-            <button
-            id="login_button"
-            mat-raised-button
-            color="primary"
-            type="submit"
-            >
-              Login
-            </button>
-          </div>
-        </form>
-      </div>
-    </mat-card>
+              <button
+              id="login_button"
+              mat-raised-button
+              color="primary"
+              type="submit"
+              >
+                Login
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-card>
+    </div>
   </div>
-</div>
+}

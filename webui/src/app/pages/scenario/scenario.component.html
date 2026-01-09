@@ -1,50 +1,79 @@
-<app-text-waiting *ngIf="!sandbox" text="Retrieving sandbox metadata..."></app-text-waiting>
+@if (!sandbox) {
+  <app-text-waiting text="Retrieving sandbox metadata..."></app-text-waiting>
+}
 
-<div *ngIf="sandbox">
-  <div class="paragraph"><a [routerLink]="'/sandbox/' + sandbox!.id">Sandbox:</a> {{ sandbox.name }}</div>
-  <div class="paragraph">
-    <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>
-  </div>
+@if (sandbox) {
+  <div>
+    <div class="paragraph"><a [routerLink]="'/sandbox/' + sandbox.id">Sandbox:</a> {{ sandbox.name }}</div>
+    <div class="paragraph">
+      <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>
+    </div>
 
-  <app-text-waiting *ngIf="!scenario" text="Retrieving scenario metadata..."></app-text-waiting>
+    @if (!scenario) {
+      <app-text-waiting text="Retrieving scenario metadata..."></app-text-waiting>
+    }
 
-  <div *ngIf="scenario" class="paragraph">Scenario: {{scenario.name}}</div>
+    @if (scenario) {
+      <div class="paragraph">Scenario: {{scenario.name}}</div>
+    }
 
-  <app-text-waiting *ngIf="scenario && !sandboxStatus" text="Retrieving sandbox status..."></app-text-waiting>
+    @if (scenario && !sandboxStatus) {
+      <app-text-waiting text="Retrieving sandbox status..."></app-text-waiting>
+    }
 
-  <app-text-waiting *ngIf="scenario && sandboxStatus && sandboxStatus!.waiting.length == 0 && !scenarioStatus" text="Retrieving scenario status..."></app-text-waiting>
+    @if (scenario && sandboxStatus && sandboxStatus.waiting.length == 0 && !scenarioStatus) {
+      <app-text-waiting text="Retrieving scenario status..."></app-text-waiting>
+    }
 
-  <app-text-waiting *ngIf="scenario && performingAction" [text]="performingAction"></app-text-waiting>
+    @if (scenario && performingAction) {
+      <app-text-waiting [text]="performingAction"></app-text-waiting>
+    }
 
-  <div *ngIf="sandboxStatus">
-      <div *ngFor="let sandboxWaiting of sandboxStatus!.waiting">
-        <app-text-waiting [text]="formattedSandboxWaiting(sandboxWaiting)"></app-text-waiting>
-      </div>
-  </div>
-
-  <div *ngIf="scenarioStatus && !performingAction">
-      <div *ngIf="!scenarioStatus.isRunning && scenarioStatus.nextActions !== ''">
-          <div class="paragraph">The scenario was not started yet.</div>
-      </div>
-
-      <div *ngIf="scenarioStatus.isRunning">
-          <div *ngIf="!scenarioStatus.nextActions">
-              <div class="paragraph">The execution of this scenario is complete.</div>
+    @if (sandboxStatus) {
+      <div>
+        @for (sandboxWaiting of sandboxStatus.waiting; track sandboxWaiting) {
+          <div>
+            <app-text-waiting [text]="formattedSandboxWaiting(sandboxWaiting)"></app-text-waiting>
           </div>
+        }
+      </div>
+    }
 
-          <div *ngIf="scenarioStatus.nextActions">
+    @if (scenarioStatus && !performingAction) {
+      <div>
+        @if (!scenarioStatus.isRunning && scenarioStatus.nextActions !== '') {
+          <div>
+            <div class="paragraph">The scenario was not started yet.</div>
+          </div>
+        }
+
+        @if (scenarioStatus.isRunning) {
+          <div>
+            @if (!scenarioStatus.nextActions) {
+              <div>
+                <div class="paragraph">The execution of this scenario is complete.</div>
+              </div>
+            }
+
+            @if (scenarioStatus.nextActions) {
+              <div>
               <div class="paragraph" id="nextActions">Remaining actions: {{scenarioStatus.nextActions}}</div>
 
-            <div class="pageTitle">
-              Current action:&nbsp;
-              <span *ngIf="scenarioStatus.promptText" testId="yourTurnIcon">▶️</span>&nbsp;
-              <span testId="currentAction" style="font-weight: bold;">{{ getCurrentActionTitle() }}</span>
-            </div>
+                <div class="pageTitle">
+                  Current action:&nbsp;
+                  @if (scenarioStatus.promptText) {
+                    <span testId="yourTurnIcon">▶️</span>
+                  }
+                  &nbsp;
+                  <span testId="currentAction" style="font-weight: bold;">{{ getCurrentActionTitle() }}</span>
+                </div>
 
-            <div *ngIf="scenarioStatus.promptText">
-                  <div class="paragraph"><markdown [data]="scenarioStatus.promptText"></markdown></div>
+                @if (scenarioStatus.promptText) {
+                  <div>
+                    <div class="paragraph"><markdown [data]="scenarioStatus.promptText"></markdown></div>
 
-                  <div *ngIf="scenarioStatus.inputRequired">
+                    @if (scenarioStatus.inputRequired) {
+                      <div>
                       <div class="paragraph">
                           <mat-form-field
                           [ngClass]="'fullWidth'"
@@ -58,15 +87,17 @@
                               name="actionInput"
                               [(ngModel)]="actionInput"
                               ></textarea>
-                          </mat-form-field>
-                      </div>
-                    <div class="paragraph" *ngIf="submitAttempted && inlineErrorMessage">
-                      <mat-card style="background-color: #fdecea; color: #b00020; padding: 1em;">
-                          <mat-icon>error</mat-icon>
-                          <pre style="margin: 0; white-space: pre-wrap;">{{ inlineErrorMessage }}</pre>
-                      </mat-card>
-                    </div>
-                      <div class="paragraph">
+                      </mat-form-field>
+                        </div>
+                        @if (submitAttempted && inlineErrorMessage) {
+                          <div class="paragraph">
+                            <mat-card style="background-color: #fdecea; color: #b00020; padding: 1em;">
+                              <mat-icon>error</mat-icon>
+                              <pre style="margin: 0; white-space: pre-wrap;">{{ inlineErrorMessage }}</pre>
+                            </mat-card>
+                          </div>
+                        }
+                        <div class="paragraph">
                           <button
                           id="submitActionButton"
                           mat-raised-button
@@ -74,32 +105,40 @@
                           [disabled]="cannotSubmit()"
                           (click)="onSubmit(true)"
                           >Submit</button>
+                        </div>
                       </div>
+                    }
                   </div>
-              </div>
+                }
 
-              <div *ngIf="!scenarioStatus.inputRequired">
-                  <div *ngIf="!scenarioStatus.promptText">
-                      <div *ngIf="scenarioStatus.needsAction; else noActionInstructions">
-                          <div class="paragraph">Verify that your application has handled correctly the action performed
+                @if (!scenarioStatus.inputRequired) {
+                  <div>
+                    @if (!scenarioStatus.promptText) {
+                      <div>
+                        @if (scenarioStatus.needsAction) {
+                          <div>
+                            <div class="paragraph">Verify that your application has handled correctly the action performed
                               by the other party.
-                          </div>
-                          <div class="paragraph">If needed, press "Refresh status" to refresh the scenario status and
+                            </div>
+                            <div class="paragraph">If needed, press "Refresh status" to refresh the scenario status and
                               conformance checks.
-                          </div>
-                          <div class="paragraph">When done, press "Action completed" to mark this scenario action
+                            </div>
+                            <div class="paragraph">When done, press "Action completed" to mark this scenario action
                               completed.
+                            </div>
                           </div>
+                        } @else {
+                          <div>
+                            <div class="paragraph">There is currently no action required from your side.</div>
+                            <div class="paragraph">To proceed, press "Action completed" to mark this scenario action
+                              completed.
+                            </div>
+                          </div>
+                        }
                       </div>
-                      <ng-template #noActionInstructions>
-                          <div class="paragraph">There is currently no action required from your side.</div>
-                          <div class="paragraph">To proceed, press "Action completed" to mark this scenario action
-                              completed.
-                          </div>
-                      </ng-template>
-                  </div>
+                    }
 
-                  <div class="paragraph">
+                    <div class="paragraph">
                       <button
                       id="refreshStatusButton"
                       mat-raised-button
@@ -107,14 +146,15 @@
                       (click)="loadScenarioStatus()"
                       >Refresh status</button>
                       &nbsp;
-                      <button
-                        *ngIf="scenarioStatus.isSkippable"
-                        id="skipCurrentActionButton"
-                        mat-raised-button
-                        class="green-button"
-                        (click)="skipCurrentAction()"
-                      >Skip action
-                      </button>
+                      @if (scenarioStatus.isSkippable) {
+                        <button
+                          id="skipCurrentActionButton"
+                          mat-raised-button
+                          class="green-button"
+                          (click)="skipCurrentAction()"
+                        >Skip action
+                        </button>
+                      }
                       &nbsp;
                       <button
                         id="completeCurrentActionButton"
@@ -128,18 +168,24 @@
                         mat-raised-button
                         (click)="viewHttpExchanges()"
                       >View HTTP exchanges</button>
+                    </div>
                   </div>
+                }
               </div>
+            }
           </div>
-      </div>
+        }
 
-      <div *ngIf="scenario && scenarioStatus?.conformanceSubReport">
-          <div class="pageSubtitle">Conformance status</div>
-          <app-report
-          *ngIf="scenario && scenarioStatus?.conformanceSubReport"
-          [unfoldedLevels]="1"
-          [report]="scenarioStatus.conformanceSubReport"
-          ></app-report>
+        @if (scenario && scenarioStatus.conformanceSubReport) {
+          <div>
+            <div class="pageSubtitle">Conformance status</div>
+            <app-report
+            [unfoldedLevels]="1"
+            [report]="scenarioStatus.conformanceSubReport"
+            ></app-report>
+          </div>
+        }
       </div>
+    }
   </div>
-</div>
+}

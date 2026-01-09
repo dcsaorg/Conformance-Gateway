@@ -1,6 +1,9 @@
-<app-text-waiting *ngIf="isLoading && !sandbox" text="Retrieving sandbox metadata..."></app-text-waiting>
+@if (isLoading && !sandbox) {
+  <app-text-waiting text="Retrieving sandbox metadata..."></app-text-waiting>
+}
 
-<div *ngIf="sandbox">
+@if (sandbox) {
+  <div>
     <div class="pageTitle">
         <span>Sandbox: {{sandbox.name}}</span>
 
@@ -25,23 +28,34 @@
     <div class="paragraph">
         <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>
     </div>
-</div>
+  </div>
+}
 
-<app-text-waiting *ngIf="isLoading && sandbox && !sandbox.canNotifyParty" text="Retrieving scenarios..."></app-text-waiting>
+@if (isLoading && sandbox && !sandbox.canNotifyParty) {
+  <app-text-waiting text="Retrieving scenarios..."></app-text-waiting>
+}
 
-<div class="pageSubtitle" *ngIf="!isLoading && standardModules.length == 0">No scenarios</div>
+@if (!isLoading && standardModules.length == 0) {
+  <div class="pageSubtitle">No scenarios</div>
+}
 
-<app-text-waiting *ngIf="startingOrStoppingScenario" text="Updating scenario state..."></app-text-waiting>
+@if (startingOrStoppingScenario) {
+  <app-text-waiting text="Updating scenario state..."></app-text-waiting>
+}
 
-<div *ngIf="!isInternalSandbox()">
+@if (!isInternalSandbox()) {
+  <div>
     <br />
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
         <mat-tab label="▶️ Scenarios">
-            <div *ngIf="!startingOrStoppingScenario">
-                <div *ngFor="let standardModule of standardModules">
+            @if (!startingOrStoppingScenario) {
+              <div>
+                @for (standardModule of standardModules; track standardModule.moduleName) {
+                  <div>
                     <div class="pageSubtitle">{{standardModule.moduleName}}</div>
 
-                    <mat-card [ngClass]="'entityCard'" *ngFor="let scenario of standardModule.scenarios">
+                    @for (scenario of standardModule.scenarios; track scenario.id) {
+                      <mat-card [ngClass]="'entityCard'">
                         <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
                             <button
                             class="scenarioActionButton"
@@ -60,13 +74,17 @@
 
                             <span class="wrappingText">{{scenario.name}}</span>
                         </div>
-                    </mat-card>
+                      </mat-card>
+                    }
                     <br/>
-                </div>
-            </div>
+                  </div>
+                }
+              </div>
+            }
         </mat-tab>
         <mat-tab label="📜 Reports">
-            <div *ngIf="!displayedReportDigest">
+            @if (!displayedReportDigest) {
+              <div>
                 <div class="paragraph">Create a report from the current sandbox state:</div>
                 <br/>
                 <mat-form-field class="fullWidth">
@@ -87,31 +105,39 @@
                     >Create report</button>
                 </div>
 
-                <mat-card [ngClass]="'entityCard'" *ngFor="let reportDigest of reportDigests">
+                @for (reportDigest of reportDigests; track reportDigest.dateTime) {
+                  <mat-card [ngClass]="'entityCard'">
                     <div class="cardContent withPointerCursor" (click)="onReportClick(reportDigest)">
                       <span style="margin: 8px" class="wrappingText">📜 {{reportDigest.dateTime}} {{reportDigest.title}}</span>
                     </div>
-                </mat-card>
-            </div>
+                  </mat-card>
+                }
+              </div>
+            }
 
-            <div *ngIf="displayedReportDigest">
+            @if (displayedReportDigest) {
+              <div>
                 <div class="paragraph withPointerCursor">
                   <a (click)="onClickBackToAllReports()">⬅️ Back to all reports</a>
                 </div>
 
-                <app-report
-                *ngIf="displayedReportContent"
-                [unfoldedLevels]="2"
-                [report]="displayedReportContent"
-                ></app-report>
-            </div>
+                @if (displayedReportContent) {
+                  <app-report
+                  [unfoldedLevels]="2"
+                  [report]="displayedReportContent"
+                  ></app-report>
+                }
+              </div>
+            }
 
             <br />
         </mat-tab>
     </mat-tab-group>
-</div>
+  </div>
+}
 
-<div *ngIf="isInternalSandbox()">
+@if (isInternalSandbox()) {
+  <div>
     <div class="paragraph">
         <button
         id="notifyPartyButton"
@@ -137,5 +163,10 @@
         (click)="onClickRefresh()"
         >Refresh</button>
     </div>
-    <div class="paragraph" testId="operatorLog" *ngFor="let logEntry of sandbox?.operatorLog">{{logEntry}}</div>
-</div>
+    @if (sandbox && sandbox.operatorLog) {
+      @for (logEntry of sandbox.operatorLog; track logEntry) {
+        <div class="paragraph" testId="operatorLog">{{logEntry}}</div>
+      }
+    }
+  </div>
+}

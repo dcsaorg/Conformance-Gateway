@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { ChangeDetectorRef, Component } from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -19,6 +19,7 @@ export class EnvironmentComponent {
     public authService: AuthService,
     public conformanceService: ConformanceService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit() {
@@ -31,6 +32,7 @@ export class EnvironmentComponent {
     }
     this.sandboxes = await this.conformanceService.getAllSandboxes();
     this.isLoading = false;
+    this.cdr.detectChanges();
   }
 
   onSandboxClick(sandbox: Sandbox) {

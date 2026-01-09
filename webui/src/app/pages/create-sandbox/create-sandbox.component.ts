@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { ChangeDetectorRef, Component } from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -32,6 +32,7 @@ export class CreateSandboxComponent {
     public conformanceService: ConformanceService,
     private readonly router: Router,
     private readonly dialog: MatDialog,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit() {
@@ -42,6 +43,7 @@ export class CreateSandboxComponent {
       return;
     }
     this.standards = await this.conformanceService.getAvailableStandards();
+    this.cdr.detectChanges();
   }
 
   onSelectedStandardChanged(standard: Standard | undefined) {

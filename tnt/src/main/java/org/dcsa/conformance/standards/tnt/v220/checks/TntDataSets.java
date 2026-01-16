@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.checks;
+package org.dcsa.conformance.standards.tnt.v220.checks;
 
 import lombok.NoArgsConstructor;
 import org.dcsa.conformance.core.check.KeywordDataset;

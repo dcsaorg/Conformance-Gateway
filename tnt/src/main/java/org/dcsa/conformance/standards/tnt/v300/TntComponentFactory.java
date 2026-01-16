@@ -1,26 +1,40 @@
-package org.dcsa.conformance.standards.tnt;
+package org.dcsa.conformance.standards.tnt.v300;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.dcsa.conformance.core.AbstractComponentFactory;
-import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.tnt.action.TntEventType;
-import org.dcsa.conformance.standards.tnt.party.TntPublisher;
-import org.dcsa.conformance.standards.tnt.party.TntRole;
-import org.dcsa.conformance.standards.tnt.party.TntSubscriber;
+import org.dcsa.conformance.standards.tnt.v300.party.TntConsumer;
+import org.dcsa.conformance.standards.tnt.v300.party.TntProducer;
+import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
-class TntComponentFactory extends AbstractComponentFactory {
-  TntComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
-    super(standardName, standardVersion, scenarioSuite, "Publisher", "Subscriber");
+public class TntComponentFactory extends AbstractComponentFactory {
+
+  public TntComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
+    super(
+        standardName,
+        standardVersion,
+        scenarioSuite,
+        TntRole.PRODUCER.getConfigName(),
+        TntRole.CONSUMER.getConfigName());
   }
 
+  @Override
   public List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
@@ -36,27 +50,27 @@ class TntComponentFactory extends AbstractComponentFactory {
 
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
-    PartyConfiguration publisherConfiguration =
-        partyConfigurationsByRoleName.get(TntRole.PUBLISHER.getConfigName());
-    if (publisherConfiguration != null) {
+    PartyConfiguration providerConfiguration =
+        partyConfigurationsByRoleName.get(TntRole.PRODUCER.getConfigName());
+    if (providerConfiguration != null) {
       parties.add(
-          new TntPublisher(
+          new TntProducer(
               standardVersion,
-              publisherConfiguration,
-              counterpartConfigurationsByRoleName.get(TntRole.SUBSCRIBER.getConfigName()),
+              providerConfiguration,
+              counterpartConfigurationsByRoleName.get(TntRole.CONSUMER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
     }
 
-    PartyConfiguration subscriberConfiguration =
-        partyConfigurationsByRoleName.get(TntRole.SUBSCRIBER.getConfigName());
-    if (subscriberConfiguration != null) {
+    PartyConfiguration consumerConfiguration =
+        partyConfigurationsByRoleName.get(TntRole.CONSUMER.getConfigName());
+    if (consumerConfiguration != null) {
       parties.add(
-          new TntSubscriber(
+          new TntConsumer(
               standardVersion,
-              subscriberConfiguration,
-              counterpartConfigurationsByRoleName.get(TntRole.PUBLISHER.getConfigName()),
+              consumerConfiguration,
+              counterpartConfigurationsByRoleName.get(TntRole.PRODUCER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
@@ -65,6 +79,7 @@ class TntComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
+  @Override
   public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
@@ -72,9 +87,9 @@ class TntComponentFactory extends AbstractComponentFactory {
     return TntScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, TntRole::isPublisher),
+            partyConfigurations, counterpartConfigurations, TntRole::isProducer),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, TntRole::isSubscriber));
+            partyConfigurations, counterpartConfigurations, TntRole::isConsumer));
   }
 
   @Override
@@ -84,11 +99,14 @@ class TntComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toCollection(TreeSet::new));
   }
 
+  @Override
   public Set<String> getReportRoleNames(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return (partyConfigurations.length == TntRole.values().length
-            ? Arrays.stream(TntRole.values()).map(TntRole::getConfigName)
+    return (partyConfigurations.length
+                == TntRole.values().length
+            ? Arrays.stream(TntRole.values())
+                .map(TntRole::getConfigName)
             : Arrays.stream(counterpartConfigurations)
                 .map(CounterpartConfiguration::getRole)
                 .filter(
@@ -97,19 +115,5 @@ class TntComponentFactory extends AbstractComponentFactory {
                             .map(PartyConfiguration::getRole)
                             .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
         .collect(Collectors.toSet());
-  }
-
-  public Map<TntEventType, JsonSchemaValidator> getEventSchemaValidators() {
-    String schemaFilePath = "/standards/tnt/schemas/TNT_v2.2.0-resolved.yaml";
-    return Map.ofEntries(
-        Map.entry(
-            TntEventType.EQUIPMENT,
-            JsonSchemaValidator.getInstance(schemaFilePath, "equipmentEvent")),
-        Map.entry(
-            TntEventType.SHIPMENT,
-            JsonSchemaValidator.getInstance(schemaFilePath, "shipmentEvent")),
-        Map.entry(
-            TntEventType.TRANSPORT,
-            JsonSchemaValidator.getInstance(schemaFilePath, "transportEvent")));
   }
 }

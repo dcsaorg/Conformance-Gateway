@@ -1,6 +1,24 @@
-package org.dcsa.conformance.standards.tnt;
+package org.dcsa.conformance.standards.tnt.v220;
 
-import static org.dcsa.conformance.standards.tnt.party.TntFilterParameter.*;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.CARRIER_BOOKING_REFERENCE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.CARRIER_SERVICE_CODE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.DOCUMENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.EQUIPMENT_EVENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.EQUIPMENT_REFERENCE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.EVENT_CREATED_DATE_TIME_EQ;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.EVENT_CREATED_DATE_TIME_GT;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.EVENT_CREATED_DATE_TIME_GTE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.EVENT_CREATED_DATE_TIME_LT;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.EVENT_CREATED_DATE_TIME_LTE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.EVENT_TYPE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.EXPORT_VOYAGE_NUMBER;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.LIMIT;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.SHIPMENT_EVENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.TRANSPORT_CALL_ID;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.TRANSPORT_DOCUMENT_REFERENCE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.TRANSPORT_EVENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.UN_LOCATION_CODE;
+import static org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter.VESSEL_IMO_NUMBER;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -8,15 +26,14 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.standards.tnt.action.SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.tnt.action.TntAction;
-import org.dcsa.conformance.standards.tnt.action.TntGetEventsAction;
-import org.dcsa.conformance.standards.tnt.action.TntGetEventsBadRequestAction;
-import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
+import org.dcsa.conformance.standards.tnt.v220.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.tnt.v220.action.TntAction;
+import org.dcsa.conformance.standards.tnt.v220.action.TntGetEventsAction;
+import org.dcsa.conformance.standards.tnt.v220.action.TntGetEventsBadRequestAction;
+import org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter;
 
 @Slf4j
 class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder> {

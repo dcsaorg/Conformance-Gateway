@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.party;
+package org.dcsa.conformance.standards.tnt.v220.party;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;

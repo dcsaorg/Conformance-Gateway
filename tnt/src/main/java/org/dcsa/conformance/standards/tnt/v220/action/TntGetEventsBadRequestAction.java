@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.action;
+package org.dcsa.conformance.standards.tnt.v220.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.tnt.party.TntRole;
+import org.dcsa.conformance.standards.tnt.v220.party.TntRole;
 
 @Getter
 @Slf4j

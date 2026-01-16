@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.party;
+package org.dcsa.conformance.standards.tnt.v220.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,8 +14,8 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.tnt.action.TntGetEventsAction;
-import org.dcsa.conformance.standards.tnt.action.TntGetEventsBadRequestAction;
+import org.dcsa.conformance.standards.tnt.v220.action.TntGetEventsAction;
+import org.dcsa.conformance.standards.tnt.v220.action.TntGetEventsBadRequestAction;
 
 @Slf4j
 public class TntSubscriber extends ConformanceParty {

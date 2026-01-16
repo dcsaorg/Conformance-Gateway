@@ -1,9 +1,9 @@
-package org.dcsa.conformance.standards.tnt.party;
+package org.dcsa.conformance.standards.tnt.v220.party;
 
-import static org.dcsa.conformance.standards.tnt.checks.TntDataSets.VALID_DOCUMENT_TYPE_CODES;
-import static org.dcsa.conformance.standards.tnt.checks.TntDataSets.VALID_EQUIPMENT_EVENT_TYPES;
-import static org.dcsa.conformance.standards.tnt.checks.TntDataSets.VALID_EVENT_TYPES;
-import static org.dcsa.conformance.standards.tnt.checks.TntDataSets.VALID_SHIPMENT_EVENT_TYPES;
+import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_DOCUMENT_TYPE_CODES;
+import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_EQUIPMENT_EVENT_TYPES;
+import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_EVENT_TYPES;
+import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_SHIPMENT_EVENT_TYPES;
 
 import java.util.Arrays;
 import java.util.Collection;

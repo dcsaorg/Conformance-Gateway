@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.party;
+package org.dcsa.conformance.standards.tnt.v220.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -23,8 +23,8 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.tnt.action.SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.tnt.checks.TntSchemaConformanceCheck;
+import org.dcsa.conformance.standards.tnt.v220.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.tnt.v220.checks.TntSchemaConformanceCheck;
 
 import static org.dcsa.conformance.core.party.CustomJsonPointer.traverse;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.checks;
+package org.dcsa.conformance.standards.tnt.v220.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
@@ -13,8 +13,8 @@ import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.tnt.action.TntEventType;
-import org.dcsa.conformance.standards.tnt.party.TntRole;
+import org.dcsa.conformance.standards.tnt.v220.action.TntEventType;
+import org.dcsa.conformance.standards.tnt.v220.party.TntRole;
 
 public class TntSchemaConformanceCheck extends ActionCheck {
 

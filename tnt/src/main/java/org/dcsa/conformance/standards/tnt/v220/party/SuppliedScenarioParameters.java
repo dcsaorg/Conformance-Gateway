@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.party;
+package org.dcsa.conformance.standards.tnt.v220.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 

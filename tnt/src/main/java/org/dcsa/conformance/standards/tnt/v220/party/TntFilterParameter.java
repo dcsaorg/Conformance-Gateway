@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.party;
+package org.dcsa.conformance.standards.tnt.v220.party;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import org.dcsa.conformance.standards.tnt.action.TntEventType;
+import org.dcsa.conformance.standards.tnt.v220.action.TntEventType;
 
 @Getter
 public enum TntFilterParameter {

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.action;
+package org.dcsa.conformance.standards.tnt.v220.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 import org.dcsa.conformance.core.UserFacingException;
-import org.dcsa.conformance.standards.tnt.party.SuppliedScenarioParameters;
-import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
+import org.dcsa.conformance.standards.tnt.v220.party.SuppliedScenarioParameters;
+import org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter;
 
 @Getter
 public class SupplyScenarioParametersAction extends TntAction {

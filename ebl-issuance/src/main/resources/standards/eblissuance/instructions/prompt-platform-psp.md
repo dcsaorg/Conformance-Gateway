@@ -10,12 +10,19 @@ setup steps:
 
 ### 1. Public Key for Signature Verification
 
-The DCSA synthetic carrier will sign all issuance request payloads using its private key. Your platform application can
-verify these signatures using the public key present in the certificate below:
+The DCSA synthetic carrier will sign all issuance request payloads using JWS (JSON Web Signature). Your platform must:
+
+1. Extract the public key from the X.509 certificate provided below
+2. Configure your platform to verify signatures using this public key
+3. Support signature verification at least for RSA and ECDSA algorithms
+
+**Certificate:**
 
 ```
 PUBLIC_KEY
 ```
+
+**Note:** The synthetic carrier will use **PS256** (RSA-PSS with SHA-256) for signing. However, your platform should support all standard JWS algorithms for RSA (RS256/384/512, PS256/384/512) and ECDSA (ES256/384/512) key types to ensure broader compatibility.
 
 ### 2. Scenario Parameters
 

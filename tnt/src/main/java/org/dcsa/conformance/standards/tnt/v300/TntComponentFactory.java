@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.dcsa.conformance.core.AbstractComponentFactory;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -103,10 +104,8 @@ public class TntComponentFactory extends AbstractComponentFactory {
   public Set<String> getReportRoleNames(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return (partyConfigurations.length
-                == TntRole.values().length
-            ? Arrays.stream(TntRole.values())
-                .map(TntRole::getConfigName)
+    return (partyConfigurations.length == TntRole.values().length
+            ? Arrays.stream(TntRole.values()).map(TntRole::getConfigName)
             : Arrays.stream(counterpartConfigurations)
                 .map(CounterpartConfiguration::getRole)
                 .filter(
@@ -115,5 +114,11 @@ public class TntComponentFactory extends AbstractComponentFactory {
                             .map(PartyConfiguration::getRole)
                             .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
         .collect(Collectors.toSet());
+  }
+
+  public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {
+    String schemaFilePath =
+        "/standards/tnt/schemas/TNT_v%s.yaml".formatted(standardVersion);
+    return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 }

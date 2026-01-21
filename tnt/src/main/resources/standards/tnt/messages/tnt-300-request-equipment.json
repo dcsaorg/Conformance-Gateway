@@ -1,0 +1,41 @@
+{
+  "events": [
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-equip-001-2026-01-20T14:15:00Z",
+      "eventDateTime": "2026-01-20T14:15:00Z",
+      "eventUpdatedDateTime": "2026-01-20T14:20:00Z",
+      "eventLocation": {
+        "locationName": "Example Container Yard",
+        "UNLocationCode": "NLRTM",
+        "facilityTypeCode": "DEPO",
+        "address": {
+          "street": "Example Boulevard",
+          "streetNumber": "123",
+          "postCode": "1000AB",
+          "city": "Example City",
+          "countryCode": "NL"
+        }
+      },
+      "eventClassification": {
+        "eventTypeCode": "EQUIPMENT",
+        "eventClassifierCode": "ACT",
+        "equipmentEventTypeCode": "LOAD"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "EXCU1234567",
+        "ISOEquipmentCode": "22GP",
+        "emptyIndicatorCode": "LADEN",
+        "movementType": "EXPORT"
+      }
+    }
+  ]
+}
+

@@ -1,0 +1,28 @@
+{
+  "events": [
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-ship-001-2026-01-20T10:00:00Z",
+      "eventDateTime": "2026-01-20T10:00:00Z",
+      "eventUpdatedDateTime": "2026-01-20T10:05:00Z",
+      "eventClassification": {
+        "eventTypeCode": "SHIPMENT",
+        "eventClassifierCode": "ACT",
+        "shipmentEventTypeCode": "CONF"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "typeCode": "BKG",
+          "reference": "BKG123456789"
+        }
+      }
+    }
+  ]
+}

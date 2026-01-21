@@ -1,0 +1,46 @@
+{
+  "events": [
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-trans-001-2026-01-20T12:30:00Z",
+      "eventDateTime": "2026-01-20T12:30:00Z",
+      "eventUpdatedDateTime": "2026-01-20T12:35:00Z",
+      "eventLocation": {
+        "locationName": "Sample Port Terminal",
+        "UNLocationCode": "DEHAM",
+        "facilityTypeCode": "POTE"
+      },
+      "eventClassification": {
+        "eventTypeCode": "TRANSPORT",
+        "eventClassifierCode": "ACT",
+        "transportEventTypeCode": "ARRI"
+      },
+      "transportDetails": {
+        "transportCall": {
+          "transportCallID": "tc-12345-abc",
+          "carrierServiceCode": "SVC001",
+          "exportVoyageNumber": "V001E",
+          "importVoyageNumber": "V001N",
+          "transportCallSequenceNumber": 3,
+          "UNLocationCode": "DEHAM",
+          "facilityTypeCode": "POTE",
+          "modeOfTransport": "VESSEL",
+          "vessel": {
+            "vesselIMONumber": "1234567",
+            "vesselName": "Example Vessel Alpha",
+            "vesselFlag": "DE",
+            "vesselCallSignNumber": "ABCD"
+          }
+        }
+      }
+    }
+  ]
+}
+

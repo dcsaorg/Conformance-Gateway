@@ -1,0 +1,52 @@
+{
+  "events": [
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-reefer-001-2026-01-20T18:00:00Z",
+      "eventDateTime": "2026-01-20T18:00:00Z",
+      "eventUpdatedDateTime": "2026-01-20T18:05:00Z",
+      "eventLocation": {
+        "locationName": "Reefer Monitoring Station",
+        "UNLocationCode": "USNYC",
+        "facilityTypeCode": "POTE"
+      },
+      "eventClassification": {
+        "eventTypeCode": "REEFER",
+        "eventClassifierCode": "ACT",
+        "reeferEventTypeCode": "MEAS"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "EXCU7654321",
+        "ISOEquipmentCode": "45R1"
+      },
+      "reeferDetails": {
+        "temperatureUnit": "CEL",
+        "internalSetpointTemperature": -18.5,
+        "ambientMeasuredTemperature": 22.3,
+        "temperatureProbeMeasurements": [
+          {
+            "probeNumber": 1,
+            "temperature": -18.2
+          },
+          {
+            "probeNumber": 2,
+            "temperature": -18.7
+          }
+        ],
+        "setpointParameters": {
+          "humidityPercentage": 75.0,
+          "o2Percentage": 21.0,
+          "co2Percentage": 0.5
+        }
+      }
+    }
+  ]
+}
+

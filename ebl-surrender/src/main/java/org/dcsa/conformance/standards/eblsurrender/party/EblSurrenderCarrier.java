@@ -158,14 +158,10 @@ public class EblSurrenderCarrier extends ConformanceParty {
           request, "Simulated error response for surrender request reference '%s'".formatted(srr));
     }
 
-      return request.createResponse(
-          204,
-          Map.of(API_VERSION, List.of(apiVersion)),
-          new ConformanceMessageBody(
-              OBJECT_MAPPER
-                  .createObjectNode()
-                  .put("surrenderRequestReference", srr)
-                  .put("transportDocumentReference", tdr)));
+    return request.createResponse(
+        204,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {

@@ -11,7 +11,7 @@
       },
       "eventID": "evt-ship-001-2026-01-20T10:00:00Z",
       "eventDateTime": "2026-01-20T10:00:00Z",
-      "eventUpdatedDateTime": "2026-01-20T10:05:00Z",
+      "eventUpdatedDateTime": "2025-01-23T01:23:45Z",
       "eventClassification": {
         "eventTypeCode": "SHIPMENT",
         "eventClassifierCode": "ACT",
@@ -20,7 +20,7 @@
       "shipmentDetails": {
         "documentReference": {
           "typeCode": "BKG",
-          "reference": "BKG123456789"
+          "reference": "ABC709951"
         }
       }
     }

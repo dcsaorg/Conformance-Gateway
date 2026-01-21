@@ -11,7 +11,7 @@
       },
       "eventID": "evt-resp-ship-001",
       "eventDateTime": "2026-01-15T09:00:00Z",
-      "eventUpdatedDateTime": "2026-01-15T09:02:00Z",
+      "eventUpdatedDateTime": "2025-01-23T01:23:45Z",
       "eventClassification": {
         "eventTypeCode": "SHIPMENT",
         "eventClassifierCode": "ACT",
@@ -20,12 +20,12 @@
       "shipmentDetails": {
         "documentReference": {
           "typeCode": "BKG",
-          "reference": "BKG987654321"
+          "reference": "ABC709951"
         },
         "additionalDocumentReferences": [
           {
             "typeCode": "TRD",
-            "reference": "TRD123456"
+            "reference": "HHL71800000"
           }
         ]
       }
@@ -41,7 +41,7 @@
       },
       "eventID": "evt-resp-trans-001",
       "eventDateTime": "2026-01-16T11:30:00Z",
-      "eventUpdatedDateTime": "2026-01-16T11:32:00Z",
+      "eventUpdatedDateTime": "2025-01-25T01:23:45Z",
       "eventLocation": {
         "locationName": "Example Terminal Alpha",
         "UNLocationCode": "GBSOU",
@@ -51,6 +51,18 @@
         "eventTypeCode": "TRANSPORT",
         "eventClassifierCode": "ACT",
         "transportEventTypeCode": "DEPA"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "typeCode": "BKG",
+          "reference": "ABC709951"
+        },
+        "additionalDocumentReferences": [
+          {
+            "typeCode": "TRD",
+            "reference": "HHL71800000"
+          }
+        ]
       },
       "transportDetails": {
         "transportCall": {
@@ -82,7 +94,7 @@
       },
       "eventID": "evt-resp-equip-001",
       "eventDateTime": "2026-01-17T13:45:00Z",
-      "eventUpdatedDateTime": "2026-01-17T13:47:00Z",
+      "eventUpdatedDateTime": "2025-01-27T01:23:45Z",
       "eventLocation": {
         "locationName": "Example Warehouse Facility",
         "UNLocationCode": "FRPAR",
@@ -101,7 +113,7 @@
         "equipmentEventTypeCode": "GTIN"
       },
       "equipmentDetails": {
-        "equipmentReference": "EXCU9876543",
+        "equipmentReference": "APZU4812090",
         "ISOEquipmentCode": "45G1",
         "emptyIndicatorCode": "EMPTY",
         "movementType": "IMPORT"
@@ -118,7 +130,7 @@
       },
       "eventID": "evt-resp-iot-001",
       "eventDateTime": "2026-01-18T15:20:00Z",
-      "eventUpdatedDateTime": "2026-01-18T15:22:00Z",
+      "eventUpdatedDateTime": "2025-01-29T01:23:45Z",
       "eventLocation": {
         "locationName": "Monitoring Station Alpha",
         "latitude": "51.5074",
@@ -130,7 +142,7 @@
         "iotEventTypeCode": "DETC"
       },
       "equipmentDetails": {
-        "equipmentReference": "EXCU9876543"
+        "equipmentReference": "APZU4812090"
       },
       "iotDetails": {
         "iotEventCode": "LOC"
@@ -147,7 +159,7 @@
       },
       "eventID": "evt-resp-reefer-001",
       "eventDateTime": "2026-01-19T17:00:00Z",
-      "eventUpdatedDateTime": "2026-01-19T17:02:00Z",
+      "eventUpdatedDateTime": "2025-02-01T01:23:45Z",
       "eventLocation": {
         "locationName": "Cold Storage Facility",
         "UNLocationCode": "BEANR",
@@ -159,7 +171,7 @@
         "reeferEventTypeCode": "MEAS"
       },
       "equipmentDetails": {
-        "equipmentReference": "EXCU1122334",
+        "equipmentReference": "APZU4812090",
         "ISOEquipmentCode": "42R1"
       },
       "reeferDetails": {

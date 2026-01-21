@@ -30,7 +30,7 @@
         "equipmentEventTypeCode": "LOAD"
       },
       "equipmentDetails": {
-        "equipmentReference": "EXCU1234567",
+        "equipmentReference": "APZU4812090",
         "ISOEquipmentCode": "22GP",
         "emptyIndicatorCode": "LADEN",
         "movementType": "EXPORT"

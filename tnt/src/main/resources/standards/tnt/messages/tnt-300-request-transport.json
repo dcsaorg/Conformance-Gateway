@@ -11,7 +11,7 @@
       },
       "eventID": "evt-trans-001-2026-01-20T12:30:00Z",
       "eventDateTime": "2026-01-20T12:30:00Z",
-      "eventUpdatedDateTime": "2026-01-20T12:35:00Z",
+      "eventUpdatedDateTime": "2025-01-25T01:23:45Z",
       "eventLocation": {
         "locationName": "Sample Port Terminal",
         "UNLocationCode": "DEHAM",
@@ -21,6 +21,18 @@
         "eventTypeCode": "TRANSPORT",
         "eventClassifierCode": "ACT",
         "transportEventTypeCode": "ARRI"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "typeCode": "BKG",
+          "reference": "ABC709951"
+        },
+        "additionalDocumentReferences": [
+          {
+            "typeCode": "TRD",
+            "reference": "HHL71800000"
+          }
+        ]
       },
       "transportDetails": {
         "transportCall": {

@@ -11,7 +11,7 @@
       },
       "eventID": "evt-resp-ship-002",
       "eventDateTime": "2026-01-20T08:00:00Z",
-      "eventUpdatedDateTime": "2026-01-20T08:02:00Z",
+      "eventUpdatedDateTime": "2025-02-23T01:23:45Z",
       "eventClassification": {
         "eventTypeCode": "SHIPMENT",
         "eventClassifierCode": "ACT",
@@ -20,7 +20,7 @@
       "shipmentDetails": {
         "documentReference": {
           "typeCode": "BKG",
-          "reference": "BKG555666777"
+          "reference": "ABC709951"
         }
       }
     },
@@ -35,7 +35,7 @@
       },
       "eventID": "evt-resp-trans-002",
       "eventDateTime": "2026-01-20T10:15:00Z",
-      "eventUpdatedDateTime": "2026-01-20T10:17:00Z",
+      "eventUpdatedDateTime": "2025-02-10T01:23:45Z",
       "eventLocation": {
         "locationName": "Example Port Beta",
         "UNLocationCode": "ESBCN",
@@ -45,6 +45,18 @@
         "eventTypeCode": "TRANSPORT",
         "eventClassifierCode": "EST",
         "transportEventTypeCode": "ARRI"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "typeCode": "BKG",
+          "reference": "ABC709951"
+        },
+        "additionalDocumentReferences": [
+          {
+            "typeCode": "TRD",
+            "reference": "HHL71800000"
+          }
+        ]
       },
       "transportDetails": {
         "transportCall": {
@@ -77,7 +89,7 @@
       },
       "eventID": "evt-resp-equip-002",
       "eventDateTime": "2026-01-20T12:30:00Z",
-      "eventUpdatedDateTime": "2026-01-20T12:32:00Z",
+      "eventUpdatedDateTime": "2025-02-15T01:23:45Z",
       "eventLocation": {
         "locationName": "Example Yard Beta",
         "UNLocationCode": "ITGOA",
@@ -89,7 +101,7 @@
         "equipmentEventTypeCode": "DISC"
       },
       "equipmentDetails": {
-        "equipmentReference": "EXCU5544332",
+        "equipmentReference": "APZU4812090",
         "ISOEquipmentCode": "22GP",
         "emptyIndicatorCode": "LADEN",
         "movementType": "TRANSSHIPMENT"
@@ -106,7 +118,7 @@
       },
       "eventID": "evt-resp-iot-002",
       "eventDateTime": "2026-01-20T14:45:00Z",
-      "eventUpdatedDateTime": "2026-01-20T14:47:00Z",
+      "eventUpdatedDateTime": "2025-02-18T01:23:45Z",
       "eventLocation": {
         "locationName": "Sensor Hub Beta",
         "latitude": "48.8566",
@@ -118,7 +130,7 @@
         "iotEventTypeCode": "DETC"
       },
       "equipmentDetails": {
-        "equipmentReference": "EXCU5544332"
+        "equipmentReference": "APZU4812090"
       },
       "iotDetails": {
         "iotEventCode": "DRC"
@@ -135,7 +147,7 @@
       },
       "eventID": "evt-resp-reefer-002",
       "eventDateTime": "2026-01-20T16:30:00Z",
-      "eventUpdatedDateTime": "2026-01-20T16:32:00Z",
+      "eventUpdatedDateTime": "2025-02-20T01:23:45Z",
       "eventLocation": {
         "locationName": "Refrigeration Hub",
         "UNLocationCode": "NLAMS",
@@ -147,7 +159,7 @@
         "reeferEventTypeCode": "ADJU"
       },
       "equipmentDetails": {
-        "equipmentReference": "EXCU6677889",
+        "equipmentReference": "APZU4812090",
         "ISOEquipmentCode": "45R1"
       },
       "reeferDetails": {

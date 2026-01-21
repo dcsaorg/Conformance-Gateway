@@ -22,7 +22,7 @@ The DCSA synthetic carrier will sign all issuance request payloads using JWS (JS
 PUBLIC_KEY
 ```
 
-**Note:** The synthetic carrier will use **PS256** (RSA-PSS with SHA-256) for signing. However, your platform should support all standard JWS algorithms for RSA (RS256/384/512, PS256/384/512) and ECDSA (ES256/384/512) key types to ensure broader compatibility.
+**Note:** The synthetic carrier will use **PS256** (RSA-PSS with SHA-256) for signing. However, your platform could support all standard JWS algorithms for RSA (RS256/384/512, PS256/384/512) and ECDSA (ES256/384/512) key types to ensure broader compatibility.
 
 ### 2. Scenario Parameters
 

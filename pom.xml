@@ -55,7 +55,8 @@
 		<module>standards-commons</module>
 		<module>port-call</module>
 		<module>vgm</module>
-    </modules>
+		<module>ebl-endorsement-chain</module>
+	</modules>
 
 	<dependencyManagement>
 		<dependencies>

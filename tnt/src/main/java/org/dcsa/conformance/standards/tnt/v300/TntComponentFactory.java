@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.tnt.v300;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,6 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
-import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.tnt.v300.party.TntConsumer;
 import org.dcsa.conformance.standards.tnt.v300.party.TntProducer;
@@ -81,7 +79,7 @@ public class TntComponentFactory extends AbstractComponentFactory {
   }
 
   @Override
-  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
+  public Map<String, TntScenarioListBuilder> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
       boolean isWithNotifications) {

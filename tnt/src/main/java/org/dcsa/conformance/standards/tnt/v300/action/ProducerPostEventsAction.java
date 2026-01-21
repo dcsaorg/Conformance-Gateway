@@ -9,24 +9,28 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.tnt.v300.checks.TntChecks;
+import org.dcsa.conformance.standards.tnt.TntStandard;
+import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
-public class ProducerPostTntAction extends TntAction {
+public class ProducerPostEventsAction extends TntAction {
 
   private final JsonSchemaValidator requestSchemaValidator;
+  private final JsonSchemaValidator responseSchemaValidator;
   private final TntEventType eventType;
 
-  public ProducerPostTntAction(
+  public ProducerPostEventsAction(
       String sourcePartyName,
       String targetPartyName,
       TntAction previousAction,
       TntEventType eventType,
-      JsonSchemaValidator requestSchemaValidator) {
+      JsonSchemaValidator requestSchemaValidator,
+      JsonSchemaValidator responseSchemaValidator) {
     super(
-        sourcePartyName, targetPartyName, previousAction, "Producer POST Action for " + eventType);
+        sourcePartyName, targetPartyName, previousAction, "POST Events (%s)".formatted(eventType));
     this.eventType = eventType;
     this.requestSchemaValidator = requestSchemaValidator;
+    this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
@@ -38,7 +42,7 @@ public class ProducerPostTntAction extends TntAction {
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("eventType", eventType.name());
+    jsonNode.put(TntConstants.EVENT_TYPE, eventType.name());
     return jsonNode;
   }
 
@@ -48,7 +52,7 @@ public class ProducerPostTntAction extends TntAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new UrlPathCheck(TntRole::isProducer, getMatchedExchangeUuid(), "/events"),
+            new UrlPathCheck(TntRole::isProducer, getMatchedExchangeUuid(), TntStandard.API_PATH),
             new ResponseStatusCheck(TntRole::isConsumer, getMatchedExchangeUuid(), 200),
             new ApiHeaderCheck(
                 TntRole::isConsumer,
@@ -64,9 +68,15 @@ public class ProducerPostTntAction extends TntAction {
                 TntRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator)
-            //,TntChecks.getTntPostPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion, eventType.name())
-        );
+                requestSchemaValidator),
+            new JsonSchemaCheck(
+                TntRole::isConsumer,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator)
+            // ,TntChecks.getTntPostPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion,
+            // eventType.name())
+            );
       }
     };
   }

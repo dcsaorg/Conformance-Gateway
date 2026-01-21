@@ -1,8 +1,28 @@
 package org.dcsa.conformance.standards.tnt.v300.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.HexFormat;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.standards.tnt.v300.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.tnt.v300.party.SuppliedScenarioParameters;
+import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
 
+@Slf4j
 public abstract class TntAction extends ConformanceAction {
+
+  protected final Supplier<SuppliedScenarioParameters> sspSupplier;
+  private final OverwritingReference<DynamicScenarioParameters> dsp;
 
   protected TntAction(
       String sourcePartyName,
@@ -10,10 +30,105 @@ public abstract class TntAction extends ConformanceAction {
       TntAction previousAction,
       String actionTitle) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
+    this.sspSupplier = getSspSupplier(previousAction);
+    this.dsp = getDspSupplier(previousAction);
+  }
+
+  protected Supplier<DynamicScenarioParameters> getDspSupplier() {
+    return dsp::get;
   }
 
   @Override
-  public String getHumanReadablePrompt() {
-    return "";
+  public void reset() {
+    super.reset();
+    if (previousAction != null) {
+      this.dsp.set(null);
+    } else {
+      this.dsp.set(new DynamicScenarioParameters(null, null, null, null));
+    }
+  }
+
+  @Override
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    super.doHandleExchange(exchange);
+    updateCursorFromResponsePayload(exchange);
+  }
+
+  @Override
+  public ObjectNode exportJsonState() {
+    ObjectNode jsonState = super.exportJsonState();
+    if (dsp.hasCurrentValue()) {
+      jsonState.set(TntConstants.CURRENT_DSP, dsp.get().toJson());
+    }
+    return jsonState;
+  }
+
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    super.importJsonState(jsonState);
+    JsonNode dspNode = jsonState.get(TntConstants.CURRENT_DSP);
+    if (dspNode != null) {
+      dsp.set(DynamicScenarioParameters.fromJson(dspNode));
+    }
+  }
+
+  private void updateCursorFromResponsePayload(ConformanceExchange exchange) {
+    DynamicScenarioParameters dspRef = dsp.get();
+
+    Collection<String> paginationHeaders =
+        exchange.getResponse().message().headers().get(TntConstants.HEADER_CURSOR_NAME);
+    var updatedDsp = dspRef;
+    if (paginationHeaders != null) {
+      Optional<String> cursor = paginationHeaders.stream().findFirst();
+      updatedDsp = updateIfNotNull(updatedDsp, cursor.orElse(null), updatedDsp::withCursor);
+    }
+
+    String jsonResponse = exchange.getResponse().message().body().toString();
+    if (previousAction != null) {
+      if (previousAction instanceof SupplyScenarioParametersAction) {
+        String firstPageHash = getHashString(jsonResponse);
+        updatedDsp = updateIfNotNull(updatedDsp, firstPageHash, updatedDsp::withFirstPage);
+      } else {
+        String secondPageHash = getHashString(jsonResponse);
+        updatedDsp = updateIfNotNull(updatedDsp, secondPageHash, updatedDsp::withSecondPage);
+      }
+    }
+
+    if (!dsp.get().equals(updatedDsp)) dsp.set(updatedDsp);
+  }
+
+  private String getHashString(String actualResponse) {
+    String responseHash = "";
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hashBytes = digest.digest(actualResponse.getBytes());
+      responseHash = HexFormat.of().formatHex(hashBytes);
+    } catch (NoSuchAlgorithmException e) {
+      log.error("Hashing of the response failed.", e);
+    }
+    return responseHash;
+  }
+
+  protected <T> DynamicScenarioParameters updateIfNotNull(
+      DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+    if (value == null) {
+      return dsp;
+    }
+    return with.apply(value);
+  }
+
+  private Supplier<SuppliedScenarioParameters> getSspSupplier(ConformanceAction previousAction) {
+    return previousAction
+            instanceof SupplyScenarioParametersAction supplyScenarioParametersActionAction
+        ? supplyScenarioParametersActionAction::getSuppliedScenarioParameters
+        : previousAction == null
+            ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
+            : getSspSupplier(previousAction.getPreviousAction());
+  }
+
+  private OverwritingReference<DynamicScenarioParameters> getDspSupplier(TntAction previousAction) {
+    return previousAction == null
+        ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null, null))
+        : new OverwritingReference<>(previousAction.dsp, null);
   }
 }

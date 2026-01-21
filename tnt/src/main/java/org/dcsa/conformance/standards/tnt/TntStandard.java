@@ -10,9 +10,18 @@ public class TntStandard extends AbstractStandard {
   public static final TntStandard INSTANCE = new TntStandard();
 
   private static final String SCENARIO_SUITE_CONFORMANCE = "Conformance %s";
+
   private static final String VERSION_220 = "2.2.0";
   private static final String VERSION_300 = "3.0.0";
+
   private static final String TNT = "TnT";
+
+  public static final String API_PATH = "/events";
+  private static final String API_PATH_V2 = "/v2%s".formatted(API_PATH);
+  private static final String API_PATH_V3 = "/v3%s".formatted(API_PATH);
+
+  private static final String GET = "GET";
+  private static final String POST = "POST";
 
   private final Map<String, BiFunction<String, String, AbstractComponentFactory>>
       factoryCreatorsByVersion =
@@ -52,7 +61,7 @@ public class TntStandard extends AbstractStandard {
                 Map.entry(
                     TntRole.PUBLISHER.getConfigName(),
                     new TreeMap<>(
-                        Map.ofEntries(Map.entry("/v2/events", new TreeSet<>(Set.of("GET")))))),
+                        Map.ofEntries(Map.entry(API_PATH_V2, new TreeSet<>(Set.of(GET)))))),
                 Map.entry(TntRole.SUBSCRIBER.getConfigName(), new TreeMap<>()))),
         Map.entry(
             SCENARIO_SUITE_CONFORMANCE.formatted(VERSION_300),
@@ -60,11 +69,11 @@ public class TntStandard extends AbstractStandard {
                 Map.entry(
                     org.dcsa.conformance.standards.tnt.v300.party.TntRole.PRODUCER.getConfigName(),
                     new TreeMap<>(
-                        Map.ofEntries(Map.entry("/v3/events", new TreeSet<>(Set.of("GET")))))),
+                        Map.ofEntries(Map.entry(API_PATH_V3, new TreeSet<>(Set.of(GET)))))),
                 Map.entry(
                     org.dcsa.conformance.standards.tnt.v300.party.TntRole.CONSUMER.getConfigName(),
                     new TreeMap<>(
-                        Map.ofEntries(Map.entry("/v3/events", new TreeSet<>(Set.of("POST")))))))));
+                        Map.ofEntries(Map.entry(API_PATH_V3, new TreeSet<>(Set.of(POST)))))))));
   }
 
   @Override

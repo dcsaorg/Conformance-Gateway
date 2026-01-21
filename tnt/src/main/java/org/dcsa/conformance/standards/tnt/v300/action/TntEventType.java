@@ -16,18 +16,6 @@ public enum TntEventType {
           case IOT -> "iot";
           case REEFER -> "reefer";
         };
-    return "tnt-" + version + "-" + suffix + "-request.json";
-  }
-
-  public String tntEventResponse(String version) {
-    String suffix =
-        switch (this) {
-          case SHIPMENT -> "shipment";
-          case TRANSPORT -> "transport";
-          case EQUIPMENT -> "equipment";
-          case IOT -> "iot";
-          case REEFER -> "reefer";
-        };
-    return "tnt-" + version + "-" + suffix + "-response.json";
+    return "tnt-" + version + "-request-" + suffix + ".json";
   }
 }

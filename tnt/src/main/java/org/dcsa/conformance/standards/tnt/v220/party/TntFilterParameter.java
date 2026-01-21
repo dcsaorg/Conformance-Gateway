@@ -9,7 +9,7 @@ import lombok.Getter;
 import org.dcsa.conformance.standards.tnt.v220.action.TntEventType;
 
 @Getter
-public enum TntFilterParameter {
+public enum  TntFilterParameter {
   EVENT_TYPE("eventType"),
   SHIPMENT_EVENT_TYPE_CODE("shipmentEventTypeCode", TntEventType.SHIPMENT),
   DOCUMENT_TYPE_CODE("documentTypeCode", TntEventType.SHIPMENT),

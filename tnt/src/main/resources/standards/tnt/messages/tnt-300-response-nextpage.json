@@ -1,0 +1,181 @@
+{
+  "events": [
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-ship-002",
+      "eventDateTime": "2026-01-20T08:00:00Z",
+      "eventUpdatedDateTime": "2026-01-20T08:02:00Z",
+      "eventClassification": {
+        "eventTypeCode": "SHIPMENT",
+        "eventClassifierCode": "ACT",
+        "shipmentEventTypeCode": "APPR"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "typeCode": "BKG",
+          "reference": "BKG555666777"
+        }
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-trans-002",
+      "eventDateTime": "2026-01-20T10:15:00Z",
+      "eventUpdatedDateTime": "2026-01-20T10:17:00Z",
+      "eventLocation": {
+        "locationName": "Example Port Beta",
+        "UNLocationCode": "ESBCN",
+        "facilityTypeCode": "POTE"
+      },
+      "eventClassification": {
+        "eventTypeCode": "TRANSPORT",
+        "eventClassifierCode": "EST",
+        "transportEventTypeCode": "ARRI"
+      },
+      "transportDetails": {
+        "transportCall": {
+          "transportCallID": "tc-11223-ghi",
+          "carrierServiceCode": "SVC003",
+          "exportVoyageNumber": "V003E",
+          "importVoyageNumber": "V003N",
+          "transportCallSequenceNumber": 5,
+          "UNLocationCode": "ESBCN",
+          "facilityTypeCode": "POTE",
+          "modeOfTransport": "VESSEL",
+          "vessel": {
+            "vesselIMONumber": "2468135",
+            "vesselName": "Example Vessel Gamma",
+            "vesselFlag": "ES",
+            "vesselCallSignNumber": "MNOP"
+          }
+        },
+        "changeRemark": "Slight delay due to weather"
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-equip-002",
+      "eventDateTime": "2026-01-20T12:30:00Z",
+      "eventUpdatedDateTime": "2026-01-20T12:32:00Z",
+      "eventLocation": {
+        "locationName": "Example Yard Beta",
+        "UNLocationCode": "ITGOA",
+        "facilityTypeCode": "OFFD"
+      },
+      "eventClassification": {
+        "eventTypeCode": "EQUIPMENT",
+        "eventClassifierCode": "ACT",
+        "equipmentEventTypeCode": "DISC"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "EXCU5544332",
+        "ISOEquipmentCode": "22GP",
+        "emptyIndicatorCode": "LADEN",
+        "movementType": "TRANSSHIPMENT"
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-iot-002",
+      "eventDateTime": "2026-01-20T14:45:00Z",
+      "eventUpdatedDateTime": "2026-01-20T14:47:00Z",
+      "eventLocation": {
+        "locationName": "Sensor Hub Beta",
+        "latitude": "48.8566",
+        "longitude": "2.3522"
+      },
+      "eventClassification": {
+        "eventTypeCode": "IOT",
+        "eventClassifierCode": "ACT",
+        "iotEventTypeCode": "DETC"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "EXCU5544332"
+      },
+      "iotDetails": {
+        "iotEventCode": "DRC"
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-reefer-002",
+      "eventDateTime": "2026-01-20T16:30:00Z",
+      "eventUpdatedDateTime": "2026-01-20T16:32:00Z",
+      "eventLocation": {
+        "locationName": "Refrigeration Hub",
+        "UNLocationCode": "NLAMS",
+        "facilityTypeCode": "COFS"
+      },
+      "eventClassification": {
+        "eventTypeCode": "REEFER",
+        "eventClassifierCode": "ACT",
+        "reeferEventTypeCode": "ADJU"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "EXCU6677889",
+        "ISOEquipmentCode": "45R1"
+      },
+      "reeferDetails": {
+        "temperatureUnit": "CEL",
+        "internalSetpointTemperature": -15.0,
+        "ambientMeasuredTemperature": 20.0,
+        "temperatureProbeMeasurements": [
+          {
+            "probeNumber": 1,
+            "temperature": -14.9
+          },
+          {
+            "probeNumber": 2,
+            "temperature": -15.2
+          }
+        ],
+        "setpointParameters": {
+          "humidityPercentage": 70.0,
+          "o2Percentage": 21.0,
+          "co2Percentage": 0.4
+        },
+        "measuredParameters": {
+          "humidityPercentage": 69.5,
+          "o2Percentage": 21.1,
+          "co2Percentage": 0.42
+        }
+      }
+    }
+  ]
+}
+

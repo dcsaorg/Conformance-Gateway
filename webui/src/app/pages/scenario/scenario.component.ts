@@ -189,6 +189,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
         this.inlineErrorMessage = `Error parsing input: ${errorMsg}`;
       }
       this.performingAction = "";
+      this.cdr.detectChanges();
       this.restoreScrollPosition(scrollPosition)
       return;
     }
@@ -203,6 +204,7 @@ export class ScenarioComponent implements OnInit, OnDestroy {
     if (response?.error) {
       this.inlineErrorMessage = response.error;
       this.performingAction = "";
+      this.cdr.detectChanges();
 
       this.restoreScrollPosition(scrollPosition)
       return;

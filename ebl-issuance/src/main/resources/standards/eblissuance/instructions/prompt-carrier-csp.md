@@ -5,18 +5,29 @@ using the format described below. Your private key must remain with you and must
 
 ### **Generate Your Key Pair and Certificate**
 
-You must generate your own key pair:
+**Step 1: Generate a cryptographic key pair (private + public key)**
 
-**Private key**
+Choose one of the supported key types and generate your key pair:
 
-- Keep securely.
-- Use it to sign the payload of each API request.
+- **RSA**: 2048-bit or 4096-bit key size
+- **ECDSA**: P-256, P-384, or P-521 elliptic curves
 
-**X.509 certificate containing your public key**
+The private key must be kept securely and never shared. You will use it to sign API request payloads.
 
-- Create an X.509 certificate using your public key.
-- This certificate must be shared with our platform.
+**Step 2: Create an X.509 certificate containing your public key**
+
+- Generate an X.509 certificate from the key pair created in Step 1.
+- This certificate contains your public key and must be shared with our platform.
 - We will extract the public key from the certificate to verify your request signatures.
+- **Important**: Only X.509 certificates with RSA or ECDSA public keys are supported.
+
+**Step 3: Sign your API requests** *(for future use after certificate submission)*
+
+When making API requests to our platform, you will need to sign the payload using your private key with one of these JWS algorithms:
+- For RSA keys: RS256, RS384, RS512, PS256, PS384, or PS512
+- For ECDSA keys: ES256, ES384, or ES512
+
+The signing algorithm must be compatible with your key type from Step 1.
 
 ### **Prepare Your X.509 Certificate**
 

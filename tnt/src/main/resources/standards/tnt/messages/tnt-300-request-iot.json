@@ -14,8 +14,10 @@
       "eventUpdatedDateTime": "2026-01-20T16:50:00Z",
       "eventLocation": {
         "locationName": "Container Storage Area",
-        "latitude": "52.3676",
-        "longitude": "4.9041"
+        "geoCoordinate": {
+          "latitude": "52.3676",
+          "longitude": "4.9041"
+        }
       },
       "eventClassification": {
         "eventTypeCode": "IOT",
@@ -23,7 +25,8 @@
         "iotEventTypeCode": "DETC"
       },
       "equipmentDetails": {
-        "equipmentReference": "APZU4812090"
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "22GP"
       },
       "iotDetails": {
         "iotEventCode": "DRO"

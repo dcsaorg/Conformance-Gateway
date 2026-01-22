@@ -32,12 +32,12 @@
         "ambientMeasuredTemperature": 22.3,
         "temperatureProbeMeasurements": [
           {
-            "probeNumber": 1,
-            "temperature": -18.2
+            "USDAProbeNumber": 1,
+            "measuredTemperatureValue": -18.2
           },
           {
-            "probeNumber": 2,
-            "temperature": -18.7
+            "USDAProbeNumber": 2,
+            "measuredTemperatureValue": -18.7
           }
         ],
         "setpointParameters": {

@@ -13,8 +13,9 @@ import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.tnt.TntStandard;
-import org.dcsa.conformance.standards.tnt.v300.checks.TntQueryParameters;
+import org.dcsa.conformance.standards.tnt.v300.checks.TntChecks;
 import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
+import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
 public class ConsumerGetEventsWithQueryParametersAction extends TntAction {
@@ -134,9 +135,8 @@ public class ConsumerGetEventsWithQueryParametersAction extends TntAction {
                         getMatchedExchangeUuid(),
                         HttpMessageType.RESPONSE,
                         TntConstants.HEADER_CURSOR_NAME)
-                    .withApplicability(hasNextPage)
-                // ,TntChecks.getTntGetPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion)
-                );
+                    .withApplicability(hasNextPage),
+                TntChecks.getTntGetResponseChecks(getMatchedExchangeUuid(), expectedApiVersion, null));
 
         var queryParamChecks =
             sspSupplier.get() == null

@@ -24,7 +24,6 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 import org.dcsa.conformance.standards.tnt.v300.action.ConsumerGetEventsWithQueryParametersAction;
 import org.dcsa.conformance.standards.tnt.v300.action.ConsumerGetEventsWithTypeAction;
 import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
-import org.dcsa.conformance.standards.tnt.v300.checks.TntQueryParameters;
 
 @Slf4j
 public class TntConsumer extends ConformanceParty {

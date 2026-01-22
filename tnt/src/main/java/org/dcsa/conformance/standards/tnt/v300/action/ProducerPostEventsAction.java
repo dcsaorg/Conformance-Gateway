@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.tnt.TntStandard;
+import org.dcsa.conformance.standards.tnt.v300.checks.TntChecks;
 import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
@@ -73,10 +74,8 @@ public class ProducerPostEventsAction extends TntAction {
                 TntRole::isConsumer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                responseSchemaValidator)
-            // ,TntChecks.getTntPostPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion,
-            // eventType.name())
-            );
+                responseSchemaValidator),
+            TntChecks.getTntPostPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion, eventType));
       }
     };
   }

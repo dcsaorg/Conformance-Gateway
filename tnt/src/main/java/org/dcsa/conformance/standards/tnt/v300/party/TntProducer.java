@@ -27,7 +27,6 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 import org.dcsa.conformance.standards.tnt.v300.action.ProducerPostEventsAction;
 import org.dcsa.conformance.standards.tnt.v300.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
-import org.dcsa.conformance.standards.tnt.v300.checks.TntQueryParameters;
 
 @Slf4j
 public class TntProducer extends ConformanceParty {

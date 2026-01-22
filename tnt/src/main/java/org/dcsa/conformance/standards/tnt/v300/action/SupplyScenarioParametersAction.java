@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.standards.tnt.v300.checks.TntQueryParameters;
+import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.SuppliedScenarioParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
 

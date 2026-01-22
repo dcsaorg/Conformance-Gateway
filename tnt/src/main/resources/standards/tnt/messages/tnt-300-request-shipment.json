@@ -9,7 +9,7 @@
           "partyFunction": "CA"
         }
       },
-      "eventID": "evt-ship-001-2026-01-20T10:00:00Z",
+      "eventID": "evt-ship-001",
       "eventDateTime": "2026-01-20T10:00:00Z",
       "eventUpdatedDateTime": "2025-01-23T01:23:45Z",
       "eventClassification": {
@@ -21,7 +21,13 @@
         "documentReference": {
           "typeCode": "BKG",
           "reference": "ABC709951"
-        }
+        },
+        "additionalDocumentReferences": [
+          {
+            "typeCode": "TRD",
+            "reference": "HHL71800000"
+          }
+        ]
       }
     }
   ]

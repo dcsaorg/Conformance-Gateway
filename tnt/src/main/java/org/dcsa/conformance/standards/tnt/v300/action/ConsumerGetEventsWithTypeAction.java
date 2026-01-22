@@ -11,8 +11,9 @@ import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.tnt.TntStandard;
-import org.dcsa.conformance.standards.tnt.v300.checks.TntQueryParameters;
+import org.dcsa.conformance.standards.tnt.v300.checks.TntChecks;
 import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
+import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
 public class ConsumerGetEventsWithTypeAction extends TntAction {
@@ -76,7 +77,8 @@ public class ConsumerGetEventsWithTypeAction extends TntAction {
                 TntRole::isConsumer,
                 getMatchedExchangeUuid(),
                 TntQueryParameters.ET.getParameterName(),
-                eventType.name()));
+                eventType.name()),
+            TntChecks.getTntGetResponseChecks(getMatchedExchangeUuid(), expectedApiVersion, eventType));
       }
     };
   }

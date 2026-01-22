@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.tnt.v300.checks;
+package org.dcsa.conformance.standards.tnt.v300.party;
 
 import lombok.Getter;
 

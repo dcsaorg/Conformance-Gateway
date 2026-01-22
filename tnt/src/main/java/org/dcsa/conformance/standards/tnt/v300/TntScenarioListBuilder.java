@@ -13,7 +13,7 @@ import org.dcsa.conformance.standards.tnt.v300.action.ProducerPostEventsAction;
 import org.dcsa.conformance.standards.tnt.v300.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.tnt.v300.action.TntAction;
 import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
-import org.dcsa.conformance.standards.tnt.v300.checks.TntQueryParameters;
+import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 
 public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder> {
 

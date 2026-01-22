@@ -66,19 +66,23 @@
       },
       "transportDetails": {
         "transportCall": {
-          "transportCallID": "tc-67890-def",
-          "carrierServiceCode": "SVC002",
-          "exportVoyageNumber": "V002E",
-          "importVoyageNumber": "V002N",
+          "transportCallReference": "tc-67890-def",
           "transportCallSequenceNumber": 1,
-          "UNLocationCode": "GBSOU",
-          "facilityTypeCode": "POTE",
           "modeOfTransport": "VESSEL",
-          "vessel": {
+          "serviceCodeOrReference": {
+            "carrierServiceCode": "SVC002"
+          },
+          "exportVoyageNumberOrReference": {
+            "carrierVoyageNumber": "V002E"
+          },
+          "importVoyageNumberOrReference": {
+            "carrierVoyageNumber": "V002N"
+          },
+          "vesselTransport": {
             "vesselIMONumber": "7654321",
             "vesselName": "Example Vessel Beta",
             "vesselFlag": "GB",
-            "vesselCallSignNumber": "WXYZ"
+            "vesselCallSign": "WXYZ"
           }
         }
       }
@@ -133,8 +137,10 @@
       "eventUpdatedDateTime": "2025-01-29T01:23:45Z",
       "eventLocation": {
         "locationName": "Monitoring Station Alpha",
-        "latitude": "51.5074",
-        "longitude": "-0.1278"
+        "geoCoordinate": {
+          "latitude": "51.5074",
+          "longitude": "-0.1278"
+        }
       },
       "eventClassification": {
         "eventTypeCode": "IOT",
@@ -142,7 +148,8 @@
         "iotEventTypeCode": "DETC"
       },
       "equipmentDetails": {
-        "equipmentReference": "APZU4812090"
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "22GP"
       },
       "iotDetails": {
         "iotEventCode": "LOC"
@@ -180,16 +187,16 @@
         "ambientMeasuredTemperature": 18.5,
         "temperatureProbeMeasurements": [
           {
-            "probeNumber": 1,
-            "temperature": -19.8
+            "USDAProbeNumber": 1,
+            "measuredTemperatureValue": -19.8
           },
           {
-            "probeNumber": 2,
-            "temperature": -20.1
+            "USDAProbeNumber": 2,
+            "measuredTemperatureValue": -20.1
           },
           {
-            "probeNumber": 3,
-            "temperature": -19.9
+            "USDAProbeNumber": 3,
+            "measuredTemperatureValue": -19.9
           }
         ],
         "setpointParameters": {

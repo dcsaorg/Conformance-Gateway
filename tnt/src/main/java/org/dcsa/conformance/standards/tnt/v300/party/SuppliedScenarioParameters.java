@@ -11,7 +11,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import org.dcsa.conformance.core.party.ScenarioParameters;
-import org.dcsa.conformance.standards.tnt.v300.checks.TntQueryParameters;
 
 @Getter
 public class SuppliedScenarioParameters implements ScenarioParameters{

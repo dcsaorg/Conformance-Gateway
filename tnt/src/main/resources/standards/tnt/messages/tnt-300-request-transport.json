@@ -36,19 +36,23 @@
       },
       "transportDetails": {
         "transportCall": {
-          "transportCallID": "tc-12345-abc",
-          "carrierServiceCode": "SVC001",
-          "exportVoyageNumber": "V001E",
-          "importVoyageNumber": "V001N",
+          "transportCallReference": "tc-12345-abc",
           "transportCallSequenceNumber": 3,
-          "UNLocationCode": "DEHAM",
-          "facilityTypeCode": "POTE",
           "modeOfTransport": "VESSEL",
-          "vessel": {
+          "serviceCodeOrReference": {
+            "carrierServiceCode": "SVC001"
+          },
+          "exportVoyageNumberOrReference": {
+            "carrierVoyageNumber": "V001E"
+          },
+          "importVoyageNumberOrReference": {
+            "carrierVoyageNumber": "V001N"
+          },
+          "vesselTransport": {
             "vesselIMONumber": "1234567",
             "vesselName": "Example Vessel Alpha",
             "vesselFlag": "DE",
-            "vesselCallSignNumber": "ABCD"
+            "vesselCallSign": "ABCD"
           }
         }
       }

@@ -9,7 +9,7 @@ import org.dcsa.conformance.standards.tnt.v220.party.TntRole;
 public class TntStandard extends AbstractStandard {
   public static final TntStandard INSTANCE = new TntStandard();
 
-  private static final String SCENARIO_SUITE_CONFORMANCE = "Conformance %s";
+  private static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 
   private static final String VERSION_220 = "2.2.0";
   private static final String VERSION_300 = "3.0.0";
@@ -43,12 +43,8 @@ public class TntStandard extends AbstractStandard {
   public SortedMap<String, SortedSet<String>> getScenarioSuitesByStandardVersion() {
     return new TreeMap<>(
         Map.ofEntries(
-            Map.entry(
-                VERSION_220,
-                new TreeSet<>(Set.of(SCENARIO_SUITE_CONFORMANCE.formatted(VERSION_220)))),
-            Map.entry(
-                VERSION_300,
-                new TreeSet<>(Set.of(SCENARIO_SUITE_CONFORMANCE.formatted(VERSION_300))))));
+            Map.entry(VERSION_220, new TreeSet<>(Set.of(SCENARIO_SUITE_CONFORMANCE))),
+            Map.entry(VERSION_300, new TreeSet<>(Set.of(SCENARIO_SUITE_CONFORMANCE)))));
   }
 
   @Override
@@ -56,16 +52,13 @@ public class TntStandard extends AbstractStandard {
       getEndpointUrisAndMethodsByScenarioSuiteAndRoleName() {
     return Map.ofEntries(
         Map.entry(
-            SCENARIO_SUITE_CONFORMANCE.formatted(VERSION_220),
+            SCENARIO_SUITE_CONFORMANCE,
             Map.ofEntries(
                 Map.entry(
                     TntRole.PUBLISHER.getConfigName(),
                     new TreeMap<>(
                         Map.ofEntries(Map.entry(API_PATH_V2, new TreeSet<>(Set.of(GET)))))),
-                Map.entry(TntRole.SUBSCRIBER.getConfigName(), new TreeMap<>()))),
-        Map.entry(
-            SCENARIO_SUITE_CONFORMANCE.formatted(VERSION_300),
-            Map.ofEntries(
+                Map.entry(TntRole.SUBSCRIBER.getConfigName(), new TreeMap<>()),
                 Map.entry(
                     org.dcsa.conformance.standards.tnt.v300.party.TntRole.PRODUCER.getConfigName(),
                     new TreeMap<>(

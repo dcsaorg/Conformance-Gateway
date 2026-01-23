@@ -1,0 +1,81 @@
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  max-height: 90vh;
+  max-width: 90vw;
+}
+
+.mat-mdc-dialog-title {
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.mat-mdc-dialog-content {
+  flex: 1;
+  overflow: auto !important;
+  padding: 16px 24px !important;
+  background-color: #4a4a4a;
+  min-height: 0;
+}
+
+.mat-mdc-dialog-content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #ffffff;
+}
+
+/* Enhanced styling for JSON content */
+.mat-mdc-dialog-content pre.json-content {
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.mat-mdc-dialog-actions {
+  flex-shrink: 0;
+  min-height: auto;
+}
+
+/* Make button white with simple shadow */
+.mat-mdc-dialog-actions button {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.mat-mdc-dialog-actions button:hover {
+  background-color: #f0f0f0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Resize handle */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 1000;
+}
+
+/* Resize handle visual indicator */
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 16px 16px;
+  border-color: transparent transparent #999 transparent;
+}

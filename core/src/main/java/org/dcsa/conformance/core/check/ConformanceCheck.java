@@ -3,7 +3,7 @@ package org.dcsa.conformance.core.check;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -41,13 +41,17 @@ public abstract class ConformanceCheck {
   }
 
   public final void check(Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    List<ConformanceCheck> conformanceChecks = getSubChecks();
-    if (conformanceChecks.isEmpty()) {
-      this.doCheck(getExchangeByUuid);
-    } else {
-      conformanceChecks.forEach(subCheck -> subCheck.check(getExchangeByUuid));
-      if (conformanceChecks.stream().noneMatch(ConformanceCheck::isApplicable))
-        this.setApplicable(false);
+    try {
+      List<ConformanceCheck> conformanceChecks = getSubChecks();
+      if (conformanceChecks.isEmpty()) {
+        this.doCheck(getExchangeByUuid);
+      } else {
+        conformanceChecks.forEach(subCheck -> subCheck.check(getExchangeByUuid));
+        if (conformanceChecks.stream().noneMatch(ConformanceCheck::isApplicable))
+          this.setApplicable(false);
+      }
+    } catch (Exception e) {
+      results.add(ConformanceResult.withErrors(Set.of("ConformanceCheck execution failed, see log file for details: %s".formatted(e))));
     }
   }
 

@@ -31,13 +31,18 @@ public abstract class ConformanceCheck {
   }
 
   private synchronized List<ConformanceCheck> getSubChecks() {
-    if (subChecks == null) {
-      subChecks = createSubChecks().collect(Collectors.toList());
+    try {
+      if (subChecks == null) {
+        subChecks = createSubChecks().collect(Collectors.toList());
+      }
+      return subChecks.stream()
+          .filter(Objects::nonNull)
+          .filter(ConformanceCheck::isApplicable)
+          .toList();
+    } catch (Exception e) {
+      results.add(ConformanceResult.withErrors(Set.of("ConformanceCheck.getSubChecks() execution failed, see log file for details: %s".formatted(e))));
+      return List.of();
     }
-    return subChecks.stream()
-        .filter(Objects::nonNull)
-        .filter(ConformanceCheck::isApplicable)
-        .toList();
   }
 
   public final void check(Function<UUID, ConformanceExchange> getExchangeByUuid) {
@@ -51,7 +56,7 @@ public abstract class ConformanceCheck {
           this.setApplicable(false);
       }
     } catch (Exception e) {
-      results.add(ConformanceResult.withErrors(Set.of("ConformanceCheck execution failed, see log file for details: %s".formatted(e))));
+      results.add(ConformanceResult.withErrors(Set.of("ConformanceCheck.check() execution failed, see log file for details: %s".formatted(e))));
     }
   }
 

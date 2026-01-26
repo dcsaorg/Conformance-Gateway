@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.cs.party;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
@@ -21,6 +23,8 @@ import org.dcsa.conformance.standards.cs.action.CsGetVesselSchedulesAction;
 @Slf4j
 public class CsSubscriber extends ConformanceParty {
   private static final String CURSOR = "cursor";
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   public CsSubscriber(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -63,7 +67,7 @@ public class CsSubscriber extends ConformanceParty {
 
     addOperatorLogEntry(
         "Sent GET vessel schedules request with parameters %s"
-            .formatted(ssp.toJson().toPrettyString()));
+            .formatted(getParamsForLogging(queryParams)));
   }
 
   private static Map<String, Collection<String>> getQueryParams(
@@ -89,7 +93,7 @@ public class CsSubscriber extends ConformanceParty {
 
     addOperatorLogEntry(
         "Sent GET port schedules request with parameters %s"
-            .formatted(ssp.toJson().toPrettyString()));
+            .formatted(getParamsForLogging(queryParams)));
   }
 
   private void getPointToPointRoutings(JsonNode actionPrompt) {
@@ -102,12 +106,31 @@ public class CsSubscriber extends ConformanceParty {
 
     addOperatorLogEntry(
         "Sent GET point to point routings request with parameters %s"
-            .formatted(ssp.toJson().toPrettyString()));
+            .formatted(getParamsForLogging(queryParams)));
   }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("CsSubscriber.handleRequest(%s)".formatted(request));
     throw new UnsupportedOperationException();
+  }
+
+  private String getParamsForLogging(Map<String, Collection<String>> queryParams) {
+    Map<String, String> flattenedParams = flattenQueryParams(queryParams);
+    return toPrettyJson(flattenedParams);
+  }
+
+  private Map<String, String> flattenQueryParams(Map<String, Collection<String>> queryParams) {
+
+    return queryParams.entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().iterator().next()));
+  }
+
+  private String toPrettyJson(Map<String, String> map) {
+    try {
+      return OBJECT_MAPPER.writeValueAsString(map);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to serialize query params", e);
+    }
   }
 }

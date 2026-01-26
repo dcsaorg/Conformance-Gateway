@@ -55,9 +55,9 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
                 TRANSPORT_DOCUMENT_LABEL,
                 TRANSPORT_DOCUMENT_PATH,
                 () -> {
-                  List<JsonContentCheck> checks =
-                      EblChecks.getTdPayloadChecks(transportDocumentStatus, dspSupplier);
+                  List<JsonContentCheck> checks = new ArrayList<>();
                   getTdrCheck().ifPresent(checks::add);
+                  checks.addAll(EblChecks.getTdPayloadChecks(transportDocumentStatus, dspSupplier));
                   return checks;
                 }))
         .flatMap(Function.identity());

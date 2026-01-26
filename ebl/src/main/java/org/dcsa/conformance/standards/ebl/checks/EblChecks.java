@@ -1575,18 +1575,13 @@ public class EblChecks {
 
   private static void genericTdContentChecks(
       List<? super JsonRebasableContentCheck> jsonContentChecks,
-      Supplier<String> tdrSupplier,
       TransportDocumentStatus transportDocumentStatus) {
-    genericTdContentChecks(jsonContentChecks, tdrSupplier, List.of(transportDocumentStatus));
+    genericTdContentChecks(jsonContentChecks, List.of(transportDocumentStatus));
   }
 
   private static void genericTdContentChecks(
       List<? super JsonRebasableContentCheck> jsonContentChecks,
-      Supplier<String> tdrSupplier,
       List<TransportDocumentStatus> transportDocumentStatus) {
-    if (tdrSupplier != null) {
-      jsonContentChecks.add(JsonAttribute.mustEqual(TD_TDR, tdrSupplier));
-    }
     jsonContentChecks.add(
         JsonAttribute.mustBeOneOf(
             TD_TRANSPORT_DOCUMENT_STATUS,
@@ -1602,7 +1597,10 @@ public class EblChecks {
   public static List<JsonRebasableContentCheck> genericTDContentChecks(
       TransportDocumentStatus transportDocumentStatus, Supplier<String> tdrReferenceSupplier) {
     List<JsonRebasableContentCheck> jsonContentChecks = new ArrayList<>();
-    genericTdContentChecks(jsonContentChecks, tdrReferenceSupplier, transportDocumentStatus);
+    if (tdrReferenceSupplier != null) {
+      jsonContentChecks.add(JsonAttribute.mustEqual(TD_TDR, tdrReferenceSupplier));
+    }
+    genericTdContentChecks(jsonContentChecks, transportDocumentStatus);
     return jsonContentChecks;
   }
 
@@ -1611,8 +1609,12 @@ public class EblChecks {
       String standardVersion,
       List<TransportDocumentStatus> transportDocumentStatus,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
-    List<JsonContentCheck> jsonContentChecks =
-        getTdPayloadChecks(transportDocumentStatus, dspSupplier);
+      List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
+    if (dspSupplier.get().transportDocumentReference() != null) {
+      jsonContentChecks.add(
+          JsonAttribute.mustEqual(TD_TDR, dspSupplier.get().transportDocumentReference()));
+    }
+    jsonContentChecks.addAll(getTdPayloadChecks(transportDocumentStatus, dspSupplier));
     return JsonAttribute.contentChecks(
         EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, jsonContentChecks);
   }
@@ -1624,10 +1626,7 @@ public class EblChecks {
     var scenarioType = ScenarioType.valueOf(dspSupplier.get().scenarioType());
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
 
-    genericTdContentChecks(
-        jsonContentChecks,
-        () -> dspSupplier.get().transportDocumentReference(),
-        transportDocumentStatus);
+    genericTdContentChecks(jsonContentChecks, transportDocumentStatus);
 
     jsonContentChecks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(

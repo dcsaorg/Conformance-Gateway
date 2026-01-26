@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.cs.party;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -115,22 +114,5 @@ public class CsSubscriber extends ConformanceParty {
     throw new UnsupportedOperationException();
   }
 
-  private String getParamsForLogging(Map<String, Collection<String>> queryParams) {
-    Map<String, String> flattenedParams = flattenQueryParams(queryParams);
-    return toPrettyJson(flattenedParams);
-  }
 
-  private Map<String, String> flattenQueryParams(Map<String, Collection<String>> queryParams) {
-
-    return queryParams.entrySet().stream()
-        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().iterator().next()));
-  }
-
-  private String toPrettyJson(Map<String, String> map) {
-    try {
-      return OBJECT_MAPPER.writeValueAsString(map);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed to serialize query params", e);
-    }
-  }
 }

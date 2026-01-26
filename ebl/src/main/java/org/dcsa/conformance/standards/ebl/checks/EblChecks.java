@@ -182,12 +182,6 @@ public class EblChecks {
   private static final JsonPointer SI_REF_UPDATED_SI_STATUS_PTR =
       JsonPointer.compile(S.formatted(UPDATED_SHIPPING_INSTRUCTIONS_STATUS));
 
-  private static final JsonPointer TD_REF_TDR_PTR =
-      JsonPointer.compile(S.formatted(TRANSPORT_DOCUMENT_REFERENCE));
-
-  private static final JsonPointer TD_REF_TD_STATUS_PTR =
-      JsonPointer.compile(S.formatted(TRANSPORT_DOCUMENT_STATUS));
-
   private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM =
       JsonPointer.compile(SSS.formatted(DOCUMENT_PARTIES, ISSUE_TO, SEND_TO_PLATFORM));
 
@@ -1303,7 +1297,7 @@ public class EblChecks {
           VALID_TYPE_OF_PERSON);
 
   public static final JsonContentCheck SIR_OR_TDR_REQUIRED_IN_NOTIFICATION =
-      JsonAttribute.atLeastOneOf(SI_REF_SIR_PTR, TD_REF_TDR_PTR);
+      JsonAttribute.atLeastOneOf(SI_REF_SIR_PTR, TD_TDR);
 
   public static JsonContentCheck sirInNotificationMustMatchDSP(
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
@@ -1314,7 +1308,7 @@ public class EblChecks {
   public static JsonContentCheck tdrInNotificationMustMatchDSP(
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.mustEqual(
-        TD_REF_TDR_PTR, () -> dspSupplier.get().transportDocumentReference());
+            TD_TDR, () -> dspSupplier.get().transportDocumentReference());
   }
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
@@ -1540,8 +1534,8 @@ public class EblChecks {
         HttpMessageType.RESPONSE,
         standardVersion,
         JsonAttribute.mustEqual(
-            TD_REF_TDR_PTR, () -> dspSupplier.get().transportDocumentReference()),
-        JsonAttribute.mustEqual(TD_REF_TD_STATUS_PTR, transportDocumentStatus.wireName()));
+                TD_TDR, () -> dspSupplier.get().transportDocumentReference()),
+        JsonAttribute.mustEqual(TD_TRANSPORT_DOCUMENT_STATUS, transportDocumentStatus.wireName()));
   }
 
   public static List<JsonContentCheck> getSiNotificationChecks(
@@ -1563,11 +1557,15 @@ public class EblChecks {
   }
 
   public static List<JsonContentCheck> getTdNotificationChecks(
-      TransportDocumentStatus transportDocumentStatus, JsonContentCheck... extraChecks) {
+      List<TransportDocumentStatus> transportDocumentStatus, JsonContentCheck... extraChecks) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>(Arrays.asList(extraChecks));
 
     jsonContentChecks.add(
-        JsonAttribute.mustEqual(TD_REF_TD_STATUS_PTR, transportDocumentStatus.wireName()));
+        JsonAttribute.mustBeOneOf(
+            TD_TRANSPORT_DOCUMENT_STATUS,
+            transportDocumentStatus.stream()
+                .map(TransportDocumentStatus::wireName)
+                .collect(Collectors.toSet())));
 
     jsonContentChecks.add(FEEDBACKS_PRESENCE);
     jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY);
@@ -1579,14 +1577,23 @@ public class EblChecks {
       List<? super JsonRebasableContentCheck> jsonContentChecks,
       Supplier<String> tdrSupplier,
       TransportDocumentStatus transportDocumentStatus) {
+    genericTdContentChecks(jsonContentChecks, tdrSupplier, List.of(transportDocumentStatus));
+  }
+
+  private static void genericTdContentChecks(
+      List<? super JsonRebasableContentCheck> jsonContentChecks,
+      Supplier<String> tdrSupplier,
+      List<TransportDocumentStatus> transportDocumentStatus) {
     if (tdrSupplier != null) {
       jsonContentChecks.add(JsonAttribute.mustEqual(TD_TDR, tdrSupplier));
     }
     jsonContentChecks.add(
-        JsonAttribute.mustEqual(
+        JsonAttribute.mustBeOneOf(
             TD_TRANSPORT_DOCUMENT_STATUS,
-            transportDocumentStatus.hasWireName(),
-            transportDocumentStatus.wireName()));
+            transportDocumentStatus.stream().allMatch(TransportDocumentStatus::hasWireName),
+            transportDocumentStatus.stream()
+                .map(TransportDocumentStatus::wireName)
+                .collect(Collectors.toSet())));
     jsonContentChecks.addAll(STATIC_TD_CHECKS);
     jsonContentChecks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     jsonContentChecks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
@@ -1602,7 +1609,7 @@ public class EblChecks {
   public static ActionCheck tdPlusScenarioContentChecks(
       UUID matched,
       String standardVersion,
-      TransportDocumentStatus transportDocumentStatus,
+      List<TransportDocumentStatus> transportDocumentStatus,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks =
         getTdPayloadChecks(transportDocumentStatus, dspSupplier);
@@ -1611,7 +1618,7 @@ public class EblChecks {
   }
 
   public static List<JsonContentCheck> getTdPayloadChecks(
-      TransportDocumentStatus transportDocumentStatus,
+          List<TransportDocumentStatus> transportDocumentStatus,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
 
     var scenarioType = ScenarioType.valueOf(dspSupplier.get().scenarioType());

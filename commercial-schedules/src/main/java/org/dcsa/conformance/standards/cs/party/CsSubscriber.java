@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.cs.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
@@ -22,7 +21,6 @@ import org.dcsa.conformance.standards.cs.action.CsGetVesselSchedulesAction;
 @Slf4j
 public class CsSubscriber extends ConformanceParty {
   private static final String CURSOR = "cursor";
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public CsSubscriber(
       String apiVersion,

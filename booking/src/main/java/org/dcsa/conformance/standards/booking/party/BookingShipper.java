@@ -190,7 +190,7 @@ public class BookingShipper extends ConformanceParty {
             new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 
     addOperatorLogEntry(
-        "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
+        "Handled notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
 

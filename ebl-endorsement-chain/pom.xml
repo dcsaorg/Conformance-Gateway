@@ -10,12 +10,8 @@
 	</parent>
 
 	<artifactId>ebl-endorsement-chain</artifactId>
-
-	<properties>
-		<maven.compiler.source>25</maven.compiler.source>
-		<maven.compiler.target>25</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+	<name>dcsa-conformance-ebl-endorsement-chain</name>
+	<description>DCSA Conformance eBL Endorsement Chain</description>
 
 	<dependencies>
 		<dependency>

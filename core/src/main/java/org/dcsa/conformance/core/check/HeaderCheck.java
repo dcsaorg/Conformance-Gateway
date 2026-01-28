@@ -14,10 +14,7 @@ public class HeaderCheck extends ActionCheck {
   private final String headerValue;
   private final boolean checkPresenceOnly;
 
-  /**
-   * Constructor for checking only the presence of a header.
-   * Does not validate the header value.
-   */
+  /** Constructor for checking only the presence of a header. Does not validate the header value. */
   public HeaderCheck(
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
@@ -25,7 +22,7 @@ public class HeaderCheck extends ActionCheck {
       String headerName) {
     this(
         "",
-        "The header '%s' is present".formatted(headerName),
+        "The HTTP %s header '%s' is present".formatted(httpMessageType.getName(), headerName),
         isRelevantForRoleName,
         matchedExchangeUuid,
         httpMessageType,
@@ -35,8 +32,8 @@ public class HeaderCheck extends ActionCheck {
   }
 
   /**
-   * Constructor for checking both presence and value of a header.
-   * Validates that the header exists and has the expected value.
+   * Constructor for checking both presence and value of a header. Validates that the header exists
+   * and has the expected value.
    */
   public HeaderCheck(
       Predicate<String> isRelevantForRoleName,
@@ -46,7 +43,8 @@ public class HeaderCheck extends ActionCheck {
       String headerValue) {
     this(
         "",
-        "The value of header '%s' is correct".formatted(headerName),
+        "The HTTP %s contains a correct value for the header '%s'"
+            .formatted(httpMessageType.getName(), headerName),
         isRelevantForRoleName,
         matchedExchangeUuid,
         httpMessageType,
@@ -55,9 +53,7 @@ public class HeaderCheck extends ActionCheck {
         false);
   }
 
-  /**
-   * Internal constructor with all parameters including title prefix and custom title.
-   */
+  /** Internal constructor with all parameters including title prefix and custom title. */
   private HeaderCheck(
       String titlePrefix,
       String title,
@@ -67,12 +63,7 @@ public class HeaderCheck extends ActionCheck {
       String headerName,
       String headerValue,
       boolean checkPresenceOnly) {
-    super(
-        titlePrefix,
-        title,
-        isRelevantForRoleName,
-        matchedExchangeUuid,
-        httpMessageType);
+    super(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
     this.headerName = headerName;
     this.headerValue = headerValue;
     this.checkPresenceOnly = checkPresenceOnly;
@@ -89,18 +80,20 @@ public class HeaderCheck extends ActionCheck {
             ? exchange.getRequest().message().headers()
             : exchange.getResponse().message().headers();
 
-    var values = headers.entrySet().stream()
-        .filter(entry -> entry.getKey().equalsIgnoreCase(headerName))
-        .map(java.util.Map.Entry::getValue)
-        .findFirst()
-        .orElse(null);
+    var values =
+        headers.entrySet().stream()
+            .filter(entry -> entry.getKey().equalsIgnoreCase(headerName))
+            .map(java.util.Map.Entry::getValue)
+            .findFirst()
+            .orElse(null);
 
     // Check for header presence
     if (values == null || values.isEmpty()) {
-      String errorMessage = checkPresenceOnly
-          ? "Missing the header '%s'".formatted(headerName)
-          : "Missing the header '%s' (which should be set to '%s')"
-              .formatted(headerName, headerValue);
+      String errorMessage =
+          checkPresenceOnly
+              ? "Missing the header '%s'".formatted(headerName)
+              : "Missing the header '%s' (which should be set to '%s')"
+                  .formatted(headerName, headerValue);
       return ConformanceCheckResult.simple(Set.of(errorMessage));
     }
 
@@ -124,4 +117,3 @@ public class HeaderCheck extends ActionCheck {
                     .formatted(headerName, headerValue, actualValue)));
   }
 }
-

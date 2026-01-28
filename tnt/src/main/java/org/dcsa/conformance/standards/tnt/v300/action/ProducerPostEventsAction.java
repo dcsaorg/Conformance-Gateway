@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.tnt.v300.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -36,8 +37,8 @@ public class ProducerPostEventsAction extends TntAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Have your system POST a message containing at least one event of type %s"
-        .formatted(eventType);
+    return getMarkdownHumanReadablePrompt(
+        Map.of("EVENT_TYPE_VALUE", eventType.name()), "prompt-producer-post-with-event-type.md");
   }
 
   @Override
@@ -75,7 +76,8 @@ public class ProducerPostEventsAction extends TntAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            TntChecks.getTntPostPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion, eventType));
+            TntChecks.getTntPostPayloadChecks(
+                getMatchedExchangeUuid(), expectedApiVersion, eventType));
       }
     };
   }

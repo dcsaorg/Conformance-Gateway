@@ -24,7 +24,7 @@ public class QueryParamCheck extends ActionCheck {
       String queryParamName) {
     this(
         "",
-        "The query parameter '%s' is present".formatted(queryParamName),
+        "The HTTP request query parameter '%s' is present".formatted(queryParamName),
         isRelevantForRoleName,
         matchedExchangeUuid,
         queryParamName,
@@ -43,7 +43,7 @@ public class QueryParamCheck extends ActionCheck {
       String queryParamValue) {
     this(
         "",
-        "The value of query parameter '%s' is correct".formatted(queryParamName),
+        "The HTTP request contains a correct value for the query parameter '%s'".formatted(queryParamName),
         isRelevantForRoleName,
         matchedExchangeUuid,
         queryParamName,

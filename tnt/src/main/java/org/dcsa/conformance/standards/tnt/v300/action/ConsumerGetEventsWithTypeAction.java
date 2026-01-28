@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.tnt.v300.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -34,13 +35,11 @@ public class ConsumerGetEventsWithTypeAction extends TntAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return """
-        Send a GET request to the sandbox endpoint '/events' with the following query parameters:
-
-        - %s=%s
-
-        The sandbox will respond with events matching your query parameters."""
-        .formatted(TntQueryParameters.ET.getParameterName(), eventType.name());
+    return getMarkdownHumanReadablePrompt(
+        Map.of(
+            "EVENT_TYPE_PARAM_NAME", TntQueryParameters.ET.getParameterName(),
+            "EVENT_TYPE_VALUE", eventType.name()),
+        "prompt-consumer-get-with-event-type.md");
   }
 
   @Override
@@ -78,7 +77,8 @@ public class ConsumerGetEventsWithTypeAction extends TntAction {
                 getMatchedExchangeUuid(),
                 TntQueryParameters.ET.getParameterName(),
                 eventType.name()),
-            TntChecks.getTntGetResponseChecks(getMatchedExchangeUuid(), expectedApiVersion, eventType));
+            TntChecks.getTntGetResponseChecks(
+                getMatchedExchangeUuid(), expectedApiVersion, eventType));
       }
     };
   }

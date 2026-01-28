@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.tnt.v300.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
@@ -8,6 +9,7 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.HeaderCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.core.check.PayloadPaginationCheck;
 import org.dcsa.conformance.core.check.QueryParamCheck;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
@@ -56,44 +58,31 @@ public class ConsumerGetEventsWithQueryParametersAction extends TntAction {
   @Override
   public String getHumanReadablePrompt() {
     if (previousAction instanceof ConsumerGetEventsWithQueryParametersAction) {
-      return """
-          Send a GET request to the sandbox endpoint '/events' to fetch the next results page, using the cursor retrieved from the headers of the response of the previous GET request.
-
-          Query parameters:
-          - cursor=%s
-          """
-          .formatted(getDspSupplier().get().cursor());
+      return getMarkdownHumanReadablePrompt(
+          Map.of("CURSOR_PLACEHOLDER", getDspSupplier().get().cursor()),
+          "prompt-consumer-get-next-page.md");
     }
 
     var params = sspSupplier.get();
     if (params == null || params.getMap().isEmpty()) {
-      return """
-          Send a GET request to the sandbox endpoint '/events'.
-
-          The sandbox will respond with events matching your query parameters.""";
+      return getMarkdownHumanReadablePrompt(Map.of(), "prompt-consumer-get.md");
     }
 
-    StringBuilder prompt =
-        new StringBuilder(
-            """
-        Send a GET request to the sandbox endpoint '/events' with the following query parameters:
-
-        """);
-
+    StringBuilder queryParams = new StringBuilder();
     params
         .getMap()
         .forEach(
             (key, value) ->
-                prompt
+                queryParams
                     .append("- ")
                     .append(key.getParameterName())
                     .append("=")
                     .append(value)
                     .append("\n"));
 
-    prompt.append("\nThe sandbox will respond with events matching your query parameters.");
-
-    return prompt.toString();
+    return getMarkdownHumanReadablePrompt(
+        Map.of("QUERY_PARAMS_PLACEHOLDER", queryParams.toString().trim()),
+        "prompt-consumer-get-with-query-params.md");
   }
 
   @Override
@@ -136,7 +125,18 @@ public class ConsumerGetEventsWithQueryParametersAction extends TntAction {
                         HttpMessageType.RESPONSE,
                         TntConstants.HEADER_CURSOR_NAME)
                     .withApplicability(hasNextPage),
-                TntChecks.getTntGetResponseChecks(getMatchedExchangeUuid(), expectedApiVersion, null));
+                new PayloadPaginationCheck(
+                        TntRole::isProducer,
+                        getMatchedExchangeUuid(),
+                        HttpMessageType.RESPONSE,
+                        getDspSupplier().get().firstPage(),
+                        getDspSupplier().get().secondPage())
+                    .withApplicability(
+                        previousAction
+                                instanceof ConsumerGetEventsWithQueryParametersAction previous
+                            && previous.hasNextPage),
+                TntChecks.getTntGetResponseChecks(
+                    getMatchedExchangeUuid(), expectedApiVersion, null));
 
         var queryParamChecks =
             sspSupplier.get() == null

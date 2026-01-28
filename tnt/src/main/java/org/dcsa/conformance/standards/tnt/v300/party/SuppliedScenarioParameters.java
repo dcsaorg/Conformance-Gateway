@@ -13,33 +13,35 @@ import lombok.Getter;
 import org.dcsa.conformance.core.party.ScenarioParameters;
 
 @Getter
-public class SuppliedScenarioParameters implements ScenarioParameters{
+public class SuppliedScenarioParameters implements ScenarioParameters {
 
-    private final Map<TntQueryParameters, String> map;
+  private final Map<TntQueryParameters, String> map;
 
-    private SuppliedScenarioParameters(Map<TntQueryParameters, String> map) {
-        this.map = Collections.unmodifiableMap(map);
-    }
+  private SuppliedScenarioParameters(Map<TntQueryParameters, String> map) {
+    this.map = Collections.unmodifiableMap(map);
+  }
 
-    public static SuppliedScenarioParameters fromMap(Map<TntQueryParameters, String> map) {
-        return new SuppliedScenarioParameters(map);
-    }
+  public static SuppliedScenarioParameters fromMap(Map<TntQueryParameters, String> map) {
+    return new SuppliedScenarioParameters(map);
+  }
 
-    public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {
-        return new SuppliedScenarioParameters(
-                Arrays.stream(TntQueryParameters.values())
-                        .filter(vgmQueryParameters -> jsonNode.has(vgmQueryParameters.getParameterName()))
-                        .collect(
-                                Collectors.toUnmodifiableMap(
-                                        Function.identity(),
-                                        vgmQueryParameters -> jsonNode.required(vgmQueryParameters.getParameterName()).asText())));
-    }
+  public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {
+    return new SuppliedScenarioParameters(
+        Arrays.stream(TntQueryParameters.values())
+            .filter(tntQueryParameters -> jsonNode.has(tntQueryParameters.getParameterName()))
+            .collect(
+                Collectors.toUnmodifiableMap(
+                    Function.identity(),
+                    tntQueryParameters ->
+                        jsonNode.required(tntQueryParameters.getParameterName()).asText())));
+  }
 
-    @Override
-    public ObjectNode toJson() {
-        ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
-        map.forEach((vgmQueryParameters, value) -> objectNode.put(vgmQueryParameters.getParameterName(), value));
-        return objectNode;
-    }
+  @Override
+  public ObjectNode toJson() {
+    ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
+    map.forEach(
+        (tntQueryParameters, value) ->
+            objectNode.put(tntQueryParameters.getParameterName(), value));
+    return objectNode;
+  }
 }
-

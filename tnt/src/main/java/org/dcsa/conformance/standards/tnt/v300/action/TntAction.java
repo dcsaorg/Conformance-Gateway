@@ -4,15 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.tnt.v300.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.SuppliedScenarioParameters;
@@ -130,5 +133,14 @@ public abstract class TntAction extends ConformanceAction {
     return previousAction == null
         ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null, null))
         : new OverwritingReference<>(previousAction.dsp, null);
+  }
+
+  protected String getMarkdownHumanReadablePrompt(Map<String, String> replacements, String... fileNames) {
+    return Arrays.stream(fileNames)
+        .map(
+            fileName ->
+                IOToolkit.templateFileToText(
+                    "/standards/tnt/instructions/" + fileName, replacements))
+        .collect(Collectors.joining());
   }
 }

@@ -275,19 +275,6 @@ public class JsonAttribute {
         });
   }
 
-  public static JsonRebasableContentCheck allIndividualMatchesMustBeValidWithoutRelevance(
-      @NonNull String name,
-      @NonNull Consumer<MultiAttributeValidator> scanner,
-      @NonNull JsonContentMatchedValidation subvalidation) {
-    return JsonRebasableCheckImpl.of(
-        name,
-        (body, contextPath) -> {
-          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation, false);
-          scanner.accept(v);
-          return ConformanceCheckResult.from(v.getValidationIssues());
-        });
-  }
-
   public static JsonRebasableContentCheck allIndividualMatchesMustBeValid(
           @NonNull
           String name,
@@ -318,21 +305,6 @@ public class JsonAttribute {
           scanner.accept(v);
           return v.getValidationResult();
         });
-  }
-
-  public static JsonRebasableContentCheck atLeastOneIndividualMatchMustBeValid(
-          @NonNull String name,
-          boolean isRelevant,
-          @NonNull Consumer<MultiAttributeValidator> scanner,
-          @NonNull JsonContentMatchedValidation subvalidation) {
-    return JsonRebasableCheckImpl.of(
-            name,
-            isRelevant,
-            (body, contextPath) -> {
-              var v = new AtLeastOneMatchValidatorImpl(contextPath, body, subvalidation, true);
-              scanner.accept(v);
-              return v.getValidationResult();
-            });
   }
 
   public static JsonContentMatchedValidation unique(

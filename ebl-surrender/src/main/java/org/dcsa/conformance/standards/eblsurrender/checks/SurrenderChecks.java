@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.eblsurrender.checks;
 
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.REASON_CODES;
 
 import java.util.UUID;
 import lombok.experimental.UtilityClass;
@@ -22,6 +23,7 @@ public class SurrenderChecks {
   private static final String ENDORSEMENT_CHAIN = "endorsementChain";
   private static final String ACTION_CODE = "actionCode";
   private static final String CODE_LIST_PROVIDER = "codeListProvider";
+  private static final String REASON_CODE = "reasonCode";
   private static final String ACTOR = "actor";
   private static final String IDENTIFYING_CODES = "identifyingCodes";
   private static final String RECIPIENT = "recipient";
@@ -49,6 +51,12 @@ public class SurrenderChecks {
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
               DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES));
 
+  private static final JsonRebasableContentCheck REASON_CODE_CHECK =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate '%s' (if present) is a known value".formatted(REASON_CODE),
+          mav -> mav.submitAllMatching(REASON_CODE),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(REASON_CODES));
+
   public static ActionCheck surrenderRequestChecks(UUID matched, String standardVersion) {
     return JsonAttribute.contentChecks(
         EblSurrenderRole::isPlatform,
@@ -56,6 +64,7 @@ public class SurrenderChecks {
         HttpMessageType.REQUEST,
         standardVersion,
         SURRENDER_ACTION_VALIDATION,
-        SURRENDER_PARTY_CODE_LIST_PROVIDER);
+        SURRENDER_PARTY_CODE_LIST_PROVIDER,
+        REASON_CODE_CHECK);
   }
 }

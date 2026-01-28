@@ -45,6 +45,9 @@ public class EblDatasets {
           "WAVE", "CARX", "ESSD", "IDT", "BOLE", "EDOX", "IQAX", "SECR", "TRGO", "ETEU", "TRAC",
           "BRIT", "GSBN", "WISE", "GLEIF", "W3C", "DNB", "FMC", "DCSA", "ZZZ");
 
+  public static final KeywordDataset REASON_CODES =
+      KeywordDataset.staticDataset("SWTP", "COD", "SWI");
+
   public static final KeywordDataset REQUESTED_CARRIER_CLAUSES_SET =
       KeywordDataset.staticDataset(
           "CARGO_CARGOSPECIFICS",

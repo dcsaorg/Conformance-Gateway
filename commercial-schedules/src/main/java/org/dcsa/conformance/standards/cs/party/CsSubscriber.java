@@ -21,6 +21,7 @@ import org.dcsa.conformance.standards.cs.action.CsGetVesselSchedulesAction;
 @Slf4j
 public class CsSubscriber extends ConformanceParty {
   private static final String CURSOR = "cursor";
+
   public CsSubscriber(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -63,7 +64,7 @@ public class CsSubscriber extends ConformanceParty {
 
     addOperatorLogEntry(
         "Sent GET vessel schedules request with parameters %s"
-            .formatted(ssp.toJson().toPrettyString()));
+            .formatted(getParamsForLogging(queryParams)));
   }
 
   private static Map<String, Collection<String>> getQueryParams(
@@ -89,7 +90,7 @@ public class CsSubscriber extends ConformanceParty {
 
     addOperatorLogEntry(
         "Sent GET port schedules request with parameters %s"
-            .formatted(ssp.toJson().toPrettyString()));
+            .formatted(getParamsForLogging(queryParams)));
   }
 
   private void getPointToPointRoutings(JsonNode actionPrompt) {
@@ -102,7 +103,7 @@ public class CsSubscriber extends ConformanceParty {
 
     addOperatorLogEntry(
         "Sent GET point to point routings request with parameters %s"
-            .formatted(ssp.toJson().toPrettyString()));
+            .formatted(getParamsForLogging(queryParams)));
   }
 
   @Override
@@ -110,4 +111,6 @@ public class CsSubscriber extends ConformanceParty {
     log.info("CsSubscriber.handleRequest(%s)".formatted(request));
     throw new UnsupportedOperationException();
   }
+
+
 }

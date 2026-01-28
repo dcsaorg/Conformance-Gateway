@@ -135,21 +135,7 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
                     HttpMessageType.REQUEST,
                     JsonPointer.compile("/surrenderRequestCode"),
                     forAmendment ? "AREQ" : "SREQ"),
-                new JsonAttributeCheck(
-                    EblSurrenderRole::isPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    JsonPointer.compile("/reasonCode"),
-                    forAmendment && isSwitchToPaper ? "SWTP" : ""),
-                surrenderRequestChecks(getMatchedExchangeUuid(), expectedApiVersion),
-                new JsonAttributeCheck(
-                    EblSurrenderRole::isPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    JsonPointer.compile("/transportDocumentReference"),
-                    sspSupplier.get() == null
-                        ? null
-                        : sspSupplier.get().transportDocumentReference())),
+                surrenderRequestChecks(getMatchedExchangeUuid(), expectedApiVersion)),
             Stream.of(
                 new UrlPathCheck(
                     "[Response]",

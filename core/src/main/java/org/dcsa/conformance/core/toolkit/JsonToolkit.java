@@ -3,6 +3,7 @@ package org.dcsa.conformance.core.toolkit;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.BufferedWriter;
 import java.io.InputStream;
@@ -14,6 +15,7 @@ import java.util.*;
 import java.util.stream.StreamSupport;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.dcsa.conformance.core.util.JsonUtil;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class JsonToolkit {
@@ -45,7 +47,10 @@ public class JsonToolkit {
   @SneakyThrows
   public static JsonNode templateFileToJsonNode(
       String templatePath, Map<String, String> replacements) {
-    return OBJECT_MAPPER.readTree(IOToolkit.templateFileToText(templatePath, replacements));
+    JsonNode jsonNode =
+        OBJECT_MAPPER.readTree(IOToolkit.templateFileToText(templatePath, replacements));
+    removeEmptyOrNullFields(jsonNode);
+    return jsonNode;
   }
 
   public static ArrayNode stringCollectionToArrayNode(Collection<String> strings) {
@@ -78,5 +83,27 @@ public class JsonToolkit {
                     entryNode.get("key").asText(),
                     JsonToolkit.arrayNodeToStringCollection((ArrayNode) entryNode.get("values"))));
     return map;
+  }
+
+  private static void removeEmptyOrNullFields(JsonNode node) {
+    if (node.isObject()) {
+      ObjectNode objectNode = (ObjectNode) node;
+      List<String> fieldsToRemove = new ArrayList<>();
+
+      Iterator<String> fieldNames = objectNode.fieldNames();
+      while (fieldNames.hasNext()) {
+        String fieldName = fieldNames.next();
+        JsonNode value = objectNode.get(fieldName);
+
+        if (JsonUtil.isMissingOrEmpty(value)) {
+          fieldsToRemove.add(fieldName);
+        } else if (value.isContainerNode()) {
+          removeEmptyOrNullFields(value);
+        }
+      }
+      fieldsToRemove.forEach(objectNode::remove);
+    } else if (node.isArray()) {
+      node.forEach(JsonToolkit::removeEmptyOrNullFields);
+    }
   }
 }

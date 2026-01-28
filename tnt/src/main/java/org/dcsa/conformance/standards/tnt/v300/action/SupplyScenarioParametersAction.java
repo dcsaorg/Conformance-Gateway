@@ -90,7 +90,7 @@ public class SupplyScenarioParametersAction extends TntAction {
 
     return "Using the example format below, provide the query parameter filter(s) specified in the action title"
         + " that the sandbox can use in a GET request to fetch events from your system."
-        + " The action 'Supply parameters (%s)' requires you to provide values for the %s query parameter%s."
+        + " The action 'Supply scenario parameters (%s)' requires you to provide values for the %s query parameter %s."
             .formatted(parameterCodes, parameterNames, tntQueryParameters.size() > 1 ? "s" : "")
         + "%n%nThe required query parameters are:%n%s".formatted(parametersList);
   }

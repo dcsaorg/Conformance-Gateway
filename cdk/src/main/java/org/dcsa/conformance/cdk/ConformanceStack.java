@@ -214,6 +214,12 @@ public class ConformanceStack extends Stack {
             "org.dcsa.conformance.lambda.AdminLambda",
             vpc);
 
+    adminLambda.grantInvoke(
+        software.amazon.awscdk.services.iam.User.fromUserArn(
+            this,
+            prefix + "GitHubActionsCdkDeployUser",
+            "arn:aws:iam::" + this.getAccount() + ":user/GITHUB_ACTION_CDK_DEPLOY"));
+
     Policy invokeSandboxTaskLambdaPolicy =
         new Policy(
             this,

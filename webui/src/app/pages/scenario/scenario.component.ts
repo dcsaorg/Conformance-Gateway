@@ -205,7 +205,6 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       this.inlineErrorMessage = response.error;
       this.performingAction = "";
       this.cdr.detectChanges();
-
       this.restoreScrollPosition(scrollPosition)
       return;
     }

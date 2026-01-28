@@ -162,6 +162,19 @@ public class JsonAttribute {
     @NonNull String path,
     @NonNull String expectedValue
   ) {
+    if (path.contains(".")) {
+      return baseNode -> {
+        JsonNode node = baseNode;
+        for (String segment : path.split("\\.")) {
+          node = node.path(segment);
+          if (node.isMissingNode()) {
+            return false;
+          }
+        }
+        return expectedValue.equals(node.asText());
+      };
+    }
+
     return baseNode -> expectedValue.equals(baseNode.path(path).asText());
   }
 
@@ -169,6 +182,19 @@ public class JsonAttribute {
     @NonNull String path,
     @NonNull Set<String> expectedValue
   ) {
+    if (path.contains(".")) {
+      return baseNode -> {
+        JsonNode node = baseNode;
+        for (String segment : path.split("\\.")) {
+          node = node.path(segment);
+          if (node.isMissingNode()) {
+            return false;
+          }
+        }
+        return expectedValue.contains(node.asText());
+      };
+    }
+
     return baseNode -> expectedValue.contains(baseNode.path(path).asText());
   }
 
@@ -249,19 +275,6 @@ public class JsonAttribute {
         });
   }
 
-  public static JsonRebasableContentCheck allIndividualMatchesMustBeValidWithoutRelevance(
-      @NonNull String name,
-      @NonNull Consumer<MultiAttributeValidator> scanner,
-      @NonNull JsonContentMatchedValidation subvalidation) {
-    return JsonRebasableCheckImpl.of(
-        name,
-        (body, contextPath) -> {
-          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation, false);
-          scanner.accept(v);
-          return ConformanceCheckResult.from(v.getValidationIssues());
-        });
-  }
-
   public static JsonRebasableContentCheck allIndividualMatchesMustBeValid(
           @NonNull
           String name,
@@ -278,6 +291,19 @@ public class JsonAttribute {
           var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation, true);
           scanner.accept(v);
           return ConformanceCheckResult.from(v.getValidationIssues());
+        });
+  }
+
+  public static JsonRebasableContentCheck atLeastOneIndividualMatchMustBeValid(
+      @NonNull String name,
+      @NonNull Consumer<MultiAttributeValidator> scanner,
+      @NonNull JsonContentMatchedValidation subvalidation) {
+    return JsonRebasableCheckImpl.of(
+        name,
+        (body, contextPath) -> {
+          var v = new AtLeastOneMatchValidatorImpl(contextPath, body, subvalidation, true);
+          scanner.accept(v);
+          return v.getValidationResult();
         });
   }
 
@@ -353,7 +379,7 @@ public class JsonAttribute {
 
   public static JsonContentMatchedValidation matchedMustBeNonEmpty() {
     return (node, contextPath) -> {
-        if (node.isMissingNode() || node.isNull() || node.isEmpty()) {
+        if (JsonUtil.isMissingOrEmpty(node)) {
           return ConformanceCheckResult.simple(Set.of(
             "The value of '%s' must present and non-empty"
               .formatted(contextPath)));
@@ -364,10 +390,27 @@ public class JsonAttribute {
 
   public static JsonContentMatchedValidation matchedMustBeNotNull() {
     return (node, contextPath) -> {
-      if (node.isMissingNode() || node.isNull()) {
+      if (JsonUtil.isMissing(node)) {
         return ConformanceCheckResult.simple(Set.of(
           "The value of '%s' must present and not null"
             .formatted(contextPath)));
+      }
+      return ConformanceCheckResult.simple(Set.of());
+    };
+  }
+
+  public static JsonContentMatchedValidation matchedMustBeOneOf(Set<String> allowedValues) {
+    return (node, contextPath) -> {
+      if (JsonUtil.isMissingOrEmpty(node)) {
+        return ConformanceCheckResult.simple(Set.of(
+          "The value of '%s' must be present and not null"
+            .formatted(contextPath)));
+      }
+      String actualValue = node.asText();
+      if (!allowedValues.contains(actualValue)) {
+        return ConformanceCheckResult.simple(Set.of(
+          "The value of '%s' was '%s' but must be one of: %s"
+            .formatted(contextPath, actualValue, String.join(", ", allowedValues))));
       }
       return ConformanceCheckResult.simple(Set.of());
     };

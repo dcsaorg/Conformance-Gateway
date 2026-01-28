@@ -1,0 +1,37 @@
+{
+  "events": [
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-iot-001-2026-01-20T16:45:00Z",
+      "eventDateTime": "2026-01-20T16:45:00Z",
+      "eventUpdatedDateTime": "2026-01-20T16:50:00Z",
+      "eventLocation": {
+        "locationName": "Container Storage Area",
+        "geoCoordinate": {
+          "latitude": "52.3676",
+          "longitude": "4.9041"
+        }
+      },
+      "eventClassification": {
+        "eventTypeCode": "IOT",
+        "eventClassifierCode": "ACT",
+        "iotEventTypeCode": "DETC"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "22GP"
+      },
+      "iotDetails": {
+        "iotEventCode": "DRO"
+      }
+    }
+  ]
+}
+

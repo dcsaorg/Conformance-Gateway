@@ -112,7 +112,7 @@ public abstract class ConformanceAction implements StatefulEntity {
               Spliterators.spliteratorUnknownSize(
                   jsonForHumanReadablePrompt.fieldNames(), Spliterator.ORDERED),
               false)
-          .collect(Collectors.toMap(fieldName -> fieldName, fieldName -> true));
+          .collect(Collectors.toMap(fieldName -> fieldName, _ -> true));
     }
     return Map.of();
   }

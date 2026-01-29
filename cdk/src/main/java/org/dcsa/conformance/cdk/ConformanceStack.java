@@ -59,11 +59,14 @@ import software.amazon.awscdk.services.dynamodb.TableProps;
 import software.amazon.awscdk.services.ec2.SubnetSelection;
 import software.amazon.awscdk.services.ec2.SubnetType;
 import software.amazon.awscdk.services.ec2.Vpc;
+import software.amazon.awscdk.services.iam.Effect;
+import software.amazon.awscdk.services.iam.IUser;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
 import software.amazon.awscdk.services.iam.Policy;
 import software.amazon.awscdk.services.iam.PolicyProps;
 import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.amazon.awscdk.services.iam.ServicePrincipal;
+import software.amazon.awscdk.services.iam.User;
 import software.amazon.awscdk.services.lambda.AssetCode;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
@@ -214,11 +217,25 @@ public class ConformanceStack extends Stack {
             "org.dcsa.conformance.lambda.AdminLambda",
             vpc);
 
-    adminLambda.grantInvoke(
-        software.amazon.awscdk.services.iam.User.fromUserArn(
+    IUser githubDeployUser =
+        User.fromUserArn(
             this,
             prefix + "GitHubActionsCdkDeployUser",
-            "arn:aws:iam::" + this.getAccount() + ":user/GITHUB_ACTION_CDK_DEPLOY"));
+            "arn:aws:iam::" + this.getAccount() + ":user/GITHUB_ACTION_CDK_DEPLOY");
+
+    PolicyStatement allowInvokeAdminLambda =
+        PolicyStatement.Builder.create()
+            .effect(Effect.ALLOW)
+            .actions(List.of("lambda:InvokeFunction"))
+            .resources(List.of(adminLambda.getFunctionArn()))
+            .build();
+
+    Policy invokeAdminLambdaPolicy =
+        Policy.Builder.create(this, prefix + "InvokeAdminLambdaPolicy")
+            .statements(List.of(allowInvokeAdminLambda))
+            .build();
+
+    invokeAdminLambdaPolicy.attachToUser(githubDeployUser);
 
     Policy invokeSandboxTaskLambdaPolicy =
         new Policy(

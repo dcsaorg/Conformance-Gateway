@@ -61,6 +61,11 @@ public abstract class ActionCheck extends ConformanceCheck {
     return this;
   }
 
+  public ActionCheck withApplicability(boolean isApplicable) {
+    this.setApplicable(isApplicable);
+    return this;
+  }
+
   private void addResult(
       Function<UUID, ConformanceExchange> getExchangeByUuid, ConformanceCheckResult result) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);

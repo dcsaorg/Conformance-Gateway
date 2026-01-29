@@ -68,7 +68,7 @@ jobs:
       - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
         run: |
           cd cdk/
-          cdk deploy ${{ env.AWS_ENVIRONMENT }}ConformanceStack
+          cdk deploy ${{ env.AWS_ENVIRONMENT }}ConformanceStack --require-approval never
 
       - name: Verify a scenario in AWS Dev environment
         env:

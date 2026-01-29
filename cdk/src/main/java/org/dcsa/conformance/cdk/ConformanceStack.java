@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import software.amazon.awscdk.BundlingOptions;
 import software.amazon.awscdk.DockerVolume;
 import software.amazon.awscdk.Duration;
@@ -213,12 +212,6 @@ public class ConformanceStack extends Stack {
             assetCode,
             "org.dcsa.conformance.lambda.AdminLambda",
             vpc);
-
-    adminLambda.grantInvoke(
-        software.amazon.awscdk.services.iam.User.fromUserArn(
-            this,
-            prefix + "GitHubActionsCdkDeployUser",
-            "arn:aws:iam::" + this.getAccount() + ":user/GITHUB_ACTION_CDK_DEPLOY"));
 
     Policy invokeSandboxTaskLambdaPolicy =
         new Policy(

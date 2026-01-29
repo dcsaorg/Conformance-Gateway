@@ -1,0 +1,95 @@
+[
+  {
+    "transportDocumentReference": "62CD536BA8D34C469AFD",
+    "transportDocumentSubReference": "fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9",
+    "carrierSCACCode": "YMLU",
+    "endorsementChain": [
+      {
+        "actionDateTime": "2025-09-12T17:23:12Z",
+        "actionCode": "SURRENDERED",
+        "actor": {
+          "partyName": "Yang Ming Marine Transport Corporation",
+          "eblPlatform": "WAVE",
+          "identifyingCodes": [
+            {
+              "codeListProvider": "WAVE",
+              "partyCode": "4bd196da-0d8b-436d-bad4-4cc88f04a035"
+            }
+          ]
+        }
+      },
+      {
+        "actionDateTime": "2025-09-12T17:23:12Z",
+        "actionCode": "SURRENDER_FOR_DELIVERY",
+        "actor": {
+          "partyName": "Suzano China",
+          "eblPlatform": "WAVE",
+          "identifyingCodes": [
+            {
+              "codeListProvider": "WAVE",
+              "partyCode": "0665fefb-7c3f-443b-8ccd-73ced178448f"
+            }
+          ]
+        },
+        "recipient": {
+          "partyName": "Yang Ming Marine Transport Corporation",
+          "eblPlatform": "WAVE",
+          "identifyingCodes": [
+            {
+              "codeListProvider": "WAVE",
+              "partyCode": "4bd196da-0d8b-436d-bad4-4cc88f04a035"
+            }
+          ]
+        }
+      },
+      {
+        "actionDateTime": "2025-09-10T14:35:42Z",
+        "actionCode": "TRANSFER",
+        "actor": {
+          "partyName": "Suzano Brazil",
+          "eblPlatform": "WAVE",
+          "identifyingCodes": [
+            {
+              "codeListProvider": "WAVE",
+              "partyCode": "ee92b6b7-ac27-4537-87df-019c69389346"
+            }
+          ]
+        },
+        "recipient": {
+          "partyName": "Suzano China",
+          "eblPlatform": "WAVE",
+          "identifyingCodes": [
+            {
+              "codeListProvider": "WAVE",
+              "partyCode": "0665fefb-7c3f-443b-8ccd-73ced178448f"
+            }
+          ]
+        }
+      },
+      {
+        "actionDateTime": "2025-09-09T12:55:31Z",
+        "actionCode": "ISSUE",
+        "actor": {
+          "partyName": "Yang Ming Marine Transport Corporation",
+          "eblPlatform": "WAVE",
+          "identifyingCodes": [
+            {
+              "codeListProvider": "WAVE",
+              "partyCode": "4bd196da-0d8b-436d-bad4-4cc88f04a035"
+            }
+          ]
+        },
+        "recipient": {
+          "partyName": "Suzano Brazil",
+          "eblPlatform": "WAVE",
+          "identifyingCodes": [
+            {
+              "codeListProvider": "WAVE",
+              "partyCode": "ee92b6b7-ac27-4537-87df-019c69389346"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

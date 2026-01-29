@@ -30,6 +30,7 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.*;
+import org.dcsa.conformance.end.EblEndorsementChainStandard;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
@@ -59,6 +60,7 @@ public class ConformanceSandbox {
     BookingStandard.INSTANCE,
     CsStandard.INSTANCE,
     EblStandard.INSTANCE,
+    EblEndorsementChainStandard.INSTANCE,
     EblIssuanceStandard.INSTANCE,
     EblSurrenderStandard.INSTANCE,
     BookingAndEblStandard.INSTANCE,

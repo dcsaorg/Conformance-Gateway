@@ -10,11 +10,11 @@ import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.end.party.EndorsementChainRole;
 
-public class EndorsementChainStandard extends AbstractStandard {
+public class EblEndorsementChainStandard extends AbstractStandard {
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
-  public static final EndorsementChainStandard INSTANCE = new EndorsementChainStandard();
+  public static final EblEndorsementChainStandard INSTANCE = new EblEndorsementChainStandard();
 
-  protected EndorsementChainStandard() {
+  protected EblEndorsementChainStandard() {
     super("Ebl Endorsement Chain");
   }
 
@@ -40,7 +40,7 @@ public class EndorsementChainStandard extends AbstractStandard {
   @Override
   protected AbstractComponentFactory doCreateComponentFactory(
       String standardVersion, String scenarioSuite) {
-    return null;
+    return new EndorsementChainComponentFactory(getName(), standardVersion, scenarioSuite);
   }
 
   @Override

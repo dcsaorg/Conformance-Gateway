@@ -1,10 +1,17 @@
 package org.dcsa.conformance.end;
 
+import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.CARRIER_SCAC_CODE;
+import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_SUB_REFERENCE;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.end.action.CarrierGetEndorsementChainAction;
+import org.dcsa.conformance.end.action.EndorsementChainAction;
+import org.dcsa.conformance.end.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.end.party.EndorsementChainFilterParameter;
 
 public class EndorsementChainScenarioListBuilder
     extends ScenarioListBuilder<EndorsementChainScenarioListBuilder> {
@@ -33,9 +40,12 @@ public class EndorsementChainScenarioListBuilder
         "GET-only scenarios (for adopters only supporting GET)",
         noAction()
             .thenEither(
-                supplyScenarioParameters().then(getEndorsementChain()),
-                supplyScenarioParameters().then(getEndorsementChain()),
-                supplyScenarioParameters().then(getEndorsementChain())));
+                scenarioWithParameters(),
+                scenarioWithParameters(TRANSPORT_DOCUMENT_SUB_REFERENCE),
+                scenarioWithParameters(CARRIER_SCAC_CODE),
+                scenarioWithParameters(
+                    TRANSPORT_DOCUMENT_SUB_REFERENCE,
+                    CARRIER_SCAC_CODE)));
     return map;
   }
 
@@ -43,13 +53,29 @@ public class EndorsementChainScenarioListBuilder
     return new EndorsementChainScenarioListBuilder(null);
   }
 
-  private static EndorsementChainScenarioListBuilder supplyScenarioParameters() {
-    String publisherPartyName = threadLocalPublisherPartyName.get();
+  private static EndorsementChainScenarioListBuilder scenarioWithParameters(
+      EndorsementChainFilterParameter... endorsementChainFilterParameter) {
+    return supplyScenarioParameters(endorsementChainFilterParameter).then(getEndorsementChain());
+  }
+
+  private static EndorsementChainScenarioListBuilder supplyScenarioParameters(
+      EndorsementChainFilterParameter... endorsementChainFilterParameter) {
+    String providerPartyName = threadLocalPublisherPartyName.get();
     return new EndorsementChainScenarioListBuilder(
-        previousAction -> new SupplyScenarioParametersAction(publisherPartyName, scenarioType));
+        _ ->
+            new SupplyScenarioParametersAction(providerPartyName, endorsementChainFilterParameter));
   }
 
   private static EndorsementChainScenarioListBuilder getEndorsementChain() {
-    return null;
+    EndorsementChainComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String providerPartyName = threadLocalPublisherPartyName.get();
+    String carrierPartyName = threadLocalSubscriberPartyName.get();
+    return new EndorsementChainScenarioListBuilder(
+        previousAction ->
+            new CarrierGetEndorsementChainAction(
+                providerPartyName,
+                carrierPartyName,
+                (EndorsementChainAction) previousAction,
+                componentFactory.getMessageSchemaValidator("endorsementChains")));
   }
 }

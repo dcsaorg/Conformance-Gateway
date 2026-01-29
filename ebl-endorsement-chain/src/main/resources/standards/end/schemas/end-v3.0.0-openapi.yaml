@@ -417,6 +417,10 @@ components:
         type: string
         example: 3.0.2
   schemas:
+    endorsementChains:
+      type: array
+      items:
+        $ref: '#/components/schemas/EndorsementChain'
     EndorsementChain:
       type: object
       title: Endorsement Chain

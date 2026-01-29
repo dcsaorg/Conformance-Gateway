@@ -2,6 +2,7 @@ package org.dcsa.conformance.sandbox;
 
 import java.util.Arrays;
 import org.dcsa.conformance.core.AbstractStandard;
+import org.dcsa.conformance.end.EblEndorsementChainStandard;
 import org.dcsa.conformance.standards.adoption.AdoptionStandard;
 import org.dcsa.conformance.standards.an.AnStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
@@ -22,6 +23,7 @@ public enum SupportedStandard {
   BOOKING(BookingStandard.INSTANCE),
   CS(CsStandard.INSTANCE),
   EBL(EblStandard.INSTANCE),
+  EBL_ENDORSEMENT_CHAIN(EblEndorsementChainStandard.INSTANCE),
   EBL_ISSUANCE(EblIssuanceStandard.INSTANCE),
   EBL_SURRENDER(EblSurrenderStandard.INSTANCE),
   BOOKING_AND_EBL(BookingAndEblStandard.INSTANCE),

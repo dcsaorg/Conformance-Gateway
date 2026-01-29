@@ -58,12 +58,8 @@ import software.amazon.awscdk.services.dynamodb.TableProps;
 import software.amazon.awscdk.services.ec2.SubnetSelection;
 import software.amazon.awscdk.services.ec2.SubnetType;
 import software.amazon.awscdk.services.ec2.Vpc;
-import software.amazon.awscdk.services.iam.CfnUserPolicy;
-import software.amazon.awscdk.services.iam.CfnUserPolicyProps;
-import software.amazon.awscdk.services.iam.Effect;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
 import software.amazon.awscdk.services.iam.Policy;
-import software.amazon.awscdk.services.iam.PolicyDocument;
 import software.amazon.awscdk.services.iam.PolicyProps;
 import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.amazon.awscdk.services.iam.ServicePrincipal;
@@ -216,26 +212,6 @@ public class ConformanceStack extends Stack {
             assetCode,
             "org.dcsa.conformance.lambda.AdminLambda",
             vpc);
-
-    PolicyDocument invokeAdminLambdaPolicyDoc =
-        PolicyDocument.Builder.create()
-            .statements(
-                List.of(
-                    PolicyStatement.Builder.create()
-                        .effect(Effect.ALLOW)
-                        .actions(List.of("lambda:InvokeFunction"))
-                        .resources(List.of(adminLambda.getFunctionArn()))
-                        .build()))
-            .build();
-
-    new CfnUserPolicy(
-        this,
-        prefix + "InvokeAdminLambdaUserPolicy",
-        CfnUserPolicyProps.builder()
-            .userName("GITHUB_ACTION_CDK_DEPLOY")
-            .policyName(prefix + "InvokeAdminLambda")
-            .policyDocument(invokeAdminLambdaPolicyDoc)
-            .build());
 
     Policy invokeSandboxTaskLambdaPolicy =
         new Policy(

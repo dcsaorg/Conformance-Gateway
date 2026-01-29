@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import software.amazon.awscdk.BundlingOptions;
 import software.amazon.awscdk.DockerVolume;
 import software.amazon.awscdk.Duration;
@@ -59,14 +58,15 @@ import software.amazon.awscdk.services.dynamodb.TableProps;
 import software.amazon.awscdk.services.ec2.SubnetSelection;
 import software.amazon.awscdk.services.ec2.SubnetType;
 import software.amazon.awscdk.services.ec2.Vpc;
+import software.amazon.awscdk.services.iam.CfnUserPolicy;
+import software.amazon.awscdk.services.iam.CfnUserPolicyProps;
 import software.amazon.awscdk.services.iam.Effect;
-import software.amazon.awscdk.services.iam.IUser;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
 import software.amazon.awscdk.services.iam.Policy;
+import software.amazon.awscdk.services.iam.PolicyDocument;
 import software.amazon.awscdk.services.iam.PolicyProps;
 import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.amazon.awscdk.services.iam.ServicePrincipal;
-import software.amazon.awscdk.services.iam.User;
 import software.amazon.awscdk.services.lambda.AssetCode;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
@@ -217,25 +217,25 @@ public class ConformanceStack extends Stack {
             "org.dcsa.conformance.lambda.AdminLambda",
             vpc);
 
-    IUser githubDeployUser =
-        User.fromUserArn(
-            this,
-            prefix + "GitHubActionsCdkDeployUser",
-            "arn:aws:iam::" + this.getAccount() + ":user/GITHUB_ACTION_CDK_DEPLOY");
-
-    PolicyStatement allowInvokeAdminLambda =
-        PolicyStatement.Builder.create()
-            .effect(Effect.ALLOW)
-            .actions(List.of("lambda:InvokeFunction"))
-            .resources(List.of(adminLambda.getFunctionArn()))
+    PolicyDocument invokeAdminLambdaPolicyDoc =
+        PolicyDocument.Builder.create()
+            .statements(
+                List.of(
+                    PolicyStatement.Builder.create()
+                        .effect(Effect.ALLOW)
+                        .actions(List.of("lambda:InvokeFunction"))
+                        .resources(List.of(adminLambda.getFunctionArn()))
+                        .build()))
             .build();
 
-    Policy invokeAdminLambdaPolicy =
-        Policy.Builder.create(this, prefix + "InvokeAdminLambdaPolicy")
-            .statements(List.of(allowInvokeAdminLambda))
-            .build();
-
-    invokeAdminLambdaPolicy.attachToUser(githubDeployUser);
+    new CfnUserPolicy(
+        this,
+        prefix + "InvokeAdminLambdaUserPolicy",
+        CfnUserPolicyProps.builder()
+            .userName("GITHUB_ACTION_CDK_DEPLOY")
+            .policyName(prefix + "InvokeAdminLambda")
+            .policyDocument(invokeAdminLambdaPolicyDoc)
+            .build());
 
     Policy invokeSandboxTaskLambdaPolicy =
         new Policy(

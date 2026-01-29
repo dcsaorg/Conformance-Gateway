@@ -87,9 +87,6 @@ jobs:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Debug AWS identity
-        run: aws sts get-caller-identity
-
       - name: Diff Conformance-Gateway Stack of ${{ env.AWS_ENVIRONMENT }}
         run: |
           cd cdk/

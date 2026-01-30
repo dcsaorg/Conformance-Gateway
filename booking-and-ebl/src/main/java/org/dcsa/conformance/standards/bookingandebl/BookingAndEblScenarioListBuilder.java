@@ -10,7 +10,9 @@ import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.T
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_ISSUED;
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_PENDING_SURRENDER_FOR_AMENDMENT;
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_SURRENDERED_FOR_AMENDMENT;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_VOIDED;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -345,7 +347,7 @@ public class BookingAndEblScenarioListBuilder
   }
 
   private static BookingAndEblScenarioListBuilder shipperGetTransportDocument(
-      TransportDocumentStatus expectedTdStatus) {
+      TransportDocumentStatus... expectedTdStatus) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -355,7 +357,7 @@ public class BookingAndEblScenarioListBuilder
                     carrierPartyName,
                     shipperPartyName,
                     (EblAction) previousAction,
-                    expectedTdStatus,
+                    Arrays.stream(expectedTdStatus).toList(),
                     componentFactory.getEblMessageSchemaValidator(
                         EblScenarioListBuilder.GET_TD_SCHEMA_NAME))
                 .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
@@ -547,6 +549,6 @@ public class BookingAndEblScenarioListBuilder
   private static BookingAndEblScenarioListBuilder uc11TDGet(
       BookingAndEblScenarioListBuilder... thenEither) {
     return uc11CarrierVoidTDAndIssueAmendedTransportDocument()
-        .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither));
+        .then(shipperGetTransportDocument(TD_ISSUED,TD_VOIDED).thenEither(thenEither));
   }
 }

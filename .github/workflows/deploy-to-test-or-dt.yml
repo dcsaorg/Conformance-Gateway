@@ -92,24 +92,24 @@ jobs:
           cd cdk/
           cdk diff ${{ env.AWS_ENVIRONMENT }}ConformanceStack
 
-      - name: Create pre-deployment reports in all sandboxes
-        run: |
-          echo "Creating report in all sandboxes before deployment..."
-          REPORT_TITLE="Before DCSA deployment - $(date '+%Y-%m-%d %H:%M:%S UTC')"
-          PAYLOAD=$(jq -n \
-            --arg operation "createReportInAllSandboxes" \
-            --arg reportTitle "$REPORT_TITLE" \
-            '{operation: $operation, reportTitle: $reportTitle}')
-
-          aws lambda invoke \
-            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
-            --payload "$PAYLOAD" \
-            --cli-binary-format raw-in-base64-out \
-            response.json
-
-          echo "Lambda response:"
-          cat response.json | jq '.'
-          rm response.json
+#      - name: Create pre-deployment reports in all sandboxes
+#        run: |
+#          echo "Creating report in all sandboxes before deployment..."
+#          REPORT_TITLE="Before DCSA deployment - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+#          PAYLOAD=$(jq -n \
+#            --arg operation "createReportInAllSandboxes" \
+#            --arg reportTitle "$REPORT_TITLE" \
+#            '{operation: $operation, reportTitle: $reportTitle}')
+#
+#          aws lambda invoke \
+#            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+#            --payload "$PAYLOAD" \
+#            --cli-binary-format raw-in-base64-out \
+#            response.json
+#
+#          echo "Lambda response:"
+#          cat response.json | jq '.'
+#          rm response.json
 
       - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
         run: |

@@ -93,11 +93,6 @@ public class EblSurrenderPlatform extends ConformanceParty {
         forAmendment
             ? EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED
             : EblSurrenderState.DELIVERY_SURRENDER_REQUESTED);
-    String reasonCode =
-        actionPrompt.get("isSwitchToPaper") != null
-                && actionPrompt.get("isSwitchToPaper").booleanValue()
-            ? "SWTP"
-            : "";
     JsonNode jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
             "/standards/eblsurrender/messages/eblsurrender-api-v%s-request.json"
@@ -106,7 +101,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry("SURRENDER_REQUEST_REFERENCE_PLACEHOLDER", srr),
                 Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
                 Map.entry("SURRENDER_REQUEST_CODE_PLACEHOLDER", src),
-                Map.entry("REASON_CODE", reasonCode),
+                Map.entry("REASON_CODE", ""),
                 Map.entry("ISSUE_TO_PARTY", ssp.issueToParty().toString()),
                 Map.entry("SURRENDEREE_PARTY", ssp.surrendereeParty().toString()),
                 Map.entry("CARRIER_PARTY", ssp.carrierParty().toString()),

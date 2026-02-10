@@ -108,6 +108,7 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
         return Stream.concat(
             primaryExchangeChecks,
             getTDNotificationChecks(
+                    getMatchedNotificationExchangeUuid(),
                 expectedApiVersion,
                 notificationSchemaValidator,
                 TransportDocumentStatus.TD_APPROVED));

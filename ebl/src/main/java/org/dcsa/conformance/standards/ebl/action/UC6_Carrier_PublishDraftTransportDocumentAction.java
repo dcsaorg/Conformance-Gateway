@@ -4,6 +4,8 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -143,7 +145,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
             getMatchedExchangeUuid(),
             expectedApiVersion,
             notificationSchemaValidator,
-            TransportDocumentStatus.TD_DRAFT,
+            List.of(TransportDocumentStatus.TD_DRAFT),
             false);
       }
     };

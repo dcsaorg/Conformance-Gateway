@@ -33,6 +33,7 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
             .collect(Collectors.joining(", "))));
 
     this.endorsementChainFilterParameters = new LinkedHashSet<>(Arrays.asList(endorsementChainFilterParameters));
+
   }
   @Override
   public ObjectNode exportJsonState() {
@@ -72,23 +73,29 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
   public JsonNode getJsonForHumanReadablePrompt() {
 
     return SuppliedScenarioParameters.fromMap(
-        endorsementChainFilterParameters.stream()
-          .collect(
-            Collectors.toMap(
-              Function.identity(),
-              endorsementChainFilterParameter ->
-                switch (endorsementChainFilterParameter) {
-                  case TRANSPORT_DOCUMENT_REFERENCE -> "";
-                  case TRANSPORT_DOCUMENT_SUB_REFERENCE -> "";
-                  case CARRIER_SCAC_CODE -> "";
-                  default -> "TODO";
-                })))
-      .toJson();
+            endorsementChainFilterParameters.stream()
+                .collect(
+                    Collectors.toMap(
+                        Function.identity(),
+                        endorsementChainFilterParameter ->
+                            switch (endorsementChainFilterParameter) {
+                              case TRANSPORT_DOCUMENT_REFERENCE -> "123456789";
+                              case TRANSPORT_DOCUMENT_SUB_REFERENCE -> "sub1234";
+                              case CARRIER_SCAC_CODE -> "MAEU";
+                              default -> "TODO";
+                            })))
+        .toJson();
   }
 
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
+    this.getDspConsumer()
+        .accept(
+            getDspSupplier()
+                .get()
+                .withTransportDocumentReference(
+                    partyInput.get("input").get("transportDocumentReference").asText()));
   }
 
   @Override

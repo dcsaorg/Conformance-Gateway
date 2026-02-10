@@ -74,9 +74,9 @@ public class EndorsementChainProvider extends ConformanceParty {
                         Function.identity(),
                         endorsementChainFilterParam ->
                             switch (endorsementChainFilterParam) {
-                              case TRANSPORT_DOCUMENT_REFERENCE -> "";
-                              case TRANSPORT_DOCUMENT_SUB_REFERENCE -> "";
-                              case CARRIER_SCAC_CODE -> "";
+                              case TRANSPORT_DOCUMENT_REFERENCE -> "123456789";
+                              case TRANSPORT_DOCUMENT_SUB_REFERENCE -> "sub1234";
+                              case CARRIER_SCAC_CODE -> "MAEU";
                             })));
 
     asyncOrchestratorPostPartyInput(

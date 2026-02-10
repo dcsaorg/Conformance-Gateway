@@ -8,7 +8,6 @@ import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.end.party.EndorsementChainRole;
 
@@ -19,7 +18,7 @@ public class CarrierGetEndorsementChainAction extends EndorsementChainAction{
   public CarrierGetEndorsementChainAction(
       String providerPartyName,
       String carrierPartyName,
-      ConformanceAction previousAction,
+      EndorsementChainAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
     super(carrierPartyName, providerPartyName, previousAction, "GetEndorsementChain");
     this.responseSchemaValidator = responseSchemaValidator;
@@ -30,11 +29,16 @@ public class CarrierGetEndorsementChainAction extends EndorsementChainAction{
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        var dsp = getDspSupplier().get();
+        var tdr =
+            dsp.transportDocumentReference() != null
+                ? dsp.transportDocumentReference()
+                : "<UNKNOWN-TDR>";
         return Stream.of(
             new UrlPathCheck(
                 EndorsementChainRole::isCarrier,
                 getMatchedExchangeUuid(),
-                "/endorsement-chains/{transportDocumentReference}"),
+                "/endorsement-chains/" + tdr),
             new ResponseStatusCheck(
                 EndorsementChainRole::isProvider, getMatchedExchangeUuid(), 200),
             new JsonSchemaCheck(

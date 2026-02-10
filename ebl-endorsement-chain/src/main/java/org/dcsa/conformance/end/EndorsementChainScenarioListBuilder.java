@@ -1,6 +1,7 @@
 package org.dcsa.conformance.end;
 
 import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.CARRIER_SCAC_CODE;
+import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_REFERENCE;
 import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_SUB_REFERENCE;
 
 import java.util.LinkedHashMap;
@@ -40,10 +41,12 @@ public class EndorsementChainScenarioListBuilder
         "GET-only scenarios (for adopters only supporting GET)",
         noAction()
             .thenEither(
-                scenarioWithParameters(),
-                scenarioWithParameters(TRANSPORT_DOCUMENT_SUB_REFERENCE),
-                scenarioWithParameters(CARRIER_SCAC_CODE),
+                scenarioWithParameters(TRANSPORT_DOCUMENT_REFERENCE),
                 scenarioWithParameters(
+                    TRANSPORT_DOCUMENT_REFERENCE, TRANSPORT_DOCUMENT_SUB_REFERENCE),
+                scenarioWithParameters(TRANSPORT_DOCUMENT_REFERENCE, CARRIER_SCAC_CODE),
+                scenarioWithParameters(
+                    TRANSPORT_DOCUMENT_REFERENCE,
                     TRANSPORT_DOCUMENT_SUB_REFERENCE,
                     CARRIER_SCAC_CODE)));
     return map;

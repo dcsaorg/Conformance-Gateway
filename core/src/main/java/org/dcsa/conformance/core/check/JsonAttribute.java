@@ -442,6 +442,35 @@ public class JsonAttribute {
         });
   }
 
+  public static JsonRebasableContentCheck mustBeOneOf(
+      JsonPointer jsonPointer, Set<String> expectedValue) {
+    return mustBeOneOf(jsonPointer, true, expectedValue);
+  }
+
+  public static JsonRebasableContentCheck mustBeOneOf(
+      JsonPointer jsonPointer, boolean isRelevant, Set<String> expectedValue) {
+    Objects.requireNonNull(
+        expectedValue,
+        "expectedValue cannot be null; Note: Use `() -> getDspSupplier().get().foo()` (or similar) when testing a value against a dynamic scenario property");
+    return JsonRebasableCheckImpl.of(
+        "%s: Must be one of '%s'".formatted(jsonCheckName(jsonPointer), expectedValue),
+        isRelevant,
+        (body, contextPath) -> {
+          var node = body.at(jsonPointer);
+          var actualValue = node.asText(null);
+          if (!expectedValue.contains(actualValue)) {
+            return ConformanceCheckResult.simple(
+                Set.of(
+                    "The value of '%s' was '%s' which is not equal to any of '%s'"
+                        .formatted(
+                            renderJsonPointer(jsonPointer, contextPath),
+                            renderValue(node),
+                            renderValue(expectedValue.toString()))));
+          }
+          return ConformanceCheckResult.simple(Collections.emptySet());
+        });
+  }
+
   public static JsonRebasableContentCheck mustEqual(JsonPointer jsonPointer, String expectedValue) {
     return mustEqual(jsonPointer, true, expectedValue);
   }

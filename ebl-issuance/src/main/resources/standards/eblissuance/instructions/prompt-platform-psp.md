@@ -27,7 +27,7 @@ PUBLIC_KEY
 ### 2. Scenario Parameters
 
 Supply the following parameters so that when your platform system receives the issuance request, it sends back an
-asynchronous response with the code **RESPONSE_CODE**.
+asynchronous response by making a POST request to `/ebl-issuance-responses` with the code **RESPONSE_CODE**.
 
 These parameters customize the requests sent to your platform application throughout the scenario.
 

@@ -3,7 +3,8 @@ Send a surrender request for **SURRENDER_TYPE** from your platform to the synthe
 ### What Happens:
 
 1. **Your platform sends**: POST request to `/ebl-surrender-requests` with the surrender request details
-2. **Synthetic carrier responds**: Automatically accepts or rejects the surrender request
+2. **Synthetic carrier responds**: Automatically accepts or rejects the surrender request by making a POST request to
+   `/ebl-surrender-responses`.
 3. **Conformance validates**: Your platform's request conforms to the DCSA eBL Surrender API standard
 
 ### Next Steps:

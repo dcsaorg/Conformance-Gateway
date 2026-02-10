@@ -2,7 +2,7 @@ name: Deploy+Verify on AWS dev
 
 on:
   push:
-    branches: ["dev"]
+    branches: [ "dev" ]
 
 env:
   AWS_REGION: "eu-north-1"

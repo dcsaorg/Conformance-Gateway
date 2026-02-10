@@ -100,13 +100,15 @@ public class BookingShipper extends ConformanceParty {
 
     ConformanceResponse conformanceResponse = syncCounterpartPost("/v2/bookings", bookingPayload);
 
+    addOperatorLogEntry("Sent a booking request with the parameters: %s".formatted(bookingPayload));
+
     JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
     String cbrr = jsonBody.path("carrierBookingRequestReference").asText();
     ObjectNode updatedBooking =
         ((ObjectNode) bookingPayload).put("carrierBookingRequestReference", cbrr);
     persistentMap.save(cbrr, updatedBooking);
 
-    addOperatorLogEntry("Sent a booking request with the parameters: %s".formatted(bookingPayload));
+
   }
 
   private void sendCancelBookingRequest(JsonNode actionPrompt) {
@@ -188,7 +190,7 @@ public class BookingShipper extends ConformanceParty {
             new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 
     addOperatorLogEntry(
-        "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
+        "Handled notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
 

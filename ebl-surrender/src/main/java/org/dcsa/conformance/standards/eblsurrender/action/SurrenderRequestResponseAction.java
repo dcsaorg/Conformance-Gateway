@@ -24,7 +24,6 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
   private final JsonSchemaValidator responseSchemaValidator;
   private final boolean forAmendment;
   private final boolean accept;
-  private final boolean isSwitchToPaper;
 
   private final AtomicReference<String> surrenderRequestReference = new AtomicReference<>();
 
@@ -39,14 +38,12 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       boolean accept,
-      String title,
-      boolean isSWTP) {
+      String title) {
     super(platformPartyName, carrierPartyName, expectedStatus, previousAction, title);
     this.forAmendment = forAmendment;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.accept = accept;
-    this.isSwitchToPaper = isSWTP;
   }
 
   @Override
@@ -88,9 +85,7 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
   @Override
   public ObjectNode asJsonNode() {
     // don't include srr because it's not known when this is sent out
-    return super.asJsonNode()
-        .put("forAmendment", forAmendment)
-        .put("isSwitchToPaper", isSwitchToPaper);
+    return super.asJsonNode().put("forAmendment", forAmendment);
   }
 
   @Override
@@ -135,21 +130,7 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
                     HttpMessageType.REQUEST,
                     JsonPointer.compile("/surrenderRequestCode"),
                     forAmendment ? "AREQ" : "SREQ"),
-                new JsonAttributeCheck(
-                    EblSurrenderRole::isPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    JsonPointer.compile("/reasonCode"),
-                    forAmendment && isSwitchToPaper ? "SWTP" : ""),
-                surrenderRequestChecks(getMatchedExchangeUuid(), expectedApiVersion),
-                new JsonAttributeCheck(
-                    EblSurrenderRole::isPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    JsonPointer.compile("/transportDocumentReference"),
-                    sspSupplier.get() == null
-                        ? null
-                        : sspSupplier.get().transportDocumentReference())),
+                surrenderRequestChecks(getMatchedExchangeUuid(), expectedApiVersion)),
             Stream.of(
                 new UrlPathCheck(
                     "[Response]",

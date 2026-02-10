@@ -1,6 +1,6 @@
 package org.dcsa.conformance.standards.tnt.checks;
 
-import static org.dcsa.conformance.standards.tnt.checks.TntChecks.VALIDATE_NON_EMPTY_EVENTS;
+import static org.dcsa.conformance.standards.tnt.v220.checks.TntChecks.VALIDATE_NON_EMPTY_EVENTS;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

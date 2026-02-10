@@ -1,0 +1,216 @@
+{
+  "events": [
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-ship-001",
+      "eventDateTime": "2026-01-15T09:00:00Z",
+      "eventUpdatedDateTime": "2025-01-23T01:23:45Z",
+      "eventClassification": {
+        "eventTypeCode": "SHIPMENT",
+        "eventClassifierCode": "ACT",
+        "shipmentEventTypeCode": "CONF"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "typeCode": "BKG",
+          "reference": "ABC709951"
+        },
+        "additionalDocumentReferences": [
+          {
+            "typeCode": "TRD",
+            "reference": "HHL71800000"
+          }
+        ]
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-trans-001",
+      "eventDateTime": "2026-01-16T11:30:00Z",
+      "eventUpdatedDateTime": "2025-01-25T01:23:45Z",
+      "eventLocation": {
+        "locationName": "Example Terminal Alpha",
+        "UNLocationCode": "GBSOU",
+        "facilityTypeCode": "POTE"
+      },
+      "eventClassification": {
+        "eventTypeCode": "TRANSPORT",
+        "eventClassifierCode": "ACT",
+        "transportEventTypeCode": "DEPA"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "typeCode": "BKG",
+          "reference": "ABC709951"
+        },
+        "additionalDocumentReferences": [
+          {
+            "typeCode": "TRD",
+            "reference": "HHL71800000"
+          }
+        ]
+      },
+      "transportDetails": {
+        "transportCall": {
+          "transportCallReference": "tc-67890-def",
+          "transportCallSequenceNumber": 1,
+          "modeOfTransport": "VESSEL",
+          "serviceCodeOrReference": {
+            "carrierServiceCode": "SVC002"
+          },
+          "exportVoyageNumberOrReference": {
+            "carrierVoyageNumber": "V002E"
+          },
+          "importVoyageNumberOrReference": {
+            "carrierVoyageNumber": "V002N"
+          },
+          "vesselTransport": {
+            "vesselIMONumber": "7654321",
+            "vesselName": "Example Vessel Beta",
+            "vesselFlag": "GB",
+            "vesselCallSign": "WXYZ"
+          }
+        }
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-equip-001",
+      "eventDateTime": "2026-01-17T13:45:00Z",
+      "eventUpdatedDateTime": "2025-01-27T01:23:45Z",
+      "eventLocation": {
+        "locationName": "Example Warehouse Facility",
+        "UNLocationCode": "FRPAR",
+        "facilityTypeCode": "DEPO",
+        "address": {
+          "street": "Sample Avenue",
+          "streetNumber": "456",
+          "postCode": "75001",
+          "city": "Example Town",
+          "countryCode": "FR"
+        }
+      },
+      "eventClassification": {
+        "eventTypeCode": "EQUIPMENT",
+        "eventClassifierCode": "ACT",
+        "equipmentEventTypeCode": "GTIN"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "45G1",
+        "emptyIndicatorCode": "EMPTY",
+        "movementType": "IMPORT"
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-iot-001",
+      "eventDateTime": "2026-01-18T15:20:00Z",
+      "eventUpdatedDateTime": "2025-01-29T01:23:45Z",
+      "eventLocation": {
+        "locationName": "Monitoring Station Alpha",
+        "geoCoordinate": {
+          "latitude": "51.5074",
+          "longitude": "-0.1278"
+        }
+      },
+      "eventClassification": {
+        "eventTypeCode": "IOT",
+        "eventClassifierCode": "ACT",
+        "iotEventTypeCode": "DETC"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "22GP"
+      },
+      "iotDetails": {
+        "iotEventCode": "LOC"
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-reefer-001",
+      "eventDateTime": "2026-01-19T17:00:00Z",
+      "eventUpdatedDateTime": "2025-02-01T01:23:45Z",
+      "eventLocation": {
+        "locationName": "Cold Storage Facility",
+        "UNLocationCode": "BEANR",
+        "facilityTypeCode": "COFS"
+      },
+      "eventClassification": {
+        "eventTypeCode": "REEFER",
+        "eventClassifierCode": "ACT",
+        "reeferEventTypeCode": "MEAS"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "42R1"
+      },
+      "reeferDetails": {
+        "temperatureUnit": "CEL",
+        "internalSetpointTemperature": -20.0,
+        "ambientMeasuredTemperature": 18.5,
+        "temperatureProbeMeasurements": [
+          {
+            "USDAProbeNumber": 1,
+            "measuredTemperatureValue": -19.8
+          },
+          {
+            "USDAProbeNumber": 2,
+            "measuredTemperatureValue": -20.1
+          },
+          {
+            "USDAProbeNumber": 3,
+            "measuredTemperatureValue": -19.9
+          }
+        ],
+        "setpointParameters": {
+          "humidityPercentage": 85.0,
+          "o2Percentage": 20.5,
+          "co2Percentage": 0.3
+        },
+        "measuredParameters": {
+          "humidityPercentage": 84.2,
+          "o2Percentage": 20.6,
+          "co2Percentage": 0.35
+        }
+      }
+    }
+  ]
+}
+

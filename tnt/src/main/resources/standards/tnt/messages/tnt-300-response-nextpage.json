@@ -1,0 +1,200 @@
+{
+  "events": [
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-ship-002",
+      "eventDateTime": "2026-01-20T08:00:00Z",
+      "eventUpdatedDateTime": "2025-02-23T01:23:45Z",
+      "eventClassification": {
+        "eventTypeCode": "SHIPMENT",
+        "eventClassifierCode": "ACT",
+        "shipmentEventTypeCode": "APPR"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "typeCode": "BKG",
+          "reference": "ABC709951"
+        }
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-trans-002",
+      "eventDateTime": "2026-01-20T10:15:00Z",
+      "eventUpdatedDateTime": "2025-02-10T01:23:45Z",
+      "eventLocation": {
+        "locationName": "Example Port Beta",
+        "UNLocationCode": "ESBCN",
+        "facilityTypeCode": "POTE"
+      },
+      "eventClassification": {
+        "eventTypeCode": "TRANSPORT",
+        "eventClassifierCode": "EST",
+        "transportEventTypeCode": "ARRI"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "typeCode": "BKG",
+          "reference": "ABC709951"
+        },
+        "additionalDocumentReferences": [
+          {
+            "typeCode": "TRD",
+            "reference": "HHL71800000"
+          }
+        ]
+      },
+      "transportDetails": {
+        "transportCall": {
+          "transportCallReference": "tc-11223-ghi",
+          "transportCallSequenceNumber": 5,
+          "modeOfTransport": "VESSEL",
+          "serviceCodeOrReference": {
+            "carrierServiceCode": "SVC003"
+          },
+          "exportVoyageNumberOrReference": {
+            "carrierVoyageNumber": "V003E"
+          },
+          "importVoyageNumberOrReference": {
+            "carrierVoyageNumber": "V003N"
+          },
+          "vesselTransport": {
+            "vesselIMONumber": "2468135",
+            "vesselName": "Example Vessel Gamma",
+            "vesselFlag": "ES",
+            "vesselCallSign": "MNOP"
+          }
+        },
+        "changeRemark": "Slight delay due to weather"
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-equip-002",
+      "eventDateTime": "2026-01-20T12:30:00Z",
+      "eventUpdatedDateTime": "2025-02-15T01:23:45Z",
+      "eventLocation": {
+        "locationName": "Example Yard Beta",
+        "UNLocationCode": "ITGOA",
+        "facilityTypeCode": "OFFD"
+      },
+      "eventClassification": {
+        "eventTypeCode": "EQUIPMENT",
+        "eventClassifierCode": "ACT",
+        "equipmentEventTypeCode": "DISC"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "22GP",
+        "emptyIndicatorCode": "LADEN",
+        "movementType": "TRANSSHIPMENT"
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-iot-002",
+      "eventDateTime": "2026-01-20T14:45:00Z",
+      "eventUpdatedDateTime": "2025-02-18T01:23:45Z",
+      "eventLocation": {
+        "locationName": "Sensor Hub Beta",
+        "geoCoordinate": {
+          "latitude": "48.8566",
+          "longitude": "2.3522"
+        }
+      },
+      "eventClassification": {
+        "eventTypeCode": "IOT",
+        "eventClassifierCode": "ACT",
+        "iotEventTypeCode": "DETC"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "22GP"
+      },
+      "iotDetails": {
+        "iotEventCode": "DRC"
+      }
+    },
+    {
+      "eventRouting": {
+        "originatingParty": {
+          "partyCode": "EXCO",
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyFunction": "CA"
+        }
+      },
+      "eventID": "evt-resp-reefer-002",
+      "eventDateTime": "2026-01-20T16:30:00Z",
+      "eventUpdatedDateTime": "2025-02-20T01:23:45Z",
+      "eventLocation": {
+        "locationName": "Refrigeration Hub",
+        "UNLocationCode": "NLAMS",
+        "facilityTypeCode": "COFS"
+      },
+      "eventClassification": {
+        "eventTypeCode": "REEFER",
+        "eventClassifierCode": "ACT",
+        "reeferEventTypeCode": "ADJU"
+      },
+      "equipmentDetails": {
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "45R1"
+      },
+      "reeferDetails": {
+        "temperatureUnit": "CEL",
+        "internalSetpointTemperature": -15.0,
+        "ambientMeasuredTemperature": 20.0,
+        "temperatureProbeMeasurements": [
+          {
+            "USDAProbeNumber": 1,
+            "measuredTemperatureValue": -14.9
+          },
+          {
+            "USDAProbeNumber": 2,
+            "measuredTemperatureValue": -15.2
+          }
+        ],
+        "setpointParameters": {
+          "humidityPercentage": 70.0,
+          "o2Percentage": 21.0,
+          "co2Percentage": 0.4
+        },
+        "measuredParameters": {
+          "humidityPercentage": 69.5,
+          "o2Percentage": 21.1,
+          "co2Percentage": 0.42
+        }
+      }
+    }
+  ]
+}
+

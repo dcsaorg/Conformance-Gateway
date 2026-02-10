@@ -145,7 +145,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                     scenarioType != ScenarioType.REGULAR_SWB_AMF
                                         && scenarioType
                                             != ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE)
-                            .map(scenarioType -> buildScenarioForType(scenarioType))
+                            .map(EblScenarioListBuilder::buildScenarioForType)
                             .toArray(EblScenarioListBuilder[]::new))),
             Map.entry(
                 "Shipper interactions with transport document",
@@ -159,7 +159,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                     true,
                                     ScenarioType.REGULAR_STRAIGHT_BL,
                                     uc8Get(uc12Get(uc13Get())))),
-                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get(uc12Get(uc13Get()))))))))),
+                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get()))))))),
             Map.entry(
                 "Carrier error response conformance",
                 noAction()
@@ -198,12 +198,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                                 SI_RECEIVED,
                                                                 SI_UPDATE_CONFIRMED,
                                                                 true,
-                                                                uc11Get(
-                                                                    uc12Get(
-                                                                        uc13Get(
-                                                                            uc14Get(
-                                                                                SI_COMPLETED,
-                                                                                true))))))))))),
+                                                                uc11Get()))))))),
                                 uc3Get(
                                     SI_RECEIVED,
                                     SI_UPDATE_RECEIVED,
@@ -242,12 +237,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                         true,
                                                         uc9Get(
                                                             uc10Get(
-                                                                uc11Get(
-                                                                    uc12Get(
-                                                                        uc13Get(
-                                                                            uc14Get(
-                                                                                SI_COMPLETED,
-                                                                                true)))))))),
+                                                                uc11Get())))),
                                                 uc9Get(
                                                     uc3Get(
                                                         SI_RECEIVED,
@@ -258,12 +248,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                                                             SI_UPDATE_CONFIRMED,
                                                             true,
                                                             uc10Get(
-                                                                uc11Get(
-                                                                    uc12Get(
-                                                                        uc13Get(
-                                                                            uc14Get(
-                                                                                SI_COMPLETED,
-                                                                                true))))))))))))))),
+                                                                uc11Get()))))))))))),
             Map.entry(
                 "Sea Waybill",
                 carrierSupplyScenarioParameters(ScenarioType.REGULAR_SWB, isTd)
@@ -474,7 +459,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static EblScenarioListBuilder uc11Get(EblScenarioListBuilder... thenEither) {
     return uc11CarrierVoidTDandIssueAmendedTransportDocument()
-        .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither));
+        .then(shipperGetTransportDocument(TD_ISSUED, TD_VOIDED).thenEither(thenEither));
   }
 
   private static EblScenarioListBuilder uc12Get(EblScenarioListBuilder... thenEither) {
@@ -579,7 +564,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder shipperGetTransportDocument(
-      TransportDocumentStatus expectedTdStatus) {
+      TransportDocumentStatus... expectedTdStatus) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
@@ -588,7 +573,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 carrierPartyName,
                 shipperPartyName,
                 (EblAction) previousAction,
-                expectedTdStatus,
+                Arrays.stream(expectedTdStatus).toList(),
                 resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME)));
   }
 

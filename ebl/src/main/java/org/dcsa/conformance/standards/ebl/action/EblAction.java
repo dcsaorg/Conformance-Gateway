@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.ebl.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -223,17 +224,6 @@ public abstract class EblAction extends BookingAndEblAction {
   }
 
   protected Stream<ActionCheck> getTDNotificationChecks(
-      String expectedApiVersion,
-      JsonSchemaValidator notificationSchemaValidator,
-      TransportDocumentStatus transportDocumentStatus) {
-    return getTDNotificationChecks(
-        getMatchedNotificationExchangeUuid(),
-        expectedApiVersion,
-        notificationSchemaValidator,
-        transportDocumentStatus);
-  }
-
-  protected Stream<ActionCheck> getTDNotificationChecks(
       UUID notificationExchangeUuid,
       String expectedApiVersion,
       JsonSchemaValidator notificationSchemaValidator,
@@ -242,7 +232,7 @@ public abstract class EblAction extends BookingAndEblAction {
         notificationExchangeUuid,
         expectedApiVersion,
         notificationSchemaValidator,
-        transportDocumentStatus,
+        List.of(transportDocumentStatus),
         true);
   }
 
@@ -250,7 +240,7 @@ public abstract class EblAction extends BookingAndEblAction {
       UUID notificationExchangeUuid,
       String expectedApiVersion,
       JsonSchemaValidator notificationSchemaValidator,
-      TransportDocumentStatus transportDocumentStatus,
+      List<TransportDocumentStatus> transportDocumentStatus,
       boolean tdrIsKnown) {
     String titlePrefix = "[Notification]";
     return Stream.of(

@@ -500,9 +500,12 @@ public class EblCarrier extends ConformanceParty {
       ConformanceResponse response =
           request.createResponse(
               200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(body));
+      String stateInfo = amendedContent
+          ? "(amended content, in state '%s')".formatted(si.getShippingInstructionsState().wireName())
+          : "(in state '%s')".formatted(si.getShippingInstructionsState().wireName());
       addOperatorLogEntry(
-          "Responded to GET shipping instructions request '%s' (in state '%s')"
-              .formatted(documentReference, si.getShippingInstructionsState().wireName()));
+          "Responded to GET shipping instructions request '%s' %s"
+              .formatted(documentReference, stateInfo));
       return response;
     }
     return return404(request, "The Shipping Instructions does not exist");
@@ -528,7 +531,7 @@ public class EblCarrier extends ConformanceParty {
             200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(body));
     addOperatorLogEntry(
         "Responded to GET transport document request '%s' (in state '%s')"
-            .formatted(documentReference, si.getShippingInstructionsState().wireName()));
+            .formatted(documentReference, si.getTransportDocumentState().wireName()));
     return response;
   }
 

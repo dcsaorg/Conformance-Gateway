@@ -66,7 +66,8 @@ public class EndorsementChainCarrier extends ConformanceParty {
     syncCounterpartGet("/endorsement-chains/" + pathParam, queryParams);
 
     addOperatorLogEntry(
-        "Sent GET Endorsement Chain request with parameters: %s".formatted(ssp.toString()));
+        "Sent GET endorsement chain request with parameters: %s"
+            .formatted(ssp.toJson().toString()));
   }
 
   private static Map<String, Collection<String>> getQueryParams(SuppliedScenarioParameters ssp) {

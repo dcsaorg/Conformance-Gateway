@@ -38,7 +38,7 @@ public class EndorsementChainScenarioListBuilder
     Map<String, EndorsementChainScenarioListBuilder> map = new LinkedHashMap<>();
 
     map.put(
-        "GET-only scenarios (for adopters only supporting GET)",
+        "Endorsement Chain Scenarios",
         noAction()
             .thenEither(
                 scenarioWithParameters(TRANSPORT_DOCUMENT_REFERENCE),

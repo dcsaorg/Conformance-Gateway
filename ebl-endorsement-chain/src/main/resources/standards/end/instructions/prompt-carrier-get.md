@@ -1,1 +1,1 @@
-Send a GET `/endorsemet-chains/`TDR request to the synthetic provider.
+Send a GET request to /endorsement-chains/{TDR} to the synthetic provider.

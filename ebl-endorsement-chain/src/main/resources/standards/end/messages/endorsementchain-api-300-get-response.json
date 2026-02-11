@@ -26,14 +26,14 @@
           "eblPlatform": "WAVE",
           "identifyingCodes": [
             {
-              "codeListProvider": "WAE",
+              "codeListProvider": "WAVE",
               "partyCode": "0665fefb-7c3f-443b-8ccd-73ced178448f"
             }
           ]
         },
         "recipient": {
           "partyName": "Yang Ming Marine Transport Corporation",
-          "eblPlatform": "AVE",
+          "eblPlatform": "WAVE",
           "identifyingCodes": [
             {
               "codeListProvider": "WAVE",

@@ -49,10 +49,7 @@ public class CarrierGetEndorsementChainAction extends EndorsementChainAction{
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        var tdr =
-            dsp.transportDocumentReference() != null
-                ? dsp.transportDocumentReference()
-                : "<UNKNOWN-TDR>";
+        var tdr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : "";
         return Stream.of(
             new UrlPathCheck(
                 EndorsementChainRole::isCarrier,

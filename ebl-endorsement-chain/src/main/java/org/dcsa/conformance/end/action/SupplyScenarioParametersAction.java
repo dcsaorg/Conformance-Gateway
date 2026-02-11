@@ -64,7 +64,7 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(null, "prompt-publisher-ssp.md");
+    return getMarkdownHumanReadablePrompt(null, "prompt-provider-ssp.md");
   }
 
 

@@ -1,6 +1,8 @@
 package org.dcsa.conformance.end.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -9,6 +11,7 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.end.checks.EndorsementChainChecks;
 import org.dcsa.conformance.end.party.EndorsementChainRole;
 
 public class CarrierGetEndorsementChainAction extends EndorsementChainAction{
@@ -22,6 +25,19 @@ public class CarrierGetEndorsementChainAction extends EndorsementChainAction{
       JsonSchemaValidator responseSchemaValidator) {
     super(carrierPartyName, providerPartyName, previousAction, "GetEndorsementChain");
     this.responseSchemaValidator = responseSchemaValidator;
+  }
+
+  @Override
+  public String getHumanReadablePrompt() {
+    JsonNode root = sspSupplier.get().toJson();
+
+    String tdr = root.get("transportDocumentReference").asText();
+
+    ObjectNode queryParams = root.get("queryParameters").deepCopy();
+    queryParams.remove("transportDocumentReference"); // remove unwanted field
+
+    return getMarkdownHumanReadablePrompt(
+        Map.of("TDR", tdr, "QUERY_PARAMS", queryParams.toString()), "prompt-carrier-get.md");
   }
 
   @Override
@@ -55,7 +71,9 @@ public class CarrierGetEndorsementChainAction extends EndorsementChainAction{
                 EndorsementChainRole::isProvider,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                expectedApiVersion));
+                expectedApiVersion),
+            EndorsementChainChecks.getENDGetResponseChecks(
+                getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

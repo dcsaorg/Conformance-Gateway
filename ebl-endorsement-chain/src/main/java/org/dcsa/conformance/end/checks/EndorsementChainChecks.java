@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -26,6 +27,7 @@ public class EndorsementChainChecks {
       UUID matchedExchangeUuid, String expectedApiVersion) {
 
     var checks = new ArrayList<JsonContentCheck>();
+    checks.add(validResponseIsEmpty());
     checks.add(validActionCode());
     checks.add(validEblPlatformPseudoEnum());
     checks.add(validCodeListProviderPseudoEnumEverywhere());
@@ -39,15 +41,28 @@ public class EndorsementChainChecks {
         checks);
   }
 
+  private static JsonContentCheck validResponseIsEmpty() {
+    return JsonAttribute.customValidator(
+        "Response must be a non empty array",
+        body -> {
+          Set<String> errors = new LinkedHashSet<>();
+
+          if (body.isEmpty() || !body.isArray()) {
+            errors.add("Response must be a non empty array");
+          }
+
+          return ConformanceCheckResult.simple(errors);
+        });
+  }
+
   private static JsonContentCheck validActionCode() {
     return JsonAttribute.customValidator(
         "All actionCode values must be one of dataset values",
         body -> {
           Set<String> errors = new LinkedHashSet<>();
 
-          if (!body.isArray() || body.isEmpty()) {
-            errors.add("Response must be a non-empty array");
-            return ConformanceCheckResult.simple(errors);
+          if (body.isEmpty() || !body.isArray()) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
           }
 
           for (int docIdx = 0; docIdx < body.size(); docIdx++) {
@@ -88,12 +103,10 @@ public class EndorsementChainChecks {
     return JsonAttribute.customValidator(
         "All eblPlatform values must be of dataset values",
         body -> {
-          Set<String> errors = new LinkedHashSet<>();
-
-          if (!body.isArray() || body.isEmpty()) {
-            errors.add("Response must be a non-empty array");
-            return ConformanceCheckResult.simple(errors);
+          if (body.isEmpty() || !body.isArray()) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
           }
+          Set<String> errors = new LinkedHashSet<>();
 
           for (int docIdx = 0; docIdx < body.size(); docIdx++) {
             JsonNode endorsementChain = body.get(docIdx).path(ENDORSEMENT_CHAIN);
@@ -126,12 +139,10 @@ public class EndorsementChainChecks {
     return JsonAttribute.customValidator(
         "All codeListProvider values mustbe of dataset values",
         body -> {
-          Set<String> errors = new LinkedHashSet<>();
-
-          if (!body.isArray() || body.isEmpty()) {
-            errors.add("Response must be a non-empty array");
-            return ConformanceCheckResult.simple(errors);
+          if (body.isEmpty() || !body.isArray()) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
           }
+          Set<String> errors = new LinkedHashSet<>();
 
           for (int docIdx = 0; docIdx < body.size(); docIdx++) {
             JsonNode endorsementChain = body.get(docIdx).path(ENDORSEMENT_CHAIN);
@@ -166,11 +177,8 @@ public class EndorsementChainChecks {
     if (partyNode.isMissingNode() || partyNode.isNull()) {
       return;
     }
-
-    // party.identifyingCodes[*].codeListProvider
     validateCodeListProvidersUnderParty(errors, partyNode, partyPath, allowedValues);
 
-    // party.representedParty.identifyingCodes[*].codeListProvider
     JsonNode representedParty = partyNode.path(REPRESENTED_PARTY);
     if (!representedParty.isMissingNode() && !representedParty.isNull()) {
       validateCodeListProvidersUnderParty(
@@ -201,7 +209,7 @@ public class EndorsementChainChecks {
       Set<String> errors, JsonNode node, String jsonPathForError, Set<String> allowedValues) {
 
     if (node.isMissingNode() || node.isNull()) {
-      return; // optional; flip to error if you want it required
+      return;
     }
 
     String value = node.asText();

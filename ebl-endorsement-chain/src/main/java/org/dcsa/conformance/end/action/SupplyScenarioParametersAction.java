@@ -23,14 +23,14 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
 
   public SupplyScenarioParametersAction(String providerPartyName, EndorsementChainFilterParameter...endorsementChainFilterParameters) {
     super(
-      providerPartyName,
-      null,
-      null,
-      "SupplyScenarioParameters(%s)"
-        .formatted(
-          Arrays.stream(endorsementChainFilterParameters)
-            .map(EndorsementChainFilterParameter::getQueryParamName)
-            .collect(Collectors.joining(", "))));
+        providerPartyName,
+        null,
+        null,
+        "SupplyScenarioParameters(%s)"
+            .formatted(
+                Arrays.stream(endorsementChainFilterParameters)
+                    .map(EndorsementChainFilterParameter::getParamName)
+                    .collect(Collectors.joining(", "))));
 
     this.endorsementChainFilterParameters = new LinkedHashSet<>(Arrays.asList(endorsementChainFilterParameters));
 
@@ -58,7 +58,8 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
     ObjectNode objectNode = super.asJsonNode();
     ArrayNode jsonEndorsementChainFilterParam = objectNode.putArray("endorsementChainFilterParamQueryParamNames");
     endorsementChainFilterParameters.forEach(
-      endorsementChainFilterParameter -> jsonEndorsementChainFilterParam.add(endorsementChainFilterParameter.getQueryParamName()));
+        endorsementChainFilterParameter ->
+            jsonEndorsementChainFilterParam.add(endorsementChainFilterParameter.getParamName()));
     return objectNode;
   }
 
@@ -81,7 +82,7 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
                         Function.identity(),
                         endorsementChainFilterParameter ->
                             switch (endorsementChainFilterParameter) {
-                              case TRANSPORT_DOCUMENT_REFERENCE -> "123456789";
+                              case TRANSPORT_DOCUMENT_REFERENCE -> "HHL71800000";
                               case TRANSPORT_DOCUMENT_SUB_REFERENCE -> "sub1234";
                               case CARRIER_SCAC_CODE -> "MAEU";
                               default -> "TODO";

@@ -1,5 +1,9 @@
 package org.dcsa.conformance.end.party;
 
+import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.CARRIER_SCAC_CODE;
+import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_REFERENCE;
+import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_SUB_REFERENCE;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Collection;
@@ -67,14 +71,14 @@ public class EndorsementChainProvider extends ConformanceParty {
                     false)
                 .map(
                     jsonEndorsementChainFilterParam ->
-                        EndorsementChainFilterParameter.byQueryParamName.get(
+                        EndorsementChainFilterParameter.byParamName.get(
                             jsonEndorsementChainFilterParam.asText()))
                 .collect(
                     Collectors.toMap(
                         Function.identity(),
                         endorsementChainFilterParam ->
                             switch (endorsementChainFilterParam) {
-                              case TRANSPORT_DOCUMENT_REFERENCE -> "123456789";
+                              case TRANSPORT_DOCUMENT_REFERENCE -> "HHL71800000";
                               case TRANSPORT_DOCUMENT_SUB_REFERENCE -> "sub1234";
                               case CARRIER_SCAC_CODE -> "MAEU";
                             })));

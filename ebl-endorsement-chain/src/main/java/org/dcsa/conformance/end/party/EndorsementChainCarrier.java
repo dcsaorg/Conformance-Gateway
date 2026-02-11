@@ -79,7 +79,7 @@ public class EndorsementChainCarrier extends ConformanceParty {
                     .equals(EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_REFERENCE))
         .collect(
             Collectors.toMap(
-                entry -> entry.getKey().getQueryParamName(), entry -> Set.of(entry.getValue())));
+                entry -> entry.getKey().getParamName(), entry -> Set.of(entry.getValue())));
   }
 
   private static String getPathParam(SuppliedScenarioParameters ssp) {

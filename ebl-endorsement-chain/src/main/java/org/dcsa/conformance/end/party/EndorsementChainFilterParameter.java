@@ -12,14 +12,14 @@ public enum EndorsementChainFilterParameter {
   TRANSPORT_DOCUMENT_SUB_REFERENCE("transportDocumentSubReference"),
   CARRIER_SCAC_CODE("carrierSCACCode");
 
-  public static final Map<String, EndorsementChainFilterParameter> byQueryParamName =
-    Arrays.stream(values())
-      .collect(
-        Collectors.toUnmodifiableMap(
-          EndorsementChainFilterParameter::getQueryParamName, Function.identity()));
-  private final String queryParamName;
+  public static final Map<String, EndorsementChainFilterParameter> byParamName =
+      Arrays.stream(values())
+          .collect(
+              Collectors.toUnmodifiableMap(
+                  EndorsementChainFilterParameter::getParamName, Function.identity()));
+  private final String paramName;
 
-  EndorsementChainFilterParameter(String queryParamName) {
-    this.queryParamName = queryParamName;
+  EndorsementChainFilterParameter(String paramName) {
+    this.paramName = paramName;
   }
 }

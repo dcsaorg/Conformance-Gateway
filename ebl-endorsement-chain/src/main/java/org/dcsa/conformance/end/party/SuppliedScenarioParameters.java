@@ -27,18 +27,23 @@ public class SuppliedScenarioParameters {
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {
     return new SuppliedScenarioParameters(
         Arrays.stream(EndorsementChainFilterParameter.values())
-            .filter(endorsementChainFilterParameter -> jsonNode.has(endorsementChainFilterParameter.getQueryParamName()))
+            .filter(
+                endorsementChainFilterParameter ->
+                    jsonNode.has(endorsementChainFilterParameter.getParamName()))
             .collect(
                 Collectors.toUnmodifiableMap(
                     Function.identity(),
-                  endorsementChainFilterParameter ->
-                        jsonNode.required(endorsementChainFilterParameter.getQueryParamName()).asText())));
+                    endorsementChainFilterParameter ->
+                        jsonNode
+                            .required(endorsementChainFilterParameter.getParamName())
+                            .asText())));
   }
 
   public ObjectNode toJson() {
     ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
     map.forEach(
-        (endorsementChainFilterParameter, value) -> objectNode.put(endorsementChainFilterParameter.getQueryParamName(), value));
+        (endorsementChainFilterParameter, value) ->
+            objectNode.put(endorsementChainFilterParameter.getParamName(), value));
     return objectNode;
   }
 }

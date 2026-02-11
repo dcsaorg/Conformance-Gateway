@@ -1,2 +1,2 @@
-Provide the TransportDocumentReference and the following query parameters so that the synthetic carrier can make a GET
-REquest.
+Provide the Transport Document Reference and the query parameters (if applicable for the scenario) so that the
+synthetic carrier can make a GET request.

@@ -33,11 +33,14 @@ public class CarrierGetEndorsementChainAction extends EndorsementChainAction{
 
     String tdr = root.get("transportDocumentReference").asText();
 
-    ObjectNode queryParams = root.get("queryParameters").deepCopy();
-    queryParams.remove("transportDocumentReference"); // remove unwanted field
+    ObjectNode queryParams = root.deepCopy();
+    queryParams.remove("transportDocumentReference"); // remove path param field
 
-    return getMarkdownHumanReadablePrompt(
-        Map.of("TDR", tdr, "QUERY_PARAMS", queryParams.toString()), "prompt-carrier-get.md");
+    return queryParams.isEmpty()
+        ? getMarkdownHumanReadablePrompt(Map.of("TDR", tdr), "prompt-carrier-get.md")
+        : getMarkdownHumanReadablePrompt(
+            Map.of("TDR", tdr, "QUERY_PARAMS", queryParams.toString()),
+            "prompt-carrier-get-with-queryparams.md");
   }
 
   @Override

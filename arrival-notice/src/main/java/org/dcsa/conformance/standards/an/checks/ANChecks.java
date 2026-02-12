@@ -529,13 +529,13 @@ public class ANChecks {
 
       if (facility.isObject() && !hasFacility) {
         issues.add(
-            "transport.portOfDischarge.facility must contain non blank (facilityCode + facilityCodeListProvider) OR non-blank facilityName.");
+            "transport.portOfDischarge.facility field must include either a non-blank combination of facilityCode and facilityCodeListProvider, or a non-blank facilityName.");
       }
     }
 
     if (!hasUNLoc && !hasAddress && !hasFacility) {
       issues.add(
-          "transport.portOfDischarge must contain at least one of: UNLocationCode (non empty), a non empty address, or a facility either with both facilityCode and facilityCodeListProvider or with a non-empty facilityName");
+          "transport.portOfDischarge must include at least one of the following: a non-empty UNLocationCode, a non-empty address, or a facility specified either by both facilityCode and facilityCodeListProvider (non-blank), or by a non-blank facilityName.");
     }
 
     var legs = t.path("legs");

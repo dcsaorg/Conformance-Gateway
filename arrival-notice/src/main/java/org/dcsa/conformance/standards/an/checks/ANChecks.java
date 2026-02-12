@@ -522,25 +522,20 @@ public class ANChecks {
         }
       }
 
-      hasFacility = hasCode && hasProvider;
+      boolean hasFacilityName =
+          facility.hasNonNull("facilityName") && !facility.get("facilityName").asText().isBlank();
+
+      hasFacility = (hasCode && hasProvider) || hasFacilityName;
 
       if (facility.isObject() && !hasFacility) {
-        if (!hasCode) {
-          issues.add(
-              S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(
-                  "transport.portOfDischarge.facility.facilityCode"));
-        }
-        if (!hasProvider) {
-          issues.add(
-              S_MUST_BE_PRESENT_AND_NON_EMPTY.formatted(
-                  "transport.portOfDischarge.facility.facilityCodeListProvider"));
-        }
+        issues.add(
+            "transport.portOfDischarge.facility must contain non blank (facilityCode + facilityCodeListProvider) OR non-blank facilityName.");
       }
     }
 
     if (!hasUNLoc && !hasAddress && !hasFacility) {
       issues.add(
-          "transport.portOfDischarge must contain at least one of: UNLocationCode (non empty), a non empty address, or a facility with both facilityCode and facilityCodeListProvider");
+          "transport.portOfDischarge must contain at least one of: UNLocationCode (non empty), a non empty address, or a facility either with both facilityCode and facilityCodeListProvider or with a non-empty facilityName");
     }
 
     var legs = t.path("legs");
@@ -1010,7 +1005,6 @@ public class ANChecks {
     return issues;
   }
 
-
   private static final List<String> ADDRESS_FIELDS =
       List.of(
           "street",
@@ -1020,9 +1014,8 @@ public class ANChecks {
           "POBox",
           "city",
           "stateRegion",
-          "countryCode");
-
-
+          "countryCode",
+          "addressLines");
 
   public static JsonContentCheck atLeastOneTransportDocumentReferenceCorrectANN() {
     return JsonAttribute.customValidator(

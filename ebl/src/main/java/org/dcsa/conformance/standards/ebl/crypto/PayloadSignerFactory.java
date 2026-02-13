@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
@@ -151,9 +152,20 @@ public class PayloadSignerFactory {
     return CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER;
   }
 
+  @SneakyThrows
+  private static String generateKeyId(PublicKey publicKey) {
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    byte[] hash = digest.digest(publicKey.getEncoded());
+    String base64 = Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+    return base64.substring(0, Math.min(8, base64.length()));
+  }
+
   private static PayloadSignerWithKey rsaBasedPayloadSigner(KeyPair keyPair) {
     return new X509BackedPayloadSigner(
-        new JWSSignerDetails(JWSAlgorithm.PS256, new RSASSASigner(keyPair.getPrivate())),
+        new JWSSignerDetails(
+            JWSAlgorithm.PS256,
+            new RSASSASigner(keyPair.getPrivate()),
+            generateKeyId(keyPair.getPublic())),
         generateSelfSignedCertificateSecret(keyPair));
   }
 
@@ -161,7 +173,9 @@ public class PayloadSignerFactory {
   private static PayloadSignerWithKey ecBasedPayloadSigner(KeyPair keyPair) {
     return new X509BackedPayloadSigner(
         new JWSSignerDetails(
-            JWSAlgorithm.ES256, new ECDSASigner((ECPrivateKey) keyPair.getPrivate())),
+            JWSAlgorithm.ES256,
+            new ECDSASigner((ECPrivateKey) keyPair.getPrivate()),
+            generateKeyId(keyPair.getPublic())),
         generateSelfSignedCertificateSecret(keyPair));
   }
 

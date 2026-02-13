@@ -15,7 +15,9 @@ public class DefaultPayloadSigner implements PayloadSigner {
 
   @SneakyThrows
   public String sign(String payload) {
-    JWSHeader header = new JWSHeader.Builder(jwsSignerDetails.algorithm()).build();
+    JWSHeader header = new JWSHeader.Builder(jwsSignerDetails.algorithm())
+            .keyID(jwsSignerDetails.keyId())
+            .build();
     JWSObject jwsObject = new JWSObject(header, new Payload(payload));
     jwsObject.sign(jwsSignerDetails.signer());
     return jwsObject.serialize();

@@ -8,10 +8,12 @@ import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.core.check.QueryParamCheck;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.end.checks.EndorsementChainChecks;
+import org.dcsa.conformance.end.party.EndorsementChainFilterParameter;
 import org.dcsa.conformance.end.party.EndorsementChainRole;
 
 public class CarrierGetEndorsementChainAction extends EndorsementChainAction{
@@ -50,33 +52,56 @@ public class CarrierGetEndorsementChainAction extends EndorsementChainAction{
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
         var tdr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : "";
-        return Stream.of(
-            new UrlPathCheck(
-                EndorsementChainRole::isCarrier,
-                getMatchedExchangeUuid(),
-                "/endorsement-chains/" + tdr),
-            new ResponseStatusCheck(
-                EndorsementChainRole::isProvider, getMatchedExchangeUuid(), 200),
-            new JsonSchemaCheck(
-                EndorsementChainRole::isProvider,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator),
-            new ApiHeaderCheck(
-                EndorsementChainRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new ApiHeaderCheck(
-                EndorsementChainRole::isProvider,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            EndorsementChainChecks.getENDGetResponseChecks(
-                getMatchedExchangeUuid(), expectedApiVersion));
+        var checks =
+            Stream.of(
+                new UrlPathCheck(
+                    EndorsementChainRole::isCarrier,
+                    getMatchedExchangeUuid(),
+                    "/endorsement-chains/" + tdr),
+                new ResponseStatusCheck(
+                    EndorsementChainRole::isProvider, getMatchedExchangeUuid(), 200),
+                new JsonSchemaCheck(
+                    EndorsementChainRole::isProvider,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    responseSchemaValidator),
+                new ApiHeaderCheck(
+                    EndorsementChainRole::isCarrier,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    expectedApiVersion),
+                new ApiHeaderCheck(
+                    EndorsementChainRole::isProvider,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    expectedApiVersion),
+                EndorsementChainChecks.getENDGetResponseChecks(
+                    getMatchedExchangeUuid(), expectedApiVersion));
+
+        // Build query-param checks from SSP (excluding the path param)
+        var queryParamChecks =
+            sspSupplier.get() == null
+                ? Stream.<QueryParamCheck>empty()
+                : sspSupplier.get().getMap().entrySet().stream()
+                    .filter(
+                        e ->
+                            e.getKey()
+                                != EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_REFERENCE)
+                    .filter(e -> e.getValue() != null && !e.getValue().isBlank())
+                    .map(
+                        e ->
+                            new QueryParamCheck(
+                                EndorsementChainRole::isCarrier,
+                                getMatchedExchangeUuid(),
+                                e.getKey().getParamName(),
+                                e.getValue()));
+
+        return Stream.concat(checks, queryParamChecks);
       }
     };
-  }
+      }
+
+
 
   @Override
   public ObjectNode asJsonNode() {

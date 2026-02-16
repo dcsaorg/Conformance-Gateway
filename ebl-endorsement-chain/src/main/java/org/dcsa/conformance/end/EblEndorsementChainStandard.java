@@ -13,6 +13,7 @@ import org.dcsa.conformance.end.party.EndorsementChainRole;
 public class EblEndorsementChainStandard extends AbstractStandard {
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
   public static final EblEndorsementChainStandard INSTANCE = new EblEndorsementChainStandard();
+  public static final String END_ENDPOINT = "/endorsement-chains/";
 
   protected EblEndorsementChainStandard() {
     super("Ebl Endorsement Chain");
@@ -32,7 +33,10 @@ public class EblEndorsementChainStandard extends AbstractStandard {
             Map.entry(
                 EndorsementChainRole.PROVIDER.getConfigName(),
                 new TreeMap<>(
-                    Map.ofEntries(Map.entry("/arrival-notices", new TreeSet<>(Set.of("GET")))))),
+                    Map.ofEntries(
+                        Map.entry(
+                            "/endorsement-chains/{transportDocumentReference}",
+                            new TreeSet<>(Set.of("GET")))))),
             Map.entry(EndorsementChainRole.CARRIER.getConfigName(), new TreeMap<>()));
     return Map.ofEntries(Map.entry(SCENARIO_SUITE_CONFORMANCE, endpointUrisAndMethodsByRoleName));
   }

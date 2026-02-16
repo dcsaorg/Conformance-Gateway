@@ -22,6 +22,14 @@ public class EndorsementChainChecks {
   private static final String IDENTIFYING_CODES = "identifyingCodes";
   private static final String CODE_LIST_PROVIDER = "codeListProvider";
   private static final String REPRESENTED_PARTY = "representedParty";
+  private static final String ENDORSEMENT_CHAIN = "endorsementChain";
+  private static final String ACTOR = "actor";
+  private static final String RECIPIENT = "recipient";
+  private static final String EBL_PLATFORM = "eblPlatform";
+  private static final String ACTION_CODE = "actionCode";
+
+  private static final String DATASET_VALIDATION_MESSAGE =
+      "All '%s' values must be one of the predefined dataset values.";
 
   public static ActionCheck getENDGetResponseChecks(
       UUID matchedExchangeUuid, String expectedApiVersion) {
@@ -43,21 +51,21 @@ public class EndorsementChainChecks {
 
   private static JsonContentCheck validResponseIsEmpty() {
     return JsonAttribute.customValidator(
-        "Response must be a non empty array",
-        body -> {
-          Set<String> errors = new LinkedHashSet<>();
+      "Response must be a non empty array",
+      body -> {
+        Set<String> errors = new LinkedHashSet<>();
 
-          if (body.isEmpty() || !body.isArray()) {
-            errors.add("Response must be a non empty array");
-          }
+        if (body.isEmpty() || !body.isArray()) {
+          errors.add("Response must be a non empty array");
+        }
 
-          return ConformanceCheckResult.simple(errors);
-        });
+        return ConformanceCheckResult.simple(errors);
+      });
   }
 
   private static JsonContentCheck validActionCode() {
     return JsonAttribute.customValidator(
-        "All actionCode values must be one of dataset values",
+        DATASET_VALIDATION_MESSAGE.formatted(ACTION_CODE),
         body -> {
           Set<String> errors = new LinkedHashSet<>();
 
@@ -66,13 +74,13 @@ public class EndorsementChainChecks {
           }
 
           for (int docIdx = 0; docIdx < body.size(); docIdx++) {
-            JsonNode endorsementChain = body.get(docIdx).path("endorsementChain");
+            JsonNode endorsementChain = body.get(docIdx).path(ENDORSEMENT_CHAIN);
             if (!endorsementChain.isArray() || endorsementChain.isEmpty()) {
               continue;
             }
 
             for (int entryIdx = 0; entryIdx < endorsementChain.size(); entryIdx++) {
-              JsonNode actionCodeNode = endorsementChain.get(entryIdx).path("actionCode");
+              JsonNode actionCodeNode = endorsementChain.get(entryIdx).path(ACTION_CODE);
 
               if (actionCodeNode.isMissingNode() || actionCodeNode.isNull()) {
                 continue;
@@ -94,14 +102,9 @@ public class EndorsementChainChecks {
         });
   }
 
-  private static final String ENDORSEMENT_CHAIN = "endorsementChain";
-  private static final String ACTOR = "actor";
-  private static final String RECIPIENT = "recipient";
-  private static final String EBL_PLATFORM = "eblPlatform";
-
   private static JsonContentCheck validEblPlatformPseudoEnum() {
     return JsonAttribute.customValidator(
-        "All eblPlatform values must be of dataset values",
+        DATASET_VALIDATION_MESSAGE.formatted(EBL_PLATFORM),
         body -> {
           if (body.isEmpty() || !body.isArray()) {
             return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
@@ -137,7 +140,7 @@ public class EndorsementChainChecks {
 
   private static JsonContentCheck validCodeListProviderPseudoEnumEverywhere() {
     return JsonAttribute.customValidator(
-        "All codeListProvider values mustbe of dataset values",
+        DATASET_VALIDATION_MESSAGE.formatted(CODE_LIST_PROVIDER),
         body -> {
           if (body.isEmpty() || !body.isArray()) {
             return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
@@ -170,7 +173,6 @@ public class EndorsementChainChecks {
           return ConformanceCheckResult.simple(errors);
         });
   }
-
   private static void validateCodeListProviderForPartyAndRepresentedParty(
       Set<String> errors, JsonNode partyNode, String partyPath, Set<String> allowedValues) {
 

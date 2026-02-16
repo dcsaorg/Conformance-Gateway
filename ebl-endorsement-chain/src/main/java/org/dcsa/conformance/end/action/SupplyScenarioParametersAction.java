@@ -1,9 +1,5 @@
 package org.dcsa.conformance.end.action;
 
-import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.CARRIER_SCAC_CODE;
-import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_REFERENCE;
-import static org.dcsa.conformance.end.party.EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_SUB_REFERENCE;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -20,6 +16,10 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
 
   private final LinkedHashSet<EndorsementChainFilterParameter> endorsementChainFilterParameters;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
+  private static final String SUPPLIED_SCENARIO_PARAMETERS = "suppliedScenarioParameters";
+  private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
+  private static final String END_FILTER_PARAM_QUERY_PARAM_NAMES =
+      "endorsementChainFilterParamQueryParamNames";
 
   public SupplyScenarioParametersAction(String providerPartyName, EndorsementChainFilterParameter...endorsementChainFilterParameters) {
     super(
@@ -39,7 +39,7 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (suppliedScenarioParameters != null) {
-      jsonState.set("suppliedScenarioParameters", suppliedScenarioParameters.toJson());
+      jsonState.set(SUPPLIED_SCENARIO_PARAMETERS, suppliedScenarioParameters.toJson());
     }
     return jsonState;
   }
@@ -47,16 +47,17 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    if (jsonState.has("suppliedScenarioParameters")) {
+    if (jsonState.has(SUPPLIED_SCENARIO_PARAMETERS)) {
       suppliedScenarioParameters =
-        SuppliedScenarioParameters.fromJson(jsonState.required("suppliedScenarioParameters"));
+          SuppliedScenarioParameters.fromJson(jsonState.required(SUPPLIED_SCENARIO_PARAMETERS));
     }
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode objectNode = super.asJsonNode();
-    ArrayNode jsonEndorsementChainFilterParam = objectNode.putArray("endorsementChainFilterParamQueryParamNames");
+    ArrayNode jsonEndorsementChainFilterParam =
+        objectNode.putArray(END_FILTER_PARAM_QUERY_PARAM_NAMES);
     endorsementChainFilterParameters.forEach(
         endorsementChainFilterParameter ->
             jsonEndorsementChainFilterParam.add(endorsementChainFilterParameter.getParamName()));
@@ -98,7 +99,7 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
             getDspSupplier()
                 .get()
                 .withTransportDocumentReference(
-                    partyInput.get("input").get("transportDocumentReference").asText()));
+                    partyInput.get("input").get(TRANSPORT_DOCUMENT_REFERENCE).asText()));
   }
 
   @Override

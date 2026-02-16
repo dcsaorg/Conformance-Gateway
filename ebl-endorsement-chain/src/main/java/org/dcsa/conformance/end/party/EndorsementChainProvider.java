@@ -60,7 +60,9 @@ public class EndorsementChainProvider extends ConformanceParty {
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
-    log.info("CsPublisher.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "EndorsementChainProvider.supplyScenarioParameters(%s)"
+            .formatted(actionPrompt.toPrettyString()));
 
     SuppliedScenarioParameters responseSsp =
         SuppliedScenarioParameters.fromMap(

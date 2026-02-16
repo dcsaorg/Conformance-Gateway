@@ -1,5 +1,7 @@
 package org.dcsa.conformance.end.party;
 
+import static org.dcsa.conformance.end.EblEndorsementChainStandard.END_ENDPOINT;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Collection;
@@ -33,17 +35,12 @@ public class EndorsementChainCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-
+    // no state to import
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-
-  }
-
-  @Override
-  public ConformanceResponse handleRequest(ConformanceRequest request) {
-    return null;
+    // no state to export
   }
 
   @Override
@@ -63,7 +60,7 @@ public class EndorsementChainCarrier extends ConformanceParty {
 
     Map<String, Collection<String>> queryParams = getQueryParams(ssp);
     String pathParam = getPathParam(ssp);
-    syncCounterpartGet("/endorsement-chains/" + pathParam, queryParams);
+    syncCounterpartGet(END_ENDPOINT + pathParam, queryParams);
 
     addOperatorLogEntry(
         "Sent GET endorsement chain request with parameters: %s"
@@ -93,5 +90,11 @@ public class EndorsementChainCarrier extends ConformanceParty {
             .findFirst();
 
     return pathParam.isPresent() ? pathParam.get().getValue() : "";
+  }
+
+  @Override
+  public ConformanceResponse handleRequest(ConformanceRequest request) {
+    log.info("EndorsementChainCarrier.handleRequest(%s)".formatted(request));
+    throw new UnsupportedOperationException();
   }
 }

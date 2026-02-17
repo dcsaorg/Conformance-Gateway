@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -90,6 +91,13 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
                               default -> "TODO";
                             })))
         .toJson();
+  }
+
+  @Override
+  public Map<String, Boolean> getExpectedInputAttributes() {
+    Map<String, Boolean> expectedAttributes = super.getExpectedInputAttributes();
+    expectedAttributes.put("transportDocumentReference", true);
+    return expectedAttributes;
   }
 
   @Override

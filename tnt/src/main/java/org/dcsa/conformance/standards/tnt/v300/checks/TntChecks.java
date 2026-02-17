@@ -304,66 +304,59 @@ public class TntChecks {
                           }
 
                           switch (modeOfTransport) {
-                            case VESSEL:
+                            case VESSEL, BARGE:
                               if (!hasVessel) {
                                 return ConformanceCheckResult.simple(
                                     Set.of(
-                                        "The '%s' object must contain '%s' when %s is %s"
+                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' or '%s' must demonstrate the correct use of the '%s' object."
                                             .formatted(
+                                                TntEventType.TRANSPORT.name(),
                                                 contextPath,
-                                                VESSEL_TRANSPORT,
                                                 MODE_OF_TRANSPORT,
-                                                VESSEL)));
+                                                VESSEL,
+                                                BARGE,
+                                                VESSEL_TRANSPORT)));
                               }
                               break;
                             case RAIL:
                               if (!hasRail) {
                                 return ConformanceCheckResult.simple(
                                     Set.of(
-                                        "The '%s' object must contain '%s' when %s is %s"
+                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' must demonstrate the correct use of the '%s' object."
                                             .formatted(
+                                                TntEventType.TRANSPORT.name(),
                                                 contextPath,
-                                                RAIL_TRANSPORT,
                                                 MODE_OF_TRANSPORT,
-                                                RAIL)));
+                                                RAIL,
+                                                RAIL_TRANSPORT)));
                               }
                               break;
                             case TRUCK:
                               if (!hasTruck) {
                                 return ConformanceCheckResult.simple(
                                     Set.of(
-                                        "The '%s' object must contain '%s' when %s is %S"
+                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' must demonstrate the correct use of the '%s' object."
                                             .formatted(
+                                                TntEventType.TRANSPORT.name(),
                                                 contextPath,
-                                                TRUCK_TRANSPORT,
                                                 MODE_OF_TRANSPORT,
-                                                TRUCK)));
-                              }
-                              break;
-                            case BARGE:
-                              if (!hasVessel) {
-                                return ConformanceCheckResult.simple(
-                                    Set.of(
-                                        "The '%s' object must contain '%s' when %s is %s"
-                                            .formatted(
-                                                contextPath,
-                                                VESSEL_TRANSPORT,
-                                                MODE_OF_TRANSPORT,
-                                                BARGE)));
+                                                TRUCK,
+                                                TRUCK_TRANSPORT)));
                               }
                               break;
                             case MULTIMODAL:
                               if (hasVessel || hasRail || hasTruck) {
                                 return ConformanceCheckResult.simple(
                                     Set.of(
-                                        "The '%s' object must not contain '%s', '%s', or '%s' when %s is %s"
+                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' must not contain '%s', '%s', or '%s' objects."
                                             .formatted(
+                                                TntEventType.TRANSPORT.name(),
                                                 contextPath,
+                                                MODE_OF_TRANSPORT,
+                                                MULTIMODAL,
                                                 VESSEL_TRANSPORT,
                                                 RAIL_TRANSPORT,
-                                                TRUCK_TRANSPORT,
-                                                MODE_OF_TRANSPORT,
-                                                MULTIMODAL)));
+                                                TRUCK_TRANSPORT)));
                               }
                               break;
                             default:

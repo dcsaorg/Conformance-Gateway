@@ -157,7 +157,7 @@ public class PayloadSignerFactory {
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
     byte[] hash = digest.digest(publicKey.getEncoded());
     String base64 = Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
-    return base64.substring(0, Math.min(8, base64.length()));
+    return base64;
   }
 
   private static PayloadSignerWithKey rsaBasedPayloadSigner(KeyPair keyPair) {

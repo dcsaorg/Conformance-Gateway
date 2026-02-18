@@ -68,7 +68,9 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
             "RESPONSE_CODE",
             responseCode.standardCode,
             "PUBLIC_KEY",
-            EblIssuanceCarrier.getCarrierPublicKey()),
+            EblIssuanceCarrier.getCarrierPublicKey(),
+            "KEY_ID",
+            EblIssuanceCarrier.getCarrierKeyId()),
         "prompt-platform-psp.md");
   }
 

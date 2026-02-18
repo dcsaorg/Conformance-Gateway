@@ -306,4 +306,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
   public static String getCarrierPublicKey() {
     return PAYLOAD_SIGNER.getPublicKeyInPemFormat();
   }
+
+  public static String getCarrierKeyId() {
+    return PAYLOAD_SIGNER.getKeyId();
+  }
 }

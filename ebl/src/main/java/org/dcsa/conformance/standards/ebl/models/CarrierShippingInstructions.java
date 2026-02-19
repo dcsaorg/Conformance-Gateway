@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.function.*;
 import lombok.NonNull;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
@@ -166,9 +167,7 @@ public class CarrierShippingInstructions {
   }
 
   private static final TDField[] CARRIER_PROVIDED_TD_FIELDS = {
-    initialFieldValue(
-        TRANSPORT_DOCUMENT_REFERENCE,
-        () -> UUID.randomUUID().toString().replace("-", "").toUpperCase().substring(0, 20)),
+    initialFieldValue(TRANSPORT_DOCUMENT_REFERENCE, ReferenceGenerator::newReference),
     initialFieldValue(TRANSPORT_DOCUMENT_STATUS, TD_DRAFT.wireName()),
     initialFieldValue("cargoMovementTypeAtOrigin", "FCL"),
     initialFieldValue("cargoMovementTypeAtDestination", "FCL"),
@@ -712,13 +711,13 @@ public class CarrierShippingInstructions {
 
   public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(
       ObjectNode siRequest, String standardsVersion) {
-    String sir = UUID.randomUUID().toString();
+    String sir = ReferenceGenerator.newReference();
     siRequest.put(SHIPPING_INSTRUCTIONS_REFERENCE, sir).put(SI_STATUS, SI_RECEIVED.wireName());
     var state =
         OBJECT_MAPPER
             .createObjectNode()
             .put(STD_VERSION_FIELD, standardsVersion)
-            .put(SUBSCRIPTION_REFERENCE, UUID.randomUUID().toString());
+            .put(SUBSCRIPTION_REFERENCE, ReferenceGenerator.newReference());
     state.set(SI_DATA_FIELD, siRequest);
     return new CarrierShippingInstructions(state);
   }

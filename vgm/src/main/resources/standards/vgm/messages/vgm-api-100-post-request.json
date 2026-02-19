@@ -81,7 +81,7 @@
       },
       "shipmentDetails": {
         "carrierBookingReference": "ABC709951",
-        "transportDocumentReference": "HHL71800000",
+        "transportDocumentReference": "DCSA71800000",
         "otherReferences": [
           {
             "typeCode": "SI",

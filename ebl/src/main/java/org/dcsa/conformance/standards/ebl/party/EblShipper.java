@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 
@@ -135,8 +136,7 @@ public class EblShipper extends ConformanceParty {
   static ObjectNode updateShippingInstructions(ObjectNode si) {
     var seal = si.required("utilizedTransportEquipments").required(0).required("seals").path(0);
     var newSealNumber =
-        UUID.randomUUID()
-            .toString()
+        ReferenceGenerator.newReference()
             .substring(0, 8)
             .toUpperCase(); // adding a different seal number for each UC3
     ((ObjectNode) seal).put("number", newSealNumber);

@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.StreamSupport;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -330,12 +331,12 @@ public class PersistableCarrierBooking {
   }
 
   public static PersistableCarrierBooking initializeFromBookingRequest(ObjectNode bookingRequest) {
-    String cbrr = UUID.randomUUID().toString();
+    String cbrr = ReferenceGenerator.newReference();
     bookingRequest
         .put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr)
         .put(BOOKING_STATUS, BookingState.RECEIVED.name());
     var state = OBJECT_MAPPER.createObjectNode();
-    state.put(SUBSCRIPTION_REFERENCE, UUID.randomUUID().toString());
+    state.put(SUBSCRIPTION_REFERENCE, ReferenceGenerator.newReference());
     state.set(BOOKING_DATA_FIELD, bookingRequest);
     return new PersistableCarrierBooking(state);
   }

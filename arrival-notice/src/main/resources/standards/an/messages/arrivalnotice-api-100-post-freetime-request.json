@@ -11,7 +11,7 @@
           "email": "carrier@example.com"
         }
       ],
-      "transportDocumentReference": "MSK71900000",
+      "transportDocumentReference": "DCSA71900000",
       "deliveryTypeAtDestination": "CY",
 
       "documentParties": [

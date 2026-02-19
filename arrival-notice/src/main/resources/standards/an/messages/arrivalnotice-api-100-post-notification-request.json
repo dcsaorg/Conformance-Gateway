@@ -2,7 +2,7 @@
   "arrivalNoticeNotifications": [
     {
       "issueDateTime": "2024-03-04T00:00:00Z",
-      "transportDocumentReference": "HLCUSGS250302123",
+      "transportDocumentReference": "DCSA250302123",
       "equipmentReferences": [
         "HLCU1234567"
       ],

@@ -208,7 +208,7 @@ public class ConformanceStack extends Stack {
         createLambda(
             prefix + "AdminLambda",
             15,
-            2,
+            16,
             assetCode,
             "org.dcsa.conformance.lambda.AdminLambda",
             vpc);

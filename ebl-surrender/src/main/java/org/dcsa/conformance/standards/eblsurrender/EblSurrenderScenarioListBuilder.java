@@ -40,13 +40,11 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                         supplyAvailableTdrAction("SURR", "Straight eBL")
                             .thenEither(
                                 requestSurrenderForDeliveryAnd(true),
-                                requestSurrenderForAmendmentAnd(true, false),
-                                requestSurrenderForAmendmentAnd(true, true)),
+                                requestSurrenderForAmendmentAnd(true)),
                         supplyAvailableTdrAction("SURR", "Negotiable eBL")
                             .thenEither(
                                 requestSurrenderForDeliveryAnd(true),
-                                requestSurrenderForAmendmentAnd(true, false),
-                                requestSurrenderForAmendmentAnd(true, true)))),
+                                requestSurrenderForAmendmentAnd(true)))),
             Map.entry(
                 "Surrender Rejected",
                 noAction()
@@ -54,13 +52,11 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                         supplyAvailableTdrAction("SREJ", "Straight eBL")
                             .thenEither(
                                 requestSurrenderForDeliveryAnd(false),
-                                requestSurrenderForAmendmentAnd(false, false),
-                                requestSurrenderForAmendmentAnd(false, true)),
+                                requestSurrenderForAmendmentAnd(false)),
                         supplyAvailableTdrAction("SREJ", "Negotiable eBL")
                             .thenEither(
                                 requestSurrenderForDeliveryAnd(false),
-                                requestSurrenderForAmendmentAnd(false, false),
-                                requestSurrenderForAmendmentAnd(false, true)))),
+                                requestSurrenderForAmendmentAnd(false)))),
             Map.entry(
                 "Carrier error response conformance",
                 supplyAvailableTdrAction("SURR", "Straight eBl", true)
@@ -93,23 +89,21 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                 carrierPartyName, null, response, eblType, isErrorScenario));
   }
 
-  private static EblSurrenderScenarioListBuilder requestSurrenderForAmendmentAnd(
-      boolean accept, boolean isSWTP) {
+  private static EblSurrenderScenarioListBuilder requestSurrenderForAmendmentAnd(boolean accept) {
     log.debug("EblSurrenderScenarioListBuilder.requestSurrenderForAmendment");
 
-    String titleSuffix = isSWTP ? "AndSwitchToPaper" : "";
-    titleSuffix = accept ? titleSuffix + "Accepted" : titleSuffix + "Rejected";
-    return _surrenderRequestBuilder(true, accept, "SurrenderForAmendment" + titleSuffix, isSWTP);
+    String titleSuffix = accept ? "Accepted" : "Rejected";
+    return _surrenderRequestBuilder(true, accept, "SurrenderForAmendment" + titleSuffix);
   }
 
   private static EblSurrenderScenarioListBuilder requestSurrenderForDeliveryAnd(boolean accept) {
     log.debug("EblSurrenderScenarioListBuilder.requestSurrenderForDelivery");
     String titleSuffix = accept ? "Accepted" : "Rejected";
-    return _surrenderRequestBuilder(false, accept, "SurrenderForDelivery" + titleSuffix, false);
+    return _surrenderRequestBuilder(false, accept, "SurrenderForDelivery" + titleSuffix);
   }
 
   private static EblSurrenderScenarioListBuilder _surrenderRequestBuilder(
-      boolean forAmendment, boolean accept, String title, boolean isSWTP) {
+      boolean forAmendment, boolean accept, String title) {
     EblSurrenderComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String platformPartyName = threadLocalPlatformPartyName.get();
@@ -126,8 +120,7 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                 componentFactory.getMessageSchemaValidator(
                     EblSurrenderRole.PLATFORM.getConfigName(), true),
                 accept,
-                title,
-                isSWTP));
+                title));
   }
 
   private static EblSurrenderScenarioListBuilder requestSurrenderError() {

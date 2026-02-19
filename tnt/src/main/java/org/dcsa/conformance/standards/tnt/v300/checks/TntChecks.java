@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.tnt.v300.checks;
 
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.*;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
@@ -273,14 +274,12 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s.%s' object within every event of type '%s' must demonstrate the correct use of the '%s', '%s' or '%s' object"
+            "The '%s.%s' object within every event of type '%s' must demonstrate the correct use of transport objects based on '%s'"
                 .formatted(
                     TRANSPORT_DETAILS,
                     TRANSPORT_CALL,
                     TntEventType.TRANSPORT.name(),
-                    VESSEL_TRANSPORT,
-                    RAIL_TRANSPORT,
-                    TRUCK_TRANSPORT),
+                    MODE_OF_TRANSPORT),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.TRANSPORT),
@@ -289,21 +288,79 @@ public class TntChecks {
                     JsonAttribute.path(
                         TRANSPORT_CALL,
                         (transportCall, contextPath) -> {
+                          String modeOfTransport =
+                              transportCall.path(MODE_OF_TRANSPORT).asText(null);
                           boolean hasVessel =
                               !JsonUtil.isMissing(transportCall.path(VESSEL_TRANSPORT));
                           boolean hasRail = !JsonUtil.isMissing(transportCall.path(RAIL_TRANSPORT));
                           boolean hasTruck =
                               !JsonUtil.isMissing(transportCall.path(TRUCK_TRANSPORT));
 
-                          if (!hasVessel && !hasRail && !hasTruck) {
+                          if (modeOfTransport == null || modeOfTransport.isEmpty()) {
                             return ConformanceCheckResult.simple(
                                 Set.of(
-                                    "The '%s' object must contain at least one of: '%s', '%s', or '%s'"
-                                        .formatted(
-                                            contextPath,
-                                            VESSEL_TRANSPORT,
-                                            RAIL_TRANSPORT,
-                                            TRUCK_TRANSPORT)));
+                                    "The '%s' object must contain a '%s' attribute"
+                                        .formatted(contextPath, MODE_OF_TRANSPORT)));
+                          }
+
+                          switch (modeOfTransport) {
+                            case VESSEL, BARGE:
+                              if (!hasVessel) {
+                                return ConformanceCheckResult.simple(
+                                    Set.of(
+                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' or '%s' must demonstrate the correct use of the '%s' object."
+                                            .formatted(
+                                                TntEventType.TRANSPORT.name(),
+                                                contextPath,
+                                                MODE_OF_TRANSPORT,
+                                                VESSEL,
+                                                BARGE,
+                                                VESSEL_TRANSPORT)));
+                              }
+                              break;
+                            case RAIL:
+                              if (!hasRail) {
+                                return ConformanceCheckResult.simple(
+                                    Set.of(
+                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' must demonstrate the correct use of the '%s' object."
+                                            .formatted(
+                                                TntEventType.TRANSPORT.name(),
+                                                contextPath,
+                                                MODE_OF_TRANSPORT,
+                                                RAIL,
+                                                RAIL_TRANSPORT)));
+                              }
+                              break;
+                            case TRUCK:
+                              if (!hasTruck) {
+                                return ConformanceCheckResult.simple(
+                                    Set.of(
+                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' must demonstrate the correct use of the '%s' object."
+                                            .formatted(
+                                                TntEventType.TRANSPORT.name(),
+                                                contextPath,
+                                                MODE_OF_TRANSPORT,
+                                                TRUCK,
+                                                TRUCK_TRANSPORT)));
+                              }
+                              break;
+                            case MULTIMODAL:
+                              if (hasVessel || hasRail || hasTruck) {
+                                return ConformanceCheckResult.simple(
+                                    Set.of(
+                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' must not contain '%s', '%s', or '%s' objects."
+                                            .formatted(
+                                                TntEventType.TRANSPORT.name(),
+                                                contextPath,
+                                                MODE_OF_TRANSPORT,
+                                                MULTIMODAL,
+                                                VESSEL_TRANSPORT,
+                                                RAIL_TRANSPORT,
+                                                TRUCK_TRANSPORT)));
+                              }
+                              break;
+                            default:
+                              break;
                           }
                           return ConformanceCheckResult.simple(Collections.emptySet());
                         })))));
@@ -372,7 +429,6 @@ public class TntChecks {
                         JsonAttribute.matchedMustBeOneOf(
                             TntDataSets.VALID_EQUIPMENT_EVENT_TYPE_CODES))))));
 
-
     checks.addAll(commonEquipmentDetailsChecks(TntEventType.EQUIPMENT));
 
     return checks;
@@ -394,7 +450,6 @@ public class TntChecks {
                         IOT_EVENT_TYPE_CODE,
                         JsonAttribute.matchedMustBeOneOf(
                             TntDataSets.VALID_IOT_EVENT_TYPE_CODES))))));
-
 
     checks.addAll(commonEquipmentDetailsChecks(TntEventType.IOT));
 
@@ -439,7 +494,6 @@ public class TntChecks {
                         REEFER_EVENT_TYPE_CODE,
                         JsonAttribute.matchedMustBeOneOf(
                             TntDataSets.VALID_REEFER_EVENT_TYPE_CODES))))));
-
 
     checks.addAll(commonEquipmentDetailsChecks(TntEventType.REEFER));
 

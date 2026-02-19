@@ -11,15 +11,11 @@ info:
 
     Each VGM Producer implements the `GET /vgm-declarations` endpoint, which can be called by the authorized VGM Consumers to retrieve relevant available VGM declarations.
 
-    Each VGM Consumer implements the `POST /vgm-declarations` endpoint, which can be called by VGM Producers call to send relevant VGM declarations as they become available or are updated.
+    Each VGM Consumer implements the `POST /vgm-declarations` endpoint, which can be called by VGM Producers to send relevant VGM declarations as they become available or are updated.
 
     The registration of VGM Consumers with VGM Producers is out of scope.
 
     The authentication and authorization in both directions between VGM Producers and VGM Consumers is out of scope.
-
-    ### Work in progress ⚠️
-
-    The DCSA Verified Gross Mass (VGM) standard, including this API, is currently being designed and is **not** ready for general adoption yet.
   contact:
     name: "Digital Container Shipping Association (DCSA)"
     url: "https://dcsa.org"
@@ -27,7 +23,7 @@ info:
   license:
     name: "Apache 2.0"
     url: "https://www.apache.org/licenses/LICENSE-2.0.html"
-  version: 1.0.0-20251024-design
+  version: "1.0.1"
 tags:
   - name: "VGM Producer Endpoints"
     description: "Endpoints implemented by the VGM Producers"
@@ -55,6 +51,7 @@ paths:
         * `carrierBookingReference`, `equipmentReference`
         * `transportDocumentReference`
         * `transportDocumentReference`, `equipmentReference`
+        * `equipmentReference`
 
         Every VGM Producer must support combining any of the query parameter filters above with all of these additional filters:
         * `declarationDateTimeMin`
@@ -149,7 +146,7 @@ paths:
           required: false
           schema:
             type: "string"
-          example: "1.0.0"
+          example: "1.0.1"
       responses:
         "200":
           description: "List of VGM declarations matching the query parameters"
@@ -187,7 +184,7 @@ paths:
           required: false
           schema:
             type: "string"
-          example: "1.0.0"
+          example: "1.0.1"
       requestBody:
         description: "List of VGM declarations"
         content:
@@ -259,6 +256,15 @@ components:
           type: "string"
           description: "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)"
           example: "NL"
+        addressLines:
+          maxItems: 5
+          type: "array"
+          description: "Unstructured address lines, used as a fallback when structured address fields are unavailable."
+          items:
+            maxLength: 250
+            type: "string"
+            description: "One line of an unstructured `Address`."
+            example: "123 Example Rd"
       description: "An object for storing address-related information."
     ContactDetails:
       type: "object"
@@ -314,7 +320,7 @@ components:
             $ref: "#/components/schemas/Seal"
         cargoGrossWeight:
           description: |
-            Gross weight of the cargo item including packaging being carried in the container.
+            Gross weight of the cargo including packaging being carried in the container.
             Excludes the tare weight of the container.
           allOf:
             - $ref: "#/components/schemas/Weight"
@@ -326,6 +332,11 @@ components:
     Facility:
       type: "object"
       properties:
+        facilityName:
+          maxLength: 100
+          type: "string"
+          description: "The name of the facility."
+          example: "Building 123"
         facilityCode:
           maxLength: 6
           type: "string"
@@ -367,25 +378,23 @@ components:
           description: |
             [JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
             about which the feedback is provided (if applicable)
-          example: "$.VGMDeclarations[2].location"
+          example: "$.VGMDeclarations[2].VGM.location"
       description: |
         An individual piece of feedback (potentially out of several) providing information on how an API request is processed
     GeoCoordinate:
       type: "object"
       properties:
         latitude:
-          maxLength: 10
+          maxLength: 20
           type: "string"
-          description: |
-            Geographic coordinate that specifies the north–south position of a point on the Earth's surface.
-          example: "48.85855"
+          description: "Latitude expressed as decimal degrees using the ISO 6709 data interchange numeric format."
+          example: "33.629152"
         longitude:
-          maxLength: 11
+          maxLength: 20
           type: "string"
-          description: |
-            Geographic coordinate that specifies the east–west position of a point on the Earth's surface.
-          example: "2.294492036"
-      description: "An object used to express a location using `latitude` and `longitude`."
+          description: "Longitude expressed as decimal degrees using the ISO 6709 data interchange numeric format."
+          example: "-118.587187"
+      description: "An object used to express a location using its geographic coordinates."
     GetVGMDeclarationsError:
       type: "object"
       properties:
@@ -462,7 +471,7 @@ components:
           allOf:
             - $ref: "#/components/schemas/Facility"
         geoCoordinate:
-          description: "An object used to express a location using `latitude` and `longitude`."
+          description: "An object used to express a location using its geographic coordinates."
           allOf:
             - $ref: "#/components/schemas/GeoCoordinate"
       description: "Location information"
@@ -624,19 +633,24 @@ components:
           description: "Identifies a seal affixed to the container."
           example: "VET123"
         source:
+          maxLength: 10
           type: "string"
           description: |
             The source of the seal, namely who has affixed the seal.
             - `CAR` (Carrier)
-            - `SHI` (Shipper)
-            - `PHY` (Phytosanitary)
-            - `VET` (Veterinary)
+            - `CNS` (Consolidator)
+            - `CST` (Customer)
             - `CUS` (Customs)
+            - `PHY` (Phytosanitary)
+            - `SHI` (Shipper)
+            - `TER` (Terminal)
+            - `VET` (Veterinary)
 
             In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
             both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).
           example: "CUS"
         type:
+          maxLength: 10
           type: "string"
           description: |
             The type of seal.
@@ -644,10 +658,17 @@ components:
             - `BLT` (Bolt)
             - `WIR` (Wire)
           example: "WIR"
+        placement:
+          maxLength: 10
+          type: "string"
+          description: |
+            Placement of the seal.
+            - `DOOR` (Door)
+            - `VENT` (Vent)
+          example: "DOOR"
+          default: "DOOR"
       description: |
-        Seal-related information associated with the shipment equipment.
-        A seal is put on a shipment equipment once it is loaded.
-        This seal is meant to stay on until the shipment equipment reaches its final destination.
+        Seal-related information associated with the equipment.
     ShipmentDetails:
       type: "object"
       properties:
@@ -733,11 +754,6 @@ components:
           description: "The date and time when the VGM declaration was last updated"
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
-        VGM:
-          description: |
-            Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6
-          allOf:
-            - $ref: "#/components/schemas/VGM"
         equipmentDetails:
           description: "VGM declaration details specific to the equipment"
           allOf:
@@ -750,6 +766,11 @@ components:
           description: "VGM declaration details specific to the vessel voyage"
           allOf:
             - $ref: "#/components/schemas/VesselVoyageDetails"
+        VGM:
+          description: |
+            Verified Gross Mass of one piece of equipment, according to SOLAS Chapter VI, Regulation 2, paragraphs 4-6
+          allOf:
+            - $ref: "#/components/schemas/VGM"
         responsibleParty:
           description: "Party responsible for the VGM declaration."
           allOf:
@@ -761,8 +782,14 @@ components:
         authorizedPersonSignatory:
           maxLength: 255
           type: "string"
-          description: "Authorized person signatory"
-          example: "Jane Doe"
+          description: |
+            Upper case name of the person authorized to sign the declaration.
+
+            According to SOLAS 6.2:
+            "Irrespective of its form, the document declaring the verified gross mass of the packed container
+            should be signed by a person duly authorised by the shipper. The signature may be an electronic signature
+            or may be replaced by the name in capitals of the person authorised to sign it."
+          example: "JANE DOE"
         weighingParty:
           description: "Legally accepted party designated to perform the weighing."
           allOf:
@@ -789,9 +816,9 @@ components:
           type: "string"
           description: |
             The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by
-            [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the Arrival Notice.
+            [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the carrier.
 
-            `carrierCodeListProvider` defines which list the `carrierCode` is based upon.
+            The `carrierCodeListProvider` specifies the provider of the list in which the `carrierCode` is defined.
           example: "MMCU"
         carrierCodeListProvider:
           maxLength: 10
@@ -820,7 +847,7 @@ components:
         vesselName:
           maxLength: 50
           type: "string"
-          description: "Vessel name"
+          description: "Name of the first sea-going vessel on which the cargo is loaded or intended to be loaded."
           example: "King of the Seas"
       description: "VGM declaration details specific to the vessel voyage"
     VoyageNumberOrReference:
@@ -867,7 +894,7 @@ components:
       description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
       schema:
         type: "string"
-        example: "1.0.0"
+        example: "1.0.1"
     Next-Page-Cursor:
       description: "A cursor value pointing to the next page of results in a paginated GET response."
       schema:

@@ -101,15 +101,37 @@ jobs:
             --arg reportTitle "$REPORT_TITLE" \
             '{operation: $operation, reportTitle: $reportTitle}')
 
-          aws lambda invoke \
-            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
-            --payload "$PAYLOAD" \
-            --cli-binary-format raw-in-base64-out \
-            response.json
-
-          echo "Lambda response:"
-          cat response.json | jq '.'
-          rm response.json
+          # Retry logic to handle ResourceNotReadyException
+          MAX_RETRIES=5
+          RETRY_COUNT=0
+          RETRY_DELAY=10
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+          
+            if aws lambda invoke \
+              --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+              --payload "$PAYLOAD" \
+              --cli-binary-format raw-in-base64-out \
+              response.json 2>&1; then
+          
+              echo "Lambda response:"
+              cat response.json | jq '.'
+              rm response.json
+              echo "Successfully created pre-deployment report"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "Lambda invocation failed. Waiting ${RETRY_DELAY}s before retry..."
+                sleep $RETRY_DELAY
+                RETRY_DELAY=$((RETRY_DELAY * 2))  # Exponential backoff
+              else
+                echo "Max retries reached. Failed to create pre-deployment report."
+                exit 1
+              fi
+            fi
+          done
 
       - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
         run: |

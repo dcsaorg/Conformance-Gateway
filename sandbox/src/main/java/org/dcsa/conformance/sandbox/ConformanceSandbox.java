@@ -1018,6 +1018,12 @@ public class ConformanceSandbox {
       ConformancePersistenceProvider persistenceProvider,
       JsonNode jsonInput) {
     String operation = jsonInput.path("operation").asText();
+    if ("ping".equals(operation)) {
+      // Lightweight operation for warming up the Lambda / health check
+      return OBJECT_MAPPER.createObjectNode()
+          .put("status", "ok")
+          .put("timestamp", Instant.now().toString());
+    }
     if ("createReportInAllSandboxes".equals(operation)) {
       String reportTitle = jsonInput.get("reportTitle").asText(); // throw NPE if missing
       return createReportInAllSandboxes(persistenceProvider, reportTitle);

@@ -71,7 +71,7 @@ jobs:
             --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
             --payload "$PAYLOAD" \
             --cli-binary-format raw-in-base64-out \
-            --cli-read-timeout 550 \
+            --cli-read-timeout 420 \
             --cli-connect-timeout 60 \
             response.json
           

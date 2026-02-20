@@ -3,6 +3,15 @@ name: Deploy+Verify on AWS dev
 on:
   push:
     branches: [ "dev" ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to dev'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
 
 env:
   AWS_REGION: "eu-north-1"

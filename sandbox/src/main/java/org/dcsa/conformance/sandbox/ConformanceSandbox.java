@@ -52,6 +52,8 @@ import org.dcsa.conformance.standards.vgm.VgmStandard;
 public class ConformanceSandbox {
   protected static final String SANDBOX = "sandbox#";
   protected static final String SESSION = "session#";
+  private static final String ADMIN_PK = "admin";
+  private static final String REPORT_JOB_SK = "reportJob#latest";
   public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
@@ -1015,18 +1017,37 @@ public class ConformanceSandbox {
   }
 
   public static JsonNode executeAdminTask(
-      ConformancePersistenceProvider persistenceProvider,
-      JsonNode jsonInput) {
+      ConformancePersistenceProvider persistenceProvider, JsonNode jsonInput) {
     String operation = jsonInput.path("operation").asText();
     if ("ping".equals(operation)) {
-      // Lightweight operation for warming up the Lambda / health check
-      return OBJECT_MAPPER.createObjectNode()
+      return OBJECT_MAPPER
+          .createObjectNode()
           .put("status", "ok")
           .put("timestamp", Instant.now().toString());
     }
+    if ("checkReportStatus".equals(operation)) {
+      return getReportStatus(persistenceProvider);
+    }
     if ("createReportInAllSandboxes".equals(operation)) {
       String reportTitle = jsonInput.get("reportTitle").asText(); // throw NPE if missing
-      return createReportInAllSandboxes(persistenceProvider, reportTitle);
+      try {
+        markJobRunning(persistenceProvider, reportTitle);
+        JsonNode result = createReportInAllSandboxes(persistenceProvider, reportTitle);
+        markJobCompleted(persistenceProvider);
+        return result;
+      } catch (Exception e) {
+        persistenceProvider
+            .getNonLockingMap()
+            .setItemValue(
+                ADMIN_PK,
+                REPORT_JOB_SK,
+                OBJECT_MAPPER
+                    .createObjectNode()
+                    .put("status", "FAILED")
+                    .put("finishedAt", Instant.now().toString())
+                    .put("error", e.getMessage()));
+        throw e;
+      }
     }
     throw new UnsupportedOperationException("Unsupported operation '%s'".formatted(operation));
   }
@@ -1107,5 +1128,40 @@ public class ConformanceSandbox {
                   .forEach(sortKey -> sandboxIds.add(sortKey.substring(sortKeyPrefix.length())));
             });
     return sandboxIdsByEnvironmentId;
+  }
+
+  private static void markJobRunning(
+      ConformancePersistenceProvider persistenceProvider, String reportTitle) {
+    String startedAt = Instant.now().toString();
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue(
+            ADMIN_PK,
+            REPORT_JOB_SK,
+            OBJECT_MAPPER
+                .createObjectNode()
+                .put("status", "RUNNING")
+                .put("startedAt", startedAt)
+                .put("reportTitle", reportTitle));
+  }
+
+  private static void markJobCompleted(ConformancePersistenceProvider persistenceProvider) {
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue(
+            ADMIN_PK,
+            REPORT_JOB_SK,
+            OBJECT_MAPPER
+                .createObjectNode()
+                .put("status", "COMPLETED")
+                .put("finishedAt", Instant.now().toString()));
+  }
+
+  private static JsonNode getReportStatus(ConformancePersistenceProvider persistenceProvider) {
+    JsonNode job = persistenceProvider.getNonLockingMap().getItemValue(ADMIN_PK, REPORT_JOB_SK);
+    if (job == null) {
+      return OBJECT_MAPPER.createObjectNode().put("status", "NOT_STARTED");
+    }
+    return OBJECT_MAPPER.createObjectNode().put("status", job.path("status").asText("UNKNOWN"));
   }
 }

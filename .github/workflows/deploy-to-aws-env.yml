@@ -11,6 +11,7 @@ on:
         options:
           - test
           - dt
+          - dev
 
 env:
   AWS_REGION: "eu-north-1"
@@ -43,6 +44,12 @@ jobs:
             echo "CONFORMANCE_USER_EMAIL=${{ secrets.DT_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
             echo "CONFORMANCE_USER_PASSWORD=${{ secrets.DT_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
             echo "CONFORMANCE_WEB_URL=${{ secrets.DT_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
+          elif [ "${{ env.AWS_ENVIRONMENT }}" = "dev" ]; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_EMAIL=${{ secrets.DEV_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_PASSWORD=${{ secrets.DEV_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_WEB_URL=${{ secrets.DEV_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
           else
             echo "AWS_ACCESS_KEY_ID=${{ secrets.TEST_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
@@ -109,31 +116,69 @@ jobs:
             /dev/null 2>&1 || echo "Warm-up invocation sent (async)"
           
           # Wait a bit for Lambda to initialize
-          echo "Waiting 30 seconds for Lambda to warm up..."
-          sleep 30
+          echo "Waiting 20 seconds for Lambda to warm up..."
+          sleep 20
           echo "Lambda should now be warm"
 
-      - name: Create pre-deployment reports in all sandboxes
+      - name: Create pre-deployment reports in all sandboxes (async + wait)
+        env:
+          AWS_MAX_ATTEMPTS: 1
         run: |
-          echo "Creating report in all sandboxes before deployment at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "Triggering report generation at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+
           REPORT_TITLE="Before DCSA deployment - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+
           PAYLOAD=$(jq -n \
             --arg operation "createReportInAllSandboxes" \
             --arg reportTitle "$REPORT_TITLE" \
             '{operation: $operation, reportTitle: $reportTitle}')
-          
+
+          # Trigger async execution
           aws lambda invoke \
             --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+            --invocation-type Event \
             --payload "$PAYLOAD" \
             --cli-binary-format raw-in-base64-out \
-            --cli-read-timeout 550 \
-            --cli-connect-timeout 60 \
-            response.json
-          
-          echo "Successfully created pre-deployment reports"
-          echo "Lambda response:"
-          cat response.json | jq '.'
-          rm response.json
+            /dev/null
+
+          echo "Report generation started. Waiting for completion..."
+
+          MAX_WAIT=1200   # 20 minutes max
+          INTERVAL=30
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+
+            STATUS_PAYLOAD='{"operation":"checkReportStatus"}'
+
+            aws lambda invoke \
+              --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+              --payload "$STATUS_PAYLOAD" \
+              --cli-binary-format raw-in-base64-out \
+              status.json > /dev/null
+
+            STATUS=$(cat status.json | jq -r '.status')
+
+            echo "Current status: $STATUS (elapsed: ${ELAPSED}s)"
+
+            if [ "$STATUS" = "COMPLETED" ]; then
+              echo "Reports completed successfully."
+              rm status.json
+              exit 0
+            fi
+
+            if [ "$STATUS" = "FAILED" ]; then
+              echo "Report generation failed."
+              rm status.json
+              exit 1
+            fi
+
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          echo "Timed out waiting for report generation."
+          exit 1
 
       - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
         run: |

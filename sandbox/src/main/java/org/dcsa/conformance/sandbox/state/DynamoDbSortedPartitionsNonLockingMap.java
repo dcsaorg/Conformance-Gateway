@@ -45,8 +45,8 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
 
     item.put("PK", AttributeValue.fromS(partitionKey));
     item.put("SK", AttributeValue.fromS(sortKey));
-    item.put("value", AttributeValue.fromS(value.toString()));
     item.put("ttl", AttributeValue.fromN(String.valueOf(ttlEpochSeconds)));
+    item.put("value", AttributeValue.fromS(value.toString()));
 
     dynamoDbClient.putItem(
             PutItemRequest.builder()

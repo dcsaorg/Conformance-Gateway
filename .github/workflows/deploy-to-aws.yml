@@ -65,6 +65,71 @@ jobs:
           cd cdk/
           cdk diff ${{ env.AWS_ENVIRONMENT }}ConformanceStack
 
+      - name: Create pre-deployment reports in all sandboxes
+        run: |
+          echo "Creating report in all sandboxes before deployment..."
+          REPORT_TITLE="Before DCSA deployment - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          PAYLOAD=$(jq -n \
+            --arg operation "createReportInAllSandboxes" \
+            --arg reportTitle "$REPORT_TITLE" \
+            '{operation: $operation, reportTitle: $reportTitle}')
+          
+          # Retry logic to handle ResourceNotReadyException and TooManyRequestsException
+          # Note: AdminLambda has 15min timeout and may take time to process all sandboxes
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          RETRY_DELAY=30
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+          
+            # Capture stderr and stdout
+            if OUTPUT=$(aws lambda invoke \
+              --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+              --payload "$PAYLOAD" \
+              --cli-binary-format raw-in-base64-out \
+              --cli-read-timeout 900 \
+              response.json 2>&1); then
+          
+              # Check if response.json was created and is valid
+              if [ -f response.json ]; then
+                echo "Lambda response:"
+                cat response.json | jq '.' || cat response.json
+          
+                # Check for Lambda function errors in the response
+                if grep -q '"errorMessage"' response.json 2>/dev/null; then
+                  echo "Lambda function returned an error, but invocation succeeded"
+                  rm response.json
+                  exit 1
+                fi
+          
+                rm response.json
+                echo "Successfully created pre-deployment report"
+                exit 0
+              fi
+            fi
+          
+            # Invocation failed
+            echo "Lambda invocation output: $OUTPUT"
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+          
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+              # Only retry on specific retryable errors
+              if echo "$OUTPUT" | grep -qE "ResourceNotReadyException|TooManyRequestsException|Rate Exceeded|Throttling"; then
+                echo "Retryable error detected. Waiting ${RETRY_DELAY}s before retry..."
+                sleep $RETRY_DELAY
+                RETRY_DELAY=$((RETRY_DELAY + 30))  # Linear backoff (30s, 60s, 90s)
+              else
+                echo "Non-retryable error encountered. Failing immediately."
+                exit 1
+              fi
+            else
+              echo "Max retries ($MAX_RETRIES) reached. Failed to create pre-deployment report."
+              echo "This may indicate the Lambda needs more resources or the operation should be async."
+              exit 1
+            fi
+          done
+
       - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
         run: |
           cd cdk/

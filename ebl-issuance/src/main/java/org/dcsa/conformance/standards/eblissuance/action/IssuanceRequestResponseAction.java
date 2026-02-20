@@ -26,6 +26,7 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
   private final JsonSchemaValidator issuanceManifestSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
   private final AtomicReference<String> transportDocumentReference;
+  private final AtomicReference<String> transportDocumentSubReference;
 
   public IssuanceRequestResponseAction(
       String platformPartyName,
@@ -53,6 +54,10 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
         previousAction != null && !(this.previousAction instanceof PlatformScenarioParametersAction)
             ? null
             : new AtomicReference<>();
+    this.transportDocumentSubReference =
+        previousAction != null && !(this.previousAction instanceof PlatformScenarioParametersAction)
+            ? null
+            : new AtomicReference<>();
   }
 
   @Override
@@ -60,6 +65,9 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
     super.reset();
     if (this.transportDocumentReference != null) {
       this.transportDocumentReference.set(null);
+    }
+    if (this.transportDocumentSubReference != null) {
+      this.transportDocumentSubReference.set(null);
     }
   }
 
@@ -72,12 +80,26 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
   }
 
   @Override
+  protected Supplier<String> getTdsrSupplier() {
+    return this.previousAction != null
+            && !(this.previousAction instanceof PlatformScenarioParametersAction)
+            ? ((IssuanceAction) this.previousAction).getTdsrSupplier()
+            : this.transportDocumentSubReference::get;
+  }
+
+  @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (transportDocumentReference != null) {
       String tdr = transportDocumentReference.get();
       if (tdr != null) {
         jsonState.put("transportDocumentReference", tdr);
+      }
+    }
+    if (transportDocumentSubReference != null) {
+      String tdsr = transportDocumentSubReference.get();
+      if (tdsr != null) {
+        jsonState.put("transportDocumentSubReference", tdsr);
       }
     }
     return jsonState;
@@ -90,6 +112,12 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
       JsonNode tdrNode = jsonState.get("transportDocumentReference");
       if (tdrNode != null) {
         transportDocumentReference.set(tdrNode.asText());
+      }
+    }
+    if (transportDocumentSubReference != null) {
+      JsonNode tdsrNode = jsonState.get("transportDocumentSubReference");
+      if (tdsrNode != null) {
+        transportDocumentSubReference.set(tdsrNode.asText());
       }
     }
   }
@@ -113,6 +141,10 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
     if (tdr != null) {
       jsonNode.put("tdr", tdr);
     }
+    String tdsr = getTdsrSupplier().get();
+    if (tdsr != null) {
+      jsonNode.put("tdsr", tdsr);
+    }
     return jsonNode;
   }
 
@@ -127,6 +159,10 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
     String exchangeTdr = requestJsonNode.path("document").path("transportDocumentReference").asText();
     if (transportDocumentReference != null && transportDocumentReference.get() == null) {
       transportDocumentReference.set(exchangeTdr);
+    }
+    String exchangeTdsr = requestJsonNode.path("document").path("transportDocumentSubReference").asText();
+    if (transportDocumentSubReference != null && transportDocumentSubReference.get() == null) {
+      transportDocumentSubReference.set(exchangeTdsr);
     }
   }
 

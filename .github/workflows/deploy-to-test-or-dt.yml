@@ -11,6 +11,7 @@ on:
         options:
           - test
           - dt
+          - dev
 
 env:
   AWS_REGION: "eu-north-1"

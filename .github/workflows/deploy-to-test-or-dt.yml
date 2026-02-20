@@ -92,58 +92,46 @@ jobs:
           cd cdk/
           cdk diff ${{ env.AWS_ENVIRONMENT }}ConformanceStack
 
-      - name: Create pre-deployment reports in all sandboxes
-        run: |
-          echo "Creating report in all sandboxes before deployment..."
-          REPORT_TITLE="Before DCSA deployment - $(date '+%Y-%m-%d %H:%M:%S UTC')"
-          PAYLOAD=$(jq -n \
-            --arg operation "createReportInAllSandboxes" \
-            --arg reportTitle "$REPORT_TITLE" \
-            '{operation: $operation, reportTitle: $reportTitle}')
-
-          # Retry logic to handle ResourceNotReadyException and TooManyRequestsException
-          MAX_RETRIES=6
-          RETRY_COUNT=0
-          RETRY_DELAY=15
-          
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-            
-            # Capture both stdout and stderr
-            if OUTPUT=$(aws lambda invoke \
-              --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
-              --payload "$PAYLOAD" \
-              --cli-binary-format raw-in-base64-out \
-              response.json 2>&1); then
-              
-              # Check if response.json was created and contains valid response
-              if [ -f response.json ]; then
-                echo "Lambda response:"
-                cat response.json | jq '.'
-                rm response.json
-                echo "Successfully created pre-deployment report"
-                exit 0
-              fi
-            fi
-            
-            # Invocation failed, check the error
-            echo "Lambda invocation output: $OUTPUT"
-            RETRY_COUNT=$((RETRY_COUNT + 1))
-            
-            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-              if echo "$OUTPUT" | grep -q "ResourceNotReadyException\|TooManyRequestsException\|Rate Exceeded"; then
-                echo "Retryable error detected. Waiting ${RETRY_DELAY}s before retry..."
-                sleep $RETRY_DELAY
-                RETRY_DELAY=$((RETRY_DELAY + 10))  # Linear backoff (15s, 25s, 35s, 45s, 55s)
-              else
-                echo "Non-retryable error. Failing immediately."
-                exit 1
-              fi
-            else
-              echo "Max retries reached. Failed to create pre-deployment report."
-              exit 1
-            fi
-          done
+#      - name: Create pre-deployment reports in all sandboxes
+#        run: |
+#          echo "Creating report in all sandboxes before deployment..."
+#          REPORT_TITLE="Before DCSA deployment - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+#          PAYLOAD=$(jq -n \
+#            --arg operation "createReportInAllSandboxes" \
+#            --arg reportTitle "$REPORT_TITLE" \
+#            '{operation: $operation, reportTitle: $reportTitle}')
+#
+#          # Retry logic to handle ResourceNotReadyException
+#          MAX_RETRIES=5
+#          RETRY_COUNT=0
+#          RETRY_DELAY=10
+#
+#          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+#            echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+#
+#            if aws lambda invoke \
+#              --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+#              --payload "$PAYLOAD" \
+#              --cli-binary-format raw-in-base64-out \
+#              response.json 2>&1; then
+#
+#              echo "Lambda response:"
+#              cat response.json | jq '.'
+#              rm response.json
+#              echo "Successfully created pre-deployment report"
+#              break
+#            else
+#              RETRY_COUNT=$((RETRY_COUNT + 1))
+#              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+#                echo "Lambda invocation failed. Waiting ${RETRY_DELAY}s before retry..."
+#                sleep $RETRY_DELAY
+#                RETRY_DELAY=$((RETRY_DELAY * 2))  # Exponential backoff
+#              else
+#                echo "Max retries reached. Failed to create pre-deployment report."
+#                exit 1
+#              fi
+#            fi
+#          done
 
       - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
         run: |

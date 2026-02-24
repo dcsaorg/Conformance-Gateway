@@ -868,6 +868,13 @@ public class EblCarrier extends ConformanceParty {
       var notification = super.asJsonNode();
       var data = (ObjectNode) notification.get("data");
 
+      // Convert transportDocumentStatus from wireName to notificationWireName
+      var statusNode = data.get("transportDocumentStatus");
+      if (statusNode != null && !statusNode.isNull()) {
+        var status = TransportDocumentStatus.fromWireName(statusNode.asText());
+        data.put("transportDocumentStatus", status.notificationWireName());
+      }
+
       data.set("transportDocument", transportDocument);
 
       return notification;

@@ -82,9 +82,4 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
   protected Supplier<String> getTdrSupplier() {
     return null;
   }
-
-  @Override
-  protected Supplier<String> getTdsrSupplier() {
-    return null;
-  }
 }

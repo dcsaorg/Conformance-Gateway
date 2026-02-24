@@ -22,7 +22,6 @@ public class IssuanceRequestErrorResponseAction extends IssuanceAction {
   public static final String SEND_NO_ISSUING_PARTY = "sendNoIssuingParty";
 
   private final AtomicReference<String> transportDocumentReference;
-  private final AtomicReference<String> transportDocumentSubReference;
   private final JsonSchemaValidator responseSchemaValidator;
 
   public IssuanceRequestErrorResponseAction(
@@ -45,10 +44,6 @@ public class IssuanceRequestErrorResponseAction extends IssuanceAction {
         previousAction != null && !(this.previousAction instanceof PlatformScenarioParametersAction)
             ? null
             : new AtomicReference<>();
-    this.transportDocumentSubReference =
-        previousAction != null && !(this.previousAction instanceof PlatformScenarioParametersAction)
-            ? null
-            : new AtomicReference<>();
   }
 
   @Override
@@ -57,14 +52,6 @@ public class IssuanceRequestErrorResponseAction extends IssuanceAction {
             && !(this.previousAction instanceof PlatformScenarioParametersAction)
         ? ((IssuanceAction) this.previousAction).getTdrSupplier()
         : this.transportDocumentReference::get;
-  }
-
-  @Override
-  protected Supplier<String> getTdsrSupplier() {
-    return this.previousAction != null
-            && !(this.previousAction instanceof PlatformScenarioParametersAction)
-        ? ((IssuanceAction) this.previousAction).getTdsrSupplier()
-        : this.transportDocumentSubReference::get;
   }
 
   @Override

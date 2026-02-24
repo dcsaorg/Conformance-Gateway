@@ -168,9 +168,4 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
   protected Supplier<String> getTdrSupplier() {
     return null;
   }
-
-  @Override
-  protected Supplier<String> getTdsrSupplier() {
-    return null;
-  }
 }

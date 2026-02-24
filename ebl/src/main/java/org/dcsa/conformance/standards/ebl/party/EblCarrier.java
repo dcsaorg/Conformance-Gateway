@@ -869,7 +869,6 @@ public class EblCarrier extends ConformanceParty {
       var data = (ObjectNode) notification.get("data");
 
       // Convert transportDocumentStatus from wireName to notificationWireName
-      // Due to API schema mistake, notification uses different status names
       var statusNode = data.get("transportDocumentStatus");
       if (statusNode != null && !statusNode.isNull()) {
         var status = TransportDocumentStatus.fromWireName(statusNode.asText());

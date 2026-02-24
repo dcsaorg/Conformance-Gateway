@@ -23,7 +23,7 @@ public enum TransportDocumentStatus {
   ;
 
   private final String wireName;
-  // Due to a mistake in the API schema, the notification wire names are different for some statuses
+  // The notification wire names are different for some statuses due to a mistake in the API schema.
   private final String notificationWireName;
 
   private static final Map<String, TransportDocumentStatus> WIRENAME2STATUS = Arrays.stream(values())
@@ -36,12 +36,7 @@ public enum TransportDocumentStatus {
     }
     return wireName;
   }
-
-  /**
-   * Returns the wire name used in notification payloads. Due to a mistake in the API schema, the
-   * notification wire names are different for some statuses: SURRENDERED_FOR_AMENDMENT ->
-   * SURRENDER_FOR_AMENDMENT SURRENDERED_FOR_DELIVERY -> SURRENDER_FOR_DELIVERY VOIDED -> VOID
-   */
+  
   public String notificationWireName() {
     if (!hasWireName()) {
       throw new IllegalArgumentException("State does not have a name visible in any transmission");

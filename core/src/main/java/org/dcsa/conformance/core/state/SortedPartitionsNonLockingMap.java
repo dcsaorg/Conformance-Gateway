@@ -7,6 +7,9 @@ import java.util.TreeMap;
 public interface SortedPartitionsNonLockingMap {
   void setItemValue(String partitionKey, String sortKey, JsonNode value);
 
+  void setItemValueWithTtl(
+      String partitionKey, String sortKey, long ttlEpochSeconds, JsonNode value);
+
   JsonNode getItemValue(String partitionKey, String sortKey);
 
   LinkedHashMap<String, JsonNode> getPartitionValuesBySortKey(

@@ -134,10 +134,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
         actionPrompt.has("tdr")
             ? actionPrompt.path("tdr").asText()
             : UUID.randomUUID().toString().substring(20);
-    String tdsr =
-        actionPrompt.has("tdsr")
-            ? actionPrompt.path("tdsr").asText()
-            : UUID.randomUUID().toString().substring(20);
+    String tdsr = UUID.randomUUID().toString().substring(20);
     String sir = sirsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString());
     String br =
         brsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString().substring(35));

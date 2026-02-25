@@ -80,8 +80,8 @@
         }
       },
       "shipmentDetails": {
-        "carrierBookingReference": "ABC709951",
-        "transportDocumentReference": "DCSA71800000",
+        "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+        "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
         "otherReferences": [
           {
             "typeCode": "SI",

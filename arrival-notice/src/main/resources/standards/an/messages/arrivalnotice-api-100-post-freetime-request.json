@@ -11,7 +11,7 @@
           "email": "carrier@example.com"
         }
       ],
-      "transportDocumentReference": "DCSA71900000",
+      "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
       "deliveryTypeAtDestination": "CY",
 
       "documentParties": [

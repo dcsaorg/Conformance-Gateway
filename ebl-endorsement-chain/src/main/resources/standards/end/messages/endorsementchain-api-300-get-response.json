@@ -1,7 +1,7 @@
 [
   {
-    "transportDocumentReference": "DCSA71800000",
-    "transportDocumentSubReference": "fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9",
+    "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
+    "transportDocumentSubReference": "TRANSPORT_DOCUMENT_SUB_REFERENCE_PLACEHOLDER",
     "carrierSCACCode": "YMLU",
     "endorsementChain": [
       {

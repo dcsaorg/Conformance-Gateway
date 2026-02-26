@@ -99,122 +99,122 @@ jobs:
           cd cdk/
           cdk diff ${{ env.AWS_ENVIRONMENT }}ConformanceStack
 
-      - name: Warm up AdminLambda (prevent cold start)
-        run: |
-          echo "Warming up AdminLambda at $(date '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "Note: VPC-attached Lambdas can take 10-30 seconds on cold start"
-          
-          # Invoke with a lightweight operation to warm up the Lambda
-          WARM_PAYLOAD='{"operation":"ping"}'
-          
-          # Fire and forget - we don't care about the response, just warming up
-          aws lambda invoke \
-            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
-            --invocation-type Event \
-            --payload "$WARM_PAYLOAD" \
-            --cli-binary-format raw-in-base64-out \
-            /dev/null 2>&1 || echo "Warm-up invocation sent (async)"
-          
-          # Wait a bit for Lambda to initialize
-          echo "Waiting 20 seconds for Lambda to warm up..."
-          sleep 20
-          echo "Lambda should now be warm"
-
-      - name: Create pre-deployment reports in all sandboxes (safe async pattern)
-        env:
-          AWS_MAX_ATTEMPTS: 1
-        run: |
-          echo "Starting report generation at $(date '+%Y-%m-%d %H:%M:%S UTC')"
-
-          REPORT_TITLE="Before DCSA deployment - $(date '+%Y-%m-%d %H:%M:%S UTC')"
-          
-          # Start job (synchronous, fast, returns jobId)
-
-          START_PAYLOAD=$(jq -n \
-            --arg operation "startReportJob" \
-            --arg reportTitle "$REPORT_TITLE" \
-            '{operation: $operation, reportTitle: $reportTitle}')
-
-          aws lambda invoke \
-            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
-            --payload "$START_PAYLOAD" \
-            --cli-binary-format raw-in-base64-out \
-            start-response.json > /dev/null
-
-          JOB_ID=$(cat start-response.json | jq -r '.jobId')
-          rm start-response.json
-
-          if [ -z "$JOB_ID" ] || [ "$JOB_ID" = "null" ]; then
-            echo "Failed to obtain jobId"
-            exit 1
-          fi
-
-          echo "Job started successfully. Job ID: $JOB_ID"
-
-          # Trigger heavy processing asynchronously
-
-          PROCESS_PAYLOAD=$(jq -n \
-            --arg operation "createReportInAllSandboxes" \
-            --arg jobId "$JOB_ID" \
-            --arg reportTitle "$REPORT_TITLE" \
-            '{operation: $operation, jobId: $jobId, reportTitle: $reportTitle}')
-
-          aws lambda invoke \
-            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
-            --invocation-type Event \
-            --payload "$PROCESS_PAYLOAD" \
-            --cli-binary-format raw-in-base64-out \
-            /dev/null
-
-          echo "Heavy report generation triggered asynchronously."
-
-          # Poll until job completes
-
-          echo "Waiting for report generation to complete..."
-
-          MAX_WAIT=1800   # 30 minutes max
-          INTERVAL=30
-          ELAPSED=0
-
-          while [ $ELAPSED -lt $MAX_WAIT ]; do
-
-            STATUS_PAYLOAD=$(jq -n \
-              --arg operation "checkReportStatus" \
-              --arg jobId "$JOB_ID" \
-              '{operation: $operation, jobId: $jobId}')
-
-            aws lambda invoke \
-              --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
-              --payload "$STATUS_PAYLOAD" \
-              --cli-binary-format raw-in-base64-out \
-              status.json > /dev/null
-
-            STATUS=$(cat status.json | jq -r '.status')
-            rm status.json
-
-            echo "Current status: $STATUS (elapsed ${ELAPSED}s)"
-
-            if [ "$STATUS" = "COMPLETED" ]; then
-              echo "Report generation completed successfully."
-              exit 0
-            fi
-
-            if [ "$STATUS" = "FAILED" ]; then
-              echo "Report generation failed."
-              exit 1
-            fi
-
-            if [ "$STATUS" = "NOT_FOUND" ]; then
-              echo "Job not found — unexpected state."
-              exit 1
-            fi
-
-            sleep $INTERVAL
-            ELAPSED=$((ELAPSED + INTERVAL))
-          done
-
-          echo "Timed out waiting for report generation."
-          exit 1
+#      - name: Warm up AdminLambda (prevent cold start)
+#        run: |
+#          echo "Warming up AdminLambda at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+#          echo "Note: VPC-attached Lambdas can take 10-30 seconds on cold start"
+#
+#          # Invoke with a lightweight operation to warm up the Lambda
+#          WARM_PAYLOAD='{"operation":"ping"}'
+#
+#          # Fire and forget - we don't care about the response, just warming up
+#          aws lambda invoke \
+#            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+#            --invocation-type Event \
+#            --payload "$WARM_PAYLOAD" \
+#            --cli-binary-format raw-in-base64-out \
+#            /dev/null 2>&1 || echo "Warm-up invocation sent (async)"
+#
+#          # Wait a bit for Lambda to initialize
+#          echo "Waiting 20 seconds for Lambda to warm up..."
+#          sleep 20
+#          echo "Lambda should now be warm"
+#
+#      - name: Create pre-deployment reports in all sandboxes (safe async pattern)
+#        env:
+#          AWS_MAX_ATTEMPTS: 1
+#        run: |
+#          echo "Starting report generation at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+#
+#          REPORT_TITLE="Before DCSA deployment - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+#
+#          # Start job (synchronous, fast, returns jobId)
+#
+#          START_PAYLOAD=$(jq -n \
+#            --arg operation "startReportJob" \
+#            --arg reportTitle "$REPORT_TITLE" \
+#            '{operation: $operation, reportTitle: $reportTitle}')
+#
+#          aws lambda invoke \
+#            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+#            --payload "$START_PAYLOAD" \
+#            --cli-binary-format raw-in-base64-out \
+#            start-response.json > /dev/null
+#
+#          JOB_ID=$(cat start-response.json | jq -r '.jobId')
+#          rm start-response.json
+#
+#          if [ -z "$JOB_ID" ] || [ "$JOB_ID" = "null" ]; then
+#            echo "Failed to obtain jobId"
+#            exit 1
+#          fi
+#
+#          echo "Job started successfully. Job ID: $JOB_ID"
+#
+#          # Trigger heavy processing asynchronously
+#
+#          PROCESS_PAYLOAD=$(jq -n \
+#            --arg operation "createReportInAllSandboxes" \
+#            --arg jobId "$JOB_ID" \
+#            --arg reportTitle "$REPORT_TITLE" \
+#            '{operation: $operation, jobId: $jobId, reportTitle: $reportTitle}')
+#
+#          aws lambda invoke \
+#            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+#            --invocation-type Event \
+#            --payload "$PROCESS_PAYLOAD" \
+#            --cli-binary-format raw-in-base64-out \
+#            /dev/null
+#
+#          echo "Heavy report generation triggered asynchronously."
+#
+#          # Poll until job completes
+#
+#          echo "Waiting for report generation to complete..."
+#
+#          MAX_WAIT=1800   # 30 minutes max
+#          INTERVAL=30
+#          ELAPSED=0
+#
+#          while [ $ELAPSED -lt $MAX_WAIT ]; do
+#
+#            STATUS_PAYLOAD=$(jq -n \
+#              --arg operation "checkReportStatus" \
+#              --arg jobId "$JOB_ID" \
+#              '{operation: $operation, jobId: $jobId}')
+#
+#            aws lambda invoke \
+#              --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+#              --payload "$STATUS_PAYLOAD" \
+#              --cli-binary-format raw-in-base64-out \
+#              status.json > /dev/null
+#
+#            STATUS=$(cat status.json | jq -r '.status')
+#            rm status.json
+#
+#            echo "Current status: $STATUS (elapsed ${ELAPSED}s)"
+#
+#            if [ "$STATUS" = "COMPLETED" ]; then
+#              echo "Report generation completed successfully."
+#              exit 0
+#            fi
+#
+#            if [ "$STATUS" = "FAILED" ]; then
+#              echo "Report generation failed."
+#              exit 1
+#            fi
+#
+#            if [ "$STATUS" = "NOT_FOUND" ]; then
+#              echo "Job not found — unexpected state."
+#              exit 1
+#            fi
+#
+#            sleep $INTERVAL
+#            ELAPSED=$((ELAPSED + INTERVAL))
+#          done
+#
+#          echo "Timed out waiting for report generation."
+#          exit 1
 
       - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
         run: |

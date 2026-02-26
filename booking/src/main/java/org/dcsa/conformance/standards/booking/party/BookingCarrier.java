@@ -22,6 +22,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
@@ -295,7 +296,7 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   private String generateAndAssociateCBR(String cbrr) {
-    var cbr = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+    var cbr = ReferenceGenerator.newReference();
     assert cbrr != null;
     cbrrToCbr.put(cbrr, cbr);
     cbrToCbrr.put(cbr, cbrr);
@@ -356,7 +357,7 @@ public class BookingCarrier extends ConformanceParty {
                     "REQUEST_URI_PLACEHOLDER",
                     request.url(),
                     "REFERENCE_PLACEHOLDER",
-                    UUID.randomUUID().toString(),
+                    ReferenceGenerator.newReference(),
                     "ERROR_DATE_TIME_PLACEHOLDER",
                     LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
                     "ERROR_MESSAGE_PLACEHOLDER",

@@ -87,7 +87,7 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
                               case TRANSPORT_DOCUMENT_REFERENCE -> "HHL71800000";
                               case TRANSPORT_DOCUMENT_SUB_REFERENCE ->
                                   "fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9";
-                              case CARRIER_SCAC_CODE -> "MAEU";
+                              case CARRIER_SCAC_CODE -> "YMLU";
                               default -> "TODO";
                             })))
         .toJson();

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.eblsurrender.party.SuppliedScenarioParameters;
 
 @Getter
@@ -88,7 +89,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
     var surrendereeParty = OBJECT_MAPPER.createObjectNode();
     surrendereeParty.put("partyName", "Surrenderee name").put("eblPlatform", "BOLE");
     return new SuppliedScenarioParameters(
-            UUID.randomUUID().toString().replace("-", "").substring(0, 20),
+            ReferenceGenerator.newReference(),
             issueToParty,
             carrierParty,
             surrendereeParty)

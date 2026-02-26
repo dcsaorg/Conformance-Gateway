@@ -38,7 +38,7 @@ public class IssuanceRequestErrorResponseAction extends IssuanceAction {
                 latestPlatformScenarioParametersAction(previousAction)
                     .getResponseCode()
                     .standardCode),
-            400);
+        400);
     this.responseSchemaValidator = responseSchemaValidator;
     this.transportDocumentReference =
         previousAction != null && !(this.previousAction instanceof PlatformScenarioParametersAction)

@@ -166,7 +166,7 @@ public class PayloadSignerFactory {
             JWSAlgorithm.PS256,
             new RSASSASigner(keyPair.getPrivate()),
             generateKeyId(keyPair.getPublic())),
-        generateSelfSignedCertificateSecret(keyPair));
+        generateStaticSelfSignedCertificate(keyPair));
   }
 
   @SneakyThrows
@@ -176,7 +176,7 @@ public class PayloadSignerFactory {
             JWSAlgorithm.ES256,
             new ECDSASigner((ECPrivateKey) keyPair.getPrivate()),
             generateKeyId(keyPair.getPublic())),
-        generateSelfSignedCertificateSecret(keyPair));
+        generateStaticSelfSignedCertificate(keyPair));
   }
 
   @SneakyThrows
@@ -273,18 +273,42 @@ public class PayloadSignerFactory {
     return w.getBuffer().toString();
   }
 
-  private static X509CertificateHolder generateSelfSignedCertificateSecret(KeyPair keyPair) {
-    X500Principal subject = new X500Principal("CN=DCSA-Conformance-Framework");
+  private static X509CertificateHolder generateStaticSelfSignedCertificate(KeyPair keyPair) {
+    // Fixed dates for consistent certificate generation
+    // Valid from: 2026-02-24 00:00:00 UTC (yesterday)
+    // Valid until: 2056-02-24 00:00:00 UTC (30 years ahead)
+    long notBefore = 1771977600000L;
+    long notAfter = 2718748800000L;
 
+    // Use a deterministic serial number derived from the public key
+    // This ensures the same key pair always produces the same serial number
+    byte[] publicKeyBytes = keyPair.getPublic().getEncoded();
+    BigInteger serialNumber = new BigInteger(1, publicKeyBytes).abs();
+
+    return buildCertificate(keyPair, notBefore, notAfter, serialNumber);
+  }
+
+  @SuppressWarnings("unused")
+  private static X509CertificateHolder generateSelfSignedCertificateSecret(KeyPair keyPair) {
     long notBefore = System.currentTimeMillis();
-    // 2500 days (several) years should be sufficient.
+    // 2500 days (several years) should be sufficient.
     long notAfter = notBefore + (1000L * 3600L * 24 * 2500);
+
     byte[] serialBytes = new byte[16];
     SECURE_RANDOM.nextBytes(serialBytes);
+    BigInteger serialNumber = new BigInteger(serialBytes);
+
+    return buildCertificate(keyPair, notBefore, notAfter, serialNumber);
+  }
+
+  private static X509CertificateHolder buildCertificate(
+      KeyPair keyPair, long notBefore, long notAfter, BigInteger serialNumber) {
+    X500Principal subject = new X500Principal("CN=DCSA-Conformance-Framework");
+
     X509v3CertificateBuilder certBuilder =
         new JcaX509v3CertificateBuilder(
             subject,
-            new BigInteger(serialBytes),
+            serialNumber,
             new Date(notBefore),
             new Date(notAfter),
             subject,
@@ -307,7 +331,7 @@ public class PayloadSignerFactory {
       return certBuilder.build(signer);
     } catch (Exception e) {
       throw new UserFacingException(
-          "Error while generating a self-certificate: " + e.getMessage(), e);
+          "Error while generating a self-signed certificate: " + e.getMessage(), e);
     }
   }
 }

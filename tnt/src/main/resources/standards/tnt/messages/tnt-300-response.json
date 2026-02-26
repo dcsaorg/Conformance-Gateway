@@ -20,12 +20,12 @@
       "shipmentDetails": {
         "documentReference": {
           "typeCode": "BKG",
-          "reference": "ABC709951"
+          "reference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER"
         },
         "additionalDocumentReferences": [
           {
             "typeCode": "TRD",
-            "reference": "HHL71800000"
+            "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
           }
         ]
       }
@@ -55,12 +55,12 @@
       "shipmentDetails": {
         "documentReference": {
           "typeCode": "BKG",
-          "reference": "ABC709951"
+          "reference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER"
         },
         "additionalDocumentReferences": [
           {
             "typeCode": "TRD",
-            "reference": "HHL71800000"
+            "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
           }
         ]
       },
@@ -213,4 +213,3 @@
     }
   ]
 }
-

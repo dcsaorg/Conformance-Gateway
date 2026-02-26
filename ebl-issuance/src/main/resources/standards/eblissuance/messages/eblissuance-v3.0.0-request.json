@@ -1,6 +1,7 @@
 {
   "document": {
     "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
+    "transportDocumentSubReference": "TRANSPORT_DOCUMENT_SUB_REFERENCE_PLACEHOLDER",
     "shippingInstructionsReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
     "transportDocumentStatus": "ISSUED",
     "transportDocumentTypeCode": "BOL",

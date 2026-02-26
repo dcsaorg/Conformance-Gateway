@@ -222,10 +222,12 @@ export class SandboxComponent implements OnInit, OnDestroy {
           "Error creating report",
           response.error);
       this.newReportTitle = "";
+      this.cdr.detectChanges();
       return
     }
     this.reportDigests = await this.conformanceService.getReportDigests(this.sandbox!.id);
     this.newReportTitle = "";
+    this.cdr.detectChanges();
   }
 
   async onReportClick(reportDigest: ReportDigest) {
@@ -235,14 +237,17 @@ export class SandboxComponent implements OnInit, OnDestroy {
           this.dialog,
           "Error retrieving report content",
           response.error);
+      this.cdr.detectChanges();
       return;
     }
     this.displayedReportContent = response;
     this.displayedReportDigest = reportDigest;
+    this.cdr.detectChanges();
   }
 
   onClickBackToAllReports() {
     this.displayedReportDigest = null;
     this.displayedReportContent = null;
+    this.cdr.detectChanges();
   }
 }

@@ -24,6 +24,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.end.action.SupplyScenarioParametersAction;
 
 @Slf4j
@@ -83,7 +84,7 @@ public class EndorsementChainProvider extends ConformanceParty {
                               case TRANSPORT_DOCUMENT_REFERENCE -> "HHL71800000";
                               case TRANSPORT_DOCUMENT_SUB_REFERENCE ->
                                   "fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9";
-                              case CARRIER_SCAC_CODE -> "MAEU";
+                              case CARRIER_SCAC_CODE -> "YMLU";
                             })));
 
     asyncOrchestratorPostPartyInput(
@@ -102,7 +103,9 @@ public class EndorsementChainProvider extends ConformanceParty {
         JsonToolkit.templateFileToJsonNode(
             "/standards/end/messages/endorsementchain-api-%s-get-response.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
-            Map.of());
+            Map.of(
+                "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
+                "TRANSPORT_DOCUMENT_SUB_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
     return request.createResponse(
         200,
         Map.of(API_VERSION, List.of(apiVersion)),

@@ -134,6 +134,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
         actionPrompt.has("tdr")
             ? actionPrompt.path("tdr").asText()
             : UUID.randomUUID().toString().substring(20);
+    String tdsr = UUID.randomUUID().toString().substring(20);
     String sir = sirsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString());
     String br =
         brsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString().substring(35));
@@ -147,6 +148,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
                     .formatted(apiVersion),
                 Map.ofEntries(
                     Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
+                    Map.entry("TRANSPORT_DOCUMENT_SUB_REFERENCE_PLACEHOLDER", tdsr),
                     Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
                     Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
                     Map.entry(

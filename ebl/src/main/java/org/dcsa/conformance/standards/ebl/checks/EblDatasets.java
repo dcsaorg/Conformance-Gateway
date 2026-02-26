@@ -9,7 +9,7 @@ public class EblDatasets {
   public static final KeywordDataset EBL_PLATFORMS_DATASET =
       KeywordDataset.staticDataset(
           "WAVE", "CARX", "ESSD", "IDT", "BOLE", "EDOX", "IQAX", "SECR", "TRGO", "ETEU", "TRAC",
-          "BRIT");
+          "BRIT", "COVA", "ETIT", "KTNE", "CRED", "BLOC");
 
   public static final KeywordDataset CARGO_MOVEMENT_TYPE =
       KeywordDataset.staticDataset("FCL", "LCL");
@@ -45,6 +45,10 @@ public class EblDatasets {
           "WAVE", "CARX", "ESSD", "IDT", "BOLE", "EDOX", "IQAX", "SECR", "TRGO", "ETEU", "TRAC",
           "BRIT", "GSBN", "WISE", "GLEIF", "W3C", "DNB", "FMC", "DCSA", "ZZZ");
 
+  public static final KeywordDataset SURRENDER_DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES =
+      KeywordDataset.staticDataset(
+          "WAVE", "CARX", "ESSD", "IDT", "BOLE", "EDOX", "IQAX", "SECR", "TRGO", "ETEU", "TRAC",
+          "BRIT", "GSBN", "WISE", "GLEIF", "W3C", "DNB", "FMC", "DCSA", "ZZZ", "NONE");
   public static final KeywordDataset REASON_CODES =
       KeywordDataset.staticDataset("SWTP", "COD", "SWI");
 
@@ -74,4 +78,16 @@ public class EblDatasets {
           "PROPERTY_VALUE_HAS_BEEN_CHANGED",
           "PROPERTY_VALUE_MAY_CHANGE",
           "PROPERTY_HAS_BEEN_DELETED");
+
+  public static final KeywordDataset SURRENDER_ACTIONS_DATA_SET =
+      KeywordDataset.staticDataset(
+          "ISSUE",
+          "ENDORSE",
+          "SIGN",
+          "SURRENDER_FOR_DELIVERY",
+          "SURRENDER_FOR_AMENDMENT",
+          "BLANK_ENDORSE",
+          "ENDORSE_TO_ORDER",
+          "TRANSFER",
+          "SURRENDERED");
 }

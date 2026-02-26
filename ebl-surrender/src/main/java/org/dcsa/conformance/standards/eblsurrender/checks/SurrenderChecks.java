@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.eblsurrender.checks;
 
-import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.REASON_CODES;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.SURRENDER_ACTIONS_DATA_SET;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.SURRENDER_DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 
 import java.util.UUID;
 import lombok.experimental.UtilityClass;
@@ -9,16 +10,11 @@ import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonRebasableContentCheck;
-import org.dcsa.conformance.core.check.KeywordDataset;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
 @UtilityClass
 public class SurrenderChecks {
-
-  private static final KeywordDataset SURRENDER_ACTIONS_DATA_SET =
-      KeywordDataset.staticDataset(
-          "ISSUE", "ENDORSE", "SIGN", "SURRENDER_FOR_DELIVERY", "SURRENDER_FOR_AMENDMENT");
 
   private static final String ENDORSEMENT_CHAIN = "endorsementChain";
   private static final String ACTION_CODE = "actionCode";
@@ -49,7 +45,7 @@ public class SurrenderChecks {
                     ENDORSEMENT_CHAIN, RECIPIENT, IDENTIFYING_CODES, CODE_LIST_PROVIDER));
           },
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
-              DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES));
+              SURRENDER_DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES));
 
   private static final JsonRebasableContentCheck REASON_CODE_CHECK =
       JsonAttribute.allIndividualMatchesMustBeValid(

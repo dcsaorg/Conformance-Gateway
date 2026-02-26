@@ -23,6 +23,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.an.action.PublisherPostANAction;
 import org.dcsa.conformance.standards.an.action.PublisherPostANNotificationAction;
 import org.dcsa.conformance.standards.an.action.SupplyScenarioParametersAction;
@@ -73,7 +74,8 @@ public class ANPublisher extends ConformanceParty {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     String filePath = getAnPayloadFilepath(scenarioType);
 
-    JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath, Map.ofEntries());
+    JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath,
+        Map.of("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
     syncCounterpartPost("/arrival-notices", jsonRequestBody);
     addOperatorLogEntry("Sent Arrival Notices ");
   }
@@ -95,7 +97,7 @@ public class ANPublisher extends ConformanceParty {
         JsonToolkit.templateFileToJsonNode(
             "/standards/an/messages/arrivalnotice-api-%s-post-notification-request.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
-            Map.ofEntries());
+            Map.of("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
 
     syncCounterpartPost("/arrival-notice-notifications", jsonRequestBody);
     addOperatorLogEntry("Sent Arrival Notice Notifications");

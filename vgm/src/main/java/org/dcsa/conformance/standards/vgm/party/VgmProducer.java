@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.vgm.action.ProducerPostVgmDeclarationAction;
 import org.dcsa.conformance.standards.vgm.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.vgm.checks.VgmQueryParameters;
@@ -92,7 +93,9 @@ public class VgmProducer extends ConformanceParty {
         JsonToolkit.templateFileToJsonNode(
             "/standards/vgm/messages/vgm-api-%s-post-request.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
-            Map.of());
+            Map.of(
+                "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
+                "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
     syncCounterpartPost("/vgm-declarations", jsonRequestBody);
 
     addOperatorLogEntry("Sent VGM Declarations");
@@ -104,7 +107,9 @@ public class VgmProducer extends ConformanceParty {
         JsonToolkit.templateFileToJsonNode(
             "/standards/vgm/messages/vgm-api-%s-get-response.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
-            Map.of());
+            Map.of(
+                "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
+                "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
 
     return request.createResponse(
         200,

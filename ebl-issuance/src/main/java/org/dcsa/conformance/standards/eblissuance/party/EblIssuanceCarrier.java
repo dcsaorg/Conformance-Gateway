@@ -26,6 +26,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
@@ -133,11 +134,10 @@ public class EblIssuanceCarrier extends ConformanceParty {
     String tdr =
         actionPrompt.has("tdr")
             ? actionPrompt.path("tdr").asText()
-            : UUID.randomUUID().toString().substring(20);
-    String tdsr = UUID.randomUUID().toString().substring(20);
-    String sir = sirsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString());
-    String br =
-        brsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString().substring(35));
+            : ReferenceGenerator.newReference();
+    String tdsr = ReferenceGenerator.newReference();
+    String sir = sirsByTdr.computeIfAbsent(tdr, ignoredTdr -> ReferenceGenerator.newReference());
+    String br = brsByTdr.computeIfAbsent(tdr, ignoredTdr -> ReferenceGenerator.newReference());
 
     eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
 

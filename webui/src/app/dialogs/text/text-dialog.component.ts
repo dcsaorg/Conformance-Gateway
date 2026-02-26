@@ -107,8 +107,8 @@ export class TextDialog implements OnDestroy {
     text: string,
   ): Promise<boolean> {
     return firstValueFrom(dialog.open(TextDialog, {
-      width: "600px",
-      height: "500px",
+      width: "80vw",
+      height: "70vh",
       hasBackdrop: true,
       disableClose: false,
       data: {

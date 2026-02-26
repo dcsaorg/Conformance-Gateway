@@ -135,9 +135,9 @@ public class EblIssuanceCarrier extends ConformanceParty {
         actionPrompt.has("tdr")
             ? actionPrompt.path("tdr").asText()
             : ReferenceGenerator.newReference();
+    String tdsr = ReferenceGenerator.newReference();
     String sir = sirsByTdr.computeIfAbsent(tdr, ignoredTdr -> ReferenceGenerator.newReference());
-    String br =
-        brsByTdr.computeIfAbsent(tdr, ignoredTdr -> ReferenceGenerator.newReference());
+    String br = brsByTdr.computeIfAbsent(tdr, ignoredTdr -> ReferenceGenerator.newReference());
 
     eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
 
@@ -148,6 +148,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
                     .formatted(apiVersion),
                 Map.ofEntries(
                     Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
+                    Map.entry("TRANSPORT_DOCUMENT_SUB_REFERENCE_PLACEHOLDER", tdsr),
                     Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
                     Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
                     Map.entry(

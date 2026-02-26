@@ -24,6 +24,12 @@ public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonL
   }
 
   @Override
+  public void setItemValueWithTtl(
+      String partitionKey, String sortKey, long ttlEpochSeconds, JsonNode value) {
+    setItemValue(partitionKey, sortKey, value);
+  }
+
+  @Override
   public synchronized JsonNode getItemValue(String partitionKey, String sortKey) {
     return memoryMap
         .getOrDefault(partitionKey, new TreeMap<>())

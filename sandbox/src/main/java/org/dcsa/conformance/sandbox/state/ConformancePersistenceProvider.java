@@ -81,6 +81,12 @@ public class ConformancePersistenceProvider {
           }
 
           @Override
+          public void setItemValueWithTtl(
+              String partitionKey, String sortKey, long ttlEpochSeconds, JsonNode value) {
+            setItemValue(partitionKey, sortKey, value);
+          }
+
+          @Override
           public JsonNode getItemValue(String partitionKey, String sortKey) {
             JsonNode internalItemValue = internalNonLockingMap.getItemValue(partitionKey, sortKey);
             if (isNotChunkedValueRedirect(internalItemValue)) {

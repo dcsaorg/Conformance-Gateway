@@ -1,4 +1,4 @@
-Please provide the required information for a **EBL_TYPE** that is **NOT available for surrender** in your system:
+Please provide the required information for a Straight or Negotiable eBL that is **NOT available for surrender** in your system:
 
 ### Required Information:
 - **Transport Document Reference**: An eBL reference that cannot be surrendered (e.g., already surrendered, cancelled, not yet issued)

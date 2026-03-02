@@ -169,14 +169,6 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- Jackson 3.x BOM for Spring Boot 4.x compatibility -->
-			<dependency>
-				<groupId>tools.jackson</groupId>
-				<artifactId>jackson-bom</artifactId>
-				<version>3.1.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-bom</artifactId>

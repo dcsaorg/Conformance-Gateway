@@ -8,7 +8,7 @@ on:
 permissions:
   contents: read
   security-events: read
-  
+
 jobs:
   sync-alerts:
     runs-on: ubuntu-latest
@@ -33,7 +33,26 @@ jobs:
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
         run: |
+          # Check if API returned an error
+          if jq -e '.message' alerts.json > /dev/null 2>&1; then
+            echo "GitHub API error detected:"
+            cat alerts.json
+            exit 1
+          fi
+
+          # Ensure it's an array
+          if ! jq -e 'type == "array"' alerts.json > /dev/null; then
+            echo "Unexpected JSON format:"
+            cat alerts.json
+            exit 1
+          fi
+
           HIGH_ALERTS=$(jq -c '.[] | select(.security_advisory.severity=="high" or .security_advisory.severity=="critical")' alerts.json)
+
+          if [ -z "$HIGH_ALERTS" ]; then
+            echo "No high or critical alerts found."
+            exit 0
+          fi
 
           for alert in $HIGH_ALERTS; do
             CVE=$(echo $alert | jq -r '.security_advisory.cve_id')
@@ -41,6 +60,8 @@ jobs:
             SEVERITY=$(echo $alert | jq -r '.security_advisory.severity')
             URL=$(echo $alert | jq -r '.html_url')
             STATE=$(echo $alert | jq -r '.state')
+
+            echo "Processing $CVE"
 
             JQL="project = SD AND summary ~ \"$CVE\""
             RESPONSE=$(curl -s -u "$JIRA_EMAIL:$JIRA_API_TOKEN" \

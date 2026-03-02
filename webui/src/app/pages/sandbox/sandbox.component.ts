@@ -130,12 +130,10 @@ export class SandboxComponent implements OnInit, OnDestroy {
     ) {
       this.startingOrStoppingScenario = true;
       const response: any = await this.conformanceService.startOrStopScenario(this.sandbox!.id, scenario.id);
-      if (response?.error) {
-        await MessageDialog.open(
-            this.dialog,
-            "Error starting/stopping scenario",
-            response.error);
-        return
+      if (await MessageDialog.showIfError(response, this.dialog, "Error starting/stopping scenario")) {
+        this.startingOrStoppingScenario = false;
+        this.cdr.detectChanges();
+        return;
       }
       this.startingOrStoppingScenario = false;
       if (action === "Stop") {
@@ -168,12 +166,9 @@ export class SandboxComponent implements OnInit, OnDestroy {
             "Are you sure you want to delete this sandbox? You cannot undo this operation.")
     ) {
       const response: any = await this.conformanceService.deleteSandbox(this.sandbox!.id);
-      if (response?.error) {
-        await MessageDialog.open(
-            this.dialog,
-            "Error deleting sandbox",
-            response.error);
-        return
+      if (await MessageDialog.showIfError(response, this.dialog, "Error deleting sandbox")) {
+        this.cdr.detectChanges();
+        return;
       }
       await this.router.navigate([
         '/'
@@ -183,11 +178,8 @@ export class SandboxComponent implements OnInit, OnDestroy {
 
   async onClickNotifyParty() {
     const response: any = await this.conformanceService.notifyParty(this.sandbox!.id);
-    if (response?.error) {
-      await MessageDialog.open(
-          this.dialog,
-          "Error notifying party",
-          response.error);
+    if (await MessageDialog.showIfError(response, this.dialog, "Error notifying party")) {
+      this.cdr.detectChanges();
     }
   }
 
@@ -200,11 +192,8 @@ export class SandboxComponent implements OnInit, OnDestroy {
         + "All current party data will be lost.")
     ) {
       const response: any = await this.conformanceService.resetParty(this.sandbox!.id);
-      if (response?.error) {
-        await MessageDialog.open(
-            this.dialog,
-            "Error resetting party",
-            response.error);
+      if (await MessageDialog.showIfError(response, this.dialog, "Error resetting party")) {
+        this.cdr.detectChanges();
       }
     }
   }
@@ -216,14 +205,10 @@ export class SandboxComponent implements OnInit, OnDestroy {
 
   async onClickCreateReport() {
     const response: any = await this.conformanceService.createReport(this.sandbox!.id, this.newReportTitle);
-    if (response?.error) {
-      await MessageDialog.open(
-          this.dialog,
-          "Error creating report",
-          response.error);
+    if (await MessageDialog.showIfError(response, this.dialog, "Error creating report")) {
       this.newReportTitle = "";
       this.cdr.detectChanges();
-      return
+      return;
     }
     this.reportDigests = await this.conformanceService.getReportDigests(this.sandbox!.id);
     this.newReportTitle = "";
@@ -232,11 +217,7 @@ export class SandboxComponent implements OnInit, OnDestroy {
 
   async onReportClick(reportDigest: ReportDigest) {
     const response: any = await this.conformanceService.getReportContent(this.sandbox!.id, reportDigest.isoTimestamp);
-    if (response?.error) {
-      await MessageDialog.open(
-          this.dialog,
-          "Error retrieving report content",
-          response.error);
+    if (await MessageDialog.showIfError(response, this.dialog, "Error retrieving report content")) {
       this.cdr.detectChanges();
       return;
     }

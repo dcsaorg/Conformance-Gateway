@@ -14,17 +14,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Fetch Dependabot alerts
-        id: alerts
+      - name: Fetch open Dependabot alerts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat ${{ github.repository }}
-          
           curl -s \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/dependabot/alerts \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/dependabot/alerts?state=open&severity=high,critical" \
             > alerts.json
 
           cat alerts.json
@@ -49,8 +47,8 @@ jobs:
             exit 1
           fi
 
-          HIGH_ALERTS=$(jq -c '.[] | select(.security_advisory.severity=="high" or .security_advisory.severity=="critical")' alerts.json)
-
+          HIGH_ALERTS=$(jq -c '.[]' alerts.json)
+  
           if [ -z "$HIGH_ALERTS" ]; then
             echo "No high or critical alerts found."
             exit 0

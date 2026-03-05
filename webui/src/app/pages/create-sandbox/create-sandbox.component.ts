@@ -87,13 +87,10 @@ export class CreateSandboxComponent {
         this.selectedSandboxType === this.SANDBOX_TYPES[0],
         this.newSandboxName
     );
-    if (response?.error) {
-      await MessageDialog.open(
-          this.dialog,
-          "Error creating sandbox",
-          response.error);
+    if (await MessageDialog.showIfError(response, this.dialog, "Error creating sandbox")) {
       this.creatingSandbox = false;
-      return
+      this.cdr.detectChanges();
+      return;
     }
     await this.router.navigate([
       "/edit-sandbox", response.sandboxId

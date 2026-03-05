@@ -7,3 +7,9 @@ export const environment = {
   cognitoClientId: '4b2c2dt168j0tkf1ubg16n3g42',
   siteTitle: 'DCSA Conformance Test',
 };
+
+describe('environment', () => {
+  it('should have production defined', () => {
+    expect(environment.production).toBeDefined();
+  });
+});

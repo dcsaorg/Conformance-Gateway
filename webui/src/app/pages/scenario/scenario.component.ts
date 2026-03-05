@@ -100,14 +100,10 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges(); // Immediately show the "performing action" message
 
       const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, false);
-      if (response?.error) {
+      if (await MessageDialog.showIfError(response, this.dialog, "Error completing action")) {
         this.performingAction = "";
         this.cdr.detectChanges();
-        await MessageDialog.open(
-            this.dialog,
-            "Error completing action",
-            response.error)
-        return
+        return;
       }
       this.performingAction = "";
       await this.loadScenarioStatus();
@@ -119,14 +115,10 @@ export class ScenarioComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges(); // Immediately show the "performing action" message
 
     const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id, true);
-    if (response?.error) {
+    if (await MessageDialog.showIfError(response, this.dialog, "Error skipping action")) {
       this.performingAction = "";
       this.cdr.detectChanges();
-      await MessageDialog.open(
-          this.dialog,
-          "Error skipping action",
-          response.error)
-      return
+      return;
     }
     this.performingAction = "";
     await this.loadScenarioStatus();
@@ -138,12 +130,9 @@ export class ScenarioComponent implements OnInit, OnDestroy {
       this.scenario!.id
     );
 
-    if (response?.error) {
-      await MessageDialog.open(
-          this.dialog,
-          "Error retrieving http exchanges",
-          response.error);
-      return
+    if (await MessageDialog.showIfError(response, this.dialog, "Error retrieving http exchanges")) {
+      this.cdr.detectChanges();
+      return;
     }
     await TextDialog.open(
         this.dialog,

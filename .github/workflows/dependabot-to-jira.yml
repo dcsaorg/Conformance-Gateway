@@ -1,0 +1,90 @@
+name: Sync Dependabot Alerts to Jira
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+  security-events: read
+
+jobs:
+  sync-alerts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch open Dependabot alerts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -s \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/dependabot/alerts?state=open&severity=high,critical" \
+            > alerts.json
+
+          cat alerts.json
+
+      - name: Process alerts
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: |
+          # Check if API returned an error
+          if jq -e '.message' alerts.json > /dev/null 2>&1; then
+            echo "GitHub API error detected:"
+            cat alerts.json
+            exit 1
+          fi
+
+          # Ensure it's an array
+          if ! jq -e 'type == "array"' alerts.json > /dev/null; then
+            echo "Unexpected JSON format:"
+            cat alerts.json
+            exit 1
+          fi
+
+          HIGH_ALERTS=$(jq -c '.[]' alerts.json)
+  
+          if [ -z "$HIGH_ALERTS" ]; then
+            echo "No high or critical alerts found."
+            exit 0
+          fi
+
+          for alert in $HIGH_ALERTS; do
+            CVE=$(echo $alert | jq -r '.security_advisory.cve_id')
+            PACKAGE=$(echo $alert | jq -r '.dependency.package.name')
+            SEVERITY=$(echo $alert | jq -r '.security_advisory.severity')
+            URL=$(echo $alert | jq -r '.html_url')
+            STATE=$(echo $alert | jq -r '.state')
+
+            echo "Processing $CVE"
+
+            JQL="project = SD AND summary ~ \"$CVE\""
+            RESPONSE=$(curl -s -u "$JIRA_EMAIL:$JIRA_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data "{\"jql\":\"$JQL\"}" \
+              $JIRA_BASE_URL/rest/api/3/search)
+
+            COUNT=$(echo $RESPONSE | jq '.total')
+
+            if [ "$STATE" = "open" ] && [ "$COUNT" = "0" ]; then
+              echo "Creating Jira ticket for $CVE"
+
+              curl -s -X POST \
+                -u "$JIRA_EMAIL:$JIRA_API_TOKEN" \
+                -H "Content-Type: application/json" \
+                --data "{
+                  \"fields\": {
+                    \"project\": { \"key\": \"SD\" },
+                    \"summary\": \"Dependabot: $CVE - $PACKAGE\",
+                    \"description\": \"Severity: $SEVERITY\n\nPackage: $PACKAGE\n\nGitHub: $URL\",
+                    \"issuetype\": { \"name\": \"Bug\" }
+                  }
+                }" \
+                $JIRA_BASE_URL/rest/api/3/issue
+            fi
+          done

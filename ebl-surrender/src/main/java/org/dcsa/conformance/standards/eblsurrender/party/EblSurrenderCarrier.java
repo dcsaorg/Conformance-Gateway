@@ -26,7 +26,7 @@ import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParamete
 @Slf4j
 public class EblSurrenderCarrier extends ConformanceParty {
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
-  private boolean errorScenario = false;
+  private boolean errorScenario;
 
   public EblSurrenderCarrier(
       String apiVersion,
@@ -84,8 +84,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
             .formatted(actionPrompt.toPrettyString()));
 
     String tdr = ReferenceGenerator.newReference();
-    errorScenario =
-        actionPrompt.has("errorScenario") && actionPrompt.get("errorScenario").asBoolean();
+    errorScenario = actionPrompt.get("errorScenario").asBoolean(false);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     persistentMap.save("response", actionPrompt.get("response"));
 

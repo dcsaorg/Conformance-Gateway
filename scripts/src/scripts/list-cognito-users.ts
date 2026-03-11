@@ -50,7 +50,7 @@ async function main(): Promise<void> {
   console.error(`\nFetched ${count} user(s).`);
 }
 
-main().catch((err) => {
+if (require.main === module) main().catch((err) => {
   console.error('Error:', err);
   process.exit(1);
 });

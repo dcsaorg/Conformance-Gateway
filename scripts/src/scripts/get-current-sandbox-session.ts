@@ -44,7 +44,7 @@ async function main(): Promise<void> {
   console.log(sessionId);
 }
 
-main().catch((err) => {
+if (require.main === module) main().catch((err) => {
   console.error('Error:', err);
   process.exit(1);
 });

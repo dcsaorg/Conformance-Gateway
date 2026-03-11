@@ -62,7 +62,7 @@ async function main(): Promise<void> {
   console.log(JSON.stringify(metadata, null, 2));
 }
 
-main().catch((err) => {
+if (require.main === module) main().catch((err) => {
   console.error('Error:', err);
   process.exit(1);
 });

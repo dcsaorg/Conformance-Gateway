@@ -37,7 +37,7 @@ import { listCognitoUsers } from './list-cognito-users';
 import { getUserSandboxes } from './get-user-sandboxes';
 import { getCurrentSandboxSession } from './get-current-sandbox-session';
 import { getSandboxMetadata, SandboxMetadata } from './get-sandbox-metadata';
-import { queryByPkAndSkRange } from '../aws/dynamodb';
+import { countByPkAndSkRange } from '../aws/dynamodb';
 
 interface SandboxStats {
   metadata: SandboxMetadata | null;
@@ -52,12 +52,7 @@ async function countExchanges(
   dateMax: string,
 ): Promise<number> {
   // SK format: <UTC> (e.g. "2026-03-06T07:46:14.734397249Z")
-  const items = await queryByPkAndSkRange(
-    `session#${sessionId}`,
-    dateMin,
-    dateMax,
-  );
-  return items.length;
+  return countByPkAndSkRange(`session#${sessionId}`, dateMin, dateMax);
 }
 
 export async function getSandboxUsageStats(

@@ -48,10 +48,8 @@ async function main(): Promise<void> {
     return;
   }
 
-  console.log(`Found ${items.length} report content item(s):\n`);
   for (const item of items) {
     console.log(JSON.stringify(item, null, 2));
-    console.log('---');
   }
 }
 

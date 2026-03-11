@@ -6,7 +6,6 @@
   "scripts": {
     "list-cognito-users": "ts-node src/scripts/list-cognito-users.ts",
     "get-cognito-user": "ts-node src/scripts/get-cognito-user.ts",
-    "scan-dynamodb": "ts-node src/scripts/scan-dynamodb.ts",
     "query-dynamodb": "ts-node src/scripts/query-dynamodb.ts",
     "get-user-sandboxes": "ts-node src/scripts/get-user-sandboxes.ts",
     "list-user-sandbox-reports": "ts-node src/scripts/list-user-sandbox-reports.ts",

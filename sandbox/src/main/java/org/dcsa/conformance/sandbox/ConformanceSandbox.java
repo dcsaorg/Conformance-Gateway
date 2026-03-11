@@ -1048,6 +1048,15 @@ public class ConformanceSandbox {
           .run();
       return resultReference.get();
     }
+    if ("saveSandboxSnapshotReport".equals(operation)) {
+      String sandboxId = jsonInput.get("sandboxId").asText();
+      String environmentId = jsonInput.get("environmentId").asText();
+      String reportTitle = jsonInput.get("reportTitle").asText();
+      SandboxConfiguration sandboxConfiguration =
+          loadSandboxConfiguration(persistenceProvider, sandboxId);
+      createReport(persistenceProvider, environmentId, sandboxConfiguration, reportTitle);
+      return OBJECT_MAPPER.createObjectNode().put("status", "OK");
+    }
     if ("createReportInAllSandboxes".equals(operation)) {
       String jobId = jsonInput.get("jobId").asText();
       String reportTitle = jsonInput.get("reportTitle").asText();

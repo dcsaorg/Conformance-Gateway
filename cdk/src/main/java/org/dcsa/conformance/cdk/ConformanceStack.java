@@ -145,6 +145,7 @@ public class ConformanceStack extends Stack {
                 .tableName(tableName)
                 .partitionKey(Attribute.builder().name("PK").type(AttributeType.STRING).build())
                 .sortKey(Attribute.builder().name("SK").type(AttributeType.STRING).build())
+                .timeToLiveAttribute("ttl")
                 .pointInTimeRecoverySpecification(
                     PointInTimeRecoverySpecification.builder()
                         .pointInTimeRecoveryEnabled(true)
@@ -208,7 +209,7 @@ public class ConformanceStack extends Stack {
         createLambda(
             prefix + "AdminLambda",
             15,
-            2,
+            4,
             assetCode,
             "org.dcsa.conformance.lambda.AdminLambda",
             vpc);

@@ -23,6 +23,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.tnt.TntStandard;
 import org.dcsa.conformance.standards.tnt.v300.action.ProducerPostEventsAction;
 import org.dcsa.conformance.standards.tnt.v300.action.SupplyScenarioParametersAction;
@@ -94,7 +95,10 @@ public class TntProducer extends ConformanceParty {
     var eventType = TntEventType.valueOf(actionPrompt.required(TntConstants.EVENT_TYPE).asText());
     String filePath = getTntEventPayloadFilepath(eventType);
 
-    JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath, Map.ofEntries());
+    JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath,
+        Map.of(
+            "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
+            "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
     syncCounterpartPost(TntStandard.API_PATH, jsonRequestBody);
 
     addOperatorLogEntry("Sent TnT Events %s".formatted(jsonRequestBody.toPrettyString()));
@@ -127,7 +131,10 @@ public class TntProducer extends ConformanceParty {
                 .toList();
 
     String filePath = getTntEventResponseFilepath(hasCursor);
-    JsonNode responseObject = JsonToolkit.templateFileToJsonNode(filePath, Map.ofEntries());
+    JsonNode responseObject = JsonToolkit.templateFileToJsonNode(filePath,
+        Map.of(
+            "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
+            "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
 
     if (!eventTypes.isEmpty() && responseObject.has(TntConstants.EVENTS)) {
       JsonNode filteredResponse = filterEventsByType(responseObject, eventTypes);

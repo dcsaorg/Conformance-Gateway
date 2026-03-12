@@ -45,6 +45,8 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
         Arguments.of("eBL Issuance", true),
         Arguments.of("eBL Surrender", false),
         Arguments.of("eBL Surrender", true),
+        Arguments.of("Ebl Endorsement Chain", false),
+        Arguments.of("Ebl Endorsement Chain", true),
         Arguments.of("Booking + eBL", false),
         Arguments.of("Booking + eBL", true),
         Arguments.of("VGM", false),

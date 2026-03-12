@@ -1564,7 +1564,7 @@ public class EblChecks {
         JsonAttribute.mustBeOneOf(
             TD_TRANSPORT_DOCUMENT_STATUS,
             transportDocumentStatus.stream()
-                .map(TransportDocumentStatus::wireName)
+                .map(TransportDocumentStatus::notificationWireName)
                 .collect(Collectors.toSet())));
 
     jsonContentChecks.add(FEEDBACKS_PRESENCE);

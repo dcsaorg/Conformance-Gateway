@@ -13,7 +13,7 @@
         }
       ],
       "deliveryTypeAtDestination": "CY",
-      "transportDocumentReference": "SAM43512554",
+      "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
       "documentParties": [
         {
           "partyFunction": "OS",

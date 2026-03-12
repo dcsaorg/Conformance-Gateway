@@ -5,34 +5,25 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
-import java.util.UUID;
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.eblsurrender.party.SuppliedScenarioParameters;
 
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
+
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private String response;
-  private String eblType;
-  private boolean isErrorScenario = false;
-
-  public SupplyScenarioParametersAction(
-      String carrierPartyName, ConformanceAction previousAction, String response, String eblType) {
-    super(carrierPartyName, null, previousAction, "SupplyTDR[%s]".formatted(eblType));
-    this.response = response;
-    this.eblType = eblType;
-  }
+  private final boolean isErrorScenario;
 
   public SupplyScenarioParametersAction(
       String carrierPartyName,
       ConformanceAction previousAction,
       String response,
-      String eblType,
       boolean errorScenario) {
-    super(carrierPartyName, null, previousAction, "SupplyTDR[%s]".formatted(eblType));
+    super(carrierPartyName, null, previousAction, "SupplyTDR");
     this.response = response;
-    this.eblType = eblType;
     this.isErrorScenario = errorScenario;
   }
 
@@ -49,7 +40,6 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
       jsonState.set("suppliedScenarioParameters", suppliedScenarioParameters.toJson());
     }
     jsonState.put("response", response);
-    jsonState.put("eblType", eblType);
     return jsonState;
   }
 
@@ -61,7 +51,6 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
       suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(sspNode);
     }
     response = jsonState.get("response").asText();
-    eblType = jsonState.get("eblType").asText();
   }
 
   @Override
@@ -69,12 +58,9 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
     String responseAction = response.equals("SURR") ? "accept" : "reject";
     return isErrorScenario
         ? EblSurrenderAction.getMarkdownHumanReadablePrompt(
-            Map.of("EBL_TYPE", eblType), "prompt-surrender-error-ssp.md")
+            Map.of(), "prompt-surrender-error-ssp.md")
         : EblSurrenderAction.getMarkdownHumanReadablePrompt(
-            Map.of(
-                "EBL_TYPE", eblType,
-                "RESPONSE", responseAction),
-            "prompt-surrender-ssp.md");
+            Map.of("RESPONSE", responseAction), "prompt-surrender-ssp.md");
   }
 
   @Override
@@ -88,10 +74,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
     var surrendereeParty = OBJECT_MAPPER.createObjectNode();
     surrendereeParty.put("partyName", "Surrenderee name").put("eblPlatform", "BOLE");
     return new SuppliedScenarioParameters(
-            UUID.randomUUID().toString().replace("-", "").substring(0, 20),
-            issueToParty,
-            carrierParty,
-            surrendereeParty)
+            ReferenceGenerator.newReference(), issueToParty, carrierParty, surrendereeParty)
         .toJson();
   }
 
@@ -107,9 +90,6 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode()
-        .put("eblType", eblType)
-        .put("response", response)
-        .put("isErrorScenario", isErrorScenario);
+    return super.asJsonNode().put("response", response).put("errorScenario", isErrorScenario);
   }
 }

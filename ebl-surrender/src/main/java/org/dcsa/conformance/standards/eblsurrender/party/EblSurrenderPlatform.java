@@ -19,13 +19,14 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseErrorAction;
 
 @Slf4j
 public class EblSurrenderPlatform extends ConformanceParty {
 
-  public static final String INVALID_TDR = UUID.randomUUID().toString();
+  public static final String INVALID_TDR = ReferenceGenerator.newReference();
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
   private final Map<String, String> tdrsBySrr = new HashMap<>();
 
@@ -76,7 +77,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
     log.info("EblSurrenderPlatform.requestSurrender(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-    String srr = UUID.randomUUID().toString();
+    String srr = ReferenceGenerator.newReference();
     String tdr = ssp.transportDocumentReference();
     boolean forAmendment = actionPrompt.get("forAmendment").booleanValue();
     String src = forAmendment ? "AREQ" : "SREQ";

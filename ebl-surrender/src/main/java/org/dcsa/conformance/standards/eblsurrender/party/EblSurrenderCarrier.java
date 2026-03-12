@@ -20,12 +20,13 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
 
 @Slf4j
 public class EblSurrenderCarrier extends ConformanceParty {
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
-  private boolean errorScenario = false;
+  private boolean errorScenario;
 
   public EblSurrenderCarrier(
       String apiVersion,
@@ -82,9 +83,8 @@ public class EblSurrenderCarrier extends ConformanceParty {
         "EblSurrenderPlatform.supplyScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
 
-    String tdr = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
-    errorScenario =
-        actionPrompt.has("errorScenario") && actionPrompt.get("errorScenario").asBoolean();
+    String tdr = ReferenceGenerator.newReference();
+    errorScenario = actionPrompt.get("errorScenario").asBoolean(false);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     persistentMap.save("response", actionPrompt.get("response"));
 
@@ -130,7 +130,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
     String action = tdr.contains("WAVER") ? "SREJ" : "SURR";
 
     if ("*".equals(srr)) {
-      srr = UUID.randomUUID().toString();
+      srr = ReferenceGenerator.newReference();
     }
     if (persistentMap.load("response") != null) {
       action = persistentMap.load("response").asText();
@@ -175,7 +175,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
                     "REQUEST_URI_PLACEHOLDER",
                     request.url(),
                     "REFERENCE_PLACEHOLDER",
-                    UUID.randomUUID().toString(),
+                    ReferenceGenerator.newReference(),
                     "ERROR_DATE_TIME_PLACEHOLDER",
                     LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT),
                     "ERROR_MESSAGE_PLACEHOLDER",

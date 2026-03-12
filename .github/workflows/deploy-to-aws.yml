@@ -1,13 +1,22 @@
-name: Deploy+Verify on AWS dev
+name: Deploy+Verify on AWS
 
 on:
-  push:
-    branches: [ "dev" ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - test
+          - dt
+          - dev
 
 env:
   AWS_REGION: "eu-north-1"
   NG_CLI_ANALYTICS: "ci"
-  AWS_ENVIRONMENT: "dev"
+  AWS_ENVIRONMENT: ${{ github.event.inputs.environment }}
 
 jobs:
   build:
@@ -16,13 +25,38 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: test
 
       - name: Print commit sha
         shell: bash
         env:
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
           echo "sha: $COMMIT_SHA"
+
+      - name: Set environment-specific secrets
+        id: set-secrets
+        run: |
+          if [ "${{ env.AWS_ENVIRONMENT }}" = "dt" ]; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.DT_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DT_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_EMAIL=${{ secrets.DT_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_PASSWORD=${{ secrets.DT_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_WEB_URL=${{ secrets.DT_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
+          elif [ "${{ env.AWS_ENVIRONMENT }}" = "dev" ]; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_EMAIL=${{ secrets.DEV_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_PASSWORD=${{ secrets.DEV_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_WEB_URL=${{ secrets.DEV_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
+          else
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.TEST_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_EMAIL=${{ secrets.TEST_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_USER_PASSWORD=${{ secrets.TEST_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
+            echo "CONFORMANCE_WEB_URL=${{ secrets.TEST_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
+          fi
 
       - name: Set up Java JDK
         uses: actions/setup-java@v4
@@ -57,23 +91,140 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
 
       - name: Diff Conformance-Gateway Stack of ${{ env.AWS_ENVIRONMENT }}
         run: |
           cd cdk/
           cdk diff ${{ env.AWS_ENVIRONMENT }}ConformanceStack
 
+      - name: Warm up AdminLambda (prevent cold start)
+        run: |
+          echo "Warming up AdminLambda at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "Note: VPC-attached Lambdas can take 10-30 seconds on cold start"
+
+          # Invoke with a lightweight operation to warm up the Lambda
+          WARM_PAYLOAD='{"operation":"ping"}'
+
+          # Fire and forget - we don't care about the response, just warming up
+          aws lambda invoke \
+            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+            --invocation-type Event \
+            --payload "$WARM_PAYLOAD" \
+            --cli-binary-format raw-in-base64-out \
+            /dev/null 2>&1 || echo "Warm-up invocation sent (async)"
+
+          # Wait a bit for Lambda to initialize
+          echo "Waiting 20 seconds for Lambda to warm up..."
+          sleep 20
+          echo "Lambda should now be warm"
+
+      - name: Create pre-deployment reports in all sandboxes (safe async pattern)
+        env:
+          AWS_MAX_ATTEMPTS: 1
+        run: |
+          echo "Starting report generation at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+
+          REPORT_TITLE="Before DCSA deployment - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+
+          # Start job (synchronous, fast, returns jobId)
+
+          START_PAYLOAD=$(jq -n \
+            --arg operation "startReportJob" \
+            --arg reportTitle "$REPORT_TITLE" \
+            '{operation: $operation, reportTitle: $reportTitle}')
+
+          aws lambda invoke \
+            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+            --payload "$START_PAYLOAD" \
+            --cli-binary-format raw-in-base64-out \
+            start-response.json > /dev/null
+
+          JOB_ID=$(cat start-response.json | jq -r '.jobId')
+          rm start-response.json
+
+          if [ -z "$JOB_ID" ] || [ "$JOB_ID" = "null" ]; then
+            echo "Failed to obtain jobId"
+            exit 1
+          fi
+
+          echo "Job started successfully. Job ID: $JOB_ID"
+
+          # Trigger heavy processing asynchronously
+
+          PROCESS_PAYLOAD=$(jq -n \
+            --arg operation "createReportInAllSandboxes" \
+            --arg jobId "$JOB_ID" \
+            --arg reportTitle "$REPORT_TITLE" \
+            '{operation: $operation, jobId: $jobId, reportTitle: $reportTitle}')
+
+          aws lambda invoke \
+            --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+            --invocation-type Event \
+            --payload "$PROCESS_PAYLOAD" \
+            --cli-binary-format raw-in-base64-out \
+            /dev/null
+
+          echo "Heavy report generation triggered asynchronously."
+
+          # Poll until job completes
+
+          echo "Waiting for report generation to complete..."
+
+          MAX_WAIT=1800   # 30 minutes max
+          INTERVAL=30
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+
+            STATUS_PAYLOAD=$(jq -n \
+              --arg operation "checkReportStatus" \
+              --arg jobId "$JOB_ID" \
+              '{operation: $operation, jobId: $jobId}')
+
+            aws lambda invoke \
+              --function-name ${{ env.AWS_ENVIRONMENT }}AdminLambda \
+              --payload "$STATUS_PAYLOAD" \
+              --cli-binary-format raw-in-base64-out \
+              status.json > /dev/null
+
+            STATUS=$(cat status.json | jq -r '.status')
+            rm status.json
+
+            echo "Current status: $STATUS (elapsed ${ELAPSED}s)"
+
+            if [ "$STATUS" = "COMPLETED" ]; then
+              echo "Report generation completed successfully."
+              exit 0
+            fi
+
+            if [ "$STATUS" = "FAILED" ]; then
+              echo "Report generation failed."
+              exit 1
+            fi
+
+            if [ "$STATUS" = "NOT_FOUND" ]; then
+              echo "Job not found — unexpected state."
+              exit 1
+            fi
+
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          echo "Timed out waiting for report generation."
+          exit 1
+
       - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
         run: |
           cd cdk/
           cdk deploy ${{ env.AWS_ENVIRONMENT }}ConformanceStack --require-approval never
 
-      - name: Verify a scenario in AWS Dev environment
+      - name: Verify a scenario in AWS ${{ env.AWS_ENVIRONMENT }} environment
         env:
-          TEST_LOGIN_EMAIL: ${{ secrets.DEV_CONFORMANCE_USER_EMAIL }} # User account details to log in the Web UI.
-          TEST_LOGIN_PASSWORD: ${{ secrets.DEV_CONFORMANCE_USER_PASSWORD }}
-          TEST_BASE_URL: ${{ secrets.DEV_CONFORMANCE_WEB_URL }}
+          TEST_LOGIN_EMAIL: ${{ env.CONFORMANCE_USER_EMAIL }}
+          TEST_LOGIN_PASSWORD: ${{ env.CONFORMANCE_USER_PASSWORD }}
+          TEST_BASE_URL: ${{ env.CONFORMANCE_WEB_URL }}
         run: |
           ./mvnw -B test -Pintegration

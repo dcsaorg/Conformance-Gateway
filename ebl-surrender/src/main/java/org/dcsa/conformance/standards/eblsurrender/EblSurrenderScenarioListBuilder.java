@@ -37,11 +37,7 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                 "Surrender Accepted",
                 noAction()
                     .thenEither(
-                        supplyAvailableTdrAction("SURR", "Straight eBL")
-                            .thenEither(
-                                requestSurrenderForDeliveryAnd(true),
-                                requestSurrenderForAmendmentAnd(true)),
-                        supplyAvailableTdrAction("SURR", "Negotiable eBL")
+                        supplyAvailableTdrAction("SURR")
                             .thenEither(
                                 requestSurrenderForDeliveryAnd(true),
                                 requestSurrenderForAmendmentAnd(true)))),
@@ -49,18 +45,13 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                 "Surrender Rejected",
                 noAction()
                     .thenEither(
-                        supplyAvailableTdrAction("SREJ", "Straight eBL")
-                            .thenEither(
-                                requestSurrenderForDeliveryAnd(false),
-                                requestSurrenderForAmendmentAnd(false)),
-                        supplyAvailableTdrAction("SREJ", "Negotiable eBL")
+                        supplyAvailableTdrAction("SREJ")
                             .thenEither(
                                 requestSurrenderForDeliveryAnd(false),
                                 requestSurrenderForAmendmentAnd(false)))),
             Map.entry(
                 "Carrier error response conformance",
-                supplyAvailableTdrAction("SURR", "Straight eBl", true)
-                    .then(requestSurrenderError())))
+                supplyAvailableTdrErrorAction("SURR").then(requestSurrenderError())))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -70,23 +61,20 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
     return new EblSurrenderScenarioListBuilder(null);
   }
 
-  private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction(
-      String response, String eblType) {
-    log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrAction()");
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    return new EblSurrenderScenarioListBuilder(
-        noPreviousAction ->
-            new SupplyScenarioParametersAction(carrierPartyName, null, response, eblType));
+  private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction(String response) {
+    return supplyAvailableTdrAction(response, false);
+  }
+
+  private static EblSurrenderScenarioListBuilder supplyAvailableTdrErrorAction(String response) {
+    return supplyAvailableTdrAction(response, true);
   }
 
   private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction(
-      String response, String eblType, boolean isErrorScenario) {
+      String response, boolean isErrorScenario) {
     log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrAction()");
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblSurrenderScenarioListBuilder(
-        noPreviousAction ->
-            new SupplyScenarioParametersAction(
-                carrierPartyName, null, response, eblType, isErrorScenario));
+        _ -> new SupplyScenarioParametersAction(carrierPartyName, null, response, isErrorScenario));
   }
 
   private static EblSurrenderScenarioListBuilder requestSurrenderForAmendmentAnd(boolean accept) {

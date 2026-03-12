@@ -12,7 +12,7 @@
         }
       ],
       "deliveryTypeAtDestination": "CY",
-      "transportDocumentReference": "HLCUSGS250302123",
+      "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
       "documentParties": [
         {
           "partyFunction": "OS",

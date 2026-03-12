@@ -3,6 +3,7 @@ package org.dcsa.conformance.sandbox.state;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,25 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
                     Map.entry("SK", AttributeValue.fromS(sortKey)),
                     Map.entry("value", AttributeValue.fromS(value.toString()))))
             .build());
+  }
+
+  public void setItemValueWithTtl(
+          String partitionKey,
+          String sortKey,
+          long ttlEpochSeconds,
+          JsonNode value) {
+    Map<String, AttributeValue> item = new HashMap<>();
+
+    item.put("PK", AttributeValue.fromS(partitionKey));
+    item.put("SK", AttributeValue.fromS(sortKey));
+    item.put("ttl", AttributeValue.fromN(String.valueOf(ttlEpochSeconds)));
+    item.put("value", AttributeValue.fromS(value.toString()));
+
+    dynamoDbClient.putItem(
+            PutItemRequest.builder()
+                    .tableName(tableName)
+                    .item(item)
+                    .build());
   }
 
   @Override

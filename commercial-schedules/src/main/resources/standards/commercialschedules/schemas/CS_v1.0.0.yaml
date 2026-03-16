@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: DCSA OpenAPI specification for Commercial Schedules
-  version: 1.0.1
+  version: 1.0.2
   description: |
     API specification issued by [Digital Container Shipping Association (DCSA)](https://dcsa.org/).
 
@@ -9,9 +9,9 @@ info:
 
     **Commercial schedules - point-to-point routings**: provides the product offering of single or multiple estimated end-to-end route options for a shipment in the pre-booking phase. This includes point-to-point specification of all transport legs, estimated timings, estimated schedules and interdependencies between transport legs.
 
-    **Commercial schedules – port schedules**: provides, for a required specific port and starting date, the set of all vessels arriving and departing from the port with the corresponding estimated timestamps.
+    **Commercial schedules - port schedules**: provides, for a required specific port and starting date, the set of all vessels arriving and departing from the port with the corresponding estimated timestamps.
 
-    **Commercial schedules – vessel schedules**: provides, for a required specific service and/or voyage and/or vessel and/or location, the timetable of estimated departure and arrival times for each port call on the rotation of the vessel(s).
+    **Commercial schedules - vessel schedules**: provides, for a required specific service and/or voyage and/or vessel and/or location, the timetable of estimated departure and arrival times for each port call on the rotation of the vessel(s).
 
     **All use cases mentioned in this API specification refer to use cases defined in the Commercial Schedules Interface Standard.**
 
@@ -28,7 +28,7 @@ info:
     ### API Design & Implementation Principles
     This API follows the guidelines defined in version 2.0 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design).
 
-    For a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/cs/v1#v101). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
+    For a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/cs/v1#v102). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
   license:
     url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
     name: Apache 2.0
@@ -55,7 +55,7 @@ paths:
             API-Version:
               schema:
                 type: string
-                example: 1.0.1
+                example: 1.0.2
               description: |
                 SemVer used to indicate the version of the contract (API version) returned.
             Next-Page-Cursor:
@@ -64,18 +64,18 @@ paths:
                 maxLength: 1024
                 example: fE9mZnNldHw9MTAmbGltaXQ9MTA
               description: |
-                The Next-Page-Cursor header contains a cursor value that points to the next page of results in a paginated API response.
+                The `Next-Page-Cursor` header contains a cursor value that points to the next page of results in a paginated API response.
                 When an initial `GET` endpoint request includes the query parameter `limit=...` the API provider limits the number of items in the root array of the response to the specified limit. If the response would contain more items than the specified limit, the API provider includes only the first set of limit items and appends the following response header:
-                `Next-Page-Cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`, a string that acts as a reference for the next page of results. The cursor value is used in subsequent requests to retrieve the next page by passing it as a query parameter: `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`.
+                `Next-Page-Cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`, a string that acts as a reference for the next page of results. The `Next-Page-Cursor` value is used in a subsequent request to retrieve the next page by passing it as a value in the `cursor`-query parameter: `cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`.
 
-                To retrieve the next page, the API consumer sends a `GET` request to the endpoint URL with only `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA` as query parameter. The limit of items per page and any other query parameters may not be altered, therefore it may also not be specified when requesting subsequent pages. The API provider must ignore any query parameters passed along with a cursor, and should return a `400` error if any other query parameter is passed along with the `cursor`.
+                To retrieve the next page, the API consumer sends a `GET` request to the endpoint URL with `cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA` as query parameter along with the limit of items per page and any other query parameters used in the original request. Filter parameters may not be altered and MUST be preserved when requesting subsequent pages.
         '400':
           description: Bad Request
           headers:
             API-Version:
               schema:
                 type: string
-                example: 1.0.1
+                example: 1.0.2
               description: |
                 SemVer used to indicate the version of the contract (API version) returned.
           content:
@@ -103,7 +103,7 @@ paths:
             API-Version:
               schema:
                 type: string
-                example: 1.0.1
+                example: 1.0.2
               description: |
                 SemVer used to indicate the version of the contract (API version) returned.
           content:
@@ -276,7 +276,7 @@ paths:
             API-Version:
               schema:
                 type: string
-                example: 1.0.1
+                example: 1.0.2
               description: |
                 SemVer used to indicate the version of the contract (API version) returned.
             Next-Page-Cursor:
@@ -285,18 +285,18 @@ paths:
                 maxLength: 1024
                 example: fE9mZnNldHw9MTAmbGltaXQ9MTA
               description: |
-                The Next-Page-Cursor header contains a cursor value that points to the next page of results in a paginated API response.
+                The `Next-Page-Cursor` header contains a cursor value that points to the next page of results in a paginated API response.
                 When an initial `GET` endpoint request includes the query parameter `limit=...` the API provider limits the number of items in the root array of the response to the specified limit. If the response would contain more items than the specified limit, the API provider includes only the first set of limit items and appends the following response header:
-                `Next-Page-Cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`, a string that acts as a reference for the next page of results. The cursor value is used in subsequent requests to retrieve the next page by passing it as a query parameter: `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`.
+                `Next-Page-Cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`, a string that acts as a reference for the next page of results. The `Next-Page-Cursor` value is used in a subsequent request to retrieve the next page by passing it as a value in the `cursor`-query parameter: `cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`.
 
-                To retrieve the next page, the API consumer sends a `GET` request to the endpoint URL with only `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA` as query parameter. The limit of items per page and any other query parameters may not be altered, therefore it may also not be specified when requesting subsequent pages. The API provider must ignore any query parameters passed along with a cursor, and should return a `400` error if any other query parameter is passed along with the `cursor`.
+                To retrieve the next page, the API consumer sends a `GET` request to the endpoint URL with `cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA` as query parameter along with the limit of items per page and any other query parameters used in the original request. Filter parameters may not be altered and MUST be preserved when requesting subsequent pages.
         '400':
           description: Bad Request
           headers:
             API-Version:
               schema:
                 type: string
-                example: 1.0.1
+                example: 1.0.2
               description: |
                 SemVer used to indicate the version of the contract (API version) returned.
           content:
@@ -324,7 +324,7 @@ paths:
             API-Version:
               schema:
                 type: string
-                example: 1.0.1
+                example: 1.0.2
               description: |
                 SemVer used to indicate the version of the contract (API version) returned.
           content:
@@ -395,7 +395,6 @@ paths:
           in: query
           name: cursor
           description: A server generated value to specify a specific point in a collection result, used for pagination.
-    parameters: []
   /v1/vessel-schedules:
     get:
       summary: Vessel Schedule
@@ -414,7 +413,7 @@ paths:
             API-Version:
               schema:
                 type: string
-                example: 1.0.1
+                example: 1.0.2
               description: |
                 SemVer used to indicate the version of the contract (API version) returned.
             Next-Page-Cursor:
@@ -423,18 +422,18 @@ paths:
                 maxLength: 1024
                 example: fE9mZnNldHw9MTAmbGltaXQ9MTA
               description: |
-                The Next-Page-Cursor header contains a cursor value that points to the next page of results in a paginated API response.
+                The `Next-Page-Cursor` header contains a cursor value that points to the next page of results in a paginated API response.
                 When an initial `GET` endpoint request includes the query parameter `limit=...` the API provider limits the number of items in the root array of the response to the specified limit. If the response would contain more items than the specified limit, the API provider includes only the first set of limit items and appends the following response header:
-                `Next-Page-Cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`, a string that acts as a reference for the next page of results. The cursor value is used in subsequent requests to retrieve the next page by passing it as a query parameter: `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`.
+                `Next-Page-Cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`, a string that acts as a reference for the next page of results. The `Next-Page-Cursor` value is used in a subsequent request to retrieve the next page by passing it as a value in the `cursor`-query parameter: `cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`.
 
-                To retrieve the next page, the API consumer sends a `GET` request to the endpoint URL with only `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA` as query parameter. The limit of items per page and any other query parameters may not be altered, therefore it may also not be specified when requesting subsequent pages. The API provider must ignore any query parameters passed along with a cursor, and should return a `400` error if any other query parameter is passed along with the `cursor`.
+                To retrieve the next page, the API consumer sends a `GET` request to the endpoint URL with `cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA` as query parameter along with the limit of items per page and any other query parameters used in the original request. Filter parameters may not be altered and MUST be preserved when requesting subsequent pages.
         '400':
           description: Bad Request
           headers:
             API-Version:
               schema:
                 type: string
-                example: 1.0.1
+                example: 1.0.2
               description: |
                 SemVer used to indicate the version of the contract (API version) returned.
           content:
@@ -462,7 +461,7 @@ paths:
             API-Version:
               schema:
                 type: string
-                example: 1.0.1
+                example: 1.0.2
               description: |
                 SemVer used to indicate the version of the contract (API version) returned.
           content:
@@ -495,7 +494,7 @@ paths:
             example: '9321483'
           in: query
           name: vesselIMONumber
-          description: The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd&apos;s register code, which does not change during the lifetime of the vessel.
+          description: The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code, which does not change during the lifetime of the vessel.
         - schema:
             type: string
             maxLength: 50
@@ -604,7 +603,7 @@ paths:
 
         - b) `carrierServiceCode` **&** `carrierVoyageNumber`: Get a specific full voyage within a service
 
-        - c) `carrierServiceCode` **&** `vesselIMONumber`: Get a specific vessel’s full voyages within a service.
+        - c) `carrierServiceCode` **&** `vesselIMONumber`: Get a specific vessel's full voyages within a service.
 
         - d) `vesselIMONumber`: Get all full voyages for a specific vessel across all the services in which it is involved.
 
@@ -625,7 +624,6 @@ paths:
         The `GET /v1/vessel-schedules` endpoint can be implemented independently of having implemented the  `GET /v1/point-to-point-routes`  and `GET /v1/port-schedules`  endpoints.
 
         **IMPORTANT**: This endpoint is for carriers to make available vessel schedules to BCO, LSP, and Solution Platforms, with a commercial purpose; this is out of the boundaries of their vessel schedules alignment with other carriers and terminals for operational purposes for which the Operational Vessel Schedules [API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_OVS/3.0.0) is used between carriers, and carriers and terminals.
-    parameters: []
 components:
   schemas:
     PlaceOfReceipt:
@@ -706,6 +704,14 @@ components:
         - location
         - dateTime
       properties:
+        transportCallReference:
+          type: string
+          example: SR11111X-9321483-2107W-NLAMS-ACT-1-1
+          maxLength: 100
+          description: |
+            The unique reference for the arrival transport call. It's the vessel operator's responsibility to provide the Transport Call Reference, other parties are obliged to pick it up and use it. It can take the form of Port Call References as defined in OVS Definitions Document, or alternatively a reference as defined by the vessel operator.
+
+            **Note:** This property takes precedence over the `transportCallReference` in the Vessel-Transport or Barge-Transport objects. If both this property and a `transportCallReference` in the Vessel-Transport or Barge-Transport objects are provided- the `transportCallReference` in those objects must be ignored.
         facilityTypeCode:
           description: |
             The code to identify the specific type of facility. The code indicates which role the facility plays during the transportCall.
@@ -740,6 +746,14 @@ components:
         - location
         - dateTime
       properties:
+        transportCallReference:
+          type: string
+          example: SR11111X-9321483-2107W-NLAMS-ACT-1-1
+          maxLength: 100
+          description: |
+            The unique reference for the departure transport call. It's the vessel operator's responsibility to provide the Transport Call Reference, other parties are obliged to pick it up and use it. It can take the form of Port Call References as defined in OVS Definitions Document, or alternatively a reference as defined by the vessel operator.
+
+            **Note:** This property takes precedence over the `transportCallReference` in the Vessel-Transport or Barge-Transport objects. If both this property and a `transportCallReference` in the Vessel-Transport or Barge-Transport objects are provided- the `transportCallReference` in those objects must be ignored.
         facilityTypeCode:
           description: |
             The code to identify the specific type of facility. The code indicates which role the facility plays during the transportCall.
@@ -829,6 +843,35 @@ components:
           description: The estimated total time in days that it takes a shipment to move from place of receipt to place of delivery. Transit time includes stop-over time during transhipments and waiting time at connection points, if applicable, thus can vary between the same locations.
           format: int32
           example: 10
+        solutionFootprint:
+          type: object
+          description: |
+            Carbon footprint emission calculation for the full routing solution.
+          properties:
+            co2:
+              type: number
+              format: double
+              description: |
+                CO<sub>2</sub> (Carbon Dioxide) emissions in metric tonnes (t).
+              example: 506.4
+            sox:
+              type: number
+              format: double
+              description: |
+                SO<sub>x</sub> (Sulphur Oxide) emissions in kilograms (kg).
+              example: 12.4
+            nox:
+              type: number
+              format: double
+              description: |
+                NO<sub>x</sub> (Nitrogen Oxide) emissions in kilograms (kg).
+              example: 15.4
+            pm10:
+              type: number
+              format: double
+              description: |
+                PM<sub>10</sub> (Small Particle) emissions in kilograms (kg).
+              example: 0.8
         legs:
           type: array
           minItems: 1
@@ -928,7 +971,7 @@ components:
         transportCallReference:
           type: string
           maxLength: 100
-          description: The unique reference for a transport call. It’s the vessel operator’s responsibility to provide the Transport Call Reference, other parties are obliged to pick it up and use it. It can take the form of Port Call References as defined in OVS Definitions Document, or alternatively a reference as defined by the vessel operator.
+          description: The unique reference for a transport call. It's the vessel operator's responsibility to provide the Transport Call Reference, other parties are obliged to pick it up and use it. It can take the form of Port Call References as defined in OVS Definitions Document, or alternatively a reference as defined by the vessel operator.
           example: SR11111X-9321483-2107W-NLRTM-HPD2-1-1
         carrierImportVoyageNumber:
           type: string
@@ -983,6 +1026,8 @@ components:
     Timestamp:
       title: Timestamp
       type: object
+      description: |
+        Timestamp defined by a type (Arrival or Departure), a classifier (Planned, Estimated or Actual) and a date and time.
       required:
         - eventTypeCode
         - eventClassifierCode
@@ -1057,6 +1102,8 @@ components:
     VesselSchedule:
       title: Vessel Schedule
       type: object
+      description: |
+        The timetable of departure and arrival times for each `TransportCall` on a Service of the vessel in question.
       required:
         - isDummyVessel
       properties:
@@ -1155,6 +1202,7 @@ components:
     ErrorResponse:
       title: Error Response
       type: object
+      description: Unexpected error
       required:
         - httpMethod
         - requestUri
@@ -1213,10 +1261,12 @@ components:
     Vessel:
       title: Vessel
       type: object
+      description: |
+        Static vessel information like `IMONumber`, `MMSINumber`, `name`, `flag`, `callSign` and operator.
       properties:
         vesselIMONumber:
           type: string
-          description: The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd&apos;s register code, which does not change during the lifetime of the vessel.
+          description: The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code, which does not change during the lifetime of the vessel.
           example: '9321483'
           pattern: ^\d{7,8}$
           minLength: 7
@@ -1265,10 +1315,12 @@ components:
     Barge:
       title: Barge
       type: object
+      description: |
+        Static barge information like `IMONumber`, `MMSINumber`, `name`, `flag`, `callSign` and operator.
       properties:
         vesselIMONumber:
           type: string
-          description: The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd&apos;s register code, which does not change during the lifetime of the vessel.
+          description: The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code, which does not change during the lifetime of the vessel.
           example: '9321483'
           pattern: ^\d{7,8}$
           minLength: 7
@@ -1334,9 +1386,13 @@ components:
           description: The unique reference that can be used to link different `transportCallReferences` to the same port visit. The reference is provided by the port to uniquely identify a port call.
         transportCallReference:
           type: string
+          deprecated: true
           example: SR11111X-9321483-2107W-NLAMS-ACT-1-1
           maxLength: 100
-          description: The unique reference for a transport call. It’s the vessel operator’s responsibility to provide the Transport Call Reference, other parties are obliged to pick it up and use it. It can take the form of Port Call References as defined in OVS Definitions Document, or alternatively a reference as defined by the vessel operator.
+          description: |
+            The unique reference for a transport call. It's the vessel operator's responsibility to provide the Transport Call Reference, other parties are obliged to pick it up and use it. It can take the form of Port Call References as defined in OVS Definitions Document, or alternatively a reference as defined by the vessel operator.
+
+            **Deprecated:** Please use the `transportCallReference` (in **Departure** object) or `transportCallReference` (in **Arrival** object) in order to specify what the **TransportCall** is linked to. If provided in either `Arrival` or `Departure` object - this property must be ignored.
         servicePartners:
           type: array
           items:
@@ -1397,9 +1453,13 @@ components:
           description: The unique reference that can be used to link different `transportCallReferences` to the same port visit. The reference is provided by the port to uniquely identify a port call.
         transportCallReference:
           type: string
+          deprecated: true
           example: SR11111X-9321483-2107W-NLAMS-ACT-1-1
           maxLength: 100
-          description: The unique reference for a transport call. It’s the vessel operator’s responsibility to provide the Transport Call Reference, other parties are obliged to pick it up and use it. It can take the form of Port Call References as defined in OVS Definitions Document, or alternatively a reference as defined by the vessel operator.
+          description: |
+            The unique reference for a transport call. It's the vessel operator's responsibility to provide the Transport Call Reference, other parties are obliged to pick it up and use it. It can take the form of Port Call References as defined in OVS Definitions Document, or alternatively a reference as defined by the vessel operator.
+
+            **Deprecated:** Please use the `transportCallReference` (in **Departure** object) or `transportCallReference` (in **Arrival** object) in order to specify what the **TransportCall** is linked to. If provided in either `Arrival` or `Departure` object - this property must be ignored.
         servicePartners:
           type: array
           items:
@@ -1588,6 +1648,7 @@ components:
           maxLength: 50
           pattern: ^\S(?:.*\S)?$
           description: The identifier of an export voyage. The carrier-specific identifier of the export Voyage.
+
     Leg:
       title: Leg
       type: object
@@ -1611,16 +1672,53 @@ components:
           $ref: '#/components/schemas/PlaceOfDeparture'
         arrival:
           $ref: '#/components/schemas/PlaceOfArrival'
+        footprint:
+          type: object
+          description: |
+            Carbon footprint emission values for this particular leg.
+          properties:
+            co2:
+              type: number
+              format: double
+              description: |
+                CO<sub>2</sub> (Carbon Dioxide) emissions in metric tonnes (t).
+              example: 506.4
+            sox:
+              type: number
+              format: double
+              description: |
+                SO<sub>x</sub> (Sulphur Oxide) emissions in kilograms (kg).
+              example: 12.4
+            nox:
+              type: number
+              format: double
+              description: |
+                NO<sub>x</sub> (Nitrogen Oxide) emissions in kilograms (kg).
+              example: 15.4
+            pm10:
+              type: number
+              format: double
+              description: |
+                PM<sub>10</sub> (Small Particle) emissions in kilograms (kg).
+              example: 0.8
+        cutOffTimes:
+          type: array
+          description: A list of cut-offs times provided by the carrier when available for this particular leg. A cut-off time indicates the latest date and time by which a task must be completed. For example, the latest date and time by which certain documentation must be provided by the Shipper.
+          items:
+            $ref: '#/components/schemas/CutOffTime'
     Location:
       title: Location
       type: object
       description: |
         The location can be specified using **any** of the nested structures:
-          - `Address` (used to specify the location via an Address)
+          - `address` (used to specify the location via a **structured** Address)
+          - `addressLines` (used to specify a location via an **unstructured** Address)
           - `UNLocationCode`
           - `Facility` (used to specify a location using a `facilityCode` and a `facilityCodeListProvider`)
 
           It is expected that if a location is specified in multiple ways (both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+          **Condition:** Providers **or** consumers on API v1.0.1 (or earlier): `addressLines` cannot be used as the only property to identify the location.
       properties:
         locationName:
           type: string
@@ -1628,8 +1726,26 @@ components:
           example: Port of Amsterdam
           maxLength: 100
           description: An optional name for the location.
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** Providers **or** consumers on API v1.0.1 (or earlier): `addressLines` cannot be used as the only property to identify the location.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         UNLocationCode:
           type: string
           pattern: ^[A-Z]{2}[A-Z2-9]{3}$
@@ -1650,10 +1766,14 @@ components:
       type: object
       description: |
         General purpose object to capture location-related data, the location can be specified in **any** of the following ways:
-          - `Address` (used to specify the location via an Address)
+          - `address` (used to specify the location via a **structured** Address)
+          - `addressLines` (used to specify a location via an **unstructured** Address)
           - `UNLocationCode`
           - `FacilitySMDGCode` (used to specify a location using a `facilitySMDGCode`)
+
           It is expected that if a location is specified in multiple ways (both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+          **Condition:** Providers **or** consumers on API v1.0.1 (or earlier): `addressLines` cannot be used as the only property to identify the location.
       properties:
         locationName:
           type: string
@@ -1661,8 +1781,26 @@ components:
           example: Port of Amsterdam
           maxLength: 100
           description: An optional name for the location.
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** Providers **or** consumers on API v1.0.1 (or earlier): `addressLines` cannot be used as the only property to identify the location.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         UNLocationCode:
           type: string
           pattern: ^[A-Z]{2}[A-Z2-9]{3}$
@@ -1699,6 +1837,11 @@ components:
           example: Port of Amsterdam
           maxLength: 100
           description: An optional name for the location.
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         UNLocationCode:
           type: string
           pattern: ^[A-Z]{2}[A-Z2-9]{3}$
@@ -1731,13 +1874,9 @@ components:
           type: integer
           format: int32
           description: |
-            The detailed error code returned.
+            The detailed error code returned. The codes returned are maintained by the implementor of the API. For further explanation as to the meaning of an errorCode please consult the implementer.
 
-              - `7000-7999` Technical error codes
-              - `8000-8999` Functional error codes
-              - `9000-9999` API provider-specific error codes
-
-            [Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).
+            **Note:** Previously it was the intention of DCSA to standardize this but it never gained traction.
           example: 7003
           minimum: 7000
           maximum: 9999

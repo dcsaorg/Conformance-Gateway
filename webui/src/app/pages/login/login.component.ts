@@ -52,6 +52,7 @@ export class LoginComponent implements OnInit {
         'Login failed',
         (error as any).error || error
       );
+      this.cdr.detectChanges();
       form.reset();
       return;
     }

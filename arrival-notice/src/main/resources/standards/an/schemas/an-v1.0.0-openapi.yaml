@@ -18,10 +18,6 @@ info:
     The registration of subscribers with arrival notice publishers is out of scope.
 
     The authentication and authorization in both directions between arrival notice publishers and subscribers is out of scope.
-
-    ### Work in progress ⚠️
-
-    The DCSA Arrival Notice standard, including this API, is currently being designed and is **not** ready for general adoption yet.
   contact:
     name: "Digital Container Shipping Association (DCSA)"
     url: "https://dcsa.org"
@@ -29,17 +25,17 @@ info:
   license:
     name: "Apache 2.0"
     url: "https://www.apache.org/licenses/LICENSE-2.0.html"
-  version: "1.0.0"
+  version: "1.0.1"
 tags:
-- name: "AN Publisher Endpoints"
-  description: "Endpoints implemented by the adopters who publish arrival notices"
-- name: "AN Subscriber Endpoints"
-  description: "Endpoints implemented by the adopters who receive arrival notices"
+  - name: "AN Publisher Endpoints"
+    description: "Endpoints implemented by the adopters who publish arrival notices"
+  - name: "AN Subscriber Endpoints"
+    description: "Endpoints implemented by the adopters who receive arrival notices"
 paths:
   /arrival-notices:
     get:
       tags:
-      - "AN Publisher Endpoints"
+        - "AN Publisher Endpoints"
       summary: "Retrieves a list of arrival notices"
       description: |
         Retrieves the list of arrival notices matching the criteria provided as query parameters.
@@ -120,135 +116,135 @@ paths:
         When responding with the last page of results, the arrival notice publisher no longer includes a `Next-Page-Cursor` response header. The last page of results may be empty, for example in the case of a stateless pagination implementation by the arrival notice publisher.
       operationId: "get-arrival-notices"
       parameters:
-      - name: "transportDocumentReferences"
-        in: "query"
-        description: "Reference(s) of the transport document(s) for which to return the associated arrival notices"
-        explode: false
-        schema:
-          type: "array"
-          items:
+        - name: "transportDocumentReferences"
+          in: "query"
+          description: "Reference(s) of the transport document(s) for which to return the associated arrival notices"
+          explode: false
+          schema:
+            type: "array"
+            items:
+              type: "string"
+          example: "HHL71800000,HHL71800001"
+        - name: "equipmentReferences"
+          in: "query"
+          description: "Reference(s) of the equipment for which to return the associated arrival notices"
+          explode: false
+          schema:
+            type: "array"
+            items:
+              type: "string"
+          example: "APZU4812090,APZU4812091"
+        - name: "portOfDischarge"
+          in: "query"
+          description: "UN location of the port of discharge for which to retrieve available arrival notices"
+          schema:
             type: "string"
-        example: "HHL71800000,HHL71800001"
-      - name: "equipmentReferences"
-        in: "query"
-        description: "Reference(s) of the equipment for which to return the associated arrival notices"
-        explode: false
-        schema:
-          type: "array"
-          items:
+          example: "NLRTM"
+        - name: "vesselIMONumber"
+          in: "query"
+          description: "IMO number of the vessel for which to retrieve available arrival notices"
+          schema:
             type: "string"
-        example: "APZU4812090,APZU4812091"
-      - name: "portOfDischarge"
-        in: "query"
-        description: "UN location of the port of discharge for which to retrieve available arrival notices"
-        schema:
-          type: "string"
-        example: "NLRTM"
-      - name: "vesselIMONumber"
-        in: "query"
-        description: "IMO number of the vessel for which to retrieve available arrival notices"
-        schema:
-          type: "string"
-        example: "9321483"
-      - name: "vesselName"
-        in: "query"
-        description: "Name of the vessel for which to retrieve available arrival notices"
-        schema:
-          type: "string"
-        example: "King of the Seas"
-      - name: "carrierImportVoyageNumber"
-        in: "query"
-        description: "The identifier of an import voyage. The carrier-specific identifier of the import Voyage."
-        schema:
-          type: "string"
-        example: "2208N"
-      - name: "universalImportVoyageReference"
-        in: "query"
-        description: "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA."
-        schema:
-          type: "string"
-        example: "2301W"
-      - name: "carrierServiceCode"
-        in: "query"
-        description: "The carrier specific code of the service for which the schedule details are published."
-        schema:
-          type: "string"
-        example: "FE1"
-      - name: "universalServiceReference"
-        in: "query"
-        description: "Globally unique identifier of a liner service, assigned by carriers as specified by DCSA."
-        schema:
-          type: "string"
-        example: "SR12345A"
-      - name: "portOfDischargeArrivalDateMin"
-        in: "query"
-        description: "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date"
-        schema:
-          type: "string"
-          format: "date"
-        example: "2025-01-22"
-      - name: "portOfDischargeArrivalDateMax"
-        in: "query"
-        description: "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date"
-        schema:
-          type: "string"
-          format: "date"
-        example: "2025-01-23"
-      - name: "includeVisualization"
-        in: "query"
-        description: |
-          Optional flag indicating whether the PDF `arrivalNoticeVisualization` should be included in each returned arrival notice.
+          example: "9321483"
+        - name: "vesselName"
+          in: "query"
+          description: "Name of the vessel for which to retrieve available arrival notices"
+          schema:
+            type: "string"
+          example: "King of the Seas"
+        - name: "carrierImportVoyageNumber"
+          in: "query"
+          description: "The identifier of an import voyage. The carrier-specific identifier of the import Voyage."
+          schema:
+            type: "string"
+          example: "2208N"
+        - name: "universalImportVoyageReference"
+          in: "query"
+          description: "Unique identifier of the import voyage within the service, assigned by carriers as specified by DCSA."
+          schema:
+            type: "string"
+          example: "2301W"
+        - name: "carrierServiceCode"
+          in: "query"
+          description: "The carrier specific code of the service for which the schedule details are published."
+          schema:
+            type: "string"
+          example: "FE1"
+        - name: "universalServiceReference"
+          in: "query"
+          description: "Globally unique identifier of a liner service, assigned by carriers as specified by DCSA."
+          schema:
+            type: "string"
+          example: "SR12345A"
+        - name: "portOfDischargeArrivalDateMin"
+          in: "query"
+          description: "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or after this date"
+          schema:
+            type: "string"
+            format: "date"
+          example: "2025-01-22"
+        - name: "portOfDischargeArrivalDateMax"
+          in: "query"
+          description: "Retrieve arrival notices with a date of arrival of the vessel at the Port of Discharge on or before this date"
+          schema:
+            type: "string"
+            format: "date"
+          example: "2025-01-23"
+        - name: "includeVisualization"
+          in: "query"
+          description: |
+            Optional flag indicating whether the PDF `arrivalNoticeVisualization` should be included in each returned arrival notice.
 
-          The publisher makes the final decision on whether to include PDF visualizations in the response (for some or for all
-          the arrival notices), based on a variety of factors including:
-          - whether it has implemented support for including PDF visualizations
-          - the API consumer (role, registration profile, business relationship)
-          - the type and availability status of the returned arrival notices.
+            The publisher makes the final decision on whether to include PDF visualizations in the response (for some or for all
+            the arrival notices), based on a variety of factors including:
+            - whether it has implemented support for including PDF visualizations
+            - the API consumer (role, registration profile, business relationship)
+            - the type and availability status of the returned arrival notices.
 
-          However, to support a future transition to fully automated processing of arrival notices by receivers,
-          the publisher should **not** include the PDF visualization if this parameter is set to `false`.
-        schema:
-          type: "boolean"
-        example: true
-      - name: "removeCharges"
-        in: "query"
-        description: |
-          Optional flag indicating whether the publisher should remove the charges from the PDF visualization
-          of every returned arrival notice, and for consistency, also from the structured response data.
+            However, to support a future transition to fully automated processing of arrival notices by receivers,
+            the publisher should **not** include the PDF visualization if this parameter is set to `false`.
+          schema:
+            type: "boolean"
+          example: true
+        - name: "removeCharges"
+          in: "query"
+          description: |
+            Optional flag indicating whether the publisher should remove the charges from the PDF visualization
+            of every returned arrival notice, and for consistency, also from the structured response data.
 
-          This flag allows arrival notice receivers to retrieve, for the purpose of forwarding to third parties,
-          versions of the arrival notice PDF visualizations in which the charges are removed,
-          if they would be normally received with charges included based on the role of the arrival notice recipient.
+            This flag allows arrival notice receivers to retrieve, for the purpose of forwarding to third parties,
+            versions of the arrival notice PDF visualizations in which the charges are removed,
+            if they would be normally received with charges included based on the role of the arrival notice recipient.
 
-          This flag is **not** expected to perform any filtering on the list of arrival notices included in the response.
-          However, if the removal of charges (from the arrival notices that have them) results in a list of arrival notices
-          in which some become exact duplicates, publishers may choose to remove duplicates from the response.
+            This flag is **not** expected to perform any filtering on the list of arrival notices included in the response.
+            However, if the removal of charges (from the arrival notices that have them) results in a list of arrival notices
+            in which some become exact duplicates, publishers may choose to remove duplicates from the response.
 
-          The default value is `false`, which leaves unchanged the presence or absence of charges in each returned arrival notice.
-        schema:
-          type: "boolean"
-        example: true
-      - name: "limit"
-        in: "query"
-        description: "Maximum number of arrival notices to include in each page of the response."
-        schema:
-          minimum: 1
-          type: "integer"
-          format: "int32"
-        example: 10
-      - name: "cursor"
-        in: "query"
-        description: "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page."
-        schema:
-          type: "string"
-        example: "ExampleNextPageCursor"
-      - name: "API-Version"
-        in: "header"
-        description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
-        required: false
-        schema:
-          type: "string"
-        example: "1.0.0"
+            The default value is `false`, which leaves unchanged the presence or absence of charges in each returned arrival notice.
+          schema:
+            type: "boolean"
+          example: true
+        - name: "limit"
+          in: "query"
+          description: "Maximum number of arrival notices to include in each page of the response."
+          schema:
+            minimum: 1
+            type: "integer"
+            format: "int32"
+          example: 10
+        - name: "cursor"
+          in: "query"
+          description: "Set to the value of the `Next-Page-Cursor` header of the previous response to retrieve the next page."
+          schema:
+            type: "string"
+          example: "ExampleNextPageCursor"
+        - name: "API-Version"
+          in: "header"
+          description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
+          required: false
+          schema:
+            type: "string"
+          example: "1.0.1"
       responses:
         "200":
           description: "List of arrival notices matching the query parameters"
@@ -272,7 +268,7 @@ paths:
                 $ref: "#/components/schemas/GetArrivalNoticesError"
     post:
       tags:
-      - "AN Subscriber Endpoints"
+        - "AN Subscriber Endpoints"
       summary: "Sends a list of arrival notices"
       description: |
         Used by an arrival notice publisher to send arrival notices to a registered subscriber.
@@ -280,13 +276,13 @@ paths:
         The subscription mechanism and the management of subscriber profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
       operationId: "post-arrival-notices"
       parameters:
-      - name: "API-Version"
-        in: "header"
-        description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
-        required: false
-        schema:
-          type: "string"
-        example: "1.0.0"
+        - name: "API-Version"
+          in: "header"
+          description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
+          required: false
+          schema:
+            type: "string"
+          example: "1.0.1"
       requestBody:
         description: "List of arrival notices"
         content:
@@ -316,7 +312,7 @@ paths:
   /arrival-notice-notifications:
     post:
       tags:
-      - "AN Subscriber Endpoints"
+        - "AN Subscriber Endpoints"
       summary: "Sends a list of arrival notice lightweight notifications"
       description: |
         Used by an arrival notice publisher to send lightweight arrival notice notifications to a registered subscriber.
@@ -324,13 +320,13 @@ paths:
         The subscription mechanism and the management of subscriber profiles, including any filtering or page limits similar with the GET endpoint, are out of scope in this standard.
       operationId: "post-arrival-notice-notifications"
       parameters:
-      - name: "API-Version"
-        in: "header"
-        description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
-        required: false
-        schema:
-          type: "string"
-        example: "1.0.0"
+        - name: "API-Version"
+          in: "header"
+          description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
+          required: false
+          schema:
+            type: "string"
+          example: "1.0.1"
       requestBody:
         description: "List of arrival notice lightweight notifications"
         content:
@@ -469,11 +465,20 @@ components:
           type: "string"
           description: "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)"
           example: "NL"
+        addressLines:
+          maxItems: 5
+          type: "array"
+          description: "Unstructured address lines, used as a fallback when structured address fields are unavailable."
+          items:
+            maxLength: 250
+            type: "string"
+            description: "One line of an unstructured `Address`."
+            example: "123 Example Rd"
       description: "An object for storing address-related information."
     ArrivalNotice:
       required:
-      - "issueDateTime"
-      - "transportDocumentReference"
+        - "issueDateTime"
+        - "transportDocumentReference"
       type: "object"
       properties:
         issueDateTime:
@@ -541,19 +546,19 @@ components:
         pickupInformation:
           description: "Consolidates the information required to pick up the container."
           allOf:
-          - $ref: "#/components/schemas/PickupInformation"
+            - $ref: "#/components/schemas/PickupInformation"
         returnInformation:
           description: "Groups the information regarding empty-equipment return."
           allOf:
-          - $ref: "#/components/schemas/ReturnInformation"
+            - $ref: "#/components/schemas/ReturnInformation"
         releaseInformation:
           description: "Compiles the information relevant to shipment release."
           allOf:
-          - $ref: "#/components/schemas/ReleaseInformation"
+            - $ref: "#/components/schemas/ReleaseInformation"
         customsClearance:
           description: "Customs clearance information"
           allOf:
-          - $ref: "#/components/schemas/CustomsClearance"
+            - $ref: "#/components/schemas/CustomsClearance"
         additionalInformation:
           maxLength: 5000
           type: "string"
@@ -588,6 +593,10 @@ components:
             - `BOL` (Bill of Lading)
             - `SWB` (Sea Waybill)
           example: "SWB"
+        placeOfBLIssue:
+          description: "The location where the original transport document (Bill of Lading) is issued"
+          allOf:
+            - $ref: "#/components/schemas/Location"
         isElectronic:
           type: "boolean"
           description: "An indicator whether the transport document is electronically transferred."
@@ -642,7 +651,7 @@ components:
         transport:
           description: "Transport details relevant to the arrival notice."
           allOf:
-          - $ref: "#/components/schemas/Transport"
+            - $ref: "#/components/schemas/Transport"
         freeTimes:
           type: "array"
           description: "List of free time conditions applicable to this shipment at destination"
@@ -657,7 +666,7 @@ components:
           description: |
             Bank account information provided by the carrier for customers to make payments of the outstanding charges
           allOf:
-          - $ref: "#/components/schemas/PaymentRemittance"
+            - $ref: "#/components/schemas/PaymentRemittance"
         freightPaymentStatus:
           maxLength: 50
           type: "string"
@@ -682,12 +691,12 @@ components:
         arrivalNoticeVisualization:
           description: "Visualization of an arrival notice, as an embedded document"
           allOf:
-          - $ref: "#/components/schemas/EmbeddedDocument"
+            - $ref: "#/components/schemas/EmbeddedDocument"
       description: "Full content of an Arrival Notice document."
     ArrivalNoticeNotification:
       required:
-      - "issueDateTime"
-      - "transportDocumentReference"
+        - "issueDateTime"
+        - "transportDocumentReference"
       type: "object"
       properties:
         issueDateTime:
@@ -757,21 +766,21 @@ components:
           description: |
             The location where the cargo is discharged from the last sea-going vessel
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         placeOfDelivery:
           description: |
             The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
             responsibility of the shipping line ceases
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         portOfDischargeArrivalDate:
           description: "The date of arrival of the vessel at the Port of Discharge."
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         placeOfDeliveryArrivalDate:
           description: "The date of arrival of the shipment at Place of Delivery."
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
       description: |
         Lightweight notification that can be sent when a new or updated Arrival Notice is available
     CargoItem:
@@ -791,34 +800,34 @@ components:
             Gross weight of the cargo item including packaging being carried in the container.
             Excludes the tare weight of the container.
           allOf:
-          - $ref: "#/components/schemas/Weight"
+            - $ref: "#/components/schemas/Weight"
         cargoGrossVolume:
           description: |
             Gross volume of the cargo item, calculated by multiplying the width, height, and length of the packaged cargo.
           allOf:
-          - $ref: "#/components/schemas/Volume"
+            - $ref: "#/components/schemas/Volume"
         cargoNetWeight:
           description: |
             Net weight of the cargo item, excluding packaging and excluding the tare weight of the container.
           allOf:
-          - $ref: "#/components/schemas/Weight"
+            - $ref: "#/components/schemas/Weight"
         cargoNetVolume:
           description: |
             Net volume of the cargo item, calculated by multiplying the width, height, and length of the cargo, excluding packaging.
           allOf:
-          - $ref: "#/components/schemas/Volume"
+            - $ref: "#/components/schemas/Volume"
         exportLicense:
           description: "Export license applicable to this cargo item."
           allOf:
-          - $ref: "#/components/schemas/ExportLicense"
+            - $ref: "#/components/schemas/ExportLicense"
         importLicense:
           description: "Import license applicable to this cargo item."
           allOf:
-          - $ref: "#/components/schemas/ImportLicense"
+            - $ref: "#/components/schemas/ImportLicense"
         outerPackaging:
           description: "Packaging information for this cargo item."
           allOf:
-          - $ref: "#/components/schemas/OuterPackaging"
+            - $ref: "#/components/schemas/OuterPackaging"
         customsReferences:
           type: "array"
           description: "A list of `Customs references`"
@@ -917,7 +926,7 @@ components:
         paymentLocation:
           description: "Payment location"
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         invoicePayerCode:
           maxLength: 50
           type: "string"
@@ -1000,11 +1009,11 @@ components:
         exportLicense:
           description: "Export license for the consignment item."
           allOf:
-          - $ref: "#/components/schemas/ExportLicense"
+            - $ref: "#/components/schemas/ExportLicense"
         importLicense:
           description: "Import license for the consignment item."
           allOf:
-          - $ref: "#/components/schemas/ImportLicense"
+            - $ref: "#/components/schemas/ImportLicense"
         references:
           type: "array"
           description: "A list of `References`"
@@ -1041,14 +1050,14 @@ components:
         customsClearancePoint:
           description: "The location where customs clearance occurs."
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         immediateTransportationEntry:
           description: |
             An Immediate Transportation (IT) entry is a U.S. Customs and Border Protection (CBP) mechanism
             that allows imported cargo to be moved from the first port of arrival in the U.S.
             to another port or bonded facility without being physically cleared by CBP at the first port.
           allOf:
-          - $ref: "#/components/schemas/ImmediateTransportationEntry"
+            - $ref: "#/components/schemas/ImmediateTransportationEntry"
         customsImportDeclarationProcedure:
           maxLength: 1000
           type: "string"
@@ -1232,7 +1241,7 @@ components:
         emergencyContactDetails:
           description: "24 hr emergency contact details"
           allOf:
-          - $ref: "#/components/schemas/EmergencyContactDetails"
+            - $ref: "#/components/schemas/EmergencyContactDetails"
         EMSNumber:
           maxLength: 7
           type: "string"
@@ -1268,23 +1277,23 @@ components:
         grossWeight:
           description: "Total weight of the goods carried, including packaging."
           allOf:
-          - $ref: "#/components/schemas/Weight"
+            - $ref: "#/components/schemas/Weight"
         netWeight:
           description: "Total weight of the goods carried, excluding packaging."
           allOf:
-          - $ref: "#/components/schemas/Weight"
+            - $ref: "#/components/schemas/Weight"
         netExplosiveContent:
           description: "The total weight of the explosive substances, without the packaging, casings, etc."
           allOf:
-          - $ref: "#/components/schemas/Weight"
+            - $ref: "#/components/schemas/Weight"
         netVolume:
           description: "The volume of the referenced dangerous goods. Only applicable to liquids and gas."
           allOf:
-          - $ref: "#/components/schemas/Volume"
+            - $ref: "#/components/schemas/Volume"
         limits:
           description: "Limits for the `Dangerous Goods`. The same `Temperature Unit` must apply to all attributes in this structure."
           allOf:
-          - $ref: "#/components/schemas/Limits"
+            - $ref: "#/components/schemas/Limits"
       description: |
         Specification for Dangerous Goods. Provide one of UNNumber or NANumber. Based on IMDG Code Amendment 41-22.
     DocumentParty:
@@ -1321,7 +1330,7 @@ components:
         address:
           description: "Party  address"
           allOf:
-          - $ref: "#/components/schemas/Address"
+            - $ref: "#/components/schemas/Address"
         identifyingCodes:
           type: "array"
           description: "List of codes identifying the party"
@@ -1417,7 +1426,7 @@ components:
         tareWeight:
           description: "The tare weight of the container."
           allOf:
-          - $ref: "#/components/schemas/Weight"
+            - $ref: "#/components/schemas/Weight"
       description: "Used for storing cargo during transport. Equipment size/type is defined by the ISO 6346 code. Common sizes include 20'/40'/45' containers."
     ExportLicense:
       type: "object"
@@ -1449,6 +1458,11 @@ components:
     Facility:
       type: "object"
       properties:
+        facilityName:
+          maxLength: 100
+          type: "string"
+          description: "The name of the facility."
+          example: "Building 123"
         facilityCode:
           maxLength: 6
           type: "string"
@@ -1560,11 +1574,11 @@ components:
         lastFreeDate:
           description: "The final date when the container(s) can be collected without incurring charges."
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         lastFreeDateTime:
           description: "The final date and time when the container(s) can be collected without incurring charges."
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDateTime"
+            - $ref: "#/components/schemas/ClassifiedDateTime"
       description: "Free time condition applicable to this shipment at destination."
     GeoCoordinate:
       type: "object"
@@ -1756,19 +1770,19 @@ components:
         loadLocation:
           description: "The location where the cargo is loaded for this specific leg of the transport plan."
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         dischargeLocation:
           description: "The location where the cargo is discharged for this specific leg of the transport plan."
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         departureDate:
           description: "The departure date from the load location for this specific leg of the transport plan."
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         arrivalDate:
           description: "The arrival date at the discharge location for this specific leg of the transport plan."
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         modeOfTransport:
           maxLength: 50
           type: "string"
@@ -1783,7 +1797,7 @@ components:
         vesselVoyage:
           description: "Vessel and voyage details of a transport leg"
           allOf:
-          - $ref: "#/components/schemas/VesselVoyage"
+            - $ref: "#/components/schemas/VesselVoyage"
       description: "Details of one specific leg of the transport plan"
     Limits:
       type: "object"
@@ -1852,7 +1866,7 @@ components:
         address:
           description: "Location address"
           allOf:
-          - $ref: "#/components/schemas/Address"
+            - $ref: "#/components/schemas/Address"
         UNLocationCode:
           maxLength: 5
           type: "string"
@@ -1868,11 +1882,11 @@ components:
           description: |
             Facility identified by a code as defined by a code list provider.
           allOf:
-          - $ref: "#/components/schemas/Facility"
+            - $ref: "#/components/schemas/Facility"
         geoCoordinate:
           description: "An object used to express a location using its geographic coordinates."
           allOf:
-          - $ref: "#/components/schemas/GeoCoordinate"
+            - $ref: "#/components/schemas/GeoCoordinate"
       description: "Location information"
     NationalCommodityCode:
       type: "object"
@@ -2013,7 +2027,7 @@ components:
           description: |
             The equipment handling facility where container is to be picked up by the consignee or the appointed logistics partner.
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
       description: "Consolidates the information required to pick up the container."
     PostArrivalNoticeNotificationsRequest:
       type: "object"
@@ -2159,7 +2173,7 @@ components:
           description: |
             The equipment handling facility where container is to be returned by the consignee or the appointed logistics partner.
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         returnInstructions:
           maxLength: 5000
           type: "string"
@@ -2180,15 +2194,37 @@ components:
           description: |
             The source of the seal, namely who has affixed the seal.
             - `CAR` (Carrier)
-            - `SHI` (Shipper)
-            - `PHY` (Phytosanitary)
-            - `VET` (Veterinary)
+            - `CNS` (Consolidator)
+            - `CST` (Customer)
             - `CUS` (Customs)
+            - `PHY` (Phytosanitary)
+            - `SHI` (Shipper)
+            - `TER` (Terminal)
+            - `VET` (Veterinary)
 
             In [UN/EDIFACT 16A 9303](https://unece.org/fileadmin/DAM/trade/untdid/d16a/tred/tred9303.htm),
             both VET (Veterinary) and PHY (Phytosanitary) map to AC (Quarantine agency).
           example: "CUS"
-      description: "Seal-related information associated with shipment equipment. A seal is affixed once the equipment is loaded and remains until final destination."
+        type:
+          maxLength: 10
+          type: "string"
+          description: |
+            The type of seal.
+            - `KLP` (Keyless padlock)
+            - `BLT` (Bolt)
+            - `WIR` (Wire)
+          example: "WIR"
+        placement:
+          maxLength: 10
+          type: "string"
+          description: |
+            Placement of the seal.
+            - `DOOR` (Door)
+            - `VENT` (Vent)
+          example: "DOOR"
+          default: "DOOR"
+      description: |
+        Seal-related information associated with the equipment.
     TaxLegalReference:
       type: "object"
       properties:
@@ -2219,65 +2255,65 @@ components:
             The location where the cargo is handed over by the shipper, or his agent, to the shipping line.
             This indicates the point at which the shipping line takes on responsibility for carriage of the container.
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         portOfLoading:
           description: |
             The location where the cargo is loaded onto a first sea-going vessel for water transportation.
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         portOfDischarge:
           description: |
             The location where the cargo is discharged from the last sea-going vessel.
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         placeOfDelivery:
           description: |
             The location where the cargo is handed over to the consignee, or his agent,
             by the shipping line and where responsibility of the shipping line ceases.
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         departureDate:
           description: |
             The date of departure from the location where the cargo is handed over by the shipper, or his agent,
             to the shipping line. This can refer either to the Place of Receipt or the Port of Loading.
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         receivedForShipmentDate:
           description: |
             The date on which the carrier takes possession of all containers under the bill of lading.
             For carrier haulage, this is when the carrier collects the last container at the place of receipt.
             For merchant haulage, this is when the last container is physically handed over to the terminal.
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         onBoardDate:
           description: |
             The date when the container was loaded onto the vessel at the port of origin.
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         portOfDischargeArrivalDate:
           description: "The date of arrival of the vessel at the Port of Discharge."
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         placeOfDeliveryArrivalDate:
           description: "The date of arrival of the shipment at Place of Delivery."
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         inlandArrivalDate:
           description: |
             The date when the container reaches its inland destination (e.g., a warehouse or rail terminal).
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDate"
+            - $ref: "#/components/schemas/ClassifiedDate"
         generalOrderDateTime:
           description: |
             The date and time when the shipment will be placed under General Order status
             (shipment is transferred to a bonded warehouse, and additional fees or penalties may apply).
           allOf:
-          - $ref: "#/components/schemas/ClassifiedDateTime"
+            - $ref: "#/components/schemas/ClassifiedDateTime"
         borderCrossingLocation:
           description: |
             The inland location where the cargo is intended to cross an international border.
           allOf:
-          - $ref: "#/components/schemas/Location"
+            - $ref: "#/components/schemas/Location"
         legs:
           type: "array"
           description: |
@@ -2291,7 +2327,7 @@ components:
         equipment:
           description: "The container or transport equipment used."
           allOf:
-          - $ref: "#/components/schemas/Equipment"
+            - $ref: "#/components/schemas/Equipment"
         isShipperOwned:
           type: "boolean"
           description: "Indicates whether the container is shipper owned (SOC)."
@@ -2304,7 +2340,7 @@ components:
         activeReeferSettings:
           description: "Active reefer settings applied to this equipment."
           allOf:
-          - $ref: "#/components/schemas/ActiveReeferSettings"
+            - $ref: "#/components/schemas/ActiveReeferSettings"
         shippingMarks:
           maxItems: 50
           type: "array"
@@ -2334,11 +2370,11 @@ components:
         pickupInformation:
           description: "Consolidates the information required to pick up the container."
           allOf:
-          - $ref: "#/components/schemas/PickupInformation"
+            - $ref: "#/components/schemas/PickupInformation"
         returnInformation:
           description: "Groups the information regarding empty-equipment return."
           allOf:
-          - $ref: "#/components/schemas/ReturnInformation"
+            - $ref: "#/components/schemas/ReturnInformation"
         charges:
           type: "array"
           description: "A list of `Charges`"
@@ -2488,7 +2524,7 @@ components:
       description: "Every API request and response must contain the `API-Version` header, set to the full version of the implemented DCSA standard."
       schema:
         type: "string"
-        example: "1.0.0"
+        example: "1.0.1"
     Next-Page-Cursor:
       description: "A cursor value pointing to the next page of results in a paginated GET response."
       schema:

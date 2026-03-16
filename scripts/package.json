@@ -1,0 +1,31 @@
+{
+  "name": "conformance-scripts",
+  "version": "1.0.0",
+  "description": "Console scripts for AWS operations on the Conformance Gateway project",
+  "private": true,
+  "scripts": {
+    "list-cognito-users": "ts-node src/scripts/list-cognito-users.ts",
+    "get-cognito-user": "ts-node src/scripts/get-cognito-user.ts",
+    "query-dynamodb": "ts-node src/scripts/query-dynamodb.ts",
+    "get-user-sandboxes": "ts-node src/scripts/get-user-sandboxes.ts",
+    "list-user-sandbox-reports": "ts-node src/scripts/list-user-sandbox-reports.ts",
+    "get-user-sandbox-report-json": "ts-node src/scripts/get-user-sandbox-report-json.ts",
+    "get-user-sandbox-report-html": "ts-node src/scripts/get-user-sandbox-report-html.ts",
+    "get-current-sandbox-session": "ts-node src/scripts/get-current-sandbox-session.ts",
+    "get-sandbox-metadata": "ts-node src/scripts/get-sandbox-metadata.ts",
+    "get-sandbox-session-exchanges": "ts-node src/scripts/get-sandbox-session-exchanges.ts",
+    "get-sandbox-usage-stats": "ts-node src/scripts/get-sandbox-usage-stats.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.787.0",
+    "@aws-sdk/client-dynamodb": "^3.787.0",
+    "@aws-sdk/util-dynamodb": "^3.787.0",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.8.3"
+  }
+}
+

@@ -113,13 +113,10 @@ export class EditSandboxComponent {
       this.updatedSandboxConfig!.externalPartyAdditionalHeaders,
       this.updatedSandboxConfig!.externalPartyEndpointUriOverrides,
     );
-    if (response?.error) {
-      await MessageDialog.open(
-        this.dialog,
-        "Error updating sandbox",
-        response.error);
+    if (await MessageDialog.showIfError(response, this.dialog, "Error updating sandbox")) {
       this.updatingSandbox = false;
-      return
+      this.cdr.detectChanges();
+      return;
     }
     await this.router.navigate([
       "/sandbox", this.sandboxId

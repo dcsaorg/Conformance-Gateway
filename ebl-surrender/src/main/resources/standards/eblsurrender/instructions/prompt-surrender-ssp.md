@@ -1,4 +1,4 @@
-Please provide the required information for a **EBL_TYPE** that your system can process:
+Please provide the required information for a Straight or Negotiable eBL that your system can process:
 
 ### Required Information:
 - **Transport Document Reference**: A valid eBL reference in your system

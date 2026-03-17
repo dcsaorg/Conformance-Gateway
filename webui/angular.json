@@ -113,7 +113,7 @@
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.spec.ts"
+                  "with": "src/environments/environment.testci.ts"
                 }
               ],
               "outputHashing": "all"

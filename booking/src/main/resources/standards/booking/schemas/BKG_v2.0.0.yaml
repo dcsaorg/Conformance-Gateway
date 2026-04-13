@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: 2.0.3
+  version: 2.0.4
   title: DCSA Booking API
   description: |
     <h1>DCSA OpenAPI specification for the Booking process</h1>
@@ -43,7 +43,7 @@ info:
     This API follows the guidelines defined in version 2.0 of the API Design & Implementation Principles which can be found on the [DCSA Developer Portal](https://developer.dcsa.org/api_design)
 
     ### Changelog and GitHub
-    For a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v203). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
+    For a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v204). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
 
     API specification issued by [DCSA.org](https://dcsa.org/).
   license:
@@ -53,7 +53,7 @@ info:
     name: Digital Container Shipping Association (DCSA)
     url: 'https://dcsa.org'
     email: info@dcsa.org
-security: [ ]
+security: []
 tags:
   - name: Booking
     description: Booking endPoints to be implemented by **providers** of the Booking API
@@ -70,13 +70,13 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Api-Version-Major'
       description: |
-        Creates a new booking request. This endPoint corresponds with **UseCase 1 - Submit booking request**.
+        Creates a new booking request. This endPoint corresponds with **UseCase 1 - Submit Booking request**.
 
         ## Precondition
         The consumer has information for a `Booking Request`
 
         ## Postcondition
-        The provider has received the `Booking Request`. 
+        The provider has received the `Booking Request`.
 
         The consumer will receive a `202` (Accepted) if the request payload schema-validates or a `400` (Bad Request) if it does not.
 
@@ -91,7 +91,7 @@ paths:
             - all values provided have correct data type.
 
             A `carrierBookingRequestReference` (as a reference to the `Booking Request`) is created and linked to the payload in the provider system.
-        
+
             **For the rest of this description and in all examples the value `cbrr-123` will be used as `carrierBookingRequestReference`**
 
         3. A `202` (Accepted) response is returned with a payload containing **only** the `carrierBookingRequestReference`:
@@ -110,9 +110,9 @@ paths:
         The provider will now start asynchronous processing. Once processed, the status `RECEIVED` of the `Booking Request` will be communicated via a [Booking Notification](#/BookingNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the
 
             GET /v2/bookings/{bookingReference}
-        
+
         endPoint to check if the `bookingStatus` of the `Booking Request` has changed.
-        
+
         After the status has changed to `RECEIVED` further processing can continue by provider and will be communicated via a [Booking Notification](#/BookingNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll the above endPoint.
       requestBody:
         description: The payload used to create a `Booking Request`
@@ -439,12 +439,12 @@ paths:
                   summary: |
                     Booking request accepted
                   description: |
-                    A `Booking Request` has been accepted (no `bookingStatus`) and schema validated by provider
+                    A `Booking Request` has been accepted (no `bookingStatus`) and schema-validated by provider
                   value:
                     carrierBookingRequestReference: cbrr-123
         '400':
           description: |
-            In case the `Booking Request` does not schema validate a `400` (Bad Request) is returned
+            In case the `Booking Request` does not validate against the schema a `400` (Bad Request) is returned
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -534,7 +534,7 @@ paths:
                     statusCode: 429
                     statusCodeText: Too Many Requests
                     statusCodeMessage: |
-                      Too many request to create a booking has been requested. Please try again in 1 hour
+                      Too many requests to create a booking have been made. Please try again in 1 hour
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: '2024-09-04T09:41:00Z'
                     errors:
@@ -592,19 +592,19 @@ paths:
           - the status of the `Booking Request` is unchanged.
           - a `202` (Accepted) response is sent with an empty payload
           - awaits further processing by the provider
-        
+
         The provider will now start asynchronous processing. Once processed, the state will change to one of the following values depending on the use case for calling the `PUT` endPoint:
           - `UPDATE_RECEIVED` in case this endPoint has been used to:
             - send an update to a newly created Booking (precondition: `bookingStatus='RECEIVED'`)
             - send an update to a Booking because of a request from provider via **UseCase 2 - Request to update Booking request** (precondition: `bookingStatus='PENDING_UPDATE'`)
             - send an additional update to a Booking that has already received an update  (precondition: `bookingStatus='UPDATE_RECEIVED'`)
-          - `bookingStatus` will stay as `PENDING_AMENDMENT` but `amendedBookingStatus` will change to `AMENDMENT_RECEIVED` in case this endPoint is being used in response to a request from provider via **UseCase 6 - Request to amend Confirmed Booking** (precondition: `bookingStatus='PENDING_AMENDMENT'`)
-          - `bookingStatus` will stay as `CONFIRMED` but `amendedBookingStatus` will change to `AMENDMENT_RECEIVED` in case this endPoint is being used to update an already confirmed Booking via  **UseCase 7 - Request Amendments to Confirmed Booking** (precondition: `bookingStatus='CONFIRMED'`)
+          - `bookingStatus` will stay as `PENDING_AMENDMENT` but `amendedBookingStatus` will change to `AMENDMENT_RECEIVED` in case this endPoint is being used in response to a request from provider via **UseCase 6 - Request to amend confirmed Booking** (precondition: `bookingStatus='PENDING_AMENDMENT'`)
+          - `bookingStatus` will stay as `CONFIRMED` but `amendedBookingStatus` will change to `AMENDMENT_RECEIVED` in case this endPoint is being used to update an already confirmed Booking via  **UseCase 7 - Request amendments to confirmed Booking** (precondition: `bookingStatus='CONFIRMED'`)
 
-        Once processed, the new state will be communicated via a [Booking Notification](#/BookingNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the 
+        Once processed, the new state will be communicated via a [Booking Notification](#/BookingNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the
 
             GET /v2/bookings/{bookingReference}
-        
+
         endPoint to check if the `bookingStatus` and `amendedBookingStatus` of the `Booking` has changed.
 
         If the consumer wants to get the content of the `Amended Booking` provided via this `PUT` endPoint, the `GET` endPoint needs to be used in combination with the `?amendedContent=true` queryParameter:
@@ -615,7 +615,7 @@ paths:
 
         - the provider requests for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the "old update" is no longer accessible
         - the consumer submits a new update (**UseCase 7: Request amendment to confirmed Booking**) in which case the "new amendment" provided **replaces** the "old amendment".
-        - the provider re-confirms the `Booking` (**UseCase 5: Confirm booking request**) in which case the "old update" is no longer accessible.
+        - the provider re-confirms the `Booking` (**UseCase 5: Confirm Booking request**) in which case the "old update" is no longer accessible.
       requestBody:
         description: |
           Parameters used to update the `Booking request`
@@ -946,11 +946,11 @@ paths:
                   summary: |
                     Booking request updated with no content
                   description: |
-                    An updated `Booking request` received, schema validated and accepted by provider - the `Booking` now awaits provider action, `bookingStatus` does not change.
+                    An updated `Booking request` received, schema-validated and accepted by provider - the `Booking` now awaits provider action, `bookingStatus` does not change.
                   value: null
         '400':
           description: |
-            In case the updated/amended `Booking request` does not schema validate a `400` (Bad Request) is returned
+            In case the updated/amended `Booking request` does not validate against the schema a `400` (Bad Request) is returned
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1093,9 +1093,9 @@ paths:
                     Updating too many Bookings requests
                   description: |
                     Calling the endPoint
-                    
+
                         GET /v2/bookings/cbrr-123
-                    
+
                     too many times within a time period.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example"
@@ -1105,7 +1105,7 @@ paths:
                     statusCode: 429
                     statusCodeText: Too Many Requests
                     statusCodeMessage: |
-                      Too many request to update a booking has been requested. Please try again in 1 hour
+                      Too many requests to update a booking have been made. Please try again in 1 hour
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: '2024-09-04T09:41:00Z'
                     errors:
@@ -1126,15 +1126,19 @@ paths:
             GET /v2/bookings/{bookingReference}?amendedContent=true
 
         The `status` of the "original" `Booking` is included in both payloads as `bookingStatus`. `amendedBookingStatus` and related content is only available after the provider has approved the `Booking` via **UseCase 5: Confirm Booking request** and until:
-        - the provider requests for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the "old update" is no longer accessible.
+        - the provider requests a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the "old update" is no longer accessible.
         - the consumer submits a new amendment (**UseCase 7: Request amendment to confirmed Booking**) in which case the "new update" provided **replaces** the "old update".
-        - the provider re-confirms the `Booking` (**UseCase 5: Confirm booking request**) in which case the "old update" is no longer accessible.
+        - the provider re-confirms the `Booking` (**UseCase 5: Confirm Booking request**) in which case the "old update" is no longer accessible.
 
         If `amendedContent=true` is requested but no amendment has yet been provided by the consumer **or** the state of the "original" `Booking` is `PENDING_AMENDMENT`, then a `404` (Not Found) is returned.
 
+        The status of a cancellation of the Booking is included in both payloads as `bookingCancellationStatus` in case an attempt to cancel the booking has been made. It is only available after the provider has approved the `Booking` via **UseCase 5: Confirm Booking request** and until:
+        - the provider requests for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the "old status" is no longer accessible.
+        - the provider re-confirms the `Booking` (**UseCase 5: Confirm Booking request**) in which case the "old status" is not "carried over" and will no longer be accessible.
+
         If the provider is requesting changes to the `Booking`, the `Feedback` object is used to inform the consumer what needs to change.
 
-        In case no subscription (`Notification`) has been set up - it is possible to use this endPoint to poll on in order to detect if `bookingStatus` and/or `amendedBookingStatus` has changed.
+        In case no subscription (`Notification`) has been set up - it is possible to use this endPoint to poll on in order to detect if `bookingStatus` and/or `amendedBookingStatus` (and `bookingCancellationStatus`) has changed.
 
         In case a previous request is being processed by the provider - a `202` (Accepted) with **no payload** can be used as a response until the processing is finished.
       parameters:
@@ -1345,7 +1349,7 @@ paths:
             In case the consumer is requesting the `Amended Booking` by calling:
 
                 GET /v2/bookings/{bookingReference}?amendedContent=true
-            
+
             but:
             - the `Booking` has not yet been confirmed
             - the `Booking` has been confirmed but no amendment has yet been provided by the consumer
@@ -1484,7 +1488,7 @@ paths:
                     Calling
 
                         GET /v2/bookings/cbrr-123
-                    
+
                     results in an error as booking `cbrr-123` does not exist.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example"
@@ -1511,7 +1515,7 @@ paths:
       description: |
         A shipper initiated cancellation of the `Booking` or `Booking Amendment` with the `bookingReference`. The path can contain a `carrierBookingRequestReference` or a `carrierBookingReference`.
 
-        This endPoint corresponds with **UseCase 11 - Cancel Booking Request by shipper**, **UseCase 9 - Cancel amendment to confirmed Booking** or **UseCase 13 - Cancel confirmed Booking by shipper**.
+        This endPoint corresponds with **UseCase 11 - Cancel Booking request by shipper**, **UseCase 9 - Cancel amendment to confirmed Booking** or **UseCase 13 - Cancel confirmed Booking by shipper**.
 
         ## Precondition
         In order to cancel a `Booking`, the `bookingStatus` must be one of
@@ -1538,8 +1542,10 @@ paths:
            - all required properties are provided.
            - all values provided have correct data type.
         3. An empty response is returned and the consumer now awaits further processing by the provider.
-        
+
         Once processed, the `Booking` or `Amended Booking` is cancelled and a [Booking Notification](#/BookingNotification) is sent. In case of a Confirmed Booking - the provider has the opportunity to decline the Cancellation of the Booking (in which case the `bookingCancellationStatus='CANCELLATION_DECLINED'`).
+
+        Re-confirming a Booking or requesting a Booking Amendment (**UseCase 7: Request amendment to confirmed Booking**) "clears" the `bookingCancellationStatus`.
       parameters:
         - $ref: '#/components/parameters/bookingReferencePathParam'
         - $ref: '#/components/parameters/Api-Version-Major'
@@ -1602,7 +1608,7 @@ paths:
                   value: null
         '400':
           description: |
-            In case the cancel payload does not schema validate a `400` (Bad Request) is returned
+            In case the cancel payload does not validate against the schema a `400` (Bad Request) is returned
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1637,7 +1643,7 @@ paths:
             In case the consumer is cancelling the `Amended Booking` by setting:
 
                 `amendedBookingStatus='AMENDMENT_CANCELLED'`
-            
+
             but:
             - the `Booking` has not yet been confirmed
             - the `Booking` has been confirmed but no amendment has yet been provided by the consumer
@@ -1772,9 +1778,9 @@ paths:
                     Updating too many Bookings requests
                   description: |
                     Calling the endPoint
-                    
+
                         PATCH /v2/bookings/cbrr-123
-                    
+
                     too many times within a time period.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example"
@@ -1784,7 +1790,7 @@ paths:
                     statusCode: 429
                     statusCodeText: Too Many Requests
                     statusCodeMessage: |
-                      Too many request to cancel a booking has been requested. Please try again in 1 hour
+                      Too many requests to cancel a booking have been made. Please try again in 1 hour
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: '2024-09-04T09:41:00Z'
                     errors:
@@ -2144,7 +2150,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case the `Notification` does not schema validate a `400` (Bad Request) is returned
+            In case the `Notification` does not validate against the schema a `400` (Bad Request) is returned
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -2234,7 +2240,7 @@ paths:
                     statusCode: 429
                     statusCodeText: Too Many Requests
                     statusCodeMessage: |
-                      Too many request to create a Notification has been requested. Please try again in 1 hour
+                      Too many requests to create a Notification have been made. Please try again in 1 hour
                     providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
                     errorDateTime: '2024-09-04T09:41:00Z'
                     errors:
@@ -2246,7 +2252,7 @@ components:
     API-Version:
       schema:
         type: string
-        example: 2.0.3
+        example: 2.0.4
       description: |
         SemVer used to indicate the version of the contract (API version) returned.
   parameters:
@@ -2589,7 +2595,7 @@ components:
           maxLength: 50
           description: |
             A code used to describe the feedback. Possible values are:
-            - `INFORMATIONAL_MESSAGE` (INFO - to be used when providing extra information) 
+            - `INFORMATIONAL_MESSAGE` (INFO - to be used when providing extra information)
             - `PROPERTY_WILL_BE_IGNORED` (WARN - to be used for unsupported properties/values)
             - `PROPERTY_VALUE_MUST_CHANGE` (ERROR - to be used when a wrong property/value is provided)
             - `PROPERTY_VALUE_HAS_BEEN_CHANGED` (WARN - when something has been auto-updated without consumer intervention)
@@ -2700,13 +2706,9 @@ components:
           type: integer
           format: int32
           description: |
-            The detailed error code returned.
+            The detailed error code returned. The codes returned are maintained by the implementor of the API. For further explanation as to the meaning of an errorCode please consult the implementer.
 
-              - `7000-7999` Technical error codes
-              - `8000-8999` Functional error codes
-              - `9000-9999` API provider-specific error codes            
-
-            [Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).
+            **Note:** Previously it was the intention of DCSA to standardize this but it never gained traction.
           minimum: 7000
           maximum: 9999
           example: 7003
@@ -2932,7 +2934,7 @@ components:
           maxLength: 30
           description: |
             Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.
-            
+
             **Condition:** One of `serviceContractReference` or `contractQuotationReference` must be provided, but not both.
           example: HHL51800000
         freightPaymentTermCode:
@@ -3032,7 +3034,7 @@ components:
                 - `POL` (Port of Loading)
                 - `POD` (Port of Discharge)
                 - `PDE` (Place of Delivery)
-            
+
             **Note:** `ROU` (Routing Reference) can be used as a `shipmentLocation` in order to comply with `shipmentLocation` being a mandatory field.
           example: Route123
         declaredValue:
@@ -3073,7 +3075,7 @@ components:
           type: boolean
           description: |
             Indicates whether the shipper agrees to load part of the shipment in case not all of the cargo is delivered within cut-off.
-            
+
             **Note:** The carrier is not liable in case unable to follow the customer's instructions due to operational constraints. If this value is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         isExportDeclarationRequired:
@@ -3095,7 +3097,7 @@ components:
           format: date
           description: |
             The date when the shipment is expected to be loaded on board a vessel at `Port of Loading` as provided by the shipper or its agent.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` or `expectedDepartureFromPlaceOfReceiptDate` (at PRE) is not provided. If `routingReference` is provided - this property MUST not be provided.
           example: '2021-05-17'
         expectedDepartureFromPlaceOfReceiptDate:
@@ -3111,7 +3113,7 @@ components:
           format: date
           description: |
             The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at `Place Of Delivery`.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided. If `routingReference` is provided - this property MUST not be provided.
           example: '2021-05-17'
         expectedArrivalAtPlaceOfDeliveryEndDate:
@@ -3119,7 +3121,7 @@ components:
           format: date
           description: |
             The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at `Place Of Delivery`.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided. If `routingReference` is provided - this property MUST not be provided.
           example: '2021-05-19'
         transportDocumentTypeCode:
@@ -3166,7 +3168,7 @@ components:
           maxLength: 20
           description: |
             Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other.
-            
+
             **Condition:** a booking channel is being used
           example: Inttra reference
         incoTerms:
@@ -3323,7 +3325,7 @@ components:
           maxLength: 30
           description: |
             Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.
-            
+
             **Condition:** One of `serviceContractReference` or `contractQuotationReference` must be provided, but not both.
           example: HHL51800000
         freightPaymentTermCode:
@@ -3461,7 +3463,7 @@ components:
           type: boolean
           description: |
             Indicates whether the shipper agrees to load part of the shipment in case not all of the cargo is delivered within cut-off.
-            
+
             **Note:** The carrier is not liable in case unable to follow the customer's instructions due to operational constraints. If this value is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         isExportDeclarationRequired:
@@ -3483,7 +3485,7 @@ components:
           format: date
           description: |
             The date when the shipment is expected to be loaded on board a vessel at `Port of Loading` as provided by the shipper or its agent.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` or `expectedDepartureFromPlaceOfReceiptDate` (at PRE) is not provided. If `routingReference` is provided - this property MUST not be provided.
           example: '2021-05-17'
         expectedDepartureFromPlaceOfReceiptDate:
@@ -3491,7 +3493,7 @@ components:
           format: date
           description: |
             The date when the shipment is expected to be handed over to the carrier at `Place of Receipt` as provided by the shipper or its agent.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` or `expectedDepartureDate` (at POL) is not provided.
           example: '2021-05-17'
         expectedArrivalAtPlaceOfDeliveryStartDate:
@@ -3499,7 +3501,7 @@ components:
           format: date
           description: |
             The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at `Place Of Delivery`.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided. If `routingReference` is provided - this property MUST not be provided.
           example: '2021-05-17'
         expectedArrivalAtPlaceOfDeliveryEndDate:
@@ -3507,7 +3509,7 @@ components:
           format: date
           description: |
             The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at `Place Of Delivery`.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided. If `routingReference` is provided - this property MUST not be provided.
           example: '2021-05-19'
         transportDocumentTypeCode:
@@ -3554,7 +3556,7 @@ components:
           maxLength: 20
           description: |
             Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other.
-            
+
             **Condition:** a booking channel is being used
           example: Inttra reference
         incoTerms:
@@ -3780,7 +3782,7 @@ components:
           maxLength: 30
           description: |
             Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.
-            
+
             **Condition:** One of `serviceContractReference` or `contractQuotationReference` must be provided, but not both.
           example: HHL51800000
         freightPaymentTermCode:
@@ -3918,7 +3920,7 @@ components:
           type: boolean
           description: |
             Indicates whether the shipper agrees to load part of the shipment in case not all of the cargo is delivered within cut-off.
-            
+
             **Note:** The carrier is not liable in case unable to follow the customer's instructions due to operational constraints. If this value is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         isExportDeclarationRequired:
@@ -3940,7 +3942,7 @@ components:
           format: date
           description: |
             The date when the shipment is expected to be loaded on board a vessel at `Port of Loading` as provided by the shipper or its agent.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` or `expectedDepartureFromPlaceOfReceiptDate` (at PRE) is not provided. If `routingReference` is provided - this property MUST not be provided.
           example: '2021-05-17'
         expectedDepartureFromPlaceOfReceiptDate:
@@ -3948,7 +3950,7 @@ components:
           format: date
           description: |
             The date when the shipment is expected to be handed over to the carrier at `Place of Receipt` as provided by the shipper or its agent.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` or `expectedDepartureDate` (at POL) is not provided.
           example: '2021-05-17'
         expectedArrivalAtPlaceOfDeliveryStartDate:
@@ -3956,7 +3958,7 @@ components:
           format: date
           description: |
             The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at `Place Of Delivery`.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided. If `routingReference` is provided - this property MUST not be provided.
           example: '2021-05-17'
         expectedArrivalAtPlaceOfDeliveryEndDate:
@@ -3964,7 +3966,7 @@ components:
           format: date
           description: |
             The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at `Place Of Delivery`.
-            
+
             **Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided. If `routingReference` is provided - this property MUST not be provided.
           example: '2021-05-19'
         transportDocumentTypeCode:
@@ -4011,7 +4013,7 @@ components:
           maxLength: 20
           description: |
             Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other.
-            
+
             **Condition:** a booking channel is being used
           example: Inttra reference
         incoTerms:
@@ -4449,6 +4451,7 @@ components:
         - street
         - city
         - countryCode
+
     OtherDocumentParty:
       type: object
       title: Other Document Party
@@ -4471,6 +4474,7 @@ components:
             - `N2` (Second Notify Party)
             - `NI` (Other Notify Party)
             - `NAC` (Named Account Customer)
+            - `CSR` (Carrier customer service representative)
           example: DDS
       required:
         - party
@@ -4491,6 +4495,17 @@ components:
           example: IKEA Denmark
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         partyContactDetails:
           type: array
           minItems: 1
@@ -4531,8 +4546,46 @@ components:
           description: |
             Name of the party.
           example: IKEA Denmark
+        eblPlatform:
+          type: string
+          pattern: ^\S+$
+          maxLength: 4
+          description: |
+            The eBL platform of the party. The value **MUST** be one of:
+            - `WAVE` (Wave)
+            - `CARX` (CargoX)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
+            - `IDT` (ICE Digital Trade)
+            - `BOLE` (Bolero)
+            - `EDOX` (EdoxOnline)
+            - `IQAX` (IQAX)
+            - `SECR` (Secro)
+            - `TRGO` (TradeGO)
+            - `ETEU` (eTEU)
+            - `TRAC` (Enigio trace:original)
+            - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
+            - `DOCU` (DocuTrade)
+            - `AEOT` (AEOTrade)
+            - `SGTD` (SGTraDex)
+          example: BOLE
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         partyContactDetails:
           type: array
           minItems: 1
@@ -4584,8 +4637,46 @@ components:
           description: |
             Name of the party.
           example: IKEA Denmark
+        eblPlatform:
+          type: string
+          pattern: ^\S+$
+          maxLength: 4
+          description: |
+            The eBL platform of the party. The value **MUST** be one of:
+            - `WAVE` (Wave)
+            - `CARX` (CargoX)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
+            - `IDT` (ICE Digital Trade)
+            - `BOLE` (Bolero)
+            - `EDOX` (EdoxOnline)
+            - `IQAX` (IQAX)
+            - `SECR` (Secro)
+            - `TRGO` (TradeGO)
+            - `ETEU` (eTEU)
+            - `TRAC` (Enigio trace:original)
+            - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
+            - `DOCU` (DocuTrade)
+            - `AEOT` (AEOTrade)
+            - `SGTD` (SGTraDex)
+          example: BOLE
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         partyContactDetails:
           type: array
           minItems: 1
@@ -4639,6 +4730,17 @@ components:
           example: IKEA Denmark
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         partyContactDetails:
           type: array
           minItems: 1
@@ -4694,6 +4796,17 @@ components:
           example: NLAMS
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         partyContactDetails:
           type: array
           minItems: 1
@@ -4723,7 +4836,7 @@ components:
           pattern: ^\S+$
           maxLength: 4
           description: |
-            The eBL platform of the transaction party. 
+            The eBL platform of the transaction party.
             The value **MUST** be one of:
             - `WAVE` (Wave)
             - `CARX` (CargoX)
@@ -4742,6 +4855,9 @@ components:
             - `KTNE` (KTNET)
             - `CRED` (Credore)
             - `BLOC` (BlockPeer Technologies)
+            - `DOCU` (DocuTrade)
+            - `AEOT` (AEOTrade)
+            - `SGTD` (SGTraDex)
 
             **Condition:** Only applicable when `isElectronic=true` and `transportDocumentTypeCode=BOL`. The property **MUST** be absent for paper B/Ls (`isElectronic=false`)
           example: BOLE
@@ -4773,6 +4889,17 @@ components:
           example: IKEA Denmark
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         identifyingCodes:
           type: array
           items:
@@ -4875,6 +5002,9 @@ components:
             - `KTNE` (KTNET)
             - `CRED` (Credore)
             - `BLOC` (BlockPeer Technologies)
+            - `DOCU` (DocuTrade)
+            - `AEOT` (AEOTrade)
+            - `SGTD` (SGTraDex)
             - `GSBN` (Global Shipping Business Network)
             - `WISE` (WiseTech)
             - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -5063,7 +5193,7 @@ components:
       type: object
       title: Shipment Location
       description: |
-        Maps the relationship between `Shipment` and `Location`, e.g., the `Place of Receipt` and the `Place of Delivery` for a specific shipment. This is a reusable object between `Booking` and `Transport Document`
+        Maps the relationship between `Shipment` and `Location`, e.g., the `Place of Receipt` and the `Place of Delivery` for a specific shipment.
 
         **Condition:** In case `routingReference` is provided - then `PRE` (Place of Receipt), `POL` (Port of Loading), `POD` (Port of Discharge) and `PDE` (Place of Delivery) MUST not be provided.
       properties:
@@ -5089,6 +5219,62 @@ components:
 
             **Note:** Use `ROU` when `routingReference` is used in order to comply with the need to add at least 1 `shipmentLocation` to a Booking request.
           example: PRE
+        departingVesselVoyage:
+          type: object
+          title: Vessel Voyage
+          description: |
+            Vessel and voyage details of a transport leg.
+
+            **Note:** This property is not to be used in combination with `locationTypeCode='ROU'`.
+          properties:
+            vesselName:
+              type: string
+              pattern: ^\S(?:.*\S)?$
+              maxLength: 50
+              description: |
+                The name of the Vessel given by the Vessel Operator and registered with IMO.
+              example: King of the Seas
+            vesselIMONumber:
+              type: string
+              pattern: ^\d{7,8}$
+              minLength: 7
+              maxLength: 8
+              description: |
+                The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code, which does not change during the lifetime of the vessel.
+              example: '9321483'
+            carrierServiceCode:
+              type: string
+              pattern: ^\S(?:.*\S)?$
+              maxLength: 11
+              description: |
+                The carrier-specific code of the service for which the schedule details are published.
+              example: FE1
+            universalServiceReference:
+              type: string
+              pattern: ^SR\d{5}[A-Z]$
+              minLength: 8
+              maxLength: 8
+              description: |
+                A global unique service reference, as per DCSA standard, agreed by VSA partners for the service. The service reference must match the regular expression pattern: `SR\d{5}[A-Z]`. The letters `SR` followed by `5 digits`, followed by a checksum-character as a capital letter from `A to Z`.
+              example: SR12345A
+            carrierExportVoyageNumber:
+              type: string
+              pattern: ^\S(?:.*\S)?$
+              maxLength: 50
+              description: |
+                The identifier of an export voyage. The carrier-specific identifier of the export Voyage.
+              example: 2103S
+            universalExportVoyageReference:
+              type: string
+              pattern: ^\d{2}[0-9A-Z]{2}[NEWSR]$
+              minLength: 5
+              maxLength: 5
+              description: |
+                A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\d{2}[0-9A-Z]{2}[NEWSR]`
+                - `2 digits` for the year
+                - `2 alphanumeric characters` for the sequence number of the voyage
+                - `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).
+              example: 2103N
       required:
         - location
         - locationTypeCode
@@ -5098,12 +5284,15 @@ components:
       title: Location
       description: |
         The location can be specified using **any** of the nested structures:
-        - `address` (used to specify the location via an Address)
+        - `address` (used to specify the location via a **structured** Address)
+        - `addressLines` (used to specify a location via an **unstructured** Address)
         - `UNLocationCode`
         - `facility` (used to specify a location using a `facilityCode` and a `facilityCodeListProvider`)
         - `geoCoordinate` (used to specify a location using `latitude` and `longitude`)
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+        **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
       example:
         locationName: CMP Container Terminal Copenhagen
         UNLocationCode: DKCPH
@@ -5117,8 +5306,26 @@ components:
           pattern: ^\S(?:.*\S)?$
           example: Port of Amsterdam
           maxLength: 100
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         facility:
           $ref: '#/components/schemas/Facility'
         UNLocationCode:
@@ -5164,7 +5371,7 @@ components:
           type: array
           description: |
             A list of date and time and locations of the customer facility where the container(s) will be loaded. If multiple Container positioning locations (`CPO`) are provided (multi-stop), the first location is where the empty container will be stuffed first. The order in which the `CPO` locations should be visited is implicitly defined by the shipper based on the date and time provided per location.
-            
+
             **Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`).
           items:
             $ref: '#/components/schemas/ContainerPositioning'
@@ -5258,7 +5465,7 @@ components:
           type: array
           description: |
             A list of date and time and locations of the customer facility where the container(s) will be loaded. If multiple Container positioning locations (`CPO`) are provided (multi-stop), the first location is where the empty container will be stuffed first. The order in which the `CPO` locations should be visited is implicitly defined by the shipper based on the date and time provided per location.
-            
+
             **Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`).
           items:
             $ref: '#/components/schemas/ContainerPositioning'
@@ -5386,7 +5593,7 @@ components:
           format: date-time
           description: |
             The estimated date and time for the positioning of the container(s) at the `Container Positioning Location` (CPO), if provided, or the `Place of Receipt` (PRE) if CPO location is not provided.
-            
+
             **Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`).
           example: '2024-09-04T09:41:00Z'
         location:
@@ -5400,12 +5607,14 @@ components:
         An object to capture the `Container Positioning Location`.
 
         The location of the customer facility where the container(s) will be loaded.
-        
+
         **Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`).
 
-        The location can be specified in **any** of the following ways: `Address`, `Facility`, `UN Location Code` or a `GeoCoordinate`.
+        The location can be specified in **any** of the following ways: `Address` (structured address), `AddressLines` (unstructured address), `Facility`, `UN Location Code` or a `GeoCoordinate`.
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+        **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
       example:
         locationName: Shanghai Shengdong International Container Terminal
         UNLocationCode: CNSGH
@@ -5419,8 +5628,26 @@ components:
           pattern: ^\S(?:.*\S)?$
           example: Shanghai Shengdong International Container Terminal
           maxLength: 100
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         facility:
           $ref: '#/components/schemas/Facility'
         UNLocationCode:
@@ -5446,10 +5673,12 @@ components:
         An object to capture the `Empty Container Depot Release Location`.
 
         The location of the depot from which the empty container(s) will be released from
-        
-        The location can be specified in **any** of the following ways: `Address`, `Facility`, `UN Location Code` or a `GeoCoordinate`.
+
+        The location can be specified in **any** of the following ways: `Address` (structured address), `AddressLines` (unstructured address), `Facility`, `UN Location Code` or a `GeoCoordinate`.
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+        **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
       example:
         locationName: Shanghai Shengdong International Container Terminal
         UNLocationCode: CNSGH
@@ -5463,8 +5692,26 @@ components:
           pattern: ^\S(?:.*\S)?$
           example: Shanghai Shengdong International Container Terminal
           maxLength: 100
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         facility:
           $ref: '#/components/schemas/Facility'
         UNLocationCode:
@@ -5501,8 +5748,11 @@ components:
           example: Mobile phones
         HSCodes:
           type: array
+          deprecated: true
           description: |
             A list of `HS Codes` that apply to this `commodity`
+
+            **DEPRECATED:** This property is not to be used any more, please use `extendedHSCodes` instead. If both `HSCodes` and `extendedHSCodes` are provided then `extendedHSCodes` takes precedence and `HSCodes` must be ignored.
           items:
             type: string
             pattern: ^\d{6,10}$
@@ -5513,12 +5763,39 @@ components:
 
               More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
             example: '851713'
-        nationalCommodityCodes:
+        extendedHSCodes:
           type: array
           description: |
+            A list of `HS Codes` that apply to this `commodity`. The `extendedHSCodes` support up to 12 character codes.
+
+            **Note:** If both `HSCodes` and `extendedHSCodes` are provided then `extendedHSCodes` takes precedence and `HSCodes` must be ignored.
+          items:
+            type: string
+            pattern: ^\d{6,12}$
+            minLength: 6
+            maxLength: 12
+            description: |
+              Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 12 digits.
+
+              More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
+            example: '851713'
+        nationalCommodityCodes:
+          type: array
+          deprecated: true
+          description: |
             A list of `National Commodity Codes` that apply to this `commodity`
+
+            **DEPRECATED:** This property is not to be used any more, please use `extendedNationalCommodityCodes` instead. If both `nationalCommodityCodes` and `extendedNationalCommodityCodes` are provided then `extendedNationalCommodityCodes` takes precedence and `nationalCommodityCodes` must be ignored.
           items:
             $ref: '#/components/schemas/NationalCommodityCode'
+        extendedNationalCommodityCodes:
+          type: array
+          description: |
+            A list of `National Commodity Codes` that apply to this `commodity`. The `extendedNationalCommodityCodes` support up to 16 character codes.
+
+            **Note:** If both `nationalCommodityCodes` and `extendedNationalCommodityCodes` are provided then `extendedNationalCommodityCodes` takes precedence and `nationalCommodityCodes` must be ignored.
+          items:
+            $ref: '#/components/schemas/ExtendedNationalCommodityCode'
         cargoGrossWeight:
           $ref: '#/components/schemas/CargoGrossWeight'
         cargoGrossVolume:
@@ -5571,8 +5848,11 @@ components:
           example: Mobile phones
         HSCodes:
           type: array
+          deprecated: true
           description: |
             A list of `HS Codes` that apply to this `commodity`
+
+            **DEPRECATED:** This property is not to be used any more, please use `extendedHSCodes` instead. If both `HSCodes` and `extendedHSCodes` are provided then `extendedHSCodes` takes precedence and `HSCodes` must be ignored.
           items:
             type: string
             pattern: ^\d{6,10}$
@@ -5583,12 +5863,39 @@ components:
 
               More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
             example: '851713'
-        nationalCommodityCodes:
+        extendedHSCodes:
           type: array
           description: |
+            A list of `HS Codes` that apply to this `commodity`. The `extendedHSCodes` support up to 12 character codes.
+
+            **Note:** If both `HSCodes` and `extendedHSCodes` are provided then `extendedHSCodes` takes precedence and `HSCodes` must be ignored.
+          items:
+            type: string
+            pattern: ^\d{6,12}$
+            minLength: 6
+            maxLength: 12
+            description: |
+              Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 12 digits.
+
+              More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
+            example: '851713'
+        nationalCommodityCodes:
+          type: array
+          deprecated: true
+          description: |
             A list of `National Commodity Codes` that apply to this `commodity`
+
+            **DEPRECATED:** This property is not to be used any more, please use `extendedNationalCommodityCodes` instead. If both `nationalCommodityCodes` and `extendedNationalCommodityCodes` are provided then `extendedNationalCommodityCodes` takes precedence and `nationalCommodityCodes` must be ignored.
           items:
             $ref: '#/components/schemas/NationalCommodityCode'
+        extendedNationalCommodityCodes:
+          type: array
+          description: |
+            A list of `National Commodity Codes` that apply to this `commodity`. The `extendedNationalCommodityCodes` support up to 16 character codes.
+
+            **Note:** If both `nationalCommodityCodes` and `extendedNationalCommodityCodes` are provided then `extendedNationalCommodityCodes` takes precedence and `nationalCommodityCodes` must be ignored.
+          items:
+            $ref: '#/components/schemas/ExtendedNationalCommodityCode'
         cargoGrossWeight:
           $ref: '#/components/schemas/CargoGrossWeight'
         cargoGrossVolume:
@@ -5628,7 +5935,7 @@ components:
           type: boolean
           description: |
             Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
-            
+
             **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         reference:
@@ -5661,7 +5968,7 @@ components:
           type: boolean
           description: |
             Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
-            
+
             **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         reference:
@@ -5834,6 +6141,7 @@ components:
     NationalCommodityCode:
       type: object
       title: National Commodity Code
+      deprecated: true
       description: |
         The national commodity classification code linked to a country with a value.
 
@@ -5842,6 +6150,8 @@ components:
         | Type  | Country | Value |
         |-------|:-------:|-------------|
         |NCM|BR|['1515', '2106', '2507', '2512']|
+
+        **DEPRECATED:** This object is not to be used any more, please use `ExtendedNationalCommodityCode` instead.
       properties:
         type:
           type: string
@@ -5851,7 +6161,7 @@ components:
             The national commodity classification code, which can be one of the following values defined by DCSA:
             - `NCM` (Nomenclatura Comum do Mercosul)
             - `HTS` (Harmonized Tariff Schedule)
-            - `SCHEDULE_B` ( Schedule B)
+            - `SCHEDULE_B` (Schedule B)
             - `TARIC` (Integrated Tariff of the European Communities)
             - `CN` (Combined Nomenclature)
             - `CUS` (Customs Union and Statistics)
@@ -5887,6 +6197,62 @@ components:
         - type
         - values
 
+    ExtendedNationalCommodityCode:
+      type: object
+      title: National Commodity Code (Extended)
+      description: |
+        Extended version of the national commodity classification code linked to a country with a value supporting up to 16 characters.
+
+        An example could look like this:
+
+        | Type  | Country | Value |
+        |-------|:-------:|-------------|
+        |NCM|BR|['1515', '2106', '2507', '2512']|
+      properties:
+        type:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 10
+          description: |
+            The national commodity classification code, which can be one of the following values defined by DCSA:
+            - `NCM` (Nomenclatura Comum do Mercosul)
+            - `HTS` (Harmonized Tariff Schedule)
+            - `SCHEDULE_B` (Schedule B)
+            - `TARIC` (Integrated Tariff of the European Communities)
+            - `CN` (Combined Nomenclature)
+            - `CUS` (Customs Union and Statistics)
+          example: NCM
+        countryCode:
+          type: string
+          pattern: ^[A-Z]{2}$
+          minLength: 2
+          maxLength: 2
+          description: |
+            The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
+          example: BR
+        values:
+          type: array
+          minItems: 1
+          description: |
+            A list of `national commodity codes` values supporting up to 16 characters.
+          items:
+            type: string
+            pattern: ^\S(?:.*\S)?$
+            maxLength: 16
+            description: |
+              The value of the `National Commodity Code`
+            example: '1515'
+          example:
+            - '1515'
+            - '2106'
+            - '2507'
+            - '2512'
+      required:
+        - type
+        - values
+
     #################
     # Outer Packaging
     #################
@@ -5894,7 +6260,7 @@ components:
       type: object
       title: Outer Packaging
       description: |
-        Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport.
+        Object for `Outer Packaging/Overpack` specification. Examples of `Overpacks` are a number of packages stacked on to a pallet and secured by strapping or placed in a protective `Outer Packaging` such as a box or crate to form one unit for the convenience of handling and stowage during transport.
 
         **Condition:** Mandatory for DG (Dangerous Goods) cargo.
       properties:
@@ -5904,7 +6270,7 @@ components:
           minLength: 2
           maxLength: 2
           description: |
-            A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
+            A code identifying the `Outer Packaging/Overpack`. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
 
             **Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.
           example: 5H
@@ -5924,7 +6290,7 @@ components:
           minimum: 1
           maximum: 99999999
           description: |
-            Specifies the number of outer packagings/overpacks associated with this `Commodity`.
+            Specifies the number of `Outer Packagings/Overpacks` associated with this `Commodity`.
 
             **Condition:** In case this `OuterPackaging` includes `Dangerous Goods` the `numberOfPackages` is mandatory to provide
           example: 18
@@ -5932,7 +6298,7 @@ components:
           type: string
           maxLength: 100
           description: |
-            Description of the outer packaging/overpack.
+            Description of the `Outer Packaging/Overpack`.
           example: 'Drum, steel'
         dangerousGoods:
           type: array
@@ -6117,7 +6483,7 @@ components:
         innerPackagings:
           type: array
           description: |
-            A list of `Inner Packings` contained inside this `outer packaging/overpack`.
+            A list of `Inner Packagings` contained inside this `Outer Packaging/Overpack`.
           items:
             $ref: '#/components/schemas/InnerPackaging'
         emergencyContactDetails:
@@ -6250,7 +6616,7 @@ components:
       type: object
       title: Net Explosive Content
       description: |
-        The total weight of the explosive substances, without the packaging’s, casings, etc.
+        The total weight of the explosive substances, without the packaging's, casings, etc.
       properties:
         value:
           type: number
@@ -6258,7 +6624,7 @@ components:
           minimum: 0
           exclusiveMinimum: true
           description: |
-            The total weight of the explosive substances, without the packaging’s, casings, etc.
+            The total weight of the explosive substances, without the packaging's, casings, etc.
           example: 2.4
         unit:
           type: string
@@ -6312,7 +6678,7 @@ components:
       type: object
       title: Inner Packaging
       description: |
-        Object for inner packaging specification
+        Object for `Inner Packaging` specification
       properties:
         quantity:
           type: integer
@@ -6332,6 +6698,12 @@ components:
           description: |
             Description of the packaging.
           example: Woven plastic water resistant Bag
+        innerPackagings:
+          type: array
+          description: |
+            A list of `Inner Packagings` contained inside this `Inner Packaging`.
+          items:
+            $ref: '#/components/schemas/InnerPackaging'
       required:
         - quantity
         - material
@@ -6391,7 +6763,7 @@ components:
           format: float
           description: |
             Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.
-            
+
             **Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code.
           example: 42
         transportControlTemperature:
@@ -6448,7 +6820,7 @@ components:
           type: array
           description: |
             A list of date and time and locations of the customer facility where the container(s) will be loaded. If multiple Container positioning locations (`CPO`) are provided (multi-stop), the first location is where the empty container will be stuffed first. The order in which the `CPO` locations should be visited is implicitly defined by the shipper based on the date and time provided per location (all times are estimated).
-            
+
             **Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`).
           items:
             $ref: '#/components/schemas/ContainerPositioningEstimated'
@@ -6466,7 +6838,7 @@ components:
       title: Empty Container Pickup
       description: |
         The date and time and location for the empty container pick-up.
-        
+
         **Condition:** Only applicable to merchant haulage service at origin (`Receipt type at origin = 'CY'`).
 
         **Deprecated:** In case both provider and consumer are on API v2.0.2 (or later), please use `originEmptyContainerPickup` instead as it contains no conditions.
@@ -6485,7 +6857,7 @@ components:
       title: Origin Empty Container Pickup
       description: |
         The date, time and location of the depot from which the empty container(s) will be released from.
-        
+
         **Note:** Applicable to **all** `Receipt type at origin`.
       properties:
         dateTime:
@@ -6570,7 +6942,7 @@ components:
           minLength: 7
           maxLength: 8
           description: |
-            The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd&apos;s register code, which does not change during the lifetime of the vessel
+            The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code, which does not change during the lifetime of the vessel
           example: '9321483'
         carrierServiceCode:
           type: string
@@ -6630,15 +7002,18 @@ components:
         - dischargeLocation
         - plannedDepartureDate
         - plannedArrivalDate
+
     LoadLocation:
       type: object
       title: Load Location
       description: |
         An object to capture the `Load Location`.
 
-        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.
+        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, `Address` (structured address) or `AddressLines` (unstructured address).
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+        **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
       example:
         locationName: Shanghai Shengdong International Container Terminal
         UNLocationCode: CNSGH
@@ -6652,8 +7027,26 @@ components:
           pattern: ^\S(?:.*\S)?$
           example: Port of Amsterdam
           maxLength: 100
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         facility:
           $ref: '#/components/schemas/Facility'
         UNLocationCode:
@@ -6669,15 +7062,18 @@ components:
 
             More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: NLAMS
+
     DischargeLocation:
       type: object
       title: Discharge Location
       description: |
         An object to capture the `Discharge Location`.
 
-        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.
+        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, `Address` (structured address) or `AddressLines` (unstructured address).
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+        **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
       example:
         locationName: Transnet Port Terminals Cape Town
         UNLocationCode: ZACPT
@@ -6691,8 +7087,26 @@ components:
           pattern: ^\S(?:.*\S)?$
           example: Port of Amsterdam
           maxLength: 100
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** When communicating with providers **or** consumers implementing API **v2.0.3 or earlier**, a sender implementing API **v2.0.4 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         facility:
           $ref: '#/components/schemas/Facility'
         UNLocationCode:
@@ -6792,9 +7206,21 @@ components:
           type: string
           pattern: ^\S(?:.*\S)?$
           maxLength: 50
+          deprecated: true
           description: |
-            Free text field describing the charge to apply
+            Free text field describing the charge to apply.
+
+            **DEPRECATED:** Because of backward compatibility it is required to provide a value in this property even though a value is provided in the `extendedChargeName` property. In case both properties are provided (`extendedChargeName` and `chargeName`) - `chargeName` must be ignored.
           example: Documentation fee - Destination
+        extendedChargeName:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 100
+          description: |
+            Extended Free text field, now allowing up to 100 characters, describing the charge to apply.
+
+            **Note:** If `extendedChargeName` is provided - it always takes precedence over `chargeName` (which is a required property but must be ignored).
+          example: Special documentation fee - Destination
         currencyAmount:
           type: number
           format: float
@@ -6944,7 +7370,7 @@ components:
       title: Vessel
       description: |
         Vessels related to this booking request.
-        
+
         **Condition:** Mandatory if `carrierExportVoyageNumber` is provided and `carrierServiceCode` or `carrierServiceName` are blank. If `routingReference` is provided - this object MUST not be provided.
       required:
         - name
@@ -6962,5 +7388,5 @@ components:
           minLength: 7
           maxLength: 8
           description: |
-            The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd&apos;s register code, which does not change during the lifetime of the vessel
+            The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code, which does not change during the lifetime of the vessel
           example: '9321483'

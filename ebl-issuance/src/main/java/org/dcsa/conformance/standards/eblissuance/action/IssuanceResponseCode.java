@@ -15,6 +15,10 @@ public enum IssuanceResponseCode {
     this.sendToPlatform = sendToPlatform;
   }
 
+  public boolean requiresConsigneeData() {
+    return this != BLOCKED;
+  }
+
   public static IssuanceResponseCode forStandardCode(String standardCode) {
     return Stream.of(values())
         .filter(

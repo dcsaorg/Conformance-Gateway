@@ -34,7 +34,7 @@
  */
 
 import { listCognitoUsers } from './list-cognito-users';
-import { getUserSandboxes } from './get-user-sandboxes';
+import { listUserSandboxes } from './list-user-sandboxes';
 import { getCurrentSandboxSession } from './get-current-sandbox-session';
 import { getSandboxMetadata, SandboxMetadata } from './get-sandbox-metadata';
 import { countByPkAndSkRange } from '../aws/dynamodb';
@@ -69,7 +69,7 @@ export async function getSandboxUsageStats(
   for (const [domain, users] of Object.entries(usersByDomain)) {
     for (const { email, username } of users) {
       process.stderr.write(`[${remainingUsers--} user(s) remaining] Processing ${email}...\n`);
-      const sandboxes = (await getUserSandboxes(username as string)) as {
+      const sandboxes = (await listUserSandboxes(username as string)) as {
         id: string;
         name: string;
       }[];

@@ -23,7 +23,7 @@
               "locationType": "UNLO",
               "UNLocationCode": "NLAMS"
             },
-            "statusCode": "OMIT",
+            "statusCodes": ["OMIT"],
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",
@@ -62,7 +62,7 @@
               "locationType": "UNLO",
               "UNLocationCode": "SGSIN"
             },
-            "statusCode": "BLNK",
+            "statusCodes": ["BLNK"],
             "timestamps": [
               {
                 "eventTypeCode": "DEPA",
@@ -101,7 +101,7 @@
               "locationType": "UNLO",
               "UNLocationCode": "USNYC"
             },
-            "statusCode": "OMIT",
+            "statusCodes": ["OMIT"],
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",
@@ -140,7 +140,7 @@
               "UNLocationCode": "USNYC",
               "facilitySMDGCode": "APM"
             },
-            "statusCode": "OMIT",
+            "statusCodes": ["OMIT"],
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",
@@ -179,7 +179,7 @@
               "UNLocationCode": "NLAMS",
               "facilitySMDGCode": "APM"
             },
-            "statusCode": "BLNK",
+            "statusCodes": ["BLNK"],
             "timestamps": [
               {
                 "eventTypeCode": "ARRI",

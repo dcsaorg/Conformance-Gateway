@@ -81,6 +81,12 @@ class OvsChecksTest {
     }
 
     @Test
+    void extendedCodes_validForStatusCodesOnly_noError() {
+      addTransportCallWithStatusCodes("DRYD", "BUNK", "OOSV");
+      assertTrue(VALID_STATUS_CODES.validate(body).getErrorMessages().isEmpty());
+    }
+
+    @Test
     void oneInvalidAmongMultiple_returnsError() {
       addTransportCallWithStatusCodes("OMIT", "CU", "BLNK");
       assertFalse(VALID_STATUS_CODES.validate(body).getErrorMessages().isEmpty());
@@ -123,6 +129,15 @@ class OvsChecksTest {
     @Test
     void absent_isIrrelevant() {
       addTransportCallWithoutStatusCodes();
+      assertFalse(VALID_DEPRECATED_STATUS_CODE.validate(body).isRelevant());
+    }
+
+    @Test
+    void ignoredWhenStatusCodesPresent_isIrrelevant() {
+      // statusCode is invalid, but statusCodes takes precedence — should be irrelevant
+      ObjectNode transportCall = getTransportCallNode();
+      transportCall.putArray("statusCodes").add("OMIT");
+      transportCall.put("statusCode", "ARRIVED");
       assertFalse(VALID_DEPRECATED_STATUS_CODE.validate(body).isRelevant());
     }
   }

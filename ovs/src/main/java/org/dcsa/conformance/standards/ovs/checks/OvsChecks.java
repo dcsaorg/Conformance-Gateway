@@ -88,7 +88,7 @@ public class OvsChecks {
                   if (!JsonUtil.isMissingOrEmpty(statusCodes)) {
                     anyStatusCodeFound = true;
                     for (JsonNode code : statusCodes) {
-                      if (!OVSDataSets.STATUS_CODE.contains(code.asText())) {
+                      if (!OVSDataSets.STATUS_CODES.contains(code.asText())) {
                         errors.add(
                             ConformanceError.error(
                                 "Invalid status '%s' in statusCodes at schedule [%d]"
@@ -125,6 +125,11 @@ public class OvsChecks {
 
             for (JsonNode transportCall : transportCalls) {
               JsonNode statusCode = transportCall.path("statusCode");
+
+              // statusCodes (plural) takes precedence — skip statusCode validation when present
+              if (!JsonUtil.isMissingOrEmpty(transportCall.path("statusCodes"))) {
+                continue;
+              }
 
               if (!JsonUtil.isMissingOrEmpty(statusCode)) {
                 anyStatusCodeFound = true;

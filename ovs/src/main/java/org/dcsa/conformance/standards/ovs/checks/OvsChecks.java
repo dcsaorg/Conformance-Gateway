@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.ovs.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ActionCheck;
@@ -38,18 +37,25 @@ public class OvsChecks {
         JsonAttribute.customValidator(
             "Validate statusCodes in transport calls",
             body -> {
-              Set<String> errors = new LinkedHashSet<>();
               Set<String> scheduleErrors = checkServiceSchedulesExist(body);
               if (!scheduleErrors.isEmpty()) {
                 return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
               }
 
-              var result = VALID_STATUS_CODE.validate(body);
-              if (!result.getErrorMessages().isEmpty()) {
-                errors.addAll(result.getErrorMessages());
-              }
-              return ConformanceCheckResult.simple(errors);
+              return VALID_STATUS_CODES.validate(body);
             }));
+
+    checks.add(
+      JsonAttribute.customValidator(
+        "Validate deprecated statusCode in transport calls",
+        body -> {
+          Set<String> scheduleErrors = checkServiceSchedulesExist(body);
+          if (!scheduleErrors.isEmpty()) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+          }
+
+          return VALID_DEPRECATED_STATUS_CODE.validate(body);
+        }));
 
     return checks;
   }
@@ -61,51 +67,90 @@ public class OvsChecks {
         OvsRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
-  static final JsonContentCheck VALID_STATUS_CODE =
+  static final JsonContentCheck VALID_STATUS_CODES =
       JsonAttribute.customValidator(
           "Validate allowed status codes",
           body -> {
             var errors = new LinkedHashSet<ConformanceError>();
-
-            var index = new AtomicInteger(0);
-
-            if (JsonUtil.isMissingOrEmpty(body)) {
-              errors.add(ConformanceError.irrelevant(0));
-              return ConformanceCheckResult.withRelevance(errors);
-            }
+            int currentIndex = 0;
+            boolean anyStatusCodeFound = false;
 
             for (JsonNode schedule : body) {
-              int currentIndex = index.getAndIncrement();
-              JsonNode vesselSchedules = schedule.get("vesselSchedules");
-
-              if (JsonUtil.isMissingOrEmpty(vesselSchedules)) {
-                errors.add(ConformanceError.irrelevant(currentIndex));
-                continue;
-              }
-
-              for (JsonNode vesselSchedule : vesselSchedules) {
+              for (JsonNode vesselSchedule : schedule.get("vesselSchedules")) {
                 JsonNode transportCalls = vesselSchedule.get("transportCalls");
                 if (JsonUtil.isMissingOrEmpty(transportCalls)) {
-                  errors.add(ConformanceError.irrelevant(currentIndex));
                   continue;
                 }
 
-                transportCalls.forEach(
-                    transportCall -> {
-                      JsonNode statusCode = transportCall.path("statusCode");
-                      if (!OVSDataSets.STATUS_CODE.contains(statusCode.asText())) {
+                for (JsonNode transportCall : transportCalls) {
+                  JsonNode statusCodes = transportCall.path("statusCodes");
+
+                  if (!JsonUtil.isMissingOrEmpty(statusCodes)) {
+                    anyStatusCodeFound = true;
+                    for (JsonNode code : statusCodes) {
+                      if (!OVSDataSets.STATUS_CODES.contains(code.asText())) {
                         errors.add(
                             ConformanceError.error(
-                                "Invalid status '%s' at [%d]"
-                                    .formatted(statusCode.asText(), currentIndex)));
+                                "Invalid status '%s' in statusCodes at schedule [%d]"
+                                    .formatted(code.asText(), currentIndex)));
                       }
-                    });
+                    }
+                  }
+                }
               }
+              currentIndex++;
             }
+
+            if (!anyStatusCodeFound) {
+              errors.add(ConformanceError.irrelevant());
+            }
+
             return ConformanceCheckResult.withRelevance(errors);
           });
 
+  static final JsonContentCheck VALID_DEPRECATED_STATUS_CODE =
+    JsonAttribute.customValidator(
+      "Validate allowed deprecated statusCode",
+      body -> {
+        var errors = new LinkedHashSet<ConformanceError>();
+        int currentIndex = 0;
+        boolean anyStatusCodeFound = false;
 
+        for (JsonNode schedule : body) {
+          for (JsonNode vesselSchedule : schedule.get("vesselSchedules")) {
+            JsonNode transportCalls = vesselSchedule.get("transportCalls");
+            if (JsonUtil.isMissingOrEmpty(transportCalls)) {
+              continue;
+            }
+
+            for (JsonNode transportCall : transportCalls) {
+              JsonNode statusCode = transportCall.path("statusCode");
+
+              // statusCodes (plural) takes precedence whenever the field is present — skip statusCode validation
+              if (!JsonUtil.isMissing(transportCall.path("statusCodes"))) {
+                continue;
+              }
+
+              if (!JsonUtil.isMissingOrEmpty(statusCode)) {
+                anyStatusCodeFound = true;
+                if (!OVSDataSets.STATUS_CODE.contains(statusCode.asText())) {
+                  errors.add(
+                    ConformanceError.error(
+                      "Invalid deprecated statusCode '%s' at schedule [%d]"
+                        .formatted(statusCode.asText(), currentIndex)));
+                }
+              }
+            }
+          }
+          currentIndex++;
+        }
+
+        if (!anyStatusCodeFound) {
+          errors.add(ConformanceError.irrelevant());
+        }
+
+        return ConformanceCheckResult.withRelevance(errors);
+      });
 
   public Set<String> checkServiceSchedulesExist(JsonNode body) {
 

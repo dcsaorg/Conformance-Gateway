@@ -126,8 +126,8 @@ public class OvsChecks {
             for (JsonNode transportCall : transportCalls) {
               JsonNode statusCode = transportCall.path("statusCode");
 
-              // statusCodes (plural) takes precedence — skip statusCode validation when present
-              if (!JsonUtil.isMissingOrEmpty(transportCall.path("statusCodes"))) {
+              // statusCodes (plural) takes precedence whenever the field is present — skip statusCode validation
+              if (!JsonUtil.isMissing(transportCall.path("statusCodes"))) {
                 continue;
               }
 

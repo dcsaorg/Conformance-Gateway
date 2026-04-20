@@ -134,9 +134,16 @@ class OvsChecksTest {
 
     @Test
     void ignoredWhenStatusCodesPresent_isIrrelevant() {
-      // statusCode is invalid, but statusCodes takes precedence — should be irrelevant
       ObjectNode transportCall = getTransportCallNode();
       transportCall.putArray("statusCodes").add("OMIT");
+      transportCall.put("statusCode", "ARRIVED");
+      assertFalse(VALID_DEPRECATED_STATUS_CODE.validate(body).isRelevant());
+    }
+
+    @Test
+    void ignoredWhenStatusCodesEmptyArrayPresent_isIrrelevant() {
+      ObjectNode transportCall = getTransportCallNode();
+      transportCall.putArray("statusCodes"); // empty array
       transportCall.put("statusCode", "ARRIVED");
       assertFalse(VALID_DEPRECATED_STATUS_CODE.validate(body).isRelevant());
     }

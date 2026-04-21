@@ -162,6 +162,18 @@ public class ConformanceApplication {
       throw new RuntimeException(e);
     }
 
+    // for web UI testing only
+    try {
+      persistenceProvider
+          .getNonLockingMap()
+          .setItemValue(
+              "configuration",
+              "inboundApiCallsTargetIpAddresses",
+              OBJECT_MAPPER.readTree("\"12.34.56.78,23.45.67.89\""));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+
     deferredSandboxTaskConsumer =
         jsonNode ->
             executor.schedule(

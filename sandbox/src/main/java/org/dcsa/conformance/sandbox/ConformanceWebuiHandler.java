@@ -274,6 +274,14 @@ public class ConformanceWebuiHandler {
       jsonSandboxConfig.put("outboundApiCallsSourceIpAddress", ipAddressConfigValue.asText());
     }
 
+    JsonNode inboundIpAddressesConfigValue =
+        persistenceProvider
+            .getNonLockingMap()
+            .getItemValue("configuration", "inboundApiCallsTargetIpAddresses");
+    if (inboundIpAddressesConfigValue != null && inboundIpAddressesConfigValue.isTextual()) {
+      jsonSandboxConfig.put("inboundApiCallsTargetIpAddresses", inboundIpAddressesConfigValue.asText());
+    }
+
     return jsonSandboxConfig;
   }
 

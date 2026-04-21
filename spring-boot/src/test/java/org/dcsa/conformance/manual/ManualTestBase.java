@@ -626,8 +626,9 @@ public abstract class ManualTestBase {
     EndpointUriMethod[] sandboxEndpointUriMethods,
     EndpointUriMethod[] externalPartyEndpointUriMethods,
     EndpointUriOverrideConfiguration[] externalPartyEndpointUriOverrides,
-    String outboundApiCallsSourceIpAddress) {
-    
+    String outboundApiCallsSourceIpAddress,
+    String inboundApiCallsTargetIpAddresses) {
+
     @Override
     public boolean equals(Object obj) {
       if (this == obj) return true;
@@ -635,7 +636,7 @@ public abstract class ManualTestBase {
       SandboxConfig that = (SandboxConfig) obj;
       return java.util.Objects.equals(sandboxId, that.sandboxId);
     }
-    
+
     @Override
     public int hashCode() {
       return java.util.Objects.hash(sandboxId);

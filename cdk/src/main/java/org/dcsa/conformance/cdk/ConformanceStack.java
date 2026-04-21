@@ -9,19 +9,23 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import software.amazon.awscdk.BundlingOptions;
+import software.amazon.awscdk.CfnOutput;
+import software.amazon.awscdk.CfnOutputProps;
 import software.amazon.awscdk.DockerVolume;
 import software.amazon.awscdk.Duration;
+import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.aws_apigatewayv2_authorizers.HttpUserPoolAuthorizer;
 import software.amazon.awscdk.aws_apigatewayv2_authorizers.HttpUserPoolAuthorizerProps;
 import software.amazon.awscdk.aws_apigatewayv2_integrations.HttpLambdaIntegration;
-import software.amazon.awscdk.services.apigateway.AccessLogFormat;
-import software.amazon.awscdk.services.apigateway.DomainNameOptions;
-import software.amazon.awscdk.services.apigateway.LambdaRestApi;
-import software.amazon.awscdk.services.apigateway.LambdaRestApiProps;
-import software.amazon.awscdk.services.apigateway.LogGroupLogDestination;
-import software.amazon.awscdk.services.apigateway.StageOptions;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationLoadBalancer;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationProtocol;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationTargetGroup;
+import software.amazon.awscdk.services.elasticloadbalancingv2.BaseApplicationListenerProps;
+import software.amazon.awscdk.services.elasticloadbalancingv2.HealthCheck;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ListenerCertificate;
+import software.amazon.awscdk.services.elasticloadbalancingv2.targets.LambdaTarget;
 import software.amazon.awscdk.services.apigatewayv2.AddRoutesOptions;
 import software.amazon.awscdk.services.apigatewayv2.CfnStage;
 import software.amazon.awscdk.services.apigatewayv2.CorsHttpMethod;
@@ -35,6 +39,15 @@ import software.amazon.awscdk.services.apigatewayv2.HttpMethod;
 import software.amazon.awscdk.services.apigatewayv2.IDomainName;
 import software.amazon.awscdk.services.certificatemanager.Certificate;
 import software.amazon.awscdk.services.cloudfront.BehaviorOptions;
+import software.amazon.awscdk.services.globalaccelerator.Accelerator;
+import software.amazon.awscdk.services.globalaccelerator.AcceleratorProps;
+import software.amazon.awscdk.services.globalaccelerator.CfnEndpointGroup;
+import software.amazon.awscdk.services.globalaccelerator.CfnEndpointGroupProps;
+import software.amazon.awscdk.services.globalaccelerator.ConnectionProtocol;
+import software.amazon.awscdk.services.globalaccelerator.Listener;
+import software.amazon.awscdk.services.globalaccelerator.ListenerProps;
+import software.amazon.awscdk.services.globalaccelerator.PortRange;
+
 import software.amazon.awscdk.services.cloudfront.CachePolicy;
 import software.amazon.awscdk.services.cloudfront.Distribution;
 import software.amazon.awscdk.services.cloudfront.DistributionProps;
@@ -77,9 +90,9 @@ import software.amazon.awscdk.services.route53.IPublicHostedZone;
 import software.amazon.awscdk.services.route53.PublicHostedZone;
 import software.amazon.awscdk.services.route53.PublicHostedZoneAttributes;
 import software.amazon.awscdk.services.route53.RecordTarget;
-import software.amazon.awscdk.services.route53.targets.ApiGateway;
 import software.amazon.awscdk.services.route53.targets.ApiGatewayv2DomainProperties;
 import software.amazon.awscdk.services.route53.targets.CloudFrontTarget;
+import software.amazon.awscdk.services.route53.targets.GlobalAcceleratorDomainTarget;
 import software.amazon.awscdk.services.s3.Bucket;
 import software.amazon.awscdk.services.s3.BucketProps;
 import software.amazon.awscdk.services.s3.assets.AssetOptions;
@@ -246,29 +259,72 @@ public class ConformanceStack extends Stack {
             });
 
     String lambdaRestApiUrl = "%s-api.%s".formatted(prefix, hostedZoneName);
-    LambdaRestApi lambdaRestApi =
-        new LambdaRestApi(
+
+    // --- REST API via ALB + Global Accelerator (static IPs) ---
+    Vpc albVpc =
+        Vpc.Builder.create(this, prefix + "AlbVpc")
+            .maxAzs(2)
+            .natGateways(0)
+            .build();
+
+    ApplicationLoadBalancer alb =
+        ApplicationLoadBalancer.Builder.create(this, prefix + "Alb")
+            .vpc(albVpc)
+            .internetFacing(true)
+            .build();
+
+    ApplicationTargetGroup lambdaTargetGroup =
+        ApplicationTargetGroup.Builder.create(this, prefix + "ApiLambdaTargetGroup")
+            .targets(List.of(new LambdaTarget(apiLambda)))
+            .healthCheck(HealthCheck.builder().enabled(false).build())
+            .build();
+    lambdaTargetGroup.setAttribute("lambda.multi_value_headers.enabled", "true");
+
+    alb.addListener(
+        prefix + "AlbHttpsListener",
+        BaseApplicationListenerProps.builder()
+            .port(443)
+            .protocol(ApplicationProtocol.HTTPS)
+            .certificates(List.of(ListenerCertificate.fromArn(restApiCertificateArn)))
+            .defaultTargetGroups(List.of(lambdaTargetGroup))
+            .build());
+
+    Accelerator accelerator =
+        new Accelerator(
             this,
-            prefix + "LambdaRestApi",
-            LambdaRestApiProps.builder()
-                .restApiName(prefix + "LambdaRestApi")
-                .handler(apiLambda)
-                .proxy(true)
-                .domainName(
-                    DomainNameOptions.builder()
-                        .domainName(lambdaRestApiUrl)
-                        .certificate(
-                            Certificate.fromCertificateArn(
-                                this, prefix + "LambdaRestApiCertificate", restApiCertificateArn))
-                        .build())
-                .deployOptions(
-                    StageOptions.builder()
-                        .accessLogDestination(
-                            new LogGroupLogDestination(
-                                new LogGroup(this, prefix + "LambdaRestApiGatewayLogs")))
-                        .accessLogFormat(AccessLogFormat.jsonWithStandardFields())
-                        .build())
+            prefix + "Accelerator",
+            AcceleratorProps.builder().acceleratorName(prefix + "Accelerator").build());
+
+    Listener listener =
+        new Listener(
+            this,
+            prefix + "AcceleratorListener",
+            ListenerProps.builder()
+                .accelerator(accelerator)
+                .portRanges(List.of(PortRange.builder().fromPort(443).toPort(443).build()))
+                .protocol(ConnectionProtocol.TCP)
                 .build());
+
+    new CfnEndpointGroup(
+        this,
+        prefix + "AcceleratorEndpointGroup",
+        CfnEndpointGroupProps.builder()
+            .listenerArn(listener.getListenerArn())
+            .endpointGroupRegion(this.getRegion())
+            .endpointConfigurations(
+                List.of(
+                    CfnEndpointGroup.EndpointConfigurationProperty.builder()
+                        .endpointId(alb.getLoadBalancerArn())
+                        .build()))
+            .build());
+
+    new CfnOutput(
+        this,
+        prefix + "AcceleratorIPs",
+        CfnOutputProps.builder()
+            .value(Fn.join(", ", Objects.requireNonNull(accelerator.getIpv4Addresses())))
+            .description("Static IPs for API whitelisting")
+            .build());
 
     String webuiApiGatewayUrl = "%s-webui.%s".formatted(prefix, hostedZoneName);
     String webuiDistributionUrl = "%s.%s".formatted(prefix, hostedZoneName);
@@ -397,7 +453,9 @@ public class ConformanceStack extends Stack {
         ARecordProps.builder()
             .zone(publicHostedZone)
             .recordName(lambdaRestApiUrl)
-            .target(RecordTarget.fromAlias(new ApiGateway(lambdaRestApi)))
+            .target(
+                RecordTarget.fromAlias(
+                    new GlobalAcceleratorDomainTarget(accelerator.getDnsName())))
             .build());
     new ARecord(
         this,

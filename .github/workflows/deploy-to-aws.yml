@@ -12,6 +12,11 @@ on:
           - test
           - dt
           - dev
+      branch:
+        description: 'Branch to checkout and deploy'
+        required: true
+        default: 'test'
+        type: string
 
 env:
   AWS_REGION: "eu-north-1"
@@ -24,9 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
-          ref: test
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Print commit sha
         shell: bash
@@ -59,14 +64,14 @@ jobs:
           fi
 
       - name: Set up Java JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.2.0
         with:
           distribution: 'corretto'
           java-version: '25'
           cache: 'maven'
 
       - name: Set up Node.js 22.x
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.4.0
         with:
           node-version: 22
           cache: 'npm'
@@ -88,7 +93,7 @@ jobs:
           npm run build -- --configuration=${{ env.AWS_ENVIRONMENT }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           aws-region: ${{ env.AWS_REGION }}
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}

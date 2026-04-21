@@ -11,7 +11,8 @@ export interface SandboxConfig {
   externalPartyAuthHeaderName: string,
   externalPartyAuthHeaderValue: string,
   externalPartyAdditionalHeaders: HeaderNameAndValue[],
-  outboundApiCallsSourceIpAddress: string
+  outboundApiCallsSourceIpAddress: string,
+  inboundApiCallsTargetIpAddresses: string
 }
 
 export interface EndpointUriMethods {

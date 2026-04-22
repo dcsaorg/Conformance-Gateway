@@ -2,9 +2,11 @@ package org.dcsa.conformance.standards.eblissuance.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.core.party.ScenarioParameters;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record SuppliedScenarioParameters(
     String issueToSendToPlatform,
     String issueToPartyName,

@@ -7,6 +7,8 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.ApplicationLoadBalancerRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.ApplicationLoadBalancerResponseEvent;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,9 @@ public class ApiLambda
                   Objects.requireNonNullElse(
                       event.getMultiValueQueryStringParameters(), Collections.emptyMap()),
                   event.getMultiValueHeaders(),
-                  event.getBody()),
+                  event.getIsBase64Encoded() && event.getBody() != null
+                      ? new String(Base64.getDecoder().decode(event.getBody()), StandardCharsets.UTF_8)
+                      : event.getBody()),
               LambdaToolkit.createDeferredSandboxTaskConsumer(persistenceProvider));
 
       Map<String, List<String>> responseHeaders = conformanceWebResponse.getValueListHeaders();

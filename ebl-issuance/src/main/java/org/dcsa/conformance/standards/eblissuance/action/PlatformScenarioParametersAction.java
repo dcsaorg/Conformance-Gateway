@@ -77,6 +77,7 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     String sendToPlatform = responseCode.sendToPlatform;
+    boolean includeConsignee = responseCode.requiresConsigneeData();
     return (Objects.equals(eblType, EblType.BLANK_EBL)
             ? new SuppliedScenarioParameters(
                 sendToPlatform,
@@ -106,10 +107,10 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
                 "Code list provider of shipper",
                 "Party code of shipper",
                 "DCSA (code list name for shipper)",
-                "Legal name of consignee/endorsee",
-                "Code list provider of consignee/endorsee",
-                "Party code of consignee/endorsee",
-                "DCSA (code list name for consignee/endorsee)",
+                includeConsignee ? "Legal name of consignee/endorsee" : null,
+                includeConsignee ? "Code list provider of consignee/endorsee" : null,
+                includeConsignee ? "Party code of consignee/endorsee" : null,
+                includeConsignee ? "DCSA (code list name for consignee/endorsee)" : null,
                 "Legal name of issuing party",
                 "Code list provider of issuing party",
                 "Party code of issuing party",

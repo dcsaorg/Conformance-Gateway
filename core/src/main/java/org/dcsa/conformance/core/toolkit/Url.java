@@ -34,7 +34,7 @@ public final class Url {
    */
   public static Url of(String url, boolean allowHttpLocalhost, boolean allowEmpty) throws UserFacingException {
     validate(url, allowHttpLocalhost, allowEmpty);
-    return new Url(url);
+    return new Url(url != null ? url : "");
   }
 
   /**
@@ -58,7 +58,7 @@ public final class Url {
    * @throws UserFacingException if the URL is invalid
    */
   public static void validate(String url, boolean allowHttpLocalhost, boolean allowEmpty) throws UserFacingException {
-    if (url.isEmpty()) {
+    if (url == null || url.isEmpty()) {
       if (allowEmpty) {
         return;
       }

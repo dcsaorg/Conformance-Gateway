@@ -208,14 +208,17 @@ public class ConformanceWebuiHandler {
     CounterpartConfiguration externalPartyCounterpartConfig =
         sandboxConfiguration.getExternalPartyCounterpartConfiguration();
 
+    var sandboxUrl = sandboxPartyCounterpartConfig.getUrl();
+    var externalPartyUrl = externalPartyCounterpartConfig.getUrl();
+
     ObjectNode jsonSandboxConfig = OBJECT_MAPPER
             .createObjectNode()
             .put(SANDBOX_ID, sandboxConfiguration.getId())
             .put("sandboxName", sandboxConfiguration.getName())
-            .put("sandboxUrl", sandboxPartyCounterpartConfig.getUrl().getValue())
+            .put("sandboxUrl", sandboxUrl != null ? sandboxUrl.getValue() : "")
             .put("sandboxAuthHeaderName", sandboxConfiguration.getAuthHeaderName())
             .put("sandboxAuthHeaderValue", sandboxConfiguration.getAuthHeaderValue())
-            .put("externalPartyUrl", externalPartyCounterpartConfig.getUrl().getValue())
+            .put("externalPartyUrl", externalPartyUrl != null ? externalPartyUrl.getValue() : "")
             .put("externalPartyAuthHeaderName", externalPartyCounterpartConfig.getAuthHeaderName())
       .put("externalPartyAuthHeaderValue", externalPartyCounterpartConfig.getAuthHeaderValue());
 
@@ -349,15 +352,18 @@ public class ConformanceWebuiHandler {
             .orElseThrow();
 
     String externalPartyUrl = requestNode.get("externalPartyUrl").asText();
-    String sandboxPartyBaseUrl =
+    var sandboxPartyUrl =
         Stream.of(sandboxConfiguration.getCounterparts())
                 .filter(
                     counterpart ->
                     counterpart.getName().equals(sandboxConfiguration.getParties()[0].getName()))
                 .findFirst()
                 .orElseThrow()
-                .getUrl()
-            .getValue().split("/party/")[0] + "/";
+                .getUrl();
+    String sandboxPartyBaseUrl =
+        sandboxPartyUrl != null
+            ? sandboxPartyUrl.getValue().split("/party/")[0] + "/"
+            : "";
     boolean allowEmptyUrl =
         SupportedStandard.forName(sandboxConfiguration.getStandard().getName())
             .standard
@@ -401,19 +407,21 @@ public class ConformanceWebuiHandler {
     }
 
     if (!sandboxConfiguration.getOrchestrator().isActive()) {
-      Arrays.stream(sandboxConfiguration.getParties())
-          .findFirst()
-          .orElseThrow()
-          .setOrchestratorUrl(
-              externalPartyCounterpartConfig
-                  .getUrl()
-                  .getValue()
-                  .substring(
-                      0,
-                      externalPartyCounterpartConfig.getUrl().length()
-                          - "/party/%s/api"
-                              .formatted(externalPartyCounterpartConfig.getName())
-                              .length()));
+      var extPartyUrl = externalPartyCounterpartConfig.getUrl();
+      if (extPartyUrl != null && !extPartyUrl.isBlank()) {
+        Arrays.stream(sandboxConfiguration.getParties())
+            .findFirst()
+            .orElseThrow()
+            .setOrchestratorUrl(
+                extPartyUrl
+                    .getValue()
+                    .substring(
+                        0,
+                        extPartyUrl.length()
+                            - "/party/%s/api"
+                                .formatted(externalPartyCounterpartConfig.getName())
+                                .length()));
+      }
     }
 
     ConformanceSandbox.saveSandboxConfiguration(persistenceProvider, userId, sandboxConfiguration);

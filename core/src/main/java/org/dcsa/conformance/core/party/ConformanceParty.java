@@ -299,7 +299,13 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   private String _getCounterpartUrl(
       CounterpartConfiguration counterpartConfiguration, String method, String path) {
-    var url = counterpartConfiguration.getUrl().getValue() + path;
+    var counterpartUrl = counterpartConfiguration.getUrl();
+    if (counterpartUrl == null || counterpartUrl.isBlank()) {
+      throw new IllegalStateException(
+          "Cannot create request URL: counterpart '%s' has no URL configured"
+              .formatted(counterpartConfiguration.getName()));
+    }
+    var url = counterpartUrl.getValue() + path;
     EndpointUriOverrideConfiguration[] endpointUriOverrideConfigurations =
         counterpartConfiguration.getEndpointUriOverrideConfigurations();
     if (endpointUriOverrideConfigurations != null) {

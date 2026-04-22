@@ -299,6 +299,10 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   private String _getCounterpartUrl(
       CounterpartConfiguration counterpartConfiguration, String method, String path) {
+    // If path is already a full URL (e.g., orchestrator URL), use it directly
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path;
+    }
     var counterpartUrl = counterpartConfiguration.getUrl();
     if (counterpartUrl == null || counterpartUrl.isBlank()) {
       throw new IllegalStateException(

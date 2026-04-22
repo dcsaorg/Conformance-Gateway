@@ -7,7 +7,7 @@ import software.amazon.awscdk.StackProps;
 public final class ConformanceApp {
   public static final String REGION = "eu-north-1";
 
-  public static void main(final String[] args) {
+  static void main(final String[] ignoredArgs) {
     App app = new App();
 
     new ConformanceStack(
@@ -31,11 +31,8 @@ public final class ConformanceApp {
         "Z08637291XUXSIEGQ5KNR",
         "conformance-dt-1.dcsa.org",
         "arn:aws:lambda:eu-north-1:580247275435:layer:LambdaInsightsExtension:35",
-        // dt-api.conformance-dt-1.dcsa.org
         "arn:aws:acm:eu-north-1:231663969095:certificate/5b911671-b1b1-4435-9d68-654828be4ac0",
-        // dt-webui.conformance-dt-1.dcsa.org
         "arn:aws:acm:eu-north-1:231663969095:certificate/58332d65-4f49-4216-9ebc-d8ed2219abdf",
-        // dt.conformance-dt-1.dcsa.org
         "arn:aws:acm:us-east-1:231663969095:certificate/bba79568-0523-4b34-9844-accedcb4bd5e",
         false);
 

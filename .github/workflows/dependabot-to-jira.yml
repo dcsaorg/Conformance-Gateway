@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   sync-alerts:
+    if: false # Workflow temporarily disabled
     runs-on: ubuntu-latest
 
     steps:
@@ -48,7 +49,7 @@ jobs:
           fi
 
           HIGH_ALERTS=$(jq -c '.[]' alerts.json)
-  
+
           if [ -z "$HIGH_ALERTS" ]; then
             echo "No high or critical alerts found."
             exit 0

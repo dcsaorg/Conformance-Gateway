@@ -371,7 +371,7 @@ public class ConformanceWebuiHandler {
                 sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole());
     Url.validate(
         externalPartyUrl, sandboxPartyBaseUrl.startsWith("http://localhost"), allowEmptyUrl);
-    if (externalPartyUrl.startsWith(sandboxPartyBaseUrl))
+    if (!sandboxPartyBaseUrl.isEmpty() && externalPartyUrl.startsWith(sandboxPartyBaseUrl))
       throw new UserFacingException("The sandbox URL cannot be used as external party URL");
 
     sandboxConfiguration.setName(requestNode.get("sandboxName").asText());
@@ -409,18 +409,19 @@ public class ConformanceWebuiHandler {
     if (!sandboxConfiguration.getOrchestrator().isActive()) {
       var extPartyUrl = externalPartyCounterpartConfig.getUrl();
       if (extPartyUrl != null && !extPartyUrl.isBlank()) {
+        String expectedSuffix = "/party/%s/api"
+            .formatted(externalPartyCounterpartConfig.getName());
+        String urlValue = extPartyUrl.getValue();
+        if (!urlValue.endsWith(expectedSuffix)) {
+          throw new UserFacingException(
+              "The external party URL must end with '%s' for this sandbox type"
+                  .formatted(expectedSuffix));
+        }
         Arrays.stream(sandboxConfiguration.getParties())
             .findFirst()
             .orElseThrow()
             .setOrchestratorUrl(
-                extPartyUrl
-                    .getValue()
-                    .substring(
-                        0,
-                        extPartyUrl.length()
-                            - "/party/%s/api"
-                                .formatted(externalPartyCounterpartConfig.getName())
-                                .length()));
+                urlValue.substring(0, urlValue.length() - expectedSuffix.length()));
       }
     }
 

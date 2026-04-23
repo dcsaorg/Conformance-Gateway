@@ -17,6 +17,8 @@ public enum ShippingInstructionsStatus {
   SI_UPDATE_DECLINED("UPDATE_DECLINED"),
   SI_UPDATE_CONFIRMED("UPDATE_CONFIRMED"),
   SI_COMPLETED("COMPLETED"),
+  SI_CANCELLED("CANCELLED"),
+  SI_DECLINED("DECLINED"),
   ;
 
   private final String wireName;

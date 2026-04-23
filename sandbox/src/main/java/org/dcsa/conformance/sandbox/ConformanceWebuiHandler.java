@@ -22,6 +22,7 @@ import org.dcsa.conformance.core.party.EndpointUriOverrideConfiguration;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.core.toolkit.Url;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 
@@ -164,12 +165,12 @@ public class ConformanceWebuiHandler {
             .orElseThrow();
 
     sandboxPartyCounterpartConfig.setUrl(
-        "%s/conformance/sandbox/%s/party/%s/api"
+        Url.ofTrusted("%s/conformance/sandbox/%s/party/%s/api"
             .formatted(
                 environmentBaseUrl,
                 sandboxId,
                 URLEncoder.encode(
-                    sandboxPartyCounterpartConfig.getName(), StandardCharsets.UTF_8)));
+                    sandboxPartyCounterpartConfig.getName(), StandardCharsets.UTF_8))));
     sandboxPartyCounterpartConfig.setAuthHeaderName(sandboxConfiguration.getAuthHeaderName());
     sandboxPartyCounterpartConfig.setAuthHeaderValue(sandboxConfiguration.getAuthHeaderValue());
 
@@ -182,7 +183,7 @@ public class ConformanceWebuiHandler {
             .findFirst()
             .orElseThrow();
 
-    externalPartyCounterpartConfig.setUrl("");
+    externalPartyCounterpartConfig.setUrl(Url.ofTrusted(""));
 
     ConformanceSandbox.create(
         persistenceProvider,
@@ -207,14 +208,17 @@ public class ConformanceWebuiHandler {
     CounterpartConfiguration externalPartyCounterpartConfig =
         sandboxConfiguration.getExternalPartyCounterpartConfiguration();
 
+    var sandboxUrl = sandboxPartyCounterpartConfig.getUrl();
+    var externalPartyUrl = externalPartyCounterpartConfig.getUrl();
+
     ObjectNode jsonSandboxConfig = OBJECT_MAPPER
             .createObjectNode()
             .put(SANDBOX_ID, sandboxConfiguration.getId())
             .put("sandboxName", sandboxConfiguration.getName())
-            .put("sandboxUrl", sandboxPartyCounterpartConfig.getUrl())
+            .put("sandboxUrl", sandboxUrl != null ? sandboxUrl.getValue() : "")
             .put("sandboxAuthHeaderName", sandboxConfiguration.getAuthHeaderName())
             .put("sandboxAuthHeaderValue", sandboxConfiguration.getAuthHeaderValue())
-            .put("externalPartyUrl", externalPartyCounterpartConfig.getUrl())
+            .put("externalPartyUrl", externalPartyUrl != null ? externalPartyUrl.getValue() : "")
             .put("externalPartyAuthHeaderName", externalPartyCounterpartConfig.getAuthHeaderName())
       .put("externalPartyAuthHeaderValue", externalPartyCounterpartConfig.getAuthHeaderValue());
 
@@ -348,27 +352,30 @@ public class ConformanceWebuiHandler {
             .orElseThrow();
 
     String externalPartyUrl = requestNode.get("externalPartyUrl").asText();
-    String sandboxPartyBaseUrl =
+    var sandboxPartyUrl =
         Stream.of(sandboxConfiguration.getCounterparts())
                 .filter(
                     counterpart ->
                     counterpart.getName().equals(sandboxConfiguration.getParties()[0].getName()))
                 .findFirst()
                 .orElseThrow()
-                .getUrl()
-            .split("/party/")[0] + "/";
+                .getUrl();
+    String sandboxPartyBaseUrl =
+        !sandboxPartyUrl.isBlank()
+            ? sandboxPartyUrl.getValue().split("/party/")[0] + "/"
+            : "";
     boolean allowEmptyUrl =
         SupportedStandard.forName(sandboxConfiguration.getStandard().getName())
             .standard
             .isExternalPartyEmptyUrlAllowed(
                 sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole());
-    CounterpartConfiguration.validateUrl(
+    Url.validate(
         externalPartyUrl, sandboxPartyBaseUrl.startsWith("http://localhost"), allowEmptyUrl);
-    if (externalPartyUrl.startsWith(sandboxPartyBaseUrl))
+    if (!sandboxPartyBaseUrl.isEmpty() && externalPartyUrl.startsWith(sandboxPartyBaseUrl))
       throw new UserFacingException("The sandbox URL cannot be used as external party URL");
 
     sandboxConfiguration.setName(requestNode.get("sandboxName").asText());
-    externalPartyCounterpartConfig.setUrl(externalPartyUrl);
+    externalPartyCounterpartConfig.setUrl(Url.ofTrusted(externalPartyUrl));
     externalPartyCounterpartConfig.setAuthHeaderName(
         requestNode.get("externalPartyAuthHeaderName").asText());
     externalPartyCounterpartConfig.setAuthHeaderValue(
@@ -400,18 +407,22 @@ public class ConformanceWebuiHandler {
     }
 
     if (!sandboxConfiguration.getOrchestrator().isActive()) {
-      Arrays.stream(sandboxConfiguration.getParties())
-          .findFirst()
-          .orElseThrow()
-          .setOrchestratorUrl(
-              externalPartyCounterpartConfig
-                  .getUrl()
-                  .substring(
-                      0,
-                      externalPartyCounterpartConfig.getUrl().length()
-                          - "/party/%s/api"
-                              .formatted(externalPartyCounterpartConfig.getName())
-                              .length()));
+      var extPartyUrl = externalPartyCounterpartConfig.getUrl();
+      if (extPartyUrl != null && !extPartyUrl.isBlank()) {
+        String expectedSuffix = "/party/%s/api"
+            .formatted(externalPartyCounterpartConfig.getName());
+        String urlValue = extPartyUrl.getValue();
+        if (!urlValue.endsWith(expectedSuffix)) {
+          throw new UserFacingException(
+              "The external party URL must end with '%s' for this sandbox type"
+                  .formatted(expectedSuffix));
+        }
+        Arrays.stream(sandboxConfiguration.getParties())
+            .findFirst()
+            .orElseThrow()
+            .setOrchestratorUrl(
+                urlValue.substring(0, urlValue.length() - expectedSuffix.length()));
+      }
     }
 
     ConformanceSandbox.saveSandboxConfiguration(persistenceProvider, userId, sandboxConfiguration);

@@ -361,7 +361,7 @@ public class ConformanceWebuiHandler {
                 .orElseThrow()
                 .getUrl();
     String sandboxPartyBaseUrl =
-        sandboxPartyUrl != null
+        !sandboxPartyUrl.isBlank()
             ? sandboxPartyUrl.getValue().split("/party/")[0] + "/"
             : "";
     boolean allowEmptyUrl =

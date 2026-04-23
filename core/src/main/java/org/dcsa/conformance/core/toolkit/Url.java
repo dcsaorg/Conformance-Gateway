@@ -17,6 +17,9 @@ import org.dcsa.conformance.core.UserFacingException;
  */
 public final class Url {
 
+  /** An empty URL instance, useful as a default value. */
+  public static final Url EMPTY = new Url("");
+
   private final String value;
 
   private Url(String value) {

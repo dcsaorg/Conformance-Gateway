@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: 3.0.2
+  version: 3.0.3
   title: DCSA eBL Issuance API
   description: |
     <h1>DCSA OpenAPI specification for the issuance of an electronic Bill of Lading (referred to as eBL) via an eBL Solution Provider</h1>
@@ -17,7 +17,7 @@ info:
 
     for the eBL Solution Provider to call.
 
-    When the document is to be surrendered, it should happen via a version of the [DCSA eBL Surrender](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.2) API.
+    When the document is to be surrendered, it should happen via a version of the [DCSA eBL Surrender](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.3) API.
 
     ### API Design & Implementation Principles
     This API follows the guidelines defined in version 2.0 of the API Design & Implementation Principles which can be found on the [DCSA Developer Portal](https://developer.dcsa.org/api_design)
@@ -26,7 +26,7 @@ info:
     Please look at the following implementation guide for how to create [Digital Signatures](https://developer.dcsa.org/implementing-digital-signatures-for-transport-documents).
 
     ### Changelog and GitHub
-    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/issuance#v302). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
+    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/issuance#v303). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
 
     API specification issued by [DCSA.org](https://dcsa.org/).
   license:
@@ -62,6 +62,130 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/IssuanceRequest'
+            examples:
+              regularSTDExample:
+                summary: |
+                  Issuing a Transport Document with regular Dry cargo
+                description: |
+                  A **Transport Document** being issued.
+
+                  **Note:** The `content` in the `eBLVisualisationByCarrier` and `issuanceManifestSignedContent` are not "real" values but rather random strings (this example cannot be used as is).
+                value:
+                  document:
+                    transportDocumentReference: 62CD536BA8D34C469AFD
+                    shippingInstructionsReference: fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9
+                    transportDocumentStatus: DRAFT
+                    transportDocumentTypeCode: BOL
+                    isShippedOnBoardType: true
+                    freightPaymentTermCode: PRE
+                    isElectronic: true
+                    isToOrder: true
+                    shippedOnBoardDate: '2023-12-20'
+                    termsAndConditions: |
+                      You agree that this transport document exist is name only for the sake of
+                      testing your conformance with the DCSA eBL API. This transport document is NOT backed
+                      by a real shipment with ANY carrier and NONE of the requested services will be
+                      carried out in real life.
+
+                      Unless required by applicable law or agreed to in writing, DCSA provides
+                      this JSON data on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+                      ANY KIND, either express or implied, including, without limitation, any
+                      warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,
+                      or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for
+                      determining the appropriateness of using or redistributing this JSON
+                      data and assume any risks associated with Your usage of this data.
+
+                      In no event and under no legal theory, whether in tort (including negligence),
+                      contract, or otherwise, unless required by applicable law (such as deliberate
+                      and grossly negligent acts) or agreed to in writing, shall DCSA be liable to
+                      You for damages, including any direct, indirect, special, incidental, or
+                      consequential damages of any character arising as a result of this terms or conditions
+                      or out of the use or inability to use the provided JSON data (including but not limited
+                      to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any
+                      and all other commercial damages or losses), even if DCSA has been advised of the
+                      possibility of such damages.
+                    receiptTypeAtOrigin: CY
+                    deliveryTypeAtDestination: CY
+                    cargoMovementTypeAtOrigin: FCL
+                    cargoMovementTypeAtDestination: FCL
+                    serviceContractReference: SCR-1234-REGULAR
+                    carrierCode: MSC
+                    carrierCodeListProvider: SMDG
+                    transports:
+                      plannedDepartureDate: '2023-12-20'
+                      plannedArrivalDate: '2023-12-22'
+                      portOfLoading:
+                        UNLocationCode: DKAAR
+                      portOfDischarge:
+                        UNLocationCode: DEBRV
+                      vesselVoyages:
+                        - vesselName: MSC Gülsün
+                          carrierExportVoyageNumber: 402E
+                    charges:
+                      - chargeName: Fictive transport document fee
+                        currencyAmount: 1
+                        currencyCode: EUR
+                        paymentTermCode: COL
+                        calculationBasis: Per transport document
+                        unitPrice: 1
+                        quantity: 1
+                    invoicePayableAt:
+                      UNLocationCode: DKAAR
+                    partyContactDetails:
+                      - name: DCSA test person
+                        email: no-reply@dcsa.example.org
+                    documentParties:
+                      shipper:
+                        partyName: DCSA CTK
+                        displayedAddress:
+                          - Strawinskylaan 4117
+                        partyContactDetails:
+                          - name: DCSA test person
+                            email: no-reply@dcsa.example.org
+                      issuingParty:
+                        partyName: Mediterranean Shipping Company
+                        address:
+                          street: Chemin Rieu
+                          streetNumber: 12-14
+                          city: Geneva
+                          countryCode: CH
+                        identifyingCodes:
+                          - codeListProvider: GLEIF
+                            codeListName: LEI
+                            partyCode: 529900T8BM49AURSDO55
+                    consignmentItems:
+                      - carrierBookingReference: CBR_123_REGULAR
+                        descriptionOfGoods:
+                          - 'Shoes - black'
+                        HSCodes:
+                          - '640510'
+                        cargoItems:
+                          - equipmentReference: NARU3472484
+                            cargoGrossWeight:
+                              value: 12000
+                              unit: KGM
+                            outerPackaging:
+                              numberOfPackages: 400
+                              packageCode: 4G
+                              description: Fibreboard boxes
+                    utilizedTransportEquipments:
+                      - isShipperOwned: false
+                        seals:
+                          - number: DCSA-CTK-1234
+                        equipment:
+                          ISOEquipmentCode: 22G1
+                          equipmentReference: NARU3472484
+                  issueTo:
+                    partyName: HHL Invest
+                    sendToPlatform: BOLE
+                    identifyingCodes:
+                      - codeListProvider: BOLE
+                        partyCode: BOLE001
+                  eBLVisualisationByCarrier:
+                    name: Carrier rendered copy of the EBL.pdf
+                    content: iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAGaSURBVDhPnZO/S0JRFMe/zygxwgqcfZtz0N7SFNgPaKlJpTFLCqwotV9qRYN/gIOL1FK22NISWENT0BTUkNLgIL2iHxYRnc697/kKzdA+cOD8uOec77uXB/oHngMPnd2eSb/pAf5DP2EWhGlQ8ChIikiiQa7vruFacwHdHHwC9nY7mhqgRBTdsbDdA/nVvHQbYnxvHHhnp4XtFZjon4DapTam4Lx4jt7NXlO6WEsreltDA5RFlt4qHDaWXlgrwNnplDX5CcWnIo5vjmWimsGdQV7HjjjJ0gMDAbNZopU1wgwfmQSlL9JCkEkunyMEuLbMFgZZ161G5RsFES5WNrC8lC8Fb49XDlcWWLNVOHqttFGCo90haxUsyeEk8GhEfEm+lA/ZqyyGdof0ocJegMhIpKZZIC8xfhLH0v6SfstCzRubeK42tg9Od3RDm9c4qMV8hWguinAmDHTJvC5bVB6A8nYZtlabTFcjX0EQ6gshNhqTDSbPQGIsUbdZIhT8ZOt0izDFu+dAakI1svX59W/MXGbIveM2or8g+gL+Fn3DwcYf+gAAAABJRU5ErkJggg==
+                    contentType: application/pdf
+                  issuanceManifestSignedContent: eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJkb2N1bWVudENoZWNrc3VtIjogIjhkYzk5ZDhhYzkyMjI0MGM1NWMwMzg0NWY0OWRlZjY0MTg3MTQ2NjUxYmFlNGY5YTYzMTMxMjc3Y2YwMGQ5ZGYiLCJlQkxWaXN1YWxpc2F0aW9uQnlDYXJyaWVyQ2hlY2tzdW0iOiAiNzZhN2QxNGM4M2Q3MjY4ZDY0M2FlNzM0NWM0NDhkZTYwNzAxZjk1NWQyNjRhNzQzZTY5MjhhMGI4MjY4YjI0ZiIsImlzc3VlVG9DaGVja3N1bSI6ICI3NmE3ZDE0YzgzZDcyNjhkNjQzYWU3MzQ1YzQ0OGRlNjA3MDFmOTU1ZDI2NGE3NDNlNjkyOGEwYjgyNjhiMjRmIn0.c4SJ9-61fE6RmeIuZ3EI-TSM0M6qXuOudtr3YhpDjqVMaYk_RYpaWYvw75ssTbjgGFKTBKCy5lpmOfb8Fq--Qu2k0MWbH6qdX5jTYwl0DX946RQg-hnmVTg9np3bmqVeKqKURyV-UUdG-KK_XCGzPZ-lZkeUlpMcIthQFs0pCODR9GPytv7ZXLPZFOmHM9fn3FD2yRqVhQzcs7HdcxMjCx6hkBW8Z-jW4qteVy2_E9uqjkKwlu_cQLoY83Z0mcjn0PZNQvKF10x7q1_Jjf_Su19UigTUu3pFMrzo4iPS_jcrFoIb3TSZNSzbgAwtujSBFOufPDyEmxlx1sH0ZowMvA
       responses:
         '204':
           description: |
@@ -112,6 +236,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                errorExample:
+                  summary: |
+                    Internal Error
+                  description: |
+                    An Internal error occurred.
+
+                    **NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a "random example".
+                  value:
+                    httpMethod: PUT
+                    requestUri: /v3/ebl-issuance-requests
+                    statusCode: 500
+                    statusCodeText: Internal Error
+                    statusCodeMessage: Internal Error
+                    providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
+                    errorDateTime: '2025-11-26T09:41:00Z'
+                    errors:
+                      - errorCode: 7003
+                        errorCodeText: Internal Error
+                        errorCodeMessage: Internal Error
   /v3/ebl-issuance-responses:
     post:
       tags:
@@ -139,6 +283,18 @@ paths:
                 value:
                   transportDocumentReference: HHL7180000000
                   issuanceResponseCode: ISSU
+              rejectedExample:
+                summary: |
+                  Rejected response
+                description: |
+                  The document was rejected as `BOLE001` is an unknown party on the receiving platform
+                value:
+                  transportDocumentReference: HHL7180000000
+                  issuanceResponseCode: REFU
+                  reason: 'IssueTo party not recognized by receiving platform'
+                  errors:
+                    - reason: '"HHL Invest" with partyCode BOLE001 is unknown'
+                      errorCode: PAR12345
       responses:
         '204':
           description: Carrier's acknowledgement of the Issuance Response
@@ -154,13 +310,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                errorExample:
+                  summary: |
+                    Internal Error
+                  description: |
+                    An Internal error occurred.
 
+                    **NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a "random example".
+                  value:
+                    httpMethod: POST
+                    requestUri: /v3/ebl-issuance-responses
+                    statusCode: 500
+                    statusCodeText: Internal Error
+                    statusCodeMessage: Internal Error
+                    providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
+                    errorDateTime: '2025-11-26T09:41:00Z'
+                    errors:
+                      - errorCode: 7003
+                        errorCodeText: Internal Error
+                        errorCodeMessage: Internal Error
 components:
   headers:
     API-Version:
       schema:
         type: string
-        example: 3.0.2
+        example: 3.0.3
       description: |
         SemVer used to indicate the version of the contract (API version) returned.
   parameters:
@@ -251,13 +426,9 @@ components:
           type: integer
           format: int32
           description: |
-            The detailed error code returned.
+            The detailed error code returned. The codes returned are maintained by the implementor of the API. For further explanation as to the meaning of an errorCode please consult the implementer.
 
-              - `7000-7999` Technical error codes
-              - `8000-8999` Functional error codes
-              - `9000-9999` API provider-specific error codes
-
-            [Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).
+            **Note:** Previously it was the intention of DCSA to standardize this but it never gained traction.
           minimum: 7000
           maximum: 9999
           example: 7003
@@ -313,7 +484,6 @@ components:
           pattern: ^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$
           description: |
             JWS content with compact serialization according to [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515#section-7.1). JWS-signed payload is defined in schema [IssuanceManifest](#/IssuanceManifest). This attribute is used to provide integrity of various parts of the payload that enable parties to validate whether a payload matches what the carrier issued originally. Accordingly, the payload is signed by the carrier or a party (typically an agent) acting on behalf of the carrier.
-          # TODO: Update example
           example: eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJkb2N1bWVudENoZWNrc3VtIjogIjhkYzk5ZDhhYzkyMjI0MGM1NWMwMzg0NWY0OWRlZjY0MTg3MTQ2NjUxYmFlNGY5YTYzMTMxMjc3Y2YwMGQ5ZGYiLCJlQkxWaXN1YWxpc2F0aW9uQnlDYXJyaWVyQ2hlY2tzdW0iOiAiNzZhN2QxNGM4M2Q3MjY4ZDY0M2FlNzM0NWM0NDhkZTYwNzAxZjk1NWQyNjRhNzQzZTY5MjhhMGI4MjY4YjI0ZiIsImlzc3VlVG9DaGVja3N1bSI6ICI3NmE3ZDE0YzgzZDcyNjhkNjQzYWU3MzQ1YzQ0OGRlNjA3MDFmOTU1ZDI2NGE3NDNlNjkyOGEwYjgyNjhiMjRmIn0.c4SJ9-61fE6RmeIuZ3EI-TSM0M6qXuOudtr3YhpDjqVMaYk_RYpaWYvw75ssTbjgGFKTBKCy5lpmOfb8Fq--Qu2k0MWbH6qdX5jTYwl0DX946RQg-hnmVTg9np3bmqVeKqKURyV-UUdG-KK_XCGzPZ-lZkeUlpMcIthQFs0pCODR9GPytv7ZXLPZFOmHM9fn3FD2yRqVhQzcs7HdcxMjCx6hkBW8Z-jW4qteVy2_E9uqjkKwlu_cQLoY83Z0mcjn0PZNQvKF10x7q1_Jjf_Su19UigTUu3pFMrzo4iPS_jcrFoIb3TSZNSzbgAwtujSBFOufPDyEmxlx1sH0ZowMvA
       required:
         - document
@@ -419,6 +589,9 @@ components:
             - `KTNE` (KTNET)
             - `CRED` (Credore)
             - `BLOC` (BlockPeer Technologies)
+            - `DOCU` (DocuTrade)
+            - `AEOT` (AEOTrade)
+            - `SGTD` (SGTraDex)
           example: BOLE
         identifyingCodes:
           type: array
@@ -465,6 +638,9 @@ components:
             - `KTNE` (KTNET)
             - `CRED` (Credore)
             - `BLOC` (BlockPeer Technologies)
+            - `DOCU` (DocuTrade)
+            - `AEOT` (AEOTrade)
+            - `SGTD` (SGTraDex)
             - `GSBN` (Global Shipping Business Network)
             - `WISE` (WiseTech)
             - `GLEIF` (Global Legal Entity Identifier Foundation)
@@ -580,14 +756,14 @@ components:
           maxLength: 50
           description: |
             The status of the `Transport Document`. Possible values are:
-            - `DRAFT` (the Transport Document is currently a Draft)
-            - `APPROVED` (the Transport Document has been Approved by consumer)
-            - `ISSUED` (the Transport Document has been Issued by provider)
-            - `PENDING_SURRENDER_FOR_AMENDMENT` (the Transport Document has a pending Surrender for Amendment)
-            - `SURRENDERED_FOR_AMENDMENT` (the Transport Document is Surrendered for Amendment)
-            - `PENDING_SURRENDER_FOR_DELIVERY` (the Transport Document has a pending Surrender for Delivery)
-            - `SURRENDERED_FOR_DELIVERY` (the Transport Document is Surrendered for Delivery)
-            - `VOIDED` (the Transport Document has been Voided)
+            - `DRAFT` (The Transport Document is currently a Draft)
+            - `APPROVED` (The Transport Document has been Approved by consumer)
+            - `ISSUED` (The Transport Document has been Issued by provider)
+            - `PENDING_SURRENDER_FOR_AMENDMENT` (The Transport Document has a pending Surrender for Amendment)
+            - `SURRENDERED_FOR_AMENDMENT` (The Transport Document is Surrendered for Amendment)
+            - `PENDING_SURRENDER_FOR_DELIVERY` (The Transport Document has a pending Surrender for Delivery)
+            - `SURRENDERED_FOR_DELIVERY` (The Transport Document is Surrendered for Delivery)
+            - `VOIDED` (The Transport Document has been Voided)
           example: DRAFT
         transportDocumentTypeCode:
           type: string
@@ -662,7 +838,7 @@ components:
           format: int32
           minimum: 0
           description: |
-            Number of originals of the Bill of Lading that has been requested by the customer with charges.
+            Number of originals of the Bill of Lading that have been requested by the customer with charges.
 
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
@@ -671,7 +847,7 @@ components:
           format: int32
           minimum: 0
           description: |
-            Number of originals of the Bill of Lading that has been requested by the customer without charges.
+            Number of originals of the Bill of Lading that have been requested by the customer without charges.
 
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero). `numberOfOriginalsWithoutCharges` + `numberOfOriginalsWithCharges` must be ≤ 1.
           example: 1
@@ -1019,7 +1195,7 @@ components:
           maxLength: 3
           description: |
             The reference type codes defined by DCSA. Possible values are:
-            - `CR` (Customer’s Reference)
+            - `CR` (Customer's Reference)
             - `AKG` (Vehicle Identification Number)
           example: CR
         value:
@@ -1044,7 +1220,7 @@ components:
           maxLength: 3
           description: |
             The reference type codes defined by DCSA. Possible values are:
-            - `CR` (Customer’s Reference)
+            - `CR` (Customer's Reference)
             - `AKG` (Vehicle Identification Number)
             - `SPO` (Shipper's Purchase Order)
             - `CPO` (Consignee's Purchase Order)
@@ -1098,8 +1274,11 @@ components:
         HSCodes:
           type: array
           minItems: 1
+          deprecated: true
           description: |
-            A list of `HS Codes` that apply to this `consignmentItem`
+            A list of `HS Codes` that apply to this `consignmentItem`.
+
+            **DEPRECATED:** Because of backward compatibility it is required to provide a value in this property even though a value is provided in the `extendedHSCodes` property. In case both properties are provided (`extendedHSCodes` and `HSCodes`) - `HSCodes` must be ignored.
           items:
             type: string
             pattern: ^\d{6,10}$
@@ -1110,12 +1289,39 @@ components:
 
               More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
             example: '851713'
-        nationalCommodityCodes:
+        extendedHSCodes:
           type: array
           description: |
-            A list of `National Commodity Codes` that apply to this `commodity`
+            A list of `HS Codes` that apply to this `consignmentItem`. The `extendedHSCodes` support up to 12 character codes.
+
+            **Note:** If `extendedHSCodes` is provided - it always takes precedence over `HSCodes` (which is a required property but must be ignored).
+          items:
+            type: string
+            pattern: ^\d{6,12}$
+            minLength: 6
+            maxLength: 12
+            description: |
+              Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 12 digits.
+
+              More information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).
+            example: '851713'
+        nationalCommodityCodes:
+          type: array
+          deprecated: true
+          description: |
+            A list of `National Commodity Codes` that apply to this `consignmentItem`
+
+            **DEPRECATED:** This property is not to be used any more, please use `extendedNationalCommodityCodes` instead. If both `nationalCommodityCodes` and `extendedNationalCommodityCodes` are provided then `extendedNationalCommodityCodes` takes precedence and `nationalCommodityCodes` must be ignored.
           items:
             $ref: '#/components/schemas/NationalCommodityCode'
+        extendedNationalCommodityCodes:
+          type: array
+          description: |
+            A list of `National Commodity Codes` that apply to this `consignmentItem`. The `extendedNationalCommodityCodes` support up to 16 character codes.
+
+            **Note:** If both `nationalCommodityCodes` and `extendedNationalCommodityCodes` are provided then `extendedNationalCommodityCodes` takes precedence and `nationalCommodityCodes` must be ignored.
+          items:
+            $ref: '#/components/schemas/ExtendedNationalCommodityCode'
         shippingMarks:
           type: array
           maxItems: 50
@@ -1164,6 +1370,7 @@ components:
     NationalCommodityCode:
       type: object
       title: National Commodity Code
+      deprecated: true
       description: |
         The national commodity classification code linked to a country with a value.
 
@@ -1172,6 +1379,8 @@ components:
         | Type  | Country | Value |
         |-------|:-------:|-------------|
         |NCM|BR|['1515', '2106', '2507', '2512']|
+
+        **DEPRECATED:** This object is not to be used any more, please use `ExtendedNationalCommodityCode` instead.
       properties:
         type:
           type: string
@@ -1181,7 +1390,7 @@ components:
             The national commodity classification code, which can be one of the following values defined by DCSA:
             - `NCM` (Nomenclatura Comum do Mercosul)
             - `HTS` (Harmonized Tariff Schedule)
-            - `SCHEDULE_B` ( Schedule B)
+            - `SCHEDULE_B` (Schedule B)
             - `TARIC` (Integrated Tariff of the European Communities)
             - `CN` (Combined Nomenclature)
             - `CUS` (Customs Union and Statistics)
@@ -1217,6 +1426,62 @@ components:
         type: TARIC
         values:
           - '85171200'
+      required:
+        - type
+        - values
+
+    ExtendedNationalCommodityCode:
+      type: object
+      title: National Commodity Code (Extended)
+      description: |
+        Extended version of the national commodity classification code linked to a country with a value supporting up to 16 characters.
+
+        An example could look like this:
+
+        | Type  | Country | Value |
+        |-------|:-------:|-------------|
+        |NCM|BR|['1515', '2106', '2507', '2512']|
+      properties:
+        type:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 10
+          description: |
+            The national commodity classification code, which can be one of the following values defined by DCSA:
+            - `NCM` (Nomenclatura Comum do Mercosul)
+            - `HTS` (Harmonized Tariff Schedule)
+            - `SCHEDULE_B` (Schedule B)
+            - `TARIC` (Integrated Tariff of the European Communities)
+            - `CN` (Combined Nomenclature)
+            - `CUS` (Customs Union and Statistics)
+          example: NCM
+        countryCode:
+          type: string
+          pattern: ^[A-Z]{2}$
+          minLength: 2
+          maxLength: 2
+          description: |
+            The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            **Note:** In case the `countryCode` is unknown it is possible to use the code `ZZ`.
+          example: BR
+        values:
+          type: array
+          minItems: 1
+          description: |
+            A list of `national commodity codes` values supporting up to 16 characters.
+          items:
+            type: string
+            pattern: ^\S(?:.*\S)?$
+            maxLength: 16
+            description: |
+              The value of the `National Commodity Code`
+            example: '1515'
+          example:
+            - '1515'
+            - '2106'
+            - '2507'
+            - '2512'
       required:
         - type
         - values
@@ -1309,10 +1574,21 @@ components:
           $ref: '#/components/schemas/OuterPackaging'
         nationalCommodityCodes:
           type: array
+          deprecated: true
           description: |
             A list of `National Commodity Codes` that apply to this `cargoItem`
+
+            **DEPRECATED:** This property is not to be used any more, please use `extendedNationalCommodityCodes` instead. If both `nationalCommodityCodes` and `extendedNationalCommodityCodes` are provided then `extendedNationalCommodityCodes` takes precedence and `nationalCommodityCodes` must be ignored.
           items:
             $ref: '#/components/schemas/NationalCommodityCode'
+        extendedNationalCommodityCodes:
+          type: array
+          description: |
+            A list of `National Commodity Codes` that apply to this `cargoItem`. The `extendedNationalCommodityCodes` support up to 16 character codes.
+
+            **Note:** If both `nationalCommodityCodes` and `extendedNationalCommodityCodes` are provided then `extendedNationalCommodityCodes` takes precedence and `nationalCommodityCodes` must be ignored.
+          items:
+            $ref: '#/components/schemas/ExtendedNationalCommodityCode'
         customsReferences:
           type: array
           description: |
@@ -1440,7 +1716,7 @@ components:
       type: object
       title: Outer Packaging
       description: |
-        Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport.
+        Object for `Outer Packaging/Overpack` specification. Examples of `Overpacks` are a number of packages stacked on to a pallet and secured by strapping or placed in a protective `Outer Packaging` such as a box or crate to form one unit for the convenience of handling and stowage during transport.
       properties:
         packageCode:
           type: string
@@ -1448,7 +1724,7 @@ components:
           minLength: 2
           maxLength: 2
           description: |
-            A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
+            A code identifying the `Outer Packaging/Overpack`. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)
 
             **Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.
           example: 5H
@@ -1468,13 +1744,13 @@ components:
           minimum: 1
           maximum: 99999999
           description: |
-            Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.
+            Specifies the number of `Outer Packagings/Overpacks` associated with this `Cargo Item`.
           example: 18
         description:
           type: string
           maxLength: 100
           description: |
-            Description of the outer packaging/overpack.
+            Description of the `Outer Packaging/Overpack`.
           example: 'Drum, steel'
         woodDeclaration:
           type: string
@@ -1674,7 +1950,7 @@ components:
         innerPackagings:
           type: array
           description: |
-            A list of `Inner Packings` contained inside this `outer packaging/overpack`.
+            A list of `Inner Packagings` contained inside this `Outer Packaging/Overpack`.
           items:
             $ref: '#/components/schemas/InnerPackaging'
         emergencyContactDetails:
@@ -1785,7 +2061,7 @@ components:
       type: object
       title: Net Explosive Content
       description: |
-        The total weight of the explosive substances, without the packaging’s, casings, etc.
+        The total weight of the explosive substances, without the packaging's, casings, etc.
       properties:
         value:
           type: number
@@ -1793,7 +2069,7 @@ components:
           minimum: 0
           exclusiveMinimum: true
           description: |
-            The total weight of the explosive substances, without the packaging’s, casings, etc.
+            The total weight of the explosive substances, without the packaging's, casings, etc.
           example: 2.4
         unit:
           type: string
@@ -1847,7 +2123,7 @@ components:
       type: object
       title: Inner Packaging
       description: |
-        Object for inner packaging specification
+        Object for `Inner Packaging` specification
       properties:
         quantity:
           type: integer
@@ -1867,6 +2143,12 @@ components:
           description: |
             Description of the packaging.
           example: Woven plastic water resistant Bag
+        innerPackagings:
+          type: array
+          description: |
+            A list of `Inner Packagings` contained inside this `Inner Packaging`.
+          items:
+            $ref: '#/components/schemas/InnerPackaging'
       required:
         - quantity
         - material
@@ -1964,7 +2246,7 @@ components:
       type: object
       title: Utilized Transport Equipment
       description: |
-        Specifies the container (`equipment`), the total `weight`, total `volume`, possible `ActiveReeferSettings`, `seals` and `references`
+        Specifies the container (`equipment`) information, possible `ActiveReeferSettings`, `seals`, `references`, and other related details.
       properties:
         equipment:
           $ref: '#/components/schemas/Equipment'
@@ -2280,7 +2562,8 @@ components:
     VesselVoyage:
       type: object
       title: Vessel/Voyage
-      description: 'Vessel and export voyage'
+      description: |
+        Vessel and export voyage. The vessel can be nominated a `role` as either: first sea-going vessel or a mother vessel.
       properties:
         vesselName:
           type: string
@@ -2307,9 +2590,18 @@ components:
             - `2 alphanumeric characters` for the sequence number of the voyage
             - `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).
           example: 2103N
+        role:
+          type: string
+          maxLength: 30
+          description: |
+            Identifies the role of the vessel voyage within the Transport Document. Possible values are:
+            - `FIRST_SEA_GOING` (First sea-going vessel)
+            - `MOTHER` (Mother vessel)
+          example: MOTHER
       required:
         - vesselName
         - carrierExportVoyageNumber
+
     PlaceOfReceipt:
       type: object
       title: Place of Receipt
@@ -2318,9 +2610,11 @@ components:
 
         **Condition:** Only when pre-carriage is done by the carrier.
 
-        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, `Address` or a `Geo Coordinate`.
+        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, `Address` (structured address), `AddressLines` (unstructured address) or a `Geo Coordinate`.
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+        **Condition:** When communicating with providers **or** consumers implementing API **v3.0.2 or earlier**, a sender implementing API **v3.0.3 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
       example:
         locationName: Hamburg
         UNLocationCode: DEHAM
@@ -2331,8 +2625,26 @@ components:
           pattern: ^\S(?:.*\S)?$
           example: Port of Amsterdam
           maxLength: 100
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** When communicating with providers **or** consumers implementing API **v3.0.2 or earlier**, a sender implementing API **v3.0.3 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         facility:
           $ref: '#/components/schemas/Facility'
         UNLocationCode:
@@ -2350,6 +2662,7 @@ components:
           example: NLAMS
         geoCoordinate:
           $ref: '#/components/schemas/GeoCoordinate'
+
     PortOfLoading:
       type: object
       title: Port of Loading
@@ -2384,6 +2697,7 @@ components:
 
             More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: NLAMS
+
     PortOfDischarge:
       type: object
       title: Port of Discharge
@@ -2418,6 +2732,7 @@ components:
 
             More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: NLAMS
+
     PlaceOfDelivery:
       type: object
       title: Place of Delivery
@@ -2426,9 +2741,11 @@ components:
 
         **Condition:** Only when onward transport is done by the carrier
 
-        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, `Address` or a `Geo Coordinate`.
+        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, `Address` (structured address), `AddressLines` (unstructured address) or a `Geo Coordinate`.
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+        **Condition:** When communicating with providers **or** consumers implementing API **v3.0.2 or earlier**, a sender implementing API **v3.0.3 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
       example:
         locationName: Hamburg
         UNLocationCode: DEHAM
@@ -2439,8 +2756,26 @@ components:
           pattern: ^\S(?:.*\S)?$
           example: Port of Amsterdam
           maxLength: 100
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** When communicating with providers **or** consumers implementing API **v3.0.2 or earlier**, a sender implementing API **v3.0.3 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         facility:
           $ref: '#/components/schemas/Facility'
         UNLocationCode:
@@ -2458,15 +2793,18 @@ components:
           example: NLAMS
         geoCoordinate:
           $ref: '#/components/schemas/GeoCoordinate'
+
     OnwardInlandRouting:
       type: object
       title: Onward Inland Routing
       description: |
         An object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).
 
-        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.
+        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, `Address` (structured address) or `AddressLines` (unstructured address).
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
+
+        **Condition:** When communicating with providers **or** consumers implementing API **v3.0.2 or earlier**, a sender implementing API **v3.0.3 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
       example:
         locationName: Hamburg
         UNLocationCode: DEHAM
@@ -2477,8 +2815,26 @@ components:
           pattern: ^\S(?:.*\S)?$
           example: Port of Amsterdam
           maxLength: 100
+        facilityName:
+          maxLength: 100
+          type: string
+          description: The name of the facility.
+          example: Building 123
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+
+            **Condition:** When communicating with providers **or** consumers implementing API **v3.0.2 or earlier**, a sender implementing API **v3.0.3 or later MUST NOT** use `addressLines` as the only property to identify the location. Recipients implementing earlier versions **MAY ignore** this property.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         facility:
           $ref: '#/components/schemas/Facility'
         UNLocationCode:
@@ -2508,9 +2864,21 @@ components:
           type: string
           pattern: ^\S(?:.*\S)?$
           maxLength: 50
+          deprecated: true
           description: |
-            Free text field describing the charge to apply
+            Free text field describing the charge to apply.
+
+            **DEPRECATED:** Because of backward compatibility it is required to provide a value in this property even though a value is provided in the `extendedChargeName` property. In case both properties are provided (`extendedChargeName` and `chargeName`) - `chargeName` must be ignored.
           example: Documentation fee - Destination
+        extendedChargeName:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 100
+          description: |
+            Extended Free text field, now allowing up to 100 characters, describing the charge to apply.
+
+            **Note:** If `extendedChargeName` is provided - it always takes precedence over `chargeName` (which is a required property but must be ignored).
+          example: Special documentation fee - Destination
         currencyAmount:
           type: number
           format: float
@@ -2759,24 +3127,24 @@ components:
       properties:
         street:
           type: string
-          description: The name of the street of the party’s address.
+          description: The name of the street of the party's address.
           maxLength: 70
           example: Ruijggoordweg
         streetNumber:
           type: string
-          description: The number of the street of the party’s address.
+          description: The number of the street of the party's address.
           maxLength: 50
           example: '100'
         floor:
           type: string
           description: |
-            The floor of the party’s street number.
+            The floor of the party's street number.
           pattern: ^\S(?:.*\S)?$
           maxLength: 50
           example: 2nd
         postCode:
           type: string
-          description: The post code of the party’s address.
+          description: The post code of the party's address.
           maxLength: 10
           example: 1047 HM
         POBox:
@@ -2787,7 +3155,7 @@ components:
         city:
           type: string
           description: |
-            The city name of the party’s address.
+            The city name of the party's address.
           pattern: ^\S(?:.*\S)?$
           maxLength: 35
           example: Amsterdam
@@ -2804,7 +3172,7 @@ components:
           example: NLAMS
         stateRegion:
           type: string
-          description: The state/region of the party’s address.
+          description: The state/region of the party's address.
           maxLength: 65
           example: North Holland
         countryCode:
@@ -2828,7 +3196,7 @@ components:
       description: |
         The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a carrier, or the party by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier in relation to the contract of carriage by sea.
 
-        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
+        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address` or `addressLines`.
       properties:
         partyName:
           type: string
@@ -2837,6 +3205,33 @@ components:
           description: |
             Name of the party.
           example: IKEA Denmark
+        eblPlatform:
+          type: string
+          pattern: ^\S+$
+          maxLength: 4
+          description: |
+            The eBL platform of the party. The value **MUST** be one of:
+            - `WAVE` (Wave)
+            - `CARX` (CargoX)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
+            - `IDT` (ICE Digital Trade)
+            - `BOLE` (Bolero)
+            - `EDOX` (EdoxOnline)
+            - `IQAX` (IQAX)
+            - `SECR` (Secro)
+            - `TRGO` (TradeGO)
+            - `ETEU` (eTEU)
+            - `TRAC` (Enigio trace:original)
+            - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
+            - `DOCU` (DocuTrade)
+            - `AEOT` (AEOTrade)
+            - `SGTD` (SGTraDex)
+          example: BOLE
         typeOfPerson:
           type: string
           maxLength: 50
@@ -2849,6 +3244,17 @@ components:
           example: 'NATURAL_PERSON'
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         displayedAddress:
           type: array
           maxItems: 6
@@ -2908,8 +3314,6 @@ components:
       title: On Behalf of Shipper
       description: |
         The party allowed to act on behalf of the shipper for documentation purposes.
-
-        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`.
       properties:
         partyName:
           type: string
@@ -2920,6 +3324,17 @@ components:
           example: IKEA Denmark
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         identifyingCodes:
           type: array
           description: |
@@ -2935,9 +3350,9 @@ components:
       description: |
         The party to which goods are consigned in the `Master Bill of Lading`.
 
-        **Condition:** Mandatory for non-negotiable BL (`isToOrder=false`)
+        **Condition:** Mandatory for non-negotiable BL (`isToOrder=false`). Note `Consignee` and `Endorsee` are mutually exclusive.
 
-        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
+        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address` or `addressLines`.
       properties:
         partyName:
           type: string
@@ -2946,6 +3361,33 @@ components:
           description: |
             Name of the party.
           example: IKEA Denmark
+        eblPlatform:
+          type: string
+          pattern: ^\S+$
+          maxLength: 4
+          description: |
+            The eBL platform of the party. The value **MUST** be one of:
+            - `WAVE` (Wave)
+            - `CARX` (CargoX)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
+            - `IDT` (ICE Digital Trade)
+            - `BOLE` (Bolero)
+            - `EDOX` (EdoxOnline)
+            - `IQAX` (IQAX)
+            - `SECR` (Secro)
+            - `TRGO` (TradeGO)
+            - `ETEU` (eTEU)
+            - `TRAC` (Enigio trace:original)
+            - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
+            - `DOCU` (DocuTrade)
+            - `AEOT` (AEOTrade)
+            - `SGTD` (SGTraDex)
+          example: BOLE
         typeOfPerson:
           type: string
           maxLength: 50
@@ -2958,6 +3400,17 @@ components:
           example: 'NATURAL_PERSON'
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         displayedAddress:
           type: array
           maxItems: 6
@@ -3019,8 +3472,6 @@ components:
       title: On Behalf of Consignee
       description: |
         The party allowed to act on behalf of the consignee for documentation purposes.
-
-        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`.
       properties:
         partyName:
           type: string
@@ -3031,6 +3482,17 @@ components:
           example: IKEA Denmark
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         identifyingCodes:
           type: array
           minItems: 1
@@ -3047,7 +3509,7 @@ components:
 
         **Condition:** Can only be provided for negotiable BLs (`isToOrder=true`). If a negotiable BL does not have an `Endorsee`, the BL is said to be "blank endorsed". Note `Consignee` and `Endorsee` are mutually exclusive.
 
-        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
+        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address` or `addressLines`.
       properties:
         partyName:
           type: string
@@ -3056,8 +3518,46 @@ components:
           description: |
             Name of the party.
           example: IKEA Denmark
+        eblPlatform:
+          type: string
+          pattern: ^\S+$
+          maxLength: 4
+          description: |
+            The eBL platform of the party. The value **MUST** be one of:
+            - `WAVE` (Wave)
+            - `CARX` (CargoX)
+            - `ESSD` (EssDOCS - This value has been **deprecated**. Please use `IDT`)
+            - `IDT` (ICE Digital Trade)
+            - `BOLE` (Bolero)
+            - `EDOX` (EdoxOnline)
+            - `IQAX` (IQAX)
+            - `SECR` (Secro)
+            - `TRGO` (TradeGO)
+            - `ETEU` (eTEU)
+            - `TRAC` (Enigio trace:original)
+            - `BRIT` (BRITC eBL)
+            - `COVA` (Covantis)
+            - `ETIT` (e-title)
+            - `KTNE` (KTNET)
+            - `CRED` (Credore)
+            - `BLOC` (BlockPeer Technologies)
+            - `DOCU` (DocuTrade)
+            - `AEOT` (AEOTrade)
+            - `SGTD` (SGTraDex)
+          example: BOLE
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         displayedAddress:
           type: array
           maxItems: 6
@@ -3111,6 +3611,17 @@ components:
           example: IKEA Denmark
         address:
           $ref: '#/components/schemas/Address'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         partyContactDetails:
           type: array
           description: |
@@ -3128,7 +3639,7 @@ components:
       description: |
         The person to be notified when a shipment arrives at its destination.
 
-        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
+        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address` or `addressLines`.
       properties:
         partyName:
           type: string
@@ -3149,6 +3660,17 @@ components:
           example: 'NATURAL_PERSON'
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         displayedAddress:
           type: array
           maxItems: 6
@@ -3207,6 +3729,17 @@ components:
           example: Asseco Denmark
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         identifyingCodes:
           type: array
           items:
@@ -3248,6 +3781,17 @@ components:
           example: Asseco Denmark
         address:
           $ref: '#/components/schemas/PartyAddress'
+        addressLines:
+          type: array
+          maxItems: 5
+          description: |
+            Unstructured address lines, used as a fallback when structured address fields are unavailable.
+          items:
+            type: string
+            maxLength: 250
+            description: |
+              One line of an unstructured `Address`.
+            example: "123 Example Rd"
         identifyingCodes:
           type: array
           items:

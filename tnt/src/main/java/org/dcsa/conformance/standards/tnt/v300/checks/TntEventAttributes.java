@@ -10,6 +10,7 @@ public class TntEventAttributes {
   static final String EVENT_UPDATED_DATE_TIME = "eventUpdatedDateTime";
   static final String EVENT_CLASSIFICATION = "eventClassification";
   static final String EVENT_TYPE_CODE = "eventTypeCode";
+  static final String EVENT_CLASSIFIER = "eventClassifier";
   static final String SHIPMENT_EVENT_TYPE_CODE = "shipmentEventTypeCode";
   static final String SHIPMENT_DETAILS = "shipmentDetails";
   static final String DOCUMENT_REFERENCE = "documentReference";

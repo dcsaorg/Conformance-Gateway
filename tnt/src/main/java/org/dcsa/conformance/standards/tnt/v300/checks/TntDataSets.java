@@ -6,6 +6,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TntDataSets {
 
+  static final Set<String> VALID_EVENT_CLASSIFIERS = Set.of("ACTUAL", "ESTIMATED", "PLANNED");
+
   static final Set<String> VALID_SHIPMENT_EVENT_TYPE_CODES =
       Set.of(
           "AMCF", "AMCN", "AMDC", "AMPR", "AMRE", "APPR", "CACF", "CADC", "CANC", "CARE", "CMPL",

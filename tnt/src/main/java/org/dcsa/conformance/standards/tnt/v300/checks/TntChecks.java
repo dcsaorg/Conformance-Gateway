@@ -1,15 +1,6 @@
 package org.dcsa.conformance.standards.tnt.v300.checks;
 
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.*;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Predicate;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
@@ -21,8 +12,62 @@ import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.DOCUMENT_REFERENCE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EQUIPMENT_DETAILS;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EQUIPMENT_EVENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EQUIPMENT_REFERENCE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENTS;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_CLASSIFICATION;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_CLASSIFIER;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_DATE_TIME;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_ID;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_LOCATION;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_UPDATED_DATE_TIME;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.IOT_DETAILS;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.IOT_EVENT_CODE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.IOT_EVENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.ISO_EQUIPMENT_CODE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.MODE_OF_TRANSPORT;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.RAIL_TRANSPORT;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.REEFER_DETAILS;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.REEFER_EVENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.REFERENCE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.SHIPMENT_DETAILS;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.SHIPMENT_EVENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_CALL;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_DETAILS;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_EVENT_TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRUCK_TRANSPORT;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TYPE_CODE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.VESSEL_IMO_NUMBER;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.VESSEL_NAME;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.VESSEL_TRANSPORT;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.BARGE;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.MULTIMODAL;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.RAIL;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.TRUCK;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.VESSEL;
+
 @UtilityClass
 public class TntChecks {
+
+  private static final Map<TntEventType, Supplier<List<JsonContentCheck>>> EVENT_TYPE_CHECKS = Map.of(
+    TntEventType.SHIPMENT, TntChecks::shipmentEventChecks,
+    TntEventType.TRANSPORT, TntChecks::transportEventChecks,
+    TntEventType.EQUIPMENT, TntChecks::equipmentEventChecks,
+    TntEventType.IOT, TntChecks::iotEventChecks,
+    TntEventType.REEFER, TntChecks::reeferEventChecks
+  );
 
   public static ActionCheck getTntGetResponseChecks(
       UUID matched, String standardVersion, TntEventType eventType) {
@@ -45,24 +90,14 @@ public class TntChecks {
     checks.add(atLeastOneEventHasEventIdCheck());
     checks.add(atLeastOneEventHasEventDateTimeCheck());
     checks.add(atLeastOneEventHasEventUpdatedDateTimeCheck());
+    checks.add(everyEventHasNonEmptyEventClassificationCheck());
+    checks.add(everyEventHasValidEventClassifierCheck());
 
     if (eventType != null) {
       checks.add(atLeastOneEventHasEventTypeCodeCheck(eventType));
-    }
-    if (eventType == null || eventType == TntEventType.SHIPMENT) {
-      checks.addAll(shipmentEventChecks());
-    }
-    if (eventType == null || eventType == TntEventType.TRANSPORT) {
-      checks.addAll(transportEventChecks());
-    }
-    if (eventType == null || eventType == TntEventType.EQUIPMENT) {
-      checks.addAll(equipmentEventChecks());
-    }
-    if (eventType == null || eventType == TntEventType.IOT) {
-      checks.addAll(iotEventChecks());
-    }
-    if (eventType == null || eventType == TntEventType.REEFER) {
-      checks.addAll(reeferEventChecks());
+      checks.addAll(EVENT_TYPE_CHECKS.get(eventType).get());
+    } else {
+      EVENT_TYPE_CHECKS.values().forEach(supplier -> checks.addAll(supplier.get()));
     }
 
     return checks;
@@ -95,6 +130,26 @@ public class TntChecks {
             .formatted(EVENT_UPDATED_DATE_TIME),
         mav -> mav.submitAllMatching(EVENTS + ".*." + EVENT_UPDATED_DATE_TIME),
         JsonAttribute.matchedMustBeNonEmpty());
+  }
+
+  private static JsonContentCheck everyEventHasNonEmptyEventClassificationCheck() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "Every event must demonstrate the correct use of the '%s' object"
+            .formatted(EVENT_CLASSIFICATION),
+        mav -> mav.submitAllMatching(EVENTS + ".*"),
+        JsonAttribute.path(EVENT_CLASSIFICATION, JsonAttribute.matchedMustBeNonEmpty()));
+  }
+
+  private static JsonContentCheck everyEventHasValidEventClassifierCheck() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The '%s' object within every event must demonstrate the correct use of the '%s' attribute (having one of the expected values: %s)"
+            .formatted(EVENT_CLASSIFICATION, EVENT_CLASSIFIER, TntDataSets.VALID_EVENT_CLASSIFIERS),
+        mav -> mav.submitAllMatching(EVENTS + ".*"),
+        JsonAttribute.path(
+            EVENT_CLASSIFICATION,
+            JsonAttribute.path(
+                EVENT_CLASSIFIER,
+                JsonAttribute.matchedMustBeOneOf(TntDataSets.VALID_EVENT_CLASSIFIERS))));
   }
 
   private static JsonContentCheck atLeastOneEventHasEventTypeCodeCheck(TntEventType eventType) {

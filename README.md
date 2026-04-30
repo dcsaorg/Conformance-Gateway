@@ -10,48 +10,63 @@ Background information can be found at [DCSA Conformance](https://developer.dcsa
 DCSA developers can run the Conformance Framework locally, using Spring Boot and Angular.
 Adopters use an AWS deployment of the Conformance Framework managed by DCSA.
 
-## Prerequisites
-- Java 25 or higher
-- Maven 3.9 or higher (Maven wrapper included)
-- Node.js and npm; works with v20 or higher
+---
 
-> **No prerequisites needed if using Docker** — see Docker Compose section below.
+## Running Locally
 
-## Build and Run
+There are two ways to run the application locally. Choose the one that fits your setup:
 
-### Docker Compose (recommended for local use)
-The easiest way to run the full application (backend + frontend) without installing Java or Node.js:
+| | **Option A — Docker** | **Option B — Manual** |
+|---|---|---|
+| **Requires** | Docker Desktop | Java 25+, Maven 3.9+, Node.js 20+ |
+| **Runs** | Backend + Frontend | Backend + Frontend (separately) |
+| **Best for** | Quick setup, adopters | Active development |
+
+---
+
+## Option A — Docker (recommended for quick setup)
+
+> **Only Docker Desktop is required.** No Java, Maven or Node.js needed.
+
 ```sh
 docker compose up --build
 ```
-- Backend API: `http://localhost:8080`
-- Web UI: `http://localhost:4200/environment`
 
-The first build will take a few minutes. Subsequent runs are faster as Docker caches the layers.
+Once running:
+- Web UI → `http://localhost:4200/environment`
+- Backend API → `http://localhost:8080`
 
-### Java (backend only)
-1. Build the project using Maven:
-    ```sh
-    ./mvnw clean package -DskipTests
-    ```
-2. Run the application:
-    ```sh
-    ./mvnw -pl spring-boot -am spring-boot:run
-    ```
+The first build takes a few minutes. Subsequent runs are faster as Docker caches the layers.
 
+---
 
-### Angular and NodeJS Web UI
-1. Navigate to the WebUI project directory:
-    ```sh
-    cd webui/
-    ```
-2. Install dependencies & build & run the Angular application:
-    ```sh
-    npm install
-    npm run ng serve
-    ```
-3. Open a browser and navigate to `http://localhost:4200/environment`
+## Option B — Manual Setup
 
+### Prerequisites
+- Java 25 or higher
+- Maven 3.9 or higher (Maven wrapper included)
+- Node.js and npm (v20 or higher)
+
+### 1. Backend (Spring Boot)
+
+Build and run the backend:
+```sh
+./mvnw clean package -DskipTests
+./mvnw -pl spring-boot -am spring-boot:run
+```
+
+### 2. Frontend (Angular)
+
+In a separate terminal:
+```sh
+cd webui/
+npm install
+npm run ng serve
+```
+
+Then open `http://localhost:4200/environment` in your browser.
+
+---
 
 ## Testing Overview
 

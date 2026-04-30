@@ -27,7 +27,8 @@
       "eventClassification": {
         "eventTypeCode": "EQUIPMENT",
         "eventClassifierCode": "ACT",
-        "equipmentEventTypeCode": "LOAD"
+        "equipmentEventTypeCode": "LOAD",
+        "eventClassifier": "ACTUAL"
       },
       "equipmentDetails": {
         "equipmentReference": "APZU4812090",

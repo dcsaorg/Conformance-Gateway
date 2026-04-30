@@ -20,6 +20,7 @@
       "eventClassification": {
         "eventTypeCode": "REEFER",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "reeferEventTypeCode": "MEAS"
       },
       "equipmentDetails": {

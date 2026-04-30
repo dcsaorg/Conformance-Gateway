@@ -15,6 +15,7 @@
       "eventClassification": {
         "eventTypeCode": "SHIPMENT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "shipmentEventTypeCode": "CONF"
       },
       "shipmentDetails": {

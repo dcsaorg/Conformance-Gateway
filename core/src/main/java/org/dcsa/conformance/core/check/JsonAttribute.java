@@ -400,17 +400,18 @@ public class JsonAttribute {
   }
 
   public static JsonContentMatchedValidation matchedMustBeOneOf(Set<String> allowedValues) {
+    String sortedValues = allowedValues.stream().sorted().collect(Collectors.joining(", "));
     return (node, contextPath) -> {
       if (JsonUtil.isMissingOrEmpty(node)) {
         return ConformanceCheckResult.simple(Set.of(
-          "The value of '%s' must be present and not null"
-            .formatted(contextPath)));
+          "The value of '%s' must be present and must be one of: %s"
+            .formatted(contextPath, sortedValues)));
       }
       String actualValue = node.asText();
       if (!allowedValues.contains(actualValue)) {
         return ConformanceCheckResult.simple(Set.of(
           "The value of '%s' was '%s' but must be one of: %s"
-            .formatted(contextPath, actualValue, String.join(", ", allowedValues))));
+            .formatted(contextPath, actualValue, sortedValues)));
       }
       return ConformanceCheckResult.simple(Set.of());
     };

@@ -15,6 +15,7 @@
       "eventClassification": {
         "eventTypeCode": "SHIPMENT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "shipmentEventTypeCode": "APPR"
       },
       "shipmentDetails": {
@@ -44,6 +45,7 @@
       "eventClassification": {
         "eventTypeCode": "TRANSPORT",
         "eventClassifierCode": "EST",
+        "eventClassifier": "ESTIMATED",
         "transportEventTypeCode": "ARRI"
       },
       "shipmentDetails": {
@@ -102,6 +104,7 @@
       "eventClassification": {
         "eventTypeCode": "EQUIPMENT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "equipmentEventTypeCode": "DISC"
       },
       "equipmentDetails": {
@@ -133,6 +136,7 @@
       "eventClassification": {
         "eventTypeCode": "IOT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "iotEventTypeCode": "DETC"
       },
       "equipmentDetails": {
@@ -163,6 +167,7 @@
       "eventClassification": {
         "eventTypeCode": "REEFER",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "reeferEventTypeCode": "ADJU"
       },
       "equipmentDetails": {

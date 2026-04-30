@@ -15,6 +15,7 @@
       "eventClassification": {
         "eventTypeCode": "SHIPMENT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "shipmentEventTypeCode": "CONF"
       },
       "shipmentDetails": {
@@ -50,6 +51,7 @@
       "eventClassification": {
         "eventTypeCode": "TRANSPORT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "transportEventTypeCode": "DEPA"
       },
       "shipmentDetails": {
@@ -114,6 +116,7 @@
       "eventClassification": {
         "eventTypeCode": "EQUIPMENT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "equipmentEventTypeCode": "GTIN"
       },
       "equipmentDetails": {
@@ -145,6 +148,7 @@
       "eventClassification": {
         "eventTypeCode": "IOT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "iotEventTypeCode": "DETC"
       },
       "equipmentDetails": {
@@ -175,6 +179,7 @@
       "eventClassification": {
         "eventTypeCode": "REEFER",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "reeferEventTypeCode": "MEAS"
       },
       "equipmentDetails": {

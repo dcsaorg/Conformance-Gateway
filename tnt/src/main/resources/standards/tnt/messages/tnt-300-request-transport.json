@@ -20,6 +20,7 @@
       "eventClassification": {
         "eventTypeCode": "TRANSPORT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "transportEventTypeCode": "ARRI"
       },
       "shipmentDetails": {

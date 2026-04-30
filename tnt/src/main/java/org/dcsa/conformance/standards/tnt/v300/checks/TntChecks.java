@@ -142,8 +142,8 @@ public class TntChecks {
 
   private static JsonContentCheck everyEventHasValidEventClassifierCheck() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-        "The '%s' object within every event must demonstrate the correct use of the '%s' attribute (having one of the expected values: %s)"
-            .formatted(EVENT_CLASSIFICATION, EVENT_CLASSIFIER, TntDataSets.VALID_EVENT_CLASSIFIERS),
+        "The '%s' object within every event must demonstrate the correct use of the '%s' attribute"
+            .formatted(EVENT_CLASSIFICATION, EVENT_CLASSIFIER),
         mav -> mav.submitAllMatching(EVENTS + ".*"),
         JsonAttribute.path(
             EVENT_CLASSIFICATION,

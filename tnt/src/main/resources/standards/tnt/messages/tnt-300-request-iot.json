@@ -22,6 +22,7 @@
       "eventClassification": {
         "eventTypeCode": "IOT",
         "eventClassifierCode": "ACT",
+        "eventClassifier": "ACTUAL",
         "iotEventTypeCode": "DETC"
       },
       "equipmentDetails": {

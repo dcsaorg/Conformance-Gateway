@@ -2,12 +2,14 @@
   "events": [
     {
       "eventRouting": {
-        "originatingParty": {
-          "partyCode": "EXCO",
-          "codeListProvider": "SMDG",
-          "codeListName": "LCL",
-          "partyFunction": "CA"
-        }
+        "originatingParties": [
+          {
+            "partyCode": "EXCO",
+            "codeListProvider": "SMDG",
+            "codeListName": "LCL",
+            "partyFunction": "CA"
+          }
+        ]
       },
       "eventID": "evt-equip-001-2026-01-20T14:15:00Z",
       "eventDateTime": "2026-01-20T14:15:00Z",
@@ -15,7 +17,7 @@
       "eventLocation": {
         "locationName": "Example Container Yard",
         "UNLocationCode": "NLRTM",
-        "facilityTypeCode": "DEPO",
+        "facilityType": "DEPOT",
         "address": {
           "street": "Example Boulevard",
           "streetNumber": "123",
@@ -25,10 +27,9 @@
         }
       },
       "eventClassification": {
-        "eventTypeCode": "EQUIPMENT",
-        "eventClassifierCode": "ACT",
-        "equipmentEventTypeCode": "LOAD",
-        "eventClassifier": "ACTUAL"
+        "eventType": "EQUIPMENT",
+        "eventClassifier": "ACTUAL",
+        "equipmentEventType": "LOADED"
       },
       "equipmentDetails": {
         "equipmentReference": "APZU4812090",
@@ -39,4 +40,3 @@
     }
   ]
 }
-

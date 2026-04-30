@@ -161,7 +161,7 @@ public class TntProducer extends ConformanceParty {
                     if (eventClassification.isMissingNode()) {
                       return false;
                     }
-                    String eventTypeCode = eventClassification.path(TntConstants.EVENT_TYPE_CODE).asText();
+                    String eventTypeCode = eventClassification.path(TntConstants.EVENT_TYPE).asText();
                     return eventTypes.stream().anyMatch(type -> type.name().equals(eventTypeCode));
                   })
               .toList();

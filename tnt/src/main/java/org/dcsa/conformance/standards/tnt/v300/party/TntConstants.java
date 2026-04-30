@@ -14,5 +14,4 @@ public class TntConstants {
   public static final String FEEDBACK_ELEMENTS = "feedbackElements";
   public static final String EVENTS = "events";
   public static final String EVENT_CLASSIFICATION = "eventClassification";
-  public static final String EVENT_TYPE_CODE = "eventType";
 }

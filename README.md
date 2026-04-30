@@ -15,9 +15,21 @@ Adopters use an AWS deployment of the Conformance Framework managed by DCSA.
 - Maven 3.9 or higher (Maven wrapper included)
 - Node.js and npm; works with v20 or higher
 
+> **No prerequisites needed if using Docker** — see Docker Compose section below.
+
 ## Build and Run
 
-### Java
+### Docker Compose (recommended for local use)
+The easiest way to run the full application (backend + frontend) without installing Java or Node.js:
+```sh
+docker compose up --build
+```
+- Backend API: `http://localhost:8080`
+- Web UI: `http://localhost:4200/environment`
+
+The first build will take a few minutes. Subsequent runs are faster as Docker caches the layers.
+
+### Java (backend only)
 1. Build the project using Maven:
     ```sh
     ./mvnw clean package -DskipTests
@@ -27,9 +39,6 @@ Adopters use an AWS deployment of the Conformance Framework managed by DCSA.
     ./mvnw -pl spring-boot -am spring-boot:run
     ```
 
-### Docker Compose
-Instead of building the project and running it locally, you can use Docker Compose to run the application.
-Just run `docker compose up` in the root directory of the project. This will build the project and run the application.
 
 ### Angular and NodeJS Web UI
 1. Navigate to the WebUI project directory:

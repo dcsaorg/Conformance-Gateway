@@ -4,3 +4,11 @@ services:
     build: .
     ports:
       - "8080:8080"
+
+  conformance-webui:
+    container_name: conformance-webui
+    build: ./webui
+    ports:
+      - "4200:80"
+    depends_on:
+      - conformance-gateway

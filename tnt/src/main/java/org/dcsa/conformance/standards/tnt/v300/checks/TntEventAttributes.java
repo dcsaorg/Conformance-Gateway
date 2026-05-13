@@ -20,6 +20,7 @@ public class TntEventAttributes {
   static final String EVENT_LOCATION = "eventLocation";
   static final String TRANSPORT_DETAILS = "transportDetails";
   static final String TRANSPORT_CALL = "transportCall";
+  static final String TRANSPORT_CALL_REFERENCE = "transportCallReference";
   static final String MODE_OF_TRANSPORT = "modeOfTransport";
   static final String VESSEL_TRANSPORT = "vesselTransport";
   static final String RAIL_TRANSPORT = "railTransport";

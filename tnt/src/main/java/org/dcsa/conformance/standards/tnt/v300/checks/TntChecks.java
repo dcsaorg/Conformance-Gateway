@@ -44,6 +44,7 @@ import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.SHIPMENT_DETAILS;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.SHIPMENT_EVENT_TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_CALL;
+import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_CALL_REFERENCE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_DETAILS;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_EVENT_TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRUCK_TRANSPORT;
@@ -314,6 +315,20 @@ public class TntChecks {
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.TRANSPORT),
                 JsonAttribute.path(TRANSPORT_DETAILS, JsonAttribute.matchedMustBeNonEmpty()))));
+
+    checks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "The '%s.%s' object within every event of type '%s' must demonstrate the correct use of the '%s' attribute"
+                .formatted(TRANSPORT_DETAILS, TRANSPORT_CALL, TntEventType.TRANSPORT.name(), TRANSPORT_CALL_REFERENCE),
+            mav -> mav.submitAllMatching(EVENTS + ".*"),
+            JsonAttribute.ifMatchedThen(
+                isEventOfType(TntEventType.TRANSPORT),
+                JsonAttribute.path(
+                    TRANSPORT_DETAILS,
+                    JsonAttribute.path(
+                        TRANSPORT_CALL,
+                        JsonAttribute.path(
+                            TRANSPORT_CALL_REFERENCE, JsonAttribute.matchedMustBeNonEmpty()))))));
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(

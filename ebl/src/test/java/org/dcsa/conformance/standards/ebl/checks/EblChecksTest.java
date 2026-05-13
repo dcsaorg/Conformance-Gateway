@@ -16,6 +16,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EblChecks.NUMBER_OF_PACK
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SEND_TO_PLATFORM_CONDITIONAL_CHECK;
+import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SWBS_CANNOT_BE_NEGOTIABLE;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EblChecks.VALIDATE_DOCUMENT_PARTY;
@@ -496,6 +497,43 @@ class EblChecksTest {
     ConformanceCheckResult.ErrorsWithRelevance irrelevantResult =
         (ConformanceCheckResult.ErrorsWithRelevance)
             SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
+  }
+
+  @Test
+  void testSWBsCannotBeNegotiable() {
+    // SWB with isToOrder = false should pass
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    rootNode.put("isToOrder", false);
+    assertTrue(SWBS_CANNOT_BE_NEGOTIABLE.validate(rootNode).getErrorMessages().isEmpty());
+
+    // SWB with isToOrder = true should fail
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    rootNode.put("isToOrder", true);
+    assertFalse(SWBS_CANNOT_BE_NEGOTIABLE.validate(rootNode).getErrorMessages().isEmpty());
+
+    // SWB without isToOrder (defaults to false) should pass
+    rootNode.removeAll();
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    assertTrue(SWBS_CANNOT_BE_NEGOTIABLE.validate(rootNode).getErrorMessages().isEmpty());
+
+    // BOL with isToOrder = true should be irrelevant (not an SWB)
+    rootNode.removeAll();
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("isToOrder", true);
+    ConformanceCheckResult.ErrorsWithRelevance irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            SWBS_CANNOT_BE_NEGOTIABLE.validate(rootNode);
+    assertEquals(1, irrelevantResult.errors().size());
+    assertFalse(irrelevantResult.isRelevant());
+
+    // BOL with isToOrder = false should also be irrelevant
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("isToOrder", false);
+    irrelevantResult =
+        (ConformanceCheckResult.ErrorsWithRelevance)
+            SWBS_CANNOT_BE_NEGOTIABLE.validate(rootNode);
     assertEquals(1, irrelevantResult.errors().size());
     assertFalse(irrelevantResult.isRelevant());
   }

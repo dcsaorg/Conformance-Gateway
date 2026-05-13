@@ -10,39 +10,63 @@ Background information can be found at [DCSA Conformance](https://developer.dcsa
 DCSA developers can run the Conformance Framework locally, using Spring Boot and Angular.
 Adopters use an AWS deployment of the Conformance Framework managed by DCSA.
 
-## Prerequisites
+---
+
+## Running Locally
+
+There are two ways to run the application locally. Choose the one that fits your setup:
+
+| | **Option A — Docker** | **Option B — Manual** |
+|---|---|---|
+| **Requires** | Docker Desktop | Java 25+, Maven 3.9+, Node.js 20+ |
+| **Runs** | Backend + Frontend | Backend + Frontend (separately) |
+| **Best for** | Quick setup, adopters | Active development |
+
+---
+
+## Option A — Docker (recommended for quick setup)
+
+> **Only Docker Desktop is required.** No Java, Maven or Node.js needed.
+
+```sh
+docker compose up --build
+```
+
+Once running:
+- Web UI → `http://localhost:4200/environment`
+- Backend API → `http://localhost:8080`
+
+The first build takes a few minutes. Subsequent runs are faster as Docker caches the layers.
+
+---
+
+## Option B — Manual Setup
+
+### Prerequisites
 - Java 25 or higher
 - Maven 3.9 or higher (Maven wrapper included)
-- Node.js and npm; works with v20 or higher
+- Node.js and npm (v20 or higher)
 
-## Build and Run
+### 1. Backend (Spring Boot)
 
-### Java
-1. Build the project using Maven:
-    ```sh
-    ./mvnw clean package -DskipTests
-    ```
-2. Run the application:
-    ```sh
-    ./mvnw -pl spring-boot -am spring-boot:run
-    ```
+Build and run the backend:
+```sh
+./mvnw clean package -DskipTests
+./mvnw -pl spring-boot -am spring-boot:run
+```
 
-### Docker Compose
-Instead of building the project and running it locally, you can use Docker Compose to run the application.
-Just run `docker compose up` in the root directory of the project. This will build the project and run the application.
+### 2. Frontend (Angular)
 
-### Angular and NodeJS Web UI
-1. Navigate to the WebUI project directory:
-    ```sh
-    cd webui/
-    ```
-2. Install dependencies & build & run the Angular application:
-    ```sh
-    npm install
-    npm run ng serve
-    ```
-3. Open a browser and navigate to `http://localhost:4200/environment`
+In a separate terminal:
+```sh
+cd webui/
+npm install
+npm run ng serve
+```
 
+Then open `http://localhost:4200/environment` in your browser.
+
+---
 
 ## Testing Overview
 

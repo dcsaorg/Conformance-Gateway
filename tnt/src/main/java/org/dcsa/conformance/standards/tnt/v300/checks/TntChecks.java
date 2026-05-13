@@ -94,7 +94,7 @@ public class TntChecks {
     checks.add(everyEventHasValidEventClassifierCheck());
 
     if (eventType != null) {
-      checks.add(atLeastOneEventHasEventTypeCodeCheck(eventType));
+      checks.add(atLeastOneEventHasEventTypeCheck(eventType));
       checks.addAll(EVENT_TYPE_CHECKS.get(eventType).get());
     } else {
       EVENT_TYPE_CHECKS.values().forEach(supplier -> checks.addAll(supplier.get()));
@@ -152,7 +152,7 @@ public class TntChecks {
                 JsonAttribute.matchedMustBeOneOf(TntDataSets.VALID_EVENT_CLASSIFIERS))));
   }
 
-  private static JsonContentCheck atLeastOneEventHasEventTypeCodeCheck(TntEventType eventType) {
+  private static JsonContentCheck atLeastOneEventHasEventTypeCheck(TntEventType eventType) {
     return JsonAttribute.atLeastOneIndividualMatchMustBeValid(
         "At least one event must be of type %s".formatted(eventType),
         mav -> mav.submitAllMatching(EVENTS + ".*." + EVENT_CLASSIFICATION + "." + EVENT_TYPE),

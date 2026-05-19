@@ -67,19 +67,6 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
                 "GET /events - Filter events using additional query parameters",
                 noAction()
                     .thenEither(
-                        supplyScenarioParameters(TntQueryParameters.CBR, TntQueryParameters.ET)
-                            .then(getTntEvents()),
-                        supplyScenarioParameters(
-                                TntQueryParameters.CBR, TntQueryParameters.E_UDT_MIN)
-                            .then(getTntEvents()),
-                        supplyScenarioParameters(
-                                TntQueryParameters.CBR, TntQueryParameters.E_UDT_MAX)
-                            .then(getTntEvents()),
-                        supplyScenarioParameters(
-                                TntQueryParameters.CBR,
-                                TntQueryParameters.E_UDT_MIN,
-                                TntQueryParameters.E_UDT_MAX)
-                            .then(getTntEvents()),
                         supplyScenarioParameters(
                                 TntQueryParameters.CBR,
                                 TntQueryParameters.ET,
@@ -87,7 +74,7 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
                                 TntQueryParameters.E_UDT_MAX)
                             .then(getTntEvents()))),
             Map.entry(
-                "GET /events - Validate pagination with cursor-based navigation",
+                "GET /events - Validate pagination with cursor-based navigation (optional)",
                 noAction()
                     .thenEither(
                         supplyScenarioParameters(TntQueryParameters.CBR, TntQueryParameters.LIMIT)

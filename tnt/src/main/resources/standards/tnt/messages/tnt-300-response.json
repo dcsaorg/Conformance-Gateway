@@ -2,29 +2,31 @@
   "events": [
     {
       "eventRouting": {
-        "originatingParty": {
-          "partyCode": "EXCO",
-          "codeListProvider": "SMDG",
-          "codeListName": "LCL",
-          "partyFunction": "CA"
-        }
+        "originatingParties": [
+          {
+            "partyCode": "EXCO",
+            "codeListProvider": "SMDG",
+            "codeListName": "LCL",
+            "partyFunction": "CA"
+          }
+        ]
       },
       "eventID": "evt-resp-ship-001",
       "eventDateTime": "2026-01-15T09:00:00Z",
       "eventUpdatedDateTime": "2025-01-23T01:23:45Z",
       "eventClassification": {
-        "eventTypeCode": "SHIPMENT",
-        "eventClassifierCode": "ACT",
-        "shipmentEventTypeCode": "CONF"
+        "eventType": "SHIPMENT",
+        "eventClassifier": "ACTUAL",
+        "shipmentEventType": "CONFIRMED"
       },
       "shipmentDetails": {
         "documentReference": {
-          "typeCode": "BKG",
+          "type": "BOOKING",
           "reference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER"
         },
         "additionalDocumentReferences": [
           {
-            "typeCode": "TRD",
+            "type": "TRANSPORT_DOCUMENT",
             "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
           }
         ]
@@ -32,12 +34,14 @@
     },
     {
       "eventRouting": {
-        "originatingParty": {
-          "partyCode": "EXCO",
-          "codeListProvider": "SMDG",
-          "codeListName": "LCL",
-          "partyFunction": "CA"
-        }
+        "originatingParties": [
+          {
+            "partyCode": "EXCO",
+            "codeListProvider": "SMDG",
+            "codeListName": "LCL",
+            "partyFunction": "CA"
+          }
+        ]
       },
       "eventID": "evt-resp-trans-001",
       "eventDateTime": "2026-01-16T11:30:00Z",
@@ -45,21 +49,21 @@
       "eventLocation": {
         "locationName": "Example Terminal Alpha",
         "UNLocationCode": "GBSOU",
-        "facilityTypeCode": "POTE"
+        "facilityType": "PORT_TERMINAL"
       },
       "eventClassification": {
-        "eventTypeCode": "TRANSPORT",
-        "eventClassifierCode": "ACT",
-        "transportEventTypeCode": "DEPA"
+        "eventType": "TRANSPORT",
+        "eventClassifier": "ACTUAL",
+        "transportEventType": "DEPARTED"
       },
       "shipmentDetails": {
         "documentReference": {
-          "typeCode": "BKG",
+          "type": "BOOKING",
           "reference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER"
         },
         "additionalDocumentReferences": [
           {
-            "typeCode": "TRD",
+            "type": "TRANSPORT_DOCUMENT",
             "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
           }
         ]
@@ -89,12 +93,14 @@
     },
     {
       "eventRouting": {
-        "originatingParty": {
-          "partyCode": "EXCO",
-          "codeListProvider": "SMDG",
-          "codeListName": "LCL",
-          "partyFunction": "CA"
-        }
+        "originatingParties": [
+          {
+            "partyCode": "EXCO",
+            "codeListProvider": "SMDG",
+            "codeListName": "LCL",
+            "partyFunction": "CA"
+          }
+        ]
       },
       "eventID": "evt-resp-equip-001",
       "eventDateTime": "2026-01-17T13:45:00Z",
@@ -102,7 +108,7 @@
       "eventLocation": {
         "locationName": "Example Warehouse Facility",
         "UNLocationCode": "FRPAR",
-        "facilityTypeCode": "DEPO",
+        "facilityType": "DEPOT",
         "address": {
           "street": "Sample Avenue",
           "streetNumber": "456",
@@ -112,9 +118,9 @@
         }
       },
       "eventClassification": {
-        "eventTypeCode": "EQUIPMENT",
-        "eventClassifierCode": "ACT",
-        "equipmentEventTypeCode": "GTIN"
+        "eventType": "EQUIPMENT",
+        "eventClassifier": "ACTUAL",
+        "equipmentEventType": "GATED_IN"
       },
       "equipmentDetails": {
         "equipmentReference": "APZU4812090",
@@ -125,12 +131,14 @@
     },
     {
       "eventRouting": {
-        "originatingParty": {
-          "partyCode": "EXCO",
-          "codeListProvider": "SMDG",
-          "codeListName": "LCL",
-          "partyFunction": "CA"
-        }
+        "originatingParties": [
+          {
+            "partyCode": "EXCO",
+            "codeListProvider": "SMDG",
+            "codeListName": "LCL",
+            "partyFunction": "CA"
+          }
+        ]
       },
       "eventID": "evt-resp-iot-001",
       "eventDateTime": "2026-01-18T15:20:00Z",
@@ -143,26 +151,28 @@
         }
       },
       "eventClassification": {
-        "eventTypeCode": "IOT",
-        "eventClassifierCode": "ACT",
-        "iotEventTypeCode": "DETC"
+        "eventType": "IOT",
+        "eventClassifier": "ACTUAL",
+        "iotEventType": "GEOFENCE_ENTRY"
       },
       "equipmentDetails": {
         "equipmentReference": "APZU4812090",
         "ISOEquipmentCode": "22GP"
       },
       "iotDetails": {
-        "iotEventCode": "LOC"
+        "iotEquipmentTechnology": "SMART_CONTAINER"
       }
     },
     {
       "eventRouting": {
-        "originatingParty": {
-          "partyCode": "EXCO",
-          "codeListProvider": "SMDG",
-          "codeListName": "LCL",
-          "partyFunction": "CA"
-        }
+        "originatingParties": [
+          {
+            "partyCode": "EXCO",
+            "codeListProvider": "SMDG",
+            "codeListName": "LCL",
+            "partyFunction": "CA"
+          }
+        ]
       },
       "eventID": "evt-resp-reefer-001",
       "eventDateTime": "2026-01-19T17:00:00Z",
@@ -170,12 +180,12 @@
       "eventLocation": {
         "locationName": "Cold Storage Facility",
         "UNLocationCode": "BEANR",
-        "facilityTypeCode": "COFS"
+        "facilityType": "DEPOT"
       },
       "eventClassification": {
-        "eventTypeCode": "REEFER",
-        "eventClassifierCode": "ACT",
-        "reeferEventTypeCode": "MEAS"
+        "eventType": "REEFER",
+        "eventClassifier": "ACTUAL",
+        "reeferEventType": "MEASURED"
       },
       "equipmentDetails": {
         "equipmentReference": "APZU4812090",

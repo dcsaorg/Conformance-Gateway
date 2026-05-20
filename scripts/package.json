@@ -17,16 +17,19 @@
     "list-user-sandboxes": "ts-node src/scripts/list-user-sandboxes.ts",
     "query-dynamodb": "ts-node src/scripts/query-dynamodb.ts"
   },
+  "overrides": {
+    "fast-xml-parser": "^5.7.0",
+    "fast-xml-builder": "^1.1.7"
+  },
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.787.0",
-    "@aws-sdk/client-dynamodb": "^3.787.0",
-    "@aws-sdk/util-dynamodb": "^3.787.0",
-    "dotenv": "^16.5.0"
+    "@aws-sdk/client-cognito-identity-provider": "^3.1050.0",
+    "@aws-sdk/client-dynamodb": "^3.1050.0",
+    "@aws-sdk/util-dynamodb": "^3.996.2",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
-    "@types/node": "^22.15.3",
+    "@types/node": "^25.9.1",
     "ts-node": "^10.9.2",
-    "typescript": "~5.8.3"
+    "typescript": "~6.0.3"
   }
 }
-

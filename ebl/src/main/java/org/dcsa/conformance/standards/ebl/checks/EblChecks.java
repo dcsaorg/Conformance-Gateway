@@ -316,6 +316,27 @@ public class EblChecks {
           JsonAttribute.mustEqual(
               JsonPointer.compile(S.formatted(TRANSPORT_DOCUMENT_TYPE_CODE)), BOL));
 
+  static final JsonRebasableContentCheck SWBS_CANNOT_BE_NEGOTIABLE =
+      JsonAttribute.ifThen(
+          "Validate '%s' vs '%s' for SWBs.".formatted(TRANSPORT_DOCUMENT_TYPE_CODE, IS_TO_ORDER),
+          node -> SWB.equals(node.path(TRANSPORT_DOCUMENT_TYPE_CODE).asText("")),
+          JsonAttribute.customValidator(
+              "SWBs cannot be negotiable - '%s' must be false or absent".formatted(IS_TO_ORDER),
+              (node, contextPath) -> {
+                boolean isToOrder = node.path(IS_TO_ORDER).asBoolean(false);
+                if (isToOrder) {
+                  return ConformanceCheckResult.simple(
+                      Set.of(
+                          "The '%s' must be false (or absent) when '%s' is '%s', but was true at '%s'."
+                              .formatted(
+                                  IS_TO_ORDER,
+                                  TRANSPORT_DOCUMENT_TYPE_CODE,
+                                  SWB,
+                                  concatContextPath(contextPath, IS_TO_ORDER))));
+                }
+                return ConformanceCheckResult.simple(Set.of());
+              }));
+
   private static final Predicate<JsonNode> IS_ELECTRONIC_PREDICATE =
       td -> td.path(IS_ELECTRONIC).asBoolean(false);
 
@@ -1144,6 +1165,7 @@ public class EblChecks {
           VALID_PARTY_FUNCTION,
           VALID_PARTY_FUNCTION_HBL,
           ONLY_EBLS_CAN_BE_NEGOTIABLE,
+          SWBS_CANNOT_BE_NEGOTIABLE,
           EBL_AT_MOST_ONE_ORIGINAL_TOTAL,
           EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
           EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
@@ -1172,6 +1194,7 @@ public class EblChecks {
   private static final List<JsonRebasableContentCheck> STATIC_TD_CHECKS =
       Arrays.asList(
           ONLY_EBLS_CAN_BE_NEGOTIABLE,
+          SWBS_CANNOT_BE_NEGOTIABLE,
           EBL_AT_MOST_ONE_ORIGINAL_TOTAL,
           EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
           EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,

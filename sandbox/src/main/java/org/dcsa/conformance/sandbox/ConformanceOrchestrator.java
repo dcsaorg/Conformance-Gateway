@@ -203,10 +203,17 @@ public class ConformanceOrchestrator implements StatefulEntity {
     waitingForBiConsumer.accept(
         partyName, "perform action '%s'".formatted(nextAction.getActionTitle()));
 
+    var counterpartUrl = counterpartConfiguration.getUrl();
+    if (counterpartUrl == null || counterpartUrl.isBlank()) {
+      log.info(
+          "Skipping party notification: counterpart %s has no URL configured".formatted(partyName));
+      return;
+    }
+
     asyncWebClient.accept(
         new ConformanceWebRequest(
             "GET",
-            counterpartConfiguration.getUrl() + "/conformance/notification",
+            counterpartUrl.getValue() + "/conformance/notification",
             Collections.emptyMap(),
             counterpartConfiguration.getAuthHeaderName().isBlank()
                 ? Collections.emptyMap()

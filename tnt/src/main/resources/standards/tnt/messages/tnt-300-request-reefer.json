@@ -2,12 +2,14 @@
   "events": [
     {
       "eventRouting": {
-        "originatingParty": {
-          "partyCode": "EXCO",
-          "codeListProvider": "SMDG",
-          "codeListName": "LCL",
-          "partyFunction": "CA"
-        }
+        "originatingParties": [
+          {
+            "partyCode": "EXCO",
+            "codeListProvider": "SMDG",
+            "codeListName": "LCL",
+            "partyFunction": "CA"
+          }
+        ]
       },
       "eventID": "evt-reefer-001-2026-01-20T18:00:00Z",
       "eventDateTime": "2026-01-20T18:00:00Z",
@@ -15,12 +17,12 @@
       "eventLocation": {
         "locationName": "Reefer Monitoring Station",
         "UNLocationCode": "USNYC",
-        "facilityTypeCode": "POTE"
+        "facilityType": "PORT_TERMINAL"
       },
       "eventClassification": {
-        "eventTypeCode": "REEFER",
-        "eventClassifierCode": "ACT",
-        "reeferEventTypeCode": "MEAS"
+        "eventType": "REEFER",
+        "eventClassifier": "ACTUAL",
+        "reeferEventType": "MEASURED"
       },
       "equipmentDetails": {
         "equipmentReference": "APZU4812090",
@@ -49,4 +51,3 @@
     }
   ]
 }
-

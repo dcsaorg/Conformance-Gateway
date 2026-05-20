@@ -229,8 +229,8 @@ public abstract class ConformanceParty implements StatefulEntity {
   }
 
   protected void asyncCounterpartNotification(String actionId, String path, JsonNode jsonBody) {
-    String counterpartBaseUrl = counterpartConfiguration.getUrl();
-    if (counterpartBaseUrl != null && !counterpartBaseUrl.isEmpty()) {
+    var counterpartUrl = counterpartConfiguration.getUrl();
+    if (counterpartUrl != null && !counterpartUrl.isBlank()) {
       webClient.asyncRequest(
           _createConformanceRequest(true, "POST", path, Collections.emptyMap(), jsonBody));
     } else {
@@ -299,7 +299,17 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   private String _getCounterpartUrl(
       CounterpartConfiguration counterpartConfiguration, String method, String path) {
-    var url = counterpartConfiguration.getUrl() + path;
+    // If path is already a full URL (e.g., orchestrator URL), use it directly
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path;
+    }
+    var counterpartUrl = counterpartConfiguration.getUrl();
+    if (counterpartUrl == null || counterpartUrl.isBlank()) {
+      throw new IllegalStateException(
+          "Cannot create request URL: counterpart '%s' has no URL configured"
+              .formatted(counterpartConfiguration.getName()));
+    }
+    var url = counterpartUrl.getValue() + path;
     EndpointUriOverrideConfiguration[] endpointUriOverrideConfigurations =
         counterpartConfiguration.getEndpointUriOverrideConfigurations();
     if (endpointUriOverrideConfigurations != null) {

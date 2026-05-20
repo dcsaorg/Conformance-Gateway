@@ -2,12 +2,14 @@
   "events": [
     {
       "eventRouting": {
-        "originatingParty": {
-          "partyCode": "EXCO",
-          "codeListProvider": "SMDG",
-          "codeListName": "LCL",
-          "partyFunction": "CA"
-        }
+        "originatingParties": [
+          {
+            "partyCode": "EXCO",
+            "codeListProvider": "SMDG",
+            "codeListName": "LCL",
+            "partyFunction": "CA"
+          }
+        ]
       },
       "eventID": "evt-trans-001-2026-01-20T12:30:00Z",
       "eventDateTime": "2026-01-20T12:30:00Z",
@@ -15,21 +17,21 @@
       "eventLocation": {
         "locationName": "Sample Port Terminal",
         "UNLocationCode": "DEHAM",
-        "facilityTypeCode": "POTE"
+        "facilityType": "PORT_TERMINAL"
       },
       "eventClassification": {
-        "eventTypeCode": "TRANSPORT",
-        "eventClassifierCode": "ACT",
-        "transportEventTypeCode": "ARRI"
+        "eventType": "TRANSPORT",
+        "eventClassifier": "ACTUAL",
+        "transportEventType": "ARRIVED"
       },
       "shipmentDetails": {
         "documentReference": {
-          "typeCode": "BKG",
+          "type": "BOOKING",
           "reference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER"
         },
         "additionalDocumentReferences": [
           {
-            "typeCode": "TRD",
+            "type": "TRANSPORT_DOCUMENT",
             "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
           }
         ]
@@ -59,4 +61,3 @@
     }
   ]
 }
-

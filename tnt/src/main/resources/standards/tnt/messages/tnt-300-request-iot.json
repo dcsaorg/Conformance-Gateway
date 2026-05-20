@@ -2,12 +2,14 @@
   "events": [
     {
       "eventRouting": {
-        "originatingParty": {
-          "partyCode": "EXCO",
-          "codeListProvider": "SMDG",
-          "codeListName": "LCL",
-          "partyFunction": "CA"
-        }
+        "originatingParties": [
+          {
+            "partyCode": "EXCO",
+            "codeListProvider": "SMDG",
+            "codeListName": "LCL",
+            "partyFunction": "CA"
+          }
+        ]
       },
       "eventID": "evt-iot-001-2026-01-20T16:45:00Z",
       "eventDateTime": "2026-01-20T16:45:00Z",
@@ -20,18 +22,17 @@
         }
       },
       "eventClassification": {
-        "eventTypeCode": "IOT",
-        "eventClassifierCode": "ACT",
-        "iotEventTypeCode": "DETC"
+        "eventType": "IOT",
+        "eventClassifier": "ACTUAL",
+        "iotEventType": "DOOR_OPENED"
       },
       "equipmentDetails": {
         "equipmentReference": "APZU4812090",
         "ISOEquipmentCode": "22GP"
       },
       "iotDetails": {
-        "iotEventCode": "DRO"
+        "iotEquipmentTechnology": "SMART_CONTAINER"
       }
     }
   ]
 }
-

@@ -55,6 +55,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
           arrayNode.add(entryNode);
         });
     targetObjectNode.set("eblStatesById", arrayNode);
+    targetObjectNode.put("errorScenario", errorScenario);
   }
 
   @Override
@@ -65,6 +66,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
                 eblStatesById.put(
                     entryNode.get("key").asText(),
                     EblSurrenderState.valueOf(entryNode.get("value").asText())));
+    errorScenario = sourceObjectNode.get("errorScenario").asBoolean(false);
   }
 
   @Override

@@ -26,7 +26,7 @@ import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestRespon
 @Slf4j
 public class EblSurrenderPlatform extends ConformanceParty {
 
-  public static final String INVALID_TDR = ReferenceGenerator.newReference();
+  public static final String INVALID_TDR = "CONFORMANCE-INVALID-TDR";
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
   private final Map<String, String> tdrsBySrr = new HashMap<>();
 

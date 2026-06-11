@@ -126,12 +126,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
         "EblSurrenderCarrier.supplyErrorScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
 
-    ObjectNode errorBody =
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("surrenderRequestCode", "SREQ")
-            .put("surrenderRequestReference", "*")
-            .put("transportDocumentReference", EblSurrenderPlatform.INVALID_TDR);
+    ObjectNode errorBody = getExampleJsonBody();
 
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), errorBody);
@@ -139,6 +134,14 @@ public class EblSurrenderCarrier extends ConformanceParty {
     addOperatorLogEntry(
         "Submitting error scenario body (transportDocumentReference='%s')"
             .formatted(EblSurrenderPlatform.INVALID_TDR));
+  }
+
+  public static ObjectNode getExampleJsonBody() {
+    return OBJECT_MAPPER
+        .createObjectNode()
+      .put("surrenderRequestReference", "EXAMPLE_SRR")
+      .put("surrenderRequestCode", "SREQ")
+      .put("transportDocumentReference", EblSurrenderPlatform.INVALID_TDR);
   }
 
   @Override

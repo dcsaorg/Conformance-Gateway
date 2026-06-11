@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderCarrier;
 
 import java.util.Map;
 
@@ -49,7 +50,7 @@ public class SupplyScenarioParametersErrorAction extends ConformanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return OBJECT_MAPPER.createObjectNode();
+    return EblSurrenderCarrier.getExampleJsonBody();
   }
 
   @Override

@@ -1,6 +1,8 @@
 Please provide the information required to trigger an error in your system when processing an eBL surrender request.
 
-This scenario is intended to validate your system’s error-handling behavior. There are no mandatory fields for this request, so you may provide any valid or invalid request data that causes your system to reject the surrender request.
+This scenario is intended to validate your system’s error handling behavior. Bellow we provide a very basic payload
+example, but there are no mandatory fields for this request, so you may provide any valid or invalid request data that
+causes your system to throw an error.
 
 For the full request structure, refer to the DCSA eBL Surrender API schema.
 

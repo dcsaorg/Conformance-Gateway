@@ -22,11 +22,12 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersErrorAction;
 
 @Slf4j
 public class EblSurrenderCarrier extends ConformanceParty {
+
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
-  private boolean errorScenario;
 
   public EblSurrenderCarrier(
       String apiVersion,
@@ -55,7 +56,6 @@ public class EblSurrenderCarrier extends ConformanceParty {
           arrayNode.add(entryNode);
         });
     targetObjectNode.set("eblStatesById", arrayNode);
-    targetObjectNode.put("errorScenario", errorScenario);
   }
 
   @Override
@@ -66,7 +66,6 @@ public class EblSurrenderCarrier extends ConformanceParty {
                 eblStatesById.put(
                     entryNode.get("key").asText(),
                     EblSurrenderState.valueOf(entryNode.get("value").asText())));
-    errorScenario = sourceObjectNode.get("errorScenario").asBoolean(false);
   }
 
   @Override
@@ -77,16 +76,16 @@ public class EblSurrenderCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
+        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(SupplyScenarioParametersErrorAction.class, this::supplyErrorScenarioParameters));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info(
-        "EblSurrenderPlatform.supplyScenarioParameters(%s)"
+        "EblSurrenderCarrier.supplyScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
 
     String tdr = ReferenceGenerator.newReference();
-    errorScenario = actionPrompt.get("errorScenario").asBoolean(false);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     persistentMap.save("response", actionPrompt.get("response"));
 
@@ -122,6 +121,26 @@ public class EblSurrenderCarrier extends ConformanceParty {
             .formatted(suppliedScenarioParameters.toJson().toPrettyString()));
   }
 
+  private void supplyErrorScenarioParameters(JsonNode actionPrompt) {
+    log.info(
+        "EblSurrenderCarrier.supplyErrorScenarioParameters(%s)"
+            .formatted(actionPrompt.toPrettyString()));
+
+    ObjectNode errorBody =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("surrenderRequestCode", "SREQ")
+            .put("surrenderRequestReference", "*")
+            .put("transportDocumentReference", EblSurrenderPlatform.INVALID_TDR);
+
+    asyncOrchestratorPostPartyInput(
+        actionPrompt.required("actionId").asText(), errorBody);
+
+    addOperatorLogEntry(
+        "Submitting error scenario body (transportDocumentReference='%s')"
+            .formatted(EblSurrenderPlatform.INVALID_TDR));
+  }
+
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblSurrenderCarrier.handleRequest(%s)".formatted(request));
@@ -138,11 +157,16 @@ public class EblSurrenderCarrier extends ConformanceParty {
       action = persistentMap.load("response").asText();
     }
 
-      eblStatesById.put(
-          tdr,
-          Objects.equals("AREQ", src)
-              ? EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED
-              : EblSurrenderState.DELIVERY_SURRENDER_REQUESTED);
+    if (tdr.equals(EblSurrenderPlatform.INVALID_TDR)) {
+      return return409(
+          request, "Simulated error response for surrender request reference '%s'".formatted(srr));
+    }
+
+    eblStatesById.put(
+        tdr,
+        Objects.equals("AREQ", src)
+            ? EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED
+            : EblSurrenderState.DELIVERY_SURRENDER_REQUESTED);
 
     var carrierResponse =
         OBJECT_MAPPER
@@ -151,14 +175,9 @@ public class EblSurrenderCarrier extends ConformanceParty {
             .put("action", action);
     asyncCounterpartNotification(null, "/v3/ebl-surrender-responses", carrierResponse);
 
-      addOperatorLogEntry(
-          "Handling surrender request with surrenderRequestCode '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-              .formatted(src, srr, tdr, eblStatesById.get(tdr)));
-
-    if (errorScenario || tdr.equals(EblSurrenderPlatform.INVALID_TDR)) {
-      return return409(
-          request, "Simulated error response for surrender request reference '%s'".formatted(srr));
-    }
+    addOperatorLogEntry(
+        "Handling surrender request with surrenderRequestCode '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
+            .formatted(src, srr, tdr, eblStatesById.get(tdr)));
 
     return request.createResponse(
         204,

@@ -1,14 +1,4 @@
-Send a surrender request from your platform to the synthetic carrier for an eBL that is **not available for surrender**.
+This scenario is intended to validate that the carrier system returns an error response that conforms to the DCSA eBL
+Surrender API standard.
 
-### What Happens:
-
-1. **Your platform sends**: POST request to `/ebl-surrender-requests` with the surrender request details
-2. **Synthetic carrier responds**: HTTP 400 (Bad Request) or HTTP 409 (Conflict) with an error response
-3. **Conformance validates**: Your platform's request conforms to the DCSA eBL Surrender API standard and properly handles the error response
-
-### Next Steps:
-
-Press **"Refresh status"** to update the scenario status and view conformance check results.
-
-Press **"Action completed"** when you have sent the request and handled the error response.
-
+This is a carrier side scenario only. You do not need to perform this action or execute this scenario.

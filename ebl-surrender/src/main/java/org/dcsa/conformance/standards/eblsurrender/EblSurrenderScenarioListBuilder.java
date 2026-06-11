@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersErrorAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseErrorAction;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
@@ -51,7 +52,7 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
                                 requestSurrenderForAmendmentAnd(false)))),
             Map.entry(
                 "Carrier error response conformance",
-                supplyAvailableTdrErrorAction("SURR").then(requestSurrenderError())))
+                supplyAvailableTdrErrorAction().then(requestSurrenderError())))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -61,20 +62,20 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
     return new EblSurrenderScenarioListBuilder(null);
   }
 
-  private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction(String response) {
-    return supplyAvailableTdrAction(response, false);
-  }
+  private static EblSurrenderScenarioListBuilder supplyAvailableTdrErrorAction() {
+    log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrErrorAction()");
 
-  private static EblSurrenderScenarioListBuilder supplyAvailableTdrErrorAction(String response) {
-    return supplyAvailableTdrAction(response, true);
-  }
-
-  private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction(
-      String response, boolean isErrorScenario) {
-    log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrAction()");
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblSurrenderScenarioListBuilder(
-        _ -> new SupplyScenarioParametersAction(carrierPartyName, null, response, isErrorScenario));
+      _ -> new SupplyScenarioParametersErrorAction(carrierPartyName));
+  }
+
+  private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction(String response) {
+    log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrAction()");
+
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    return new EblSurrenderScenarioListBuilder(
+        _ -> new SupplyScenarioParametersAction(carrierPartyName, null, response, false));
   }
 
   private static EblSurrenderScenarioListBuilder requestSurrenderForAmendmentAnd(boolean accept) {

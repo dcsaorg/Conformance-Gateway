@@ -70,7 +70,17 @@ public class EblSurrenderPlatform extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(SurrenderRequestResponseAction.class, this::requestSurrender),
-        Map.entry(SurrenderRequestResponseErrorAction.class, this::requestSurrender));
+        Map.entry(SurrenderRequestResponseErrorAction.class, this::requestErrorSurrender));
+  }
+
+  private void requestErrorSurrender(JsonNode actionPrompt) {
+    log.info("EblSurrenderPlatform.requestErrorSurrender(%s)".formatted(actionPrompt.toPrettyString()));
+
+    JsonNode inputBody = actionPrompt.get("inputBody");
+
+    syncCounterpartPost("/v%s/ebl-surrender-requests".formatted(apiVersion.charAt(0)), inputBody);
+
+    addOperatorLogEntry("Sent an invalid surrender request with body: %s".formatted(inputBody));
   }
 
   private void requestSurrender(JsonNode actionPrompt) {
@@ -110,14 +120,6 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry(
                     "SURRENDER_ACTION_CODE_PLACEHOLDER",
                     forAmendment ? "SURRENDER_FOR_AMENDMENT" : "SURRENDER_FOR_DELIVERY")));
-
-    boolean errorScenario =
-        actionPrompt
-            .path(SurrenderRequestResponseErrorAction.SEND_NO_TRANSPORT_DOCUMENT_REFERENCE)
-            .asBoolean(false);
-    if (errorScenario) {
-      ((ObjectNode) jsonRequestBody).put("transportDocumentReference", INVALID_TDR);
-    }
 
     syncCounterpartPost(
         "/v%s/ebl-surrender-requests".formatted(apiVersion.charAt(0)), jsonRequestBody);

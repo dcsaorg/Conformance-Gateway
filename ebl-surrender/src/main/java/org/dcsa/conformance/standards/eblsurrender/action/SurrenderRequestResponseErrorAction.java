@@ -1,8 +1,9 @@
 package org.dcsa.conformance.standards.eblsurrender.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -18,13 +19,9 @@ import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
 @Getter
 @Slf4j
-public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
+public class SurrenderRequestResponseErrorAction extends ConformanceAction {
 
-  public static final String SEND_NO_TRANSPORT_DOCUMENT_REFERENCE =
-      "sendNoTransportDocumentReference";
-
-  private final AtomicReference<String> surrenderRequestReference = new AtomicReference<>();
-  private final Supplier<String> srrSupplier = surrenderRequestReference::get;
+  private final Supplier<JsonNode> inputBodySupplier;
   private final JsonSchemaValidator responseSchemaValidator;
 
   public SurrenderRequestResponseErrorAction(
@@ -35,27 +32,21 @@ public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
     super(
         platformPartyName,
         carrierPartyName,
-        400,
         previousAction,
-        "SurrenderForDelivery (not available for surrender)");
+        "Surrender (Error)");
     this.responseSchemaValidator = responseSchemaValidator;
-  }
-
-  @Override
-  public Supplier<String> getSrrSupplier() {
-    return srrSupplier;
+    this.inputBodySupplier = findInputBodySupplier(previousAction);
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownHumanReadablePrompt(Map.of(), "prompt-surrender-reqres-error.md");
+    return EblSurrenderAction.getMarkdownHumanReadablePrompt(
+        Map.of(), "prompt-surrender-reqres-error.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode()
-        .put("forAmendment", false)
-        .put(SEND_NO_TRANSPORT_DOCUMENT_REFERENCE, true);
+    return super.asJsonNode().set("inputBody", inputBodySupplier.get());
   }
 
   @Override
@@ -82,5 +73,11 @@ public class SurrenderRequestResponseErrorAction extends EblSurrenderAction {
                 responseSchemaValidator));
       }
     };
+  }
+
+  private static Supplier<JsonNode> findInputBodySupplier(ConformanceAction action) {
+    return action instanceof SupplyScenarioParametersErrorAction errorSupplyAction
+      ? errorSupplyAction::getInputBody
+      : findInputBodySupplier(action.getPreviousAction());
   }
 }

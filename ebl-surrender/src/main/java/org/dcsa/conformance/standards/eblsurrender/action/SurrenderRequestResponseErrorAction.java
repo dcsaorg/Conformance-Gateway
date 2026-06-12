@@ -2,10 +2,6 @@ package org.dcsa.conformance.standards.eblsurrender.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
@@ -16,6 +12,10 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
+
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Getter
 @Slf4j

@@ -8,8 +8,6 @@ import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderCarrier;
 
 import java.util.Map;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 @Getter
 public class SupplyScenarioParametersErrorAction extends ConformanceAction {
 
@@ -61,5 +59,9 @@ public class SupplyScenarioParametersErrorAction extends ConformanceAction {
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
     inputBody = partyInput.get("input");
+  }
+
+  public Map<String, Boolean> getExpectedInputAttributes() {
+    return Map.of();
   }
 }

@@ -27,6 +27,10 @@ import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParamete
 @Slf4j
 public class EblSurrenderCarrier extends ConformanceParty {
 
+  private static final String PLACEHOLDER_TDR = "PLACEHOLDER_TDR";
+  public static final String PLACEHOLDER_SRR = "PLACEHOLDER_SRR";
+  public static final String PLACEHOLDER_SRC = "PLACEHOLDER_SRC";
+
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
 
   public EblSurrenderCarrier(
@@ -133,15 +137,15 @@ public class EblSurrenderCarrier extends ConformanceParty {
 
     addOperatorLogEntry(
         "Submitting error scenario body (transportDocumentReference='%s')"
-            .formatted(EblSurrenderPlatform.INVALID_TDR));
+            .formatted(PLACEHOLDER_TDR));
   }
 
   public static ObjectNode getExampleJsonBody() {
     return OBJECT_MAPPER
         .createObjectNode()
-      .put("surrenderRequestReference", "EXAMPLE_SRR")
-      .put("surrenderRequestCode", "SREQ")
-      .put("transportDocumentReference", EblSurrenderPlatform.INVALID_TDR);
+      .put("surrenderRequestReference", PLACEHOLDER_SRR)
+      .put("transportDocumentReference", PLACEHOLDER_TDR)
+      .put("surrenderRequestCode", PLACEHOLDER_SRC);
   }
 
   @Override
@@ -160,7 +164,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
       action = persistentMap.load("response").asText();
     }
 
-    if (tdr.equals(EblSurrenderPlatform.INVALID_TDR)) {
+    if (tdr.equals(PLACEHOLDER_TDR)) {
       return return409(
           request, "Simulated error response for surrender request reference '%s'".formatted(srr));
     }

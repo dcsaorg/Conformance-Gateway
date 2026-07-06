@@ -43,6 +43,7 @@ public class JsonSchemaCheck extends ActionCheck {
     }
     if (httpMessageType == HttpMessageType.RESPONSE && exchange.getResponse().statusCode() == 202) {
       this.setApplicable(false);
+      return ConformanceCheckResult.simple(Set.of());
     }
     return ConformanceCheckResult.simple(
         jsonSchemaValidator.validate(exchange.getMessage(httpMessageType).body().getStringBody()));

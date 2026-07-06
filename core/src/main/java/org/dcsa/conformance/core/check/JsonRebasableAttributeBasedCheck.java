@@ -71,6 +71,7 @@ class JsonRebasableAttributeBasedCheck extends ActionCheck {
         return ConformanceCheckResult.simple(Collections.emptySet());
       }
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
+      return VersionedKeywordDataset.withVersion(standardsVersion, () -> validator.validate(jsonBody));
     }
   }
 }

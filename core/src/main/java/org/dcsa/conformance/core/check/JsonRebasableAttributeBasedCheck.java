@@ -68,9 +68,9 @@ class JsonRebasableAttributeBasedCheck extends ActionCheck {
       if (exchange == null) return ConformanceCheckResult.simple(Collections.emptySet());
       if (httpMessageType == HttpMessageType.RESPONSE && exchange.getResponse().statusCode() == 202) {
         this.setApplicable(false);
+        return ConformanceCheckResult.simple(Collections.emptySet());
       }
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
-      return VersionedKeywordDataset.withVersion(standardsVersion, () -> validator.validate(jsonBody));
     }
   }
 }

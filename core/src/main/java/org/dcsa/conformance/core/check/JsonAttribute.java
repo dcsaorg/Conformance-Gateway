@@ -365,6 +365,33 @@ public class JsonAttribute {
     };
   }
 
+  public static JsonContentMatchedValidation allMatched(
+    @NonNull String arrayFieldName, @NonNull JsonContentMatchedValidation elementValidation) {
+    return (nodeToValidate, contextPath) -> {
+      var arrayNode = nodeToValidate.path(arrayFieldName);
+      if (JsonUtil.isMissingOrEmpty(arrayNode) || !arrayNode.isArray()) {
+        return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+      }
+      var results = new HashSet<ConformanceCheckResult>();
+      var arrayPath = concatContextPath(contextPath, arrayFieldName);
+      for (int i = 0; i < arrayNode.size(); i++) {
+        results.add(elementValidation.validate(arrayNode.get(i), arrayPath + "[" + i + "]"));
+      }
+      return ConformanceCheckResult.from(results);
+    };
+  }
+
+  public static JsonContentMatchedValidation validateDeprecatedUnlessReplaced(
+      @NonNull String replacementFieldName,
+      @NonNull JsonContentMatchedValidation deprecatedValidation) {
+    return (nodeToValidate, contextPath) -> {
+      if (!JsonUtil.isMissingOrEmpty(nodeToValidate.path(replacementFieldName))) {
+        return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+      }
+      return deprecatedValidation.validate(nodeToValidate, contextPath);
+    };
+  }
+
   public static JsonContentMatchedValidation at(JsonPointer pointer, JsonContentMatchedValidation delegate) {
     String ptrAsContext = renderJsonPointer(pointer);
     return (nodeToValidate, contextPath) -> {
@@ -827,8 +854,17 @@ public class JsonAttribute {
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
     );
+    return xOrFields(name, ptrs);
+  }
+
+  public static JsonRebasableContentCheck xOrFields(
+    @NonNull String description, @NonNull JsonPointer ... ptrs
+  ) {
+    if (ptrs.length < 2) {
+      throw new IllegalStateException("At least two arguments are required");
+    }
     return JsonRebasableCheckImpl.of(
-      name,
+      description,
       (body, contextPath) -> {
         var allPresent = Arrays.stream(ptrs)
           .allMatch(p -> isJsonNodePresent(body.at(p)));
@@ -885,8 +921,17 @@ public class JsonAttribute {
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
     );
+    return allOrNoneArePresent(name, ptrs);
+  }
+
+  public static JsonRebasableContentCheck allOrNoneArePresent(
+    @NonNull String description, @NonNull JsonPointer ... ptrs
+  ) {
+    if (ptrs.length < 2) {
+      throw new IllegalStateException("At least two arguments are required");
+    }
     return  JsonRebasableCheckImpl.of(
-        name,
+        description,
         (body, contextPath) -> {
           var firstPtr = ptrs[0];
           var firstNode = body.at(firstPtr);

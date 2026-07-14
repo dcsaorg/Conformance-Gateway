@@ -60,19 +60,24 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                     at(DATA_PATH, this::ensureBookingCancellationStatusIsCorrect)),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "Validate 'data.carrierBookingReference' is conditionally present",
+                    "The data.carrierBookingReference attribute in the Booking Notification must demonstrate the correct use of this conditional requirement: carrierBookingReference MUST be present, except for the booking states where it is still optional: RECEIVED, REJECTED, PENDING_UPDATE, UPDATE_RECEIVED, or CANCELLED",
                     DATA_PATH,
                     at(DATA_PATH, this::ensureCarrierBookingReferenceCompliance)),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "Validate 'data.feedbacks' is present for booking states where it is required",
+                    "The data.feedbacks attribute in the Booking Notification must be provided when bookingStatus is PENDING_UPDATE or PENDING_AMENDMENT; it is optional for all other booking statuses",
                     DATA_PATH,
                     at(DATA_PATH, this::ensureFeedbacksIsPresent)),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "Validate 'data.feedbacks' severity and code are valid",
+                    "The feedbacks.severity attribute must demonstrate the correct use of a feedback severity code: INFO, WARN, or ERROR",
                     DATA_PATH,
-                    at(DATA_PATH, this::ensureFeedbackSeverityAndCodeCompliance))),
+                    at(DATA_PATH, this::ensureFeedbackSeverityCompliance)),
+                createSubCheck(
+                    DEFAULT_PREFIX,
+                    "The feedbacks.code attribute must demonstrate the correct use of a feedback code: INFORMATIONAL_MESSAGE, PROPERTY_WILL_BE_IGNORED, PROPERTY_VALUE_MUST_CHANGE, PROPERTY_VALUE_HAS_BEEN_CHANGED, PROPERTY_VALUE_MAY_CHANGE, or PROPERTY_HAS_BEEN_DELETED",
+                    DATA_PATH,
+                    at(DATA_PATH, this::ensureFeedbackCodeCompliance))),
             createFullNotificationChecksAt(BOOKING_PATH, BOOKING_PREFIX),
             createFullNotificationChecksAt(AMENDED_BOOKING_PATH, AMENDED_BOOKING_PREFIX))
         .flatMap(Function.identity());

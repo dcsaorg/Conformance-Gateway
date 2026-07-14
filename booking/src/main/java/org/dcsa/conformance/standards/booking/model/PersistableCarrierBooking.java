@@ -449,7 +449,6 @@ public class PersistableCarrierBooking {
 
     var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
     var oneWeekPrior = formatter.format(firstTransportActionByCarrier.minusWeeks(1));
-    var twoWeeksPrior = formatter.format(firstTransportActionByCarrier.minusWeeks(2));
 
     addShipmentCutOff(shipmentCutOffTimes, "DCO", oneWeekPrior);
     addShipmentCutOff(shipmentCutOffTimes, "VCO", oneWeekPrior);
@@ -459,9 +458,6 @@ public class PersistableCarrierBooking {
     if ("CFS".equals(receiptTypeAtOrigin)) {
       addShipmentCutOff(shipmentCutOffTimes, "LCO", oneWeekPrior);
     }
-    // It would be impossible if ECP was the same time as the others, so we give another
-    // week for that one.
-    addShipmentCutOff(shipmentCutOffTimes, "ECP", twoWeeksPrior);
   }
 
   private void addShipmentCutOff(

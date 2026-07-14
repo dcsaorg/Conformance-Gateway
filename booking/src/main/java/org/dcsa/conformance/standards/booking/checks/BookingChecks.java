@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -39,6 +38,7 @@ public class BookingChecks {
   private static final String COMMODITIES = "commodities";
   private static final String REQUESTED_EQUIPMENTS = "requestedEquipments";
   private static final String NATIONAL_COMMODITY_CODES = "nationalCommodityCodes";
+  private static final String EXTENDED_NATIONAL_COMMODITY_CODES = "extendedNationalCommodityCodes";
   private static final String TYPE = "type";
   private static final String ISO_EQUIPMENT_CODE = "ISOEquipmentCode";
   private static final String ACTIVE_REEFER_SETTINGS = "activeReeferSettings";
@@ -59,8 +59,6 @@ public class BookingChecks {
   private static final String UNIVERSAL_EXPORT_VOYAGE_REFERENCE = "universalExportVoyageReference";
   private static final String UNIVERSAL_IMPORT_VOYAGE_REFERENCE = "universalImportVoyageReference";
   private static final String UNIVERSAL_SERVICE_REFERENCE1 = "universalServiceReference";
-  private static final String IS_EXPORT_DECLARATION_REQUIRED = "isExportDeclarationRequired";
-  private static final String EXPORT_DECLARATION_REFERENCE = "exportDeclarationReference";
   private static final String COMMODITY_SUB_REFERENCE = "commoditySubReference";
   private static final String CUT_OFF_DATE_TIME_CODE = "cutOffDateTimeCode";
   private static final String COUNTRY_CODE = "countryCode";
@@ -98,6 +96,43 @@ public class BookingChecks {
   private static final String DECLARED_VALUE_CURRENCY = "declaredValueCurrency";
   private static final String CHARGES = "charges";
   private static final String CURRENCY_AMOUNT = "currencyAmount";
+  private static final String IDENTIFYING_CODES = "identifyingCodes";
+  private static final String CODE_LIST_PROVIDER = "codeListProvider";
+  private static final String PARTY = "party";
+  private static final String BOOKING_AGENT = "bookingAgent";
+  private static final String SHIPPER = "shipper";
+  private static final String CONSIGNEE = "consignee";
+  private static final String SERVICE_CONTRACT_OWNER = "serviceContractOwner";
+  private static final String ISSUE_TO = "issueTo";
+  private static final String MODE_OF_TRANSPORT = "modeOfTransport";
+  private static final String REQUESTED_PRE_CARRIAGE_MODE_OF_TRANSPORT =
+      "requestedPreCarriageModeOfTransport";
+  private static final String REQUESTED_ON_CARRIAGE_MODE_OF_TRANSPORT =
+      "requestedOnCarriageModeOfTransport";
+  private static final String TRANSPORT_PLAN_STAGE_SEQUENCE_NUMBER =
+      "transportPlanStageSequenceNumber";
+  private static final String INNER_PACKAGINGS = "innerPackagings";
+  private static final String QUANTITY = "quantity";
+  private static final String EMPTY_CONTAINER_PICKUP = "emptyContainerPickup";
+  private static final String TARE_WEIGHT = "tareWeight";
+  private static final String IS_SHIPPER_OWNED = "isShipperOwned";
+  private static final String PLACE_OF_BL_ISSUE = "placeOfBLIssue";
+  private static final String INVOICE_PAYABLE_AT = "invoicePayableAt";
+  private static final String PARTY_CONTACT_DETAILS = "partyContactDetails";
+  private static final String UN_LOCATION_CODE = "UNLocationCode";
+  private static final String SEND_TO_PLATFORM = "sendToPlatform";
+  private static final String TRANSPORT_DOCUMENT_TYPE_CODE = "transportDocumentTypeCode";
+  private static final String IS_ELECTRONIC = "isElectronic";
+  private static final String PHONE = "phone";
+  private static final String EMAIL = "email";
+  private static final String EXPORT_LICENSE = "exportLicense";
+  private static final String IS_REQUIRED = "isRequired";
+  private static final String REFERENCE = "reference";
+  private static final String TEMPERATURE_SETPOINT = "temperatureSetpoint";
+  private static final String TEMPERATURE_UNIT = "temperatureUnit";
+  private static final String AIR_EXCHANGE = "airExchange";
+  private static final String AIR_EXCHANGE_UNIT = "airExchangeUnit";
+  private static final String ESTIMATED_DATE_TIME = "estimatedDateTime";
 
   private static final String S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED =
       "'%s' must not be provided when '%s' is provided.";
@@ -114,6 +149,7 @@ public class BookingChecks {
       String standardVersion,
       Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
+    checks.add(SHIPPER_REFERENCE_TYPE_VALIDATION);
     checks.addAll(generateScenarioRelatedChecks(dspSupplier));
 
     return JsonAttribute.contentChecks(
@@ -121,41 +157,27 @@ public class BookingChecks {
   }
 
   private static final JsonRebasableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION =
-      JsonAttribute.allIndividualMatchesMustBeValid(
-          "Validate that '%s' of '%s' is a known code".formatted(TYPE, NATIONAL_COMMODITY_CODES),
-          mav ->
-              mav.submitAllMatching(
-                  "%s.*.%s.*.%s.*.%s"
-                      .formatted(
-                          REQUESTED_EQUIPMENTS, COMMODITIES, NATIONAL_COMMODITY_CODES, TYPE)),
-          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_TYPE_CODES));
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "The 'type' attribute in each 'nationalCommodityCodes' object must demonstrate the correct use of a DCSA national commodity classification code: NCM, HTS, SCHEDULE_B, TARIC, CN, or CUS",
+      mav -> mav.submitAllMatching("%s.*.%s.*".formatted(REQUESTED_EQUIPMENTS, COMMODITIES)),
+      JsonAttribute.validateDeprecatedUnlessReplaced(
+        EXTENDED_NATIONAL_COMMODITY_CODES,
+        JsonAttribute.allMatched(
+          NATIONAL_COMMODITY_CODES,
+          JsonAttribute.path(
+            TYPE,
+            JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              NATIONAL_COMMODITY_TYPE_CODES)))));
 
-  private static final JsonContentCheck CHECK_EXPECTED_ARRIVAL_POD =
-      JsonAttribute.customValidator(
-          "Check expected arrival dates are valid",
-          body -> {
-            String providedArrivalStartDate =
-                body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE).asText("");
-            String providedArrivalEndDate =
-                body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE).asText("");
-            var invalidDates = new LinkedHashSet<String>();
-            if (!providedArrivalStartDate.isEmpty() && !providedArrivalEndDate.isEmpty()) {
-              LocalDate arrivalStartDate = LocalDate.parse(providedArrivalStartDate);
-              LocalDate arrivalEndDate = LocalDate.parse(providedArrivalEndDate);
-              if (arrivalStartDate.isAfter(arrivalEndDate)) {
-                invalidDates.add(arrivalStartDate.toString());
-              }
-              if (arrivalEndDate.isBefore(arrivalStartDate)) {
-                invalidDates.add(arrivalEndDate.toString());
-              }
-            } else {
-              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
-            }
-            return ConformanceCheckResult.simple(
-                invalidDates.stream()
-                    .map("The expected arrival dates '%s' are not valid"::formatted)
-                    .collect(Collectors.toSet()));
-          });
+  private static final JsonRebasableContentCheck EXTENDED_NATIONAL_COMMODITY_TYPE_CODE_VALIDATION =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "The 'type' attribute in each 'extendedNationalCommodityCodes' object must demonstrate the correct use of a DCSA national commodity classification code: NCM, HTS, SCHEDULE_B, TARIC, CN, or CUS",
+      mav ->
+        mav.submitAllMatching(
+          "%s.*.%s.*.%s.*.%s"
+            .formatted(
+              REQUESTED_EQUIPMENTS, COMMODITIES, EXTENDED_NATIONAL_COMMODITY_CODES, TYPE)),
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_TYPE_CODES));
 
   private static final Predicate<JsonNode> IS_ISO_EQUIPMENT_CONTAINER_REEFER =
       uteNode -> {
@@ -184,8 +206,7 @@ public class BookingChecks {
 
   static final JsonContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
       JsonAttribute.customValidator(
-          "All requested Equipments where '%s' is 'false' must have '%s'"
-              .formatted(IS_NON_OPERATING_REEFER, ACTIVE_REEFER_SETTINGS),
+          "The 'requestedEquipments.activeReeferSettings' object must only be used when the standard allows it: only applicable when 'isNonOperatingReefer' is set to false",
           body -> {
             var requestedEquipments = body.path(REQUESTED_EQUIPMENTS);
             var errors = new LinkedHashSet<ConformanceError>();
@@ -215,8 +236,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck ISO_EQUIPMENT_CODE_AND_NOR_CHECK =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "All requested Equipments where ISOEquipmentCode is reefer code must have '%s' flag"
-              .formatted(IS_NON_OPERATING_REEFER),
+          "The 'requestedEquipments.isNonOperatingReefer' attribute must only be used when the standard allows it: only applicable if ISOEquipmentCode shows a Reefer type",
           ALL_REQ_EQUIP,
           JsonAttribute.ifMatchedThen(
               IS_ISO_EQUIPMENT_CONTAINER_REEFER,
@@ -224,7 +244,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE =
       JsonAttribute.customValidator(
-          "Conditional Universal Service Reference",
+          "The 'universalServiceReference' attribute must demonstrate the correct use of this conditional requirement: if either universalExportVoyageReference or universalImportVoyageReference is present, then universalServiceReference is required",
           body -> {
             var universalExportVoyageReference = body.path(UNIVERSAL_EXPORT_VOYAGE_REFERENCE);
             var universalImportVoyageReference = body.path(UNIVERSAL_IMPORT_VOYAGE_REFERENCE);
@@ -265,16 +285,28 @@ public class BookingChecks {
             return ConformanceCheckResult.simple(Set.of());
           });
 
-  private static final JsonContentCheck REFERENCE_TYPE_VALIDATION =
-      JsonAttribute.allIndividualMatchesMustBeValid(
-          "Validate reference type field",
-          mav -> {
-            mav.submitAllMatching(S_S_S.formatted(REQUESTED_EQUIPMENTS, REFERENCES, TYPE));
-            mav.submitAllMatching(
-                "%s.*.%s.*.%s.*.%s".formatted(REQUESTED_EQUIPMENTS, COMMODITIES, REFERENCES, TYPE));
-            mav.submitAllMatching(S_S.formatted(REFERENCES, TYPE));
-          },
-          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.REFERENCE_TYPES));
+  private static JsonContentCheck referenceTypeValidation(
+      String description, KeywordDataset allowedReferenceTypes) {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        description,
+        mav -> {
+          mav.submitAllMatching(S_S_S.formatted(REQUESTED_EQUIPMENTS, REFERENCES, TYPE));
+          mav.submitAllMatching(
+              "%s.*.%s.*.%s.*.%s".formatted(REQUESTED_EQUIPMENTS, COMMODITIES, REFERENCES, TYPE));
+          mav.submitAllMatching(S_S.formatted(REFERENCES, TYPE));
+        },
+        JsonAttribute.matchedMustBeDatasetKeywordIfPresent(allowedReferenceTypes));
+  }
+
+  private static final JsonContentCheck SHIPPER_REFERENCE_TYPE_VALIDATION =
+      referenceTypeValidation(
+          "The 'type' attribute in each shipper-provided reference object must demonstrate the correct use of a DCSA reference type code: CR, AKG, or AEF",
+          BookingDataSets.SHIPPER_REFERENCE_TYPES);
+
+  private static final JsonContentCheck CARRIER_REFERENCE_TYPE_VALIDATION =
+      referenceTypeValidation(
+          "The 'type' attribute in each reference object in the Booking response or Booking Notification must demonstrate the correct use of a DCSA reference type code: CR, ECR, AKG, or AEF",
+          BookingDataSets.CARRIER_REFERENCE_TYPES);
 
   private static Consumer<MultiAttributeValidator> allDg(
       Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
@@ -288,38 +320,6 @@ public class BookingChecks {
                 .path(DANGEROUS_GOODS)
                 .all());
   }
-
-  static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_PRESENCE =
-      JsonAttribute.ifThenElse(
-          "Check Export declaration reference presence",
-          JsonAttribute.isTrue(
-              JsonPointer.compile("/%s".formatted(IS_EXPORT_DECLARATION_REQUIRED))),
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/%s".formatted(EXPORT_DECLARATION_REFERENCE))),
-          JsonAttribute.mustBeAbsent(
-              JsonPointer.compile("/%s".formatted(EXPORT_DECLARATION_REFERENCE))));
-
-  static final JsonContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE =
-      JsonAttribute.customValidator(
-          "Each document party can be used at most once, except 'NI' which can be repeated",
-          body -> {
-            var partyFunctionCounts = new HashMap<String, Integer>();
-
-            StreamSupport.stream(body.path(DOCUMENT_PARTIES).path(OTHER).spliterator(), false)
-                .map(party -> party.path(PARTY_FUNCTION).asText(""))
-                .filter(partyFunction -> !partyFunction.isBlank())
-                .forEach(
-                    partyFunction -> partyFunctionCounts.merge(partyFunction, 1, Integer::sum));
-
-            return ConformanceCheckResult.simple(
-                partyFunctionCounts.entrySet().stream()
-                    .filter(entry -> entry.getValue() > 1 && !"NI".equals(entry.getKey()))
-                    .map(
-                        entry ->
-                            "Party function '%s' cannot be repeated. Found %d occurrences."
-                                .formatted(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toCollection(LinkedHashSet::new)));
-          });
 
   static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE =
       JsonAttribute.customValidator(
@@ -348,7 +348,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "Validate allowed shipment cutoff codes",
+          "The 'shipmentCutOffTimes.cutOffDateTimeCode' attribute must demonstrate the correct use of a cut-off time code: DCO, VCO, FCO, LCO, or EFC",
           mav ->
               mav.submitAllMatching(S_S.formatted(SHIPMENT_CUT_OFF_TIMES, CUT_OFF_DATE_TIME_CODE)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
@@ -356,7 +356,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_CUTOFF_TIME_CODE =
       JsonAttribute.customValidator(
-          "Validate shipment cutOff Date time code",
+          "The 'shipmentCutOffTimes.cutOffDateTimeCode' attribute must demonstrate the correct use of this conditional requirement: only when the Receipt Type at Origin is CFS, EFC (Earliest full-container delivery date)",
           body -> {
             var shipmentCutOffTimes = body.path(SHIPMENT_CUT_OFF_TIMES);
             var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
@@ -370,9 +370,9 @@ public class BookingChecks {
             if (!receiptTypeAtOrigin.equals("CFS")) {
               return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
             }
-            if (!cutOffDateTimeCodes.contains("LCL")) {
+            if (!cutOffDateTimeCodes.contains("EFC")) {
               issues.add(
-                  "'%s' 'LCL' must be present when '%s' is 'CFS'"
+                  "'%s' 'EFC' (Earliest full-container delivery date) must be present when '%s' is 'CFS'"
                       .formatted(CUT_OFF_DATE_TIME_CODE, RECEIPT_TYPE_AT_ORIGIN));
             }
             return ConformanceCheckResult.simple(issues);
@@ -383,22 +383,14 @@ public class BookingChecks {
 
   private static final JsonContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "The combination of '%s' and '%s' in '%s' must be unique"
-              .formatted(COUNTRY_CODE, MANIFEST_TYPE_CODE, ADVANCE_MANIFEST_FILINGS),
+          "The 'advanceManifestFilings' object must demonstrate the correct use of this conditional requirement: the combination of '%s' and '%s' MUST be unique"
+              .formatted(COUNTRY_CODE, MANIFEST_TYPE_CODE),
           ALL_AMF,
           JsonAttribute.unique(COUNTRY_CODE, MANIFEST_TYPE_CODE));
-  private static final Consumer<MultiAttributeValidator> ALL_SHIPMENT_CUTOFF_TIMES =
-      mav -> mav.submitAllMatching(SHIPMENT_CUT_OFF_TIMES);
-
-  private static final JsonContentCheck SHIPMENT_CUTOFF_TIMES_UNIQUE =
-      JsonAttribute.allIndividualMatchesMustBeValid(
-          "'%s' in '%s' must be unique".formatted(CUT_OFF_DATE_TIME_CODE, SHIPMENT_CUT_OFF_TIMES),
-          ALL_SHIPMENT_CUTOFF_TIMES,
-          JsonAttribute.unique(CUT_OFF_DATE_TIME_CODE));
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS =
       JsonAttribute.customValidator(
-          "Validate %s".formatted(SHIPMENT_LOCATIONS),
+          "The 'shipmentLocations' object must demonstrate the correct use of these conditional requirements: a Port of Discharge (PDE/POD) and a Port of Load (PRE/POL) must be provided; when receiptTypeAtOrigin is SD, a Place of Receipt (PRE) and container positioning dateTime are required; when deliveryTypeAtDestination is SD, a Place of Delivery (PDE) is required",
           body -> {
             var issues = new LinkedHashSet<String>();
             var routingReference = body.path(ROUTING_REFERENCE).asText("");
@@ -626,7 +618,7 @@ public class BookingChecks {
 
   static final JsonContentCheck FEEDBACKS_PRESENCE =
       JsonAttribute.customValidator(
-          "Feedbacks must be present for the selected Booking Status",
+          "The 'feedbacks' attribute must be provided when bookingStatus is PENDING_UPDATE or PENDING_AMENDMENT; it is optional for all other booking statuses",
           body -> {
             var bookingStatus = body.path(BOOKING_STATUS).asText("");
             var issues = new LinkedHashSet<ConformanceError>();
@@ -646,7 +638,7 @@ public class BookingChecks {
 
   static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS =
       JsonAttribute.customValidator(
-          "check confirmed booking fields availability",
+          "The 'confirmedEquipments', 'transportPlan' and 'shipmentCutOffTimes' must be provided (mandatory and non-empty) when bookingStatus is CONFIRMED or PENDING_AMENDMENT",
           body -> {
             var issues = new LinkedHashSet<String>();
             var bookingStatusAttribute = body.path(BOOKING_STATUS).asText("");
@@ -674,7 +666,7 @@ public class BookingChecks {
 
   static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_CONDITIONS =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "Check Cargo Gross Weight conditions",
+          "The 'requestedEquipments.cargoGrossWeight' object must be provided when not provided on Commodity level",
           mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS)),
           (nodeToValidate, contextPath) -> {
             var issues = new LinkedHashSet<String>();
@@ -933,37 +925,435 @@ public class BookingChecks {
 
   static final JsonRebasableContentCheck VALID_FEEDBACK_SEVERITY =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "Validate that '%s.*.%s' is valid".formatted(FEEDBACKS, SEVERITY),
+          "The 'feedbacks.severity' attribute must demonstrate the correct use of a feedback severity code: INFO, WARN, or ERROR",
           mav -> mav.submitAllMatching(S_S.formatted(FEEDBACKS, SEVERITY)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
 
   static final JsonRebasableContentCheck VALID_FEEDBACK_CODE =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "Validate that '%s.*.%s' is valid".formatted(FEEDBACKS, CODE),
+          "The 'feedbacks.code' attribute must demonstrate the correct use of a feedback code: INFORMATIONAL_MESSAGE, PROPERTY_WILL_BE_IGNORED, PROPERTY_VALUE_MUST_CHANGE, PROPERTY_VALUE_HAS_BEEN_CHANGED, PROPERTY_VALUE_MAY_CHANGE, or PROPERTY_HAS_BEEN_DELETED",
           mav -> mav.submitAllMatching(S_S.formatted(FEEDBACKS, CODE)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
+  private static JsonContentCheck positiveIntegerCheck(
+      String description, Consumer<MultiAttributeValidator> pathSelector) {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        description,
+        pathSelector,
+        (nodeToValidate, contextPath) -> {
+          if (!nodeToValidate.isIntegralNumber() || nodeToValidate.asLong() <= 0) {
+            return ConformanceCheckResult.simple(
+                Set.of("'%s' must be a positive integer".formatted(contextPath)));
+          }
+          return ConformanceCheckResult.simple(Set.of());
+        });
+  }
+
+  private static final JsonContentCheck OTHER_PARTY_FUNCTION_CODE_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The documentParties.other.partyFunction attribute must demonstrate the correct use of an other document party function code: DDR, DDS, COW, COX, N1, N2, NI, NAC, or CSR",
+          mav ->
+              mav.submitAllMatching(
+                  "%s.%s.*.%s".formatted(DOCUMENT_PARTIES, OTHER, PARTY_FUNCTION)),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              BookingDataSets.OTHER_PARTY_FUNCTION_CODES));
+
+  private static final JsonContentCheck CODE_LIST_PROVIDER_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The identifyingCodes.codeListProvider attribute must demonstrate the correct use of a code list provider code: WAVE, CARX, ESSD, IDT, BOLE, EDOX, IQAX, SECR, TRGO, ETEU, TRAC, BRIT, COVA, ETIT, KTNE, CRED, BLOC, DOCU, AEOT, SGTD, GSBN, WISE, GLEIF, W3C, DNB, FMC, DCSA, or ZZZ",
+          mav -> {
+            for (String party :
+                new String[] {
+                  BOOKING_AGENT, SHIPPER, CONSIGNEE, SERVICE_CONTRACT_OWNER, ISSUE_TO
+                }) {
+              mav.submitAllMatching(
+                  "%s.%s.%s.*.%s"
+                      .formatted(DOCUMENT_PARTIES, party, IDENTIFYING_CODES, CODE_LIST_PROVIDER));
+            }
+            mav.submitAllMatching(
+                "%s.%s.*.%s.%s.*.%s"
+                    .formatted(
+                        DOCUMENT_PARTIES, OTHER, PARTY, IDENTIFYING_CODES, CODE_LIST_PROVIDER));
+          },
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              BookingDataSets.CODE_LIST_PROVIDER_CODES));
+
+  private static final JsonContentCheck SHIPMENT_LOCATION_TYPE_CODE_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The shipmentLocations.locationTypeCode attribute must demonstrate the correct use of a shipment location type code: PRE, POL, POD, PDE, PCF, OIR, ORI, IEL, PTP, RTP, FCD, or ROU",
+          mav -> mav.submitAllMatching(S_S.formatted(SHIPMENT_LOCATIONS, LOCATION_TYPE_CODE)),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              BookingDataSets.SHIPMENT_LOCATION_TYPES));
+
+  private static final JsonContentCheck REQUESTED_CARRIAGE_MODE_OF_TRANSPORT_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The requestedPreCarriageModeOfTransport / requestedOnCarriageModeOfTransport attribute must demonstrate the correct use of a mode of transport code: VESSEL, RAIL, TRUCK, BARGE, RAIL_TRUCK, BARGE_TRUCK, BARGE_RAIL, or MULTIMODAL",
+          mav -> {
+            mav.submitAllMatching(REQUESTED_PRE_CARRIAGE_MODE_OF_TRANSPORT);
+            mav.submitAllMatching(REQUESTED_ON_CARRIAGE_MODE_OF_TRANSPORT);
+          },
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.MODE_OF_TRANSPORT));
+
+  private static final JsonContentCheck INNER_PACKAGING_QUANTITY_POSITIVE_INTEGER =
+      positiveIntegerCheck(
+          "The innerPackaging.quantity attribute must be a positive integer",
+          mav ->
+              mav.submitAllMatching(
+                  "%s.*.%s.*.%s.%s.*.%s.*.%s"
+                      .formatted(
+                          REQUESTED_EQUIPMENTS,
+                          COMMODITIES,
+                          OUTER_PACKAGING,
+                          DANGEROUS_GOODS,
+                          INNER_PACKAGINGS,
+                          QUANTITY)));
+
+  private static final JsonContentCheck TRANSPORT_PLAN_MODE_OF_TRANSPORT_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The transportPlan.modeOfTransport attribute must demonstrate the correct use of a mode of transport code: VESSEL, RAIL, TRUCK, BARGE, RAIL_TRUCK, BARGE_TRUCK, BARGE_RAIL, or MULTIMODAL",
+          mav -> mav.submitAllMatching(S_S.formatted(TRANSPORT_PLAN, MODE_OF_TRANSPORT)),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.MODE_OF_TRANSPORT));
+
+  private static final JsonContentCheck TRANSPORT_PLAN_STAGE_SEQUENCE_NUMBER_POSITIVE_INTEGER =
+      positiveIntegerCheck(
+          "The transportPlan.transportPlanStageSequenceNumber attribute must be a positive integer",
+          mav ->
+              mav.submitAllMatching(
+                  S_S.formatted(TRANSPORT_PLAN, TRANSPORT_PLAN_STAGE_SEQUENCE_NUMBER)));
+
+  private static final JsonContentCheck CARGO_MOVEMENT_TYPE_AT_ORIGIN_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The 'cargoMovementTypeAtOrigin' attribute must demonstrate the correct use of a cargo movement type code: FCL or LCL",
+          mav -> mav.submitAllMatching(CARGO_MOVEMENT_TYPE_AT_ORIGIN),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.CARGO_MOVEMENT_TYPE));
+
+  private static final JsonContentCheck CARGO_MOVEMENT_TYPE_AT_DESTINATION_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The 'cargoMovementTypeAtDestination' attribute must demonstrate the correct use of a cargo movement type code: FCL or LCL",
+          mav -> mav.submitAllMatching(CARGO_MOVEMENT_TYPE_AT_DESTINATION),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.CARGO_MOVEMENT_TYPE));
+
+  private static final JsonContentCheck BOOKING_STATUS_CODE_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The 'bookingStatus' attribute must demonstrate the correct use of a booking status code: RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED, CONFIRMED, PENDING_AMENDMENT, REJECTED, DECLINED, CANCELLED, or COMPLETED",
+          mav -> mav.submitAllMatching(BOOKING_STATUS),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.BOOKING_STATUS));
+
+  private static final JsonContentCheck AMENDED_BOOKING_STATUS_CODE_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The 'amendedBookingStatus' attribute must demonstrate the correct use of an amended booking status code: AMENDMENT_RECEIVED, AMENDMENT_CONFIRMED, AMENDMENT_DECLINED, or AMENDMENT_CANCELLED",
+          mav -> mav.submitAllMatching(ATTR_AMENDED_BOOKING_STATUS),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.AMENDED_BOOKING_STATUS));
+
+  private static final JsonContentCheck BOOKING_CANCELLATION_STATUS_CODE_VALIDATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The 'bookingCancellationStatus' attribute must demonstrate the correct use of a booking cancellation status code: CANCELLATION_RECEIVED, CANCELLATION_DECLINED, or CANCELLATION_CONFIRMED",
+          mav -> mav.submitAllMatching(ATTR_BOOKING_CANCELLATION_STATUS),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              BookingDataSets.BOOKING_CANCELLATION_STATUS));
+
+  private static final JsonContentCheck CONTAINER_POSITIONINGS_ONLY_FOR_SD =
+      JsonAttribute.customValidator(
+          "(if included) The 'requestedEquipments.containerPositionings' attribute must only be used when the standard allows it: only applicable to carrier haulage service at origin (receiptTypeAtOrigin = 'SD')",
+          body -> {
+            var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
+            if ("SD".equals(receiptTypeAtOrigin)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            var issues = new LinkedHashSet<String>();
+            var requestedEquipments = body.path(REQUESTED_EQUIPMENTS);
+            for (int i = 0; i < requestedEquipments.size(); i++) {
+              if (!JsonUtil.isMissingOrEmpty(
+                  requestedEquipments.path(i).path(CONTAINER_POSITIONINGS))) {
+                issues.add(
+                    "'%s[%d].%s' must be absent when '%s' is not 'SD'"
+                        .formatted(
+                            REQUESTED_EQUIPMENTS, i, CONTAINER_POSITIONINGS, RECEIPT_TYPE_AT_ORIGIN));
+              }
+            }
+            return ConformanceCheckResult.simple(issues);
+          });
+
+  private static final JsonContentCheck EMPTY_CONTAINER_PICKUP_ONLY_FOR_CY =
+      JsonAttribute.customValidator(
+          "(if included) The 'requestedEquipments.emptyContainerPickup' attribute must only be used when the standard allows it: only applicable to merchant haulage service at origin (receiptTypeAtOrigin = 'CY')",
+          body -> {
+            var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
+            if ("CY".equals(receiptTypeAtOrigin)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            var issues = new LinkedHashSet<String>();
+            var requestedEquipments = body.path(REQUESTED_EQUIPMENTS);
+            for (int i = 0; i < requestedEquipments.size(); i++) {
+              if (!JsonUtil.isMissingOrEmpty(
+                  requestedEquipments.path(i).path(EMPTY_CONTAINER_PICKUP))) {
+                issues.add(
+                    "'%s[%d].%s' must be absent when '%s' is not 'CY'"
+                        .formatted(
+                            REQUESTED_EQUIPMENTS, i, EMPTY_CONTAINER_PICKUP, RECEIPT_TYPE_AT_ORIGIN));
+              }
+            }
+            return ConformanceCheckResult.simple(issues);
+          });
+
+  private static final JsonContentCheck TARE_WEIGHT_REQUIRED_FOR_SOC =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The 'requestedEquipments.tareWeight' object must be provided when the condition applies: in case of Shipper Owned Containers (isShipperOwned = true) this is a required property",
+          mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS)),
+          (nodeToValidate, contextPath) -> {
+            if (!nodeToValidate.path(IS_SHIPPER_OWNED).asBoolean(false)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            if (JsonUtil.isMissingOrEmpty(nodeToValidate.path(TARE_WEIGHT))) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s.%s' is required when '%s' is 'true' (Shipper Owned Container)"
+                          .formatted(contextPath, TARE_WEIGHT, IS_SHIPPER_OWNED)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
+
+  private static final JsonContentCheck SEND_TO_PLATFORM_ONLY_FOR_ELECTRONIC_BOL =
+      JsonAttribute.customValidator(
+          "(if included) The 'documentParties.issueTo.sendToPlatform' attribute must only be used when the standard allows it: only applicable when isElectronic=true and transportDocumentTypeCode=BOL; the property must be absent for paper B/Ls",
+          body -> {
+            var sendToPlatform =
+                body.path(DOCUMENT_PARTIES).path(ISSUE_TO).path(SEND_TO_PLATFORM);
+            if (JsonUtil.isMissingOrEmpty(sendToPlatform)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            var issues = new LinkedHashSet<String>();
+            var transportDocumentTypeCode = body.path(TRANSPORT_DOCUMENT_TYPE_CODE).asText("");
+            if (!"BOL".equals(transportDocumentTypeCode)) {
+              issues.add(
+                  "'%s.%s.%s' is only allowed when '%s' is 'BOL'"
+                      .formatted(
+                          DOCUMENT_PARTIES, ISSUE_TO, SEND_TO_PLATFORM, TRANSPORT_DOCUMENT_TYPE_CODE));
+            }
+            var isElectronic = body.path(IS_ELECTRONIC);
+            if (isElectronic.isBoolean() && !isElectronic.asBoolean()) {
+              issues.add(
+                  "'%s.%s.%s' must be absent for paper B/Ls ('%s' is 'false')"
+                      .formatted(DOCUMENT_PARTIES, ISSUE_TO, SEND_TO_PLATFORM, IS_ELECTRONIC));
+            }
+            return ConformanceCheckResult.simple(issues);
+          });
+
+  private static final JsonContentCheck PLACE_OF_BL_ISSUE_UNLOCATION_XOR_COUNTRY =
+      JsonAttribute.customValidator(
+          "The 'placeOfBLIssue' object must demonstrate the correct use of this conditional requirement: the location can be specified as one of UNLocationCode or countryCode, but not both",
+          body -> {
+            var placeOfBLIssue = body.path(PLACE_OF_BL_ISSUE);
+            if (JsonUtil.isMissingOrEmpty(placeOfBLIssue)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            var hasUnLocationCode =
+                !JsonUtil.isMissingOrEmpty(placeOfBLIssue.path(UN_LOCATION_CODE));
+            var hasCountryCode = !JsonUtil.isMissingOrEmpty(placeOfBLIssue.path(COUNTRY_CODE));
+            if (hasUnLocationCode == hasCountryCode) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s' must contain exactly one of '%s' or '%s', but not both"
+                          .formatted(PLACE_OF_BL_ISSUE, UN_LOCATION_CODE, COUNTRY_CODE)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
+
+  private static final JsonContentCheck INVOICE_PAYABLE_AT_MUST_USE_UN_LOCATION_CODE =
+      JsonAttribute.customValidator(
+          "The 'invoicePayableAt' object must demonstrate the correct use of this conditional requirement: the location must be provided as a UNLocationCode",
+          body -> {
+            var invoicePayableAt = body.path(INVOICE_PAYABLE_AT);
+            if (JsonUtil.isMissingOrEmpty(invoicePayableAt)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            if (JsonUtil.isMissingOrEmpty(invoicePayableAt.path(UN_LOCATION_CODE))) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s.%s' must be provided"
+                          .formatted(INVOICE_PAYABLE_AT, UN_LOCATION_CODE)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
+
+  private static final JsonContentCheck PARTY_CONTACT_DETAILS_NAME_AND_PHONE_OR_EMAIL =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The 'partyContactDetails' object must be provided when the condition applies: it is mandatory to provide either phone and/or email along with the name",
+          mav -> mav.submitAllMatching("%s.*".formatted(PARTY_CONTACT_DETAILS)),
+          (nodeToValidate, contextPath) -> {
+            var issues = new LinkedHashSet<String>();
+            if (JsonUtil.isMissingOrEmpty(nodeToValidate.path(NAME))) {
+              issues.add("'%s.%s' is mandatory".formatted(contextPath, NAME));
+            }
+            if (JsonUtil.isMissingOrEmpty(nodeToValidate.path(PHONE))
+                && JsonUtil.isMissingOrEmpty(nodeToValidate.path(EMAIL))) {
+              issues.add(
+                  "'%s' must provide either '%s' and/or '%s'"
+                      .formatted(contextPath, PHONE, EMAIL));
+            }
+            return ConformanceCheckResult.simple(issues);
+          });
+
+  private static final JsonContentCheck EXPORT_LICENSE_REFERENCE_WHEN_REQUIRED =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The 'requestedEquipments.commodities.exportLicense.reference' attribute must demonstrate the correct use of this conditional requirement: the reference is required when an Export License or permit is required (isRequired = true)",
+          mav ->
+              mav.submitAllMatching(
+                  "%s.*.%s.*.%s".formatted(REQUESTED_EQUIPMENTS, COMMODITIES, EXPORT_LICENSE)),
+          (nodeToValidate, contextPath) -> {
+            if (!nodeToValidate.path(IS_REQUIRED).asBoolean(false)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            if (JsonUtil.isMissingOrEmpty(nodeToValidate.path(REFERENCE))) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s.%s' is required when '%s' is 'true'"
+                          .formatted(contextPath, REFERENCE, IS_REQUIRED)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
+
+  private static JsonContentCheck onlyApplicableToDangerousGoods(String field) {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "(if included) The 'requestedEquipments.commodities.outerPackaging.%s' attribute must only be used when the standard allows it: only applicable to dangerous goods"
+            .formatted(field),
+        mav ->
+            mav.submitAllMatching(
+                S_S_S.formatted(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING)),
+        (nodeToValidate, contextPath) -> {
+          if (JsonUtil.isMissingOrEmpty(nodeToValidate.path(field))) {
+            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+          }
+          if (JsonUtil.isMissingOrEmpty(nodeToValidate.path(DANGEROUS_GOODS))) {
+            return ConformanceCheckResult.simple(
+                Set.of(
+                    "'%s.%s' is only applicable to dangerous goods"
+                        .formatted(contextPath, field)));
+          }
+          return ConformanceCheckResult.simple(Set.of());
+        });
+  }
+
+  private static final JsonContentCheck PACKAGE_CODE_ONLY_FOR_DG =
+      onlyApplicableToDangerousGoods(PACKAGE_CODE);
+  private static final JsonContentCheck IMO_PACKAGING_CODE_ONLY_FOR_DG =
+      onlyApplicableToDangerousGoods(IMO_PACKAGING_CODE);
+
+  // A unit attribute is required when its corresponding value attribute is provided.
+  private static JsonContentCheck reeferSettingUnitRequiredWhenValuePresent(
+      String valueField, String unitField) {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "The 'requestedEquipments.activeReeferSettings.%s' attribute must be provided when %s is provided; if %s is not provided, this field must be empty"
+            .formatted(unitField, valueField, valueField),
+        mav -> mav.submitAllMatching("%s.*.%s".formatted(REQUESTED_EQUIPMENTS, ACTIVE_REEFER_SETTINGS)),
+        (nodeToValidate, contextPath) -> {
+          var hasValue = !JsonUtil.isMissingOrEmpty(nodeToValidate.path(valueField));
+          var hasUnit = !JsonUtil.isMissingOrEmpty(nodeToValidate.path(unitField));
+          if (hasValue != hasUnit) {
+            return ConformanceCheckResult.simple(
+                Set.of(
+                    "'%s.%s' must be provided if and only if '%s' is provided"
+                        .formatted(contextPath, unitField, valueField)));
+          }
+          return ConformanceCheckResult.simple(Set.of());
+        });
+  }
+
+  private static final JsonContentCheck ACTIVE_REEFER_TEMPERATURE_UNIT_CONDITIONAL =
+      reeferSettingUnitRequiredWhenValuePresent(TEMPERATURE_SETPOINT, TEMPERATURE_UNIT);
+  private static final JsonContentCheck ACTIVE_REEFER_AIR_EXCHANGE_UNIT_CONDITIONAL =
+      reeferSettingUnitRequiredWhenValuePresent(AIR_EXCHANGE, AIR_EXCHANGE_UNIT);
+
+  // confirmedEquipments.containerPositionings is only applicable to carrier haulage at origin (SD).
+  private static final JsonContentCheck CONFIRMED_CONTAINER_POSITIONINGS_ONLY_FOR_SD =
+      JsonAttribute.customValidator(
+          "(if included) The 'confirmedEquipments.containerPositionings' attribute must only be used when the standard allows it: only applicable to carrier haulage service at origin (receiptTypeAtOrigin = 'SD')",
+          body -> {
+            var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
+            if ("SD".equals(receiptTypeAtOrigin)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            var issues = new LinkedHashSet<String>();
+            var confirmedEquipments = body.path(CONFIRMED_EQUIPMENTS);
+            for (int i = 0; i < confirmedEquipments.size(); i++) {
+              var containerPositionings = confirmedEquipments.path(i).path(CONTAINER_POSITIONINGS);
+              if (!JsonUtil.isMissingOrEmpty(containerPositionings)) {
+                issues.add(
+                    "'%s[%d].%s' must be absent when '%s' is not 'SD'"
+                        .formatted(
+                            CONFIRMED_EQUIPMENTS, i, CONTAINER_POSITIONINGS, RECEIPT_TYPE_AT_ORIGIN));
+                for (int j = 0; j < containerPositionings.size(); j++) {
+                  if (!JsonUtil.isMissingOrEmpty(
+                      containerPositionings.path(j).path(ESTIMATED_DATE_TIME))) {
+                    issues.add(
+                        "'%s[%d].%s[%d].%s' must be absent when '%s' is not 'SD'"
+                            .formatted(
+                                CONFIRMED_EQUIPMENTS,
+                                i,
+                                CONTAINER_POSITIONINGS,
+                                j,
+                                ESTIMATED_DATE_TIME,
+                                RECEIPT_TYPE_AT_ORIGIN));
+                  }
+                }
+              }
+            }
+            return ConformanceCheckResult.simple(issues);
+          });
+
+  // carrierBookingReference must be present except in the states where it is still optional.
+  private static final Set<String> CBR_OPTIONAL_STATES =
+      Set.of("RECEIVED", "REJECTED", "PENDING_UPDATE", "UPDATE_RECEIVED", "CANCELLED");
+
+  private static final JsonContentCheck CARRIER_BOOKING_REFERENCE_PRESENCE_BY_STATE =
+      JsonAttribute.customValidator(
+          "The 'carrierBookingReference' attribute in the Booking response must demonstrate the correct use of this conditional requirement: carrierBookingReference MUST be present, except for the booking states where it is still optional: RECEIVED, REJECTED, PENDING_UPDATE, UPDATE_RECEIVED, or CANCELLED",
+          body -> {
+            var bookingStatus = body.path(BOOKING_STATUS).asText("");
+            if (CBR_OPTIONAL_STATES.contains(bookingStatus)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            if (JsonUtil.isMissingOrEmpty(body.path(CARRIER_BOOKING_REFERENCE))) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s' must be present for booking status '%s'"
+                          .formatted(CARRIER_BOOKING_REFERENCE, bookingStatus)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
+
   static final List<JsonContentCheck> STATIC_BOOKING_CHECKS =
       Arrays.asList(
-          JsonAttribute.mustBeDatasetKeywordIfPresent(
-              JsonPointer.compile("/%s".formatted(CARGO_MOVEMENT_TYPE_AT_ORIGIN)),
-              BookingDataSets.CARGO_MOVEMENT_TYPE),
-          JsonAttribute.mustBeDatasetKeywordIfPresent(
-              JsonPointer.compile("/%s".formatted(CARGO_MOVEMENT_TYPE_AT_DESTINATION)),
-              BookingDataSets.CARGO_MOVEMENT_TYPE),
-          CHECK_EXPECTED_ARRIVAL_POD,
+          CARGO_MOVEMENT_TYPE_AT_ORIGIN_VALIDATION,
+          CARGO_MOVEMENT_TYPE_AT_DESTINATION_VALIDATION,
+          CONTAINER_POSITIONINGS_ONLY_FOR_SD,
+          EMPTY_CONTAINER_PICKUP_ONLY_FOR_CY,
+          TARE_WEIGHT_REQUIRED_FOR_SOC,
+          PACKAGE_CODE_ONLY_FOR_DG,
+          IMO_PACKAGING_CODE_ONLY_FOR_DG,
+          ACTIVE_REEFER_TEMPERATURE_UNIT_CONDITIONAL,
+          ACTIVE_REEFER_AIR_EXCHANGE_UNIT_CONDITIONAL,
+          SEND_TO_PLATFORM_ONLY_FOR_ELECTRONIC_BOL,
+          PLACE_OF_BL_ISSUE_UNLOCATION_XOR_COUNTRY,
+          INVOICE_PAYABLE_AT_MUST_USE_UN_LOCATION_CODE,
+          PARTY_CONTACT_DETAILS_NAME_AND_PHONE_OR_EMAIL,
+          EXPORT_LICENSE_REFERENCE_WHEN_REQUIRED,
           NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
           ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
-          REFERENCE_TYPE_VALIDATION,
-          IS_EXPORT_DECLARATION_REFERENCE_PRESENCE,
-          DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
+          OTHER_PARTY_FUNCTION_CODE_VALIDATION,
+          CODE_LIST_PROVIDER_VALIDATION,
+          SHIPMENT_LOCATION_TYPE_CODE_VALIDATION,
+          REQUESTED_CARRIAGE_MODE_OF_TRANSPORT_VALIDATION,
+          INNER_PACKAGING_QUANTITY_POSITIVE_INTEGER,
           UNIVERSAL_SERVICE_REFERENCE,
           VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
           VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
           VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
           NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
+          EXTENDED_NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
           CHECK_CARGO_GROSS_WEIGHT_CONDITIONS,
           JsonAttribute.xOrFields(
+              "The contractQuotationReference / serviceContractReference must demonstrate the correct use of contractQuotationReference or serviceContractReference by providing exactly one of the alternatives",
               JsonPointer.compile("/%s".formatted(CONTRACT_QUOTATION_REFERENCE)),
               JsonPointer.compile("/%s".formatted(SERVICE_CONTRACT_REFERENCE))),
           JsonAttribute.allOrNoneArePresent(
@@ -991,7 +1381,7 @@ public class BookingChecks {
                 return ConformanceCheckResult.simple(Set.of());
               }),
           JsonAttribute.allIndividualMatchesMustBeValid(
-              "DangerousGoods implies '%s'".formatted(NUMBER_OF_PACKAGES),
+              "The 'requestedEquipments.commodities.outerPackaging.numberOfPackages' attribute must be provided when the condition applies: in case this OuterPackaging includes Dangerous Goods the numberOfPackages is mandatory to provide",
               mav ->
                   mav.submitAllMatching(
                       S_S_S.formatted(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING)),
@@ -1010,21 +1400,21 @@ public class BookingChecks {
                 return ConformanceCheckResult.simple(Set.of());
               }),
           JsonAttribute.allIndividualMatchesMustBeValid(
-              "The '%s' values must be from dataset".formatted(SEGREGATION_GROUPS),
+              "The dangerousGoods.segregationGroups values must demonstrate the correct use of the IMO IMDG segregation group codes listed by the standard",
               allDg(dg -> dg.path(SEGREGATION_GROUPS).all().submitPath()),
               JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
                   BookingDataSets.DG_SEGREGATION_GROUPS)),
           JsonAttribute.allIndividualMatchesMustBeValid(
-              "The '%s' values must be from dataset".formatted(INHALATION_ZONE),
+              "The dangerousGoods.inhalationZone attribute must demonstrate the correct use of an inhalation hazard zone: A, B, C, or D",
               allDg(dg -> dg.path(INHALATION_ZONE).all().submitPath()),
               JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
                   BookingDataSets.INHALATION_ZONE_CODE)),
           JsonAttribute.allOrNoneArePresent(
+              "The declaredValueCurrency attribute must be provided when declaredValue is provided; if declaredValue is not provided, this field must be empty",
               JsonPointer.compile("/%s".formatted(DECLARED_VALUE)),
               JsonPointer.compile("/%s".formatted(DECLARED_VALUE_CURRENCY))),
           JsonAttribute.allIndividualMatchesMustBeValid(
-              "The '%s.*.%s' must not exceed more than 2 decimal points"
-                  .formatted(CHARGES, CURRENCY_AMOUNT),
+              "The charges.currencyAmount attribute must demonstrate the correct use of a monetary amount with no more than two decimal places",
               mav -> mav.submitAllMatching(S_S.formatted(CHARGES, CURRENCY_AMOUNT)),
               (nodeToValidate, contextPath) -> {
                 var currencyAmount = nodeToValidate.asDouble();
@@ -1040,12 +1430,19 @@ public class BookingChecks {
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS =
       Arrays.asList(
           ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-          SHIPMENT_CUTOFF_TIMES_UNIQUE,
           CHECK_CONFIRMED_BOOKING_FIELDS,
+          CONFIRMED_CONTAINER_POSITIONINGS_ONLY_FOR_SD,
+          CARRIER_BOOKING_REFERENCE_PRESENCE_BY_STATE,
           VALIDATE_SHIPMENT_LOCATIONS,
           FEEDBACKS_PRESENCE,
           VALID_FEEDBACK_SEVERITY,
-          VALID_FEEDBACK_CODE);
+          VALID_FEEDBACK_CODE,
+          CARRIER_REFERENCE_TYPE_VALIDATION,
+          TRANSPORT_PLAN_MODE_OF_TRANSPORT_VALIDATION,
+          TRANSPORT_PLAN_STAGE_SEQUENCE_NUMBER_POSITIVE_INTEGER,
+          BOOKING_STATUS_CODE_VALIDATION,
+          AMENDED_BOOKING_STATUS_CODE_VALIDATION,
+          BOOKING_CANCELLATION_STATUS_CODE_VALIDATION);
 
   public static ActionCheck responseContentChecks(
       UUID matched,
@@ -1082,7 +1479,7 @@ public class BookingChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate '%s'".formatted(ATTR_AMENDED_BOOKING_STATUS),
+            "(if included) The 'amendedBookingStatus' attribute in the Booking response must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case",
             body -> {
               JsonNode amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
               if (expectedAmendedBookingStatus == null) {
@@ -1111,7 +1508,7 @@ public class BookingChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate '%s'".formatted(ATTR_BOOKING_CANCELLATION_STATUS),
+            "(if included) The 'bookingCancellationStatus' attribute in the Booking response must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case",
             body -> {
               JsonNode bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
               if (expectedCancelledBookingStatus == null) {
@@ -1169,7 +1566,7 @@ public class BookingChecks {
 
   public static JsonContentCheck cbrrOrCbr(Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
-        "Validate Carrier Booking Request Reference and Carrier Booking Reference",
+        "The carrierBookingRequestReference / carrierBookingReference must demonstrate the correct use of the carrierBookingRequestReference or carrierBookingReference attribute by providing at least one of them",
         body -> {
           String cbrr = body.path(CARRIER_BOOKING_REQUEST_REFERENCE).asText("");
           String cbr = body.path(CARRIER_BOOKING_REFERENCE).asText("");
@@ -1192,7 +1589,7 @@ public class BookingChecks {
   public static JsonContentCheck cbrValidation(
       Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
-        "Validate Carrier Booking Reference",
+        "The carrierBookingReference attribute in the Booking response must demonstrate the correct use of the carrierBookingRequestReference or carrierBookingReference attribute: carrierBookingRequestReference MUST equal the reference established for the scenario, or carrierBookingReference MUST equal the reference established for the scenario",
         body -> {
           String cbr = body.path(CARRIER_BOOKING_REFERENCE).asText("");
           String expectedCbr = dspSupplier.get().carrierBookingReference();
@@ -1210,7 +1607,7 @@ public class BookingChecks {
   public static JsonContentCheck cbrrValidation(
       Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
-        "Validate Carrier Booking Request Reference",
+        "The carrierBookingRequestReference attribute in the Booking response must demonstrate the correct use of the carrierBookingRequestReference or carrierBookingReference attribute: carrierBookingRequestReference MUST equal the reference established for the scenario, or carrierBookingReference MUST equal the reference established for the scenario",
         body -> {
           String cbrr = body.path(CARRIER_BOOKING_REQUEST_REFERENCE).asText("");
           String expectedCbrr = dspSupplier.get().carrierBookingRequestReference();

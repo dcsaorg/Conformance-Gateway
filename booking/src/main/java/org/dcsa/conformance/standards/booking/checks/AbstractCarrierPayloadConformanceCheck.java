@@ -138,19 +138,29 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     return ConformanceCheckResult.simple(errors);
   }
 
-  protected ConformanceCheckResult ensureFeedbackSeverityAndCodeCompliance(
-      JsonNode responsePayload) {
-    Set<String> errors = new HashSet<>();
+  protected ConformanceCheckResult ensureFeedbackSeverityCompliance(JsonNode responsePayload) {
     JsonNode feedbacks = responsePayload.path(FEEDBACKS);
     if (JsonUtil.isMissingOrEmpty(feedbacks)) {
       return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
     }
+    Set<String> errors = new HashSet<>();
     for (JsonNode feedback : feedbacks) {
       String severity = feedback.path("severity").asText(null);
-      String code = feedback.path("code").asText(null);
       if (!BookingDataSets.FEEDBACKS_SEVERITY.contains(severity)) {
         errors.add("Invalid feedback severity: " + severity);
       }
+    }
+    return ConformanceCheckResult.simple(errors);
+  }
+
+  protected ConformanceCheckResult ensureFeedbackCodeCompliance(JsonNode responsePayload) {
+    JsonNode feedbacks = responsePayload.path(FEEDBACKS);
+    if (JsonUtil.isMissingOrEmpty(feedbacks)) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
+    Set<String> errors = new HashSet<>();
+    for (JsonNode feedback : feedbacks) {
+      String code = feedback.path("code").asText(null);
       if (!BookingDataSets.FEEDBACKS_CODE.contains(code)) {
         errors.add("Invalid feedback code: " + code);
       }

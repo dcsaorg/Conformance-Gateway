@@ -39,7 +39,21 @@
           "cargoGrossWeight": {
             "value": 3000.0,
             "unit": "KGM"
-          }
+          },
+          "nationalCommodityCodes": [
+            {
+              "type": "NCM",
+              "code": "123456",
+              "values": ["1515"]
+            }
+          ],
+          "extendedNationalCommodityCodes": [
+            {
+              "type": "NCM",
+              "code": "123456",
+              "values": ["1515"]
+            }
+          ]
         }
       ]
     }

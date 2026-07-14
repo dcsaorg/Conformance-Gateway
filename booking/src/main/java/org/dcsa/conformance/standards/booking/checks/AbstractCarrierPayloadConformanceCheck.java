@@ -85,10 +85,11 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   }
 
   protected ConformanceCheckResult ensureAmendedBookingStatusIsCorrect(JsonNode responsePayload) {
-    String actualState = responsePayload.path("amendedBookingStatus").asText(null);
+    JsonNode actualStateNode = responsePayload.path("amendedBookingStatus");
+    String actualState = actualStateNode.asText(null);
     String expectedState =
         expectedAmendedBookingStatus != null ? expectedAmendedBookingStatus.name() : null;
-    if (expectedState == null && actualState != null) {
+    if (expectedState == null && !actualStateNode.isMissingNode()) {
       return ConformanceCheckResult.simple(
           Set.of(
               "The '%s' should not be present, but response contains value '%s'"
@@ -105,10 +106,11 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
 
   protected ConformanceCheckResult ensureBookingCancellationStatusIsCorrect(
       JsonNode responsePayload) {
-    String actualState = responsePayload.path("bookingCancellationStatus").asText(null);
+    JsonNode actualStateNode = responsePayload.path("bookingCancellationStatus");
+    String actualState = actualStateNode.asText(null);
     String expectedState =
         expectedBookingCancellationStatus != null ? expectedBookingCancellationStatus.name() : null;
-    if (expectedState == null && actualState != null) {
+    if (expectedState == null && !actualStateNode.isMissingNode()) {
       return ConformanceCheckResult.simple(
           Set.of(
               "The '%s' should not be present, but response contains value '%s'"

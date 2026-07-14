@@ -882,6 +882,13 @@ public class BookingChecks {
     boolean isScenarioReefer = ScenarioType.REEFER.equals(scenario);
     boolean isScenarioNonOperatingReefer = ScenarioType.NON_OPERATING_REEFER.equals(scenario);
     boolean isScenarioDG = ScenarioType.DG.equals(scenario);
+    boolean isScenarioDryCargo =
+        Set.of(
+                ScenarioType.REGULAR,
+                ScenarioType.ROUTING_REFERENCE,
+                ScenarioType.STORE_DOOR_AT_ORIGIN,
+                ScenarioType.STORE_DOOR_AT_DESTINATION)
+            .contains(scenario);
 
     checks.add(
         JsonAttribute.customValidator(
@@ -976,8 +983,8 @@ public class BookingChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "[Scenario] Default container scenario validation",
-            !isScenarioReefer && !isScenarioNonOperatingReefer,
+            "[Scenario] Dry Cargo container validation",
+            isScenarioDryCargo,
             mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS)),
             (nodeToValidate, contextPath) -> {
               var issues = new LinkedHashSet<String>();
@@ -1042,8 +1049,8 @@ public class BookingChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "[Scenario] Non-DG scenarios require dangerous goods to be absent",
-            !isScenarioDG,
+            "[Scenario] Dry Cargo and Reefer scenarios require dangerous goods to be absent",
+            isScenarioDryCargo || isScenarioReefer,
             mav ->
                 mav.path(REQUESTED_EQUIPMENTS)
                     .all()
@@ -1801,7 +1808,7 @@ public class BookingChecks {
             body -> {
               JsonNode amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
               if (expectedAmendedBookingStatus == null) {
-                if (!JsonUtil.isMissingOrEmpty(amendedBookingStatus)) {
+                if (!amendedBookingStatus.isMissingNode()) {
                   return ConformanceCheckResult.simple(
                       Set.of(
                           "The '%s' should not be present, but response contains value '%s'"
@@ -1830,7 +1837,7 @@ public class BookingChecks {
             body -> {
               JsonNode bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
               if (expectedCancelledBookingStatus == null) {
-                if (!JsonUtil.isMissingOrEmpty(bookingCancellationStatus)) {
+                if (!bookingCancellationStatus.isMissingNode()) {
                   return ConformanceCheckResult.simple(
                       Set.of(
                           "The '%s' should not be present, but response contains value '%s'"

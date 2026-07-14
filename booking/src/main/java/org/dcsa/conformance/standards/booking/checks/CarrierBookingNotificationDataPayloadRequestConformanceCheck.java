@@ -54,19 +54,54 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                             Set.of(ConformanceError.irrelevant()))),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "Validate 'data.bookingStatus' is correct",
+                    "[Use case] The combination of data.bookingStatus, data.amendedBookingStatus and data.bookingCancellationStatus must match the active use case: data.bookingStatus must have the expected value",
                     DATA_PATH,
                     at(DATA_PATH, this::ensureBookingStatusIsCorrect)),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "Validate 'data.amendedBookingStatus' is correct",
+                    "[Use case] The combination of data.bookingStatus, data.amendedBookingStatus and data.bookingCancellationStatus must match the active use case: data.amendedBookingStatus must have the expected value or be absent",
                     DATA_PATH,
                     at(DATA_PATH, this::ensureAmendedBookingStatusIsCorrect)),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "Validate 'data.bookingCancellationStatus' is correct",
+                    "[Use case] The combination of data.bookingStatus, data.amendedBookingStatus and data.bookingCancellationStatus must match the active use case: data.bookingCancellationStatus must have the expected value or be absent",
                     DATA_PATH,
                     at(DATA_PATH, this::ensureBookingCancellationStatusIsCorrect)),
+                createSubCheck(
+                    DEFAULT_PREFIX,
+                    "(if included) The data.amendedBookingStatus attribute in the Booking Notification must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case",
+                    DATA_PATH,
+                    at(DATA_PATH, this::ensureAmendedBookingStatusUsageIsCorrect)),
+                createSubCheck(
+                    DEFAULT_PREFIX,
+                    "(if included) The data.bookingCancellationStatus attribute in the Booking Notification must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case",
+                    DATA_PATH,
+                    at(DATA_PATH, this::ensureBookingCancellationStatusUsageIsCorrect)),
+                createSubCheck(
+                    DEFAULT_PREFIX,
+                    "The data.bookingStatus attribute in the Booking Notification must demonstrate the correct use of a booking status code: RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED, CONFIRMED, PENDING_AMENDMENT, REJECTED, DECLINED, CANCELLED, or COMPLETED",
+                    DATA_PATH,
+                    at(DATA_PATH, this::ensureBookingStatusCodeCompliance)),
+                createSubCheck(
+                    DEFAULT_PREFIX,
+                    "The data.amendedBookingStatus attribute in the Booking Notification must demonstrate the correct use of an amended booking status code: AMENDMENT_RECEIVED, AMENDMENT_CONFIRMED, AMENDMENT_DECLINED, or AMENDMENT_CANCELLED",
+                    DATA_PATH,
+                    at(DATA_PATH, this::ensureAmendedBookingStatusCodeCompliance)),
+                createSubCheck(
+                    DEFAULT_PREFIX,
+                    "The data.bookingCancellationStatus attribute in the Booking Notification must demonstrate the correct use of a booking cancellation status code: CANCELLATION_RECEIVED, CANCELLATION_DECLINED, or CANCELLATION_CONFIRMED",
+                    DATA_PATH,
+                    at(DATA_PATH, this::ensureBookingCancellationStatusCodeCompliance)),
+                createSubCheck(
+                    DEFAULT_PREFIX,
+                    "The data.carrierBookingReference / data.carrierBookingRequestReference attributes in the Booking Notification must demonstrate the correct use of the carrierBookingRequestReference or carrierBookingReference attribute by providing at least one of them",
+                    DATA_PATH,
+                    at(DATA_PATH, this::ensureAtLeastOneCarrierReferenceIsPresent)),
+                createSubCheck(
+                    DEFAULT_PREFIX,
+                    "The data.carrierBookingReference / data.carrierBookingRequestReference attributes in the Booking Notification must demonstrate the correct use of the carrierBookingRequestReference or carrierBookingReference attribute: carrierBookingRequestReference MUST equal the reference established for the scenario, or carrierBookingReference MUST equal the reference established for the scenario",
+                    DATA_PATH,
+                    at(DATA_PATH, this::ensureCarrierReferenceMatchesScenario)),
                 createSubCheck(
                     DEFAULT_PREFIX,
                     "The data.carrierBookingReference attribute in the Booking Notification must demonstrate the correct use of this conditional requirement: carrierBookingReference MUST be present, except for the booking states where it is still optional: RECEIVED, REJECTED, PENDING_UPDATE, UPDATE_RECEIVED, or CANCELLED",
@@ -93,11 +128,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   }
 
   private Stream<ConformanceCheck> createFullNotificationChecksAt(String jsonPath, String prefix) {
-    return BookingChecks.fullPayloadChecks(
-            dspSupplier,
-            expectedBookingStatus,
-            expectedAmendedBookingStatus,
-            expectedBookingCancellationStatus)
+    return BookingChecks.nestedNotificationPayloadChecks(dspSupplier)
         .stream()
         .map(
             jsonContentCheck ->
@@ -107,5 +138,24 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                     jsonContentCheck.isRelevant(),
                     jsonPath,
                     at(jsonPath, jsonContentCheck::validate)));
+  }
+
+  private ConformanceCheckResult ensureCarrierReferenceMatchesScenario(
+      com.fasterxml.jackson.databind.JsonNode data) {
+    var dsp = dspSupplier.get();
+    boolean cbrrMatches =
+        dsp.carrierBookingRequestReference() != null
+            && dsp.carrierBookingRequestReference()
+                .equals(data.path("carrierBookingRequestReference").asText(""));
+    boolean cbrMatches =
+        dsp.carrierBookingReference() != null
+            && dsp.carrierBookingReference()
+                .equals(data.path("carrierBookingReference").asText(""));
+    if (cbrrMatches || cbrMatches) {
+      return ConformanceCheckResult.simple(Set.of());
+    }
+    return ConformanceCheckResult.simple(
+        Set.of(
+            "Neither carrierBookingRequestReference nor carrierBookingReference matches the reference established for the scenario"));
   }
 }

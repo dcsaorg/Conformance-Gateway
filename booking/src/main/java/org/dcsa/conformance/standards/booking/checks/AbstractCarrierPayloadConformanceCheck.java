@@ -72,6 +72,16 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     return ConformanceCheckResult.simple(Collections.emptySet());
   }
 
+  protected ConformanceCheckResult ensureAtLeastOneCarrierReferenceIsPresent(JsonNode payload) {
+    if (!JsonUtil.isMissingOrEmpty(payload.path("carrierBookingReference"))
+        || !JsonUtil.isMissingOrEmpty(payload.path("carrierBookingRequestReference"))) {
+      return ConformanceCheckResult.simple(Collections.emptySet());
+    }
+    return ConformanceCheckResult.simple(
+        Set.of(
+            "At least one of 'carrierBookingReference' or 'carrierBookingRequestReference' must be present"));
+  }
+
   protected ConformanceCheckResult ensureBookingStatusIsCorrect(JsonNode responsePayload) {
     String actualState = responsePayload.path("bookingStatus").asText(null);
     String expectedState = expectedBookingStatus.name();
@@ -104,6 +114,15 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
                 .formatted(expectedState, Objects.requireNonNullElse(actualState, UNSET_MARKER))));
   }
 
+  protected ConformanceCheckResult ensureAmendedBookingStatusUsageIsCorrect(JsonNode payload) {
+    if (expectedAmendedBookingStatus != null
+        || payload.path("amendedBookingStatus").isMissingNode()) {
+      return ConformanceCheckResult.simple(Collections.emptySet());
+    }
+    return ConformanceCheckResult.simple(
+        Set.of("The 'amendedBookingStatus' property must be absent for this use case"));
+  }
+
   protected ConformanceCheckResult ensureBookingCancellationStatusIsCorrect(
       JsonNode responsePayload) {
     JsonNode actualStateNode = responsePayload.path("bookingCancellationStatus");
@@ -123,6 +142,42 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
         Set.of(
             "Expected bookingCancellationStatus '%s' but found '%s'"
                 .formatted(expectedState, Objects.requireNonNullElse(actualState, UNSET_MARKER))));
+  }
+
+  protected ConformanceCheckResult ensureBookingCancellationStatusUsageIsCorrect(JsonNode payload) {
+    if (expectedBookingCancellationStatus != null
+        || payload.path("bookingCancellationStatus").isMissingNode()) {
+      return ConformanceCheckResult.simple(Collections.emptySet());
+    }
+    return ConformanceCheckResult.simple(
+        Set.of("The 'bookingCancellationStatus' property must be absent for this use case"));
+  }
+
+  protected ConformanceCheckResult ensureBookingStatusCodeCompliance(JsonNode payload) {
+    return ensureStatusCodeCompliance(payload, "bookingStatus", BookingDataSets.BOOKING_STATUS);
+  }
+
+  protected ConformanceCheckResult ensureAmendedBookingStatusCodeCompliance(JsonNode payload) {
+    return ensureStatusCodeCompliance(
+        payload, "amendedBookingStatus", BookingDataSets.AMENDED_BOOKING_STATUS);
+  }
+
+  protected ConformanceCheckResult ensureBookingCancellationStatusCodeCompliance(JsonNode payload) {
+    return ensureStatusCodeCompliance(
+        payload, "bookingCancellationStatus", BookingDataSets.BOOKING_CANCELLATION_STATUS);
+  }
+
+  private static ConformanceCheckResult ensureStatusCodeCompliance(
+      JsonNode payload, String field, org.dcsa.conformance.core.check.KeywordDataset dataset) {
+    JsonNode value = payload.path(field);
+    if (value.isMissingNode()) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
+    if (!value.isTextual() || !dataset.contains(value.asText())) {
+      return ConformanceCheckResult.simple(
+          Set.of("Invalid '%s' value: '%s'".formatted(field, value.asText())));
+    }
+    return ConformanceCheckResult.simple(Collections.emptySet());
   }
 
   protected ConformanceCheckResult ensureFeedbacksIsPresent(JsonNode responsePayload) {

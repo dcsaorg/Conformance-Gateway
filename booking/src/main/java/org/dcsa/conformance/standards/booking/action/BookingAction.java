@@ -1,11 +1,9 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -182,8 +180,6 @@ public abstract class BookingAction extends BookingAndEblAction {
       BookingState amendedBookingState,
       BookingCancellationState bookingCancellationState) {
     String titlePrefix = "[Notification]";
-    var cbr = getBookingDspReference().get().carrierBookingReference();
-    var cbrr = getBookingDspReference().get().carrierBookingRequestReference();
     return Stream.of(
             new HttpMethodCheck(
                 titlePrefix, BookingRole::isCarrier, getMatchedNotificationExchangeUuid(), "POST"),
@@ -219,53 +215,7 @@ public abstract class BookingAction extends BookingAndEblAction {
                 BookingRole::isCarrier,
                 getMatchedNotificationExchangeUuid(),
                 HttpMessageType.REQUEST,
-                notificationSchemaValidator),
-            cbr == null
-                ? null
-                : new JsonAttributeCheck(
-                    titlePrefix,
-                    BookingRole::isCarrier,
-                    getMatchedNotificationExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    JsonPointer.compile("/data/carrierBookingReference"),
-                    cbr),
-            cbrr == null
-                ? null
-                : new JsonAttributeCheck(
-                    titlePrefix,
-                    BookingRole::isCarrier,
-                    getMatchedNotificationExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    JsonPointer.compile("/data/carrierBookingRequestReference"),
-                    cbrr),
-            bookingState == null
-                ? null
-                : new JsonAttributeCheck(
-                    titlePrefix,
-                    BookingRole::isCarrier,
-                    getMatchedNotificationExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    JsonPointer.compile("/data/bookingStatus"),
-                    bookingState.name()),
-            amendedBookingState == null
-                ? null
-                : new JsonAttributeCheck(
-                    titlePrefix,
-                    BookingRole::isCarrier,
-                    getMatchedNotificationExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    JsonPointer.compile("/data/amendedBookingStatus"),
-                    amendedBookingState.name()),
-            bookingCancellationState == null
-                ? null
-                : new JsonAttributeCheck(
-                    titlePrefix,
-                    BookingRole::isCarrier,
-                    getMatchedNotificationExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    JsonPointer.compile("/data/bookingCancellationStatus"),
-                    bookingCancellationState.name()))
-        .filter(Objects::nonNull);
+                notificationSchemaValidator));
   }
 
   protected Stream<ActionCheck> getSimpleNotificationChecks(

@@ -875,12 +875,7 @@ public class BookingChecks {
     List<JsonContentCheck> checks = new ArrayList<>();
 
     var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
-    boolean isScenarioRoutingReference = ScenarioType.ROUTING_REFERENCE.equals(scenario);
-    boolean isScenarioStoreDoorAtOrigin = ScenarioType.STORE_DOOR_AT_ORIGIN.equals(scenario);
-    boolean isScenarioStoreDoorAtDestination =
-        ScenarioType.STORE_DOOR_AT_DESTINATION.equals(scenario);
     boolean isScenarioReefer = ScenarioType.REEFER.equals(scenario);
-    boolean isScenarioNonOperatingReefer = ScenarioType.NON_OPERATING_REEFER.equals(scenario);
     boolean isScenarioDG = ScenarioType.DG.equals(scenario);
     boolean isScenarioDryCargo =
         Set.of(
@@ -891,75 +886,6 @@ public class BookingChecks {
             .contains(scenario);
 
     checks.add(
-        JsonAttribute.customValidator(
-            "[Scenario] Verify that a '%s' is present".formatted(ROUTING_REFERENCE),
-            isScenarioRoutingReference,
-            body -> {
-              var issues = new LinkedHashSet<String>();
-              var routingReference = body.path(ROUTING_REFERENCE).asText("");
-              if (routingReference.isBlank()) {
-                issues.add(
-                    "The scenario requires the booking to have a '%s'"
-                        .formatted(ROUTING_REFERENCE));
-              }
-              return ConformanceCheckResult.simple(issues);
-            }));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "[Scenario] Store door at origin scenario requirements",
-            isScenarioStoreDoorAtOrigin,
-            body -> {
-              var issues = new LinkedHashSet<>(validateStoreDoorCommonRequirements(body));
-              var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
-              if (!"SD".equals(receiptTypeAtOrigin)) {
-                issues.add(
-                    "The scenario requires the '%s' to be 'SD'".formatted(RECEIPT_TYPE_AT_ORIGIN));
-              }
-              var preNode = getShipmentLocationTypeCode(body, "PRE");
-              if (preNode.isMissingNode()) {
-                issues.add("The scenario requires Port of Load value to be 'PRE'");
-              }
-              return ConformanceCheckResult.simple(issues);
-            }));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "[Scenario] Store door at destination scenario requirements",
-            isScenarioStoreDoorAtDestination,
-            body -> {
-              var issues = new LinkedHashSet<>(validateStoreDoorCommonRequirements(body));
-              var deliveryTypeAtDestination = body.path(DELIVERY_TYPE_AT_DESTINATION).asText("");
-              if (!"SD".equals(deliveryTypeAtDestination)) {
-                issues.add(
-                    "The scenario requires the '%s' to be 'SD'"
-                        .formatted(DELIVERY_TYPE_AT_DESTINATION));
-              }
-              var pdeNode = getShipmentLocationTypeCode(body, "PDE");
-              if (pdeNode.isMissingNode()) {
-                issues.add("The scenario requires Port of Discharge value to be 'PDE'");
-              }
-              return ConformanceCheckResult.simple(issues);
-            }));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "[Scenario] Verify that the correct '%s'/'%s' is used"
-                .formatted(CONTRACT_QUOTATION_REFERENCE, SERVICE_CONTRACT_REFERENCE),
-            body -> {
-              var contractQuotationReference = body.path(CONTRACT_QUOTATION_REFERENCE).asText("");
-              var serviceContractReference = body.path(SERVICE_CONTRACT_REFERENCE).asText("");
-              if (!contractQuotationReference.isEmpty() && !serviceContractReference.isEmpty()) {
-                return ConformanceCheckResult.simple(
-                    Set.of(
-                        "The scenario requires either of '%s'/'%s'"
-                                .formatted(CONTRACT_QUOTATION_REFERENCE, SERVICE_CONTRACT_REFERENCE)
-                            + " to be present, but not both"));
-              }
-              return ConformanceCheckResult.simple(Set.of());
-            }));
-
-    checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
             "[Scenario] Reefer scenario container validation",
             isScenarioReefer,
@@ -967,17 +893,6 @@ public class BookingChecks {
             (nodeToValidate, contextPath) -> {
               var issues = new LinkedHashSet<String>();
               reeferContainerChecks(contextPath, nodeToValidate, issues);
-              return ConformanceCheckResult.simple(issues);
-            }));
-
-    checks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-            "[Scenario] Non-operating reefer scenario container validation",
-            isScenarioNonOperatingReefer,
-            mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS)),
-            (nodeToValidate, contextPath) -> {
-              var issues = new LinkedHashSet<String>();
-              nonOperatingReeferContainerChecks(contextPath, nodeToValidate, issues);
               return ConformanceCheckResult.simple(issues);
             }));
 
@@ -1072,24 +987,6 @@ public class BookingChecks {
     return checks;
   }
 
-  private static Set<String> validateStoreDoorCommonRequirements(JsonNode body) {
-    var issues = new LinkedHashSet<String>();
-    var cargoMovementTypeAtOrigin = body.path(CARGO_MOVEMENT_TYPE_AT_ORIGIN).asText("");
-    var cargoMovementTypeAtDestination = body.path(CARGO_MOVEMENT_TYPE_AT_DESTINATION).asText("");
-
-    if (!"FCL".equals(cargoMovementTypeAtOrigin)) {
-      issues.add(
-          "The scenario requires the '%s' to be 'FCL'".formatted(CARGO_MOVEMENT_TYPE_AT_ORIGIN));
-    }
-    if (!"FCL".equals(cargoMovementTypeAtDestination)) {
-      issues.add(
-          "The scenario requires the '%s' to be 'FCL'"
-              .formatted(CARGO_MOVEMENT_TYPE_AT_DESTINATION));
-    }
-
-    return issues;
-  }
-
   private static void defaultContainerChecks(
       String contextPath, JsonNode nodeToValidate, Set<String> issues) {
     var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
@@ -1104,27 +1001,6 @@ public class BookingChecks {
     }
   }
 
-  private static void nonOperatingReeferContainerChecks(
-      String contextPath, JsonNode nodeToValidate, Set<String> issues) {
-    var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
-    var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
-    var isoEquipmentNode = nodeToValidate.path(ISO_EQUIPMENT_CODE);
-
-    if (!nonOperatingReeferNode.asBoolean(false)) {
-      issues.add(
-          "The scenario requires '%s.%s' to be true"
-              .formatted(contextPath, IS_NON_OPERATING_REEFER));
-    }
-    if (!activeReeferNode.isMissingNode()) {
-      issues.add(
-          THE_SCENARIO_REQUIRES_S_S_TO_BE_ABSENT.formatted(contextPath, ACTIVE_REEFER_SETTINGS));
-    }
-    if (!isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""))) {
-      issues.add(
-          "The scenario requires '%s.%s' to be a valid reefer container type"
-              .formatted(ISO_EQUIPMENT_CODE, contextPath));
-    }
-  }
 
   private static void reeferContainerChecks(
       String contextPath, JsonNode nodeToValidate, Set<String> issues) {
@@ -1741,7 +1617,7 @@ public class BookingChecks {
                 return ConformanceCheckResult.simple(Set.of());
               }));
 
-  private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS =
+  private static final List<JsonContentCheck> BOOKING_RESPONSE_CONTENT_CHECKS =
       Arrays.asList(
           ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
           CONFIRMED_EQUIPMENTS_MANDATORY_FOR_CONFIRMED,
@@ -1756,14 +1632,17 @@ public class BookingChecks {
           TRANSPORT_LOAD_LOCATION_ADDRESS_LINES_COMPATIBILITY,
           TRANSPORT_DISCHARGE_LOCATION_REPRESENTATIONS,
           TRANSPORT_DISCHARGE_LOCATION_ADDRESS_LINES_COMPATIBILITY,
-          CARRIER_BOOKING_REFERENCE_PRESENCE_BY_STATE,
           VALIDATE_SHIPMENT_LOCATIONS,
+          CARRIER_REFERENCE_TYPE_VALIDATION,
+          TRANSPORT_PLAN_MODE_OF_TRANSPORT_VALIDATION,
+          TRANSPORT_PLAN_STAGE_SEQUENCE_NUMBER_POSITIVE_INTEGER);
+
+  private static final List<JsonContentCheck> RESPONSE_ENVELOPE_CHECKS =
+      Arrays.asList(
+          CARRIER_BOOKING_REFERENCE_PRESENCE_BY_STATE,
           FEEDBACKS_PRESENCE,
           VALID_FEEDBACK_SEVERITY,
           VALID_FEEDBACK_CODE,
-          CARRIER_REFERENCE_TYPE_VALIDATION,
-          TRANSPORT_PLAN_MODE_OF_TRANSPORT_VALIDATION,
-          TRANSPORT_PLAN_STAGE_SEQUENCE_NUMBER_POSITIVE_INTEGER,
           BOOKING_STATUS_CODE_VALIDATION,
           AMENDED_BOOKING_STATUS_CODE_VALIDATION,
           BOOKING_CANCELLATION_STATUS_CODE_VALIDATION);
@@ -1791,19 +1670,41 @@ public class BookingChecks {
       BookingState bookingStatus,
       BookingState expectedAmendedBookingStatus,
       BookingCancellationState expectedCancelledBookingStatus) {
+    return payloadChecks(
+        dspSupplier,
+        bookingStatus,
+        expectedAmendedBookingStatus,
+        expectedCancelledBookingStatus,
+        true);
+  }
+
+  public static List<JsonContentCheck> nestedNotificationPayloadChecks(
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
+    return payloadChecks(dspSupplier, null, null, null, false);
+  }
+
+  private static List<JsonContentCheck> payloadChecks(
+      Supplier<BookingDynamicScenarioParameters> dspSupplier,
+      BookingState bookingStatus,
+      BookingState expectedAmendedBookingStatus,
+      BookingCancellationState expectedCancelledBookingStatus,
+      boolean includeResponseEnvelopeChecks) {
 
     var checks = new ArrayList<JsonContentCheck>();
 
-    checks.add(cbrValidation(dspSupplier));
-    checks.add(cbrrValidation(dspSupplier));
+    if (includeResponseEnvelopeChecks) {
+      checks.add(cbrValidation(dspSupplier));
+      checks.add(cbrrValidation(dspSupplier));
+    }
     checks.add(AT_LEAST_ONE_CARRIER_REFERENCE_PRESENT);
 
-    checks.add(
-        JsonAttribute.mustEqual(
-            JsonPointer.compile("/%s".formatted(BOOKING_STATUS)), bookingStatus.name()));
+    if (includeResponseEnvelopeChecks) {
+      checks.add(
+          JsonAttribute.mustEqual(
+              JsonPointer.compile("/%s".formatted(BOOKING_STATUS)), bookingStatus.name()));
 
-    checks.add(
-        JsonAttribute.customValidator(
+      checks.add(
+          JsonAttribute.customValidator(
             "(if included) The 'amendedBookingStatus' attribute in the Booking response must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case",
             body -> {
               JsonNode amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
@@ -1829,10 +1730,10 @@ public class BookingChecks {
                                 amendedBookingStatusValue)));
               }
               return ConformanceCheckResult.simple(Set.of());
-            }));
+              }));
 
-    checks.add(
-        JsonAttribute.customValidator(
+      checks.add(
+          JsonAttribute.customValidator(
             "(if included) The 'bookingCancellationStatus' attribute in the Booking response must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case",
             body -> {
               JsonNode bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
@@ -1859,11 +1760,15 @@ public class BookingChecks {
                                 bookingCancellationStatusValue)));
               }
               return ConformanceCheckResult.simple(Set.of());
-            }));
+              }));
+    }
 
     checks.addAll(STATIC_BOOKING_CHECKS);
 
-    checks.addAll(RESPONSE_ONLY_CHECKS);
+    checks.addAll(BOOKING_RESPONSE_CONTENT_CHECKS);
+    if (includeResponseEnvelopeChecks) {
+      checks.addAll(RESPONSE_ENVELOPE_CHECKS);
+    }
 
     checks.add(
         JsonAttribute.customValidator(

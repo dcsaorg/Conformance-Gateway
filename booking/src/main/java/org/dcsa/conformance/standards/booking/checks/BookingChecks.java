@@ -75,7 +75,6 @@ public class BookingChecks {
   private static final String EXPECTED_DEPARTURE_DATE = "expectedDepartureDate";
   private static final String EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE =
       "expectedDepartureFromPlaceOfReceiptDate";
-  private static final String VESSEL_IMO_NUMBER = "vesselIMONumber";
   private static final String LOCATION_TYPE_CODE = "locationTypeCode";
   private static final String BOOKING_STATUS = "bookingStatus";
   private static final String CONFIRMED_EQUIPMENTS = "confirmedEquipments";
@@ -125,9 +124,6 @@ public class BookingChecks {
   private static final String IS_ELECTRONIC = "isElectronic";
   private static final String PHONE = "phone";
   private static final String EMAIL = "email";
-  private static final String EXPORT_LICENSE = "exportLicense";
-  private static final String IS_REQUIRED = "isRequired";
-  private static final String REFERENCE = "reference";
   private static final String TEMPERATURE_SETPOINT = "temperatureSetpoint";
   private static final String TEMPERATURE_UNIT = "temperatureUnit";
   private static final String AIR_EXCHANGE = "airExchange";
@@ -448,164 +444,290 @@ public class BookingChecks {
             return ConformanceCheckResult.simple(issues);
           });
 
-  private static final JsonContentCheck VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS =
+  private static boolean attrPresent(JsonNode body, String field) {
+    return !body.path(field).asText("").isBlank();
+  }
+
+  private static boolean hasVesselName(JsonNode body) {
+    return !body.path(VESSEL).path(NAME).asText("").isBlank();
+  }
+
+  private static boolean hasRoutingReference(JsonNode body) {
+    return attrPresent(body, ROUTING_REFERENCE);
+  }
+
+  private static boolean hasExpectedArrivalDates(JsonNode body) {
+    return attrPresent(body, EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE)
+        && attrPresent(body, EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE);
+  }
+
+  private static boolean hasVoyageWithServiceIdentification(JsonNode body) {
+    return attrPresent(body, CARRIER_EXPORT_VOYAGE_NUMBER)
+        && (hasVesselName(body)
+            || attrPresent(body, CARRIER_SERVICE_CODE)
+            || attrPresent(body, CARRIER_SERVICE_NAME));
+  }
+
+  private static ConformanceCheckResult irrelevantResult() {
+    return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+  }
+
+  private static final JsonContentCheck CARRIER_EXPORT_VOYAGE_NUMBER_CONDITIONS =
       JsonAttribute.customValidator(
-          "Validate shipper's minimum request fields",
+          "The carrierExportVoyageNumber attribute must be provided when expectedDepartureDate or expectedArrivalAtPlaceOfDeliveryStartDate and expectedArrivalAtPlaceOfDeliveryEndDate is not provided. If routingReference is provided, this property MUST not be provided",
           body -> {
-            var issues = new LinkedHashSet<String>();
-
-            var routingReference = body.path(ROUTING_REFERENCE).asText("");
-            if (!routingReference.isBlank()) {
-              return ConformanceCheckResult.simple(routingReferenceRequestFieldsChecks(body));
+            if (hasRoutingReference(body)) {
+              return attrPresent(body, CARRIER_EXPORT_VOYAGE_NUMBER)
+                  ? ConformanceCheckResult.simple(
+                      Set.of(
+                          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+                              CARRIER_EXPORT_VOYAGE_NUMBER, ROUTING_REFERENCE)))
+                  : irrelevantResult();
             }
-
-            var vesselName = body.path(VESSEL).path(NAME).asText("");
-            var carrierExportVoyageNumber = body.path(CARRIER_EXPORT_VOYAGE_NUMBER).asText("");
-            var carrierServiceCode = body.path(CARRIER_SERVICE_CODE).asText("");
-            var carrierServiceName = body.path(CARRIER_SERVICE_NAME).asText("");
-            var expectedDepartureDate = body.path(EXPECTED_DEPARTURE_DATE).asText("");
-            var expectedDepartureFromPlaceOfReceiptDate =
-                body.path(EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE).asText("");
-
-            var polNode = getShipmentLocationTypeCode(body, "POL");
-            var preNode = getShipmentLocationTypeCode(body, "PRE");
-            var pdeNode = getShipmentLocationTypeCode(body, "PDE");
-            var podNode = getShipmentLocationTypeCode(body, "POD");
-
-            var providedArrivalStartDate =
-                body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE).asText("");
-            var providedArrivalEndDate =
-                body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE).asText("");
-
-            if (pdeNode.isMissingNode() && podNode.isMissingNode()) {
-              issues.add("Port of Discharge value must be provided (PDE or POD)");
+            if (!attrPresent(body, CARRIER_EXPORT_VOYAGE_NUMBER)
+                && !attrPresent(body, EXPECTED_DEPARTURE_DATE)
+                && !hasExpectedArrivalDates(body)) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s' must be provided when '%s' or the expected arrival dates are not provided"
+                          .formatted(CARRIER_EXPORT_VOYAGE_NUMBER, EXPECTED_DEPARTURE_DATE)));
             }
-            if (preNode.isMissingNode() && polNode.isMissingNode()) {
-              issues.add("Port of Load values must be provided (PRE or POL)");
+            return ConformanceCheckResult.simple(Set.of());
+          });
+
+  private static final JsonContentCheck CARRIER_SERVICE_CODE_CONDITIONS =
+      JsonAttribute.customValidator(
+          "The carrierServiceCode attribute must be provided when carrierExportVoyageNumber is provided and Vessel details or carrierServiceName are blank. If routingReference is provided, this property MUST not be provided",
+          body -> {
+            if (hasRoutingReference(body)) {
+              return attrPresent(body, CARRIER_SERVICE_CODE)
+                  ? ConformanceCheckResult.simple(
+                      Set.of(
+                          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+                              CARRIER_SERVICE_CODE, ROUTING_REFERENCE)))
+                  : irrelevantResult();
             }
+            if (attrPresent(body, CARRIER_EXPORT_VOYAGE_NUMBER)
+                && !hasVesselName(body)
+                && !attrPresent(body, CARRIER_SERVICE_NAME)
+                && !attrPresent(body, CARRIER_SERVICE_CODE)) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s' must be provided when '%s' is provided and vessel details and '%s' are blank"
+                          .formatted(
+                              CARRIER_SERVICE_CODE,
+                              CARRIER_EXPORT_VOYAGE_NUMBER,
+                              CARRIER_SERVICE_NAME)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
 
-            // Check minimum mandatory property combinations
-            var hasExpectedDepartureDate = !expectedDepartureDate.isEmpty();
-            var hasExpectedDepartureFromPlaceOfReceiptDate =
-                !expectedDepartureFromPlaceOfReceiptDate.isEmpty();
-            var hasArrivalDates =
-                !providedArrivalStartDate.isEmpty() && !providedArrivalEndDate.isEmpty();
-            var hasVoyageAndVessel = !carrierExportVoyageNumber.isEmpty() && !vesselName.isEmpty();
-            var hasVoyageAndServiceName =
-                !carrierExportVoyageNumber.isEmpty() && !carrierServiceName.isEmpty();
-            var hasVoyageAndServiceCode =
-                !carrierExportVoyageNumber.isEmpty() && !carrierServiceCode.isEmpty();
+  private static final JsonContentCheck CARRIER_SERVICE_NAME_CONDITIONS =
+      JsonAttribute.customValidator(
+          "The carrierServiceName attribute must be provided when carrierExportVoyageNumber is provided and Vessel details or carrierServiceCode are blank. If routingReference is provided, this property MUST not be provided",
+          body -> {
+            if (hasRoutingReference(body)) {
+              return attrPresent(body, CARRIER_SERVICE_NAME)
+                  ? ConformanceCheckResult.simple(
+                      Set.of(
+                          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+                              CARRIER_SERVICE_NAME, ROUTING_REFERENCE)))
+                  : irrelevantResult();
+            }
+            if (attrPresent(body, CARRIER_EXPORT_VOYAGE_NUMBER)
+                && !hasVesselName(body)
+                && !attrPresent(body, CARRIER_SERVICE_CODE)
+                && !attrPresent(body, CARRIER_SERVICE_NAME)) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s' must be provided when '%s' is provided and vessel details and '%s' are blank"
+                          .formatted(
+                              CARRIER_SERVICE_NAME,
+                              CARRIER_EXPORT_VOYAGE_NUMBER,
+                              CARRIER_SERVICE_CODE)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
 
-            if (!hasExpectedDepartureDate
-                && !hasExpectedDepartureFromPlaceOfReceiptDate
-                && !hasArrivalDates
-                && !hasVoyageAndVessel
-                && !hasVoyageAndServiceName
-                && !hasVoyageAndServiceCode) {
-              issues.add(
-                  "At least one of the minimum mandatory property combinations must be provided: "
-                      + "%s, %s, "
+  private static final JsonContentCheck VESSEL_CONDITIONS =
+      JsonAttribute.customValidator(
+          "The vessel object must be provided when carrierExportVoyageNumber is provided and carrierServiceCode or carrierServiceName are blank. If routingReference is provided, this object MUST not be provided",
+          body -> {
+            if (hasRoutingReference(body)) {
+              return !JsonUtil.isMissingOrEmpty(body.path(VESSEL))
+                  ? ConformanceCheckResult.simple(
+                      Set.of(
+                          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+                              VESSEL, ROUTING_REFERENCE)))
+                  : irrelevantResult();
+            }
+            if (attrPresent(body, CARRIER_EXPORT_VOYAGE_NUMBER)
+                && !attrPresent(body, CARRIER_SERVICE_CODE)
+                && !attrPresent(body, CARRIER_SERVICE_NAME)
+                && !hasVesselName(body)) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s' must be provided when '%s' is provided and '%s' and '%s' are blank"
+                          .formatted(
+                              VESSEL,
+                              CARRIER_EXPORT_VOYAGE_NUMBER,
+                              CARRIER_SERVICE_CODE,
+                              CARRIER_SERVICE_NAME)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
+
+  private static final JsonContentCheck EXPECTED_DEPARTURE_DATE_CONDITIONS =
+      JsonAttribute.customValidator(
+          "The expectedDepartureDate attribute must be provided when vessel/voyage/service details or expectedArrivalAtPlaceOfDeliveryDate or expectedDepartureFromPlaceOfReceiptDate (at PRE) is not provided. If routingReference is provided, this property MUST not be provided",
+          body -> {
+            if (hasRoutingReference(body)) {
+              return attrPresent(body, EXPECTED_DEPARTURE_DATE)
+                  ? ConformanceCheckResult.simple(
+                      Set.of(
+                          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+                              EXPECTED_DEPARTURE_DATE, ROUTING_REFERENCE)))
+                  : irrelevantResult();
+            }
+            if (!hasVoyageWithServiceIdentification(body)
+                && !hasExpectedArrivalDates(body)
+                && !attrPresent(body, EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE)
+                && !attrPresent(body, EXPECTED_DEPARTURE_DATE)) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s' must be provided when vessel/voyage/service details, the expected arrival dates or '%s' are not provided"
                           .formatted(
                               EXPECTED_DEPARTURE_DATE,
-                              EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE)
-                      + "expectedArrival dates (both start and end), "
-                      + "%s + %s, ".formatted(CARRIER_EXPORT_VOYAGE_NUMBER, NAME)
-                      + "%s + %s, or ".formatted(CARRIER_EXPORT_VOYAGE_NUMBER, CARRIER_SERVICE_NAME)
-                      + "%s + %s.".formatted(CARRIER_EXPORT_VOYAGE_NUMBER, CARRIER_SERVICE_CODE));
+                              EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE)));
             }
+            return ConformanceCheckResult.simple(Set.of());
+          });
 
+  private static final JsonContentCheck EXPECTED_DEPARTURE_FROM_RECEIPT_DATE_CONDITIONS =
+      JsonAttribute.customValidator(
+          "The expectedDepartureFromPlaceOfReceiptDate attribute must be provided when vessel/voyage/service details or expectedArrivalAtPlaceOfDeliveryDate or expectedDepartureDate (at POL) is not provided",
+          body -> {
+            if (hasRoutingReference(body)) {
+              return irrelevantResult();
+            }
+            if (!hasVoyageWithServiceIdentification(body)
+                && !hasExpectedArrivalDates(body)
+                && !attrPresent(body, EXPECTED_DEPARTURE_DATE)
+                && !attrPresent(body, EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE)) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "'%s' must be provided when vessel/voyage/service details, the expected arrival dates or '%s' are not provided"
+                          .formatted(
+                              EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE,
+                              EXPECTED_DEPARTURE_DATE)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
+
+  private static JsonContentCheck expectedArrivalDateConditions(String field) {
+    return JsonAttribute.customValidator(
+        "The %s attribute must be provided when vessel/voyage/service details or expectedDepartureDate is not provided. If routingReference is provided, this property MUST not be provided"
+            .formatted(field),
+        body -> {
+          if (hasRoutingReference(body)) {
+            return attrPresent(body, field)
+                ? ConformanceCheckResult.simple(
+                    Set.of(
+                        S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
+                            field, ROUTING_REFERENCE)))
+                : irrelevantResult();
+          }
+          if (!hasVoyageWithServiceIdentification(body)
+              && !attrPresent(body, EXPECTED_DEPARTURE_DATE)
+              && !attrPresent(body, field)) {
+            return ConformanceCheckResult.simple(
+                Set.of(
+                    "'%s' must be provided when vessel/voyage/service details or '%s' are not provided"
+                        .formatted(field, EXPECTED_DEPARTURE_DATE)));
+          }
+          return ConformanceCheckResult.simple(Set.of());
+        });
+  }
+
+  private static final JsonContentCheck EXPECTED_ARRIVAL_START_DATE_CONDITIONS =
+      expectedArrivalDateConditions(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE);
+  private static final JsonContentCheck EXPECTED_ARRIVAL_END_DATE_CONDITIONS =
+      expectedArrivalDateConditions(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE);
+
+  private static JsonContentCheck mustNotBeProvidedWhenRoutingReference(
+      String description, String field) {
+    return JsonAttribute.customValidator(
+        description,
+        body -> {
+          if (!hasRoutingReference(body)) {
+            return irrelevantResult();
+          }
+          if (attrPresent(body, field)) {
+            return ConformanceCheckResult.simple(
+                Set.of(
+                    S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(field, ROUTING_REFERENCE)));
+          }
+          return ConformanceCheckResult.simple(Set.of());
+        });
+  }
+
+  private static final JsonContentCheck UNIVERSAL_EXPORT_VOYAGE_REFERENCE_ROUTING_PROHIBITION =
+      mustNotBeProvidedWhenRoutingReference(
+          "The universalExportVoyageReference attribute must not be provided when prohibited by the standard: if routingReference is provided, this property MUST not be provided",
+          UNIVERSAL_EXPORT_VOYAGE_REFERENCE);
+
+  private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE_ROUTING_PROHIBITION =
+      mustNotBeProvidedWhenRoutingReference(
+          "The universalServiceReference attribute must not be provided when prohibited by the standard: if routingReference is provided, this property MUST not be provided",
+          UNIVERSAL_SERVICE_REFERENCE1);
+
+  private static final JsonContentCheck SHIPMENT_LOCATIONS_PROHIBITED_WHEN_ROUTING =
+      JsonAttribute.customValidator(
+          "The shipmentLocations object must not be provided when prohibited by the standard: in case routingReference is provided, then PRE (Place of Receipt), POL (Port of Loading), POD (Port of Discharge) and PDE (Place of Delivery) MUST not be provided",
+          body -> {
+            if (!hasRoutingReference(body)) {
+              return irrelevantResult();
+            }
+            var issues = new LinkedHashSet<String>();
+            for (String code : new String[] {"PRE", "POL", "POD", "PDE"}) {
+              if (!getShipmentLocationTypeCode(body, code).isMissingNode()) {
+                issues.add(
+                    "'%s.%s' '%s' must not be provided when '%s' is provided"
+                        .formatted(SHIPMENT_LOCATIONS, LOCATION_TYPE_CODE, code, ROUTING_REFERENCE));
+              }
+            }
             return ConformanceCheckResult.simple(issues);
           });
 
-  private static Set<String> routingReferenceRequestFieldsChecks(JsonNode body) {
-    var issues = new LinkedHashSet<String>();
+  private static final JsonContentCheck PORT_OF_LOAD_REQUIRED_WHEN_NO_ROUTING =
+      JsonAttribute.customValidator(
+          "The shipmentLocations object must demonstrate the correct use of this conditional requirement: when routingReference is absent, at least one Port of Load MUST be provided as a PRE (Place of Receipt) or POL (Port of Load) shipment location",
+          body -> {
+            if (hasRoutingReference(body)) {
+              return irrelevantResult();
+            }
+            if (getShipmentLocationTypeCode(body, "PRE").isMissingNode()
+                && getShipmentLocationTypeCode(body, "POL").isMissingNode()) {
+              return ConformanceCheckResult.simple(
+                  Set.of("Port of Load value must be provided (PRE or POL)"));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
 
-    var vesselName = body.path(VESSEL).path(NAME).asText("");
-    var vesselIMONumber = body.path(VESSEL).path(VESSEL_IMO_NUMBER).asText("");
-    var carrierExportVoyageNumber = body.path(CARRIER_EXPORT_VOYAGE_NUMBER).asText("");
-    var carrierServiceCode = body.path(CARRIER_SERVICE_CODE).asText("");
-    var carrierServiceName = body.path(CARRIER_SERVICE_NAME).asText("");
-    var expectedDepartureDate = body.path(EXPECTED_DEPARTURE_DATE).asText("");
-    var expectedDepartureFromPlaceOfReceiptDate =
-        body.path(EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE).asText("");
-
-    var polNode = getShipmentLocationTypeCode(body, "POL");
-    var preNode = getShipmentLocationTypeCode(body, "PRE");
-    var pdeNode = getShipmentLocationTypeCode(body, "PDE");
-    var podNode = getShipmentLocationTypeCode(body, "POD");
-
-    var providedArrivalStartDate =
-        body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE).asText("");
-    var providedArrivalEndDate =
-        body.path(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE).asText("");
-
-    if (!vesselName.isBlank()) {
-      issues.add(
-          "'%s.%s' must not be provided when '%s is provided."
-              .formatted(VESSEL, NAME, ROUTING_REFERENCE));
-    }
-    if (!vesselIMONumber.isBlank()) {
-      issues.add(
-          "'%s.%s' must not be provided when '%s' is provided."
-              .formatted(VESSEL, VESSEL_IMO_NUMBER, ROUTING_REFERENCE));
-    }
-    if (!carrierServiceName.isBlank()) {
-      issues.add(
-          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
-              CARRIER_SERVICE_NAME, ROUTING_REFERENCE));
-    }
-    if (!carrierServiceCode.isBlank()) {
-      issues.add(
-          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
-              CARRIER_SERVICE_CODE, ROUTING_REFERENCE));
-    }
-    if (!carrierExportVoyageNumber.isBlank()) {
-      issues.add(
-          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
-              CARRIER_EXPORT_VOYAGE_NUMBER, ROUTING_REFERENCE));
-    }
-    if (!expectedDepartureDate.isBlank()) {
-      issues.add(
-          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
-              EXPECTED_DEPARTURE_DATE, ROUTING_REFERENCE));
-    }
-    if (!expectedDepartureFromPlaceOfReceiptDate.isBlank()) {
-      issues.add(
-          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
-              EXPECTED_DEPARTURE_FROM_PLACE_OF_RECEIPT_DATE, ROUTING_REFERENCE));
-    }
-    if (!providedArrivalStartDate.isBlank()) {
-      issues.add(
-          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
-              EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE, ROUTING_REFERENCE));
-    }
-    if (!providedArrivalEndDate.isBlank()) {
-      issues.add(
-          S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED.formatted(
-              EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE, ROUTING_REFERENCE));
-    }
-    if (!preNode.isMissingNode()) {
-      issues.add(
-          "'%s.%s' 'PRE' must not be provided when '%s' is provided."
-              .formatted(SHIPMENT_LOCATIONS, LOCATION_TYPE_CODE, ROUTING_REFERENCE));
-    }
-    if (!polNode.isMissingNode()) {
-      issues.add(
-          "'%s.%s''POL' must not be provided when '%s' is provided."
-              .formatted(SHIPMENT_LOCATIONS, LOCATION_TYPE_CODE, ROUTING_REFERENCE));
-    }
-    if (!pdeNode.isMissingNode()) {
-      issues.add(
-          "'%s.%s' 'PDE' must not be provided when '%s' is provided."
-              .formatted(SHIPMENT_LOCATIONS, LOCATION_TYPE_CODE, ROUTING_REFERENCE));
-    }
-    if (!podNode.isMissingNode()) {
-      issues.add(
-          "'%s.%s' 'POD' must not be provided when '%s' is provided."
-              .formatted(SHIPMENT_LOCATIONS, LOCATION_TYPE_CODE, ROUTING_REFERENCE));
-    }
-    return issues;
-  }
+  private static final JsonContentCheck PORT_OF_DISCHARGE_REQUIRED_WHEN_NO_ROUTING =
+      JsonAttribute.customValidator(
+          "The shipmentLocations object must demonstrate the correct use of this conditional requirement: when routingReference is absent, at least one Port of Discharge MUST be provided as a PDE (Place of Delivery) or POD (Port of Discharge) shipment location",
+          body -> {
+            if (hasRoutingReference(body)) {
+              return irrelevantResult();
+            }
+            if (getShipmentLocationTypeCode(body, "PDE").isMissingNode()
+                && getShipmentLocationTypeCode(body, "POD").isMissingNode()) {
+              return ConformanceCheckResult.simple(
+                  Set.of("Port of Discharge value must be provided (PDE or POD)"));
+            }
+            return ConformanceCheckResult.simple(Set.of());
+          });
 
   private static JsonNode getShipmentLocationTypeCode(
       JsonNode body, @NonNull String locationTypeCode) {
@@ -664,9 +786,9 @@ public class BookingChecks {
             return ConformanceCheckResult.simple(issues);
           });
 
-  static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_CONDITIONS =
+  static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_AT_COMMODITY_LEVEL =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "The 'requestedEquipments.cargoGrossWeight' object must be provided when not provided on Commodity level",
+          "The requestedEquipments.commodities.cargoGrossWeight object must be provided when not provided on Requested Equipment level",
           mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS)),
           (nodeToValidate, contextPath) -> {
             var issues = new LinkedHashSet<String>();
@@ -695,6 +817,31 @@ public class BookingChecks {
                       }
                     });
             return ConformanceCheckResult.simple(issues);
+          });
+
+  static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_AT_EQUIPMENT_LEVEL =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The requestedEquipments.cargoGrossWeight object must be provided when not provided on Commodity level",
+          mav -> mav.submitAllMatching("%s.*".formatted(REQUESTED_EQUIPMENTS)),
+          (nodeToValidate, contextPath) -> {
+            var cargoGrossWeight = nodeToValidate.path(CARGO_GROSS_WEIGHT);
+            if (!JsonUtil.isMissingOrEmpty(cargoGrossWeight)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            var commodities = nodeToValidate.path(COMMODITIES);
+            if (JsonUtil.isMissingOrEmpty(commodities)) {
+              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+            }
+            boolean anyCommodityMissingWeight =
+                StreamSupport.stream(commodities.spliterator(), false)
+                    .anyMatch(c -> JsonUtil.isMissingOrEmpty(c.path(CARGO_GROSS_WEIGHT)));
+            if (anyCommodityMissingWeight) {
+              return ConformanceCheckResult.simple(
+                  Set.of(
+                      "The '%s.%s' must be provided when it is not provided on every Commodity"
+                          .formatted(contextPath, CARGO_GROSS_WEIGHT)));
+            }
+            return ConformanceCheckResult.simple(Set.of());
           });
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
@@ -1194,25 +1341,6 @@ public class BookingChecks {
             return ConformanceCheckResult.simple(issues);
           });
 
-  private static final JsonContentCheck EXPORT_LICENSE_REFERENCE_WHEN_REQUIRED =
-      JsonAttribute.allIndividualMatchesMustBeValid(
-          "The 'requestedEquipments.commodities.exportLicense.reference' attribute must demonstrate the correct use of this conditional requirement: the reference is required when an Export License or permit is required (isRequired = true)",
-          mav ->
-              mav.submitAllMatching(
-                  "%s.*.%s.*.%s".formatted(REQUESTED_EQUIPMENTS, COMMODITIES, EXPORT_LICENSE)),
-          (nodeToValidate, contextPath) -> {
-            if (!nodeToValidate.path(IS_REQUIRED).asBoolean(false)) {
-              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
-            }
-            if (JsonUtil.isMissingOrEmpty(nodeToValidate.path(REFERENCE))) {
-              return ConformanceCheckResult.simple(
-                  Set.of(
-                      "'%s.%s' is required when '%s' is 'true'"
-                          .formatted(contextPath, REFERENCE, IS_REQUIRED)));
-            }
-            return ConformanceCheckResult.simple(Set.of());
-          });
-
   private static JsonContentCheck onlyApplicableToDangerousGoods(String field) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
         "(if included) The 'requestedEquipments.commodities.outerPackaging.%s' attribute must only be used when the standard allows it: only applicable to dangerous goods"
@@ -1301,9 +1429,7 @@ public class BookingChecks {
             return ConformanceCheckResult.simple(issues);
           });
 
-  // carrierBookingReference must be present except in the states where it is still optional.
-  private static final Set<String> CBR_OPTIONAL_STATES =
-      Set.of("RECEIVED", "REJECTED", "PENDING_UPDATE", "UPDATE_RECEIVED", "CANCELLED");
+  private static final Set<String> CBR_OPTIONAL_STATES = Set.of("RECEIVED", "REJECTED", "PENDING_UPDATE", "UPDATE_RECEIVED", "CANCELLED");
 
   private static final JsonContentCheck CARRIER_BOOKING_REFERENCE_PRESENCE_BY_STATE =
       JsonAttribute.customValidator(
@@ -1337,7 +1463,6 @@ public class BookingChecks {
           PLACE_OF_BL_ISSUE_UNLOCATION_XOR_COUNTRY,
           INVOICE_PAYABLE_AT_MUST_USE_UN_LOCATION_CODE,
           PARTY_CONTACT_DETAILS_NAME_AND_PHONE_OR_EMAIL,
-          EXPORT_LICENSE_REFERENCE_WHEN_REQUIRED,
           NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
           ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
           OTHER_PARTY_FUNCTION_CODE_VALIDATION,
@@ -1348,18 +1473,27 @@ public class BookingChecks {
           UNIVERSAL_SERVICE_REFERENCE,
           VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
           VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
-          VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
+          CARRIER_EXPORT_VOYAGE_NUMBER_CONDITIONS,
+          CARRIER_SERVICE_CODE_CONDITIONS,
+          CARRIER_SERVICE_NAME_CONDITIONS,
+          VESSEL_CONDITIONS,
+          EXPECTED_DEPARTURE_DATE_CONDITIONS,
+          EXPECTED_DEPARTURE_FROM_RECEIPT_DATE_CONDITIONS,
+          EXPECTED_ARRIVAL_START_DATE_CONDITIONS,
+          EXPECTED_ARRIVAL_END_DATE_CONDITIONS,
+          UNIVERSAL_EXPORT_VOYAGE_REFERENCE_ROUTING_PROHIBITION,
+          UNIVERSAL_SERVICE_REFERENCE_ROUTING_PROHIBITION,
+          SHIPMENT_LOCATIONS_PROHIBITED_WHEN_ROUTING,
+          PORT_OF_LOAD_REQUIRED_WHEN_NO_ROUTING,
+          PORT_OF_DISCHARGE_REQUIRED_WHEN_NO_ROUTING,
           NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
           EXTENDED_NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
-          CHECK_CARGO_GROSS_WEIGHT_CONDITIONS,
+          CHECK_CARGO_GROSS_WEIGHT_AT_EQUIPMENT_LEVEL,
+          CHECK_CARGO_GROSS_WEIGHT_AT_COMMODITY_LEVEL,
           JsonAttribute.xOrFields(
               "The contractQuotationReference / serviceContractReference must demonstrate the correct use of contractQuotationReference or serviceContractReference by providing exactly one of the alternatives",
               JsonPointer.compile("/%s".formatted(CONTRACT_QUOTATION_REFERENCE)),
               JsonPointer.compile("/%s".formatted(SERVICE_CONTRACT_REFERENCE))),
-          JsonAttribute.allOrNoneArePresent(
-              JsonPointer.compile(
-                  "/%s".formatted(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_START_DATE)),
-              JsonPointer.compile("/%s".formatted(EXPECTED_ARRIVAL_AT_PLACE_OF_DELIVERY_END_DATE))),
           JsonAttribute.allIndividualMatchesMustBeValid(
               "DangerousGoods implies '%s' or '%s'".formatted(PACKAGE_CODE, IMO_PACKAGING_CODE),
               mav ->

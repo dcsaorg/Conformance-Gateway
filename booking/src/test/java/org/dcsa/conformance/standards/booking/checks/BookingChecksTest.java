@@ -52,7 +52,7 @@ class BookingChecksTest {
     requestedEquipments.add(requestedEquipment);
     booking.set("requestedEquipments", requestedEquipments);
 
-    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_CONDITIONS;
+    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_AT_COMMODITY_LEVEL;
     Set<ConformanceError> errors =
         ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
 
@@ -63,7 +63,7 @@ class BookingChecksTest {
   @Test
   void testCargoGrossWeightMissingAtRequestedEquipmentNoCommodities_irrelevant() {
     booking.set("requestedEquipments", requestedEquipments);
-    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_CONDITIONS;
+    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_AT_COMMODITY_LEVEL;
 
     Set<ConformanceError> errors =
         ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
@@ -79,7 +79,7 @@ class BookingChecksTest {
     requestedEquipment.set("commodities", commodities);
     requestedEquipments.add(requestedEquipment);
     booking.set("requestedEquipments", requestedEquipments);
-    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_CONDITIONS;
+    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_AT_COMMODITY_LEVEL;
     Set<String> errors = check.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
@@ -92,7 +92,7 @@ class BookingChecksTest {
     requestedEquipments.add(requestedEquipment);
     booking.set("requestedEquipments", requestedEquipments);
 
-    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_CONDITIONS;
+    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_AT_COMMODITY_LEVEL;
     Set<String> errors = check.validate(booking).getErrorMessages();
     assertEquals(1, errors.size());
     assertTrue(
@@ -110,7 +110,7 @@ class BookingChecksTest {
     requestedEquipment.set("commodities", commodities);
     requestedEquipments.add(requestedEquipment);
     booking.set("requestedEquipments", requestedEquipments);
-    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_CONDITIONS;
+    JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_AT_COMMODITY_LEVEL;
     Set<String> errors = check.validate(booking).getErrorMessages();
     assertEquals(1, errors.size());
     assertTrue(

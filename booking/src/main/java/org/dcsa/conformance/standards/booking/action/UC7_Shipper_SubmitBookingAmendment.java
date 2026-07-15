@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
@@ -72,7 +73,9 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
                         BookingRole::isShipper,
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
-                        requestSchemaValidator))),
+                        requestSchemaValidator),
+                    BookingChecks.updateRequestContentChecks(
+                        getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()))),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,

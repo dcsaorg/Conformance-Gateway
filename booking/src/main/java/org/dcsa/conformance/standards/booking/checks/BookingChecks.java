@@ -144,8 +144,30 @@ public class BookingChecks {
       UUID matched,
       String standardVersion,
       Supplier<BookingDynamicScenarioParameters> dspSupplier) {
+    return shipperRequestContentChecks(matched, standardVersion, dspSupplier, false);
+  }
+
+  public static ActionCheck updateRequestContentChecks(
+      UUID matched,
+      String standardVersion,
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
+    return shipperRequestContentChecks(matched, standardVersion, dspSupplier, true);
+  }
+
+  private static ActionCheck shipperRequestContentChecks(
+      UUID matched,
+      String standardVersion,
+      Supplier<BookingDynamicScenarioParameters> dspSupplier,
+      boolean isUpdate) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     checks.add(SHIPPER_REFERENCE_TYPE_VALIDATION);
+    checks.add(REQUESTED_CARRIAGE_MODE_OF_TRANSPORT_VALIDATION);
+    if (isUpdate) {
+      checks.add(
+          JsonAttribute.customValidator(
+              "The carrierBookingReference / carrierBookingRequestReference attributes in the Booking update or amendment request must provide at least one of them",
+              AT_LEAST_ONE_CARRIER_REFERENCE_PRESENT::validate));
+    }
     checks.addAll(generateScenarioRelatedChecks(dspSupplier));
 
     return JsonAttribute.contentChecks(
@@ -1544,11 +1566,8 @@ public class BookingChecks {
           OTHER_PARTY_FUNCTION_CODE_VALIDATION,
           CODE_LIST_PROVIDER_VALIDATION,
           SHIPMENT_LOCATION_TYPE_CODE_VALIDATION,
-          REQUESTED_CARRIAGE_MODE_OF_TRANSPORT_VALIDATION,
           INNER_PACKAGING_QUANTITY_POSITIVE_INTEGER,
           UNIVERSAL_SERVICE_REFERENCE,
-          VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
-          VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
           CARRIER_EXPORT_VOYAGE_NUMBER_CONDITIONS,
           CARRIER_SERVICE_CODE_CONDITIONS,
           CARRIER_SERVICE_NAME_CONDITIONS,
@@ -1632,6 +1651,8 @@ public class BookingChecks {
           TRANSPORT_LOAD_LOCATION_ADDRESS_LINES_COMPATIBILITY,
           TRANSPORT_DISCHARGE_LOCATION_REPRESENTATIONS,
           TRANSPORT_DISCHARGE_LOCATION_ADDRESS_LINES_COMPATIBILITY,
+          VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
+          VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
           VALIDATE_SHIPMENT_LOCATIONS,
           CARRIER_REFERENCE_TYPE_VALIDATION,
           TRANSPORT_PLAN_MODE_OF_TRANSPORT_VALIDATION,
@@ -1705,7 +1726,11 @@ public class BookingChecks {
 
       checks.add(
           JsonAttribute.customValidator(
-            "(if included) The 'amendedBookingStatus' attribute in the Booking response must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case",
+            "(if included) The 'amendedBookingStatus' attribute in the Booking response must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case. Active use case expectation: amendedBookingStatus must %s"
+                .formatted(
+                    expectedAmendedBookingStatus == null
+                        ? "be absent"
+                        : "equal " + expectedAmendedBookingStatus.name()),
             body -> {
               JsonNode amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
               if (expectedAmendedBookingStatus == null) {
@@ -1734,7 +1759,11 @@ public class BookingChecks {
 
       checks.add(
           JsonAttribute.customValidator(
-            "(if included) The 'bookingCancellationStatus' attribute in the Booking response must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case",
+            "(if included) The 'bookingCancellationStatus' attribute in the Booking response must only be used when the standard allows it: amendedBookingStatus and bookingCancellationStatus MUST NOT be present unless required by the applicable use case. Active use case expectation: bookingCancellationStatus must %s"
+                .formatted(
+                    expectedCancelledBookingStatus == null
+                        ? "be absent"
+                        : "equal " + expectedCancelledBookingStatus.name()),
             body -> {
               JsonNode bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
               if (expectedCancelledBookingStatus == null) {

@@ -507,6 +507,9 @@ public class BookingCarrier extends ConformanceParty {
         persistableCarrierBooking.updateCancelConfirmedBooking(bookingReference);
       }
     } catch (IllegalStateException e) {
+      if (CANCEL_AMENDMENT_OPERATION.equals(cancelOperation)) {
+        return return404(request);
+      }
       return return409(request, "Booking was not in the correct state");
     }
     persistableCarrierBooking.save(persistentMap);

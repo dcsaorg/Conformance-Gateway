@@ -69,7 +69,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
                     requestSchemaValidator),
-                BookingChecks.requestContentChecks(
+                BookingChecks.updateRequestContentChecks(
                     getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())),
             Stream.concat(
                 createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),

@@ -54,17 +54,26 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                             Set.of(ConformanceError.irrelevant()))),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "[Use case] The combination of data.bookingStatus, data.amendedBookingStatus and data.bookingCancellationStatus must match the active use case: data.bookingStatus must have the expected value",
+                    "[Use case] The combination of data.bookingStatus, data.amendedBookingStatus and data.bookingCancellationStatus must match the active use case: data.bookingStatus must equal %s"
+                        .formatted(expectedBookingStatus.name()),
                     DATA_PATH,
                     at(DATA_PATH, this::ensureBookingStatusIsCorrect)),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "[Use case] The combination of data.bookingStatus, data.amendedBookingStatus and data.bookingCancellationStatus must match the active use case: data.amendedBookingStatus must have the expected value or be absent",
+                    "[Use case] The combination of data.bookingStatus, data.amendedBookingStatus and data.bookingCancellationStatus must match the active use case: data.amendedBookingStatus must %s"
+                        .formatted(
+                            expectedAmendedBookingStatus == null
+                                ? "be absent"
+                                : "equal " + expectedAmendedBookingStatus.name()),
                     DATA_PATH,
                     at(DATA_PATH, this::ensureAmendedBookingStatusIsCorrect)),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "[Use case] The combination of data.bookingStatus, data.amendedBookingStatus and data.bookingCancellationStatus must match the active use case: data.bookingCancellationStatus must have the expected value or be absent",
+                    "[Use case] The combination of data.bookingStatus, data.amendedBookingStatus and data.bookingCancellationStatus must match the active use case: data.bookingCancellationStatus must %s"
+                        .formatted(
+                            expectedBookingCancellationStatus == null
+                                ? "be absent"
+                                : "equal " + expectedBookingCancellationStatus.name()),
                     DATA_PATH,
                     at(DATA_PATH, this::ensureBookingCancellationStatusIsCorrect)),
                 createSubCheck(

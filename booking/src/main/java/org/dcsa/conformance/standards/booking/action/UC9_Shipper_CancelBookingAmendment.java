@@ -67,13 +67,13 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
             Stream.concat(
                 createPatchPrimarySubChecks(
                     expectedApiVersion, "/v2/bookings/", cbrr, cbr),
-                Stream.of(
-                    new JsonSchemaCheck(
+                Stream.concat(
+                    Stream.of(new JsonSchemaCheck(
                         BookingRole::isShipper,
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
-                        requestSchemaValidator),
-                    patchPreconditionCheck(
+                        requestSchemaValidator)),
+                    patchPreconditionChecks(
                         "The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that the amendedBookingStatus is AMENDMENT_RECEIVED in order to cancel it. If this is not the case a 404 (Not Found) error response should be returned",
                         "amendedBookingStatus",
                         BookingState.AMENDMENT_RECEIVED.name()::equals,

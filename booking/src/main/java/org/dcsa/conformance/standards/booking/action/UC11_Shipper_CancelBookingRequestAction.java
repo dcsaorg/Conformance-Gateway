@@ -64,13 +64,13 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
             Stream.concat(
                 createPatchPrimarySubChecks(
                     expectedApiVersion, "/v2/bookings/", cbrr, cbr),
-                Stream.of(
-                    new JsonSchemaCheck(
+                Stream.concat(
+                    Stream.of(new JsonSchemaCheck(
                         BookingRole::isShipper,
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
-                        requestSchemaValidator),
-                    patchPreconditionCheck(
+                        requestSchemaValidator)),
+                    patchPreconditionChecks(
                         "The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that the bookingStatus is NOT CONFIRMED or PENDING_AMENDMENT in order to cancel it. If this is not the case a 409 (Conflict) error response should be returned",
                         "bookingStatus",
                         status ->

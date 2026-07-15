@@ -74,8 +74,9 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
                         HttpMessageType.REQUEST,
                         requestSchemaValidator)),
                     patchPreconditionChecks(
-                        "The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that the amendedBookingStatus is AMENDMENT_RECEIVED in order to cancel it. If this is not the case a 404 (Not Found) error response should be returned",
-                        "amendedBookingStatus",
+                        "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is AMENDMENT_RECEIVED in order to cancel it. If this is not the case a 404 (Not Found) error response should be returned"
+                            .formatted(jsonPath(AMENDED_BOOKING_STATUS)),
+                        AMENDED_BOOKING_STATUS,
                         BookingState.AMENDMENT_RECEIVED.name()::equals,
                         BookingState.AMENDMENT_RECEIVED.name(),
                         404))),

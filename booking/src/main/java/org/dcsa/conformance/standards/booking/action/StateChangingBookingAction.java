@@ -22,6 +22,13 @@ import java.util.stream.Stream;
 
 public abstract class StateChangingBookingAction extends BookingAction {
 
+  protected static final String BOOKING_STATUS = "bookingStatus";
+  protected static final String AMENDED_BOOKING_STATUS = "amendedBookingStatus";
+
+  protected static String jsonPath(String... segments) {
+    return "'%s'".formatted(String.join(".", segments));
+  }
+
   protected StateChangingBookingAction(
     String sourcePartyName,
     String targetPartyName,
@@ -98,8 +105,8 @@ public abstract class StateChangingBookingAction extends BookingAction {
         if (priorStatus == null) {
           return ConformanceCheckResult.simple(
             Set.of(
-              "Could not determine the prior '%s' from an earlier Booking response or notification"
-                .formatted(priorStatusField)));
+              "Could not determine the prior %s from an earlier Booking response or notification"
+                .formatted(jsonPath(priorStatusField))));
         }
 
         String actualPriorState = priorStatus.asText("");
@@ -108,15 +115,16 @@ public abstract class StateChangingBookingAction extends BookingAction {
         if (!precondition.test(actualPriorState)) {
           return ConformanceCheckResult.simple(
             Set.of(
-              "Prior '%s' was %s but the active use case requires %s"
-                .formatted(priorStatusField, renderedPriorState, expectedPriorStateDescription)));
+              "Prior %s was %s but the active scenario requires %s"
+                .formatted(
+                  jsonPath(priorStatusField), renderedPriorState, expectedPriorStateDescription)));
         }
         return ConformanceCheckResult.simple(Collections.emptySet());
       }
     };
 
     ActionCheck carrierResponseStatusCheck = new ActionCheck(
-      "The HTTP response status is correct for the applicable PATCH business precondition",
+      "[Scenario] The HTTP response status is correct for the applicable PATCH business precondition",
       BookingRole::isCarrier,
       patchExchangeUuid,
       HttpMessageType.RESPONSE) {
@@ -127,8 +135,8 @@ public abstract class StateChangingBookingAction extends BookingAction {
         if (priorStatus == null) {
           return ConformanceCheckResult.simple(
             Set.of(
-              "Could not determine the prior '%s' from an earlier Booking response or notification"
-                .formatted(priorStatusField)));
+              "Could not determine the prior %s from an earlier Booking response or notification"
+                .formatted(jsonPath(priorStatusField))));
         }
         String actualPriorState = priorStatus.asText("");
         int expectedResponseStatus =
@@ -141,9 +149,9 @@ public abstract class StateChangingBookingAction extends BookingAction {
         if (actualResponseStatus != expectedResponseStatus) {
           return ConformanceCheckResult.simple(
             Set.of(
-              "Prior '%s' was '%s' (required: %s), so PATCH response status must be %d but was %d"
+              "Prior %s was '%s' (required: %s), so PATCH response status must be %d but was %d"
                 .formatted(
-                  priorStatusField,
+                  jsonPath(priorStatusField),
                   actualPriorState,
                   expectedPriorStateDescription,
                   expectedResponseStatus,
@@ -171,7 +179,7 @@ public abstract class StateChangingBookingAction extends BookingAction {
         continue;
       }
       JsonNode response = exchange.getResponse().message().body().getJsonBody();
-      if (!response.path("bookingStatus").isMissingNode()) {
+      if (!response.path(BOOKING_STATUS).isMissingNode()) {
         return response.path(statusField);
       }
     }

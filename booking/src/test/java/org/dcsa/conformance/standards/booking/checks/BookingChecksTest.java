@@ -34,6 +34,16 @@ class BookingChecksTest {
   private Supplier<BookingDynamicScenarioParameters> dspSupplier;
   private static final ObjectMapper mapper = new ObjectMapper();
 
+  @Test
+  void datasetValidationDescriptionsUseQuotedPathsAndDatasetValues() {
+    assertEquals(
+        "The 'feedbacks.severity' attribute must demonstrate the correct use of a feedback severity code: INFO, WARN, ERROR",
+        BookingChecks.VALID_FEEDBACK_SEVERITY.description());
+    assertEquals(
+        "The 'feedbacks.code' attribute must demonstrate the correct use of a feedback code: INFORMATIONAL_MESSAGE, PROPERTY_WILL_BE_IGNORED, PROPERTY_VALUE_MUST_CHANGE, PROPERTY_VALUE_HAS_BEEN_CHANGED, PROPERTY_VALUE_MAY_CHANGE, PROPERTY_HAS_BEEN_DELETED",
+        BookingChecks.VALID_FEEDBACK_CODE.description());
+  }
+
   @BeforeEach
   void setUp() {
     booking = OBJECT_MAPPER.createObjectNode();

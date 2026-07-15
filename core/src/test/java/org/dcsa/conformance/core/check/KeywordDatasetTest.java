@@ -1,12 +1,21 @@
 package org.dcsa.conformance.core.check;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class KeywordDatasetTest {
+
+  @Test
+  void staticDatasetExposesValuesInDeclarationOrder() {
+    var dataset = KeywordDataset.staticDataset("FIRST", "SECOND", "THIRD");
+
+    assertEquals(List.of("FIRST", "SECOND", "THIRD"), dataset.values().stream().toList());
+  }
 
   @Test
   void convertCorrectCSVFileToKeywordDataset() {
@@ -16,6 +25,7 @@ class KeywordDatasetTest {
     assertTrue(code.contains("BID"));
     assertTrue(code.contains("FF"));
     assertFalse(code.contains("General Reference Type Code")); // Header should be skipped
+    assertThrows(UnsupportedOperationException.class, code::values);
   }
 
   @Test

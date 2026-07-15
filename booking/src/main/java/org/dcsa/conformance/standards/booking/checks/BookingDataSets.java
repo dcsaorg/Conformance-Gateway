@@ -61,6 +61,10 @@ public class BookingDataSets {
       "CANCELLED",
       "COMPLETED");
 
+  public static final KeywordDataset CARRIER_BOOKING_REFERENCE_OPTIONAL_STATES =
+    KeywordDataset.staticDataset(
+      "RECEIVED", "REJECTED", "PENDING_UPDATE", "UPDATE_RECEIVED", "CANCELLED");
+
   public static final KeywordDataset AMENDED_BOOKING_STATUS =
     KeywordDataset.staticDataset(
       "AMENDMENT_RECEIVED",

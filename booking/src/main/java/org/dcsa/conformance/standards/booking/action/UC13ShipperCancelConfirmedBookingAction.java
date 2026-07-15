@@ -78,8 +78,9 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
                         HttpMessageType.REQUEST,
                         requestSchemaValidator)),
                     patchPreconditionChecks(
-                        "The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that the bookingStatus is CONFIRMED or PENDING_AMENDMENT in order to cancel it. If this is not the case a 409 (Conflict) error response should be returned",
-                        "bookingStatus",
+                        "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is CONFIRMED or PENDING_AMENDMENT in order to cancel it. If this is not the case a 409 (Conflict) error response should be returned"
+                            .formatted(jsonPath(BOOKING_STATUS)),
+                        BOOKING_STATUS,
                         status ->
                             BookingState.CONFIRMED.name().equals(status)
                                 || BookingState.PENDING_AMENDMENT.name().equals(status),

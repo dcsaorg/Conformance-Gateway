@@ -21,8 +21,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
           BookingState.CANCELLED);
 
   protected final BookingState expectedBookingStatus;
-  protected final BookingState expectedAmendedBookingStatus;
-  protected final BookingCancellationState expectedBookingCancellationStatus;
+  protected final CarrierStatusScenario carrierStatusScenario;
 
   protected static final String FEEDBACKS = "feedbacks";
 
@@ -56,8 +55,9 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
         matchedExchangeUuid,
         httpMessageType);
     this.expectedBookingStatus = bookingState;
-    this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
-    this.expectedBookingCancellationStatus = expectedBookingCancellationStatus;
+    this.carrierStatusScenario =
+        CarrierStatusScenario.from(
+            bookingState, expectedAmendedBookingStatus, expectedBookingCancellationStatus);
   }
 
   protected ConformanceCheckResult ensureCarrierBookingReferenceCompliance(
@@ -83,74 +83,24 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   }
 
   protected ConformanceCheckResult ensureBookingStatusIsCorrect(JsonNode responsePayload) {
-    String actualState = responsePayload.path("bookingStatus").asText(null);
-    String expectedState = expectedBookingStatus.name();
-    if (Objects.equals(actualState, expectedState)) {
-      return ConformanceCheckResult.simple(Collections.emptySet());
-    }
-    return ConformanceCheckResult.simple(
-        Set.of(
-            "Expected bookingStatus '%s' but found '%s'"
-                .formatted(expectedState, Objects.requireNonNullElse(actualState, UNSET_MARKER))));
+    return carrierStatusScenario.validateBookingStatus(responsePayload);
   }
 
   protected ConformanceCheckResult ensureAmendedBookingStatusIsCorrect(JsonNode responsePayload) {
-    JsonNode actualStateNode = responsePayload.path("amendedBookingStatus");
-    String actualState = actualStateNode.asText(null);
-    String expectedState =
-        expectedAmendedBookingStatus != null ? expectedAmendedBookingStatus.name() : null;
-    if (expectedState == null && !actualStateNode.isMissingNode()) {
-      return ConformanceCheckResult.simple(
-          Set.of(
-              "The '%s' should not be present, but response contains value '%s'"
-                  .formatted("amendedBookingStatus", actualState)));
-    }
-    if (Objects.equals(actualState, expectedState)) {
-      return ConformanceCheckResult.simple(Collections.emptySet());
-    }
-    return ConformanceCheckResult.simple(
-        Set.of(
-            "Expected amendedBookingStatus '%s' but found '%s'"
-                .formatted(expectedState, Objects.requireNonNullElse(actualState, UNSET_MARKER))));
+    return carrierStatusScenario.validateAmendedBookingStatus(responsePayload);
   }
 
   protected ConformanceCheckResult ensureAmendedBookingStatusUsageIsCorrect(JsonNode payload) {
-    if (expectedAmendedBookingStatus != null
-        || payload.path("amendedBookingStatus").isMissingNode()) {
-      return ConformanceCheckResult.simple(Collections.emptySet());
-    }
-    return ConformanceCheckResult.simple(
-        Set.of("The 'amendedBookingStatus' property must be absent for this use case"));
+    return carrierStatusScenario.validateAmendedBookingStatus(payload);
   }
 
   protected ConformanceCheckResult ensureBookingCancellationStatusIsCorrect(
       JsonNode responsePayload) {
-    JsonNode actualStateNode = responsePayload.path("bookingCancellationStatus");
-    String actualState = actualStateNode.asText(null);
-    String expectedState =
-        expectedBookingCancellationStatus != null ? expectedBookingCancellationStatus.name() : null;
-    if (expectedState == null && !actualStateNode.isMissingNode()) {
-      return ConformanceCheckResult.simple(
-          Set.of(
-              "The '%s' should not be present, but response contains value '%s'"
-                  .formatted("bookingCancellationStatus", actualState)));
-    }
-    if (Objects.equals(actualState, expectedState)) {
-      return ConformanceCheckResult.simple(Collections.emptySet());
-    }
-    return ConformanceCheckResult.simple(
-        Set.of(
-            "Expected bookingCancellationStatus '%s' but found '%s'"
-                .formatted(expectedState, Objects.requireNonNullElse(actualState, UNSET_MARKER))));
+    return carrierStatusScenario.validateBookingCancellationStatus(responsePayload);
   }
 
   protected ConformanceCheckResult ensureBookingCancellationStatusUsageIsCorrect(JsonNode payload) {
-    if (expectedBookingCancellationStatus != null
-        || payload.path("bookingCancellationStatus").isMissingNode()) {
-      return ConformanceCheckResult.simple(Collections.emptySet());
-    }
-    return ConformanceCheckResult.simple(
-        Set.of("The 'bookingCancellationStatus' property must be absent for this use case"));
+    return carrierStatusScenario.validateBookingCancellationStatus(payload);
   }
 
   protected ConformanceCheckResult ensureBookingStatusCodeCompliance(JsonNode payload) {

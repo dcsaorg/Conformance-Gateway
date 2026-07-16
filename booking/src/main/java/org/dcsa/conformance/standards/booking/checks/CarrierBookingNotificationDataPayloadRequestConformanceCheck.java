@@ -75,13 +75,13 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                             Set.of(ConformanceError.irrelevant()))),
                 createSubCheck(
                     DEFAULT_PREFIX,
-                    "[Scenario] The combination of %s, %s and %s must match the active scenario: %s must equal %s"
+                    "[Scenario] The combination of %s, %s and %s must match the active scenario: %s must %s"
                         .formatted(
                             jsonPath(DATA, BOOKING_STATUS),
                             jsonPath(DATA, AMENDED_BOOKING_STATUS),
                             jsonPath(DATA, BOOKING_CANCELLATION_STATUS),
                             jsonPath(DATA, BOOKING_STATUS),
-                            expectedBookingStatus.name()),
+                            carrierStatusScenario.bookingStatusExpectation()),
                     DATA_PATH,
                     at(DATA_PATH, this::ensureBookingStatusIsCorrect)),
                 createSubCheck(
@@ -92,9 +92,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                             jsonPath(DATA, AMENDED_BOOKING_STATUS),
                             jsonPath(DATA, BOOKING_CANCELLATION_STATUS),
                             jsonPath(DATA, AMENDED_BOOKING_STATUS),
-                            expectedAmendedBookingStatus == null
-                                ? "be absent"
-                                : "equal " + expectedAmendedBookingStatus.name()),
+                            carrierStatusScenario.amendedBookingStatusExpectation()),
                     DATA_PATH,
                     at(DATA_PATH, this::ensureAmendedBookingStatusIsCorrect)),
                 createSubCheck(
@@ -105,9 +103,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                             jsonPath(DATA, AMENDED_BOOKING_STATUS),
                             jsonPath(DATA, BOOKING_CANCELLATION_STATUS),
                             jsonPath(DATA, BOOKING_CANCELLATION_STATUS),
-                            expectedBookingCancellationStatus == null
-                                ? "be absent"
-                                : "equal " + expectedBookingCancellationStatus.name()),
+                            carrierStatusScenario.bookingCancellationStatusExpectation()),
                     DATA_PATH,
                     at(DATA_PATH, this::ensureBookingCancellationStatusIsCorrect)),
                 createSubCheck(

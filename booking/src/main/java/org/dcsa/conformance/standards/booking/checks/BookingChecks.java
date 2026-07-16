@@ -2006,12 +2006,17 @@ public class BookingChecks {
     checks.add(AT_LEAST_ONE_CARRIER_REFERENCE_PRESENT);
 
     if (includeResponseEnvelopeChecks) {
+      var carrierStatusScenario =
+        CarrierStatusScenario.from(
+          bookingStatus, expectedAmendedBookingStatus, expectedCancelledBookingStatus);
       checks.add(
-        JsonAttribute.mustEqual(
-          "[Scenario] The %s must match the active scenario"
-            .formatted(jsonPath(BOOKING_STATUS)),
-          JsonPointer.compile("/%s".formatted(BOOKING_STATUS)),
-          bookingStatus::name));
+        JsonAttribute.customValidator(
+          "[Scenario] The %s must match the active scenario: %s must %s"
+            .formatted(
+              jsonPath(BOOKING_STATUS),
+              jsonPath(BOOKING_STATUS),
+              carrierStatusScenario.bookingStatusExpectation()),
+          carrierStatusScenario::validateBookingStatus));
 
       checks.add(
         JsonAttribute.customValidator(
@@ -2021,34 +2026,8 @@ public class BookingChecks {
               jsonPath(ATTR_AMENDED_BOOKING_STATUS),
               jsonPath(ATTR_BOOKING_CANCELLATION_STATUS),
               jsonPath(ATTR_AMENDED_BOOKING_STATUS),
-              expectedAmendedBookingStatus == null
-                ? "be absent"
-                : "equal " + expectedAmendedBookingStatus.name()),
-          body -> {
-            JsonNode amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
-            if (expectedAmendedBookingStatus == null) {
-              if (!amendedBookingStatus.isMissingNode()) {
-                return ConformanceCheckResult.simple(
-                  Set.of(
-                    "The '%s' should not be present, but response contains value '%s'"
-                      .formatted(
-                        ATTR_AMENDED_BOOKING_STATUS, amendedBookingStatus.asText())));
-              }
-              return ConformanceCheckResult.simple(Set.of());
-            }
-            String amendedBookingStatusValue = amendedBookingStatus.asText("");
-            if (!expectedAmendedBookingStatus.name().equals(amendedBookingStatusValue)) {
-              return ConformanceCheckResult.simple(
-                Set.of(
-                  "The expected '%s' %s is not equal to response '%s' %s"
-                    .formatted(
-                      ATTR_AMENDED_BOOKING_STATUS,
-                      expectedAmendedBookingStatus.name(),
-                      ATTR_AMENDED_BOOKING_STATUS,
-                      amendedBookingStatusValue)));
-            }
-            return ConformanceCheckResult.simple(Set.of());
-          }));
+              carrierStatusScenario.amendedBookingStatusExpectation()),
+          carrierStatusScenario::validateAmendedBookingStatus));
 
       checks.add(
         JsonAttribute.customValidator(
@@ -2058,35 +2037,8 @@ public class BookingChecks {
               jsonPath(ATTR_AMENDED_BOOKING_STATUS),
               jsonPath(ATTR_BOOKING_CANCELLATION_STATUS),
               jsonPath(ATTR_BOOKING_CANCELLATION_STATUS),
-              expectedCancelledBookingStatus == null
-                ? "be absent"
-                : "equal " + expectedCancelledBookingStatus.name()),
-          body -> {
-            JsonNode bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
-            if (expectedCancelledBookingStatus == null) {
-              if (!bookingCancellationStatus.isMissingNode()) {
-                return ConformanceCheckResult.simple(
-                  Set.of(
-                    "The '%s' should not be present, but response contains value '%s'"
-                      .formatted(
-                        ATTR_BOOKING_CANCELLATION_STATUS,
-                        bookingCancellationStatus.asText())));
-              }
-              return ConformanceCheckResult.simple(Set.of());
-            }
-            String bookingCancellationStatusValue = bookingCancellationStatus.asText("");
-            if (!expectedCancelledBookingStatus.name().equals(bookingCancellationStatusValue)) {
-              return ConformanceCheckResult.simple(
-                Set.of(
-                  "The expected '%s' %s is not equal to response '%s' %s"
-                    .formatted(
-                      ATTR_BOOKING_CANCELLATION_STATUS,
-                      expectedCancelledBookingStatus.name(),
-                      ATTR_BOOKING_CANCELLATION_STATUS,
-                      bookingCancellationStatusValue)));
-            }
-            return ConformanceCheckResult.simple(Set.of());
-          }));
+              carrierStatusScenario.bookingCancellationStatusExpectation()),
+          carrierStatusScenario::validateBookingCancellationStatus));
     }
 
     checks.addAll(STATIC_BOOKING_CHECKS);

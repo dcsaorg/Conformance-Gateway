@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
@@ -76,6 +77,139 @@ class BookingChecksTest {
                               ConformanceErrorSeverity.IRRELEVANT.equals(error.severity())),
                   check.description());
             });
+  }
+
+  @Test
+  void poAdjustedValidationDescriptionsMatchReviewedWording() {
+    assertEquals(
+        "The 'shipmentCutOffTimes.cutOffDateTimeCode' attribute must demonstrate the correct use of this conditional requirement: The cutOffDateTimeCode value LCO must only be used when receiptTypeAtOrigin is CFS.",
+        BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE.description());
+    assertEquals(
+        "The 'dangerousGoods.segregationGroups' values must demonstrate the correct use of the IMO IMDG segregation group codes listed by the standard. Possible values are: 1 to 18.",
+        BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION.description());
+  }
+
+  @Test
+  void lcoCutoffIsValidForCfsReceipt() {
+    booking.put("receiptTypeAtOrigin", "CFS");
+    booking.set(
+        "shipmentCutOffTimes",
+        OBJECT_MAPPER.createArrayNode().add(cutoff("LCO")));
+
+    assertTrue(
+        BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE
+            .validate(booking)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void lcoCutoffIsInvalidForNonCfsReceipt() {
+    booking.put("receiptTypeAtOrigin", "CY");
+    booking.set(
+        "shipmentCutOffTimes",
+        OBJECT_MAPPER.createArrayNode().add(cutoff("LCO")));
+
+    assertEquals(
+        Set.of(
+            "'shipmentCutOffTimes.cutOffDateTimeCode' value 'LCO' must only be used when 'receiptTypeAtOrigin' is 'CFS'"),
+        BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE
+            .validate(booking)
+            .getErrorMessages());
+  }
+
+  @Test
+  void cutoffRuleIsIrrelevantWithoutLco() {
+    booking.put("receiptTypeAtOrigin", "CFS");
+    booking.set(
+        "shipmentCutOffTimes",
+        OBJECT_MAPPER.createArrayNode().add(cutoff("EFC")));
+
+    assertOnlyIrrelevant(BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE, booking);
+  }
+
+  @Test
+  void segregationGroupRangeAcceptsBoundaryValues() {
+    booking = bookingWithSegregationGroups("1", "18");
+
+    assertTrue(
+        BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION
+            .validate(booking)
+            .getErrorMessages()
+            .isEmpty());
+  }
+
+  @Test
+  void segregationGroupRangeRejectsValuesOutsideBoundaries() {
+    booking = bookingWithSegregationGroups("0", "19");
+
+    assertEquals(
+        2,
+        BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION
+            .validate(booking)
+            .getErrorMessages()
+            .size());
+  }
+
+  @Test
+  void poRemovedValidationsAreAbsentFromCarrierAndShipperPayloadChecks() {
+    var descriptions =
+        BookingChecks.fullPayloadChecks(dspSupplier, CarrierStatusScenario.uc8()).stream()
+            .map(JsonContentCheck::description)
+            .toList();
+    var removedDescriptionFragments =
+        List.of(
+            "a booking channel is being used",
+            "same for each requested unit",
+            "The Export License must be valid at time of departure",
+            "implementing API v2.0.3 or earlier",
+            "both ways point to the same location",
+            "only applicable to specific hazardous goods according to the IMO IMDG Code",
+            "only applicable to liquids and gas",
+            "only applicable to specific hazardous goods",
+            "only applicable to dangerous goods if specified in the IMO IMDG code",
+            "only applicable to dangerous goods if the IMO packaging code is not available",
+            "only applicable if 'ISOEquipmentCode' shows a Reefer type");
+
+    removedDescriptionFragments.forEach(
+        fragment ->
+            assertTrue(
+                descriptions.stream().noneMatch(description -> description.contains(fragment)),
+                fragment));
+
+    assertTrue(
+        descriptions.stream().anyMatch(description -> description.contains("'invoicePayableAt'")));
+  }
+
+  private ObjectNode cutoff(String code) {
+    return OBJECT_MAPPER.createObjectNode().put("cutOffDateTimeCode", code);
+  }
+
+  private ObjectNode bookingWithSegregationGroups(String... groups) {
+    var segregationGroups = OBJECT_MAPPER.createArrayNode();
+    for (String group : groups) {
+      segregationGroups.add(group);
+    }
+    var dangerousGoods =
+        OBJECT_MAPPER.createArrayNode()
+            .add(OBJECT_MAPPER.createObjectNode().set("segregationGroups", segregationGroups));
+    var outerPackaging =
+        OBJECT_MAPPER.createObjectNode().set("dangerousGoods", dangerousGoods);
+    var commodity = OBJECT_MAPPER.createObjectNode().set("outerPackaging", outerPackaging);
+    var equipment =
+        OBJECT_MAPPER.createObjectNode()
+            .set("commodities", OBJECT_MAPPER.createArrayNode().add(commodity));
+    return OBJECT_MAPPER.createObjectNode()
+        .set("requestedEquipments", OBJECT_MAPPER.createArrayNode().add(equipment));
+  }
+
+  private void assertOnlyIrrelevant(JsonContentCheck check, JsonNode body) {
+    var result = (ConformanceCheckResult.ErrorsWithRelevance) check.validate(body);
+    assertFalse(result.errors().isEmpty(), check.description());
+    assertTrue(
+        result.errors().stream()
+            .allMatch(error -> ConformanceErrorSeverity.IRRELEVANT.equals(error.severity())),
+        check.description());
   }
 
   @Test

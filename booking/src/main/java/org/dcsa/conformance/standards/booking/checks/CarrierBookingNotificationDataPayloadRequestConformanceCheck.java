@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
-import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.KeywordDataset;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
@@ -22,7 +21,6 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   private static final String AMENDED_BOOKING_PATH = DATA_PATH + "/amendedBooking";
 
   private static final String DATA = "data";
-  private static final String TIME = "time";
   private static final String BOOKING_STATUS = "bookingStatus";
   private static final String AMENDED_BOOKING_STATUS = "amendedBookingStatus";
   private static final String BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
@@ -77,14 +75,6 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
             Stream.of(
-                createSubCheck(
-                    DEFAULT_PREFIX,
-                    "The %s attribute in the Booking Notification must demonstrate the correct use of this conditional requirement: Timestamp of when the occurrence happened. If the time of the occurrence cannot be determined then this attribute MAY be set to some other time (such as the current time) by the CloudEvents producer, however all producers for the same source MUST be consistent in this respect. In other words, either they all use the actual time of the occurrence or they all use the same algorithm to determine the value used"
-                        .formatted(jsonPath(TIME)),
-                    "",
-                    ignored ->
-                        ConformanceCheckResult.withRelevance(
-                            Set.of(ConformanceError.irrelevant()))),
                 createSubCheck(
                     DEFAULT_PREFIX,
                     "[Scenario] The combination of %s, %s and %s must match the active scenario: %s must %s"

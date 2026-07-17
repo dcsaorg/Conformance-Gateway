@@ -103,8 +103,6 @@ public class BookingChecks {
   private static final String CARGO_MOVEMENT_TYPE_AT_DESTINATION = "cargoMovementTypeAtDestination";
   private static final String SEVERITY = "severity";
   private static final String CODE = "code";
-  private static final String PACKAGE_CODE = "packageCode";
-  private static final String IMO_PACKAGING_CODE = "imoPackagingCode";
   private static final String NUMBER_OF_PACKAGES = "numberOfPackages";
   private static final String SEGREGATION_GROUPS = "segregationGroups";
   private static final String INHALATION_ZONE = "inhalationZone";
@@ -147,16 +145,6 @@ public class BookingChecks {
   private static final String AIR_EXCHANGE_UNIT = "airExchangeUnit";
   private static final String ESTIMATED_DATE_TIME = "estimatedDateTime";
   private static final String LOCATION = "location";
-  private static final String BOOKING_CHANNEL_REFERENCE = "bookingChannelReference";
-  private static final String EXPORT_LICENSE = "exportLicense";
-  private static final String REFERENCE = "reference";
-  private static final String ADDRESS_LINES = "addressLines";
-  private static final String DEPOT_RELEASE_LOCATION = "depotReleaseLocation";
-  private static final String LIMITS = "limits";
-  private static final String FLASH_POINT = "flashPoint";
-  private static final String NET_VOLUME = "netVolume";
-  private static final String LOAD_LOCATION = "loadLocation";
-  private static final String DISCHARGE_LOCATION = "dischargeLocation";
 
   private static final String S_MUST_NOT_BE_PROVIDED_WHEN_S_IS_PROVIDED =
     "'%s' must not be provided when '%s' is provided.";
@@ -268,9 +256,6 @@ public class BookingChecks {
       return false;
     };
 
-  private static final Consumer<MultiAttributeValidator> ALL_REQ_EQUIP =
-    mav -> mav.submitAllMatching(path(REQUESTED_EQUIPMENTS, "*"));
-
   static final JsonContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
     JsonAttribute.customValidator(
       "The %s object must only be used when the standard allows it: only applicable when %s is set to false"
@@ -303,17 +288,6 @@ public class BookingChecks {
 
         return ConformanceCheckResult.withRelevance(errors);
       });
-
-  private static final JsonContentCheck ISO_EQUIPMENT_CODE_AND_NOR_CHECK =
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The %s attribute must only be used when the standard allows it: only applicable if %s shows a Reefer type"
-        .formatted(
-          jsonPath(REQUESTED_EQUIPMENTS, IS_NON_OPERATING_REEFER),
-          jsonPath(ISO_EQUIPMENT_CODE)),
-      ALL_REQ_EQUIP,
-      JsonAttribute.ifMatchedThen(
-        IS_ISO_EQUIPMENT_CONTAINER_REEFER,
-        JsonAttribute.path(IS_NON_OPERATING_REEFER, JsonAttribute.matchedMustBePresent())));
 
   private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE =
     JsonAttribute.customValidator(
@@ -452,29 +426,34 @@ public class BookingChecks {
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
         BookingDataSets.CUTOFF_DATE_TIME_CODES));
 
-  private static final JsonContentCheck VALIDATE_SHIPMENT_CUTOFF_TIME_CODE =
+  static final JsonContentCheck VALIDATE_SHIPMENT_CUTOFF_TIME_CODE =
     JsonAttribute.customValidator(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: only when the Receipt Type at Origin is CFS, EFC (Earliest full-container delivery date)"
-        .formatted(jsonPath(SHIPMENT_CUT_OFF_TIMES, CUT_OFF_DATE_TIME_CODE)),
+      "The %s attribute must demonstrate the correct use of this conditional requirement: The %s value LCO must only be used when %s is CFS."
+        .formatted(
+          jsonPath(SHIPMENT_CUT_OFF_TIMES, CUT_OFF_DATE_TIME_CODE),
+          CUT_OFF_DATE_TIME_CODE,
+          RECEIPT_TYPE_AT_ORIGIN),
       body -> {
         var shipmentCutOffTimes = body.path(SHIPMENT_CUT_OFF_TIMES);
         var receiptTypeAtOrigin = body.path(RECEIPT_TYPE_AT_ORIGIN).asText("");
-        var issues = new LinkedHashSet<String>();
-        var cutOffDateTimeCodes =
+        boolean containsLco =
           StreamSupport.stream(shipmentCutOffTimes.spliterator(), false)
             .map(p -> p.path(CUT_OFF_DATE_TIME_CODE))
             .filter(JsonNode::isTextual)
-            .map(n -> n.asText(""))
-            .collect(Collectors.toSet());
-        if (!receiptTypeAtOrigin.equals("CFS")) {
+            .anyMatch(n -> "LCO".equals(n.asText("")));
+        if (!containsLco) {
           return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
         }
-        if (!cutOffDateTimeCodes.contains("EFC")) {
-          issues.add(
-            "'%s' 'EFC' (Earliest full-container delivery date) must be present when '%s' is 'CFS'"
-              .formatted(CUT_OFF_DATE_TIME_CODE, RECEIPT_TYPE_AT_ORIGIN));
+        if (!"CFS".equals(receiptTypeAtOrigin)) {
+          return ConformanceCheckResult.simple(
+            Set.of(
+              "'%s.%s' value 'LCO' must only be used when '%s' is 'CFS'"
+                .formatted(
+                  SHIPMENT_CUT_OFF_TIMES,
+                  CUT_OFF_DATE_TIME_CODE,
+                  RECEIPT_TYPE_AT_ORIGIN)));
         }
-        return ConformanceCheckResult.simple(issues);
+        return ConformanceCheckResult.simple(Set.of());
       });
 
   private static final Consumer<MultiAttributeValidator> ALL_AMF =
@@ -1542,40 +1521,6 @@ public class BookingChecks {
         return ConformanceCheckResult.simple(issues);
       });
 
-  private static JsonContentCheck onlyApplicableToDangerousGoods(String field, String description) {
-    return JsonAttribute.allIndividualMatchesMustBeValid(
-      description,
-      mav ->
-        mav.submitAllMatching(
-          path(REQUESTED_EQUIPMENTS, "*", COMMODITIES, "*", OUTER_PACKAGING)),
-      (nodeToValidate, contextPath) -> {
-        if (JsonUtil.isMissingOrEmpty(nodeToValidate.path(field))) {
-          return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
-        }
-        if (JsonUtil.isMissingOrEmpty(nodeToValidate.path(DANGEROUS_GOODS))) {
-          return ConformanceCheckResult.simple(
-            Set.of(
-              "'%s.%s' is only applicable to dangerous goods"
-                .formatted(contextPath, field)));
-        }
-        return ConformanceCheckResult.simple(Set.of());
-      });
-  }
-
-  private static final JsonContentCheck PACKAGE_CODE_ONLY_FOR_DG =
-    onlyApplicableToDangerousGoods(
-      PACKAGE_CODE,
-      "(if included) The %s attribute must only be used when the standard allows it: only applicable to dangerous goods if the IMO packaging code is not available"
-        .formatted(
-          jsonPath(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING, PACKAGE_CODE)));
-  private static final JsonContentCheck IMO_PACKAGING_CODE_ONLY_FOR_DG =
-    onlyApplicableToDangerousGoods(
-      IMO_PACKAGING_CODE,
-      "(if included) The %s attribute must only be used when the standard allows it: only applicable to dangerous goods if specified in the IMO IMDG code. If not available, the %s as per UN recommendation 21 should be used"
-        .formatted(
-          jsonPath(REQUESTED_EQUIPMENTS, COMMODITIES, OUTER_PACKAGING, IMO_PACKAGING_CODE),
-          jsonPath(PACKAGE_CODE)));
-
   private static JsonContentCheck reeferSettingUnitRequiredWhenValuePresent(
     String valueField, String unitField) {
     return JsonAttribute.allIndividualMatchesMustBeValid(
@@ -1665,103 +1610,13 @@ public class BookingChecks {
         return found ? ConformanceCheckResult.simple(issues) : irrelevantResult();
       });
 
-  private static JsonContentCheck externallyDependentRule(String description) {
-    return JsonAttribute.customValidator(description, ignored -> irrelevantResult());
-  }
-
-  private static final JsonContentCheck BOOKING_CHANNEL_REFERENCE_CONDITIONAL =
-    externallyDependentRule(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: a booking channel is being used"
-        .formatted(jsonPath(BOOKING_CHANNEL_REFERENCE)));
-  private static final JsonContentCheck COMMODITIES_IDENTICAL_PER_REQUESTED_UNIT =
-    externallyDependentRule(
-      "The %s attribute must demonstrate the correct use of this condition: the commodity (or list of commodities) defined within the same Requested Equipment object is the same for each requested unit. Example: 2 x 20' containing 50%% shoes and 50%% t-shirts can be requested within the same Requested Equipment object only if each 20' will contain 50%% shoes and 50%% t-shirts. If 1 x 20' will contain 100%% shoes and the other 20' will be 100%% t-shirts, 2 separate Requested Equipment objects must be defined"
-        .formatted(jsonPath(REQUESTED_EQUIPMENTS)));
-  private static final JsonContentCheck EXPORT_LICENSE_VALID_AT_DEPARTURE =
-    externallyDependentRule(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: Reference number assigned to an Export License or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The Export License must be valid at time of departure"
-        .formatted(
-          jsonPath(REQUESTED_EQUIPMENTS, COMMODITIES, EXPORT_LICENSE, REFERENCE)));
-  private static final JsonContentCheck CONTAINER_POSITIONING_ADDRESS_LINES_COMPATIBILITY =
-    externallyDependentRule(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: When communicating with providers or consumers implementing API v2.0.3 or earlier, a sender implementing API v2.0.4 or later MUST NOT use %s as the only property to identify the location. Recipients implementing earlier versions MAY ignore this property"
-        .formatted(
-          jsonPath(REQUESTED_EQUIPMENTS, CONTAINER_POSITIONINGS, LOCATION, ADDRESS_LINES),
-          jsonPath(ADDRESS_LINES)));
-  private static final JsonContentCheck DEPOT_RELEASE_LOCATION_REPRESENTATIONS =
-    externallyDependentRule(
-      "The %s object must demonstrate the correct use of this conditional requirement: It is expected that if a location is specified in multiple ways (e.g. both as an Address and as a Facility) that both ways point to the same location"
-        .formatted(
-          jsonPath(REQUESTED_EQUIPMENTS, EMPTY_CONTAINER_PICKUP, DEPOT_RELEASE_LOCATION)));
-  private static final JsonContentCheck DEPOT_RELEASE_LOCATION_ADDRESS_LINES_COMPATIBILITY =
-    externallyDependentRule(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: When communicating with providers or consumers implementing API v2.0.3 or earlier, a sender implementing API v2.0.4 or later MUST NOT use %s as the only property to identify the location. Recipients implementing earlier versions MAY ignore this property"
-        .formatted(
-          jsonPath(
-            REQUESTED_EQUIPMENTS,
-            EMPTY_CONTAINER_PICKUP,
-            DEPOT_RELEASE_LOCATION,
-            ADDRESS_LINES),
-          jsonPath(ADDRESS_LINES)));
-  private static final JsonContentCheck SHIPMENT_LOCATION_REPRESENTATIONS =
-    externallyDependentRule(
-      "The %s object must demonstrate the correct use of this conditional requirement: It is expected that if a location is specified in multiple ways (e.g. both as an Address and as a Facility) that both ways point to the same location"
-        .formatted(jsonPath(SHIPMENT_LOCATIONS, LOCATION)));
-  private static final JsonContentCheck SHIPMENT_LOCATION_ADDRESS_LINES_COMPATIBILITY =
-    externallyDependentRule(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: When communicating with providers or consumers implementing API v2.0.3 or earlier, a sender implementing API v2.0.4 or later MUST NOT use %s as the only property to identify the location. Recipients implementing earlier versions MAY ignore this property"
-        .formatted(
-          jsonPath(SHIPMENT_LOCATIONS, LOCATION, ADDRESS_LINES), jsonPath(ADDRESS_LINES)));
-  private static final JsonContentCheck FLASH_POINT_APPLICABILITY =
-    externallyDependentRule(
-      "(if included) The %s attribute must only be used when the standard allows it: only applicable to specific hazardous goods according to the IMO IMDG Code"
-        .formatted(
-          jsonPath(
-            REQUESTED_EQUIPMENTS,
-            COMMODITIES,
-            OUTER_PACKAGING,
-            DANGEROUS_GOODS,
-            LIMITS,
-            FLASH_POINT)));
-  private static final JsonContentCheck NET_VOLUME_APPLICABILITY =
-    externallyDependentRule(
-      "(if included) The %s object must only be used when the standard allows it: only applicable to liquids and gas"
-        .formatted(
-          jsonPath(
-            REQUESTED_EQUIPMENTS,
-            COMMODITIES,
-            OUTER_PACKAGING,
-            DANGEROUS_GOODS,
-            NET_VOLUME)));
-  private static final JsonContentCheck SEGREGATION_GROUPS_APPLICABILITY =
-    externallyDependentRule(
-      "(if included) The %s attribute must only be used when the standard allows it: only applicable to specific hazardous goods"
-        .formatted(
-          jsonPath(
-            REQUESTED_EQUIPMENTS,
-            COMMODITIES,
-            OUTER_PACKAGING,
-            DANGEROUS_GOODS,
-            SEGREGATION_GROUPS)));
-  private static final JsonContentCheck TRANSPORT_LOAD_LOCATION_REPRESENTATIONS =
-    externallyDependentRule(
-      "The %s object must demonstrate the correct use of this conditional requirement: It is expected that if a location is specified in multiple ways (e.g. both as an Address and as a Facility) that both ways point to the same location"
-        .formatted(jsonPath(TRANSPORT_PLAN, LOAD_LOCATION)));
-  private static final JsonContentCheck TRANSPORT_LOAD_LOCATION_ADDRESS_LINES_COMPATIBILITY =
-    externallyDependentRule(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: When communicating with providers or consumers implementing API v2.0.3 or earlier, a sender implementing API v2.0.4 or later MUST NOT use %s as the only property to identify the location. Recipients implementing earlier versions MAY ignore this property"
-        .formatted(
-          jsonPath(TRANSPORT_PLAN, LOAD_LOCATION, ADDRESS_LINES), jsonPath(ADDRESS_LINES)));
-  private static final JsonContentCheck TRANSPORT_DISCHARGE_LOCATION_REPRESENTATIONS =
-    externallyDependentRule(
-      "The %s object must demonstrate the correct use of this conditional requirement: It is expected that if a location is specified in multiple ways (e.g. both as an Address and as a Facility) that both ways point to the same location"
-        .formatted(jsonPath(TRANSPORT_PLAN, DISCHARGE_LOCATION)));
-  private static final JsonContentCheck TRANSPORT_DISCHARGE_LOCATION_ADDRESS_LINES_COMPATIBILITY =
-    externallyDependentRule(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: When communicating with providers or consumers implementing API v2.0.3 or earlier, a sender implementing API v2.0.4 or later MUST NOT use %s as the only property to identify the location. Recipients implementing earlier versions MAY ignore this property"
-        .formatted(
-          jsonPath(TRANSPORT_PLAN, DISCHARGE_LOCATION, ADDRESS_LINES),
-          jsonPath(ADDRESS_LINES)));
+  static final JsonContentCheck DG_SEGREGATION_GROUP_CODE_VALIDATION =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "The %s values must demonstrate the correct use of the IMO IMDG segregation group codes listed by the standard. Possible values are: 1 to 18."
+        .formatted(jsonPath(DANGEROUS_GOODS, SEGREGATION_GROUPS)),
+      allDg(dg -> dg.path(SEGREGATION_GROUPS).all().submitPath()),
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+        BookingDataSets.DG_SEGREGATION_GROUPS));
 
   private static final JsonContentCheck CARRIER_BOOKING_REFERENCE_PRESENCE_BY_STATE =
     JsonAttribute.customValidator(
@@ -1806,25 +1661,12 @@ public class BookingChecks {
 
   static final List<JsonContentCheck> STATIC_BOOKING_CHECKS =
     Arrays.asList(
-      BOOKING_CHANNEL_REFERENCE_CONDITIONAL,
-      COMMODITIES_IDENTICAL_PER_REQUESTED_UNIT,
-      EXPORT_LICENSE_VALID_AT_DEPARTURE,
       CARGO_MOVEMENT_TYPE_AT_ORIGIN_VALIDATION,
       CARGO_MOVEMENT_TYPE_AT_DESTINATION_VALIDATION,
       CONTAINER_POSITIONINGS_ONLY_FOR_SD,
       CONTAINER_POSITIONING_LOCATION_ONLY_FOR_SD,
-      CONTAINER_POSITIONING_ADDRESS_LINES_COMPATIBILITY,
-      DEPOT_RELEASE_LOCATION_REPRESENTATIONS,
-      DEPOT_RELEASE_LOCATION_ADDRESS_LINES_COMPATIBILITY,
-      SHIPMENT_LOCATION_REPRESENTATIONS,
-      SHIPMENT_LOCATION_ADDRESS_LINES_COMPATIBILITY,
       EMPTY_CONTAINER_PICKUP_ONLY_FOR_CY,
       TARE_WEIGHT_REQUIRED_FOR_SOC,
-      PACKAGE_CODE_ONLY_FOR_DG,
-      IMO_PACKAGING_CODE_ONLY_FOR_DG,
-      FLASH_POINT_APPLICABILITY,
-      NET_VOLUME_APPLICABILITY,
-      SEGREGATION_GROUPS_APPLICABILITY,
       ACTIVE_REEFER_TEMPERATURE_UNIT_CONDITIONAL,
       ACTIVE_REEFER_AIR_EXCHANGE_UNIT_CONDITIONAL,
       SEND_TO_PLATFORM_ONLY_FOR_ELECTRONIC_BOL,
@@ -1832,7 +1674,6 @@ public class BookingChecks {
       INVOICE_PAYABLE_AT_MUST_USE_UN_LOCATION_CODE,
       PARTY_CONTACT_DETAILS_NAME_AND_PHONE_OR_EMAIL,
       NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
-      ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
       OTHER_PARTY_FUNCTION_CODE_VALIDATION,
       CODE_LIST_PROVIDER_VALIDATION,
       SHIPMENT_LOCATION_TYPE_CODE_VALIDATION,
@@ -1886,12 +1727,7 @@ public class BookingChecks {
           }
           return ConformanceCheckResult.simple(Set.of());
         }),
-      JsonAttribute.allIndividualMatchesMustBeValid(
-        "The %s values must demonstrate the correct use of the IMO IMDG segregation group codes listed by the standard"
-          .formatted(jsonPath(DANGEROUS_GOODS, SEGREGATION_GROUPS)),
-        allDg(dg -> dg.path(SEGREGATION_GROUPS).all().submitPath()),
-        JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
-          BookingDataSets.DG_SEGREGATION_GROUPS)),
+      DG_SEGREGATION_GROUP_CODE_VALIDATION,
       JsonAttribute.allIndividualMatchesMustBeValid(
         "The %s attribute must demonstrate the correct use of an inhalation hazard zone: %s"
           .formatted(
@@ -1934,10 +1770,6 @@ public class BookingChecks {
       SHIPMENT_CUTOFF_TIMES_REQUIRED_BY_STATE,
       CONFIRMED_CONTAINER_POSITIONINGS_ONLY_FOR_SD,
       CONFIRMED_POSITIONING_ESTIMATED_DATE_TIME_ONLY_FOR_SD,
-      TRANSPORT_LOAD_LOCATION_REPRESENTATIONS,
-      TRANSPORT_LOAD_LOCATION_ADDRESS_LINES_COMPATIBILITY,
-      TRANSPORT_DISCHARGE_LOCATION_REPRESENTATIONS,
-      TRANSPORT_DISCHARGE_LOCATION_ADDRESS_LINES_COMPATIBILITY,
       VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
       VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
       VALIDATE_SHIPMENT_LOCATIONS,

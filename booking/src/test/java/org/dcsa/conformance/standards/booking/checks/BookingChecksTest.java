@@ -1,19 +1,9 @@
 package org.dcsa.conformance.standards.booking.checks;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.booking.checks.BookingChecks.FEEDBACKS_PRESENCE;
-import static org.dcsa.conformance.standards.booking.checks.BookingChecks.NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
@@ -24,6 +14,17 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.booking.checks.BookingChecks.FEEDBACKS_PRESENCE;
+import static org.dcsa.conformance.standards.booking.checks.BookingChecks.NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BookingChecksTest {
 
@@ -38,11 +39,11 @@ class BookingChecksTest {
   @Test
   void datasetValidationDescriptionsUseQuotedPathsAndDatasetValues() {
     assertEquals(
-        "The 'feedbacks.severity' attribute must demonstrate the correct use of a feedback severity code: INFO, WARN, ERROR",
-        BookingChecks.VALID_FEEDBACK_SEVERITY.description());
+      "The 'feedbacks.severity' attribute must demonstrate the correct use of a feedback severity code: INFO, WARN, ERROR",
+      BookingChecks.VALID_FEEDBACK_SEVERITY.description());
     assertEquals(
-        "The 'feedbacks.code' attribute must demonstrate the correct use of a feedback code: INFORMATIONAL_MESSAGE, PROPERTY_WILL_BE_IGNORED, PROPERTY_VALUE_MUST_CHANGE, PROPERTY_VALUE_HAS_BEEN_CHANGED, PROPERTY_VALUE_MAY_CHANGE, PROPERTY_HAS_BEEN_DELETED",
-        BookingChecks.VALID_FEEDBACK_CODE.description());
+      "The 'feedbacks.code' attribute must demonstrate the correct use of a feedback code: INFORMATIONAL_MESSAGE, PROPERTY_WILL_BE_IGNORED, PROPERTY_VALUE_MUST_CHANGE, PROPERTY_VALUE_HAS_BEEN_CHANGED, PROPERTY_VALUE_MAY_CHANGE, PROPERTY_HAS_BEEN_DELETED",
+      BookingChecks.VALID_FEEDBACK_CODE.description());
   }
 
   @BeforeEach
@@ -53,77 +54,77 @@ class BookingChecksTest {
     commodity = OBJECT_MAPPER.createObjectNode();
     commodities = OBJECT_MAPPER.createArrayNode();
     dspSupplier =
-        () ->
-            new BookingDynamicScenarioParameters(
-                ScenarioType.DRY_CARGO.name(), "CBRR123", "CBR456");
+      () ->
+        new BookingDynamicScenarioParameters(
+          ScenarioType.DRY_CARGO.name(), "CBRR123", "CBR456");
   }
 
   @Test
   void optionalScenariosMakeAllCargoTypeChecksIrrelevant() {
     dspSupplier =
-        () -> new BookingDynamicScenarioParameters(ScenarioType.ANY.name(), "CBRR123", "CBR456");
+      () -> new BookingDynamicScenarioParameters(ScenarioType.ANY.name(), "CBRR123", "CBR456");
 
     BookingChecks.generateScenarioRelatedChecks(dspSupplier)
-        .forEach(
-            check -> {
-              if (!check.isRelevant()) {
-                return;
-              }
-              var result = (ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking);
-              assertTrue(
-                  result.errors().stream()
-                      .allMatch(
-                          error ->
-                              ConformanceErrorSeverity.IRRELEVANT.equals(error.severity())),
-                  check.description());
-            });
+      .forEach(
+        check -> {
+          if (!check.isRelevant()) {
+            return;
+          }
+          var result = (ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking);
+          assertTrue(
+            result.errors().stream()
+              .allMatch(
+                error ->
+                  ConformanceErrorSeverity.IRRELEVANT.equals(error.severity())),
+            check.description());
+        });
   }
 
   @Test
   void poAdjustedValidationDescriptionsMatchReviewedWording() {
     assertEquals(
-        "The 'shipmentCutOffTimes.cutOffDateTimeCode' attribute must demonstrate the correct use of this conditional requirement: The cutOffDateTimeCode value LCO must only be used when receiptTypeAtOrigin is CFS.",
-        BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE.description());
+      "The 'shipmentCutOffTimes.cutOffDateTimeCode' attribute must demonstrate the correct use of this conditional requirement: The cutOffDateTimeCode value LCO must only be used when receiptTypeAtOrigin is CFS.",
+      BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE.description());
     assertEquals(
-        "The 'dangerousGoods.segregationGroups' values must demonstrate the correct use of the IMO IMDG segregation group codes listed by the standard. Possible values are: 1 to 18.",
-        BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION.description());
+      "The 'dangerousGoods.segregationGroups' values must demonstrate the correct use of the IMO IMDG segregation group codes listed by the standard. Possible values are: 1 to 18.",
+      BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION.description());
   }
 
   @Test
   void lcoCutoffIsValidForCfsReceipt() {
     booking.put("receiptTypeAtOrigin", "CFS");
     booking.set(
-        "shipmentCutOffTimes",
-        OBJECT_MAPPER.createArrayNode().add(cutoff("LCO")));
+      "shipmentCutOffTimes",
+      OBJECT_MAPPER.createArrayNode().add(cutoff("LCO")));
 
     assertTrue(
-        BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE
-            .validate(booking)
-            .getErrorMessages()
-            .isEmpty());
+      BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE
+        .validate(booking)
+        .getErrorMessages()
+        .isEmpty());
   }
 
   @Test
   void lcoCutoffIsInvalidForNonCfsReceipt() {
     booking.put("receiptTypeAtOrigin", "CY");
     booking.set(
-        "shipmentCutOffTimes",
-        OBJECT_MAPPER.createArrayNode().add(cutoff("LCO")));
+      "shipmentCutOffTimes",
+      OBJECT_MAPPER.createArrayNode().add(cutoff("LCO")));
 
     assertEquals(
-        Set.of(
-            "'shipmentCutOffTimes.cutOffDateTimeCode' value 'LCO' must only be used when 'receiptTypeAtOrigin' is 'CFS'"),
-        BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE
-            .validate(booking)
-            .getErrorMessages());
+      Set.of(
+        "'shipmentCutOffTimes.cutOffDateTimeCode' value 'LCO' must only be used when 'receiptTypeAtOrigin' is 'CFS'"),
+      BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE
+        .validate(booking)
+        .getErrorMessages());
   }
 
   @Test
   void cutoffRuleIsIrrelevantWithoutLco() {
     booking.put("receiptTypeAtOrigin", "CFS");
     booking.set(
-        "shipmentCutOffTimes",
-        OBJECT_MAPPER.createArrayNode().add(cutoff("EFC")));
+      "shipmentCutOffTimes",
+      OBJECT_MAPPER.createArrayNode().add(cutoff("EFC")));
 
     assertOnlyIrrelevant(BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE, booking);
   }
@@ -133,10 +134,10 @@ class BookingChecksTest {
     booking = bookingWithSegregationGroups("1", "18");
 
     assertTrue(
-        BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION
-            .validate(booking)
-            .getErrorMessages()
-            .isEmpty());
+      BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION
+        .validate(booking)
+        .getErrorMessages()
+        .isEmpty());
   }
 
   @Test
@@ -144,41 +145,41 @@ class BookingChecksTest {
     booking = bookingWithSegregationGroups("0", "19");
 
     assertEquals(
-        2,
-        BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION
-            .validate(booking)
-            .getErrorMessages()
-            .size());
+      2,
+      BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION
+        .validate(booking)
+        .getErrorMessages()
+        .size());
   }
 
   @Test
   void poRemovedValidationsAreAbsentFromCarrierAndShipperPayloadChecks() {
     var descriptions =
-        BookingChecks.fullPayloadChecks(dspSupplier, CarrierStatusScenario.uc8()).stream()
-            .map(JsonContentCheck::description)
-            .toList();
+      BookingChecks.fullPayloadChecks(dspSupplier, CarrierStatusScenario.uc8()).stream()
+        .map(JsonContentCheck::description)
+        .toList();
     var removedDescriptionFragments =
-        List.of(
-            "a booking channel is being used",
-            "same for each requested unit",
-            "The Export License must be valid at time of departure",
-            "implementing API v2.0.3 or earlier",
-            "both ways point to the same location",
-            "only applicable to specific hazardous goods according to the IMO IMDG Code",
-            "only applicable to liquids and gas",
-            "only applicable to specific hazardous goods",
-            "only applicable to dangerous goods if specified in the IMO IMDG code",
-            "only applicable to dangerous goods if the IMO packaging code is not available",
-            "only applicable if 'ISOEquipmentCode' shows a Reefer type");
+      List.of(
+        "a booking channel is being used",
+        "same for each requested unit",
+        "The Export License must be valid at time of departure",
+        "implementing API v2.0.3 or earlier",
+        "both ways point to the same location",
+        "only applicable to specific hazardous goods according to the IMO IMDG Code",
+        "only applicable to liquids and gas",
+        "only applicable to specific hazardous goods",
+        "only applicable to dangerous goods if specified in the IMO IMDG code",
+        "only applicable to dangerous goods if the IMO packaging code is not available",
+        "only applicable if 'ISOEquipmentCode' shows a Reefer type");
 
     removedDescriptionFragments.forEach(
-        fragment ->
-            assertTrue(
-                descriptions.stream().noneMatch(description -> description.contains(fragment)),
-                fragment));
+      fragment ->
+        assertTrue(
+          descriptions.stream().noneMatch(description -> description.contains(fragment)),
+          fragment));
 
     assertTrue(
-        descriptions.stream().anyMatch(description -> description.contains("'invoicePayableAt'")));
+      descriptions.stream().anyMatch(description -> description.contains("'invoicePayableAt'")));
   }
 
   private ObjectNode cutoff(String code) {
@@ -191,25 +192,25 @@ class BookingChecksTest {
       segregationGroups.add(group);
     }
     var dangerousGoods =
-        OBJECT_MAPPER.createArrayNode()
-            .add(OBJECT_MAPPER.createObjectNode().set("segregationGroups", segregationGroups));
+      OBJECT_MAPPER.createArrayNode()
+        .add(OBJECT_MAPPER.createObjectNode().set("segregationGroups", segregationGroups));
     var outerPackaging =
-        OBJECT_MAPPER.createObjectNode().set("dangerousGoods", dangerousGoods);
+      OBJECT_MAPPER.createObjectNode().set("dangerousGoods", dangerousGoods);
     var commodity = OBJECT_MAPPER.createObjectNode().set("outerPackaging", outerPackaging);
     var equipment =
-        OBJECT_MAPPER.createObjectNode()
-            .set("commodities", OBJECT_MAPPER.createArrayNode().add(commodity));
+      OBJECT_MAPPER.createObjectNode()
+        .set("commodities", OBJECT_MAPPER.createArrayNode().add(commodity));
     return OBJECT_MAPPER.createObjectNode()
-        .set("requestedEquipments", OBJECT_MAPPER.createArrayNode().add(equipment));
+      .set("requestedEquipments", OBJECT_MAPPER.createArrayNode().add(equipment));
   }
 
   private void assertOnlyIrrelevant(JsonContentCheck check, JsonNode body) {
     var result = (ConformanceCheckResult.ErrorsWithRelevance) check.validate(body);
     assertFalse(result.errors().isEmpty(), check.description());
     assertTrue(
-        result.errors().stream()
-            .allMatch(error -> ConformanceErrorSeverity.IRRELEVANT.equals(error.severity())),
-        check.description());
+      result.errors().stream()
+        .allMatch(error -> ConformanceErrorSeverity.IRRELEVANT.equals(error.severity())),
+      check.description());
   }
 
   @Test
@@ -220,7 +221,7 @@ class BookingChecksTest {
 
     JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_AT_COMMODITY_LEVEL;
     Set<ConformanceError> errors =
-        ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
+      ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
 
     assertEquals(1, errors.size());
     assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
@@ -232,7 +233,7 @@ class BookingChecksTest {
     JsonContentCheck check = BookingChecks.CHECK_CARGO_GROSS_WEIGHT_AT_COMMODITY_LEVEL;
 
     Set<ConformanceError> errors =
-        ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
+      ((ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking)).errors();
 
     assertEquals(1, errors.size());
     assertEquals(ConformanceErrorSeverity.IRRELEVANT, errors.iterator().next().severity());
@@ -262,8 +263,8 @@ class BookingChecksTest {
     Set<String> errors = check.validate(booking).getErrorMessages();
     assertEquals(1, errors.size());
     assertTrue(
-        errors.contains(
-            "The 'requestedEquipments[0]' must have 'cargoGrossWeight' at 'commodities' position 0"));
+      errors.contains(
+        "The 'requestedEquipments[0]' must have 'cargoGrossWeight' at 'commodities' position 0"));
   }
 
   @Test
@@ -280,20 +281,20 @@ class BookingChecksTest {
     Set<String> errors = check.validate(booking).getErrorMessages();
     assertEquals(1, errors.size());
     assertTrue(
-        errors.contains(
-            "The 'requestedEquipments[0]' must have 'cargoGrossWeight' at 'commodities' position 0"));
+      errors.contains(
+        "The 'requestedEquipments[0]' must have 'cargoGrossWeight' at 'commodities' position 0"));
   }
 
 
   @Test
   void bothReferencesCorrect() throws Exception {
     String json =
-        """
-            {
-              "carrierBookingRequestReference": "CBRR123",
-              "carrierBookingReference": "CBR456"
-            }
-            """;
+      """
+        {
+          "carrierBookingRequestReference": "CBRR123",
+          "carrierBookingReference": "CBR456"
+        }
+        """;
 
     JsonNode body = mapper.readTree(json);
     Set<String> errors = BookingChecks.cbrrOrCbr(dspSupplier).validate(body).getErrorMessages();
@@ -304,12 +305,12 @@ class BookingChecksTest {
   @Test
   void onlyCbrrCorrect() throws Exception {
     String json =
-        """
-            {
-              "carrierBookingRequestReference": "CBRR123",
-              "carrierBookingReference": "WRONG"
-            }
-            """;
+      """
+        {
+          "carrierBookingRequestReference": "CBRR123",
+          "carrierBookingReference": "WRONG"
+        }
+        """;
 
     JsonNode body = mapper.readTree(json);
     Set<String> errors = BookingChecks.cbrrOrCbr(dspSupplier).validate(body).getErrorMessages();
@@ -320,12 +321,12 @@ class BookingChecksTest {
   @Test
   void onlyCbrCorrect() throws Exception {
     String json =
-        """
-            {
-              "carrierBookingRequestReference": "WRONG",
-              "carrierBookingReference": "CBR456"
-            }
-            """;
+      """
+        {
+          "carrierBookingRequestReference": "WRONG",
+          "carrierBookingReference": "CBR456"
+        }
+        """;
     JsonNode body = mapper.readTree(json);
     Set<String> errors = BookingChecks.cbrrOrCbr(dspSupplier).validate(body).getErrorMessages();
 
@@ -335,30 +336,30 @@ class BookingChecksTest {
   @Test
   void bothReferencesWrong() throws Exception {
     String json =
-        """
-            {
-              "carrierBookingRequestReference": "WRONG1",
-              "carrierBookingReference": "WRONG2"
-            }
-            """;
+      """
+        {
+          "carrierBookingRequestReference": "WRONG1",
+          "carrierBookingReference": "WRONG2"
+        }
+        """;
 
     JsonNode body = mapper.readTree(json);
     Set<String> errors = BookingChecks.cbrrOrCbr(dspSupplier).validate(body).getErrorMessages();
 
     assertFalse(errors.isEmpty());
     assertTrue(
-        errors
-            .iterator()
-            .next()
-            .contains(
-                "Either 'carrierBookingRequestReference' must equal CBRR123 or 'carrierBookingReference' must equal CBR456"));
+      errors
+        .iterator()
+        .next()
+        .contains(
+          "Either 'carrierBookingRequestReference' must equal CBRR123 or 'carrierBookingReference' must equal CBR456"));
   }
 
   @Test
   void testCommoditiesSubreferenceUnique_noRequestedEquipments_valid() {
     // Test when requestedEquipments is missing entirely
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -369,7 +370,7 @@ class BookingChecksTest {
     booking.set("requestedEquipments", emptyEquipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -382,7 +383,7 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -397,7 +398,7 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -416,7 +417,7 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -439,7 +440,7 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -468,7 +469,7 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -491,11 +492,11 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertEquals(1, errors.size());
     assertTrue(
-        errors.contains(
-            "commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
+      errors.contains(
+        "commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
   }
 
   @Test
@@ -523,11 +524,11 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertEquals(1, errors.size());
     assertTrue(
-        errors.contains(
-            "commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
+      errors.contains(
+        "commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
   }
 
   @Test
@@ -558,14 +559,14 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertEquals(2, errors.size());
     assertTrue(
-        errors.contains(
-            "commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
+      errors.contains(
+        "commoditySubReference 'REF001' is not unique across the booking. Found 2 occurrences."));
     assertTrue(
-        errors.contains(
-            "commoditySubReference 'REF002' is not unique across the booking. Found 3 occurrences."));
+      errors.contains(
+        "commoditySubReference 'REF002' is not unique across the booking. Found 3 occurrences."));
   }
 
   @Test
@@ -590,7 +591,7 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -616,7 +617,7 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -642,7 +643,7 @@ class BookingChecksTest {
     booking.set("requestedEquipments", equipments);
 
     Set<String> errors =
-        BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
+      BookingChecks.COMMODITIES_SUBREFERENCE_UNIQUE.validate(booking).getErrorMessages();
     assertTrue(errors.isEmpty());
   }
 
@@ -734,12 +735,12 @@ class BookingChecksTest {
       Set<ConformanceError> errors = validate(booking);
       assertEquals(1, errors.size());
       assertTrue(
-          errors
-              .iterator()
-              .next()
-              .message()
-              .equals(
-                  "The attribute 'requestedEquipments[0].activeReeferSettings' should have been present but was absent"));
+        errors
+          .iterator()
+          .next()
+          .message()
+          .equals(
+            "The attribute 'requestedEquipments[0].activeReeferSettings' should have been present but was absent"));
     }
 
     @Test
@@ -747,7 +748,7 @@ class BookingChecksTest {
       requestedEquipment.put("ISOEquipmentCode", "22R1");
       requestedEquipment.put("isNonOperatingReefer", false);
       requestedEquipment.set(
-          "activeReeferSettings", OBJECT_MAPPER.createObjectNode().put("someSetting", "value"));
+        "activeReeferSettings", OBJECT_MAPPER.createObjectNode().put("someSetting", "value"));
       requestedEquipments.add(requestedEquipment);
       booking.set("requestedEquipments", requestedEquipments);
 
@@ -766,7 +767,7 @@ class BookingChecksTest {
       equipment2.put("ISOEquipmentCode", "22R1");
       equipment2.put("isNonOperatingReefer", false);
       equipment2.set(
-          "activeReeferSettings", OBJECT_MAPPER.createObjectNode().put("someSetting", "value"));
+        "activeReeferSettings", OBJECT_MAPPER.createObjectNode().put("someSetting", "value"));
 
       requestedEquipments.add(equipment1);
       requestedEquipments.add(equipment2);
@@ -790,18 +791,18 @@ class BookingChecksTest {
       Set<ConformanceError> errors = validate(booking);
       assertEquals(1, errors.size());
       assertTrue(
-          errors
-              .iterator()
-              .next()
-              .message()
-              .equals(
-                  "The attribute 'requestedEquipments[0].activeReeferSettings' should have been present but was absent"));
+        errors
+          .iterator()
+          .next()
+          .message()
+          .equals(
+            "The attribute 'requestedEquipments[0].activeReeferSettings' should have been present but was absent"));
     }
 
     private Set<ConformanceError> validate(ObjectNode booking) {
       return ((ConformanceCheckResult.ErrorsWithRelevance)
-              NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking))
-          .errors();
+        NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER.validate(booking))
+        .errors();
     }
   }
 
@@ -810,15 +811,15 @@ class BookingChecksTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {
-          "",
-          "CONFIRMED",
-          "RECEIVED",
-          "REJECTED",
-          "DECLINED",
-          "COMPLETED",
-          "UNKNOWN_STATUS"
-        })
+      strings = {
+        "",
+        "CONFIRMED",
+        "RECEIVED",
+        "REJECTED",
+        "DECLINED",
+        "COMPLETED",
+        "UNKNOWN_STATUS"
+      })
     void irrelevantBookingStatuses_shouldBeIrrelevant(String bookingStatus) {
       if (!bookingStatus.isEmpty()) {
         booking.put("bookingStatus", bookingStatus);
@@ -839,9 +840,9 @@ class BookingChecksTest {
       ConformanceError error = errors.iterator().next();
       assertEquals(ConformanceErrorSeverity.ERROR, error.severity());
       assertTrue(
-          error
-              .message()
-              .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_UPDATE'"));
+        error
+          .message()
+          .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_UPDATE'"));
     }
 
     @Test
@@ -853,9 +854,9 @@ class BookingChecksTest {
       ConformanceError error = errors.iterator().next();
       assertEquals(ConformanceErrorSeverity.ERROR, error.severity());
       assertTrue(
-          error
-              .message()
-              .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_AMENDMENT'"));
+        error
+          .message()
+          .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_AMENDMENT'"));
     }
 
     @Test
@@ -868,9 +869,9 @@ class BookingChecksTest {
       ConformanceError error = errors.iterator().next();
       assertEquals(ConformanceErrorSeverity.ERROR, error.severity());
       assertTrue(
-          error
-              .message()
-              .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_UPDATE'"));
+        error
+          .message()
+          .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_UPDATE'"));
     }
 
     @Test
@@ -883,9 +884,9 @@ class BookingChecksTest {
       ConformanceError error = errors.iterator().next();
       assertEquals(ConformanceErrorSeverity.ERROR, error.severity());
       assertTrue(
-          error
-              .message()
-              .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_AMENDMENT'"));
+        error
+          .message()
+          .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_AMENDMENT'"));
     }
 
     @Test
@@ -898,9 +899,9 @@ class BookingChecksTest {
       ConformanceError error = errors.iterator().next();
       assertEquals(ConformanceErrorSeverity.ERROR, error.severity());
       assertTrue(
-          error
-              .message()
-              .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_UPDATE'"));
+        error
+          .message()
+          .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_UPDATE'"));
     }
 
     @Test
@@ -913,9 +914,9 @@ class BookingChecksTest {
       ConformanceError error = errors.iterator().next();
       assertEquals(ConformanceErrorSeverity.ERROR, error.severity());
       assertTrue(
-          error
-              .message()
-              .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_AMENDMENT'"));
+        error
+          .message()
+          .contains("'feedbacks' is missing in the 'bookingStatus' 'PENDING_AMENDMENT'"));
     }
 
     @Test
@@ -1022,7 +1023,7 @@ class BookingChecksTest {
 
     private Set<ConformanceError> validate(ObjectNode booking) {
       return ((ConformanceCheckResult.ErrorsWithRelevance) FEEDBACKS_PRESENCE.validate(booking))
-          .errors();
+        .errors();
     }
   }
 }

@@ -1,36 +1,42 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.stream.Stream;
-import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.check.ApiHeaderCheck;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.core.check.NothingToCheck;
+import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+
+import java.util.stream.Stream;
 
 public class ShipperGetBookingErrorScenarioAction extends BookingAction {
 
   private final JsonSchemaValidator responseSchemaValidator;
 
   public ShipperGetBookingErrorScenarioAction(
-      String carrierPartyName,
-      String shipperPartyName,
-      BookingAction previousAction,
-      JsonSchemaValidator responseSchemaValidator) {
+    String carrierPartyName,
+    String shipperPartyName,
+    BookingAction previousAction,
+    JsonSchemaValidator responseSchemaValidator) {
     super(
-        shipperPartyName,
-        carrierPartyName,
-        previousAction,
-        "GET (Non existing booking)",
-        404,
-        true);
+      shipperPartyName,
+      carrierPartyName,
+      previousAction,
+      "GET (Non existing booking)",
+      404,
+      true);
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-        .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
-        .put("cbr", getDspSupplier().get().carrierBookingReference())
-        .put("invalidBookingReference", true);
+      .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
+      .put("cbr", getDspSupplier().get().carrierBookingReference())
+      .put("invalidBookingReference", true);
   }
 
   @Override
@@ -44,24 +50,24 @@ public class ShipperGetBookingErrorScenarioAction extends BookingAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new ResponseStatusCheck(
-                BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
-            new ApiHeaderCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new NothingToCheck(getMatchedExchangeUuid(), HttpMessageType.REQUEST),
-            new ApiHeaderCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator));
+          new ResponseStatusCheck(
+            BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+          new ApiHeaderCheck(
+            BookingRole::isShipper,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+          new NothingToCheck(getMatchedExchangeUuid(), HttpMessageType.REQUEST),
+          new ApiHeaderCheck(
+            BookingRole::isCarrier,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            expectedApiVersion),
+          new JsonSchemaCheck(
+            BookingRole::isCarrier,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            responseSchemaValidator));
       }
     };
   }

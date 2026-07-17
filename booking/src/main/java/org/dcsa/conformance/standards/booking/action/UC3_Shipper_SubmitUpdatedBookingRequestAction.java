@@ -1,14 +1,17 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+
+import java.util.stream.Stream;
 
 @Getter
 @Slf4j
@@ -20,14 +23,14 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
   private final BookingState expectedBookingState;
 
   public UC3_Shipper_SubmitUpdatedBookingRequestAction(
-      String carrierPartyName,
-      String shipperPartyName,
-      BookingAction previousAction,
-      BookingState expectedBookingState,
-      JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator,
-      boolean isWithNotifications) {
+    String carrierPartyName,
+    String shipperPartyName,
+    BookingAction previousAction,
+    BookingState expectedBookingState,
+    JsonSchemaValidator requestSchemaValidator,
+    JsonSchemaValidator responseSchemaValidator,
+    JsonSchemaValidator notificationSchemaValidator,
+    boolean isWithNotifications) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC3", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
@@ -38,7 +41,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        "prompt-shipper-uc3.md", "prompt-shipper-refresh-complete.md");
+      "prompt-shipper-uc3.md", "prompt-shipper-refresh-complete.md");
   }
 
   @Override
@@ -63,18 +66,18 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
         return Stream.concat(
-            Stream.of(
-                new JsonSchemaCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    requestSchemaValidator),
-                BookingChecks.updateRequestContentChecks(
-                    getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())),
-            Stream.concat(
-                createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
-                getNotificationChecks(
-                    expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)));
+          Stream.of(
+            new JsonSchemaCheck(
+              BookingRole::isShipper,
+              getMatchedExchangeUuid(),
+              HttpMessageType.REQUEST,
+              requestSchemaValidator),
+            BookingChecks.updateRequestContentChecks(
+              getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())),
+          Stream.concat(
+            createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
+            getNotificationChecks(
+              expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)));
       }
     };
   }

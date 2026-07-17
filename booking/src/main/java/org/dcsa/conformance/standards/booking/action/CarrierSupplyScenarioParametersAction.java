@@ -2,12 +2,6 @@ package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.NonNull;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
@@ -15,6 +9,13 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.util.ErrorFormatter;
 import org.dcsa.conformance.standards.booking.checks.BookingInputPayloadValidations;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CarrierSupplyScenarioParametersAction extends BookingAction {
 
@@ -28,17 +29,17 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public CarrierSupplyScenarioParametersAction(
-      String carrierPartyName,
-      @NonNull ScenarioType scenarioType,
-      String standardVersion,
-      JsonSchemaValidator requestSchemaValidator) {
+    String carrierPartyName,
+    @NonNull ScenarioType scenarioType,
+    String standardVersion,
+    JsonSchemaValidator requestSchemaValidator) {
     super(
-        carrierPartyName,
-        null,
-        null,
-        "SupplyCSP [%s]".formatted(scenarioType.displayName()),
-        -1,
-        true);
+      carrierPartyName,
+      null,
+      null,
+      "SupplyCSP [%s]".formatted(scenarioType.displayName()),
+      -1,
+      true);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
@@ -83,7 +84,7 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/messages/" + scenarioType.bookingPayload(standardVersion), Map.of());
+      "/standards/booking/messages/" + scenarioType.bookingPayload(standardVersion), Map.of());
   }
 
   @Override
@@ -104,15 +105,15 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
     JsonNode inputNode = partyInput.get(INPUT);
 
     Set<String> schemaChecksErrors =
-        BookingInputPayloadValidations.validateBookingSchema(inputNode, requestSchemaValidator);
+      BookingInputPayloadValidations.validateBookingSchema(inputNode, requestSchemaValidator);
 
     Set<String> contentChecksErrors =
-        BookingInputPayloadValidations.validateBookingContent(inputNode, getDspSupplier());
+      BookingInputPayloadValidations.validateBookingContent(inputNode, getDspSupplier());
 
     Set<String> allErrors =
-        Stream.of(schemaChecksErrors, contentChecksErrors)
-            .flatMap(Set::stream)
-            .collect(Collectors.toSet());
+      Stream.of(schemaChecksErrors, contentChecksErrors)
+        .flatMap(Set::stream)
+        .collect(Collectors.toSet());
 
     if (!allErrors.isEmpty()) {
       throw new UserFacingException(ErrorFormatter.formatInputErrors(allErrors));

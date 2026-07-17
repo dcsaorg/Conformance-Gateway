@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.booking.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.*;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -10,15 +9,21 @@ import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
 abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConformanceCheck {
 
   protected static final Set<BookingState> BOOKING_STATES_WHERE_CBR_IS_OPTIONAL =
-      Set.of(
-          BookingState.RECEIVED,
-          BookingState.REJECTED,
-          BookingState.PENDING_UPDATE,
-          BookingState.UPDATE_RECEIVED,
-          BookingState.CANCELLED);
+    Set.of(
+      BookingState.RECEIVED,
+      BookingState.REJECTED,
+      BookingState.PENDING_UPDATE,
+      BookingState.UPDATE_RECEIVED,
+      BookingState.CANCELLED);
 
   protected final BookingState expectedBookingStatus;
   protected final CarrierStatusScenario carrierStatusScenario;
@@ -26,71 +31,71 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected static final String FEEDBACKS = "feedbacks";
 
   protected AbstractCarrierPayloadConformanceCheck(
-      UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
+    UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
     this(matchedExchangeUuid, httpMessageType, bookingState, null, null);
   }
 
   protected AbstractCarrierPayloadConformanceCheck(
-      UUID matchedExchangeUuid,
-      HttpMessageType httpMessageType,
-      BookingState bookingState,
-      BookingState expectedAmendedBookingStatus) {
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    BookingState bookingState,
+    BookingState expectedAmendedBookingStatus) {
     this(
-        matchedExchangeUuid,
-        httpMessageType,
-        bookingState,
-        expectedAmendedBookingStatus,
-        null);
+      matchedExchangeUuid,
+      httpMessageType,
+      bookingState,
+      expectedAmendedBookingStatus,
+      null);
   }
 
   protected AbstractCarrierPayloadConformanceCheck(
-      UUID matchedExchangeUuid,
-      HttpMessageType httpMessageType,
-      BookingState bookingState,
-      BookingState expectedAmendedBookingStatus,
-      BookingCancellationState expectedBookingCancellationStatus) {
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    BookingState bookingState,
+    BookingState expectedAmendedBookingStatus,
+    BookingCancellationState expectedBookingCancellationStatus) {
     this(
-        matchedExchangeUuid,
-        httpMessageType,
-        bookingState,
-        CarrierStatusScenario.from(
-            bookingState, expectedAmendedBookingStatus, expectedBookingCancellationStatus));
+      matchedExchangeUuid,
+      httpMessageType,
+      bookingState,
+      CarrierStatusScenario.from(
+        bookingState, expectedAmendedBookingStatus, expectedBookingCancellationStatus));
   }
 
   protected AbstractCarrierPayloadConformanceCheck(
-      UUID matchedExchangeUuid,
-      HttpMessageType httpMessageType,
-      BookingState bookingState,
-      CarrierStatusScenario carrierStatusScenario) {
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    BookingState bookingState,
+    CarrierStatusScenario carrierStatusScenario) {
     super(
-        "Validate the carrier payload",
-        BookingRole::isCarrier,
-        matchedExchangeUuid,
-        httpMessageType);
+      "Validate the carrier payload",
+      BookingRole::isCarrier,
+      matchedExchangeUuid,
+      httpMessageType);
     this.expectedBookingStatus = bookingState;
     this.carrierStatusScenario = Objects.requireNonNull(carrierStatusScenario);
   }
 
   protected ConformanceCheckResult ensureCarrierBookingReferenceCompliance(
-      JsonNode responsePayload) {
+    JsonNode responsePayload) {
     if (BOOKING_STATES_WHERE_CBR_IS_OPTIONAL.contains(expectedBookingStatus)) {
       return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
     }
     if (responsePayload.path("carrierBookingReference").isMissingNode()) {
       return ConformanceCheckResult.simple(
-          Set.of("The 'carrierBookingReference' field was missing"));
+        Set.of("The 'carrierBookingReference' field was missing"));
     }
     return ConformanceCheckResult.simple(Collections.emptySet());
   }
 
   protected ConformanceCheckResult ensureAtLeastOneCarrierReferenceIsPresent(JsonNode payload) {
     if (!JsonUtil.isMissingOrEmpty(payload.path("carrierBookingReference"))
-        || !JsonUtil.isMissingOrEmpty(payload.path("carrierBookingRequestReference"))) {
+      || !JsonUtil.isMissingOrEmpty(payload.path("carrierBookingRequestReference"))) {
       return ConformanceCheckResult.simple(Collections.emptySet());
     }
     return ConformanceCheckResult.simple(
-        Set.of(
-            "At least one of 'carrierBookingReference' or 'carrierBookingRequestReference' must be present"));
+      Set.of(
+        "At least one of 'carrierBookingReference' or 'carrierBookingRequestReference' must be present"));
   }
 
   protected ConformanceCheckResult ensureBookingStatusIsCorrect(JsonNode responsePayload) {
@@ -106,7 +111,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   }
 
   protected ConformanceCheckResult ensureBookingCancellationStatusIsCorrect(
-      JsonNode responsePayload) {
+    JsonNode responsePayload) {
     return carrierStatusScenario.validateBookingCancellationStatus(responsePayload);
   }
 
@@ -120,23 +125,23 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
 
   protected ConformanceCheckResult ensureAmendedBookingStatusCodeCompliance(JsonNode payload) {
     return ensureStatusCodeCompliance(
-        payload, "amendedBookingStatus", BookingDataSets.AMENDED_BOOKING_STATUS);
+      payload, "amendedBookingStatus", BookingDataSets.AMENDED_BOOKING_STATUS);
   }
 
   protected ConformanceCheckResult ensureBookingCancellationStatusCodeCompliance(JsonNode payload) {
     return ensureStatusCodeCompliance(
-        payload, "bookingCancellationStatus", BookingDataSets.BOOKING_CANCELLATION_STATUS);
+      payload, "bookingCancellationStatus", BookingDataSets.BOOKING_CANCELLATION_STATUS);
   }
 
   private static ConformanceCheckResult ensureStatusCodeCompliance(
-      JsonNode payload, String field, org.dcsa.conformance.core.check.KeywordDataset dataset) {
+    JsonNode payload, String field, org.dcsa.conformance.core.check.KeywordDataset dataset) {
     JsonNode value = payload.path(field);
     if (value.isMissingNode()) {
       return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
     }
     if (!value.isTextual() || !dataset.contains(value.asText())) {
       return ConformanceCheckResult.simple(
-          Set.of("Invalid '%s' value: '%s'".formatted(field, value.asText())));
+        Set.of("Invalid '%s' value: '%s'".formatted(field, value.asText())));
     }
     return ConformanceCheckResult.simple(Collections.emptySet());
   }
@@ -150,7 +155,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
       return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
     }
     if (responsePayload.path(FEEDBACKS).isMissingNode()
-        || responsePayload.path(FEEDBACKS).isEmpty()) {
+      || responsePayload.path(FEEDBACKS).isEmpty()) {
       errors.add("feedbacks property is required in the booking state %s".formatted(bookingStatus));
     }
     return ConformanceCheckResult.simple(errors);

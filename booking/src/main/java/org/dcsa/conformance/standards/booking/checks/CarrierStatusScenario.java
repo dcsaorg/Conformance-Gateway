@@ -144,20 +144,18 @@ public final class CarrierStatusScenario {
     String cancellationStatus = textValue(payload, "bookingCancellationStatus");
     boolean valid =
       switch (combinationRule) {
-        case UC8 ->
-          BookingState.AMENDMENT_CONFIRMED.name().equals(amendedBookingStatus)
-              && BookingState.CONFIRMED.name().equals(bookingStatus)
-            || BookingState.AMENDMENT_DECLINED.name().equals(amendedBookingStatus)
-              && containsName(CONFIRMED_OR_PENDING_AMENDMENT, bookingStatus);
-        case UC14 ->
-          BookingCancellationState.CANCELLATION_CONFIRMED.name().equals(cancellationStatus)
-              && BookingState.CANCELLED.name().equals(bookingStatus)
-              && (amendedBookingStatus == null
-                || BookingState.AMENDMENT_CANCELLED.name().equals(amendedBookingStatus))
-            || BookingCancellationState.CANCELLATION_DECLINED.name().equals(cancellationStatus)
-              && containsName(CONFIRMED_OR_PENDING_AMENDMENT, bookingStatus)
-              && (amendedBookingStatus == null
-                || containsName(ANY_AMENDMENT_STATUS, amendedBookingStatus));
+        case UC8 -> BookingState.AMENDMENT_CONFIRMED.name().equals(amendedBookingStatus)
+          && BookingState.CONFIRMED.name().equals(bookingStatus)
+          || BookingState.AMENDMENT_DECLINED.name().equals(amendedBookingStatus)
+          && containsName(CONFIRMED_OR_PENDING_AMENDMENT, bookingStatus);
+        case UC14 -> BookingCancellationState.CANCELLATION_CONFIRMED.name().equals(cancellationStatus)
+          && BookingState.CANCELLED.name().equals(bookingStatus)
+          && (amendedBookingStatus == null
+          || BookingState.AMENDMENT_CANCELLED.name().equals(amendedBookingStatus))
+          || BookingCancellationState.CANCELLATION_DECLINED.name().equals(cancellationStatus)
+          && containsName(CONFIRMED_OR_PENDING_AMENDMENT, bookingStatus)
+          && (amendedBookingStatus == null
+          || containsName(ANY_AMENDMENT_STATUS, amendedBookingStatus));
         case NONE -> true;
       };
     if (valid) {

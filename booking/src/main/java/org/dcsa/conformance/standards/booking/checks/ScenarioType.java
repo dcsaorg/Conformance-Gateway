@@ -15,7 +15,7 @@ public enum ScenarioType {
   private final boolean cargoTypeValidationRequired;
 
   ScenarioType(
-      String payloadSuffix, String displayName, boolean cargoTypeValidationRequired) {
+    String payloadSuffix, String displayName, boolean cargoTypeValidationRequired) {
     this.payloadSuffix = payloadSuffix;
     this.displayName = displayName;
     this.cargoTypeValidationRequired = cargoTypeValidationRequired;

@@ -49,15 +49,26 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
       BookingState bookingState,
       BookingState expectedAmendedBookingStatus,
       BookingCancellationState expectedBookingCancellationStatus) {
+    this(
+        matchedExchangeUuid,
+        httpMessageType,
+        bookingState,
+        CarrierStatusScenario.from(
+            bookingState, expectedAmendedBookingStatus, expectedBookingCancellationStatus));
+  }
+
+  protected AbstractCarrierPayloadConformanceCheck(
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType,
+      BookingState bookingState,
+      CarrierStatusScenario carrierStatusScenario) {
     super(
         "Validate the carrier payload",
         BookingRole::isCarrier,
         matchedExchangeUuid,
         httpMessageType);
     this.expectedBookingStatus = bookingState;
-    this.carrierStatusScenario =
-        CarrierStatusScenario.from(
-            bookingState, expectedAmendedBookingStatus, expectedBookingCancellationStatus);
+    this.carrierStatusScenario = Objects.requireNonNull(carrierStatusScenario);
   }
 
   protected ConformanceCheckResult ensureCarrierBookingReferenceCompliance(

@@ -16,6 +16,7 @@ import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
+import org.dcsa.conformance.standards.booking.checks.CarrierStatusScenario;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.*;
 import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
@@ -151,7 +152,11 @@ public abstract class BookingAction extends BookingAndEblAction {
                 IOToolkit.templateFileToText(
                     "/standards/booking/instructions/" + fileName, replacementsMap))
         .collect(Collectors.joining())
-        .replace("SCENARIO_TYPE", scenarioType.displayName());
+        .replace(
+            "SCENARIO_TYPE_INSTRUCTION",
+            scenarioType == ScenarioType.ANY
+                ? "You may use any supported Booking cargo type."
+                : "Make sure the booking type remains %s.".formatted(scenarioType.displayName()));
   }
 
   protected static String withCbrOrCbrr(String cbr, String cbrr) {
@@ -253,6 +258,36 @@ public abstract class BookingAction extends BookingAndEblAction {
             amendedBookingState,
             cancellationState,
             getDspSupplier()),
+        ApiHeaderCheck.createNotificationCheck(
+            BookingRole::isCarrier,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+        ApiHeaderCheck.createNotificationCheck(
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion)
+            .withRelevance(isWithNotifications()),
+        new JsonSchemaCheck(
+            BookingRole::isCarrier,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            requestSchemaValidator));
+  }
+
+  protected Stream<ActionCheck> getSimpleNotificationChecks(
+      String expectedApiVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      CarrierStatusScenario carrierStatusScenario) {
+    return Stream.of(
+        new HttpMethodCheck(BookingRole::isCarrier, getMatchedExchangeUuid(), "POST"),
+        new UrlPathCheck(
+            BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
+        new ResponseStatusCheck(BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
+            .withRelevance(isWithNotifications()),
+        new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
+            getMatchedExchangeUuid(), carrierStatusScenario, getDspSupplier()),
         ApiHeaderCheck.createNotificationCheck(
             BookingRole::isCarrier,
             getMatchedExchangeUuid(),

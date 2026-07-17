@@ -61,6 +61,18 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
     this.dspSupplier = dspSupplier;
   }
 
+  public CarrierBookingNotificationDataPayloadRequestConformanceCheck(
+      UUID matchedExchangeUuid,
+      CarrierStatusScenario carrierStatusScenario,
+      Supplier<BookingDynamicScenarioParameters> dspSupplier) {
+    super(
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST,
+        BookingState.CONFIRMED,
+        carrierStatusScenario);
+    this.dspSupplier = dspSupplier;
+  }
+
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
@@ -106,6 +118,17 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
                             carrierStatusScenario.bookingCancellationStatusExpectation()),
                     DATA_PATH,
                     at(DATA_PATH, this::ensureBookingCancellationStatusIsCorrect)),
+                createSubCheck(
+                    DEFAULT_PREFIX,
+                    "[Scenario] The combination of %s, %s and %s must match the active scenario cross-field rules: %s"
+                        .formatted(
+                            jsonPath(DATA, BOOKING_STATUS),
+                            jsonPath(DATA, AMENDED_BOOKING_STATUS),
+                            jsonPath(DATA, BOOKING_CANCELLATION_STATUS),
+                            carrierStatusScenario.statusCombinationExpectation()),
+                    carrierStatusScenario.requiresCrossFieldValidation(),
+                    DATA_PATH,
+                    at(DATA_PATH, carrierStatusScenario::validateStatusCombination)),
                 createSubCheck(
                     DEFAULT_PREFIX,
                     "[Scenario] (if included) The %s attribute in the Booking Notification must only be used when the standard allows it: %s and %s MUST NOT be present unless required by the applicable scenario"

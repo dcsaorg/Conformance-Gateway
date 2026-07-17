@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.bookingandebl;
 
-import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_CONFIRMED;
 import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_RECEIVED;
 import static org.dcsa.conformance.standards.booking.party.BookingState.CONFIRMED;
 import static org.dcsa.conformance.standards.booking.party.BookingState.RECEIVED;
@@ -29,6 +28,7 @@ import org.dcsa.conformance.standards.booking.action.UC1_Shipper_SubmitBookingRe
 import org.dcsa.conformance.standards.booking.action.UC5_Carrier_ConfirmBookingRequestAction;
 import org.dcsa.conformance.standards.booking.action.UC7_Shipper_SubmitBookingAmendment;
 import org.dcsa.conformance.standards.booking.action.UC8_Carrier_ProcessAmendmentAction;
+import org.dcsa.conformance.standards.booking.checks.CarrierStatusScenario;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standards.ebl.EblScenarioListBuilder;
@@ -202,6 +202,24 @@ public class BookingAndEblScenarioListBuilder
                 .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
+  private static BookingAndEblScenarioListBuilder shipperGetBooking(
+      CarrierStatusScenario carrierStatusScenario) {
+    BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingAndEblScenarioListBuilder(
+        previousAction ->
+            new ShipperGetBookingAction(
+                    carrierPartyName,
+                    shipperPartyName,
+                    (BookingAction) previousAction,
+                    carrierStatusScenario,
+                    componentFactory.getBookingMessageSchemaValidator(
+                        BookingScenarioListBuilder.GET_BOOKING_SCHEMA_NAME),
+                    false)
+                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
+  }
+
   private static BookingAndEblScenarioListBuilder carrierSupplyBookingScenarioParameters(
       String carrierPartyName, ScenarioType scenarioType) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
@@ -264,22 +282,8 @@ public class BookingAndEblScenarioListBuilder
                 .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
-  private static BookingAndEblScenarioListBuilder uc8aCarrierApproveBookingAmendment() {
-    return carrierStateChange(
-        (carrierPartyName,
-            shipperPartyName,
-            previousAction,
-            requestSchemaValidator,
-            isWithNotifications) ->
-            new UC8_Carrier_ProcessAmendmentAction(
-                carrierPartyName,
-                shipperPartyName,
-                previousAction,
-                BookingState.CONFIRMED,
-                BookingState.AMENDMENT_CONFIRMED,
-                requestSchemaValidator,
-                true,
-                isWithNotifications));
+  private static BookingAndEblScenarioListBuilder uc8CarrierProcessBookingAmendment() {
+    return carrierStateChange(UC8_Carrier_ProcessAmendmentAction::new);
   }
 
   private static BookingAndEblScenarioListBuilder carrierStateChange(
@@ -321,8 +325,8 @@ public class BookingAndEblScenarioListBuilder
 
   private static BookingAndEblScenarioListBuilder uc8BookingGet(
       BookingAndEblScenarioListBuilder... thenEither) {
-    return uc8aCarrierApproveBookingAmendment()
-        .then(shipperGetBooking(CONFIRMED, AMENDMENT_CONFIRMED, false).thenEither(thenEither));
+    return uc8CarrierProcessBookingAmendment()
+        .then(shipperGetBooking(CarrierStatusScenario.uc8()).thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder shipperGetShippingInstructions(

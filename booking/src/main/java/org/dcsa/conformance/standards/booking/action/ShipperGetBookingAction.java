@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
+import org.dcsa.conformance.standards.booking.checks.CarrierStatusScenario;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
@@ -13,8 +14,7 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 public class ShipperGetBookingAction extends BookingAction {
 
   private final BookingState expectedBookingStatus;
-  private final BookingState expectedAmendedBookingStatus;
-  private final BookingCancellationState expectedCancelledBookingStatus;
+  private final CarrierStatusScenario carrierStatusScenario;
   private final JsonSchemaValidator responseSchemaValidator;
   private final boolean requestAmendedContent;
 
@@ -35,10 +35,33 @@ public class ShipperGetBookingAction extends BookingAction {
         200,
         true);
     this.expectedBookingStatus = expectedBookingStatus;
-    this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
-    this.expectedCancelledBookingStatus = expectedCancelledBookingStatus;
+    this.carrierStatusScenario =
+        CarrierStatusScenario.from(
+            expectedBookingStatus,
+            expectedAmendedBookingStatus,
+            expectedCancelledBookingStatus);
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestAmendedContent = requestAmendedStatus;
+  }
+
+  public ShipperGetBookingAction(
+      String carrierPartyName,
+      String shipperPartyName,
+      BookingAction previousAction,
+      CarrierStatusScenario carrierStatusScenario,
+      JsonSchemaValidator responseSchemaValidator,
+      boolean requestAmendedContent) {
+    super(
+        shipperPartyName,
+        carrierPartyName,
+        previousAction,
+        requestAmendedContent ? "GET (amended content)" : "GET",
+        200,
+        true);
+    this.expectedBookingStatus = BookingState.CONFIRMED;
+    this.carrierStatusScenario = carrierStatusScenario;
+    this.responseSchemaValidator = responseSchemaValidator;
+    this.requestAmendedContent = requestAmendedContent;
   }
 
   @Override
@@ -98,9 +121,7 @@ public class ShipperGetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
                 getDspSupplier(),
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                expectedCancelledBookingStatus));
+                carrierStatusScenario));
       }
     };
   }

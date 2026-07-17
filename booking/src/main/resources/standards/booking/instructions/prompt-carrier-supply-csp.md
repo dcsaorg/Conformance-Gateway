@@ -4,4 +4,4 @@ the DCSA shipper does not have any predefined knowledge of your organization’s
 Therefore, please use the example booking provided below as a template, and modify the values as necessary to ensure
 compatibility with your system.
 
-Make sure the booking type remains SCENARIO_TYPE.
+SCENARIO_TYPE_INSTRUCTION

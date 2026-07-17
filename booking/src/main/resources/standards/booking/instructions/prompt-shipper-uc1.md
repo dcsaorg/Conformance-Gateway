@@ -1,1 +1,1 @@
-Perform Use Case 1: Submit a BOOKING_TYPE_PLACEHOLDER booking request.
+Perform Use Case 1: Submit BOOKING_TYPE_PLACEHOLDER.

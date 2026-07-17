@@ -1027,10 +1027,11 @@ public class BookingChecks {
     List<JsonContentCheck> checks = new ArrayList<>();
 
     var scenario = ScenarioType.valueOf(dspSupplier.get().scenarioType());
-    boolean isScenarioReefer = ScenarioType.REEFER.equals(scenario);
-    boolean isScenarioDG = ScenarioType.DG.equals(scenario);
+    boolean validateCargoType = scenario.isCargoTypeValidationRequired();
+    boolean isScenarioReefer = validateCargoType && ScenarioType.REEFER.equals(scenario);
+    boolean isScenarioDG = validateCargoType && ScenarioType.DG.equals(scenario);
     boolean isScenarioDryCargo =
-      Set.of(
+      validateCargoType && Set.of(
           ScenarioType.DRY_CARGO,
           ScenarioType.ROUTING_REFERENCE,
           ScenarioType.STORE_DOOR_AT_ORIGIN,
@@ -1972,6 +1973,16 @@ public class BookingChecks {
       BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
+  public static ActionCheck responseContentChecks(
+    UUID matched,
+    String standardVersion,
+    Supplier<BookingDynamicScenarioParameters> dspSupplier,
+    CarrierStatusScenario carrierStatusScenario) {
+    var checks = fullPayloadChecks(dspSupplier, carrierStatusScenario);
+    return JsonAttribute.contentChecks(
+      BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
+  }
+
   public static List<JsonContentCheck> fullPayloadChecks(
     Supplier<BookingDynamicScenarioParameters> dspSupplier,
     BookingState bookingStatus,
@@ -1985,9 +1996,15 @@ public class BookingChecks {
       true);
   }
 
+  public static List<JsonContentCheck> fullPayloadChecks(
+    Supplier<BookingDynamicScenarioParameters> dspSupplier,
+    CarrierStatusScenario carrierStatusScenario) {
+    return payloadChecks(dspSupplier, carrierStatusScenario, true);
+  }
+
   public static List<JsonContentCheck> nestedNotificationPayloadChecks(
     Supplier<BookingDynamicScenarioParameters> dspSupplier) {
-    return payloadChecks(dspSupplier, null, null, null, false);
+    return payloadChecks(dspSupplier, null, false);
   }
 
   private static List<JsonContentCheck> payloadChecks(
@@ -1995,6 +2012,17 @@ public class BookingChecks {
     BookingState bookingStatus,
     BookingState expectedAmendedBookingStatus,
     BookingCancellationState expectedCancelledBookingStatus,
+    boolean includeResponseEnvelopeChecks) {
+    return payloadChecks(
+      dspSupplier,
+      CarrierStatusScenario.from(
+        bookingStatus, expectedAmendedBookingStatus, expectedCancelledBookingStatus),
+      includeResponseEnvelopeChecks);
+  }
+
+  private static List<JsonContentCheck> payloadChecks(
+    Supplier<BookingDynamicScenarioParameters> dspSupplier,
+    CarrierStatusScenario carrierStatusScenario,
     boolean includeResponseEnvelopeChecks) {
 
     var checks = new ArrayList<JsonContentCheck>();
@@ -2006,9 +2034,6 @@ public class BookingChecks {
     checks.add(AT_LEAST_ONE_CARRIER_REFERENCE_PRESENT);
 
     if (includeResponseEnvelopeChecks) {
-      var carrierStatusScenario =
-        CarrierStatusScenario.from(
-          bookingStatus, expectedAmendedBookingStatus, expectedCancelledBookingStatus);
       checks.add(
         JsonAttribute.customValidator(
           "[Scenario] The %s must match the active scenario: %s must %s"
@@ -2039,6 +2064,18 @@ public class BookingChecks {
               jsonPath(ATTR_BOOKING_CANCELLATION_STATUS),
               carrierStatusScenario.bookingCancellationStatusExpectation()),
           carrierStatusScenario::validateBookingCancellationStatus));
+
+      if (carrierStatusScenario.requiresCrossFieldValidation()) {
+        checks.add(
+          JsonAttribute.customValidator(
+            "[Scenario] The combination of %s, %s and %s must match the active scenario cross-field rules: %s"
+              .formatted(
+                jsonPath(BOOKING_STATUS),
+                jsonPath(ATTR_AMENDED_BOOKING_STATUS),
+                jsonPath(ATTR_BOOKING_CANCELLATION_STATUS),
+                carrierStatusScenario.statusCombinationExpectation()),
+            carrierStatusScenario::validateStatusCombination));
+      }
     }
 
     checks.addAll(STATIC_BOOKING_CHECKS);

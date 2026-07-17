@@ -58,6 +58,27 @@ class BookingChecksTest {
   }
 
   @Test
+  void optionalScenariosMakeAllCargoTypeChecksIrrelevant() {
+    dspSupplier =
+        () -> new BookingDynamicScenarioParameters(ScenarioType.ANY.name(), "CBRR123", "CBR456");
+
+    BookingChecks.generateScenarioRelatedChecks(dspSupplier)
+        .forEach(
+            check -> {
+              if (!check.isRelevant()) {
+                return;
+              }
+              var result = (ConformanceCheckResult.ErrorsWithRelevance) check.validate(booking);
+              assertTrue(
+                  result.errors().stream()
+                      .allMatch(
+                          error ->
+                              ConformanceErrorSeverity.IRRELEVANT.equals(error.severity())),
+                  check.description());
+            });
+  }
+
+  @Test
   void testEmptyCargoGrossWeightPresentAndNoCommoditiesAtRequestedEquipment_irrelevant() {
     requestedEquipment.set("cargoGrossWeight", OBJECT_MAPPER.createObjectNode());
     requestedEquipments.add(requestedEquipment);

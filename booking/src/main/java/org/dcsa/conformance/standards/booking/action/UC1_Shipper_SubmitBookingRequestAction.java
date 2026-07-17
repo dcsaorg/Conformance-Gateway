@@ -38,11 +38,14 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
+    ScenarioType scenarioType = ScenarioType.valueOf(getDspSupplier().get().scenarioType());
     return getMarkdownHumanReadablePrompt(
             "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
         .replace(
             "BOOKING_TYPE_PLACEHOLDER",
-            ScenarioType.valueOf(getDspSupplier().get().scenarioType()).displayName());
+            scenarioType == ScenarioType.ANY
+                ? "a booking request using any supported cargo type"
+                : "a %s booking request".formatted(scenarioType.displayName()));
   }
 
   @Override

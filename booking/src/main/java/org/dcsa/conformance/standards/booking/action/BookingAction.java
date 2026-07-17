@@ -151,7 +151,7 @@ public abstract class BookingAction extends BookingAndEblAction {
                 IOToolkit.templateFileToText(
                     "/standards/booking/instructions/" + fileName, replacementsMap))
         .collect(Collectors.joining())
-        .replace("SCENARIO_TYPE", scenarioType.name());
+        .replace("SCENARIO_TYPE", scenarioType.displayName());
   }
 
   protected static String withCbrOrCbrr(String cbr, String cbrr) {

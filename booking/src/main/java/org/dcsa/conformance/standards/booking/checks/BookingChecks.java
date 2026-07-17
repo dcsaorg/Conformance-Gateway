@@ -1031,7 +1031,7 @@ public class BookingChecks {
     boolean isScenarioDG = ScenarioType.DG.equals(scenario);
     boolean isScenarioDryCargo =
       Set.of(
-          ScenarioType.REGULAR,
+          ScenarioType.DRY_CARGO,
           ScenarioType.ROUTING_REFERENCE,
           ScenarioType.STORE_DOOR_AT_ORIGIN,
           ScenarioType.STORE_DOOR_AT_DESTINATION)
@@ -1050,7 +1050,7 @@ public class BookingChecks {
 
     checks.add(
       JsonAttribute.allIndividualMatchesMustBeValid(
-        "[Scenario] Dry Cargo container validation",
+        "[Scenario] Dry cargo container validation",
         isScenarioDryCargo,
         mav -> mav.submitAllMatching(path(REQUESTED_EQUIPMENTS, "*")),
         (nodeToValidate, contextPath) -> {
@@ -1118,7 +1118,7 @@ public class BookingChecks {
 
     checks.add(
       JsonAttribute.allIndividualMatchesMustBeValid(
-        "[Scenario] Dry Cargo and Reefer scenarios require %s to be absent"
+        "[Scenario] Dry cargo and Reefer scenarios require %s to be absent"
           .formatted(jsonPath(DANGEROUS_GOODS)),
         isScenarioDryCargo || isScenarioReefer,
         mav ->

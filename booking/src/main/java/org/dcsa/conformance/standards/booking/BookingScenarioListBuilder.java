@@ -61,7 +61,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       String carrierPartyName) {
     var scenarios = new LinkedHashMap<String, BookingScenarioListBuilder>();
     scenarios.put(
-        "Dry cargo", mandatoryScopeScenarios(carrierPartyName, ScenarioType.REGULAR));
+        "Dry cargo", mandatoryScopeScenarios(carrierPartyName, ScenarioType.DRY_CARGO));
     scenarios.put(
         "Reefer containers", mandatoryScopeScenarios(carrierPartyName, ScenarioType.REEFER));
     scenarios.put(
@@ -125,7 +125,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder optionalScenarios(String carrierPartyName) {
-    return carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
+    return carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.DRY_CARGO)
         .then(
             uc1ShipperSubmitBookingRequest()
                 .then(

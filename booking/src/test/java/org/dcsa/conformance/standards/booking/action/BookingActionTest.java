@@ -11,7 +11,7 @@ class BookingActionTest {
   private final BookingAction bookingAction =
       new CarrierSupplyScenarioParametersAction(
           "name",
-          ScenarioType.REGULAR,
+          ScenarioType.DRY_CARGO,
           "2.0.0",
           JsonSchemaValidator.getInstance(
               "/schemas/dcsaorg-DCSA_BKG-2.0.0-resolved.yaml", "CreateBooking"));

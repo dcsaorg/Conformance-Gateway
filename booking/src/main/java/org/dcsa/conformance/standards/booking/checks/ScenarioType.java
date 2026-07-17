@@ -1,25 +1,27 @@
 package org.dcsa.conformance.standards.booking.checks;
 
 public enum ScenarioType {
-  REGULAR,
-  ROUTING_REFERENCE,
-  STORE_DOOR_AT_ORIGIN,
-  STORE_DOOR_AT_DESTINATION,
-  NON_OPERATING_REEFER,
-  REEFER,
-  DG;
+  DRY_CARGO("dry-cargo", "Dry cargo"),
+  ROUTING_REFERENCE("routing-reference", "Routing reference"),
+  STORE_DOOR_AT_ORIGIN("store-door-at-origin", "Store door at origin"),
+  STORE_DOOR_AT_DESTINATION("store-door-at-destination", "Store door at destination"),
+  NON_OPERATING_REEFER("non-operating-reefer", "Non-operating reefer"),
+  REEFER("reefer", "Reefer"),
+  DG("dg", "DG");
+
+  private final String payloadSuffix;
+  private final String displayName;
+
+  ScenarioType(String payloadSuffix, String displayName) {
+    this.payloadSuffix = payloadSuffix;
+    this.displayName = displayName;
+  }
 
   public String bookingPayload(String version) {
-    String suffix =
-        switch (this) {
-          case REEFER -> "reefer";
-          case NON_OPERATING_REEFER -> "non-operating-reefer";
-          case DG -> "dg";
-          case ROUTING_REFERENCE -> "routing-reference";
-          case STORE_DOOR_AT_ORIGIN -> "store-door-at-origin";
-          case STORE_DOOR_AT_DESTINATION -> "store-door-at-destination";
-          default -> "regular";
-        };
-    return "booking-api-" + version.toLowerCase() + "-" + suffix + ".json";
+    return "booking-api-" + version.toLowerCase() + "-" + payloadSuffix + ".json";
+  }
+
+  public String displayName() {
+    return displayName;
   }
 }

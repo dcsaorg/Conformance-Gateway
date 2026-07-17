@@ -53,7 +53,8 @@ class BookingChecksTest {
     commodities = OBJECT_MAPPER.createArrayNode();
     dspSupplier =
         () ->
-            new BookingDynamicScenarioParameters(ScenarioType.REGULAR.name(), "CBRR123", "CBR456");
+            new BookingDynamicScenarioParameters(
+                ScenarioType.DRY_CARGO.name(), "CBRR123", "CBR456");
   }
 
   @Test

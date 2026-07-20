@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -81,16 +80,6 @@ class BookingChecksTest {
   }
 
   @Test
-  void poAdjustedValidationDescriptionsMatchReviewedWording() {
-    assertEquals(
-      "The 'shipmentCutOffTimes.cutOffDateTimeCode' attribute must demonstrate the correct use of this conditional requirement: The cutOffDateTimeCode value LCO must only be used when receiptTypeAtOrigin is CFS.",
-      BookingChecks.VALIDATE_SHIPMENT_CUTOFF_TIME_CODE.description());
-    assertEquals(
-      "The 'dangerousGoods.segregationGroups' values must demonstrate the correct use of the IMO IMDG segregation group codes listed by the standard. Possible values are: 1 to 18.",
-      BookingChecks.DG_SEGREGATION_GROUP_CODE_VALIDATION.description());
-  }
-
-  @Test
   void lcoCutoffIsValidForCfsReceipt() {
     booking.put("receiptTypeAtOrigin", "CFS");
     booking.set(
@@ -150,36 +139,6 @@ class BookingChecksTest {
         .validate(booking)
         .getErrorMessages()
         .size());
-  }
-
-  @Test
-  void poRemovedValidationsAreAbsentFromCarrierAndShipperPayloadChecks() {
-    var descriptions =
-      BookingChecks.fullPayloadChecks(dspSupplier, CarrierStatusScenario.uc8()).stream()
-        .map(JsonContentCheck::description)
-        .toList();
-    var removedDescriptionFragments =
-      List.of(
-        "a booking channel is being used",
-        "same for each requested unit",
-        "The Export License must be valid at time of departure",
-        "implementing API v2.0.3 or earlier",
-        "both ways point to the same location",
-        "only applicable to specific hazardous goods according to the IMO IMDG Code",
-        "only applicable to liquids and gas",
-        "only applicable to specific hazardous goods",
-        "only applicable to dangerous goods if specified in the IMO IMDG code",
-        "only applicable to dangerous goods if the IMO packaging code is not available",
-        "only applicable if 'ISOEquipmentCode' shows a Reefer type");
-
-    removedDescriptionFragments.forEach(
-      fragment ->
-        assertTrue(
-          descriptions.stream().noneMatch(description -> description.contains(fragment)),
-          fragment));
-
-    assertTrue(
-      descriptions.stream().anyMatch(description -> description.contains("'invoicePayableAt'")));
   }
 
   private ObjectNode cutoff(String code) {

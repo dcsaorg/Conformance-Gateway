@@ -15,6 +15,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.BookingAction;
 import org.dcsa.conformance.standards.booking.action.ShipperGetBookingAction;
 import org.dcsa.conformance.standards.booking.action.ShipperGetBookingErrorScenarioAction;
+import org.dcsa.conformance.standards.booking.action.ShipperGetBookingSkippableAction;
 import org.dcsa.conformance.standards.booking.action.UC11_Shipper_CancelBookingRequestAction;
 import org.dcsa.conformance.standards.booking.action.UC13ShipperCancelConfirmedBookingAction;
 import org.dcsa.conformance.standards.booking.action.UC1_Shipper_SubmitBookingRequestAction;
@@ -76,6 +77,7 @@ public class BookingShipper extends ConformanceParty {
     return Map.ofEntries(
       Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
       Map.entry(ShipperGetBookingAction.class, this::getBookingRequest),
+      Map.entry(ShipperGetBookingSkippableAction.class, this::getBookingRequest),
       Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
       Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
       Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),

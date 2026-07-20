@@ -1,18 +1,21 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+
+import java.util.stream.Stream;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 @Slf4j
@@ -23,13 +26,13 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
   private final JsonSchemaValidator notificationSchemaValidator;
 
   public UC1_Shipper_SubmitBookingRequestAction(
-      String carrierPartyName,
-      String shipperPartyName,
-      BookingAction previousAction,
-      JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator,
-      boolean isWithNotifications) {
+    String carrierPartyName,
+    String shipperPartyName,
+    BookingAction previousAction,
+    JsonSchemaValidator requestSchemaValidator,
+    JsonSchemaValidator responseSchemaValidator,
+    JsonSchemaValidator notificationSchemaValidator,
+    boolean isWithNotifications) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
@@ -38,19 +41,14 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
+    ScenarioType scenarioType = ScenarioType.valueOf(getDspSupplier().get().scenarioType());
     return getMarkdownHumanReadablePrompt(
-            "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
-        .replace(
-            "BOOKING_TYPE_PLACEHOLDER",
-            switch (ScenarioType.valueOf(getDspSupplier().get().scenarioType())) {
-              case DG -> "DG";
-              case REEFER -> "Reefer";
-              case NON_OPERATING_REEFER -> "Non-Operating Reefer";
-              case ROUTING_REFERENCE -> "Routing Reference";
-              case STORE_DOOR_AT_ORIGIN -> "Store Door at Origin";
-              case STORE_DOOR_AT_DESTINATION -> "Store Door at Destination";
-              default -> "Dry Cargo";
-            });
+      "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md")
+      .replace(
+        "BOOKING_TYPE_PLACEHOLDER",
+        scenarioType == ScenarioType.ANY
+          ? "a booking request using any supported cargo type"
+          : "a %s booking request".formatted(scenarioType.displayName()));
   }
 
   @Override
@@ -72,18 +70,18 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.concat(
-            Stream.of(
-                BookingChecks.requestContentChecks(
-                    getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()),
-                new JsonSchemaCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    requestSchemaValidator)),
-            Stream.concat(
-                createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
-                getNotificationChecks(
-                    expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)));
+          Stream.of(
+            BookingChecks.requestContentChecks(
+              getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()),
+            new JsonSchemaCheck(
+              BookingRole::isShipper,
+              getMatchedExchangeUuid(),
+              HttpMessageType.REQUEST,
+              requestSchemaValidator)),
+          Stream.concat(
+            createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
+            getNotificationChecks(
+              expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)));
       }
     };
   }

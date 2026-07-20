@@ -1,11 +1,7 @@
 package org.dcsa.conformance.standards.booking.party;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.*;
-import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -16,7 +12,24 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.booking.action.*;
+import org.dcsa.conformance.standards.booking.action.BookingAction;
+import org.dcsa.conformance.standards.booking.action.ShipperGetBookingAction;
+import org.dcsa.conformance.standards.booking.action.ShipperGetBookingErrorScenarioAction;
+import org.dcsa.conformance.standards.booking.action.UC11_Shipper_CancelBookingRequestAction;
+import org.dcsa.conformance.standards.booking.action.UC13ShipperCancelConfirmedBookingAction;
+import org.dcsa.conformance.standards.booking.action.UC1_Shipper_SubmitBookingRequestAction;
+import org.dcsa.conformance.standards.booking.action.UC3_Shipper_SubmitUpdatedBookingRequestAction;
+import org.dcsa.conformance.standards.booking.action.UC7_Shipper_SubmitBookingAmendment;
+import org.dcsa.conformance.standards.booking.action.UC9_Shipper_CancelBookingAmendment;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class BookingShipper extends ConformanceParty {
@@ -25,22 +38,22 @@ public class BookingShipper extends ConformanceParty {
   private static final String SERVICE_REF_PUT = "serviceRefPut";
 
   public static final Set<String> BOOKING_ENDPOINT_PATTERNS =
-      Set.of(".*/v2/booking-notifications$");
+    Set.of(".*/v2/booking-notifications$");
 
   public BookingShipper(
-      String apiVersion,
-      PartyConfiguration partyConfiguration,
-      CounterpartConfiguration counterpartConfiguration,
-      JsonNodeMap persistentMap,
-      PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    String apiVersion,
+    PartyConfiguration partyConfiguration,
+    CounterpartConfiguration counterpartConfiguration,
+    JsonNodeMap persistentMap,
+    PartyWebClient webClient,
+    Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
-        apiVersion,
-        partyConfiguration,
-        counterpartConfiguration,
-        persistentMap,
-        webClient,
-        orchestratorAuthHeader);
+      apiVersion,
+      partyConfiguration,
+      counterpartConfiguration,
+      persistentMap,
+      webClient,
+      orchestratorAuthHeader);
   }
 
   @Override
@@ -61,16 +74,16 @@ public class BookingShipper extends ConformanceParty {
   @Override
   public Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
-        Map.entry(ShipperGetBookingAction.class, this::getBookingRequest),
-        Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
-        Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
-        Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
-        Map.entry(UC11_Shipper_CancelBookingRequestAction.class, this::sendCancelBookingRequest),
-        Map.entry(
-            UC13ShipperCancelConfirmedBookingAction.class,
-            this::sendConfirmedBookingCancellationRequest),
-        Map.entry(ShipperGetBookingErrorScenarioAction.class, this::getBookingRequest));
+      Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
+      Map.entry(ShipperGetBookingAction.class, this::getBookingRequest),
+      Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
+      Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
+      Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
+      Map.entry(UC11_Shipper_CancelBookingRequestAction.class, this::sendCancelBookingRequest),
+      Map.entry(
+        UC13ShipperCancelConfirmedBookingAction.class,
+        this::sendConfirmedBookingCancellationRequest),
+      Map.entry(ShipperGetBookingErrorScenarioAction.class, this::getBookingRequest));
   }
 
   private void getBookingRequest(JsonNode actionPrompt) {
@@ -81,7 +94,7 @@ public class BookingShipper extends ConformanceParty {
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
     boolean errorScenario = actionPrompt.path("invalidBookingReference").asBoolean(false);
     Map<String, List<String>> queryParams =
-        requestAmendment ? Map.of("amendedContent", List.of("true")) : Collections.emptyMap();
+      requestAmendment ? Map.of("amendedContent", List.of("true")) : Collections.emptyMap();
     if (errorScenario) {
       syncCounterpartGet("/v2/bookings/" + "ABC123", queryParams);
       cbrr = "ABC123";
@@ -90,7 +103,7 @@ public class BookingShipper extends ConformanceParty {
     }
 
     addOperatorLogEntry(
-        BookingAction.createMessageForUIPrompt("Sent a GET request for booking", cbr, cbrr));
+      BookingAction.createMessageForUIPrompt("Sent a GET request for booking", cbr, cbrr));
   }
 
   private void sendBookingRequest(JsonNode actionPrompt) {
@@ -105,7 +118,7 @@ public class BookingShipper extends ConformanceParty {
     JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
     String cbrr = jsonBody.path("carrierBookingRequestReference").asText();
     ObjectNode updatedBooking =
-        ((ObjectNode) bookingPayload).put("carrierBookingRequestReference", cbrr);
+      ((ObjectNode) bookingPayload).put("carrierBookingRequestReference", cbrr);
     persistentMap.save(cbrr, updatedBooking);
 
 
@@ -115,42 +128,42 @@ public class BookingShipper extends ConformanceParty {
     log.info("Shipper.sendCancelBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String cbrr = actionPrompt.path("cbrr").asText();
     syncCounterpartPatch(
-        "/v2/bookings/%s".formatted(cbrr),
-        Collections.emptyMap(),
-        OBJECT_MAPPER.createObjectNode().put("bookingStatus", BookingState.CANCELLED.name()));
+      "/v2/bookings/%s".formatted(cbrr),
+      Collections.emptyMap(),
+      OBJECT_MAPPER.createObjectNode().put("bookingStatus", BookingState.CANCELLED.name()));
 
     addOperatorLogEntry(
-        BookingAction.createMessageForUIPrompt(
-            "Sent a cancel booking request to cancel booking", null, cbrr));
+      BookingAction.createMessageForUIPrompt(
+        "Sent a cancel booking request to cancel booking", null, cbrr));
   }
 
   private void sendConfirmedBookingCancellationRequest(JsonNode actionPrompt) {
     log.info(
-        "Shipper.sendConfirmedBookingCancellationRequest(%s)"
-            .formatted(actionPrompt.toPrettyString()));
+      "Shipper.sendConfirmedBookingCancellationRequest(%s)"
+        .formatted(actionPrompt.toPrettyString()));
     String cbr = actionPrompt.path("cbr").asText();
     syncCounterpartPatch(
-        "/v2/bookings/%s".formatted(cbr),
-        Collections.emptyMap(),
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
-            .put("reason", "Cancelling due to internal issues"));
+      "/v2/bookings/%s".formatted(cbr),
+      Collections.emptyMap(),
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
+        .put("reason", "Cancelling due to internal issues"));
 
     addOperatorLogEntry(
-        BookingAction.createMessageForUIPrompt(
-            "Sent a confirmed booking cancellation of booking", cbr, null));
+      BookingAction.createMessageForUIPrompt(
+        "Sent a confirmed booking cancellation of booking", cbr, null));
   }
 
   private void sendCancelBookingAmendment(JsonNode actionPrompt) {
     log.info("Shipper.sendCancelBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
     String reference = getBookingReference(actionPrompt);
     syncCounterpartPatch(
-        "/v2/bookings/%s".formatted(reference),
-        Collections.emptyMap(),
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
+      "/v2/bookings/%s".formatted(reference),
+      Collections.emptyMap(),
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
 
     addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(reference));
   }
@@ -164,7 +177,7 @@ public class BookingShipper extends ConformanceParty {
     syncCounterpartPut("/v2/bookings/%s".formatted(reference), bookingData);
 
     addOperatorLogEntry(
-        "Sent an updated booking request with the parameters: %s".formatted(reference));
+      "Sent an updated booking request with the parameters: %s".formatted(reference));
   }
 
   private void sendUpdatedConfirmedBooking(JsonNode actionPrompt) {
@@ -173,24 +186,24 @@ public class BookingShipper extends ConformanceParty {
     String cbrr = actionPrompt.path("cbrr").asText();
     var bookingData = persistentMap.load(cbrr);
     ((ObjectNode) bookingData)
-        .put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
+      .put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
     syncCounterpartPut("/v2/bookings/%s".formatted(reference), bookingData);
 
     addOperatorLogEntry(
-        "Sent an updated confirmed booking with the parameters: %s".formatted(reference));
+      "Sent an updated confirmed booking with the parameters: %s".formatted(reference));
   }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("Shipper.handleRequest(%s)".formatted(request));
     ConformanceResponse response =
-        request.createResponse(
-            204,
-            Map.of(API_VERSION, List.of(apiVersion)),
-            new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
+      request.createResponse(
+        204,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 
     addOperatorLogEntry(
-        "Handled notification: %s".formatted(request.message().body().getJsonBody()));
+      "Handled notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
 

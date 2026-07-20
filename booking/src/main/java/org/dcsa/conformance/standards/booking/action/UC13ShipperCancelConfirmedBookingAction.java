@@ -1,14 +1,17 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+
+import java.util.stream.Stream;
 
 @Getter
 @Slf4j
@@ -21,16 +24,16 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
   private final BookingCancellationState expectedBookingCancellationStatus;
 
   public UC13ShipperCancelConfirmedBookingAction(
-      String carrierPartyName,
-      String shipperPartyName,
-      BookingAction previousAction,
-      BookingState expectedBookingStatus,
-      BookingState expectedAmendedBookingStatus,
-      BookingCancellationState expectedBookingCancellationStatus,
-      JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator,
-      boolean isWithNotifications) {
+    String carrierPartyName,
+    String shipperPartyName,
+    BookingAction previousAction,
+    BookingState expectedBookingStatus,
+    BookingState expectedAmendedBookingStatus,
+    BookingCancellationState expectedBookingCancellationStatus,
+    JsonSchemaValidator requestSchemaValidator,
+    JsonSchemaValidator responseSchemaValidator,
+    JsonSchemaValidator notificationSchemaValidator,
+    boolean isWithNotifications) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC13", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
@@ -43,7 +46,7 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        "prompt-shipper-uc13.md", "prompt-shipper-refresh-complete.md");
+      "prompt-shipper-uc13.md", "prompt-shipper-refresh-complete.md");
   }
 
   @Override
@@ -68,22 +71,32 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
         return Stream.concat(
+          Stream.concat(
+            createPatchPrimarySubChecks(
+              expectedApiVersion, "/v2/bookings/", cbrr, cbr),
             Stream.concat(
-                createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
-                Stream.of(
-                    new JsonSchemaCheck(
-                        BookingRole::isShipper,
-                        getMatchedExchangeUuid(),
-                        HttpMessageType.REQUEST,
-                        requestSchemaValidator))),
-            expectedBookingStatus != null
-                ? getNotificationChecks(
-                    expectedApiVersion,
-                    notificationSchemaValidator,
-                    expectedBookingStatus,
-                    expectedAmendedBookingStatus,
-                    expectedBookingCancellationStatus)
-                : Stream.empty());
+              Stream.of(new JsonSchemaCheck(
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                requestSchemaValidator)),
+              patchPreconditionChecks(
+                "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is CONFIRMED or PENDING_AMENDMENT in order to cancel it. If this is not the case a 409 (Conflict) error response should be returned"
+                  .formatted(jsonPath(BOOKING_STATUS)),
+                BOOKING_STATUS,
+                status ->
+                  BookingState.CONFIRMED.name().equals(status)
+                    || BookingState.PENDING_AMENDMENT.name().equals(status),
+                "CONFIRMED or PENDING_AMENDMENT",
+                409))),
+          expectedBookingStatus != null
+            ? getNotificationChecks(
+            expectedApiVersion,
+            notificationSchemaValidator,
+            expectedBookingStatus,
+            expectedAmendedBookingStatus,
+            expectedBookingCancellationStatus)
+            : Stream.empty());
       }
     };
   }

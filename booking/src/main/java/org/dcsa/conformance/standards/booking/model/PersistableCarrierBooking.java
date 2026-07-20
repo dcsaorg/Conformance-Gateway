@@ -1,58 +1,80 @@
 package org.dcsa.conformance.standards.booking.model;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.booking.party.BookingCancellationState.*;
-import static org.dcsa.conformance.standards.booking.party.BookingState.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.StreamSupport;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.booking.party.BookingCancellationState.CANCELLATION_CONFIRMED;
+import static org.dcsa.conformance.standards.booking.party.BookingCancellationState.CANCELLATION_DECLINED;
+import static org.dcsa.conformance.standards.booking.party.BookingCancellationState.CANCELLATION_RECEIVED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_CANCELLED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_CONFIRMED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_DECLINED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_RECEIVED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.CANCELLED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.COMPLETED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.CONFIRMED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.DECLINED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.PENDING_AMENDMENT;
+import static org.dcsa.conformance.standards.booking.party.BookingState.PENDING_UPDATE;
+import static org.dcsa.conformance.standards.booking.party.BookingState.RECEIVED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.REJECTED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.UPDATE_RECEIVED;
+
 public class PersistableCarrierBooking {
 
   private static final Map<BookingState, Predicate<BookingState>>
-      PREREQUISITE_STATE_FOR_TARGET_STATE =
-          Map.ofEntries(
-              Map.entry(CONFIRMED, Set.of(RECEIVED, UPDATE_RECEIVED, CONFIRMED)::contains),
-              Map.entry(REJECTED, Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED)::contains),
-              Map.entry(
-                  DECLINED, Set.of(CONFIRMED, PENDING_AMENDMENT, AMENDMENT_RECEIVED)::contains),
-              Map.entry(
-                  PENDING_UPDATE, Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED)::contains),
-              Map.entry(PENDING_AMENDMENT, Set.of(CONFIRMED, PENDING_AMENDMENT)::contains),
-              Map.entry(COMPLETED, Set.of(CONFIRMED)::contains),
-              Map.entry(
-                  CANCELLED,
-                  Set.of(RECEIVED, UPDATE_RECEIVED, PENDING_UPDATE, CONFIRMED, PENDING_AMENDMENT)
-                      ::contains));
+    PREREQUISITE_STATE_FOR_TARGET_STATE =
+    Map.ofEntries(
+      Map.entry(CONFIRMED, Set.of(RECEIVED, UPDATE_RECEIVED, CONFIRMED)::contains),
+      Map.entry(REJECTED, Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED)::contains),
+      Map.entry(
+        DECLINED, Set.of(CONFIRMED, PENDING_AMENDMENT, AMENDMENT_RECEIVED)::contains),
+      Map.entry(
+        PENDING_UPDATE, Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED)::contains),
+      Map.entry(PENDING_AMENDMENT, Set.of(CONFIRMED, PENDING_AMENDMENT)::contains),
+      Map.entry(COMPLETED, Set.of(CONFIRMED)::contains),
+      Map.entry(
+        CANCELLED,
+        Set.of(RECEIVED, UPDATE_RECEIVED, PENDING_UPDATE, CONFIRMED, PENDING_AMENDMENT)
+          ::contains));
 
   private static final Set<BookingState> PREREQUISITE_BOOKING_STATES_FOR_CANCELLATION =
-      Set.of(
-          CONFIRMED,
-          PENDING_AMENDMENT,
-          AMENDMENT_RECEIVED,
-          AMENDMENT_CONFIRMED,
-          AMENDMENT_DECLINED,
-          AMENDMENT_CANCELLED);
+    Set.of(
+      CONFIRMED,
+      PENDING_AMENDMENT,
+      AMENDMENT_RECEIVED,
+      AMENDMENT_CONFIRMED,
+      AMENDMENT_DECLINED,
+      AMENDMENT_CANCELLED);
 
   private static final Set<BookingState> PREREQUISITE_AMENDMENT_BOOKING_STATES_FOR_CANCELLATION =
-      Set.of(AMENDMENT_RECEIVED, AMENDMENT_CONFIRMED, AMENDMENT_DECLINED, AMENDMENT_CANCELLED);
+    Set.of(AMENDMENT_RECEIVED, AMENDMENT_CONFIRMED, AMENDMENT_DECLINED, AMENDMENT_CANCELLED);
 
   private static final Set<BookingState> MAY_AMEND_STATES = Set.of(CONFIRMED, PENDING_AMENDMENT);
 
   private static final Set<BookingState> MAY_UPDATE_REQUEST_STATES =
-      Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED);
+    Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED);
 
   private static final String BOOKING_STATUS = "bookingStatus";
   private static final String AMENDED_BOOKING_STATUS = "amendedBookingStatus";
@@ -175,7 +197,7 @@ public class PersistableCarrierBooking {
   }
 
   public void confirmBookingCompleted(
-      String reference, boolean resetAmendedBooking, boolean resetCancellationBookingState) {
+    String reference, boolean resetAmendedBooking, boolean resetCancellationBookingState) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(COMPLETED);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, COMPLETED);
@@ -188,7 +210,7 @@ public class PersistableCarrierBooking {
   }
 
   public void updateConfirmedBooking(
-      String reference, Consumer<ObjectNode> bookingMutator, boolean resetAmendedBooking) {
+    String reference, Consumer<ObjectNode> bookingMutator, boolean resetAmendedBooking) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(PENDING_AMENDMENT);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, PENDING_AMENDMENT);
@@ -218,17 +240,17 @@ public class PersistableCarrierBooking {
 
   public void updateCancelConfirmedBooking(String bookingReference) {
     checkState(
-        bookingReference,
-        getOriginalBookingState(),
-        PREREQUISITE_BOOKING_STATES_FOR_CANCELLATION::contains);
+      bookingReference,
+      getOriginalBookingState(),
+      PREREQUISITE_BOOKING_STATES_FOR_CANCELLATION::contains);
     if (getBookingAmendedState() != null) {
       checkState(
-          bookingReference,
-          getBookingAmendedState(),
-          PREREQUISITE_AMENDMENT_BOOKING_STATES_FOR_CANCELLATION::contains);
+        bookingReference,
+        getBookingAmendedState(),
+        PREREQUISITE_AMENDMENT_BOOKING_STATES_FOR_CANCELLATION::contains);
     }
     mutateBookingAndAmendment(
-        b -> b.put(CANCELLATION_BOOKING_STATUS, CANCELLATION_RECEIVED.name()));
+      b -> b.put(CANCELLATION_BOOKING_STATUS, CANCELLATION_RECEIVED.name()));
   }
 
   public void declineConfirmedBookingCancellation(String bookingReference) {
@@ -250,20 +272,20 @@ public class PersistableCarrierBooking {
   }
 
   private static void checkState(
-      String reference, BookingState currentState, Predicate<BookingState> expectedState) {
+    String reference, BookingState currentState, Predicate<BookingState> expectedState) {
     if (!expectedState.test(currentState)) {
       throw new IllegalStateException(
-          "Booking '%s' is in state '%s'".formatted(reference, currentState));
+        "Booking '%s' is in state '%s'".formatted(reference, currentState));
     }
   }
 
   private static void checkState(
-      String reference,
-      BookingCancellationState currentState,
-      Predicate<BookingCancellationState> expectedState) {
+    String reference,
+    BookingCancellationState currentState,
+    Predicate<BookingCancellationState> expectedState) {
     if (!expectedState.test(currentState)) {
       throw new IllegalStateException(
-          "Booking '%s' is in state '%s'".formatted(reference, currentState));
+        "Booking '%s' is in state '%s'".formatted(reference, currentState));
     }
   }
 
@@ -271,18 +293,18 @@ public class PersistableCarrierBooking {
     var currentState = getOriginalBookingState();
     var amendedBookingState = getBookingAmendedState();
     boolean isAmendment =
-        currentState.equals(BookingState.CONFIRMED)
-            || currentState.equals(BookingState.PENDING_AMENDMENT);
+      currentState.equals(BookingState.CONFIRMED)
+        || currentState.equals(BookingState.PENDING_AMENDMENT);
 
     checkState(
-        bookingReference,
-        currentState,
-        (isAmendment ? MAY_AMEND_STATES : MAY_UPDATE_REQUEST_STATES)::contains);
+      bookingReference,
+      currentState,
+      (isAmendment ? MAY_AMEND_STATES : MAY_UPDATE_REQUEST_STATES)::contains);
 
     if (amendedBookingState != null && amendedBookingState.equals(AMENDMENT_RECEIVED)) {
       throw new IllegalStateException(
-          "Booking '%s' is in Amendment state '%s'"
-              .formatted(bookingReference, amendedBookingState));
+        "Booking '%s' is in Amendment state '%s'"
+          .formatted(bookingReference, amendedBookingState));
     }
 
     if (isAmendment) {
@@ -302,15 +324,15 @@ public class PersistableCarrierBooking {
 
   private void ensureFeedbacksExist(ObjectNode booking) {
     booking
-        .putArray("feedbacks")
-        .addObject()
-        .put("severity", "ERROR")
-        .put("code", "PROPERTY_VALUE_MUST_CHANGE")
-        .put(
-            "message",
-            "Please change any one of the attributes in the request payload for conformance. For example, change VesselName to 'King of the Seas'")
-        .put("jsonPath", "$.vessel.name")
-        .put("property", "name");
+      .putArray("feedbacks")
+      .addObject()
+      .put("severity", "ERROR")
+      .put("code", "PROPERTY_VALUE_MUST_CHANGE")
+      .put(
+        "message",
+        "Please change any one of the attributes in the request payload for conformance. For example, change VesselName to 'King of the Seas'")
+      .put("jsonPath", "$.vessel.name")
+      .put("property", "name");
   }
 
   public BookingState getOriginalBookingState() {
@@ -333,8 +355,8 @@ public class PersistableCarrierBooking {
   public static PersistableCarrierBooking initializeFromBookingRequest(ObjectNode bookingRequest) {
     String cbrr = ReferenceGenerator.newReference();
     bookingRequest
-        .put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr)
-        .put(BOOKING_STATUS, BookingState.RECEIVED.name());
+      .put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr)
+      .put(BOOKING_STATUS, BookingState.RECEIVED.name());
     var state = OBJECT_MAPPER.createObjectNode();
     state.put(SUBSCRIPTION_REFERENCE, ReferenceGenerator.newReference());
     state.set(BOOKING_DATA_FIELD, bookingRequest);
@@ -354,7 +376,7 @@ public class PersistableCarrierBooking {
   }
 
   public static PersistableCarrierBooking fromPersistentStore(
-      JsonNodeMap jsonNodeMap, String carrierBookingRequestReference) {
+    JsonNodeMap jsonNodeMap, String carrierBookingRequestReference) {
     var data = jsonNodeMap.load(carrierBookingRequestReference);
     if (data == null || data.isMissingNode() || !data.isObject()) {
       throw new IllegalArgumentException("Unknown CBRR: " + carrierBookingRequestReference);
@@ -395,17 +417,17 @@ public class PersistableCarrierBooking {
     var loadLocation = "NLRTM";
     var dischargeLocation = "DKCPH";
     if (booking.get("shipmentLocations") instanceof ArrayNode shipmentLocations
-        && !shipmentLocations.isEmpty()) {
+      && !shipmentLocations.isEmpty()) {
       var polNode =
-          StreamSupport.stream(shipmentLocations.spliterator(), false)
-              .filter(o -> o.path("locationTypeCode").asText("").equals("POL"))
-              .findFirst()
-              .orElse(null);
+        StreamSupport.stream(shipmentLocations.spliterator(), false)
+          .filter(o -> o.path("locationTypeCode").asText("").equals("POL"))
+          .findFirst()
+          .orElse(null);
       var podNode =
-          StreamSupport.stream(shipmentLocations.spliterator(), false)
-              .filter(o -> o.path("locationTypeCode").asText("").equals("POD"))
-              .findFirst()
-              .orElse(null);
+        StreamSupport.stream(shipmentLocations.spliterator(), false)
+          .filter(o -> o.path("locationTypeCode").asText("").equals("POD"))
+          .findFirst()
+          .orElse(null);
 
       loadLocation = Objects.requireNonNullElse(extractUnLocationCode(polNode), loadLocation);
       dischargeLocation = Objects.requireNonNullElse(extractUnLocationCode(podNode), loadLocation);
@@ -419,14 +441,14 @@ public class PersistableCarrierBooking {
      *  * Onward carriage steps
      */
     new TransportPlanBuilder(booking)
-        .addTransportLeg()
-        .transportPlanStage("MNC")
-        .loadLocation()
-        .unlocation(loadLocation)
-        .dischargeLocation()
-        .unlocation(dischargeLocation)
-        .plannedDepartureDate(departureDate.toString())
-        .plannedArrivalDate(arrivalDate.toString());
+      .addTransportLeg()
+      .transportPlanStage("MNC")
+      .loadLocation()
+      .unlocation(loadLocation)
+      .dischargeLocation()
+      .unlocation(dischargeLocation)
+      .plannedDepartureDate(departureDate.toString())
+      .plannedArrivalDate(arrivalDate.toString());
   }
 
   private void replaceShipmentCutOffTimes(ObjectNode booking) {
@@ -434,13 +456,13 @@ public class PersistableCarrierBooking {
     var receiptTypeAtOrigin = booking.path("receiptTypeAtOrigin").asText("");
     var firstTransportActionByCarrier = OffsetDateTime.now().plusMonths(1);
     if (booking.get("transportPlan") instanceof ArrayNode transportPlan
-        && !transportPlan.isEmpty()) {
+      && !transportPlan.isEmpty()) {
       var plannedDepartureDateNode = transportPlan.path(0).path("plannedDepartureDate");
       if (plannedDepartureDateNode.isTextual()) {
         try {
           var plannedDepartureDate = LocalDate.parse(plannedDepartureDateNode.asText());
           firstTransportActionByCarrier =
-              plannedDepartureDate.atStartOfDay().atOffset(ZoneOffset.UTC);
+            plannedDepartureDate.atStartOfDay().atOffset(ZoneOffset.UTC);
         } catch (IllegalArgumentException ignored) {
           // We have a fallback already.
         }
@@ -449,7 +471,6 @@ public class PersistableCarrierBooking {
 
     var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
     var oneWeekPrior = formatter.format(firstTransportActionByCarrier.minusWeeks(1));
-    var twoWeeksPrior = formatter.format(firstTransportActionByCarrier.minusWeeks(2));
 
     addShipmentCutOff(shipmentCutOffTimes, "DCO", oneWeekPrior);
     addShipmentCutOff(shipmentCutOffTimes, "VCO", oneWeekPrior);
@@ -459,22 +480,19 @@ public class PersistableCarrierBooking {
     if ("CFS".equals(receiptTypeAtOrigin)) {
       addShipmentCutOff(shipmentCutOffTimes, "LCO", oneWeekPrior);
     }
-    // It would be impossible if ECP was the same time as the others, so we give another
-    // week for that one.
-    addShipmentCutOff(shipmentCutOffTimes, "ECP", twoWeeksPrior);
   }
 
   private void addShipmentCutOff(
-      ArrayNode shipmentCutOffTimes, String cutOffDateTimeCode, String cutOffDateTime) {
+    ArrayNode shipmentCutOffTimes, String cutOffDateTimeCode, String cutOffDateTime) {
     shipmentCutOffTimes
-        .addObject()
-        .put("cutOffDateTimeCode", cutOffDateTimeCode)
-        .put("cutOffDateTime", cutOffDateTime);
+      .addObject()
+      .put("cutOffDateTimeCode", cutOffDateTimeCode)
+      .put("cutOffDateTime", cutOffDateTime);
   }
 
   private void replaceConfirmedEquipments(ObjectNode booking) {
     if (booking.get("requestedEquipments") instanceof ArrayNode requestedEquipments
-        && !requestedEquipments.isEmpty()) {
+      && !requestedEquipments.isEmpty()) {
       var commoditySubReferenceSequence = 1;
       var confirmedEquipments = booking.putArray("confirmedEquipments");
       for (var requestedEquipment : requestedEquipments) {
@@ -492,7 +510,7 @@ public class PersistableCarrierBooking {
         if (commoditiesNode != null && commoditiesNode.isArray()) {
           for (var commodity : commoditiesNode) {
             ((ObjectNode) commodity)
-                .put("commoditySubReference", "COM" + commoditySubReferenceSequence++);
+              .put("commoditySubReference", "COM" + commoditySubReferenceSequence++);
           }
         }
         confirmedEquipments.addObject().put("ISOEquipmentCode", equipmentCode).put("units", units);
@@ -500,10 +518,10 @@ public class PersistableCarrierBooking {
     } else {
       // It is required even if we got nothing to go on.
       booking
-          .putArray("confirmedEquipments")
-          .addObject()
-          .put("ISOEquipmentCode", "22GP")
-          .put("units", 1);
+        .putArray("confirmedEquipments")
+        .addObject()
+        .put("ISOEquipmentCode", "22GP")
+        .put("units", 1);
     }
   }
 
@@ -516,24 +534,24 @@ public class PersistableCarrierBooking {
     }
     if (charges.isEmpty()) {
       charges
-          .addObject()
-          .put("chargeName", "Fictive booking fee")
-          .put("currencyAmount", 1f)
-          .put("currencyCode", "EUR")
-          .put("paymentTermCode", "PRE")
-          .put("calculationBasis", "For the entire booking")
-          .put("unitPrice", 1f)
-          .put("quantity", 1);
+        .addObject()
+        .put("chargeName", "Fictive booking fee")
+        .put("currencyAmount", 1f)
+        .put("currencyCode", "EUR")
+        .put("paymentTermCode", "PRE")
+        .put("calculationBasis", "For the entire booking")
+        .put("unitPrice", 1f)
+        .put("quantity", 1);
     } else {
       charges
-          .addObject()
-          .put("chargeName", "Fictive amendment fee")
-          .put("currencyAmount", 1f)
-          .put("currencyCode", "EUR")
-          .put("paymentTermCode", "COL")
-          .put("calculationBasis", "For the concrete amendment")
-          .put("unitPrice", 1f)
-          .put("quantity", 1);
+        .addObject()
+        .put("chargeName", "Fictive amendment fee")
+        .put("currencyAmount", 1f)
+        .put("currencyCode", "EUR")
+        .put("paymentTermCode", "COL")
+        .put("calculationBasis", "For the concrete amendment")
+        .put("unitPrice", 1f)
+        .put("quantity", 1);
     }
   }
 
@@ -560,9 +578,9 @@ public class PersistableCarrierBooking {
 
     public T facility(String unlocationCode, String facilityCode, String facilityCodeListProvider) {
       location
-          .put("UNLocationCode", unlocationCode)
-          .put("facilityCode", facilityCode)
-          .put("facilityCodeListProvider", facilityCodeListProvider);
+        .put("UNLocationCode", unlocationCode)
+        .put("facilityCode", facilityCode)
+        .put("facilityCodeListProvider", facilityCodeListProvider);
       return endLocation();
     }
 
@@ -572,14 +590,14 @@ public class PersistableCarrierBooking {
   }
 
   private record TransportPlanStepBuilder(
-      TransportPlanBuilder parentBuilder, ObjectNode transportPlanStep) {
+    TransportPlanBuilder parentBuilder, ObjectNode transportPlanStep) {
     public LocationBuilder<TransportPlanStepBuilder> loadLocation() {
       return new LocationBuilder<>(transportPlanStep.putObject("loadLocation"), (ignored -> this));
     }
 
     public LocationBuilder<TransportPlanStepBuilder> dischargeLocation() {
       return new LocationBuilder<>(
-          transportPlanStep.putObject("dischargeLocation"), (ignored -> this));
+        transportPlanStep.putObject("dischargeLocation"), (ignored -> this));
     }
 
     public TransportPlanStepBuilder plannedArrivalDate(String plannedArrivalDate) {
@@ -611,10 +629,10 @@ public class PersistableCarrierBooking {
 
     private TransportPlanStepBuilder addTransportLeg() {
       var step =
-          transportPlan
-              .addObject()
-              // Yes, this is basically the array index (+1), but it is required, so here goes.
-              .put("transportPlanStageSequenceNumber", sequenceNumber++);
+        transportPlan
+          .addObject()
+          // Yes, this is basically the array index (+1), but it is required, so here goes.
+          .put("transportPlanStageSequenceNumber", sequenceNumber++);
       return new TransportPlanStepBuilder(this, step);
     }
 
@@ -626,34 +644,34 @@ public class PersistableCarrierBooking {
 
   private static List<String> carrierClauses() {
     return List.of(
-        "Per terms and conditions (see the termsAndConditions field), this is not a real booking.",
-        "A real booking would probably have more legal text here.");
+      "Per terms and conditions (see the termsAndConditions field), this is not a real booking.",
+      "A real booking would probably have more legal text here.");
   }
 
   private static String termsAndConditions() {
     return """
-            You agree that this booking exist is name only for the sake of
-            testing your conformance with the DCSA BKG API. This booking is NOT backed
-            by a real booking with ANY carrier and NONE of the requested services will be
-            carried out in real life.
+      You agree that this booking exist is name only for the sake of
+      testing your conformance with the DCSA BKG API. This booking is NOT backed
+      by a real booking with ANY carrier and NONE of the requested services will be
+      carried out in real life.
 
-            Unless required by applicable law or agreed to in writing, DCSA provides
-            this JSON data on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
-            ANY KIND, either express or implied, including, without limitation, any
-            warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,
-            or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for
-            determining the appropriateness of using or redistributing this JSON
-            data and assume any risks associated with Your usage of this data.
+      Unless required by applicable law or agreed to in writing, DCSA provides
+      this JSON data on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+      ANY KIND, either express or implied, including, without limitation, any
+      warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,
+      or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for
+      determining the appropriateness of using or redistributing this JSON
+      data and assume any risks associated with Your usage of this data.
 
-            In no event and under no legal theory, whether in tort (including negligence),
-            contract, or otherwise, unless required by applicable law (such as deliberate
-            and grossly negligent acts) or agreed to in writing, shall DCSA be liable to
-            You for damages, including any direct, indirect, special, incidental, or
-            consequential damages of any character arising as a result of this terms or conditions
-            or out of the use or inability to use the provided JSON data (including but not limited
-            to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any
-            and all other commercial damages or losses), even if DCSA has been advised of the
-            possibility of such damages.
-            """;
+      In no event and under no legal theory, whether in tort (including negligence),
+      contract, or otherwise, unless required by applicable law (such as deliberate
+      and grossly negligent acts) or agreed to in writing, shall DCSA be liable to
+      You for damages, including any direct, indirect, special, incidental, or
+      consequential damages of any character arising as a result of this terms or conditions
+      or out of the use or inability to use the provided JSON data (including but not limited
+      to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any
+      and all other commercial damages or losses), even if DCSA has been advised of the
+      possibility of such damages.
+      """;
   }
 }

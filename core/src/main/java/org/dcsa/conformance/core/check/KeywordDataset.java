@@ -11,6 +11,10 @@ public interface KeywordDataset {
 
   boolean contains(String value);
 
+  default Set<String> values() {
+    throw new UnsupportedOperationException("This keyword dataset does not expose its values");
+  }
+
   static KeywordDataset lazyLoaded(Supplier<KeywordDataset> loader) {
     return new LazyKeywordDataset(loader);
   }
@@ -19,7 +23,21 @@ public interface KeywordDataset {
     if (values.length < 2) {
       throw new IllegalStateException("A data set must be at least two values");
     }
-    return Set.of(values)::contains;
+    var keywords = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(values)));
+    if (keywords.size() != values.length) {
+      throw new IllegalArgumentException("A data set cannot contain duplicate values");
+    }
+    return new KeywordDataset() {
+      @Override
+      public boolean contains(String value) {
+        return keywords.contains(value);
+      }
+
+      @Override
+      public Set<String> values() {
+        return keywords;
+      }
+    };
   }
 
   static KeywordDataset staticVersionedDataset(@NonNull Object @NonNull ... values) {

@@ -53,7 +53,7 @@ info:
     name: Digital Container Shipping Association (DCSA)
     url: 'https://dcsa.org'
     email: info@dcsa.org
-security: []
+security: [ ]
 tags:
   - name: Booking
     description: Booking endPoints to be implemented by **providers** of the Booking API

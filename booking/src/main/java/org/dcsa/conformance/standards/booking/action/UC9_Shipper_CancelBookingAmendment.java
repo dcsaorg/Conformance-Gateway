@@ -1,13 +1,16 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+
+import java.util.stream.Stream;
 
 @Getter
 @Slf4j
@@ -19,15 +22,15 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
   private final BookingState expectedAmendedBookingStatus;
 
   public UC9_Shipper_CancelBookingAmendment(
-      String carrierPartyName,
-      String shipperPartyName,
-      BookingAction previousAction,
-      BookingState expectedBookingStatus,
-      BookingState expectedAmendedBookingStatus,
-      JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator,
-      boolean isWithNotifications) {
+    String carrierPartyName,
+    String shipperPartyName,
+    BookingAction previousAction,
+    BookingState expectedBookingStatus,
+    BookingState expectedAmendedBookingStatus,
+    JsonSchemaValidator requestSchemaValidator,
+    JsonSchemaValidator responseSchemaValidator,
+    JsonSchemaValidator notificationSchemaValidator,
+    boolean isWithNotifications) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC9", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
@@ -39,7 +42,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        "prompt-shipper-uc9.md", "prompt-shipper-refresh-complete.md");
+      "prompt-shipper-uc9.md", "prompt-shipper-refresh-complete.md");
   }
 
   @Override
@@ -64,19 +67,27 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
         return Stream.concat(
+          Stream.concat(
+            createPatchPrimarySubChecks(
+              expectedApiVersion, "/v2/bookings/", cbrr, cbr),
             Stream.concat(
-                createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
-                Stream.of(
-                    new JsonSchemaCheck(
-                        BookingRole::isShipper,
-                        getMatchedExchangeUuid(),
-                        HttpMessageType.REQUEST,
-                        requestSchemaValidator))),
-            getNotificationChecks(
-                expectedApiVersion,
-                notificationSchemaValidator,
-                expectedBookingStatus,
-                expectedAmendedBookingStatus));
+              Stream.of(new JsonSchemaCheck(
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                requestSchemaValidator)),
+              patchPreconditionChecks(
+                "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is AMENDMENT_RECEIVED in order to cancel it. If this is not the case a 404 (Not Found) error response should be returned"
+                  .formatted(jsonPath(AMENDED_BOOKING_STATUS)),
+                AMENDED_BOOKING_STATUS,
+                BookingState.AMENDMENT_RECEIVED.name()::equals,
+                BookingState.AMENDMENT_RECEIVED.name(),
+                404))),
+          getNotificationChecks(
+            expectedApiVersion,
+            notificationSchemaValidator,
+            expectedBookingStatus,
+            expectedAmendedBookingStatus));
       }
     };
   }

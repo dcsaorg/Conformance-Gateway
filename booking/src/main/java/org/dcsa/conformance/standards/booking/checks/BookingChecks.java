@@ -904,24 +904,6 @@ public class BookingChecks {
       });
   }
 
-  private static final JsonContentCheck CONFIRMED_EQUIPMENTS_MANDATORY_FOR_CONFIRMED =
-    fieldRequiredForBookingStates(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: Mandatory and non-empty for a CONFIRMED Booking"
-        .formatted(jsonPath(CONFIRMED_EQUIPMENTS)),
-      CONFIRMED_EQUIPMENTS,
-      Set.of(BookingState.CONFIRMED));
-  private static final JsonContentCheck TRANSPORT_PLAN_MANDATORY_FOR_CONFIRMED =
-    fieldRequiredForBookingStates(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: Mandatory and non-empty for a CONFIRMED Booking"
-        .formatted(jsonPath(TRANSPORT_PLAN)),
-      TRANSPORT_PLAN,
-      Set.of(BookingState.CONFIRMED));
-  private static final JsonContentCheck SHIPMENT_CUTOFF_TIMES_MANDATORY_FOR_CONFIRMED =
-    fieldRequiredForBookingStates(
-      "The %s attribute must demonstrate the correct use of this conditional requirement: Mandatory and non-empty for a CONFIRMED Booking"
-        .formatted(jsonPath(SHIPMENT_CUT_OFF_TIMES)),
-      SHIPMENT_CUT_OFF_TIMES,
-      Set.of(BookingState.CONFIRMED));
   private static final JsonContentCheck CONFIRMED_EQUIPMENTS_REQUIRED_BY_STATE =
     fieldRequiredForBookingStates(
       "The %s attribute must be provided when %s is CONFIRMED or PENDING_AMENDMENT"
@@ -1480,24 +1462,6 @@ public class BookingChecks {
         return ConformanceCheckResult.simple(Set.of());
       });
 
-  private static final JsonContentCheck INVOICE_PAYABLE_AT_MUST_USE_UN_LOCATION_CODE =
-    JsonAttribute.customValidator(
-      "The %s object must demonstrate the correct use of this conditional requirement: the location must be provided as a %s"
-        .formatted(jsonPath(INVOICE_PAYABLE_AT), jsonPath(UN_LOCATION_CODE)),
-      body -> {
-        var invoicePayableAt = body.path(INVOICE_PAYABLE_AT);
-        if (JsonUtil.isMissingOrEmpty(invoicePayableAt)) {
-          return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
-        }
-        if (JsonUtil.isMissingOrEmpty(invoicePayableAt.path(UN_LOCATION_CODE))) {
-          return ConformanceCheckResult.simple(
-            Set.of(
-              "'%s.%s' must be provided"
-                .formatted(INVOICE_PAYABLE_AT, UN_LOCATION_CODE)));
-        }
-        return ConformanceCheckResult.simple(Set.of());
-      });
-
   private static final JsonContentCheck PARTY_CONTACT_DETAILS_NAME_AND_PHONE_OR_EMAIL =
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The %s object must be provided when the condition applies: it is mandatory to provide either %s and/or %s along with the %s"
@@ -1671,7 +1635,6 @@ public class BookingChecks {
       ACTIVE_REEFER_AIR_EXCHANGE_UNIT_CONDITIONAL,
       SEND_TO_PLATFORM_ONLY_FOR_ELECTRONIC_BOL,
       PLACE_OF_BL_ISSUE_UNLOCATION_XOR_COUNTRY,
-      INVOICE_PAYABLE_AT_MUST_USE_UN_LOCATION_CODE,
       PARTY_CONTACT_DETAILS_NAME_AND_PHONE_OR_EMAIL,
       NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
       OTHER_PARTY_FUNCTION_CODE_VALIDATION,
@@ -1762,9 +1725,6 @@ public class BookingChecks {
   private static final List<JsonContentCheck> BOOKING_RESPONSE_CONTENT_CHECKS =
     Arrays.asList(
       ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-      CONFIRMED_EQUIPMENTS_MANDATORY_FOR_CONFIRMED,
-      TRANSPORT_PLAN_MANDATORY_FOR_CONFIRMED,
-      SHIPMENT_CUTOFF_TIMES_MANDATORY_FOR_CONFIRMED,
       CONFIRMED_EQUIPMENTS_REQUIRED_BY_STATE,
       TRANSPORT_PLAN_REQUIRED_BY_STATE,
       SHIPMENT_CUTOFF_TIMES_REQUIRED_BY_STATE,

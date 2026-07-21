@@ -104,10 +104,12 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return carrierSupplyScenarioParameters(carrierPartyName, scenarioType)
       .then(
         uc1ShipperSubmitBookingRequest()
-          .then(
+          .thenEither(
             shipperGetBooking(RECEIVED)
               .thenEither(
-                confirmedBookingScenario(),
+                confirmedBookingScenario()),
+            shipperGetBookingSkippable(RECEIVED)
+              .thenEither(
                 updatedBookingScenario(),
                 processedAmendmentScenario())));
   }
@@ -134,16 +136,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static BookingScenarioListBuilder amendmentReceivedGetActions(
     BookingScenarioListBuilder... nextActions) {
     var amendedContentGet = shipperGetBooking(CONFIRMED, AMENDMENT_RECEIVED, null, true);
-    if (nextActions.length > 0) {
-      amendedContentGet.thenEither(nextActions);
-    }
-    return shipperGetBookingSkippable(CONFIRMED, AMENDMENT_RECEIVED, null, false)
-      .then(amendedContentGet);
-  }
-
-  private static BookingScenarioListBuilder amendmentReceivedGetSkippableActions(
-    BookingScenarioListBuilder... nextActions) {
-    var amendedContentGet = shipperGetBookingSkippable(CONFIRMED, AMENDMENT_RECEIVED, null, true);
     if (nextActions.length > 0) {
       amendedContentGet.thenEither(nextActions);
     }
@@ -204,6 +196,16 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 .then(
                   shipperGetBookingSkippable(
                     CONFIRMED, AMENDMENT_CANCELLED, null, true)))));
+  }
+
+  private static BookingScenarioListBuilder amendmentReceivedGetSkippableActions(
+    BookingScenarioListBuilder... nextActions) {
+    var amendedContentGet = shipperGetBookingSkippable(CONFIRMED, AMENDMENT_RECEIVED, null, true);
+    if (nextActions.length > 0) {
+      amendedContentGet.thenEither(nextActions);
+    }
+    return shipperGetBookingSkippable(CONFIRMED, AMENDMENT_RECEIVED, null, false)
+      .then(amendedContentGet);
   }
 
   private static BookingScenarioListBuilder carrierSupplyScenarioParameters(

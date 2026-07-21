@@ -86,11 +86,6 @@ public class ShipperGetBookingAction extends BookingAction {
   }
 
   @Override
-  public Set<String> skippableForRoles() {
-    return Set.of(BookingRole.SHIPPER.getConfigName());
-  }
-
-  @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {
     return new ConformanceCheck(getActionTitle()) {
       @Override

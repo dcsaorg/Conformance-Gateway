@@ -72,7 +72,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
           Stream.of(
             new JsonSchemaCheck(BookingRole::isShipper, getMatchedExchangeUuid(), HttpMessageType.REQUEST, requestSchemaValidator),
             createShipperPatchPreconditionCheck(
-              "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that '%s' is AMENDMENT_RECEIVED in order to cancel the amendment to a Confirmed Booking.".formatted(jsonPath(AMENDED_BOOKING_STATUS)),
+              "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is AMENDMENT_RECEIVED in order to cancel the amendment to a Confirmed Booking.".formatted(jsonPath(AMENDED_BOOKING_STATUS)),
               AMENDED_BOOKING_STATUS,
               BookingState.AMENDMENT_RECEIVED.name()::equals,
               BookingState.AMENDMENT_RECEIVED.name()),

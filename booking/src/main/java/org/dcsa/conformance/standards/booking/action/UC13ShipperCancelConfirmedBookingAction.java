@@ -11,6 +11,7 @@ import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @Getter
@@ -70,33 +71,25 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
         var dsp = getDspSupplier().get();
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
-        return Stream.concat(
-          Stream.concat(
-            createPatchPrimarySubChecks(
-              expectedApiVersion, "/v2/bookings/", cbrr, cbr),
-            Stream.concat(
-              Stream.of(new JsonSchemaCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator)),
-              patchPreconditionChecks(
-                "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is CONFIRMED or PENDING_AMENDMENT in order to cancel it. If this is not the case a 409 (Conflict) error response should be returned"
-                  .formatted(jsonPath(BOOKING_STATUS)),
-                BOOKING_STATUS,
-                status ->
-                  BookingState.CONFIRMED.name().equals(status)
-                    || BookingState.PENDING_AMENDMENT.name().equals(status),
-                "CONFIRMED or PENDING_AMENDMENT",
-                409))),
+        return Stream.<Stream<? extends ConformanceCheck>>of(
+          createPatchPrimarySubChecks(expectedApiVersion, "/v2/bookings/", cbrr, cbr),
+          Stream.of(
+            new JsonSchemaCheck(BookingRole::isShipper, getMatchedExchangeUuid(), HttpMessageType.REQUEST, requestSchemaValidator),
+            createShipperPatchPreconditionCheck(
+              "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is CONFIRMED or PENDING_AMENDMENT in order to cancel a Confirmed Booking.".formatted(jsonPath(BOOKING_STATUS)),
+              BOOKING_STATUS,
+              status -> BookingState.CONFIRMED.name().equals(status) || BookingState.PENDING_AMENDMENT.name().equals(status),
+              "%s or %s".formatted(BookingState.CONFIRMED.name(), BookingState.PENDING_AMENDMENT.name())),
+            createCarrierPatchPreconditionResponseStatusCheck(
+              "[Scenario] The HTTP response status is correct for the applicable PATCH business precondition",
+              BOOKING_STATUS,
+              status -> BookingState.CONFIRMED.name().equals(status) || BookingState.PENDING_AMENDMENT.name().equals(status),
+              "%s or %s".formatted(BookingState.CONFIRMED.name(), BookingState.PENDING_AMENDMENT.name()),
+              409)),
           expectedBookingStatus != null
-            ? getNotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator,
-            expectedBookingStatus,
-            expectedAmendedBookingStatus,
-            expectedBookingCancellationStatus)
-            : Stream.empty());
+            ? getNotificationChecks(expectedApiVersion, notificationSchemaValidator, expectedBookingStatus, expectedAmendedBookingStatus, expectedBookingCancellationStatus)
+            : Stream.empty()
+        ).flatMap(Function.identity());
       }
     };
   }

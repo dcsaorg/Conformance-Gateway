@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @Getter
@@ -66,28 +67,23 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
         var dsp = getDspSupplier().get();
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
-        return Stream.concat(
-          Stream.concat(
-            createPatchPrimarySubChecks(
-              expectedApiVersion, "/v2/bookings/", cbrr, cbr),
-            Stream.concat(
-              Stream.of(new JsonSchemaCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator)),
-              patchPreconditionChecks(
-                "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is AMENDMENT_RECEIVED in order to cancel it. If this is not the case a 404 (Not Found) error response should be returned"
-                  .formatted(jsonPath(AMENDED_BOOKING_STATUS)),
-                AMENDED_BOOKING_STATUS,
-                BookingState.AMENDMENT_RECEIVED.name()::equals,
-                BookingState.AMENDMENT_RECEIVED.name(),
-                404))),
-          getNotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator,
-            expectedBookingStatus,
-            expectedAmendedBookingStatus));
+        return Stream.of(
+          createPatchPrimarySubChecks(expectedApiVersion, "/v2/bookings/", cbrr, cbr),
+          Stream.of(
+            new JsonSchemaCheck(BookingRole::isShipper, getMatchedExchangeUuid(), HttpMessageType.REQUEST, requestSchemaValidator),
+            createShipperPatchPreconditionCheck(
+              "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is AMENDMENT_RECEIVED in order to cancel the amendment to a Confirmed Booking.".formatted(jsonPath(AMENDED_BOOKING_STATUS)),
+              AMENDED_BOOKING_STATUS,
+              BookingState.AMENDMENT_RECEIVED.name()::equals,
+              BookingState.AMENDMENT_RECEIVED.name()),
+            createCarrierPatchPreconditionResponseStatusCheck(
+              "[Scenario] The HTTP response status is correct for the applicable PATCH business precondition",
+              AMENDED_BOOKING_STATUS,
+              BookingState.AMENDMENT_RECEIVED.name()::equals,
+              BookingState.AMENDMENT_RECEIVED.name(),
+              404)),
+          getNotificationChecks(expectedApiVersion, notificationSchemaValidator, expectedBookingStatus, expectedAmendedBookingStatus)
+        ).flatMap(Function.identity());
       }
     };
   }

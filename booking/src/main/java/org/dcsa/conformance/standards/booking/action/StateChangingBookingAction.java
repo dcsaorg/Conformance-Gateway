@@ -90,18 +90,16 @@ public abstract class StateChangingBookingAction extends BookingAction {
         expectedApiVersion));
   }
 
-  protected Stream<ActionCheck> patchPreconditionChecks(
-    String description,
+  protected ActionCheck createShipperPatchPreconditionCheck(
+    String shipperCheckDescription,
     String priorStatusField,
     Predicate<String> precondition,
-    String expectedPriorStateDescription,
-    int preconditionFailureStatus) {
+    String expectedPriorStateDescription) {
 
     ConformanceAction precedingAction = previousAction;
     UUID patchExchangeUuid = getMatchedExchangeUuid();
 
-    ActionCheck shipperPreconditionCheck = new ActionCheck(
-      description, BookingRole::isShipper, patchExchangeUuid, HttpMessageType.REQUEST) {
+    return new ActionCheck(shipperCheckDescription, BookingRole::isShipper, patchExchangeUuid, HttpMessageType.REQUEST) {
       @Override
       protected ConformanceCheckResult performCheck(
         Function<UUID, ConformanceExchange> getExchangeByUuid) {
@@ -129,12 +127,19 @@ public abstract class StateChangingBookingAction extends BookingAction {
         return ConformanceCheckResult.simple(Collections.emptySet());
       }
     };
+  }
 
-    ActionCheck carrierResponseStatusCheck = new ActionCheck(
-      "[Scenario] The HTTP response status is correct for the applicable PATCH business precondition",
-      BookingRole::isCarrier,
-      patchExchangeUuid,
-      HttpMessageType.RESPONSE) {
+  protected ActionCheck createCarrierPatchPreconditionResponseStatusCheck(
+    String carrierCheckDescription,
+    String priorStatusField,
+    Predicate<String> precondition,
+    String expectedPriorStateDescription,
+    int preconditionFailureStatus) {
+
+    ConformanceAction precedingAction = previousAction;
+    UUID patchExchangeUuid = getMatchedExchangeUuid();
+
+    return new ActionCheck(carrierCheckDescription, BookingRole::isCarrier, patchExchangeUuid, HttpMessageType.RESPONSE) {
       @Override
       protected ConformanceCheckResult performCheck(
         Function<UUID, ConformanceExchange> getExchangeByUuid) {
@@ -145,6 +150,7 @@ public abstract class StateChangingBookingAction extends BookingAction {
               "Could not determine the prior %s from an earlier Booking response or notification"
                 .formatted(jsonPath(priorStatusField))));
         }
+
         String actualPriorState = priorStatus.asText("");
         int expectedResponseStatus =
           precondition.test(actualPriorState) ? expectedStatus : preconditionFailureStatus;
@@ -167,7 +173,6 @@ public abstract class StateChangingBookingAction extends BookingAction {
         return ConformanceCheckResult.simple(Collections.emptySet());
       }
     };
-    return Stream.of(shipperPreconditionCheck, carrierResponseStatusCheck);
   }
 
   private boolean wasPreviousShipperGetActionSkipped() {

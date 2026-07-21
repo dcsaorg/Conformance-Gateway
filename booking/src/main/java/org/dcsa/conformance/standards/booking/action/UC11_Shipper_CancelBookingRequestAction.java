@@ -69,7 +69,7 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
           Stream.of(
             new JsonSchemaCheck(BookingRole::isShipper, getMatchedExchangeUuid(), HttpMessageType.REQUEST, requestSchemaValidator),
             createShipperPatchPreconditionCheck(
-              "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that '%s' is CONFIRMED or PENDING_AMENDMENT in order to cancel a Confirmed Booking.".formatted(jsonPath(BOOKING_STATUS)),
+              "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is neither CONFIRMED nor PENDING_AMENDMENT in order to cancel a Booking Request (prior to Booking Confirmation).".formatted(jsonPath(BOOKING_STATUS)),
               BOOKING_STATUS,
               status -> !BookingState.CONFIRMED.name().equals(status) && !BookingState.PENDING_AMENDMENT.name().equals(status),
               "neither %s nor %s".formatted(BookingState.CONFIRMED.name(), BookingState.PENDING_AMENDMENT.name())),

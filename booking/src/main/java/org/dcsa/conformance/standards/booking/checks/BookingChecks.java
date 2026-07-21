@@ -1262,11 +1262,21 @@ public class BookingChecks {
         .formatted(jsonPath(CHARGES, CURRENCY_AMOUNT)),
       mav -> mav.submitAllMatching(path(CHARGES, "*", CURRENCY_AMOUNT)),
       (nodeToValidate, contextPath) -> {
-        var currencyAmount = nodeToValidate.asDouble();
-        if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
+        if (!nodeToValidate.isNumber()) {
+          return ConformanceCheckResult.simple(
+            Set.of("%s must be a number".formatted(contextPath)));
+        }
+        BigDecimal currencyAmount;
+        try {
+          currencyAmount = new BigDecimal(nodeToValidate.asText());
+        } catch (NumberFormatException e) {
+          return ConformanceCheckResult.simple(
+            Set.of("%s must be a valid decimal number".formatted(contextPath)));
+        }
+        if (currencyAmount.scale() > 2) {
           return ConformanceCheckResult.simple(
             Set.of(
-              "%s must have at most 2 decimal point of precision"
+              "%s must have at most 2 decimal places of precision"
                 .formatted(contextPath)));
         }
         return ConformanceCheckResult.simple(Set.of());

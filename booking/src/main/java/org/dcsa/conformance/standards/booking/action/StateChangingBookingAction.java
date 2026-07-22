@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
+import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
@@ -14,6 +15,7 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -88,19 +90,22 @@ public abstract class StateChangingBookingAction extends BookingAction {
         expectedApiVersion));
   }
 
-  protected Stream<ActionCheck> patchPreconditionChecks(
-    String description,
+  protected ActionCheck createShipperPatchPreconditionCheck(
+    String shipperCheckDescription,
     String priorStatusField,
     Predicate<String> precondition,
-    String expectedPriorStateDescription,
-    int preconditionFailureStatus) {
+    String expectedPriorStateDescription) {
+
     ConformanceAction precedingAction = previousAction;
     UUID patchExchangeUuid = getMatchedExchangeUuid();
-    ActionCheck shipperPreconditionCheck = new ActionCheck(
-      description, BookingRole::isShipper, patchExchangeUuid, HttpMessageType.REQUEST) {
+
+    return new ActionCheck(shipperCheckDescription, BookingRole::isShipper, patchExchangeUuid, HttpMessageType.REQUEST) {
       @Override
       protected ConformanceCheckResult performCheck(
         Function<UUID, ConformanceExchange> getExchangeByUuid) {
+        if (wasPreviousShipperGetActionSkipped()) {
+          return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+        }
         JsonNode priorStatus = findLatestPriorStatus(getExchangeByUuid, precedingAction, priorStatusField);
         if (priorStatus == null) {
           return ConformanceCheckResult.simple(
@@ -122,12 +127,19 @@ public abstract class StateChangingBookingAction extends BookingAction {
         return ConformanceCheckResult.simple(Collections.emptySet());
       }
     };
+  }
 
-    ActionCheck carrierResponseStatusCheck = new ActionCheck(
-      "[Scenario] The HTTP response status is correct for the applicable PATCH business precondition",
-      BookingRole::isCarrier,
-      patchExchangeUuid,
-      HttpMessageType.RESPONSE) {
+  protected ActionCheck createCarrierPatchPreconditionResponseStatusCheck(
+    String carrierCheckDescription,
+    String priorStatusField,
+    Predicate<String> precondition,
+    String expectedPriorStateDescription,
+    int preconditionFailureStatus) {
+
+    ConformanceAction precedingAction = previousAction;
+    UUID patchExchangeUuid = getMatchedExchangeUuid();
+
+    return new ActionCheck(carrierCheckDescription, BookingRole::isCarrier, patchExchangeUuid, HttpMessageType.RESPONSE) {
       @Override
       protected ConformanceCheckResult performCheck(
         Function<UUID, ConformanceExchange> getExchangeByUuid) {
@@ -138,6 +150,7 @@ public abstract class StateChangingBookingAction extends BookingAction {
               "Could not determine the prior %s from an earlier Booking response or notification"
                 .formatted(jsonPath(priorStatusField))));
         }
+
         String actualPriorState = priorStatus.asText("");
         int expectedResponseStatus =
           precondition.test(actualPriorState) ? expectedStatus : preconditionFailureStatus;
@@ -160,29 +173,25 @@ public abstract class StateChangingBookingAction extends BookingAction {
         return ConformanceCheckResult.simple(Collections.emptySet());
       }
     };
-    return Stream.of(shipperPreconditionCheck, carrierResponseStatusCheck);
+  }
+
+  private boolean wasPreviousShipperGetActionSkipped() {
+    return previousAction instanceof ShipperGetBookingSkippableAction && previousAction.isMissingMatchedExchange();
   }
 
   private static JsonNode findLatestPriorStatus(
     Function<UUID, ConformanceExchange> getExchangeByUuid,
     ConformanceAction action,
     String statusField) {
-    for (ConformanceAction current = action;
-         current != null;
-         current = current.getPreviousAction()) {
-      UUID exchangeUuid = current.getMatchedExchangeUuid();
-      if (exchangeUuid == null) {
-        continue;
-      }
-      ConformanceExchange exchange = getExchangeByUuid.apply(exchangeUuid);
-      if (exchange == null) {
-        continue;
-      }
-      JsonNode response = exchange.getResponse().message().body().getJsonBody();
-      if (!response.path(BOOKING_STATUS).isMissingNode()) {
-        return response.path(statusField);
-      }
-    }
-    return null;
+    return Stream.iterate(action, Objects::nonNull, ConformanceAction::getPreviousAction)
+      .map(ConformanceAction::getMatchedExchangeUuid)
+      .filter(Objects::nonNull)
+      .map(getExchangeByUuid)
+      .filter(Objects::nonNull)
+      .map(exchange -> exchange.getResponse().message().body().getJsonBody())
+      .filter(response -> !response.path(BOOKING_STATUS).isMissingNode())
+      .findFirst()
+      .map(response -> response.path(statusField))
+      .orElse(null);
   }
 }

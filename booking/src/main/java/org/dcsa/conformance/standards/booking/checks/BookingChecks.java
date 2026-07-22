@@ -1256,6 +1256,32 @@ public class BookingChecks {
         mav.submitAllMatching(
           path(TRANSPORT_PLAN, "*", TRANSPORT_PLAN_STAGE_SEQUENCE_NUMBER)));
 
+  private static final JsonContentCheck MONETARY_AMOUNT_DECIMAL_PLACES =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "The %s attribute must demonstrate the correct use of a monetary amount with no more than two decimal places"
+        .formatted(jsonPath(CHARGES, CURRENCY_AMOUNT)),
+      mav -> mav.submitAllMatching(path(CHARGES, "*", CURRENCY_AMOUNT)),
+      (nodeToValidate, contextPath) -> {
+        if (!nodeToValidate.isNumber()) {
+          return ConformanceCheckResult.simple(
+            Set.of("%s must be a number".formatted(contextPath)));
+        }
+        BigDecimal currencyAmount;
+        try {
+          currencyAmount = new BigDecimal(nodeToValidate.asText());
+        } catch (NumberFormatException e) {
+          return ConformanceCheckResult.simple(
+            Set.of("%s must be a valid decimal number".formatted(contextPath)));
+        }
+        if (currencyAmount.scale() > 2) {
+          return ConformanceCheckResult.simple(
+            Set.of(
+              "%s must have at most 2 decimal places of precision"
+                .formatted(contextPath)));
+        }
+        return ConformanceCheckResult.simple(Set.of());
+      });
+
   private static final JsonContentCheck CARGO_MOVEMENT_TYPE_AT_ORIGIN_VALIDATION =
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The %s attribute must demonstrate the correct use of a cargo movement type code: %s"
@@ -1706,21 +1732,7 @@ public class BookingChecks {
             jsonPath(DECLARED_VALUE),
             jsonPath(DECLARED_VALUE)),
         JsonPointer.compile("/%s".formatted(DECLARED_VALUE)),
-        JsonPointer.compile("/%s".formatted(DECLARED_VALUE_CURRENCY))),
-      JsonAttribute.allIndividualMatchesMustBeValid(
-        "The %s attribute must demonstrate the correct use of a monetary amount with no more than two decimal places"
-          .formatted(jsonPath(CHARGES, CURRENCY_AMOUNT)),
-        mav -> mav.submitAllMatching(path(CHARGES, "*", CURRENCY_AMOUNT)),
-        (nodeToValidate, contextPath) -> {
-          var currencyAmount = nodeToValidate.asDouble();
-          if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
-            return ConformanceCheckResult.simple(
-              Set.of(
-                "%s must have at most 2 decimal point of precision"
-                  .formatted(contextPath)));
-          }
-          return ConformanceCheckResult.simple(Set.of());
-        }));
+        JsonPointer.compile("/%s".formatted(DECLARED_VALUE_CURRENCY))));
 
   private static final List<JsonContentCheck> BOOKING_RESPONSE_CONTENT_CHECKS =
     Arrays.asList(
@@ -1735,7 +1747,8 @@ public class BookingChecks {
       VALIDATE_SHIPMENT_LOCATIONS,
       CARRIER_REFERENCE_TYPE_VALIDATION,
       TRANSPORT_PLAN_MODE_OF_TRANSPORT_VALIDATION,
-      TRANSPORT_PLAN_STAGE_SEQUENCE_NUMBER_POSITIVE_INTEGER);
+      TRANSPORT_PLAN_STAGE_SEQUENCE_NUMBER_POSITIVE_INTEGER,
+      MONETARY_AMOUNT_DECIMAL_PLACES);
 
   private static final List<JsonContentCheck> RESPONSE_ENVELOPE_CHECKS =
     Arrays.asList(
@@ -1751,41 +1764,10 @@ public class BookingChecks {
     UUID matched,
     String standardVersion,
     Supplier<BookingDynamicScenarioParameters> dspSupplier,
-    BookingState bookingStatus,
-    BookingState expectedAmendedBookingStatus,
-    BookingCancellationState expectedCancelledBookingStatus) {
-    var checks =
-      fullPayloadChecks(
-        dspSupplier,
-        bookingStatus,
-        expectedAmendedBookingStatus,
-        expectedCancelledBookingStatus);
-
-    return JsonAttribute.contentChecks(
-      BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
-  }
-
-  public static ActionCheck responseContentChecks(
-    UUID matched,
-    String standardVersion,
-    Supplier<BookingDynamicScenarioParameters> dspSupplier,
     CarrierStatusScenario carrierStatusScenario) {
     var checks = fullPayloadChecks(dspSupplier, carrierStatusScenario);
     return JsonAttribute.contentChecks(
       BookingRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
-  }
-
-  public static List<JsonContentCheck> fullPayloadChecks(
-    Supplier<BookingDynamicScenarioParameters> dspSupplier,
-    BookingState bookingStatus,
-    BookingState expectedAmendedBookingStatus,
-    BookingCancellationState expectedCancelledBookingStatus) {
-    return payloadChecks(
-      dspSupplier,
-      bookingStatus,
-      expectedAmendedBookingStatus,
-      expectedCancelledBookingStatus,
-      true);
   }
 
   public static List<JsonContentCheck> fullPayloadChecks(
@@ -1797,19 +1779,6 @@ public class BookingChecks {
   public static List<JsonContentCheck> nestedNotificationPayloadChecks(
     Supplier<BookingDynamicScenarioParameters> dspSupplier) {
     return payloadChecks(dspSupplier, null, false);
-  }
-
-  private static List<JsonContentCheck> payloadChecks(
-    Supplier<BookingDynamicScenarioParameters> dspSupplier,
-    BookingState bookingStatus,
-    BookingState expectedAmendedBookingStatus,
-    BookingCancellationState expectedCancelledBookingStatus,
-    boolean includeResponseEnvelopeChecks) {
-    return payloadChecks(
-      dspSupplier,
-      CarrierStatusScenario.from(
-        bookingStatus, expectedAmendedBookingStatus, expectedCancelledBookingStatus),
-      includeResponseEnvelopeChecks);
   }
 
   private static List<JsonContentCheck> payloadChecks(

@@ -14,7 +14,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.BookingAction;
 import org.dcsa.conformance.standards.booking.action.ShipperGetBookingAction;
-import org.dcsa.conformance.standards.booking.action.ShipperGetBookingErrorScenarioAction;
+import org.dcsa.conformance.standards.booking.action.ShipperGetBookingSkippableAction;
 import org.dcsa.conformance.standards.booking.action.UC11_Shipper_CancelBookingRequestAction;
 import org.dcsa.conformance.standards.booking.action.UC13ShipperCancelConfirmedBookingAction;
 import org.dcsa.conformance.standards.booking.action.UC1_Shipper_SubmitBookingRequestAction;
@@ -76,14 +76,14 @@ public class BookingShipper extends ConformanceParty {
     return Map.ofEntries(
       Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
       Map.entry(ShipperGetBookingAction.class, this::getBookingRequest),
+      Map.entry(ShipperGetBookingSkippableAction.class, this::getBookingRequest),
       Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
       Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
       Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
       Map.entry(UC11_Shipper_CancelBookingRequestAction.class, this::sendCancelBookingRequest),
       Map.entry(
         UC13ShipperCancelConfirmedBookingAction.class,
-        this::sendConfirmedBookingCancellationRequest),
-      Map.entry(ShipperGetBookingErrorScenarioAction.class, this::getBookingRequest));
+        this::sendConfirmedBookingCancellationRequest));
   }
 
   private void getBookingRequest(JsonNode actionPrompt) {
@@ -92,15 +92,9 @@ public class BookingShipper extends ConformanceParty {
     String cbrr = actionPrompt.path("cbrr").asText();
     String reference = getBookingReference(actionPrompt);
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
-    boolean errorScenario = actionPrompt.path("invalidBookingReference").asBoolean(false);
     Map<String, List<String>> queryParams =
       requestAmendment ? Map.of("amendedContent", List.of("true")) : Collections.emptyMap();
-    if (errorScenario) {
-      syncCounterpartGet("/v2/bookings/" + "ABC123", queryParams);
-      cbrr = "ABC123";
-    } else {
-      syncCounterpartGet("/v2/bookings/" + reference, queryParams);
-    }
+    syncCounterpartGet("/v2/bookings/" + reference, queryParams);
 
     addOperatorLogEntry(
       BookingAction.createMessageForUIPrompt("Sent a GET request for booking", cbr, cbrr));
@@ -120,8 +114,6 @@ public class BookingShipper extends ConformanceParty {
     ObjectNode updatedBooking =
       ((ObjectNode) bookingPayload).put("carrierBookingRequestReference", cbrr);
     persistentMap.save(cbrr, updatedBooking);
-
-
   }
 
   private void sendCancelBookingRequest(JsonNode actionPrompt) {

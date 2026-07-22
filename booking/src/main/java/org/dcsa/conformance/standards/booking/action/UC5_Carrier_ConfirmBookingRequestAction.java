@@ -9,7 +9,7 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 import java.util.stream.Stream;
 
 @Getter
-public class UC5_Carrier_ConfirmBookingRequestAction extends StateChangingBookingAction {
+public class UC5_Carrier_ConfirmBookingRequestAction extends CarrierNotificationBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC5_Carrier_ConfirmBookingRequestAction(

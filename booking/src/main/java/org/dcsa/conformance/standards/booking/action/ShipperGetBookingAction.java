@@ -22,7 +22,7 @@ public class ShipperGetBookingAction extends BookingAction {
   private final BookingState expectedBookingStatus;
   private final CarrierStatusScenario carrierStatusScenario;
   private final JsonSchemaValidator responseSchemaValidator;
-  private final boolean requestAmendedContent;
+  protected final boolean requestAmendedContent;
 
   public ShipperGetBookingAction(
     String carrierPartyName,
@@ -83,11 +83,6 @@ public class ShipperGetBookingAction extends BookingAction {
     return getMarkdownHumanReadablePrompt(
       "prompt-shipper-get.md", "prompt-shipper-refresh-complete.md")
       .replace("ORIGINAL_OR_AMENDED_PLACEHOLDER", requestAmendedContent ? "AMENDED" : "ORIGINAL");
-  }
-
-  @Override
-  public Set<String> skippableForRoles() {
-    return Set.of(BookingRole.SHIPPER.getConfigName());
   }
 
   @Override

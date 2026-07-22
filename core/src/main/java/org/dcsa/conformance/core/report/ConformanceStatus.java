@@ -5,7 +5,13 @@ public enum ConformanceStatus {
   NON_CONFORMANT,
   PARTIALLY_CONFORMANT,
   CONFORMANT,
+  COMPLETED_WITHOUT_TRAFFIC,
+  SKIPPED,
   IRRELEVANT;
+
+  public ConformanceStatus forAggregation() {
+    return this == COMPLETED_WITHOUT_TRAFFIC || this == SKIPPED ? CONFORMANT : this;
+  }
 
   public static ConformanceStatus forExchangeCounts(
       int conformantExchangeCount, int nonConformantExchangeCount, boolean isRelevant) {

@@ -9,7 +9,7 @@ import org.dcsa.conformance.standards.booking.checks.CarrierStatusScenario;
 import java.util.stream.Stream;
 
 @Getter
-public class UC14CarrierProcessBookingCancellationAction extends StateChangingBookingAction {
+public class UC14CarrierProcessBookingCancellationAction extends CarrierNotificationBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC14CarrierProcessBookingCancellationAction(

@@ -1,8 +1,5 @@
-* Send a lightweight or full notification to the shipper (if you have implemented notifications support).
+* Optionally send a lightweight or full notification to the shipper if you have implemented notification support.
 
 Press "Refresh status" to refresh the scenario status and conformance checks.
 
-If you have not sent a notification, the conformance report will show "❔" (missing traffic) for the notification
-conformance checks.
-
-Press "Action completed" to mark this scenario action completed.
+Press "Action completed" after completing the required Booking action. When completed without sending a notification, the action will be shown with "✔️".

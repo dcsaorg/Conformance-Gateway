@@ -22,7 +22,7 @@ public class ShipperGetBookingAction extends BookingAction {
   private final BookingState expectedBookingStatus;
   private final CarrierStatusScenario carrierStatusScenario;
   private final JsonSchemaValidator responseSchemaValidator;
-  private final boolean requestAmendedContent;
+  protected final boolean requestAmendedContent;
 
   public ShipperGetBookingAction(
     String carrierPartyName,

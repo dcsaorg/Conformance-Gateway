@@ -329,7 +329,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
       return;
     }
 
-    if (!skipAction && nextAction.isMissingMatchedExchange()) {
+    String externalPartyRole =
+        sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole();
+
+    if (!skipAction
+        && nextAction.isMissingMatchedExchange()
+        && !nextAction.completableWithoutTrafficForRoles().contains(externalPartyRole)) {
       throw new UserFacingException(
           "A required API exchange was not yet detected for action '%s'"
               .formatted(nextAction.getActionTitle()));
@@ -338,12 +343,18 @@ public class ConformanceOrchestrator implements StatefulEntity {
     if (skipAction
         && !nextAction
             .skippableForRoles()
-            .contains(sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole())) {
+            .contains(externalPartyRole)) {
       throw new UserFacingException(
           "Action '%s' cannot be skipped for role '%s'"
               .formatted(
                   nextAction.getActionTitle(),
-                  sandboxConfiguration.getExternalPartyCounterpartConfiguration().getRole()));
+                  externalPartyRole));
+    }
+
+    if (skipAction) {
+      nextAction.markSkipped();
+    } else if (nextAction.isMissingMatchedExchange()) {
+      nextAction.markCompletedWithoutTraffic();
     }
 
     currentScenario.popNextAction();

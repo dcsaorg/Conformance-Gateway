@@ -26,6 +26,13 @@ public class ConformanceReport {
   private final List<ConformanceReport> subReports;
 
   public ConformanceReport(ConformanceCheck conformanceCheck, String roleName) {
+    this(conformanceCheck, roleName, null);
+  }
+
+  private ConformanceReport(
+      ConformanceCheck conformanceCheck,
+      String roleName,
+      ConformanceStatus inheritedStatusOverride) {
     this.conformanceCheck = conformanceCheck;
     this.title = conformanceCheck.getTitle();
     conformanceCheck
@@ -43,19 +50,32 @@ public class ConformanceReport {
         conformanceCheck
             .subChecksStream()
             .filter(check -> check.isRelevantForRole(roleName))
-            .map(subCheck -> new ConformanceReport(subCheck, roleName))
+            .map(
+                subCheck ->
+                    new ConformanceReport(
+                        subCheck,
+                        roleName,
+                        conformanceCheck.isStatusOverridePropagated()
+                            ? Objects.requireNonNullElse(
+                                inheritedStatusOverride, conformanceCheck.getStatusOverride())
+                            : null))
             .toList();
-    this.conformanceStatus =
+    ConformanceStatus computedStatus =
         this.subReports.stream()
-            .map(subReport -> subReport.conformanceStatus)
+            .map(subReport -> subReport.conformanceStatus.forAggregation())
             .reduce(ConformanceStatusReducer::reduce)
             .orElse(
                 ConformanceStatus.forExchangeCounts(
                     conformantExchangeCount,
                     nonConformantExchangeCount,
                     conformanceCheck.isRelevant()));
+    this.conformanceStatus =
+        Objects.requireNonNullElse(
+            inheritedStatusOverride,
+            Objects.requireNonNullElse(conformanceCheck.getStatusOverride(), computedStatus));
 
-    if (this.conformanceStatus.equals(ConformanceStatus.IRRELEVANT)) {
+    if (this.conformanceStatus.equals(ConformanceStatus.IRRELEVANT)
+        || this.conformanceStatus.equals(ConformanceStatus.SKIPPED)) {
       this.errorMessages = Set.of();
     }
 
@@ -192,7 +212,9 @@ public class ConformanceReport {
   private static String getConformanceIcon(ConformanceStatus conformanceStatus) {
     return switch (conformanceStatus) {
       case CONFORMANT -> "✅";
-      case PARTIALLY_CONFORMANT -> "✔️";
+      case PARTIALLY_CONFORMANT -> "❔";
+      case COMPLETED_WITHOUT_TRAFFIC -> "✔️";
+      case SKIPPED -> "↪️";
       case NON_CONFORMANT -> "🚫";
       case IRRELEVANT -> "➖";
       default -> "❔";
@@ -203,6 +225,8 @@ public class ConformanceReport {
     return switch (conformanceStatus) {
       case CONFORMANT -> "CONFORMANT";
       case PARTIALLY_CONFORMANT -> "PARTIALLY CONFORMANT";
+      case COMPLETED_WITHOUT_TRAFFIC -> "COMPLETED WITHOUT OPTIONAL TRAFFIC";
+      case SKIPPED -> "SKIPPED";
       case NON_CONFORMANT -> "NON-CONFORMANT";
       case IRRELEVANT -> "IRRELEVANT";
       default -> "NO TRAFFIC";

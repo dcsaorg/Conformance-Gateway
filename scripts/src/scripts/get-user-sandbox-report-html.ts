@@ -28,6 +28,8 @@ type ConformanceStatus =
   | 'CONFORMANT'
   | 'NON_CONFORMANT'
   | 'PARTIALLY_CONFORMANT'
+  | 'COMPLETED_WITHOUT_TRAFFIC'
+  | 'SKIPPED'
   | 'NO_TRAFFIC'
   | 'IRRELEVANT';
 
@@ -46,7 +48,9 @@ function getConformanceStatusEmoji(status: ConformanceStatus): string {
   switch (status) {
     case 'CONFORMANT':           return '✅';
     case 'NON_CONFORMANT':       return '🚫';
-    case 'PARTIALLY_CONFORMANT': return '✔️';
+    case 'PARTIALLY_CONFORMANT': return '❔';
+    case 'COMPLETED_WITHOUT_TRAFFIC': return '✔️';
+    case 'SKIPPED':              return '↪️';
     case 'NO_TRAFFIC':           return '❔';
     case 'IRRELEVANT':           return '➖';
   }
@@ -57,6 +61,8 @@ function getConformanceStatusTitle(status: ConformanceStatus): string {
     case 'CONFORMANT':           return 'Conformant';
     case 'NON_CONFORMANT':       return 'Non-conformant';
     case 'PARTIALLY_CONFORMANT': return 'Partially conformant';
+    case 'COMPLETED_WITHOUT_TRAFFIC': return 'Completed without optional traffic';
+    case 'SKIPPED':              return 'Skipped';
     case 'NO_TRAFFIC':           return 'No traffic';
     case 'IRRELEVANT':           return 'Irrelevant';
   }

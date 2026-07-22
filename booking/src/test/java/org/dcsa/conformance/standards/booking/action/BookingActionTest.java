@@ -25,8 +25,12 @@ class BookingActionTest {
 
   @ParameterizedTest
   @MethodSource("carrierNotificationActions")
-  void carrierNotificationActionsAreSkippableOnlyForCarrier(BookingAction action) {
-    assertEquals(Set.of(BookingRole.CARRIER.getConfigName()), action.skippableForRoles());
+  void carrierNotificationActionsAreCompletableWithoutTrafficButNotSkippable(
+      BookingAction action) {
+    assertEquals(Set.of(), action.skippableForRoles());
+    assertEquals(
+        Set.of(BookingRole.CARRIER.getConfigName()),
+        action.completableWithoutTrafficForRoles());
   }
 
   private static Stream<BookingAction> carrierNotificationActions() {

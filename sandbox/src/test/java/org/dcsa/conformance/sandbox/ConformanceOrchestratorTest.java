@@ -2,6 +2,7 @@ package org.dcsa.conformance.sandbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.core.AbstractComponentFactory;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -21,39 +22,102 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConformanceOrchestratorTest {
 
   @Test
   void skippingAnActionDoesNotAlsoSkipTheFollowingGet() {
-    var skippedAction = new TestAction("Carrier", "Shipper", null, "UC5", Set.of("Carrier"));
-    var getAction = new TestAction("Shipper", "Carrier", skippedAction, "GET", Set.of());
-    var scenario = new ConformanceScenario(0, 0, List.of(skippedAction, getAction));
+    var skippedAction =
+      new TestAction("Shipper", "Carrier", null, "GET", Set.of("Shipper"), Set.of());
+    var nextAction =
+      new TestAction("Carrier", "Shipper", skippedAction, "UC5", Set.of(), Set.of());
+    var scenario = new ConformanceScenario(0, 0, List.of(skippedAction, nextAction));
 
+    var orchestrator = orchestrator(scenario, "Shipper");
+    orchestrator.completeCurrentAction(true);
+
+    assertEquals(ConformanceAction.CompletionOutcome.SKIPPED, skippedAction.getCompletionOutcome());
+    assertSame(nextAction, scenario.peekNextAction());
+  }
+
+  @Test
+  void completingOptionalCarrierNotificationWithoutTrafficUnlocksFollowingGet() {
+    var carrierAction =
+      new TestAction("Carrier", "Shipper", null, "UC5", Set.of(), Set.of("Carrier"));
+    var getAction =
+      new TestAction("Shipper", "Carrier", carrierAction, "GET", Set.of(), Set.of());
+    var scenario = new ConformanceScenario(0, 0, List.of(carrierAction, getAction));
+
+    var orchestrator = orchestrator(scenario, "Carrier");
+    orchestrator.completeCurrentAction(false);
+
+    assertEquals(
+      ConformanceAction.CompletionOutcome.COMPLETED_WITHOUT_TRAFFIC,
+      carrierAction.getCompletionOutcome());
+    assertSame(getAction, scenario.peekNextAction());
+  }
+
+  @Test
+  void optionalCarrierNotificationCannotBeExplicitlySkipped() {
+    var carrierAction =
+      new TestAction("Carrier", "Shipper", null, "UC5", Set.of(), Set.of("Carrier"));
+    var orchestrator =
+      orchestrator(new ConformanceScenario(0, 0, List.of(carrierAction)), "Carrier");
+
+    assertThrows(UserFacingException.class, () -> orchestrator.completeCurrentAction(true));
+  }
+
+  @Test
+  void requiredActionCannotBeCompletedWithoutTraffic() {
+    var requiredAction =
+      new TestAction("Carrier", "Shipper", null, "Required", Set.of(), Set.of());
+    var orchestrator =
+      orchestrator(new ConformanceScenario(0, 0, List.of(requiredAction)), "Carrier");
+
+    assertThrows(UserFacingException.class, () -> orchestrator.completeCurrentAction(false));
+  }
+
+  @Test
+  void completionOutcomeIsPersisted() {
+    var original =
+      new TestAction("Carrier", "Shipper", null, "UC5", Set.of(), Set.of("Carrier"));
+    original.markCompletedWithoutTraffic();
+    var restored =
+      new TestAction("Carrier", "Shipper", null, "UC5", Set.of(), Set.of("Carrier"));
+
+    restored.importJsonState(original.exportJsonState());
+
+    assertEquals(
+      ConformanceAction.CompletionOutcome.COMPLETED_WITHOUT_TRAFFIC,
+      restored.getCompletionOutcome());
+  }
+
+  private static ConformanceOrchestrator orchestrator(
+      ConformanceScenario scenario, String externalRole) {
     var orchestrator = new ConformanceOrchestrator(
-      sandboxConfiguration(),
+      sandboxConfiguration(externalRole),
       new TestComponentFactory(scenario),
       new TrafficRecorder(null, ""),
       new EmptyJsonNodeMap(),
       ignored -> {});
     orchestrator.startOrStopScenario(scenario.getId().toString());
-
-    orchestrator.completeCurrentAction(true);
-
-    assertSame(getAction, scenario.peekNextAction());
+    return orchestrator;
   }
 
-  private static SandboxConfiguration sandboxConfiguration() {
-    var shipperParty = new PartyConfiguration();
-    shipperParty.setName("Shipper");
-    shipperParty.setRole("Shipper");
+  private static SandboxConfiguration sandboxConfiguration(String externalRole) {
+    String internalRole = externalRole.equals("Carrier") ? "Shipper" : "Carrier";
+    var internalParty = new PartyConfiguration();
+    internalParty.setName(internalRole);
+    internalParty.setRole(internalRole);
 
     var shipperCounterpart = counterpart("Shipper", "Shipper");
     var carrierCounterpart = counterpart("Carrier", "Carrier");
 
     var configuration = new SandboxConfiguration();
-    configuration.setParties(new PartyConfiguration[]{shipperParty});
+    configuration.setParties(new PartyConfiguration[]{internalParty});
     configuration.setCounterparts(new CounterpartConfiguration[]{shipperCounterpart, carrierCounterpart});
     return configuration;
   }
@@ -130,15 +194,18 @@ class ConformanceOrchestratorTest {
 
   private static final class TestAction extends ConformanceAction {
     private final Set<String> skippableForRoles;
+    private final Set<String> completableWithoutTrafficForRoles;
 
     private TestAction(
       String sourcePartyName,
       String targetPartyName,
       ConformanceAction previousAction,
       String actionTitle,
-      Set<String> skippableForRoles) {
+      Set<String> skippableForRoles,
+      Set<String> completableWithoutTrafficForRoles) {
       super(sourcePartyName, targetPartyName, previousAction, actionTitle);
       this.skippableForRoles = skippableForRoles;
+      this.completableWithoutTrafficForRoles = completableWithoutTrafficForRoles;
     }
 
     @Override
@@ -149,6 +216,11 @@ class ConformanceOrchestratorTest {
     @Override
     public Set<String> skippableForRoles() {
       return skippableForRoles;
+    }
+
+    @Override
+    public Set<String> completableWithoutTrafficForRoles() {
+      return completableWithoutTrafficForRoles;
     }
   }
 }

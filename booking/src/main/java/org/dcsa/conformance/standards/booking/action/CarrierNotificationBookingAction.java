@@ -4,6 +4,7 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 
 import java.util.Set;
 
+/** A Carrier state-changing use case whose booking notification exchange is optional. */
 public abstract class CarrierNotificationBookingAction extends StateChangingBookingAction {
 
   protected CarrierNotificationBookingAction(
@@ -23,8 +24,7 @@ public abstract class CarrierNotificationBookingAction extends StateChangingBook
   }
 
   @Override
-  public Set<String> skippableForRoles() {
+  public Set<String> completableWithoutTrafficForRoles() {
     return Set.of(BookingRole.CARRIER.getConfigName());
   }
 }
-

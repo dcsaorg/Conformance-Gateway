@@ -25,6 +25,8 @@ public abstract class ConformanceCheck {
 
   private boolean isRelevant = true;
   private boolean isApplicable = true;
+  private ConformanceStatus statusOverride;
+  private boolean statusOverridePropagated;
 
   protected ConformanceCheck(String title) {
     this.title = title;
@@ -84,6 +86,13 @@ public abstract class ConformanceCheck {
 
   public Consumer<ConformanceStatus> computedStatusConsumer() {
     return ignoredStatus -> {};
+  }
+
+  public ConformanceCheck withStatusOverride(
+      ConformanceStatus statusOverride, boolean propagateToSubChecks) {
+    this.statusOverride = statusOverride;
+    this.statusOverridePropagated = propagateToSubChecks;
+    return this;
   }
 
   public boolean isRelevant() {

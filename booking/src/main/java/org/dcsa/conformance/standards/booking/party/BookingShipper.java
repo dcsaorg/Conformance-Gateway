@@ -122,8 +122,6 @@ public class BookingShipper extends ConformanceParty {
     ObjectNode updatedBooking =
       ((ObjectNode) bookingPayload).put("carrierBookingRequestReference", cbrr);
     persistentMap.save(cbrr, updatedBooking);
-
-
   }
 
   private void sendCancelBookingRequest(JsonNode actionPrompt) {

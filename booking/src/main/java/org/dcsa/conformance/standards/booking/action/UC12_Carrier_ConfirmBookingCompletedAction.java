@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
-import java.util.Set;
 import java.util.stream.Stream;
 
 @Getter
-public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBookingAction {
+public class UC12_Carrier_ConfirmBookingCompletedAction extends CarrierNotificationBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC12_Carrier_ConfirmBookingCompletedAction(
@@ -39,10 +37,6 @@ public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
       .put("cbr", dsp.carrierBookingReference());
   }
 
-  @Override
-  public Set<String> skippableForRoles() {
-    return Set.of(BookingRole.CARRIER.getConfigName());
-  }
 
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {

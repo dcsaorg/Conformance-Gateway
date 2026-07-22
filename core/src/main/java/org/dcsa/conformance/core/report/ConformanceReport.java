@@ -212,8 +212,7 @@ public class ConformanceReport {
   private static String getConformanceIcon(ConformanceStatus conformanceStatus) {
     return switch (conformanceStatus) {
       case CONFORMANT -> "✅";
-      case PARTIALLY_CONFORMANT -> "❔";
-      case COMPLETED_WITHOUT_TRAFFIC -> "✔️";
+      case PARTIALLY_CONFORMANT, COMPLETED_WITHOUT_TRAFFIC -> "✔️";
       case SKIPPED -> "↪️";
       case NON_CONFORMANT -> "🚫";
       case IRRELEVANT -> "➖";

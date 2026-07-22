@@ -48,7 +48,7 @@ function getConformanceStatusEmoji(status: ConformanceStatus): string {
   switch (status) {
     case 'CONFORMANT':           return '✅';
     case 'NON_CONFORMANT':       return '🚫';
-    case 'PARTIALLY_CONFORMANT': return '❔';
+    case 'PARTIALLY_CONFORMANT': return '✔️';
     case 'COMPLETED_WITHOUT_TRAFFIC': return '✔️';
     case 'SKIPPED':              return '↪️';
     case 'NO_TRAFFIC':           return '❔';

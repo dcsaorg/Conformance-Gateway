@@ -19,7 +19,7 @@ export function getConformanceStatusEmoji(conformanceStatus: ConformanceStatus):
         case ConformanceStatus.NON_CONFORMANT:
             return "🚫";
         case ConformanceStatus.PARTIALLY_CONFORMANT:
-            return "❔";
+            return "✔️";
         case ConformanceStatus.COMPLETED_WITHOUT_TRAFFIC:
             return "✔️";
         case ConformanceStatus.SKIPPED:

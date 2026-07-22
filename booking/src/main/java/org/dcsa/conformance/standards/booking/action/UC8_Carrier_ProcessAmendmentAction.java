@@ -9,7 +9,7 @@ import org.dcsa.conformance.standards.booking.checks.CarrierStatusScenario;
 import java.util.stream.Stream;
 
 @Getter
-public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingAction {
+public class UC8_Carrier_ProcessAmendmentAction extends CarrierNotificationBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC8_Carrier_ProcessAmendmentAction(

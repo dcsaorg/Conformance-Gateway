@@ -19,6 +19,12 @@ public class ShipperGetBookingSkippableAction extends ShipperGetBookingAction {
   }
 
   @Override
+  public String getHumanReadablePrompt() {
+    return getMarkdownHumanReadablePrompt("prompt-shipper-get.md", "prompt-shipper-refresh-skippable-complete.md")
+      .replace("ORIGINAL_OR_AMENDED_PLACEHOLDER", requestAmendedContent ? "AMENDED" : "ORIGINAL");
+  }
+
+  @Override
   public Set<String> skippableForRoles() {
     return Set.of(BookingRole.SHIPPER.getConfigName());
   }

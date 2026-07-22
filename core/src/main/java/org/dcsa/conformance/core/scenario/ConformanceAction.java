@@ -22,12 +22,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.ConformanceResult;
+import org.dcsa.conformance.core.report.ConformanceStatus;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
 @Slf4j
 public abstract class ConformanceAction implements StatefulEntity {
+
+  public enum CompletionOutcome {
+    NONE,
+    SKIPPED,
+    COMPLETED_WITHOUT_TRAFFIC
+  }
 
   private final String sourcePartyName;
   private final String targetPartyName;
@@ -40,6 +47,7 @@ public abstract class ConformanceAction implements StatefulEntity {
   private volatile UUID matchedNotificationExchangeUuid;
   private volatile String exchangeHandlingExceptionMessage;
   private volatile String notificationHandlingExceptionMessage;
+  private volatile CompletionOutcome completionOutcome = CompletionOutcome.NONE;
 
   protected ConformanceAction(
       String sourcePartyName,
@@ -58,6 +66,7 @@ public abstract class ConformanceAction implements StatefulEntity {
     id = UUID.randomUUID();
     matchedExchangeUuid = null;
     matchedNotificationExchangeUuid = null;
+    completionOutcome = CompletionOutcome.NONE;
   }
 
   @Override
@@ -76,12 +85,18 @@ public abstract class ConformanceAction implements StatefulEntity {
     if (notificationHandlingExceptionMessage != null) {
       jsonState.put("notificationHandlingExceptionMessage", notificationHandlingExceptionMessage);
     }
+    jsonState.put("completionOutcome", completionOutcome.name());
     return jsonState;
   }
 
   @Override
   public void importJsonState(JsonNode jsonState) {
     id = UUID.fromString(jsonState.get("id").asText());
+    matchedExchangeUuid = null;
+    matchedNotificationExchangeUuid = null;
+    exchangeHandlingExceptionMessage = null;
+    notificationHandlingExceptionMessage = null;
+    completionOutcome = CompletionOutcome.NONE;
     if (jsonState.has("matchedExchangeUuid")) {
       this.matchedExchangeUuid = UUID.fromString(jsonState.get("matchedExchangeUuid").asText());
     }
@@ -96,6 +111,9 @@ public abstract class ConformanceAction implements StatefulEntity {
     if (jsonState.has("notificationHandlingExceptionMessage")) {
       this.notificationHandlingExceptionMessage =
           jsonState.get("notificationHandlingExceptionMessage").asText();
+    }
+    if (jsonState.has("completionOutcome")) {
+      completionOutcome = CompletionOutcome.valueOf(jsonState.get("completionOutcome").asText());
     }
   }
 
@@ -206,42 +224,52 @@ public abstract class ConformanceAction implements StatefulEntity {
   protected void doHandleNotificationExchange(ConformanceExchange exchange) {}
 
   public final ConformanceCheck createFullCheck(String expectedApiVersion) {
+    ConformanceCheck actionCheck;
     if (this.exchangeHandlingExceptionMessage == null
         && this.notificationHandlingExceptionMessage == null) {
-      return createCheck(expectedApiVersion);
+      actionCheck = createCheck(expectedApiVersion);
+    } else {
+      actionCheck = new ConformanceCheck(getActionTitle()) {
+        @Override
+        protected Stream<? extends ConformanceCheck> createSubChecks() {
+          // Not filtering by role: even when it's not the adopter system's fault,
+          // the operator must still see that there was an error.
+          return Stream.of(
+                  exchangeHandlingExceptionMessage == null
+                      ? null
+                      : new ConformanceCheck("Exchange handling exception") {
+                        @Override
+                        protected void doCheck(
+                            Function<UUID, ConformanceExchange> getExchangeByUuid) {
+                          addResult(
+                              ConformanceResult.withErrors(
+                                  Set.of(exchangeHandlingExceptionMessage)));
+                        }
+                      },
+                  notificationHandlingExceptionMessage == null
+                      ? null
+                      : new ConformanceCheck("Notification handling exception") {
+                        @Override
+                        protected void doCheck(
+                            Function<UUID, ConformanceExchange> getExchangeByUuid) {
+                          addResult(
+                              ConformanceResult.withErrors(
+                                  Set.of(notificationHandlingExceptionMessage)));
+                        }
+                      },
+                  createCheck(expectedApiVersion))
+              .filter(Objects::nonNull);
+        }
+      };
     }
-    return new ConformanceCheck(getActionTitle()) {
-      @Override
-      protected Stream<? extends ConformanceCheck> createSubChecks() {
-        // Not filtering by role: even when it's not the adopter system's fault,
-        // the operator must still see that there was an error.
-        return Stream.of(
-                exchangeHandlingExceptionMessage == null
-                    ? null
-                    : new ConformanceCheck("Exchange handling exception") {
-                      @Override
-                      protected void doCheck(
-                          Function<UUID, ConformanceExchange> getExchangeByUuid) {
-                        addResult(
-                            ConformanceResult.withErrors(
-                                Set.of(exchangeHandlingExceptionMessage)));
-                      }
-                    },
-                notificationHandlingExceptionMessage == null
-                    ? null
-                    : new ConformanceCheck("Notification handling exception") {
-                      @Override
-                      protected void doCheck(
-                          Function<UUID, ConformanceExchange> getExchangeByUuid) {
-                        addResult(
-                            ConformanceResult.withErrors(
-                                Set.of(notificationHandlingExceptionMessage)));
-                      }
-                    },
-                createCheck(expectedApiVersion))
-            .filter(Objects::nonNull);
-      }
-    };
+    if (actionCheck == null || completionOutcome == CompletionOutcome.NONE) {
+      return actionCheck;
+    }
+    return actionCheck.withStatusOverride(
+        completionOutcome == CompletionOutcome.SKIPPED
+            ? ConformanceStatus.SKIPPED
+            : ConformanceStatus.COMPLETED_WITHOUT_TRAFFIC,
+        completionOutcome == CompletionOutcome.SKIPPED);
   }
 
   public ConformanceCheck createCheck(String expectedApiVersion) {
@@ -309,8 +337,22 @@ public abstract class ConformanceAction implements StatefulEntity {
         .put("actionPath", actionPath);
   }
 
-  public Set<String> skippableForRoles(){
+  /** Roles allowed to intentionally bypass this entire action. */
+  public Set<String> skippableForRoles() {
     return Collections.emptySet();
+  }
+
+  /** Roles allowed to complete this action when its API exchange is optional and was not detected. */
+  public Set<String> completableWithoutTrafficForRoles() {
+    return Collections.emptySet();
+  }
+
+  public void markSkipped() {
+    completionOutcome = CompletionOutcome.SKIPPED;
+  }
+
+  public void markCompletedWithoutTraffic() {
+    completionOutcome = CompletionOutcome.COMPLETED_WITHOUT_TRAFFIC;
   }
 
   @Override

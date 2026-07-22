@@ -8,7 +8,8 @@ public class ConformanceStatusReducer {
 
   public static ConformanceStatus reduce(
       ConformanceStatus conformanceStatus1, ConformanceStatus conformanceStatus2) {
-    List<ConformanceStatus> statuses = List.of(conformanceStatus1, conformanceStatus2);
+    List<ConformanceStatus> statuses =
+        List.of(conformanceStatus1.forAggregation(), conformanceStatus2.forAggregation());
 
     if (statuses.contains(ConformanceStatus.NON_CONFORMANT)) {
       return ConformanceStatus.NON_CONFORMANT;

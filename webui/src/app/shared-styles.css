@@ -93,3 +93,11 @@
 .green-button:hover {
   background-color: #4CAF50;
 }
+
+.red-button {
+  background-color: #c62828 !important;
+  color: white !important;
+}
+.red-button:hover {
+  background-color: #d32f2f;
+}

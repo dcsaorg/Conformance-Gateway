@@ -3,7 +3,6 @@ package org.dcsa.conformance.core.scenario;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.Collections;
@@ -331,14 +330,11 @@ public abstract class ConformanceAction implements StatefulEntity {
   protected void doHandlePartyInput(JsonNode partyInput) throws UserFacingException {}
 
   public ObjectNode asJsonNode() {
-    ObjectNode jsonNode = OBJECT_MAPPER
-      .createObjectNode()
-      .put("actionId", id.toString())
-      .put("actionType", getClass().getCanonicalName())
-      .put("actionPath", actionPath);
-    ArrayNode completableWithoutTrafficForRolesNode = jsonNode.putArray("completableWithoutTrafficForRoles");
-    completableWithoutTrafficForRoles().forEach(completableWithoutTrafficForRolesNode::add);
-    return jsonNode;
+    return OBJECT_MAPPER
+        .createObjectNode()
+        .put("actionId", id.toString())
+        .put("actionType", getClass().getCanonicalName())
+        .put("actionPath", actionPath);
   }
 
   /** Roles allowed to intentionally bypass this entire action. */

@@ -13,6 +13,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSelectModule} from '@angular/material/select';
 import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatTabsModule} from "@angular/material/tabs";
 
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
@@ -35,7 +36,6 @@ import {EditHeaderComponent} from "./pages/edit-header/edit-header.component";
 import {MarkdownModule} from "ngx-markdown";
 import {SandboxTypeComponent} from "./components/sandbox-type/sandbox-type.component";
 import {TextDialog} from "./dialogs/text/text-dialog.component";
-import {MatTabsModule} from "@angular/material/tabs";
 
 @NgModule({
   declarations: [

@@ -183,11 +183,15 @@ export class SandboxComponent implements OnInit, OnDestroy {
     }
   }
 
-  async onClickNotifyPartyWithoutNotification() {
-    const response: any = await this.conformanceService.notifyPartyWithoutNotification(this.sandbox!.id);
-    if (await MessageDialog.showIfError(response, this.dialog, "Error notifying party without sending a notification")) {
+  async onClickToggleNotifications() {
+    const suppressed = !this.sandbox!.notificationsSuppressed;
+    const response: any = await this.conformanceService.setNotificationsSuppressed(this.sandbox!.id, suppressed);
+    if (await MessageDialog.showIfError(response, this.dialog, "Error toggling notifications")) {
       this.cdr.detectChanges();
+      return;
     }
+    this.sandbox!.notificationsSuppressed = suppressed;
+    this.cdr.detectChanges();
   }
 
 

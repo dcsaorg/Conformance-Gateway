@@ -382,22 +382,8 @@ public class ConformanceSandbox {
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId) {
-    _notifyParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId, true);
-  }
-
-  public static void notifyPartyWithoutNotification(
-      ConformancePersistenceProvider persistenceProvider,
-      Consumer<JsonNode> deferredSandboxTaskConsumer,
-      String sandboxId) {
-    _notifyParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId, false);
-  }
-
-  private static void _notifyParty(
-      ConformancePersistenceProvider persistenceProvider,
-      Consumer<JsonNode> deferredSandboxTaskConsumer,
-      String sandboxId,
-      boolean shouldNotify) {
-    SandboxConfiguration sandboxConfiguration = loadSandboxConfiguration(persistenceProvider, sandboxId);
+    SandboxConfiguration sandboxConfiguration =
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (sandboxConfiguration.getOrchestrator().isActive()) return;
 
     String partyName = sandboxConfiguration.getParties()[0].getName();
@@ -407,28 +393,53 @@ public class ConformanceSandbox {
             sandboxId,
             partyName,
             "handling notification for party " + partyName,
-            party -> party.handleNotification(shouldNotify))
+            ConformanceParty::handleNotification)
         .run();
   }
 
-  public static JsonNode getPendingActionPrompt(
+  /**
+   * Toggles whether this party sends notifications to its counterpart when handling action
+   * prompts (see {@code ConformanceParty.setSuppressNotifications(boolean)}).
+   */
+  public static void setPartyNotificationsSuppressed(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,
-      String sandboxId) {
-    SandboxConfiguration sandboxConfiguration = loadSandboxConfiguration(persistenceProvider, sandboxId);
-    if (sandboxConfiguration.getOrchestrator().isActive()) return null;
+      String sandboxId,
+      boolean suppressed) {
+    SandboxConfiguration sandboxConfiguration =
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
+    if (sandboxConfiguration.getOrchestrator().isActive()) return;
 
     String partyName = sandboxConfiguration.getParties()[0].getName();
-    AtomicReference<JsonNode> pendingActionPromptReference = new AtomicReference<>();
     new PartyTask(
             persistenceProvider,
             deferredSandboxTaskConsumer,
             sandboxId,
             partyName,
-            "getting pending action prompt for party " + partyName,
-            party -> pendingActionPromptReference.set(party.peekPendingActionPrompt()))
+            "setting notifications suppressed=%s for party %s".formatted(suppressed, partyName),
+            party -> party.setSuppressNotifications(suppressed))
         .run();
-    return pendingActionPromptReference.get();
+  }
+
+  public static boolean isPartyNotificationsSuppressed(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
+      String sandboxId) {
+    SandboxConfiguration sandboxConfiguration =
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
+    if (sandboxConfiguration.getOrchestrator().isActive()) return false;
+
+    String partyName = sandboxConfiguration.getParties()[0].getName();
+    AtomicReference<Boolean> suppressedReference = new AtomicReference<>(false);
+    new PartyTask(
+            persistenceProvider,
+            deferredSandboxTaskConsumer,
+            sandboxId,
+            partyName,
+            "getting notifications suppressed flag for party " + partyName,
+            party -> suppressedReference.set(party.isSuppressNotifications()))
+        .run();
+    return suppressedReference.get();
   }
 
   public static void resetParty(

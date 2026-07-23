@@ -146,16 +146,14 @@
         (click)="onClickNotifyParty()"
         >Notify party</button>
         &nbsp;
-        @if (sandbox && sandbox.canNotifyPartyWithoutNotification) {
-          <button
-          id="notifyPartyWithoutNotificationButton"
+        <button
+          id="toggleNotificationsButton"
           mat-raised-button
-          color="primary"
-          title="Handle the pending action(s) without sending a notification to the counterpart"
-          (click)="onClickNotifyPartyWithoutNotification()"
-          >Notify party without sending notification</button>
-          &nbsp;
-        }
+          [ngClass]="sandbox?.notificationsSuppressed ? 'green-button' : 'red-button'"
+          [title]="sandbox?.notificationsSuppressed ? 'Enable outbound notifications to counterpart' : 'Disable outbound notifications to counterpart'"
+          (click)="onClickToggleNotifications()"
+        >{{sandbox?.notificationsSuppressed ? 'Enable notifications' : 'Disable notifications'}}</button>
+        &nbsp;
         <button
           testId="resetPartyButton"
         mat-raised-button

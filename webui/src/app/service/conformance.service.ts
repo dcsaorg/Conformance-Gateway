@@ -52,12 +52,14 @@ export class ConformanceService {
     });
   }
 
-  async notifyPartyWithoutNotification(sandboxId: string): Promise<any> {
+  async setNotificationsSuppressed(sandboxId: string, suppressed: boolean): Promise<any> {
     return await this.apiService.call({
-      operation: "notifyPartyWithoutNotification",
+      operation: "setNotificationsSuppressed",
       sandboxId,
+      suppressed,
     });
   }
+
 
   async resetParty(sandboxId: string): Promise<any> {
     return await this.apiService.call({

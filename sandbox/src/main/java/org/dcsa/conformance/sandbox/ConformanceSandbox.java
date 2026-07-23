@@ -382,8 +382,22 @@ public class ConformanceSandbox {
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId) {
-    SandboxConfiguration sandboxConfiguration =
-        loadSandboxConfiguration(persistenceProvider, sandboxId);
+    _notifyParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId, true);
+  }
+
+  public static void notifyPartyWithoutNotification(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
+      String sandboxId) {
+    _notifyParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId, false);
+  }
+
+  private static void _notifyParty(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
+      String sandboxId,
+      boolean shouldNotify) {
+    SandboxConfiguration sandboxConfiguration = loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (sandboxConfiguration.getOrchestrator().isActive()) return;
 
     String partyName = sandboxConfiguration.getParties()[0].getName();
@@ -393,8 +407,28 @@ public class ConformanceSandbox {
             sandboxId,
             partyName,
             "handling notification for party " + partyName,
-            ConformanceParty::handleNotification)
+            party -> party.handleNotification(shouldNotify))
         .run();
+  }
+
+  public static JsonNode getPendingActionPrompt(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
+      String sandboxId) {
+    SandboxConfiguration sandboxConfiguration = loadSandboxConfiguration(persistenceProvider, sandboxId);
+    if (sandboxConfiguration.getOrchestrator().isActive()) return null;
+
+    String partyName = sandboxConfiguration.getParties()[0].getName();
+    AtomicReference<JsonNode> pendingActionPromptReference = new AtomicReference<>();
+    new PartyTask(
+            persistenceProvider,
+            deferredSandboxTaskConsumer,
+            sandboxId,
+            partyName,
+            "getting pending action prompt for party " + partyName,
+            party -> pendingActionPromptReference.set(party.peekPendingActionPrompt()))
+        .run();
+    return pendingActionPromptReference.get();
   }
 
   public static void resetParty(

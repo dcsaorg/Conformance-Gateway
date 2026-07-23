@@ -86,6 +86,7 @@ public class ConformanceWebuiHandler {
           case "getAllSandboxes" -> _getAllSandboxes(userId);
           case "getSandbox" -> _getSandbox(userId, requestNode);
           case "notifyParty" -> _notifyParty(userId, requestNode);
+          case "notifyPartyWithoutNotification" -> _notifyPartyWithoutNotification(userId, requestNode);
           case "resetParty" -> _resetParty(userId, requestNode);
           case "createReport" -> _createReport(userId, requestNode);
           case "getReportDigests" -> _getReportDigests(userId, requestNode);
@@ -565,8 +566,19 @@ public class ConformanceWebuiHandler {
           persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
       sandboxNode.set("operatorLog", operatorLog);
       sandboxNode.put("canNotifyParty", operatorLog != null);
+      sandboxNode.put("canNotifyPartyWithoutNotification", operatorLog != null && _canNotifyPartyWithoutNotification(sandboxId));
     }
     return sandboxNode;
+  }
+
+  private boolean _canNotifyPartyWithoutNotification(String sandboxId) {
+    SandboxConfiguration sandboxConfiguration = ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
+    String testedPartyRole = sandboxConfiguration.getSandboxPartyCounterpartConfiguration().getRole();
+    JsonNode pendingActionPrompt = ConformanceSandbox.getPendingActionPrompt(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+    if (pendingActionPrompt == null || !pendingActionPrompt.isArray() || pendingActionPrompt.isEmpty()) return false;
+    return StreamSupport.stream(pendingActionPrompt.spliterator(), false)
+      .allMatch(actionNode -> StreamSupport.stream(actionNode.path("completableWithoutTrafficForRoles").spliterator(), false)
+        .anyMatch(roleNode -> roleNode.asText().equals(testedPartyRole)));
   }
 
   private JsonNode _getSandbox(String userId, JsonNode requestNode) {
@@ -580,6 +592,16 @@ public class ConformanceWebuiHandler {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ConformanceSandbox.notifyParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+    return OBJECT_MAPPER.createObjectNode();
+  }
+
+  private JsonNode _notifyPartyWithoutNotification(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    if (!_canNotifyPartyWithoutNotification(sandboxId)) {
+      throw new UserFacingException("The pending action(s) for this party cannot be completed without sending a notification");
+    }
+    ConformanceSandbox.notifyPartyWithoutNotification(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     return OBJECT_MAPPER.createObjectNode();
   }
 

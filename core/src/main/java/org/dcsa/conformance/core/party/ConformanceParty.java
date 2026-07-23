@@ -57,6 +57,8 @@ public abstract class ConformanceParty implements StatefulEntity {
   private final Map<String, ? extends Collection<String>> orchestratorAuthHeader;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
+  private boolean suppressNotifications = false;
+
   private static final int MAX_OPERATOR_LOG_RECORDS = 12;
   private final List<TimestampedLogEntry> operatorLog = new LinkedList<>();
 
@@ -229,6 +231,10 @@ public abstract class ConformanceParty implements StatefulEntity {
   }
 
   protected void asyncCounterpartNotification(String actionId, String path, JsonNode jsonBody) {
+    if (suppressNotifications) {
+      log.info("Party {} NOT sending a notification for action {}: notifications are suppressed for this request", partyConfiguration.getName(), actionId);
+      return;
+    }
     var counterpartUrl = counterpartConfiguration.getUrl();
     if (counterpartUrl != null && !counterpartUrl.isBlank()) {
       webClient.asyncRequest(
@@ -331,13 +337,20 @@ public abstract class ConformanceParty implements StatefulEntity {
   public abstract ConformanceResponse handleRequest(ConformanceRequest request);
 
   public void handleNotification() {
-    log.info(
-        "{}[{}].handleNotification()", getClass().getSimpleName(), partyConfiguration.getName());
+    handleNotification(true);
+  }
+
+  public void handleNotification(boolean shouldNotify) {
+    log.info("{}[{}].handleNotification({})", getClass().getSimpleName(), partyConfiguration.getName(), shouldNotify);
     JsonNode partyPrompt = _syncGetPartyPrompt();
     if (!partyPrompt.isEmpty()) {
       StreamSupport.stream(partyPrompt.spliterator(), false).forEach(actionPromptsQueue::addLast);
-      _handleNextActionPrompt();
+      _handleNextActionPrompt(shouldNotify);
     }
+  }
+
+  public JsonNode peekPendingActionPrompt() {
+    return _syncGetPartyPrompt();
   }
 
   public void reset() {
@@ -371,7 +384,7 @@ public abstract class ConformanceParty implements StatefulEntity {
     return new ConformanceMessageBody(stringResponseBody).getJsonBody();
   }
 
-  private void _handleNextActionPrompt() {
+  private void _handleNextActionPrompt(boolean shouldNotify) {
     if (actionPromptsQueue.isEmpty()) return;
     JsonNode actionPrompt = actionPromptsQueue.removeFirst();
     if (actionPrompt == null) return;
@@ -380,23 +393,28 @@ public abstract class ConformanceParty implements StatefulEntity {
         getClass().getSimpleName(),
         partyConfiguration.getName(),
         actionPrompt.toPrettyString());
-    getActionPromptHandlers().entrySet().stream()
-        .filter(
-            entry ->
-                Objects.equals(
-                    entry.getKey().getCanonicalName(), actionPrompt.get("actionType").asText()))
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new RuntimeException(
-                    "Handler not found by %s for action prompt %s\nAvailable action prompts are %s"
-                        .formatted(
-                            ConformanceParty.this.getClass().getCanonicalName(),
-                            actionPrompt.toPrettyString(),
-                            getActionPromptHandlers().keySet())))
-        .getValue()
-        .accept(actionPrompt);
-    _handleNextActionPrompt();
+    suppressNotifications = !shouldNotify;
+    try {
+      getActionPromptHandlers().entrySet().stream()
+          .filter(
+              entry ->
+                  Objects.equals(
+                      entry.getKey().getCanonicalName(), actionPrompt.get("actionType").asText()))
+          .findFirst()
+          .orElseThrow(
+              () ->
+                  new RuntimeException(
+                      "Handler not found by %s for action prompt %s\nAvailable action prompts are %s"
+                          .formatted(
+                              ConformanceParty.this.getClass().getCanonicalName(),
+                              actionPrompt.toPrettyString(),
+                              getActionPromptHandlers().keySet())))
+          .getValue()
+          .accept(actionPrompt);
+    } finally {
+      suppressNotifications = false;
+    }
+    _handleNextActionPrompt(shouldNotify);
   }
 
   protected abstract Map<Class<? extends ConformanceAction>, Consumer<JsonNode>>

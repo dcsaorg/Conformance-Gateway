@@ -183,6 +183,14 @@ export class SandboxComponent implements OnInit, OnDestroy {
     }
   }
 
+  async onClickNotifyPartyWithoutNotification() {
+    const response: any = await this.conformanceService.notifyPartyWithoutNotification(this.sandbox!.id);
+    if (await MessageDialog.showIfError(response, this.dialog, "Error notifying party without sending a notification")) {
+      this.cdr.detectChanges();
+    }
+  }
+
+
   async onClickResetParty() {
     if (
       await ConfirmationDialog.open(

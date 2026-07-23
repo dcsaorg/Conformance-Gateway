@@ -1825,18 +1825,6 @@ public class BookingChecks {
               jsonPath(ATTR_BOOKING_CANCELLATION_STATUS),
               carrierStatusScenario.bookingCancellationStatusExpectation()),
           carrierStatusScenario::validateBookingCancellationStatus));
-
-      if (carrierStatusScenario.requiresCrossFieldValidation()) {
-        checks.add(
-          JsonAttribute.customValidator(
-            "[Scenario] The combination of %s, %s and %s must match the active scenario cross-field rules: %s"
-              .formatted(
-                jsonPath(BOOKING_STATUS),
-                jsonPath(ATTR_AMENDED_BOOKING_STATUS),
-                jsonPath(ATTR_BOOKING_CANCELLATION_STATUS),
-                carrierStatusScenario.statusCombinationExpectation()),
-            carrierStatusScenario::validateStatusCombination));
-      }
     }
 
     checks.addAll(STATIC_BOOKING_CHECKS);

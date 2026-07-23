@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.standards.booking.checks.CarrierStatusScenario;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.stream.Stream;
 
@@ -22,7 +23,7 @@ public class UC8_Carrier_ProcessAmendmentAction extends CarrierNotificationBooki
       carrierPartyName,
       shipperPartyName,
       previousAction,
-      "UC8",
+      "UC8(Approve)",
       204,
       isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
@@ -49,7 +50,9 @@ public class UC8_Carrier_ProcessAmendmentAction extends CarrierNotificationBooki
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return getSimpleNotificationChecks(
-          expectedApiVersion, requestSchemaValidator, CarrierStatusScenario.uc8());
+          expectedApiVersion,
+          requestSchemaValidator,
+          CarrierStatusScenario.from(BookingState.CONFIRMED, BookingState.AMENDMENT_CONFIRMED, null));
       }
     };
   }

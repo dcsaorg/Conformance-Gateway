@@ -254,11 +254,11 @@ public abstract class BookingAction extends BookingAndEblAction {
     BookingState bookingState,
     BookingState amendedBookingState,
     BookingCancellationState cancellationState) {
+    String titlePrefix = "[Notification]";
     return Stream.of(
-      new HttpMethodCheck(BookingRole::isCarrier, getMatchedExchangeUuid(), "POST"),
-      new UrlPathCheck(
-        BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-      new ResponseStatusCheck(BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
+      new HttpMethodCheck(titlePrefix,BookingRole::isCarrier, getMatchedExchangeUuid(), "POST"),
+      new UrlPathCheck(titlePrefix, BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
+      new ResponseStatusCheck(titlePrefix, BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
         .withRelevance(isWithNotifications()),
       new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
         getMatchedExchangeUuid(),
@@ -267,17 +267,20 @@ public abstract class BookingAction extends BookingAndEblAction {
         cancellationState,
         getDspSupplier()),
       ApiHeaderCheck.createNotificationCheck(
+        titlePrefix,
         BookingRole::isCarrier,
         getMatchedExchangeUuid(),
         HttpMessageType.REQUEST,
         expectedApiVersion),
       ApiHeaderCheck.createNotificationCheck(
+          titlePrefix,
           BookingRole::isShipper,
           getMatchedExchangeUuid(),
           HttpMessageType.RESPONSE,
           expectedApiVersion)
         .withRelevance(isWithNotifications()),
       new JsonSchemaCheck(
+        titlePrefix,
         BookingRole::isCarrier,
         getMatchedExchangeUuid(),
         HttpMessageType.REQUEST,
@@ -288,26 +291,28 @@ public abstract class BookingAction extends BookingAndEblAction {
     String expectedApiVersion,
     JsonSchemaValidator requestSchemaValidator,
     CarrierStatusScenario carrierStatusScenario) {
+    String titlePrefix = "[Notification]";
     return Stream.of(
-      new HttpMethodCheck(BookingRole::isCarrier, getMatchedExchangeUuid(), "POST"),
-      new UrlPathCheck(
-        BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-      new ResponseStatusCheck(BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
+      new HttpMethodCheck(titlePrefix, BookingRole::isCarrier, getMatchedExchangeUuid(), "POST"),
+      new UrlPathCheck(titlePrefix, BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
+      new ResponseStatusCheck(titlePrefix, BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
         .withRelevance(isWithNotifications()),
-      new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-        getMatchedExchangeUuid(), carrierStatusScenario, getDspSupplier()),
+      new CarrierBookingNotificationDataPayloadRequestConformanceCheck(getMatchedExchangeUuid(), carrierStatusScenario, getDspSupplier()),
       ApiHeaderCheck.createNotificationCheck(
+        titlePrefix,
         BookingRole::isCarrier,
         getMatchedExchangeUuid(),
         HttpMessageType.REQUEST,
         expectedApiVersion),
       ApiHeaderCheck.createNotificationCheck(
+          titlePrefix,
           BookingRole::isShipper,
           getMatchedExchangeUuid(),
           HttpMessageType.RESPONSE,
           expectedApiVersion)
         .withRelevance(isWithNotifications()),
       new JsonSchemaCheck(
+        titlePrefix,
         BookingRole::isCarrier,
         getMatchedExchangeUuid(),
         HttpMessageType.REQUEST,

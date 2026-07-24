@@ -7,6 +7,7 @@ import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.CarrierStatusScenario;
@@ -68,6 +69,12 @@ public class ShipperGetBookingAction extends BookingAction {
     this.carrierStatusScenario = carrierStatusScenario;
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestAmendedContent = requestAmendedContent;
+  }
+
+  @Override
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    super.doHandleExchange(exchange);
+    updateDSPFromResponsePayload(exchange);
   }
 
   @Override

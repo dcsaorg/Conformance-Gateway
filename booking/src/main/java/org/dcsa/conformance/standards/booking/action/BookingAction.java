@@ -118,8 +118,6 @@ public abstract class BookingAction extends BookingAndEblAction {
     updatedDsp =
       updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
     updatedDsp = updateIfNotNull(updatedDsp, newCbr, updatedDsp::withCarrierBookingReference);
-    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not
-    // have been added to the DSP
 
     if (!dsp.equals(updatedDsp)) {
       getBookingDspReference().set(updatedDsp);

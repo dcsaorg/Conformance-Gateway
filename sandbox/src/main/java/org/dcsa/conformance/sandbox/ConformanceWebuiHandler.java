@@ -86,6 +86,7 @@ public class ConformanceWebuiHandler {
           case "getAllSandboxes" -> _getAllSandboxes(userId);
           case "getSandbox" -> _getSandbox(userId, requestNode);
           case "notifyParty" -> _notifyParty(userId, requestNode);
+          case "setNotificationsSuppressed" -> _setNotificationsSuppressed(userId, requestNode);
           case "resetParty" -> _resetParty(userId, requestNode);
           case "createReport" -> _createReport(userId, requestNode);
           case "getReportDigests" -> _getReportDigests(userId, requestNode);
@@ -565,6 +566,11 @@ public class ConformanceWebuiHandler {
           persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
       sandboxNode.set("operatorLog", operatorLog);
       sandboxNode.put("canNotifyParty", operatorLog != null);
+      sandboxNode.put(
+          "notificationsSuppressed",
+          operatorLog != null
+              && ConformanceSandbox.isPartyNotificationsSuppressed(
+                  persistenceProvider, deferredSandboxTaskConsumer, sandboxId));
     }
     return sandboxNode;
   }
@@ -582,6 +588,15 @@ public class ConformanceWebuiHandler {
     ConformanceSandbox.notifyParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     return OBJECT_MAPPER.createObjectNode();
   }
+
+  private JsonNode _setNotificationsSuppressed(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    boolean suppressed = requestNode.get("suppressed").asBoolean();
+    ConformanceSandbox.setPartyNotificationsSuppressed(persistenceProvider, deferredSandboxTaskConsumer, sandboxId, suppressed);
+    return OBJECT_MAPPER.createObjectNode();
+  }
+
 
   private JsonNode _resetParty(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get(SANDBOX_ID).asText();

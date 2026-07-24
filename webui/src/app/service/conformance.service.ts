@@ -52,6 +52,15 @@ export class ConformanceService {
     });
   }
 
+  async setNotificationsSuppressed(sandboxId: string, suppressed: boolean): Promise<any> {
+    return await this.apiService.call({
+      operation: "setNotificationsSuppressed",
+      sandboxId,
+      suppressed,
+    });
+  }
+
+
   async resetParty(sandboxId: string): Promise<any> {
     return await this.apiService.call({
       operation: "resetParty",

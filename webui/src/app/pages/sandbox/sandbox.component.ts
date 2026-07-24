@@ -183,6 +183,18 @@ export class SandboxComponent implements OnInit, OnDestroy {
     }
   }
 
+  async onClickToggleNotifications() {
+    const suppressed = !this.sandbox!.notificationsSuppressed;
+    const response: any = await this.conformanceService.setNotificationsSuppressed(this.sandbox!.id, suppressed);
+    if (await MessageDialog.showIfError(response, this.dialog, "Error toggling notifications")) {
+      this.cdr.detectChanges();
+      return;
+    }
+    this.sandbox!.notificationsSuppressed = suppressed;
+    this.cdr.detectChanges();
+  }
+
+
   async onClickResetParty() {
     if (
       await ConfirmationDialog.open(

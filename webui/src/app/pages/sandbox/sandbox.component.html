@@ -147,10 +147,19 @@
         >Notify party</button>
         &nbsp;
         <button
+          id="toggleNotificationsButton"
+          mat-raised-button
+          [ngClass]="sandbox?.notificationsSuppressed ? 'green-button' : 'red-button'"
+          [title]="sandbox?.notificationsSuppressed ? 'Enable outbound notifications to counterpart' : 'Disable outbound notifications to counterpart'"
+          (click)="onClickToggleNotifications()"
+        >{{sandbox?.notificationsSuppressed ? 'Enable notifications' : 'Disable notifications'}}</button>
+        &nbsp;
+        <button
           testId="resetPartyButton"
         mat-raised-button
         (click)="onClickResetParty()"
         >Reset party</button>
+
     </div>
 
     <div class="pageSubtitle">Activity</div>

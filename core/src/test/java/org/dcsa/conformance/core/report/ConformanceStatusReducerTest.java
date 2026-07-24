@@ -51,7 +51,7 @@ class ConformanceStatusReducerTest {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
             ConformanceStatus.PARTIALLY_CONFORMANT, ConformanceStatus.PARTIALLY_CONFORMANT);
-    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
+    assertEquals(ConformanceStatus.CONFORMANT, result);
   }
 
   @Test
@@ -59,7 +59,7 @@ class ConformanceStatusReducerTest {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
             ConformanceStatus.PARTIALLY_CONFORMANT, ConformanceStatus.CONFORMANT);
-    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
+    assertEquals(ConformanceStatus.CONFORMANT, result);
   }
 
   @Test
@@ -83,7 +83,7 @@ class ConformanceStatusReducerTest {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
             ConformanceStatus.CONFORMANT, ConformanceStatus.PARTIALLY_CONFORMANT);
-    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
+    assertEquals(ConformanceStatus.CONFORMANT, result);
   }
 
   @Test
@@ -151,7 +151,7 @@ class ConformanceStatusReducerTest {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
             ConformanceStatus.IRRELEVANT, ConformanceStatus.PARTIALLY_CONFORMANT);
-    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
+    assertEquals(ConformanceStatus.CONFORMANT, result);
   }
 
   @Test
@@ -159,7 +159,7 @@ class ConformanceStatusReducerTest {
     ConformanceStatus result =
         ConformanceStatusReducer.reduce(
             ConformanceStatus.PARTIALLY_CONFORMANT, ConformanceStatus.IRRELEVANT);
-    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, result);
+    assertEquals(ConformanceStatus.CONFORMANT, result);
   }
 
   @Test

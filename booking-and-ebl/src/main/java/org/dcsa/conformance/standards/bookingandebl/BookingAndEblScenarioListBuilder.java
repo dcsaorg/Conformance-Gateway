@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.bookingandebl;
 
 import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_RECEIVED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_CONFIRMED;
 import static org.dcsa.conformance.standards.booking.party.BookingState.CONFIRMED;
 import static org.dcsa.conformance.standards.booking.party.BookingState.RECEIVED;
 import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.SI_ANY;
@@ -326,7 +327,9 @@ public class BookingAndEblScenarioListBuilder
   private static BookingAndEblScenarioListBuilder uc8BookingGet(
       BookingAndEblScenarioListBuilder... thenEither) {
     return uc8CarrierProcessBookingAmendment()
-        .then(shipperGetBooking(CarrierStatusScenario.uc8()).thenEither(thenEither));
+        .then(
+            shipperGetBooking(CarrierStatusScenario.from(CONFIRMED, AMENDMENT_CONFIRMED, null))
+                .thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder shipperGetShippingInstructions(

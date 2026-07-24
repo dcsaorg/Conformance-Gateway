@@ -606,6 +606,7 @@ public abstract class ManualTestBase {
       boolean isDefault,
       List<String> operatorLog,
       boolean canNotifyParty,
+      boolean notificationsSuppressed,
       boolean deleted) {}
 
   public record EndpointUriMethod(

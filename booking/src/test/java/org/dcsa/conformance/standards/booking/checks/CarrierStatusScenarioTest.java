@@ -91,45 +91,43 @@ class CarrierStatusScenarioTest {
   }
 
   @Test
-  void mergedUc8AcceptsEitherCompatibleOutcome() {
-    CarrierStatusScenario scenario = CarrierStatusScenario.uc8();
-    List.of(
-        statusCase(CONFIRMED, AMENDMENT_CONFIRMED, null),
-        statusCase(CONFIRMED, AMENDMENT_DECLINED, null),
-        statusCase(PENDING_AMENDMENT, AMENDMENT_DECLINED, null))
-      .forEach(statusCase -> assertValid(scenario, statusCase));
+  void uc8OnlyAcceptsApprovedOutcome() {
+    CarrierStatusScenario scenario =
+      CarrierStatusScenario.from(CONFIRMED, AMENDMENT_CONFIRMED, null);
+    assertValid(scenario, statusCase(CONFIRMED, AMENDMENT_CONFIRMED, null));
   }
 
   @Test
-  void mergedUc8RejectsIncompatibleCrossFieldCombination() {
-    assertInvalidCombination(
-      CarrierStatusScenario.uc8(),
-      statusCase(PENDING_AMENDMENT, AMENDMENT_CONFIRMED, null));
+  void uc8RejectsNonApprovedCombinations() {
+    CarrierStatusScenario scenario =
+      CarrierStatusScenario.from(CONFIRMED, AMENDMENT_CONFIRMED, null);
+    assertInvalid(scenario, statusCase(CONFIRMED, AMENDMENT_DECLINED, null), "amendedBookingStatus");
+    assertInvalid(scenario, statusCase(PENDING_AMENDMENT, AMENDMENT_CONFIRMED, null), "bookingStatus");
+    assertInvalid(scenario, statusCase(PENDING_AMENDMENT, AMENDMENT_DECLINED, null), "bookingStatus");
   }
 
   @Test
-  void mergedUc14AcceptsConfirmationOrDecline() {
-    CarrierStatusScenario scenario = CarrierStatusScenario.uc14();
+  void uc14OnlyAcceptsApprovedOutcome() {
+    CarrierStatusScenario scenario =
+      CarrierStatusScenario.from(CANCELLED, null, CANCELLATION_CONFIRMED);
     List.of(
         statusCase(CANCELLED, null, CANCELLATION_CONFIRMED),
-        statusCase(CANCELLED, AMENDMENT_CANCELLED, CANCELLATION_CONFIRMED),
-        statusCase(CONFIRMED, null, CANCELLATION_DECLINED),
-        statusCase(PENDING_AMENDMENT, AMENDMENT_RECEIVED, CANCELLATION_DECLINED),
-        statusCase(CONFIRMED, AMENDMENT_CONFIRMED, CANCELLATION_DECLINED),
-        statusCase(PENDING_AMENDMENT, AMENDMENT_DECLINED, CANCELLATION_DECLINED),
-        statusCase(CONFIRMED, AMENDMENT_CANCELLED, CANCELLATION_DECLINED))
+        statusCase(CANCELLED, AMENDMENT_CANCELLED, CANCELLATION_CONFIRMED))
       .forEach(statusCase -> assertValid(scenario, statusCase));
   }
 
   @Test
-  void mergedUc14RejectsIncompatibleCrossFieldCombinations() {
-    CarrierStatusScenario scenario = CarrierStatusScenario.uc14();
-    List.of(
-        statusCase(CONFIRMED, null, CANCELLATION_CONFIRMED),
-        statusCase(PENDING_AMENDMENT, AMENDMENT_CANCELLED, CANCELLATION_CONFIRMED),
-        statusCase(CANCELLED, null, CANCELLATION_DECLINED),
-        statusCase(CANCELLED, AMENDMENT_RECEIVED, CANCELLATION_CONFIRMED))
-      .forEach(statusCase -> assertInvalidCombination(scenario, statusCase));
+  void uc14RejectsNonApprovedCombinations() {
+    CarrierStatusScenario scenario =
+      CarrierStatusScenario.from(CANCELLED, null, CANCELLATION_CONFIRMED);
+    assertInvalid(scenario, statusCase(CONFIRMED, null, CANCELLATION_DECLINED), "bookingStatus");
+    assertInvalid(scenario, statusCase(PENDING_AMENDMENT, AMENDMENT_RECEIVED, CANCELLATION_DECLINED), "bookingStatus");
+    assertInvalid(scenario, statusCase(CONFIRMED, AMENDMENT_CONFIRMED, CANCELLATION_DECLINED), "bookingStatus");
+    assertInvalid(scenario, statusCase(PENDING_AMENDMENT, AMENDMENT_DECLINED, CANCELLATION_DECLINED), "bookingStatus");
+    assertInvalid(scenario, statusCase(CONFIRMED, AMENDMENT_CANCELLED, CANCELLATION_DECLINED), "bookingStatus");
+    assertInvalid(scenario, statusCase(CONFIRMED, null, CANCELLATION_CONFIRMED), "bookingStatus");
+    assertInvalid(scenario, statusCase(PENDING_AMENDMENT, AMENDMENT_CANCELLED, CANCELLATION_CONFIRMED), "bookingStatus");
+    assertInvalid(scenario, statusCase(CANCELLED, AMENDMENT_RECEIVED, CANCELLATION_CONFIRMED), "amendedBookingStatus");
   }
 
   private void assertValid(StatusCase statusCase) {
@@ -146,16 +144,6 @@ class CarrierStatusScenarioTest {
       statusCase::toString);
     assertTrue(
       scenario.validateBookingCancellationStatus(payload).getErrorMessages().isEmpty(),
-      statusCase::toString);
-    assertTrue(
-      scenario.validateStatusCombination(payload).getErrorMessages().isEmpty(),
-      statusCase::toString);
-  }
-
-  private static void assertInvalidCombination(
-    CarrierStatusScenario scenario, StatusCase statusCase) {
-    assertFalse(
-      scenario.validateStatusCombination(payload(statusCase)).getErrorMessages().isEmpty(),
       statusCase::toString);
   }
 
@@ -217,4 +205,3 @@ class CarrierStatusScenarioTest {
     BookingCancellationState cancellationStatus) {
   }
 }
-

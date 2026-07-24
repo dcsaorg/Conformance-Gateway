@@ -7,5 +7,6 @@ export interface Sandbox {
   testedPartyRole: string,
   isDefault: boolean,
   canNotifyParty: boolean | null | undefined,
+  notificationsSuppressed: boolean | null | undefined,
   operatorLog: string[] | null | undefined,
 }

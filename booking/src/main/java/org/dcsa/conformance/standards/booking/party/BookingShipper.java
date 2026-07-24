@@ -81,9 +81,7 @@ public class BookingShipper extends ConformanceParty {
       Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
       Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
       Map.entry(UC11_Shipper_CancelBookingRequestAction.class, this::sendCancelBookingRequest),
-      Map.entry(
-        UC13ShipperCancelConfirmedBookingAction.class,
-        this::sendConfirmedBookingCancellationRequest));
+      Map.entry(UC13ShipperCancelConfirmedBookingAction.class, this::sendConfirmedBookingCancellationRequest));
   }
 
   private void getBookingRequest(JsonNode actionPrompt) {
@@ -130,21 +128,18 @@ public class BookingShipper extends ConformanceParty {
   }
 
   private void sendConfirmedBookingCancellationRequest(JsonNode actionPrompt) {
-    log.info(
-      "Shipper.sendConfirmedBookingCancellationRequest(%s)"
-        .formatted(actionPrompt.toPrettyString()));
+    log.info("Shipper.sendConfirmedBookingCancellationRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String cbr = actionPrompt.path("cbr").asText();
+
     syncCounterpartPatch(
       "/v2/bookings/%s".formatted(cbr),
       Collections.emptyMap(),
-      OBJECT_MAPPER
-        .createObjectNode()
+      OBJECT_MAPPER.createObjectNode()
         .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
         .put("reason", "Cancelling due to internal issues"));
 
     addOperatorLogEntry(
-      BookingAction.createMessageForUIPrompt(
-        "Sent a confirmed booking cancellation of booking", cbr, null));
+      BookingAction.createMessageForUIPrompt("Sent a confirmed booking cancellation of booking", cbr, null));
   }
 
   private void sendCancelBookingAmendment(JsonNode actionPrompt) {

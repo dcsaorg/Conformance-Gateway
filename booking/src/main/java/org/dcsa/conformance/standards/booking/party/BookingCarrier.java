@@ -144,18 +144,13 @@ public class BookingCarrier extends ConformanceParty {
 
     String cbr = actionPrompt.required("cbr").asText();
     String cbrr = actionPrompt.required("cbrr").asText();
-    boolean acceptAmendment = actionPrompt.path("acceptAmendment").asBoolean(true);
     addOperatorLogEntry(
       BookingAction.createMessageForUIPrompt(
         "Confirmed the booking amendment for booking", cbr, cbrr));
 
     var persistableCarrierBooking =
       PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    if (acceptAmendment) {
-      persistableCarrierBooking.confirmBookingAmendment(cbr);
-    } else {
-      persistableCarrierBooking.declineBookingAmendment(cbr);
-    }
+    persistableCarrierBooking.confirmBookingAmendment(cbr);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
   }
@@ -165,7 +160,6 @@ public class BookingCarrier extends ConformanceParty {
       "Carrier.processConfirmedBookingCancellation(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbr = actionPrompt.required("cbr").asText();
-    boolean isCancellationConfirmed = actionPrompt.path("isCancellationConfirmed").asBoolean(true);
     addOperatorLogEntry(
       BookingAction.createMessageForUIPrompt("Cancellation of Confirmed booking", cbr, null));
 
@@ -174,11 +168,7 @@ public class BookingCarrier extends ConformanceParty {
 
     var persistableCarrierBooking =
       PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    if (isCancellationConfirmed) {
-      persistableCarrierBooking.cancelConfirmedBooking(cbr);
-    } else {
-      persistableCarrierBooking.declineConfirmedBookingCancellation(cbr);
-    }
+    persistableCarrierBooking.cancelConfirmedBooking(cbr);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
   }

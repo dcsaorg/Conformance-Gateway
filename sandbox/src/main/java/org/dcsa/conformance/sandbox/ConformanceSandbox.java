@@ -692,59 +692,82 @@ public class ConformanceSandbox {
   }
 
   private static ConformanceWebResponse _handlePartyInboundConformanceRequest(
-      ConformancePersistenceProvider persistenceProvider,
-      Consumer<JsonNode> deferredSandboxTaskConsumer,
-      String sandboxId,
-      String partyName,
-      ConformanceWebRequest webRequest) {
+    ConformancePersistenceProvider persistenceProvider,
+    Consumer<JsonNode> deferredSandboxTaskConsumer,
+    String sandboxId,
+    String partyName,
+    ConformanceWebRequest webRequest) {
+    SandboxConfiguration sandboxConfiguration = loadSandboxConfiguration(persistenceProvider, sandboxId);
+
+    if (sandboxConfiguration.getOrchestrator().isActive()) {
+      AtomicReference<String> validationErrorReference = new AtomicReference<>();
+      new OrchestratorTask(
+        persistenceProvider,
+        null,
+        sandboxId,
+        "validating if party can receive exchange",
+        orchestrator -> validationErrorReference.set(orchestrator.validatePartyCanReceiveExchange(partyName)))
+        .run();
+
+      String validationError = validationErrorReference.get();
+      if (validationError != null) {
+        log.warn("Rejecting inbound conformance request for party {}: {}", partyName, validationError);
+
+        ObjectNode errorResponse = OBJECT_MAPPER.createObjectNode().put("message", validationError);
+        return new ConformanceWebResponse(
+          409,
+          JsonToolkit.JSON_UTF_8,
+          Map.of("Content-Type", List.of(JsonToolkit.JSON_UTF_8)),
+          errorResponse.toString());
+      }
+    }
+
     AtomicReference<ConformanceRequest> conformanceRequestReference = new AtomicReference<>();
     AtomicReference<ConformanceResponse> conformanceResponseReference = new AtomicReference<>();
     new PartyTask(
-            persistenceProvider,
-            deferredSandboxTaskConsumer,
-            sandboxId,
-            partyName,
-            "get prompt for party " + partyName,
-            party -> {
-              ConformanceRequest conformanceRequest =
-                  new ConformanceRequest(
-                      webRequest.method(),
-                      webRequest.url(),
-                      webRequest.queryParameters(),
-                      new ConformanceMessage(
-                          party.getCounterpartName(),
-                          party.getCounterpartRole(),
-                          party.getName(),
-                          party.getRole(),
-                          webRequest.headers(),
-                          new ConformanceMessageBody(webRequest.body()),
-                          System.currentTimeMillis()));
-              conformanceRequestReference.set(conformanceRequest);
-              conformanceResponseReference.set(party.handleRequest(conformanceRequest));
-            })
-        .run();
+      persistenceProvider,
+      deferredSandboxTaskConsumer,
+      sandboxId,
+      partyName,
+      "get prompt for party " + partyName,
+      party -> {
+        ConformanceRequest conformanceRequest =
+          new ConformanceRequest(
+            webRequest.method(),
+            webRequest.url(),
+            webRequest.queryParameters(),
+            new ConformanceMessage(
+              party.getCounterpartName(),
+              party.getCounterpartRole(),
+              party.getName(),
+              party.getRole(),
+              webRequest.headers(),
+              new ConformanceMessageBody(webRequest.body()),
+              System.currentTimeMillis()));
+        conformanceRequestReference.set(conformanceRequest);
+        conformanceResponseReference.set(party.handleRequest(conformanceRequest));
+      })
+      .run();
     ConformanceResponse conformanceResponse = conformanceResponseReference.get();
-    SandboxConfiguration sandboxConfiguration =
-        loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (sandboxConfiguration.getOrchestrator().isActive()) {
       new OrchestratorTask(
-              persistenceProvider,
-              conformanceWebRequest ->
-                  ConformanceSandbox._asyncSendOutboundWebRequest(
-                      deferredSandboxTaskConsumer, conformanceWebRequest),
-              sandboxId,
-              "handling inbound conformance request",
-              orchestrator ->
-                  orchestrator.handlePartyTrafficExchange(
-                      new ConformanceExchange(
-                          conformanceRequestReference.get(), conformanceResponse)))
-          .run();
+        persistenceProvider,
+        conformanceWebRequest ->
+          ConformanceSandbox._asyncSendOutboundWebRequest(
+            deferredSandboxTaskConsumer, conformanceWebRequest),
+        sandboxId,
+        "handling inbound conformance request",
+        orchestrator ->
+          orchestrator.handlePartyTrafficExchange(
+            new ConformanceExchange(
+              conformanceRequestReference.get(), conformanceResponse)))
+        .run();
     }
     return new ConformanceWebResponse(
-        conformanceResponse.statusCode(),
-        JsonToolkit.JSON_UTF_8,
-        conformanceResponse.message().headers(),
-        conformanceResponse.message().body().getStringBody());
+      conformanceResponse.statusCode(),
+      JsonToolkit.JSON_UTF_8,
+      conformanceResponse.message().headers(),
+      conformanceResponse.message().body().getStringBody());
   }
 
   private static void _asyncHandleOutboundRequest(

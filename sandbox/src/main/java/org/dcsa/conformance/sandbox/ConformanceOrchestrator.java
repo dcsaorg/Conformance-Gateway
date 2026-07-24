@@ -312,6 +312,24 @@ public class ConformanceOrchestrator implements StatefulEntity {
     }
   }
 
+  public String validatePartyCanReceiveExchange(String partyName) {
+    log.info("ConformanceOrchestrator.validatePartyCanReceiveExchange(%s)".formatted(partyName));
+
+    if (currentScenarioId == null) {
+      return "There is no active scenario. This party should not be receiving any requests at this time.";
+    }
+
+    ConformanceScenario currentScenario = _getCurrentScenario();
+    ConformanceAction nextAction = currentScenario.peekNextAction();
+
+    if (nextAction == null || nextAction.getTargetPartyName() == null) {
+      return "The party '%s' is not expected to receive an exchange at this time. Read the sandbox's instructions and proceed with the scenario."
+        .formatted(partyName);
+    }
+
+    return null;
+  }
+
   public void completeCurrentAction(boolean skipAction) {
     log.info("ConformanceOrchestrator.completeCurrentAction()");
 

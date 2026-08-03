@@ -270,7 +270,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
         .createObjectNode()
         .put("name", "test-iss-document")
         .put("content", document)
-        .put("mediatype", "application/octet-stream");
+        .put("contentType", "application/pdf");
   }
 
   @Override

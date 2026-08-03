@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
-import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -33,12 +32,10 @@ import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_LOCATION;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.EVENT_UPDATED_DATE_TIME;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.IOT_DETAILS;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.IOT_EVENT_TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.ISO_EQUIPMENT_CODE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.RAIL_TRANSPORT;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.REEFER_DETAILS;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.REEFER_EVENT_TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.REFERENCE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.SHIPMENT_DETAILS;
@@ -49,11 +46,8 @@ import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_EVENT_TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRUCK_TRANSPORT;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TYPE;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.VESSEL_IMO_NUMBER;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.VESSEL_NAME;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.VESSEL_TRANSPORT;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.BARGE;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.MULTIMODAL;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.RAIL;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.TRUCK;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.VESSEL;
@@ -87,9 +81,9 @@ public class TntChecks {
     List<JsonContentCheck> checks = new ArrayList<>();
 
     checks.add(atLeastOneEventInMessageCheck());
-    checks.add(atLeastOneEventHasEventIdCheck());
-    checks.add(atLeastOneEventHasEventDateTimeCheck());
-    checks.add(atLeastOneEventHasEventUpdatedDateTimeCheck());
+    checks.add(everyEventHasEventIdCheck());
+    checks.add(everyEventHasEventDateTimeCheck());
+    checks.add(everyEventHasEventUpdatedDateTimeCheck());
     checks.add(everyEventHasNonEmptyEventClassificationCheck());
     checks.add(everyEventHasValidEventClassifierCheck());
 
@@ -105,45 +99,44 @@ public class TntChecks {
 
   private static JsonContentCheck atLeastOneEventInMessageCheck() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-        "At least one event must be included in a message sent to the sandbox during conformance testing",
+        "At least one event must be included in the tested message.",
         mav -> mav.submitAllMatching(EVENTS),
         JsonAttribute.matchedMinLength(1));
   }
 
-  private static JsonContentCheck atLeastOneEventHasEventIdCheck() {
-    return JsonAttribute.atLeastOneIndividualMatchMustBeValid(
-        "At least one event must have a non-null and non-empty '%s'".formatted(EVENT_ID),
-        mav -> mav.submitAllMatching(EVENTS + ".*." + EVENT_ID),
-        JsonAttribute.matchedMustBeNonEmpty());
+  private static JsonContentCheck everyEventHasEventIdCheck() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "Every event must demonstrate the correct use of the '%s' attribute: it must be present and not empty or blank."
+            .formatted(EVENT_ID),
+        mav -> mav.submitAllMatching(EVENTS + ".*"),
+        JsonAttribute.path(EVENT_ID, JsonAttribute.matchedMustBeNonEmpty()));
   }
 
-  private static JsonContentCheck atLeastOneEventHasEventDateTimeCheck() {
-    return JsonAttribute.atLeastOneIndividualMatchMustBeValid(
-        "At least one event must have a non-null and non-empty '%s'".formatted(EVENT_DATE_TIME),
-        mav -> mav.submitAllMatching(EVENTS + ".*." + EVENT_DATE_TIME),
-        JsonAttribute.matchedMustBeNonEmpty());
+  private static JsonContentCheck everyEventHasEventDateTimeCheck() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "Every event must have a non-empty (not blank) '%s' attribute.".formatted(EVENT_DATE_TIME),
+        mav -> mav.submitAllMatching(EVENTS + ".*"),
+        JsonAttribute.path(EVENT_DATE_TIME, JsonAttribute.matchedMustBeNonEmpty()));
   }
 
-  private static JsonContentCheck atLeastOneEventHasEventUpdatedDateTimeCheck() {
-    return JsonAttribute.atLeastOneIndividualMatchMustBeValid(
-        "At least one event must have a non-null and non-empty '%s'"
-            .formatted(EVENT_UPDATED_DATE_TIME),
-        mav -> mav.submitAllMatching(EVENTS + ".*." + EVENT_UPDATED_DATE_TIME),
-        JsonAttribute.matchedMustBeNonEmpty());
+  private static JsonContentCheck everyEventHasEventUpdatedDateTimeCheck() {
+    return JsonAttribute.allIndividualMatchesMustBeValid(
+        "Every event must demonstrate the correct use of the '%s' attribute.".formatted(EVENT_UPDATED_DATE_TIME),
+        mav -> mav.submitAllMatching(EVENTS + ".*"),
+        JsonAttribute.path(EVENT_UPDATED_DATE_TIME, JsonAttribute.matchedMustBeNonEmpty()));
   }
 
   private static JsonContentCheck everyEventHasNonEmptyEventClassificationCheck() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-        "Every event must demonstrate the correct use of the '%s' object"
-            .formatted(EVENT_CLASSIFICATION),
+        "Every event must demonstrate the correct use of the '%s' object.".formatted(EVENT_CLASSIFICATION),
         mav -> mav.submitAllMatching(EVENTS + ".*"),
         JsonAttribute.path(EVENT_CLASSIFICATION, JsonAttribute.matchedMustBeNonEmpty()));
   }
 
   private static JsonContentCheck everyEventHasValidEventClassifierCheck() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-        "The '%s' object within every event must demonstrate the correct use of the '%s' attribute"
-            .formatted(EVENT_CLASSIFICATION, EVENT_CLASSIFIER),
+        "The '%s.%s' attribute within every event must be one of ACTUAL, ESTIMATED, or PLANNED."
+          .formatted(EVENT_CLASSIFICATION, EVENT_CLASSIFIER),
         mav -> mav.submitAllMatching(EVENTS + ".*"),
         JsonAttribute.path(
             EVENT_CLASSIFICATION,
@@ -154,7 +147,8 @@ public class TntChecks {
 
   private static JsonContentCheck atLeastOneEventHasEventTypeCheck(TntEventType eventType) {
     return JsonAttribute.atLeastOneIndividualMatchMustBeValid(
-        "At least one event must be of type %s".formatted(eventType),
+        "For a scenario targeting %s, at least one event must have '%s.%s' equal to %s."
+            .formatted(eventType, EVENT_CLASSIFICATION, EVENT_TYPE, eventType),
         mav -> mav.submitAllMatching(EVENTS + ".*." + EVENT_CLASSIFICATION + "." + EVENT_TYPE),
         JsonAttribute.matchedMustEqual(eventType::name));
   }
@@ -163,20 +157,13 @@ public class TntChecks {
     return JsonAttribute.isEqualTo(EVENT_CLASSIFICATION + "." + EVENT_TYPE, eventType.name());
   }
 
-  /**
-   * Creates common equipment details validation checks for event types that require equipment
-   * information (EQUIPMENT, IOT, REEFER).
-   *
-   * @param eventType The event type requiring equipment details validation
-   * @return List of JsonContentCheck for equipment details validation
-   */
   private static List<JsonContentCheck> commonEquipmentDetailsChecks(TntEventType eventType) {
     List<JsonContentCheck> checks = new ArrayList<>();
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' object"
-                .formatted(eventType.name(), EQUIPMENT_DETAILS),
+            "Every applicable event must demonstrate the correct use of the '%s' object."
+                .formatted(EQUIPMENT_DETAILS),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(eventType),
@@ -184,8 +171,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s' object within every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(EQUIPMENT_DETAILS, eventType.name(), EQUIPMENT_REFERENCE),
+            "The '%s.%s' attribute within every applicable event must be present and not empty or blank."
+                .formatted(EQUIPMENT_DETAILS, EQUIPMENT_REFERENCE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(eventType),
@@ -196,8 +183,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s' object within every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(EQUIPMENT_DETAILS, eventType.name(), ISO_EQUIPMENT_CODE),
+            "The '%s.%s' attribute within every applicable event must be present and not empty or blank."
+                .formatted(EQUIPMENT_DETAILS, ISO_EQUIPMENT_CODE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(eventType),
@@ -214,8 +201,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(TntEventType.SHIPMENT.name(), SHIPMENT_EVENT_TYPE),
+            "For every event, the event-type-specific subtype attribute must contain a value allowed by the corresponding OpenAPI schema property ('%s')."
+                .formatted(SHIPMENT_EVENT_TYPE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.SHIPMENT),
@@ -228,8 +215,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' object"
-                .formatted(TntEventType.SHIPMENT.name(), SHIPMENT_DETAILS),
+            "Every Shipment event must demonstrate the correct use of the '%s' object."
+                .formatted(SHIPMENT_DETAILS),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.SHIPMENT),
@@ -237,8 +224,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s' object within every event of type '%s' must demonstrate the correct use of the '%s' object"
-                .formatted(SHIPMENT_DETAILS, TntEventType.SHIPMENT.name(), DOCUMENT_REFERENCE),
+            "Every Shipment event must demonstrate the correct use of the '%s.%s' object."
+                .formatted(SHIPMENT_DETAILS, DOCUMENT_REFERENCE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.SHIPMENT),
@@ -249,9 +236,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s.%s' object within every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(
-                    SHIPMENT_DETAILS, DOCUMENT_REFERENCE, TntEventType.SHIPMENT.name(), TYPE),
+            "The '%s.%s.%s' attribute within every Shipment event must contain a value allowed by DocumentReference.type in the T&T 3.0.0 OpenAPI specification."
+                .formatted(SHIPMENT_DETAILS, DOCUMENT_REFERENCE, TYPE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.SHIPMENT),
@@ -266,9 +252,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s.%s' object within every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(
-                    SHIPMENT_DETAILS, DOCUMENT_REFERENCE, TntEventType.SHIPMENT.name(), REFERENCE),
+            "The '%s.%s.%s' attribute within every Shipment event must be present and not empty or blank."
+                .formatted(SHIPMENT_DETAILS, DOCUMENT_REFERENCE, REFERENCE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.SHIPMENT),
@@ -286,8 +271,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(TntEventType.TRANSPORT.name(), TRANSPORT_EVENT_TYPE),
+            "For every event, the event-type-specific subtype attribute must contain a value allowed by the corresponding OpenAPI schema property ('%s')."
+                .formatted(TRANSPORT_EVENT_TYPE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.TRANSPORT),
@@ -300,8 +285,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' object"
-                .formatted(TntEventType.TRANSPORT.name(), EVENT_LOCATION),
+            "Every Transport event must demonstrate the correct use of the '%s' object."
+                .formatted(EVENT_LOCATION),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.TRANSPORT),
@@ -309,8 +294,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' object"
-                .formatted(TntEventType.TRANSPORT.name(), TRANSPORT_DETAILS),
+            "Every Transport event must demonstrate the correct use of the '%s' object."
+                .formatted(TRANSPORT_DETAILS),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.TRANSPORT),
@@ -318,8 +303,19 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s.%s' object within every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(TRANSPORT_DETAILS, TRANSPORT_CALL, TntEventType.TRANSPORT.name(), TRANSPORT_CALL_REFERENCE),
+            "Every Transport event must demonstrate the correct use of the '%s.%s' object."
+                .formatted(TRANSPORT_DETAILS, TRANSPORT_CALL),
+            mav -> mav.submitAllMatching(EVENTS + ".*"),
+            JsonAttribute.ifMatchedThen(
+                isEventOfType(TntEventType.TRANSPORT),
+                JsonAttribute.path(
+                    TRANSPORT_DETAILS,
+                    JsonAttribute.path(TRANSPORT_CALL, JsonAttribute.matchedMustBeNonEmpty())))));
+
+    checks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+            "The '%s.%s.%s' attribute within every Transport event must be present and not empty or blank."
+                .formatted(TRANSPORT_DETAILS, TRANSPORT_CALL, TRANSPORT_CALL_REFERENCE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.TRANSPORT),
@@ -332,23 +328,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s' object within every event of type '%s' must demonstrate the correct use of the '%s' object"
-                .formatted(TRANSPORT_DETAILS, TntEventType.TRANSPORT.name(), TRANSPORT_CALL),
-            mav -> mav.submitAllMatching(EVENTS + ".*"),
-            JsonAttribute.ifMatchedThen(
-                isEventOfType(TntEventType.TRANSPORT),
-                JsonAttribute.path(
-                    TRANSPORT_DETAILS,
-                    JsonAttribute.path(TRANSPORT_CALL, JsonAttribute.matchedMustBeNonEmpty())))));
-
-    checks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s.%s' object within every event of type '%s' must demonstrate the correct use of transport objects based on '%s'"
-                .formatted(
-                    TRANSPORT_DETAILS,
-                    TRANSPORT_CALL,
-                    TntEventType.TRANSPORT.name(),
-                    MODE_OF_TRANSPORT),
+            "When '%s.%s.%s' is VESSEL or BARGE / TRUCK / RAIL, every applicable Transport event must demonstrate the correct use of the corresponding transport sub-object."
+                .formatted(TRANSPORT_DETAILS, TRANSPORT_CALL, MODE_OF_TRANSPORT),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.TRANSPORT),
@@ -377,55 +358,30 @@ public class TntChecks {
                               if (!hasVessel) {
                                 return ConformanceCheckResult.simple(
                                     Set.of(
-                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' or '%s' must demonstrate the correct use of the '%s' object."
+                                        "When '%s.%s.%s' is VESSEL or BARGE, every applicable Transport event must demonstrate the correct use of '%s.%s.%s'."
                                             .formatted(
-                                                TntEventType.TRANSPORT.name(),
-                                                contextPath,
-                                                MODE_OF_TRANSPORT,
-                                                VESSEL,
-                                                BARGE,
-                                                VESSEL_TRANSPORT)));
+                                                TRANSPORT_DETAILS, TRANSPORT_CALL, MODE_OF_TRANSPORT,
+                                                TRANSPORT_DETAILS, TRANSPORT_CALL, VESSEL_TRANSPORT)));
                               }
                               break;
                             case RAIL:
                               if (!hasRail) {
                                 return ConformanceCheckResult.simple(
                                     Set.of(
-                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' must demonstrate the correct use of the '%s' object."
+                                        "When '%s.%s.%s' is RAIL, every applicable Transport event must demonstrate the correct use of '%s.%s.%s'."
                                             .formatted(
-                                                TntEventType.TRANSPORT.name(),
-                                                contextPath,
-                                                MODE_OF_TRANSPORT,
-                                                RAIL,
-                                                RAIL_TRANSPORT)));
+                                                TRANSPORT_DETAILS, TRANSPORT_CALL, MODE_OF_TRANSPORT,
+                                                TRANSPORT_DETAILS, TRANSPORT_CALL, RAIL_TRANSPORT)));
                               }
                               break;
                             case TRUCK:
                               if (!hasTruck) {
                                 return ConformanceCheckResult.simple(
                                     Set.of(
-                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' must demonstrate the correct use of the '%s' object."
+                                        "When '%s.%s.%s' is TRUCK, every applicable Transport event must demonstrate the correct use of '%s.%s.%s'."
                                             .formatted(
-                                                TntEventType.TRANSPORT.name(),
-                                                contextPath,
-                                                MODE_OF_TRANSPORT,
-                                                TRUCK,
-                                                TRUCK_TRANSPORT)));
-                              }
-                              break;
-                            case MULTIMODAL:
-                              if (hasVessel || hasRail || hasTruck) {
-                                return ConformanceCheckResult.simple(
-                                    Set.of(
-                                        "Within every Event of type '%s', the '%s' object with '%s' = '%s' must not contain '%s', '%s', or '%s' objects."
-                                            .formatted(
-                                                TntEventType.TRANSPORT.name(),
-                                                contextPath,
-                                                MODE_OF_TRANSPORT,
-                                                MULTIMODAL,
-                                                VESSEL_TRANSPORT,
-                                                RAIL_TRANSPORT,
-                                                TRUCK_TRANSPORT)));
+                                                TRANSPORT_DETAILS, TRANSPORT_CALL, MODE_OF_TRANSPORT,
+                                                TRANSPORT_DETAILS, TRANSPORT_CALL, TRUCK_TRANSPORT)));
                               }
                               break;
                             default:
@@ -434,49 +390,6 @@ public class TntChecks {
                           return ConformanceCheckResult.simple(Collections.emptySet());
                         })))));
 
-    checks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-            "The '%s.%s.%s' object within every event of type '%s' (if present) must demonstrate the correct use of the '%s' attribute (7-8 digits) or of the '%s' attribute (not empty or blank)"
-                .formatted(
-                    TRANSPORT_DETAILS,
-                    TRANSPORT_CALL,
-                    VESSEL_TRANSPORT,
-                    TntEventType.TRANSPORT.name(),
-                    VESSEL_IMO_NUMBER,
-                    VESSEL_NAME),
-            mav -> mav.submitAllMatching(EVENTS + ".*"),
-            JsonAttribute.ifMatchedThen(
-                isEventOfType(TntEventType.TRANSPORT),
-                JsonAttribute.path(
-                    TRANSPORT_DETAILS,
-                    JsonAttribute.path(
-                        TRANSPORT_CALL,
-                        JsonAttribute.path(
-                            VESSEL_TRANSPORT,
-                            (vesselTransport, contextPath) -> {
-                              if (JsonUtil.isMissing(vesselTransport)) {
-                                return ConformanceCheckResult.withRelevance(
-                                    Set.of(ConformanceError.irrelevant()));
-                              }
-
-                              String imoNumber =
-                                  vesselTransport.path(VESSEL_IMO_NUMBER).asText(null);
-                              String vesselName = vesselTransport.path(VESSEL_NAME).asText(null);
-
-                              boolean hasValidIMO =
-                                  imoNumber != null && imoNumber.matches("^\\d{7,8}$");
-                              boolean hasValidName =
-                                  vesselName != null && !vesselName.trim().isEmpty();
-
-                              if (!hasValidIMO && !hasValidName) {
-                                return ConformanceCheckResult.simple(
-                                    Set.of(
-                                        "The '%s' object must contain either a valid '%s' (7-8 digits) or a non-empty '%s'"
-                                            .formatted(
-                                                contextPath, VESSEL_IMO_NUMBER, VESSEL_NAME)));
-                              }
-                              return ConformanceCheckResult.simple(Collections.emptySet());
-                            }))))));
 
     return checks;
   }
@@ -486,8 +399,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(TntEventType.EQUIPMENT.name(), EQUIPMENT_EVENT_TYPE),
+            "For every event, the event-type-specific subtype attribute must contain a value allowed by the corresponding OpenAPI schema property ('%s')."
+                .formatted(EQUIPMENT_EVENT_TYPE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.EQUIPMENT),
@@ -508,8 +421,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(TntEventType.IOT.name(), IOT_EVENT_TYPE),
+            "For every event, the event-type-specific subtype attribute must contain a value allowed by the corresponding OpenAPI schema property ('%s')."
+                .formatted(IOT_EVENT_TYPE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.IOT),
@@ -522,15 +435,6 @@ public class TntChecks {
 
     checks.addAll(commonEquipmentDetailsChecks(TntEventType.IOT));
 
-    checks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' object"
-                .formatted(TntEventType.IOT.name(), IOT_DETAILS),
-            mav -> mav.submitAllMatching(EVENTS + ".*"),
-            JsonAttribute.ifMatchedThen(
-                isEventOfType(TntEventType.IOT),
-                JsonAttribute.path(IOT_DETAILS, JsonAttribute.matchedMustBeNonEmpty()))));
-
     return checks;
   }
 
@@ -539,8 +443,8 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' attribute"
-                .formatted(TntEventType.REEFER.name(), REEFER_EVENT_TYPE),
+            "For every event, the event-type-specific subtype attribute must contain a value allowed by the corresponding OpenAPI schema property ('%s')."
+                .formatted(REEFER_EVENT_TYPE),
             mav -> mav.submitAllMatching(EVENTS + ".*"),
             JsonAttribute.ifMatchedThen(
                 isEventOfType(TntEventType.REEFER),
@@ -552,15 +456,6 @@ public class TntChecks {
                             TntDataSets.VALID_REEFER_EVENT_TYPES))))));
 
     checks.addAll(commonEquipmentDetailsChecks(TntEventType.REEFER));
-
-    checks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-            "Every event of type '%s' must demonstrate the correct use of the '%s' object"
-                .formatted(TntEventType.REEFER.name(), REEFER_DETAILS),
-            mav -> mav.submitAllMatching(EVENTS + ".*"),
-            JsonAttribute.ifMatchedThen(
-                isEventOfType(TntEventType.REEFER),
-                JsonAttribute.path(REEFER_DETAILS, JsonAttribute.matchedMustBeNonEmpty()))));
 
     return checks;
   }

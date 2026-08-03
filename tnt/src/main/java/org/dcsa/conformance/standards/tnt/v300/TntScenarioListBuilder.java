@@ -35,7 +35,7 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
 
     return Stream.of(
             Map.entry(
-                "POST /events - Publish events for each event type",
+                "POST scenarios per event type — alternative required path for event push",
                 noAction()
                     .thenEither(
                         postTntEvents(TntEventType.SHIPMENT),
@@ -44,7 +44,7 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
                         postTntEvents(TntEventType.IOT),
                         postTntEvents(TntEventType.REEFER))),
             Map.entry(
-                "GET /events - Retrieve events by event type",
+                "GET scenarios per event type — alternative required path for event pull",
                 noAction()
                     .thenEither(
                         getTntEvents(TntEventType.SHIPMENT),
@@ -53,7 +53,7 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
                         getTntEvents(TntEventType.IOT),
                         getTntEvents(TntEventType.REEFER))),
             Map.entry(
-                "GET /events - Filter events using primary query parameters",
+                "Event Producer: GET scenarios for base required query parameter filter combinations — required once per GET endpoint implementation",
                 noAction()
                     .thenEither(
                         supplyScenarioParameters(TntQueryParameters.CBR).then(getTntEvents()),
@@ -64,7 +64,7 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
                             .then(getTntEvents()),
                         supplyScenarioParameters(TntQueryParameters.ER).then(getTntEvents()))),
             Map.entry(
-                "GET /events - Filter events using additional query parameters",
+                "Event Producer: GET scenarios for additional required query parameter combination — required once per GET endpoint implementation",
                 noAction()
                     .thenEither(
                         supplyScenarioParameters(
@@ -74,7 +74,7 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
                                 TntQueryParameters.E_UDT_MAX)
                             .then(getTntEvents()))),
             Map.entry(
-                "GET /events - Validate pagination with cursor-based navigation (optional)",
+                "Event Producer: GET scenario for pagination — optional/report-only",
                 noAction()
                     .thenEither(
                         supplyScenarioParameters(TntQueryParameters.CBR, TntQueryParameters.LIMIT)

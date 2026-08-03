@@ -30,7 +30,7 @@
  *   dateMax   Upper bound date (inclusive) in YYYY-MM-DD format.
  *
  * Example:
- *   npm run get-sandbox-usage-stats -- 2025-01-01 2025-12-31
+ *   npm run get-sandbox-usage-stats -- 2026-07-27 2026-08-03
  */
 
 import { listCognitoUsers } from './list-cognito-users';

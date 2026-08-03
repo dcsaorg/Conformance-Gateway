@@ -114,7 +114,7 @@ public class TntChecks {
 
   private static JsonContentCheck everyEventHasEventDateTimeCheck() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-        "Every event must demonstrate the correct use of the '%s' attribute.".formatted(EVENT_DATE_TIME),
+        "Every event must have a non-empty (not blank) '%s' attribute.".formatted(EVENT_DATE_TIME),
         mav -> mav.submitAllMatching(EVENTS + ".*"),
         JsonAttribute.path(EVENT_DATE_TIME, JsonAttribute.matchedMustBeNonEmpty()));
   }

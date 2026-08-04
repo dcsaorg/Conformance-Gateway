@@ -3,6 +3,7 @@ package org.dcsa.conformance.springboot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.dcsa.conformance.sandbox.ConformanceErrorResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -12,6 +13,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -101,6 +103,30 @@ class ConformanceBasicAPITest {
       .andExpect(status().isOk())
       .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(content().string(containsString("-testing-counterparts")));
+  }
+
+  @Test
+  void shouldMaskUnexpectedWebuiErrors() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders
+        .post("/conformance/webui/")
+        .content("{\"operation\":\"unsupported-operation\"}")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(content().string(containsString(ConformanceErrorResponses.UNEXPECTED_ERROR_MESSAGE)))
+      .andExpect(content().string(containsString("\"errorId\"")))
+      .andExpect(content().string(not(containsString("UnsupportedOperationException"))));
+  }
+
+  @Test
+  void shouldMaskUnexpectedApiErrors() throws Exception {
+    mockMvc.perform(get(getAppURL("sandbox-does-not-exist", "status")))
+      .andExpect(status().isInternalServerError())
+      .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(content().string(containsString(ConformanceErrorResponses.UNEXPECTED_ERROR_MESSAGE)))
+      .andExpect(content().string(containsString("\"errorId\"")))
+      .andExpect(content().string(not(containsString("NullPointerException"))));
   }
 
   private String getAppURL(String scenarioID, String urlPath) {

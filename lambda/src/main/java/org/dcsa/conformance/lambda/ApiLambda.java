@@ -1,23 +1,25 @@
 package org.dcsa.conformance.lambda;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.ApplicationLoadBalancerRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.ApplicationLoadBalancerResponseEvent;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.sandbox.ConformanceErrorResponses;
+import org.dcsa.conformance.sandbox.ConformanceSandbox;
+import org.dcsa.conformance.sandbox.ConformanceWebRequest;
+import org.dcsa.conformance.sandbox.ConformanceWebResponse;
+import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.sandbox.ConformanceSandbox;
-import org.dcsa.conformance.sandbox.ConformanceWebRequest;
-import org.dcsa.conformance.sandbox.ConformanceWebResponse;
-import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class ApiLambda
@@ -48,19 +50,23 @@ public class ApiLambda
                       : event.getBody()),
               LambdaToolkit.createDeferredSandboxTaskConsumer(persistenceProvider));
 
-      Map<String, List<String>> responseHeaders = conformanceWebResponse.getValueListHeaders();
-      responseHeaders.put("Content-Type", List.of(conformanceWebResponse.contentType()));
-
-      ApplicationLoadBalancerResponseEvent response = new ApplicationLoadBalancerResponseEvent();
-      response.setStatusCode(conformanceWebResponse.statusCode());
-      response.setMultiValueHeaders(responseHeaders);
-      response.setBody(conformanceWebResponse.body());
-      response.setIsBase64Encoded(false);
-      return response;
-    } catch (RuntimeException | Error e) {
-      log.error("Unhandled exception: {}", e, e);
-      throw e;
+      return getApplicationLoadBalancerResponseEvent(conformanceWebResponse);
+    } catch (RuntimeException e) {
+      ConformanceWebResponse conformanceWebResponse = ConformanceErrorResponses.unexpectedApiResponse(log, "handling the API Lambda request", e);
+      return getApplicationLoadBalancerResponseEvent(conformanceWebResponse);
     }
+  }
+
+  private ApplicationLoadBalancerResponseEvent getApplicationLoadBalancerResponseEvent(ConformanceWebResponse conformanceWebResponse) {
+    Map<String, List<String>> responseHeaders = conformanceWebResponse.getValueListHeaders();
+    responseHeaders.put("Content-Type", List.of(conformanceWebResponse.contentType()));
+
+    ApplicationLoadBalancerResponseEvent response = new ApplicationLoadBalancerResponseEvent();
+    response.setStatusCode(conformanceWebResponse.statusCode());
+    response.setMultiValueHeaders(responseHeaders);
+    response.setBody(conformanceWebResponse.body());
+    response.setIsBase64Encoded(false);
+    return response;
   }
 
   static void main(String[] ignoredArgs) {} // unused

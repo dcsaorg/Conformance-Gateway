@@ -52,6 +52,14 @@ public class OvsSubscriber extends ConformanceParty {
 
   private void getSchedules(JsonNode actionPrompt) {
     log.info("OvsSubscriber.getSchedules(%s)".formatted(actionPrompt.toPrettyString()));
+    String cursor = actionPrompt.path("cursor").asText("");
+
+    if (!cursor.isBlank()) {
+      syncCounterpartGet("/v3/service-schedules", Map.of("cursor", Set.of(cursor)));
+      addOperatorLogEntry("Sent GET service schedules request with cursor parameter.");
+      return;
+    }
+
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
@@ -63,8 +71,7 @@ public class OvsSubscriber extends ConformanceParty {
                     entry -> entry.getKey().getQueryParamName(),
                     entry -> Set.of(entry.getValue()))));
 
-    addOperatorLogEntry(
-        "Sent GET schedules request with parameters %s".formatted(ssp.toJson().toPrettyString()));
+    addOperatorLogEntry("Sent GET service schedules request with parameters %s".formatted(ssp.toJson().toPrettyString()));
   }
 
   @Override

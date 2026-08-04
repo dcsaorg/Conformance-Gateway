@@ -1,13 +1,11 @@
 package org.dcsa.conformance.standards.ovs.checks;
 
-import static org.dcsa.conformance.standards.ovs.checks.OvsChecks.VALID_DEPRECATED_STATUS_CODE;
-import static org.dcsa.conformance.standards.ovs.checks.OvsChecks.VALID_STATUS_CODES;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.*;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,163 +13,161 @@ import org.junit.jupiter.api.Test;
 class OvsChecksTest {
 
   private ObjectMapper mapper;
-  private ArrayNode body;
-  private ObjectNode schedule;
+  private List<org.dcsa.conformance.core.check.JsonContentCheck> checks;
 
   @BeforeEach
   void setUp() {
     mapper = new ObjectMapper();
-    body = mapper.createArrayNode();
-    schedule = body.addObject();
+    checks = OvsChecks.buildResponseContentChecks();
   }
 
   @Nested
-  class CheckServiceSchedulesExist {
+  class MandatoryValidations {
 
     @Test
-    void validSchedules_allHaveVesselSchedules() {
-      schedule.put("carrierServiceName", "ServiceA");
-      schedule.putArray("vesselSchedules").addObject().put("vesselIMONumber", "12345");
-      assertTrue(OvsChecks.checkServiceSchedulesExist(body).isEmpty());
+    void serviceSchedulesMustExist() {
+      assertFalse(checks.get(0).validate(null).getErrorMessages().isEmpty());
+      assertTrue(checks.get(0).validate(validResponse()).getErrorMessages().isEmpty());
     }
 
     @Test
-    void nullBody() {
-      assertFalse(OvsChecks.checkServiceSchedulesExist(null).isEmpty());
+    void vesselSchedulesMustExist() {
+      ArrayNode body = mapper.createArrayNode();
+      body.addObject().put("carrierServiceCode", "BW1");
+
+      assertFalse(checks.get(1).validate(body).getErrorMessages().isEmpty());
+      assertTrue(checks.get(1).validate(validResponse()).getErrorMessages().isEmpty());
     }
 
     @Test
-    void emptyArrayBody() {
-      assertTrue(OvsChecks.checkServiceSchedulesExist(mapper.createArrayNode()).isEmpty());
+    void transportCallsMustExist() {
+      ArrayNode body = mapper.createArrayNode();
+      body.addObject().putArray("vesselSchedules").addObject();
+
+      assertFalse(checks.get(2).validate(body).getErrorMessages().isEmpty());
+      assertTrue(checks.get(2).validate(validResponse()).getErrorMessages().isEmpty());
     }
 
     @Test
-    void missingVesselSchedules() {
-      schedule.put("carrierServiceName", "ServiceA");
-      assertFalse(OvsChecks.checkServiceSchedulesExist(body).isEmpty());
+    void locationMustExist() {
+      ArrayNode body = responseWithTransportCall();
+      assertFalse(checks.get(3).validate(body).getErrorMessages().isEmpty());
+      assertTrue(checks.get(3).validate(validResponse()).getErrorMessages().isEmpty());
     }
 
     @Test
-    void emptyVesselSchedulesArray() {
-      schedule.put("carrierServiceName", "ServiceA");
-      schedule.putArray("vesselSchedules");
-      assertFalse(OvsChecks.checkServiceSchedulesExist(body).isEmpty());
-    }
-  }
-
-  @Nested
-  class ValidStatusCodes {
-
-    @Test
-    void invalidCode_returnsError() {
-      addTransportCallWithStatusCodes("INVALID");
-      assertFalse(VALID_STATUS_CODES.validate(body).getErrorMessages().isEmpty());
-    }
-
-    @Test
-    void validCode_noError() {
-      addTransportCallWithStatusCodes("OMIT");
-      assertTrue(VALID_STATUS_CODES.validate(body).getErrorMessages().isEmpty());
-    }
-
-    @Test
-    void allValidCodes_noError() {
-      addTransportCallWithStatusCodes("OMIT", "BLNK", "ADHO");
-      assertTrue(VALID_STATUS_CODES.validate(body).getErrorMessages().isEmpty());
-    }
-
-    @Test
-    void extendedCodes_validForStatusCodesOnly_noError() {
-      addTransportCallWithStatusCodes("DRYD", "BUNK", "OOSV");
-      assertTrue(VALID_STATUS_CODES.validate(body).getErrorMessages().isEmpty());
-    }
-
-    @Test
-    void oneInvalidAmongMultiple_returnsError() {
-      addTransportCallWithStatusCodes("OMIT", "CU", "BLNK");
-      assertFalse(VALID_STATUS_CODES.validate(body).getErrorMessages().isEmpty());
-    }
-
-    @Test
-    void absent_isIrrelevant() {
-      addTransportCallWithoutStatusCodes();
-      assertFalse(VALID_STATUS_CODES.validate(body).isRelevant());
-    }
-
-    @Test
-    void emptyArray_isIrrelevant() {
-      getTransportCallNode().putArray("statusCodes");
-      assertFalse(VALID_STATUS_CODES.validate(body).isRelevant());
-    }
-
-    @Test
-    void noTransportCalls_isIrrelevant() {
-      schedule.putArray("vesselSchedules").addObject();
-      assertFalse(VALID_STATUS_CODES.validate(body).isRelevant());
+    void timestampsMustExist() {
+      ArrayNode body = responseWithTransportCall();
+      assertFalse(checks.get(4).validate(body).getErrorMessages().isEmpty());
+      assertTrue(checks.get(4).validate(validResponse()).getErrorMessages().isEmpty());
     }
   }
 
   @Nested
-  class ValidDeprecatedStatusCode {
+  class OptionalValidations {
 
     @Test
-    void invalidCode_returnsError() {
-      addTransportCallWithDeprecatedStatusCode("ARRIVED");
-      assertFalse(VALID_DEPRECATED_STATUS_CODE.validate(body).getErrorMessages().isEmpty());
+    void universalServiceReference_isIrrelevantWhenAbsent() {
+      assertFalse(checks.get(5).validate(validResponse()).isRelevant());
     }
 
     @Test
-    void validCode_noError() {
-      addTransportCallWithDeprecatedStatusCode("BLNK");
-      assertTrue(VALID_DEPRECATED_STATUS_CODE.validate(body).getErrorMessages().isEmpty());
+    void universalServiceReference_failsWhenOnlyBlankValuesPresent() {
+      ArrayNode body = validResponse();
+      ((ObjectNode) body.get(0)).put("universalServiceReference", " ");
+      assertFalse(checks.get(5).validate(body).getErrorMessages().isEmpty());
     }
 
     @Test
-    void absent_isIrrelevant() {
-      addTransportCallWithoutStatusCodes();
-      assertFalse(VALID_DEPRECATED_STATUS_CODE.validate(body).isRelevant());
+    void universalServiceReference_passesWhenNonBlankValuePresent() {
+      ArrayNode body = validResponse();
+      ((ObjectNode) body.get(0)).put("universalServiceReference", "SR12345A");
+      assertTrue(checks.get(5).validate(body).getErrorMessages().isEmpty());
     }
 
     @Test
-    void ignoredWhenStatusCodesPresent_isIrrelevant() {
-      ObjectNode transportCall = getTransportCallNode();
-      transportCall.putArray("statusCodes").add("OMIT");
-      transportCall.put("statusCode", "ARRIVED");
-      assertFalse(VALID_DEPRECATED_STATUS_CODE.validate(body).isRelevant());
+    void universalVoyageReference_isIrrelevantWhenAbsent() {
+      assertFalse(checks.get(6).validate(validResponse()).isRelevant());
     }
 
     @Test
-    void ignoredWhenStatusCodesEmptyArrayPresent_isIrrelevant() {
-      ObjectNode transportCall = getTransportCallNode();
-      transportCall.putArray("statusCodes"); // empty array
-      transportCall.put("statusCode", "ARRIVED");
-      assertFalse(VALID_DEPRECATED_STATUS_CODE.validate(body).isRelevant());
+    void universalVoyageReference_failsWhenOnlyBlankValuesPresent() {
+      ArrayNode body = validResponse();
+      ObjectNode transportCall = firstTransportCall(body);
+      transportCall.put("universalImportVoyageReference", " ");
+      transportCall.put("universalExportVoyageReference", " ");
+      assertFalse(checks.get(6).validate(body).getErrorMessages().isEmpty());
+    }
+
+    @Test
+    void universalVoyageReference_passesWhenOneNonBlankValuePresent() {
+      ArrayNode body = validResponse();
+      firstTransportCall(body).put("universalExportVoyageReference", "2103N");
+      assertTrue(checks.get(6).validate(body).getErrorMessages().isEmpty());
+    }
+
+    @Test
+    void statusCodes_isIrrelevantWhenAbsent() {
+      assertFalse(checks.get(7).validate(validResponse()).isRelevant());
+    }
+
+    @Test
+    void statusCodes_failsWhenPresentButEmpty() {
+      ArrayNode body = validResponse();
+      firstTransportCall(body).putArray("statusCodes");
+      assertFalse(checks.get(7).validate(body).getErrorMessages().isEmpty());
+    }
+
+    @Test
+    void statusCodes_passesWhenArrayHasValues() {
+      ArrayNode body = validResponse();
+      firstTransportCall(body).putArray("statusCodes").add("OMIT");
+      assertTrue(checks.get(7).validate(body).getErrorMessages().isEmpty());
+    }
+
+    @Test
+    void dummyVesselName_isIrrelevantWhenNoDummyVesselExists() {
+      assertFalse(checks.get(8).validate(validResponse()).isRelevant());
+    }
+
+    @Test
+    void dummyVesselName_failsWhenDummyVesselHasBlankName() {
+      ArrayNode body = validResponse();
+      ObjectNode vesselSchedule = (ObjectNode) body.get(0).path("vesselSchedules").get(0);
+      vesselSchedule.put("isDummyVessel", true);
+      vesselSchedule.put("vesselName", "");
+      assertFalse(checks.get(8).validate(body).getErrorMessages().isEmpty());
+    }
+
+    @Test
+    void dummyVesselName_passesWhenDummyVesselHasName() {
+      ArrayNode body = validResponse();
+      ObjectNode vesselSchedule = (ObjectNode) body.get(0).path("vesselSchedules").get(0);
+      vesselSchedule.put("isDummyVessel", true);
+      vesselSchedule.put("vesselName", "DUMMY VESSEL");
+      assertTrue(checks.get(8).validate(body).getErrorMessages().isEmpty());
     }
   }
 
-  // --- Helpers ---
-
-  private ObjectNode getTransportCallNode() {
-    schedule.putArray("vesselSchedules")
-        .addObject()
-        .putArray("transportCalls")
-        .addObject();
-    return (ObjectNode) schedule.path("vesselSchedules").get(0)
-        .path("transportCalls").get(0);
+  private ArrayNode validResponse() {
+    ArrayNode body = mapper.createArrayNode();
+    ObjectNode schedule = body.addObject();
+    ObjectNode vesselSchedule = schedule.putArray("vesselSchedules").addObject();
+    ObjectNode transportCall = vesselSchedule.putArray("transportCalls").addObject();
+    transportCall.putObject("location").put("UNLocationCode", "NLAMS");
+    transportCall.putArray("timestamps").addObject().put("eventDateTime", "2025-01-01T00:00:00Z");
+    return body;
   }
 
-  private void addTransportCallWithStatusCodes(String... codes) {
-    ArrayNode statusCodes = getTransportCallNode().putArray("statusCodes");
-    for (String code : codes) {
-      statusCodes.add(code);
-    }
+  private ArrayNode responseWithTransportCall() {
+    ArrayNode body = mapper.createArrayNode();
+    ObjectNode schedule = body.addObject();
+    schedule.putArray("vesselSchedules").addObject().putArray("transportCalls").addObject();
+    return body;
   }
 
-  private void addTransportCallWithDeprecatedStatusCode(String code) {
-    getTransportCallNode().put("statusCode", code);
-  }
-
-  private void addTransportCallWithoutStatusCodes() {
-    getTransportCallNode().put("transportCallReference", "REF001");
+  private ObjectNode firstTransportCall(ArrayNode body) {
+    return (ObjectNode)
+        body.get(0).path("vesselSchedules").get(0).path("transportCalls").get(0);
   }
 }

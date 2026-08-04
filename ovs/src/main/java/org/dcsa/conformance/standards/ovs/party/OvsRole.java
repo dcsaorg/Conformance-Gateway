@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum OvsRole {
-  PUBLISHER("Publisher"),
-  SUBSCRIBER("Subscriber");
+  PRODUCER("Schedule Producer"),
+  CONSUMER("Schedule Consumer");
 
   private final String configName;
 
@@ -14,10 +14,10 @@ public enum OvsRole {
   }
 
   public static boolean isPublisher(String configName) {
-    return OvsRole.PUBLISHER.configName.equals(configName);
+    return OvsRole.PRODUCER.configName.equals(configName);
   }
 
   public static boolean isSubscriber(String configName) {
-    return OvsRole.SUBSCRIBER.configName.equals(configName);
+    return OvsRole.CONSUMER.configName.equals(configName);
   }
 }

@@ -17,7 +17,12 @@ import org.dcsa.conformance.standards.ovs.party.OvsSubscriber;
 
 class OvsComponentFactory extends AbstractComponentFactory {
   OvsComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
-    super(standardName, standardVersion, scenarioSuite, "Publisher", "Subscriber");
+    super(
+        standardName,
+        standardVersion,
+        scenarioSuite,
+        OvsRole.PRODUCER.getConfigName(),
+        OvsRole.CONSUMER.getConfigName());
   }
 
   public List<ConformanceParty> createParties(
@@ -36,26 +41,26 @@ class OvsComponentFactory extends AbstractComponentFactory {
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration publisherConfiguration =
-        partyConfigurationsByRoleName.get(OvsRole.PUBLISHER.getConfigName());
+        partyConfigurationsByRoleName.get(OvsRole.PRODUCER.getConfigName());
     if (publisherConfiguration != null) {
       parties.add(
           new OvsPublisher(
               standardVersion,
               publisherConfiguration,
-              counterpartConfigurationsByRoleName.get(OvsRole.SUBSCRIBER.getConfigName()),
+              counterpartConfigurationsByRoleName.get(OvsRole.CONSUMER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
     }
 
     PartyConfiguration subscriberConfiguration =
-        partyConfigurationsByRoleName.get(OvsRole.SUBSCRIBER.getConfigName());
+        partyConfigurationsByRoleName.get(OvsRole.CONSUMER.getConfigName());
     if (subscriberConfiguration != null) {
       parties.add(
           new OvsSubscriber(
               standardVersion,
               subscriberConfiguration,
-              counterpartConfigurationsByRoleName.get(OvsRole.PUBLISHER.getConfigName()),
+              counterpartConfigurationsByRoleName.get(OvsRole.PRODUCER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));

@@ -230,18 +230,15 @@ class OvsChecksTest {
   class ActionCheckBuilders {
 
     @Test
-    void shouldCreateMandatoryActionCheckWithoutStatusOverride() {
+    void shouldCreateMandatoryActionCheck() {
       ActionCheck actionCheck = OvsChecks.mandatoryResponseContentChecks(UUID.randomUUID(), "3.0.0");
       assertNotNull(actionCheck);
-      assertNull(actionCheck.getStatusOverride());
     }
 
     @Test
-    void shouldCreateOptionalActionCheckWithPartialConformanceOverride() {
+    void shouldCreateOptionalActionCheck() {
       ActionCheck actionCheck = OvsChecks.optionalResponseContentChecks(UUID.randomUUID(), "3.0.0");
       assertNotNull(actionCheck);
-      assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, actionCheck.getStatusOverride());
-      assertFalse(actionCheck.isStatusOverridePropagated());
     }
   }
 

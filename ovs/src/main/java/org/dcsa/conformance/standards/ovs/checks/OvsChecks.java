@@ -9,7 +9,6 @@ import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonContentMatchedValidation;
-import org.dcsa.conformance.core.report.ConformanceStatus;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
@@ -82,22 +81,20 @@ public class OvsChecks {
 
   public static ActionCheck mandatoryResponseContentChecks(UUID matched, String standardVersion) {
     return JsonAttribute.contentChecks(
-      OvsRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion,
+      OvsRole::isProducer, matched, HttpMessageType.RESPONSE, standardVersion,
       buildMandatoryResponseContentChecks());
   }
 
   public static ActionCheck optionalResponseContentChecks(UUID matched, String standardVersion) {
-    ActionCheck check = JsonAttribute.contentChecks(
+    return JsonAttribute.contentChecks(
       "",
       "The HTTP response has valid content (optional response-content validations)",
-      OvsRole::isPublisher,
+      OvsRole::isProducer,
       matched,
       HttpMessageType.RESPONSE,
       standardVersion,
       buildOptionalResponseContentChecks()
     );
-    check.withStatusOverride(ConformanceStatus.PARTIALLY_CONFORMANT, false);
-    return check;
   }
 
   private List<JsonContentCheck> buildMandatoryResponseContentChecks() {

@@ -61,26 +61,26 @@ public class OvsGetSchedulesAction extends OvsAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var defaultChecks =
           Stream.of(
-            new UrlPathCheck(OvsRole::isSubscriber, getMatchedExchangeUuid(), "/service-schedules"),
+            new UrlPathCheck(OvsRole::isConsumer, getMatchedExchangeUuid(), "/service-schedules"),
             new ApiHeaderCheck(
-              OvsRole::isSubscriber,
+              OvsRole::isConsumer,
               getMatchedExchangeUuid(),
               HttpMessageType.REQUEST,
               expectedApiVersion),
             new ApiHeaderCheck(
-              OvsRole::isPublisher,
+              OvsRole::isProducer,
               getMatchedExchangeUuid(),
               HttpMessageType.RESPONSE,
               expectedApiVersion),
-            new ResponseStatusCheck(OvsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+            new ResponseStatusCheck(OvsRole::isProducer, getMatchedExchangeUuid(), expectedStatus),
             new QueryParameterSchemaCheck(
               "",
               "The query parameters of the HTTP request are correct",
-              OvsRole::isSubscriber,
+              OvsRole::isConsumer,
               getMatchedExchangeUuid(),
               "/standards/ovs/schemas/OVS_v3.0.0.yaml"),
             new JsonSchemaCheck(
-              OvsRole::isPublisher,
+              OvsRole::isProducer,
               getMatchedExchangeUuid(),
               HttpMessageType.RESPONSE,
               responseSchemaValidator));

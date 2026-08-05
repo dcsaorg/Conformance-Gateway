@@ -76,9 +76,9 @@ class OvsComponentFactory extends AbstractComponentFactory {
     return OvsScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, OvsRole::isPublisher),
+            partyConfigurations, counterpartConfigurations, OvsRole::isProducer),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, OvsRole::isSubscriber));
+            partyConfigurations, counterpartConfigurations, OvsRole::isConsumer));
   }
 
   @Override
@@ -105,8 +105,7 @@ class OvsComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
     String schemaFilePath = "/standards/ovs/schemas/OVS_v%s.yaml".formatted(standardVersion);
-    String schemaName =
-        OvsRole.isPublisher(apiProviderRole) ? (forRequest ? null : "serviceSchedules") : null;
+    String schemaName = OvsRole.isProducer(apiProviderRole) ? (forRequest ? null : "serviceSchedules") : null;
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 }

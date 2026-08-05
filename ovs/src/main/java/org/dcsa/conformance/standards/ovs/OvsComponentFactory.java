@@ -75,6 +75,7 @@ class OvsComponentFactory extends AbstractComponentFactory {
       boolean isWithNotifications) {
     return OvsScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        getReportRoleNames(partyConfigurations, counterpartConfigurations),
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, OvsRole::isProducer),
         _findPartyOrCounterpartName(

@@ -1,13 +1,7 @@
 package org.dcsa.conformance.standards.vgm.action;
 
-import static org.dcsa.conformance.core.report.ConformanceStatus.PARTIALLY_CONFORMANT;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -23,6 +17,11 @@ import org.dcsa.conformance.standards.vgm.checks.VgmChecks;
 import org.dcsa.conformance.standards.vgm.checks.VgmQueryParameters;
 import org.dcsa.conformance.standards.vgm.party.SuppliedScenarioParameters;
 import org.dcsa.conformance.standards.vgm.party.VgmRole;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Stream;
 
 public class ConsumerGetVgmDeclarationAction extends VgmAction {
 

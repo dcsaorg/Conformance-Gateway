@@ -23,6 +23,32 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
   @SuppressWarnings("unused")
   private static Stream<Arguments> testStandards() {
     return Stream.of(
+        Arguments.of("Adoption", false),
+        Arguments.of("Adoption", true),
+        Arguments.of("AN", false),
+        Arguments.of("AN", true),
+        Arguments.of("Booking", false),
+        Arguments.of("Booking", true),
+        Arguments.of("CS", false),
+        Arguments.of("CS", true),
+        Arguments.of("Ebl", false),
+        Arguments.of("Ebl", true),
+        Arguments.of("PortCall", false),
+        Arguments.of("PortCall", true),
+        Arguments.of("OVS", false),
+        Arguments.of("OVS", true),
+        Arguments.of("PINT", false),
+        Arguments.of("PINT", true),
+        Arguments.of("TnT", false),
+        Arguments.of("TnT", true),
+        Arguments.of("eBL Issuance", false),
+        Arguments.of("eBL Issuance", true),
+        Arguments.of("eBL Surrender", false),
+        Arguments.of("eBL Surrender", true),
+        Arguments.of("Ebl Endorsement Chain", false),
+        Arguments.of("Ebl Endorsement Chain", true),
+        Arguments.of("Booking + eBL", false),
+        Arguments.of("Booking + eBL", true),
         Arguments.of("VGM", false),
         Arguments.of("VGM", true));
   }

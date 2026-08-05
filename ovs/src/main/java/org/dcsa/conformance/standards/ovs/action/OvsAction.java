@@ -24,7 +24,6 @@ public abstract class OvsAction extends ConformanceAction {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.sspSupplier = _getSspSupplier(previousAction);
     this.expectedStatus = expectedStatus;
-    this.paginationCursor = previousAction instanceof OvsAction ? ((OvsAction) previousAction).paginationCursor : null;
   }
 
   @Override
@@ -34,7 +33,9 @@ public abstract class OvsAction extends ConformanceAction {
   }
 
   protected Supplier<String> getPaginationCursorSupplier() {
-    return () -> paginationCursor;
+    return previousAction instanceof OvsAction previousOvsAction
+        ? () -> previousOvsAction.paginationCursor
+        : () -> null;
   }
 
   @Override

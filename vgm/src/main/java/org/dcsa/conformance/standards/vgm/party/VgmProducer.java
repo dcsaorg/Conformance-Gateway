@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.vgm.party;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,9 +112,13 @@ public class VgmProducer extends ConformanceParty {
                 "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
                 "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
 
-    return request.createResponse(
-        200,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(jsonResponseBody));
+    Map<String, Collection<String>> responseHeaders = new LinkedHashMap<>();
+    responseHeaders.put(API_VERSION, List.of(apiVersion));
+    if (request.queryParams().containsKey(VgmQueryParameters.LIMIT.getParameterName())
+        && !request.queryParams().containsKey(VgmQueryParameters.CURSOR.getParameterName())) {
+      responseHeaders.put("Next-Page-Cursor", List.of(ReferenceGenerator.newReference()));
+    }
+
+    return request.createResponse(200, responseHeaders, new ConformanceMessageBody(jsonResponseBody));
   }
 }

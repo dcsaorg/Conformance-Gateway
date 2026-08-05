@@ -26,11 +26,11 @@ public class SupplyScenarioParametersAction extends VgmAction {
         sourcePartyName,
         null,
         null,
-        "SupplyScenarioParameters(%s)"
+        "Supply parameters (%s)"
             .formatted(
                 Arrays.stream(queryParameters)
-                    .map(VgmQueryParameters::name)
-                    .collect(Collectors.joining(", "))));
+                    .map(VgmQueryParameters::getParameterName)
+                    .collect(Collectors.joining(" + "))));
     this.vgmQueryParameters = new LinkedHashSet<>(Arrays.asList(queryParameters));
   }
 

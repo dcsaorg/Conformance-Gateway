@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -68,12 +67,6 @@ public abstract class AbstractComponentFactory {
           PartyConfiguration[] partyConfigurations,
           CounterpartConfiguration[] counterpartConfigurations,
           boolean isWithNotifications);
-
-  protected static Set<String> getTestedPartyRoleNames(PartyConfiguration[] partyConfigurations) {
-    return Arrays.stream(partyConfigurations)
-        .map(PartyConfiguration::getRole)
-        .collect(Collectors.toUnmodifiableSet());
-  }
 
   public <T extends ScenarioListBuilder<T>> void generateConformanceScenarios(
       Map<String, List<ConformanceScenario>> scenariosByModuleName,

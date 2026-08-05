@@ -84,6 +84,7 @@ public class VgmComponentFactory extends AbstractComponentFactory {
       boolean isWithNotifications) {
     return VgmScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        getReportRoleNames(partyConfigurations, counterpartConfigurations),
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, VgmRole::isProducer),
         _findPartyOrCounterpartName(

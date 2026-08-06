@@ -1,15 +1,7 @@
 package org.dcsa.conformance.standards.portcall.party;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -19,11 +11,20 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.portcall.action.SubscriberGetPortCallEventsAction;
+import org.dcsa.conformance.standards.portcall.action.GetPortCallEventsAction;
 
-public class PortCallSubscriber extends ConformanceParty {
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-  public PortCallSubscriber(String apiVersion, PartyConfiguration partyConfiguration, CounterpartConfiguration counterpartConfiguration, JsonNodeMap persistentMap, PartyWebClient webClient, Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
+public class PortCallConsumer extends ConformanceParty {
+
+  public PortCallConsumer(String apiVersion, PartyConfiguration partyConfiguration, CounterpartConfiguration counterpartConfiguration, JsonNodeMap persistentMap, PartyWebClient webClient, Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(apiVersion, partyConfiguration, counterpartConfiguration, persistentMap, webClient, orchestratorAuthHeader);
   }
 
@@ -45,7 +46,7 @@ public class PortCallSubscriber extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(SubscriberGetPortCallEventsAction.class, this::getEvents));
+    return Map.ofEntries(Map.entry(GetPortCallEventsAction.class, this::getEvents));
   }
 
   @Override
@@ -53,28 +54,32 @@ public class PortCallSubscriber extends ConformanceParty {
     ObjectNode responseNode = OBJECT_MAPPER.createObjectNode();
     responseNode.putArray("feedbackElements");
 
-    ConformanceResponse response =
-      request.createResponse(
-        200,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(responseNode));
+    ConformanceResponse response = request.createResponse(
+      200,
+      Map.of(API_VERSION, List.of(apiVersion)),
+      new ConformanceMessageBody(responseNode));
 
-    addOperatorLogEntry(
-        "Handled Port Call Events POST: %s".formatted(request.message().body().getJsonBody()));
+    addOperatorLogEntry("Handled Port Call Events POST: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
 
   private void getEvents(JsonNode actionPrompt) {
-    SuppliedScenarioParameters ssp =
-        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-    Map<String, Set<String>> queryParams =
-        ssp.getMap().entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    entry -> entry.getKey().getQueryParamName(),
-                    entry -> Set.of(entry.getValue())));
+    SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+    Map<String, Set<String>> queryParams = ssp.getMap()
+      .entrySet()
+      .stream()
+      .collect(Collectors.toMap(
+        entry -> entry.getKey().getQueryParamName(),
+        entry -> Set.of(entry.getValue())));
+
+    String cursorParamName = PortCallFilterParameter.CURSOR.getQueryParamName();
+    if (actionPrompt.hasNonNull(cursorParamName)) {
+      queryParams.put(cursorParamName, Set.of(actionPrompt.required(cursorParamName).asText()));
+    }
 
     syncCounterpartGet("/events", queryParams);
     addOperatorLogEntry("Sent a GET Events request with query params." + queryParams);
   }
 }
+
+

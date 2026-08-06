@@ -30,11 +30,11 @@ public class PortCallStandard extends AbstractStandard {
     Map<String, SortedMap<String, SortedSet<String>>> endpointUrisAndMethodsByRoleName =
       Map.ofEntries(
         Map.entry(
-          PortCallRole.PUBLISHER.getConfigName(),
+          PortCallRole.PRODUCER.getConfigName(),
           new TreeMap<>(
             Map.ofEntries(Map.entry("/events", new TreeSet<>(Set.of("GET")))))),
         Map.entry(
-          PortCallRole.SUBSCRIBER.getConfigName(),
+          PortCallRole.CONSUMER.getConfigName(),
           new TreeMap<>(
             Map.ofEntries(
               Map.entry("/events", new TreeSet<>(Set.of("POST")))))));

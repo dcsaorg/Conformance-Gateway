@@ -28,9 +28,7 @@ public class SuppliedScenarioParameters {
 
   public ObjectNode toJson() {
     ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
-    map.forEach(
-        (portCallFilterParameter, value) ->
-            objectNode.put(portCallFilterParameter.getQueryParamName(), value));
+    map.forEach((portCallFilterParameter, value) -> objectNode.put(portCallFilterParameter.getQueryParamName(), value));
     return objectNode;
   }
 

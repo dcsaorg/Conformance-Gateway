@@ -18,9 +18,9 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.portcall.party.PortCallPublisher;
+import org.dcsa.conformance.standards.portcall.party.PortCallConsumer;
+import org.dcsa.conformance.standards.portcall.party.PortCallProducer;
 import org.dcsa.conformance.standards.portcall.party.PortCallRole;
-import org.dcsa.conformance.standards.portcall.party.PortCallSubscriber;
 
 public class PortCallComponentFactory extends AbstractComponentFactory {
 
@@ -29,8 +29,8 @@ public class PortCallComponentFactory extends AbstractComponentFactory {
       standardName,
       standardVersion,
       scenarioSuite,
-      PortCallRole.PUBLISHER.getConfigName(),
-      PortCallRole.SUBSCRIBER.getConfigName());
+      PortCallRole.PRODUCER.getConfigName(),
+      PortCallRole.CONSUMER.getConfigName());
   }
 
   @Override
@@ -44,27 +44,27 @@ public class PortCallComponentFactory extends AbstractComponentFactory {
 
     List<ConformanceParty> parties = new LinkedList<>();
 
-    PartyConfiguration publisherConfiguration =
-      partyConfigurationsByRoleName.get(PortCallRole.PUBLISHER.getConfigName());
-    if (publisherConfiguration != null) {
+    PartyConfiguration producerConfiguration =
+      partyConfigurationsByRoleName.get(PortCallRole.PRODUCER.getConfigName());
+    if (producerConfiguration != null) {
       parties.add(
-        new PortCallPublisher(
+        new PortCallProducer(
           standardVersion,
-          publisherConfiguration,
-          counterpartConfigurationsByRoleName.get(PortCallRole.SUBSCRIBER.getConfigName()),
+          producerConfiguration,
+          counterpartConfigurationsByRoleName.get(PortCallRole.CONSUMER.getConfigName()),
           persistentMap,
           webClient,
           orchestratorAuthHeader));
     }
 
     PartyConfiguration consumerConfiguration =
-      partyConfigurationsByRoleName.get(PortCallRole.SUBSCRIBER.getConfigName());
+      partyConfigurationsByRoleName.get(PortCallRole.CONSUMER.getConfigName());
     if (consumerConfiguration != null) {
       parties.add(
-          new PortCallSubscriber(
+          new PortCallConsumer(
               standardVersion,
               consumerConfiguration,
-              counterpartConfigurationsByRoleName.get(PortCallRole.PUBLISHER.getConfigName()),
+              counterpartConfigurationsByRoleName.get(PortCallRole.PRODUCER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
@@ -80,10 +80,11 @@ public class PortCallComponentFactory extends AbstractComponentFactory {
 
     return PortCallScenarioListBuilder.createModuleScenarioListBuilders(
       this,
+      getReportRoleNames(partyConfigurations, counterpartConfigurations),
       _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, PortCallRole::isPublisher),
+        partyConfigurations, counterpartConfigurations, PortCallRole::isProducer),
       _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, PortCallRole::isSubscriber));
+        partyConfigurations, counterpartConfigurations, PortCallRole::isConsumer));
   }
 
   @Override

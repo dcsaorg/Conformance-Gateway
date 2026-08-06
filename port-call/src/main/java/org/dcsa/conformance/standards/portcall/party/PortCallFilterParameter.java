@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.portcall.party;
 
+import java.util.Arrays;
 import lombok.Getter;
 
 @Getter
@@ -28,12 +29,20 @@ public enum PortCallFilterParameter {
   CLASSIFIER_CODE("classifierCode"),
   EVENT_TIMESTAMP_MIN("eventTimestampMin"),
   EVENT_TIMESTAMP_MAX("eventTimestampMax"),
-  LIMIT("limit");
+  LIMIT("limit"),
+  CURSOR("cursor");
 
   private final String queryParamName;
 
   PortCallFilterParameter(String queryParamName) {
     this.queryParamName = queryParamName;
+  }
+
+  public static PortCallFilterParameter fromQueryParamName(String queryParamName) {
+    return Arrays.stream(values())
+        .filter(param -> param.queryParamName.equals(queryParamName))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown query parameter: " + queryParamName));
   }
 
   public String getQueryParamName() {

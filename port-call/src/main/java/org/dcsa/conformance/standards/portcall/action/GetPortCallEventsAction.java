@@ -100,7 +100,7 @@ public class GetPortCallEventsAction extends PortCallAction {
   private static String getHashString(String responseBody) {
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hashBytes = digest.digest(responseBody.getBytes());
+      byte[] hashBytes = digest.digest(responseBody.getBytes(java.nio.charset.StandardCharsets.UTF_8));
       return HexFormat.of().formatHex(hashBytes);
     } catch (NoSuchAlgorithmException e) {
       log.error("Hashing of the response failed.", e);

@@ -6,6 +6,7 @@ import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
 
 public class OvsStandard extends AbstractStandard {
+
   public static final OvsStandard INSTANCE = new OvsStandard();
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 
@@ -27,11 +28,11 @@ public class OvsStandard extends AbstractStandard {
             SCENARIO_SUITE_CONFORMANCE,
             Map.ofEntries(
                 Map.entry(
-                    OvsRole.PUBLISHER.getConfigName(),
+                    OvsRole.PRODUCER.getConfigName(),
                     new TreeMap<>(
                         Map.ofEntries(
                             Map.entry("/v3/service-schedules", new TreeSet<>(Set.of("GET")))))),
-                Map.entry(OvsRole.SUBSCRIBER.getConfigName(), new TreeMap<>()))));
+                Map.entry(OvsRole.CONSUMER.getConfigName(), new TreeMap<>()))));
   }
 
   @Override
@@ -42,6 +43,6 @@ public class OvsStandard extends AbstractStandard {
 
   @Override
   protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
-    return Set.of(OvsRole.SUBSCRIBER.getConfigName());
+    return Set.of(OvsRole.CONSUMER.getConfigName());
   }
 }

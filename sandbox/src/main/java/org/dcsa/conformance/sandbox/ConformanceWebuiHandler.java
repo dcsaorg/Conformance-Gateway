@@ -398,7 +398,7 @@ public class ConformanceWebuiHandler {
       var extPartyUrl = externalPartyCounterpartConfig.getUrl();
       if (extPartyUrl != null && !extPartyUrl.isBlank()) {
         String expectedSuffix = "/party/%s/api"
-            .formatted(externalPartyCounterpartConfig.getName());
+            .formatted(URLEncoder.encode(externalPartyCounterpartConfig.getName(), StandardCharsets.UTF_8));
         String urlValue = extPartyUrl.getValue();
         if (!urlValue.endsWith(expectedSuffix)) {
           throw new UserFacingException(

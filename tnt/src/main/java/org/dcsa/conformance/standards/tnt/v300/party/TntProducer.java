@@ -116,11 +116,9 @@ public class TntProducer extends ConformanceParty {
       headers.put(TntConstants.HEADER_CURSOR_NAME, List.of(cursor));
     }
 
-    boolean hasCursor =
-        request.queryParams().containsKey(TntQueryParameters.CURSOR.getParameterName());
+    boolean hasCursor = request.queryParams().containsKey(TntQueryParameters.CURSOR.getParameterName());
 
-    Collection<String> eventTypesValues =
-        request.queryParams().get(TntQueryParameters.ET.getParameterName());
+    Collection<String> eventTypesValues = request.queryParams().get(TntQueryParameters.ET.getParameterName());
     List<TntEventType> eventTypes =
         eventTypesValues == null
             ? Collections.emptyList()
@@ -174,8 +172,7 @@ public class TntProducer extends ConformanceParty {
 
   private String getTntEventResponseFilepath(boolean hasCursor) {
     if (hasCursor) {
-      return "/standards/tnt/messages/tnt-%s-response-nextpage.json"
-          .formatted(getFormattedVersion());
+      return "/standards/tnt/messages/tnt-%s-response-nextpage.json".formatted(getFormattedVersion());
     }
     return "/standards/tnt/messages/tnt-%s-response.json".formatted(getFormattedVersion());
   }

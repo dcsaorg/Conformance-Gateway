@@ -77,8 +77,7 @@ public class ConsumerGetEventsWithTypeAction extends TntAction {
                 getMatchedExchangeUuid(),
                 TntQueryParameters.ET.getParameterName(),
                 eventType.name()),
-            TntChecks.getTntGetResponseChecks(
-                getMatchedExchangeUuid(), expectedApiVersion, eventType));
+            TntChecks.getTntGetResponseChecks(getMatchedExchangeUuid(), expectedApiVersion, eventType));
       }
     };
   }

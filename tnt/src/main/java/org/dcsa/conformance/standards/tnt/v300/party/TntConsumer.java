@@ -79,13 +79,9 @@ public class TntConsumer extends ConformanceParty {
   }
 
   private void getTntEventsWithQueryParameters(JsonNode actionPrompt) {
-    log.info(
-        "{}.getTntEventsWithQueryParameters({})",
-        getClass().getSimpleName(),
-        actionPrompt.toPrettyString());
+    log.info("{}.getTntEventsWithQueryParameters({})", getClass().getSimpleName(), actionPrompt.toPrettyString());
 
-    SuppliedScenarioParameters ssp =
-        SuppliedScenarioParameters.fromJson(actionPrompt.get(TntConstants.SUPPLIED_SCENARIO_PARAMETERS));
+    SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get(TntConstants.SUPPLIED_SCENARIO_PARAMETERS));
 
     Map<String, Collection<String>> queryParams =
         ssp.getMap().entrySet().stream()
@@ -94,9 +90,7 @@ public class TntConsumer extends ConformanceParty {
                     entry -> entry.getKey().getParameterName(), entry -> Set.of(entry.getValue())));
 
     if (actionPrompt.hasNonNull(TntQueryParameters.CURSOR.getParameterName())) {
-      queryParams.put(
-          TntQueryParameters.CURSOR.getParameterName(),
-          List.of(actionPrompt.path(TntQueryParameters.CURSOR.getParameterName()).asText()));
+      queryParams.put(TntQueryParameters.CURSOR.getParameterName(), List.of(actionPrompt.path(TntQueryParameters.CURSOR.getParameterName()).asText()));
     }
 
     syncCounterpartGet(TntStandard.API_PATH, queryParams);

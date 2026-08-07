@@ -24,7 +24,7 @@ public class UC14CarrierProcessBookingCancellationAction extends CarrierNotifica
       carrierPartyName,
       shipperPartyName,
       previousAction,
-      "UC14(Approve)",
+      "UC14(Confirm)",
       204,
       isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;

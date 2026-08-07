@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.booking.checks;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
-import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
@@ -15,7 +14,6 @@ import org.dcsa.conformance.core.check.KeywordDataset;
 import org.dcsa.conformance.core.check.MultiAttributeValidator;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.core.util.JsonUtil;
-import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
@@ -357,7 +355,7 @@ public class BookingChecks {
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(allowedReferenceTypes));
   }
 
-  private static final JsonContentCheck SHIPPER_REFERENCE_TYPE_VALIDATION =
+  static final JsonContentCheck SHIPPER_REFERENCE_TYPE_VALIDATION =
     referenceTypeValidation(
       "The %s attribute in each shipper-provided reference object must demonstrate the correct use of a DCSA reference type code: %s"
         .formatted(
@@ -858,7 +856,7 @@ public class BookingChecks {
       });
 
   private static JsonNode getShipmentLocationTypeCode(
-    JsonNode body, @NonNull String locationTypeCode) {
+    JsonNode body, String locationTypeCode) {
     var shipmentLocations = body.path(SHIPMENT_LOCATIONS);
     return StreamSupport.stream(shipmentLocations.spliterator(), false)
       .filter(o -> o.path(LOCATION_TYPE_CODE).asText("").equals(locationTypeCode))
@@ -1000,14 +998,25 @@ public class BookingChecks {
         .contains(scenario);
 
     checks.add(
-      JsonAttribute.allIndividualMatchesMustBeValid(
-        "[Scenario] Reefer scenario container validation",
-        isScenarioReefer,
-        mav -> mav.submitAllMatching(path(REQUESTED_EQUIPMENTS, "*")),
-        (nodeToValidate, contextPath) -> {
-          var issues = new LinkedHashSet<String>();
-          reeferContainerChecks(contextPath, nodeToValidate, issues);
-          return ConformanceCheckResult.simple(issues);
+      JsonAttribute.customValidator(
+        "[Scenario] Reefer scenario requires at least one %s item to contain %s"
+          .formatted(jsonPath(REQUESTED_EQUIPMENTS), jsonPath(ACTIVE_REEFER_SETTINGS)),
+        body -> {
+          if (!isScenarioReefer) {
+            return irrelevantResult();
+          }
+          boolean hasAtLeastOneActiveReeferSettings =
+            StreamSupport.stream(body.path(REQUESTED_EQUIPMENTS).spliterator(), false)
+              .anyMatch(
+                requestedEquipment ->
+                  requestedEquipment.path(ACTIVE_REEFER_SETTINGS).isObject());
+          if (!hasAtLeastOneActiveReeferSettings) {
+            return ConformanceCheckResult.simple(
+              Set.of(
+                "The scenario requires at least one '%s[*].%s' to be present"
+                  .formatted(REQUESTED_EQUIPMENTS, ACTIVE_REEFER_SETTINGS)));
+          }
+          return ConformanceCheckResult.simple(Set.of());
         }));
 
     checks.add(
@@ -1120,17 +1129,6 @@ public class BookingChecks {
     }
   }
 
-
-  private static void reeferContainerChecks(
-    String contextPath, JsonNode nodeToValidate, Set<String> issues) {
-    var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
-    if (!activeReeferNode.isObject()) {
-      issues.add(
-        "The scenario requires %s to be present"
-          .formatted(jsonPath(contextPath, ACTIVE_REEFER_SETTINGS)));
-    }
-  }
-
   static final JsonRebasableContentCheck VALID_FEEDBACK_SEVERITY =
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The %s attribute must demonstrate the correct use of a feedback severity code: %s"
@@ -1208,7 +1206,7 @@ public class BookingChecks {
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
         BookingDataSets.SHIPMENT_LOCATION_TYPES));
 
-  private static final JsonContentCheck REQUESTED_CARRIAGE_MODE_OF_TRANSPORT_VALIDATION =
+  static final JsonContentCheck REQUESTED_CARRIAGE_MODE_OF_TRANSPORT_VALIDATION =
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The %s / %s attribute must demonstrate the correct use of a mode of transport code: %s"
         .formatted(

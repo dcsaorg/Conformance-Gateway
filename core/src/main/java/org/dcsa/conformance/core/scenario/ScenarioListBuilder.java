@@ -11,9 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
+
   protected T parent;
   private final LinkedList<T> children = new LinkedList<>();
   protected final Function<ConformanceAction, ConformanceAction> actionBuilder;
+  private ScenarioConformanceType conformanceType = ScenarioConformanceType.REQUIRED;
 
   protected ScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
     this.actionBuilder = actionBuilder;
@@ -38,9 +40,18 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
                           builder ->
                               actionList.addLast(
                                   builder.actionBuilder.apply(actionList.peekLast())));
-                  return new ConformanceScenario(moduleIndex, nextScenarioIndex.getAndIncrement(), actionList);
+                  return new ConformanceScenario(
+                      moduleIndex,
+                      nextScenarioIndex.getAndIncrement(),
+                      actionList,
+                      conformanceType);
                 })
             .toList();
+  }
+
+  protected T asOptionalReportOnlyScenario() {
+    this.conformanceType = ScenarioConformanceType.OPTIONAL;
+    return thisAsT();
   }
 
   protected LinkedList<LinkedList<T>> asBuilderListList() {

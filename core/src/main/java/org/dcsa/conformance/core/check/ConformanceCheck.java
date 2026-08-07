@@ -25,6 +25,7 @@ public abstract class ConformanceCheck {
 
   private boolean isRelevant = true;
   private boolean isApplicable = true;
+  private boolean relevantForAggregation = true;
   private ConformanceStatus statusOverride;
   private boolean statusOverridePropagated;
 

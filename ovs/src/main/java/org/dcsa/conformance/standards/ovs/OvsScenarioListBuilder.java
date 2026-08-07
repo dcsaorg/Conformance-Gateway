@@ -76,7 +76,8 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
           Map.entry(
             "GET scenario for pagination - Optional/report-only",
             scenarioWithPagination(
-              parameters(Map.entry(CARRIER_SERVICE_CODE, "BW1"), Map.entry(LIMIT, "1")))))),
+              parameters(Map.entry(CARRIER_SERVICE_CODE, "BW1"), Map.entry(LIMIT, "1")))
+              .asOptionalReportOnlyScenario()))),
       Map.entry(
         OvsRole.CONSUMER.getConfigName(),
         MapUtils.orderedMap(
@@ -109,7 +110,7 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
   private static OvsScenarioListBuilder supplyScenarioParameters(Map<OvsFilterParameter, String> parameters) {
     String publisherPartyName = threadLocalPublisherPartyName.get();
     return new OvsScenarioListBuilder(
-        previousAction -> new SupplyScenarioParametersAction(publisherPartyName, parameters));
+      previousAction -> new SupplyScenarioParametersAction(publisherPartyName, parameters));
   }
 
   @SafeVarargs
@@ -130,12 +131,12 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
     String publisherPartyName = threadLocalPublisherPartyName.get();
     String subscriberPartyName = threadLocalSubscriberPartyName.get();
     return new OvsScenarioListBuilder(
-        previousAction ->
-            new OvsGetSchedulesAction(
-                subscriberPartyName,
-                publisherPartyName,
-                previousAction,
-                hasNextPage,
-                componentFactory.getMessageSchemaValidator(OvsRole.PRODUCER.getConfigName(), false)));
+      previousAction ->
+        new OvsGetSchedulesAction(
+          subscriberPartyName,
+          publisherPartyName,
+          previousAction,
+          hasNextPage,
+          componentFactory.getMessageSchemaValidator(OvsRole.PRODUCER.getConfigName(), false)));
   }
 }

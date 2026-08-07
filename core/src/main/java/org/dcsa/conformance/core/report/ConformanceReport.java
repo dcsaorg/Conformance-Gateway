@@ -62,7 +62,10 @@ public class ConformanceReport {
             .toList();
     ConformanceStatus computedStatus =
         this.subReports.stream()
-            .map(subReport -> subReport.conformanceStatus)
+            .map(subReport ->
+                    subReport.conformanceCheck.isRelevantForAggregation()
+                        ? subReport.conformanceStatus
+                        : ConformanceStatus.IRRELEVANT)
             .reduce(ConformanceStatusReducer::reduce)
             .orElse(
                 ConformanceStatus.forExchangeCounts(

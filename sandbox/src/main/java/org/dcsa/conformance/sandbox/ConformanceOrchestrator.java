@@ -373,6 +373,9 @@ public class ConformanceOrchestrator implements StatefulEntity {
       nextAction.markSkipped();
     } else if (nextAction.isMissingMatchedExchange()) {
       nextAction.markCompletedWithoutTraffic();
+    } else if (nextAction.completableWithoutTrafficForRoles().contains(externalPartyRole)
+      && nextAction.isMissingMatchedNotificationExchange()) {
+      nextAction.markCompletedWithoutTraffic();
     }
 
     currentScenario.popNextAction();

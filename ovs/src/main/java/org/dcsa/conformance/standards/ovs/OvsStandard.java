@@ -6,6 +6,7 @@ import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
 
 public class OvsStandard extends AbstractStandard {
+
   public static final OvsStandard INSTANCE = new OvsStandard();
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 

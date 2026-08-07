@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
@@ -91,11 +92,10 @@ public class OvsPublisher extends ConformanceParty {
     Map<String, List<OvsAttributeMapping>> ovsAttributeMappings =
         OvsAttributeMapping.initializeAttributeMappings();
 
-    JsonNode jsonResponseBody =
-        JsonToolkit.templateFileToJsonNode(
-            "/standards/ovs/messages/ovs-%s-response.json"
-                .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
-            Map.ofEntries());
+    boolean hasCursor = request.queryParams().containsKey(OvsFilterParameter.CURSOR.getQueryParamName());
+    String filePath = getOvsResponseFilepath(hasCursor);
+
+    JsonNode jsonResponseBody = JsonToolkit.templateFileToJsonNode(filePath, Map.ofEntries());
 
     ArrayNode filteredArray = OBJECT_MAPPER.createArrayNode();
     jsonResponseBody.forEach(filteredArray::add);
@@ -129,8 +129,12 @@ public class OvsPublisher extends ConformanceParty {
       filteredArray = limitedArray;
     }
 
-    Map<String, Collection<String>> headers =
-        new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
+    Map<String, Collection<String>> headers = new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
+
+    if (request.queryParams().containsKey(OvsFilterParameter.LIMIT.getQueryParamName())
+      && !request.queryParams().containsKey(OvsFilterParameter.CURSOR.getQueryParamName())) {
+      headers.put("Next-Page-Cursor", List.of(ReferenceGenerator.newReference()));
+    }
 
     return request.createResponse(200, headers, new ConformanceMessageBody(filteredArray));
   }
@@ -164,4 +168,17 @@ public class OvsPublisher extends ConformanceParty {
                             })));
     return resultArray;
   }
+
+  private String getOvsResponseFilepath(boolean hasCursor) {
+    if (hasCursor) {
+      return "/standards/ovs/messages/ovs-%s-response-next-page.json"
+        .formatted(getFormattedVersion());
+    }
+    return "/standards/ovs/messages/ovs-%s-response.json".formatted(getFormattedVersion());
+  }
+
+  private String getFormattedVersion() {
+    return apiVersion.toLowerCase().replaceAll("[.-]", "");
+  }
+
 }

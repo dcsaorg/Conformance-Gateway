@@ -3,56 +3,64 @@ package org.dcsa.conformance.standards.ovs.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.standards.ovs.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class OvsAction extends ConformanceAction {
+
+  private static final String CURRENT_DSP = "currentDsp";
+
   protected final Supplier<SuppliedScenarioParameters> sspSupplier;
-  protected final int expectedStatus;
-  private String paginationCursor;
+  private final OverwritingReference<DynamicScenarioParameters> dsp;
 
   public OvsAction(
     String sourcePartyName,
     String targetPartyName,
     ConformanceAction previousAction,
-    String actionTitle,
-    int expectedStatus) {
+    String actionTitle) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.sspSupplier = _getSspSupplier(previousAction);
-    this.expectedStatus = expectedStatus;
+    this.dsp = previousAction instanceof OvsAction previousOvsAction
+      ? new OverwritingReference<>(previousOvsAction.dsp, null)
+      : new OverwritingReference<>(null, new DynamicScenarioParameters(null, null));
+  }
+
+  private Supplier<SuppliedScenarioParameters> _getSspSupplier(ConformanceAction previousAction) {
+    return previousAction instanceof SupplyScenarioParametersAction supplyAvailableTdrAction
+      ? supplyAvailableTdrAction::getSuppliedScenarioParameters
+      : previousAction == null
+      ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
+      : _getSspSupplier(previousAction.getPreviousAction());
+  }
+
+  protected Supplier<DynamicScenarioParameters> getDspSupplier() {
+    return dsp::get;
+  }
+
+  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
+    return dsp::set;
   }
 
   @Override
   public void reset() {
     super.reset();
-    paginationCursor = null;
-  }
-
-  protected Supplier<String> getPaginationCursorSupplier() {
-    return previousAction instanceof OvsAction previousOvsAction
-        ? () -> previousOvsAction.paginationCursor
-        : () -> null;
-  }
-
-  @Override
-  protected void doHandleExchange(ConformanceExchange exchange) {
-    super.doHandleExchange(exchange);
-    Collection<String> paginationHeaders =
-      exchange.getResponse().message().headers().get("Next-Page-Cursor");
-    if (paginationHeaders != null) {
-      paginationHeaders.stream().findFirst().ifPresent(cursor -> paginationCursor = cursor);
+    if (previousAction != null) {
+      this.dsp.set(null);
+    } else {
+      this.dsp.set(new DynamicScenarioParameters(null, null));
     }
   }
 
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (paginationCursor != null) {
-      jsonState.put("paginationCursor", paginationCursor);
+    if (dsp.hasCurrentValue()) {
+      jsonState.set(CURRENT_DSP, dsp.get().toJson());
     }
     return jsonState;
   }
@@ -60,16 +68,9 @@ public abstract class OvsAction extends ConformanceAction {
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    if (jsonState.has("paginationCursor")) {
-      paginationCursor = jsonState.get("paginationCursor").asText();
+    JsonNode dspNode = jsonState.get(CURRENT_DSP);
+    if (dspNode != null) {
+      dsp.set(DynamicScenarioParameters.fromJson(dspNode));
     }
-  }
-
-  private Supplier<SuppliedScenarioParameters> _getSspSupplier(ConformanceAction previousAction) {
-    return previousAction instanceof SupplyScenarioParametersAction supplyAvailableTdrAction
-        ? supplyAvailableTdrAction::getSuppliedScenarioParameters
-        : previousAction == null
-            ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
-            : _getSspSupplier(previousAction.getPreviousAction());
   }
 }

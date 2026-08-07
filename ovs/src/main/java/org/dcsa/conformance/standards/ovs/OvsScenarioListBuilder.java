@@ -1,13 +1,5 @@
 package org.dcsa.conformance.standards.ovs;
 
-import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.*;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
@@ -16,6 +8,20 @@ import org.dcsa.conformance.standards.ovs.action.OvsGetSchedulesAction;
 import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
+import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.CARRIER_SERVICE_CODE;
+import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.CARRIER_VOYAGE_NUMBER;
+import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.FACILITY_SMDG_CODE;
+import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.LIMIT;
+import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.UNIVERSAL_SERVICE_REFERENCE;
+import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.UNIVERSAL_VOYAGE_REFERENCE;
+import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.UN_LOCATION_CODE;
+import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.VESSEL_IMO_NUMBER;
 
 @Slf4j
 class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder> {
@@ -76,7 +82,7 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
         MapUtils.orderedMap(
           Map.entry(
             "GET scenario - Required",
-            noAction().then(getSchedules(false))))));
+            noAction().then(getSchedules())))));
 
     LinkedHashMap<String, OvsScenarioListBuilder> scenarios = new LinkedHashMap<>();
     testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
@@ -93,11 +99,11 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
   }
 
   private static OvsScenarioListBuilder scenarioWithParameters(Map<OvsFilterParameter, String> parameters) {
-    return supplyScenarioParameters(parameters).then(getSchedules(true));
+    return supplyScenarioParameters(parameters).then(getSchedules());
   }
 
   private static OvsScenarioListBuilder scenarioWithPagination(Map<OvsFilterParameter, String> parameters) {
-    return supplyScenarioParameters(parameters).then(getSchedules(true).then(getSchedules(true)));
+    return supplyScenarioParameters(parameters).then(getSchedules(true).then(getSchedules()));
   }
 
   private static OvsScenarioListBuilder supplyScenarioParameters(Map<OvsFilterParameter, String> parameters) {
@@ -115,7 +121,11 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
     return orderedParameters;
   }
 
-  private static OvsScenarioListBuilder getSchedules(boolean includeResponseContentChecks) {
+  private static OvsScenarioListBuilder getSchedules() {
+    return getSchedules(false);
+  }
+
+  private static OvsScenarioListBuilder getSchedules(boolean hasNextPage) {
     OvsComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();
     String subscriberPartyName = threadLocalSubscriberPartyName.get();
@@ -125,7 +135,7 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
                 subscriberPartyName,
                 publisherPartyName,
                 previousAction,
-                componentFactory.getMessageSchemaValidator(OvsRole.PRODUCER.getConfigName(), false),
-                includeResponseContentChecks));
+                hasNextPage,
+                componentFactory.getMessageSchemaValidator(OvsRole.PRODUCER.getConfigName(), false)));
   }
 }

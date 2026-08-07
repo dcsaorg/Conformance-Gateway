@@ -20,8 +20,8 @@ class OvsActionTest {
 
   @Test
   void nextGetReadsCursorFromPreviousResponseAfterScenarioConstruction() {
-    OvsGetSchedulesAction firstGet = getSchedulesAfter(null);
-    OvsGetSchedulesAction secondGet = getSchedulesAfter(firstGet);
+    OvsGetSchedulesAction firstGet = getSchedulesAfter(null, true);
+    OvsGetSchedulesAction secondGet = getSchedulesAfter(firstGet, false);
 
     assertFalse(secondGet.asJsonNode().has("cursor"));
 
@@ -29,8 +29,8 @@ class OvsActionTest {
 
     assertEquals(CURSOR, secondGet.asJsonNode().path("cursor").asText());
 
-    OvsGetSchedulesAction restoredFirstGet = getSchedulesAfter(null);
-    OvsGetSchedulesAction restoredSecondGet = getSchedulesAfter(restoredFirstGet);
+    OvsGetSchedulesAction restoredFirstGet = getSchedulesAfter(null, true);
+    OvsGetSchedulesAction restoredSecondGet = getSchedulesAfter(restoredFirstGet, false);
     restoredFirstGet.importJsonState(firstGet.exportJsonState());
 
     assertEquals(CURSOR, restoredSecondGet.asJsonNode().path("cursor").asText());
@@ -40,8 +40,9 @@ class OvsActionTest {
     assertFalse(restoredSecondGet.asJsonNode().has("cursor"));
   }
 
-  private static OvsGetSchedulesAction getSchedulesAfter(OvsGetSchedulesAction previousAction) {
-    return new OvsGetSchedulesAction(SUBSCRIBER, PUBLISHER, previousAction, null, false);
+  private static OvsGetSchedulesAction getSchedulesAfter(
+      OvsGetSchedulesAction previousAction, boolean hasNextPage) {
+    return new OvsGetSchedulesAction(SUBSCRIBER, PUBLISHER, previousAction, hasNextPage, null);
   }
 
   private static ConformanceExchange exchangeWithCursor() {

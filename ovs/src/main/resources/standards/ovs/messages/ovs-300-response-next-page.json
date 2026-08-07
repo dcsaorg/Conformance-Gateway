@@ -1,0 +1,41 @@
+[
+  {
+    "carrierServiceName": "Small Lion Service",
+    "carrierServiceCode": "BW1",
+    "universalServiceReference": "SR12345B",
+    "vesselSchedules": [
+      {
+        "vesselOperatorSMDGLinerCode": "HLC",
+        "vesselIMONumber": "9321483",
+        "vesselName": "King of the Seas",
+        "vesselCallSign": "NCVV",
+        "isDummyVessel": false,
+        "transportCalls": [
+          {
+            "portVisitReference": "NLAMS1234589",
+            "transportCallReference": "SR12345X-9321483-2107W-NLAMS-ACT-1-1",
+            "carrierImportVoyageNumber": "2103N",
+            "carrierExportVoyageNumber": "2103S",
+            "universalImportVoyageReference": "2103N",
+            "universalExportVoyageReference": "2103S",
+            "location": {
+              "locationName": "Port of Amsterdam",
+              "locationType": "UNLO",
+              "UNLocationCode": "NLAMS"
+            },
+            "statusCodes": ["OMIT"],
+            "timestamps": [
+              {
+                "eventTypeCode": "ARRI",
+                "eventClassifierCode": "PLN",
+                "eventDateTime": "2024-01-14T09:21:00+01:00",
+                "delayReasonCode": "WEA",
+                "changeRemark": "Bad weather"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

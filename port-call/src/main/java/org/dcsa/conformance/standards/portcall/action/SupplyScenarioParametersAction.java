@@ -44,9 +44,9 @@ public class SupplyScenarioParametersAction extends PortCallAction {
   @Override
   public String getHumanReadablePrompt() {
     return scenarioType != null
-        ? "Using the example format below, provide any optional query parameter for which your system returns, via GET /events, at least one Port Call event that demonstrates %s."
+        ? "Using the example format below, provide any optional query parameter for which your system returns, via GET '/events', at least one Port Call event that demonstrates %s."
             .formatted(scenarioType.getLabel())
-        : "Using the example format below, provide the query parameters for which your system supports pagination on GET /events.";
+        : "Using the example format below, provide the query parameters for which your system supports pagination on GET '/events'.";
   }
 
   @Override

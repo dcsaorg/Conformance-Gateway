@@ -2,14 +2,14 @@ package org.dcsa.conformance.standards.portcall.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.standards.portcall.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.portcall.party.SuppliedScenarioParameters;
+
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.scenario.OverwritingReference;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standards.portcall.party.DynamicScenarioParameters;
-import org.dcsa.conformance.standards.portcall.party.SuppliedScenarioParameters;
 
 public class PortCallAction extends ConformanceAction {
 
@@ -27,18 +27,17 @@ public class PortCallAction extends ConformanceAction {
     String sourcePartyName, String targetPartyName, PortCallAction previousAction, String actionTitle) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.sspSupplier = _getSspSupplier(previousAction);
-    this.dsp =
-        previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null))
-            : new OverwritingReference<>(previousAction.dsp, null);
+    this.dsp = previousAction == null
+      ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null))
+      : new OverwritingReference<>(previousAction.dsp, null);
   }
 
   private Supplier<SuppliedScenarioParameters> _getSspSupplier(ConformanceAction previousAction) {
     return previousAction instanceof SupplyScenarioParametersAction supplyScenarioParametersAction
-        ? supplyScenarioParametersAction::getSuppliedScenarioParameters
-        : previousAction == null
-            ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
-            : _getSspSupplier(previousAction.getPreviousAction());
+      ? supplyScenarioParametersAction::getSuppliedScenarioParameters
+      : previousAction == null
+      ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
+      : _getSspSupplier(previousAction.getPreviousAction());
   }
 
   @Override
@@ -49,12 +48,6 @@ public class PortCallAction extends ConformanceAction {
     } else {
       this.dsp.set(new DynamicScenarioParameters(null, null, null));
     }
-  }
-
-  @Override
-  protected void doHandleExchange(ConformanceExchange exchange) {
-    super.doHandleExchange(exchange);
-
   }
 
   @Override

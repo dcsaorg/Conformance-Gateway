@@ -24,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HexFormat;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -143,25 +142,8 @@ public class GetPortCallEventsAction extends PortCallAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    if (previousAction instanceof GetPortCallEventsAction) {
-      return "Send a GET request to the sandbox endpoint '/events' using the same query parameters as the previous request, plus the 'cursor' query parameter set to the value returned in the previous response's 'Next-Page-Cursor' header.";
-    }
-
-    SuppliedScenarioParameters suppliedScenarioParameters = safeSuppliedScenarioParameters();
-    if (suppliedScenarioParameters.getMap().isEmpty()) {
-      return standaloneScenarioType != null
-        ? "Send a GET request to the sandbox endpoint '/events'.\n\nThe sandbox will respond with at least one Port Call event that demonstrates %s."
-        .formatted(standaloneScenarioType.getLabel())
-        : "Send a GET request to the sandbox endpoint '/events'.";
-    }
-
-    String queryParameters =
-      suppliedScenarioParameters.getMap().entrySet().stream()
-        .map(entry -> "- " + entry.getKey().getQueryParamName() + "=" + entry.getValue())
-        .collect(Collectors.joining("\n"));
-    return "Send a GET request to the sandbox endpoint '/events' with the following query parameters:\n\n"
-      + queryParameters
-      + "\n\nThe sandbox will respond with Port Call events matching your query parameters.";
+    return "Send a GET request to the sandbox endpoint '/events'.\n\nThe sandbox will respond with at least one Port Call event that demonstrates %s."
+      .formatted(standaloneScenarioType.getLabel());
   }
 
   @Override
@@ -200,8 +182,7 @@ public class GetPortCallEventsAction extends PortCallAction {
             getDspSupplier().get().firstPage(),
             getDspSupplier().get().secondPage())
             .withApplicability(previousAction instanceof GetPortCallEventsAction previous && previous.hasNextPage),
-          PortCallChecks.getGetResponsePayloadChecks(
-            getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()));
+          PortCallChecks.getGetResponsePayloadChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()));
       }
     };
   }

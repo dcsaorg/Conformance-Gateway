@@ -106,8 +106,8 @@ public class PortCallProducer extends ConformanceParty {
 
     Map<String, Collection<String>> responseHeaders = new LinkedHashMap<>();
     responseHeaders.put(API_VERSION, List.of(apiVersion));
-    if (request.queryParams().containsKey(PortCallFilterParameter.LIMIT.getQueryParamName())
-      && !hasCursor) {
+
+    if (request.queryParams().containsKey(PortCallFilterParameter.LIMIT.getQueryParamName()) && !hasCursor) {
       responseHeaders.put("Next-Page-Cursor", List.of(ReferenceGenerator.newReference()));
     }
 

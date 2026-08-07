@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public enum PortCallFilterParameter {
+
   VESSEL_IMO("vesselImo"),
   PORT_CALL_ID("portCallId"),
   SERVICE_ID("serviceId"),
@@ -45,8 +46,5 @@ public enum PortCallFilterParameter {
         .orElseThrow(() -> new IllegalArgumentException("Unknown query parameter: " + queryParamName));
   }
 
-  public String getQueryParamName() {
-    return queryParamName;
-  }
 }
 

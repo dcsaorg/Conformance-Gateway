@@ -62,7 +62,10 @@ public class ConformanceReport {
             .toList();
     ConformanceStatus computedStatus =
         this.subReports.stream()
-            .map(subReport -> subReport.conformanceStatus)
+            .map(subReport ->
+                    subReport.conformanceCheck.isRelevantForAggregation()
+                        ? subReport.conformanceStatus
+                        : ConformanceStatus.IRRELEVANT)
             .reduce(ConformanceStatusReducer::reduce)
             .orElse(
                 ConformanceStatus.forExchangeCounts(
@@ -212,7 +215,8 @@ public class ConformanceReport {
   private static String getConformanceIcon(ConformanceStatus conformanceStatus) {
     return switch (conformanceStatus) {
       case CONFORMANT -> "✅";
-      case PARTIALLY_CONFORMANT, COMPLETED_WITHOUT_TRAFFIC -> "✔️";
+      case COMPLETED_WITHOUT_TRAFFIC -> "✅";
+      case PARTIALLY_CONFORMANT -> "✔️";
       case SKIPPED -> "↪️";
       case NON_CONFORMANT -> "🚫";
       case IRRELEVANT -> "➖";

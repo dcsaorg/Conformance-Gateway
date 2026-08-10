@@ -1,7 +1,5 @@
 package org.dcsa.conformance.manual;
 
-import java.util.List;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.springboot.ConformanceApplication;
 import org.dcsa.conformance.standards.ebl.EblScenarioListBuilder;
@@ -13,6 +11,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @SpringBootTest(

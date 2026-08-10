@@ -13,13 +13,14 @@ import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 @Slf4j
-public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBookingAction {
+public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationBookingAction {
 
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;

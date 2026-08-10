@@ -25,12 +25,9 @@ public class SupplyScenarioParametersAction extends OvsAction {
         publisherPartyName,
         null,
         null,
-        "SupplyScenarioParameters(%s)"
-            .formatted(
-                parameters.entrySet().stream()
-                    .map(entry -> entry.getKey().getQueryParamName())
-                    .collect(Collectors.joining(", "))),
-        -1);
+      "Supply parameters (%s)".formatted(parameters.keySet().stream()
+        .map(OvsFilterParameter::getQueryParamName)
+        .collect(Collectors.joining(" + "))));
     this.ovsFilterParameterMap = parameters;
   }
 
@@ -74,7 +71,7 @@ public class SupplyScenarioParametersAction extends OvsAction {
   @Override
   public String getHumanReadablePrompt() {
     return "Use the following format to provide the values of the specified query parameters"
-        + " for which your party can successfully process a GET request:";
+        + " for which your party can successfully process a GET request to the endpoint '/service-schedules':";
   }
 
   @Override
@@ -92,29 +89,6 @@ public class SupplyScenarioParametersAction extends OvsAction {
 
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
-    JsonNode inputNode = partyInput.get("input");
-    Arrays.stream(OvsFilterParameter.values())
-        .map(OvsFilterParameter::getQueryParamName)
-        .filter(
-            queryParamName ->
-                queryParamName.startsWith(
-                    OvsFilterParameter.START_DATE.getQueryParamName())
-              || queryParamName.startsWith(OvsFilterParameter.END_DATE.getQueryParamName()))
-        .filter(inputNode::hasNonNull)
-        .forEach(
-            queryParamName -> {
-              String dateValue = inputNode.path(queryParamName).asText();
-              try {
-                LocalDate.parse(dateValue, DateTimeFormatter.ISO_DATE);
-              } catch (DateTimeParseException e) {
-                throw new UserFacingException(
-                    "Invalid date-time format '%s' for input parameter '%s'"
-                        .formatted(dateValue, queryParamName),
-                    e);
-              }
-            });
-
-    suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(inputNode);
-
+    suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
   }
 }

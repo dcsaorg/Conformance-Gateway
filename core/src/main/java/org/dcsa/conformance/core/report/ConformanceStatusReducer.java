@@ -14,12 +14,12 @@ public class ConformanceStatusReducer {
     if (statuses.contains(ConformanceStatus.NON_CONFORMANT)) {
       return ConformanceStatus.NON_CONFORMANT;
     }
+    if (statuses.contains(ConformanceStatus.PARTIALLY_CONFORMANT)) {
+      return ConformanceStatus.PARTIALLY_CONFORMANT;
+    }
     if (statuses.stream()
-      .allMatch(
-        status ->
-          status == ConformanceStatus.CONFORMANT
-            || status == ConformanceStatus.IRRELEVANT
-            || status == ConformanceStatus.PARTIALLY_CONFORMANT)) {
+      .allMatch(status ->
+        status == ConformanceStatus.CONFORMANT || status == ConformanceStatus.IRRELEVANT)) {
       return ConformanceStatus.CONFORMANT;
     }
     if (statuses.stream()

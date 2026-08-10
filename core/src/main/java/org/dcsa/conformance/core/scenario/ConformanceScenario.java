@@ -18,19 +18,30 @@ import org.dcsa.conformance.core.state.StatefulEntity;
 
 @Slf4j
 public class ConformanceScenario implements StatefulEntity {
+
   @Getter private final String title;
   @Getter protected UUID id;
+  @Getter private final ScenarioConformanceType conformanceType;
   protected final LinkedList<ConformanceAction> allActions = new LinkedList<>();
   protected final LinkedList<ConformanceAction> nextActions = new LinkedList<>();
 
   @Getter private ConformanceStatus latestComputedStatus = ConformanceStatus.NO_TRAFFIC;
 
   public ConformanceScenario(long moduleIndex, long scenarioIndex, Collection<ConformanceAction> actions) {
-    this(new UUID(moduleIndex, scenarioIndex), actions);
+    this(new UUID(moduleIndex, scenarioIndex), actions, ScenarioConformanceType.REQUIRED);
   }
 
-  public ConformanceScenario(UUID id, Collection<ConformanceAction> actions) {
+  public ConformanceScenario(
+      long moduleIndex,
+      long scenarioIndex,
+      Collection<ConformanceAction> actions,
+      ScenarioConformanceType conformanceType) {
+    this(new UUID(moduleIndex, scenarioIndex), actions, conformanceType);
+  }
+
+  public ConformanceScenario(UUID id, Collection<ConformanceAction> actions, ScenarioConformanceType conformanceType) {
     this.id = id;
+    this.conformanceType = conformanceType;
     this.allActions.addAll(actions);
     this.nextActions.addAll(actions);
     this.title = allActions.isEmpty() ? "" : allActions.peekLast().getActionPath();

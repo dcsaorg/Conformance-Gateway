@@ -17,7 +17,12 @@ import org.dcsa.conformance.standards.ovs.party.OvsSubscriber;
 
 class OvsComponentFactory extends AbstractComponentFactory {
   OvsComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
-    super(standardName, standardVersion, scenarioSuite, "Publisher", "Subscriber");
+    super(
+        standardName,
+        standardVersion,
+        scenarioSuite,
+        OvsRole.PRODUCER.getConfigName(),
+        OvsRole.CONSUMER.getConfigName());
   }
 
   public List<ConformanceParty> createParties(
@@ -36,26 +41,26 @@ class OvsComponentFactory extends AbstractComponentFactory {
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration publisherConfiguration =
-        partyConfigurationsByRoleName.get(OvsRole.PUBLISHER.getConfigName());
+        partyConfigurationsByRoleName.get(OvsRole.PRODUCER.getConfigName());
     if (publisherConfiguration != null) {
       parties.add(
           new OvsPublisher(
               standardVersion,
               publisherConfiguration,
-              counterpartConfigurationsByRoleName.get(OvsRole.SUBSCRIBER.getConfigName()),
+              counterpartConfigurationsByRoleName.get(OvsRole.CONSUMER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
     }
 
     PartyConfiguration subscriberConfiguration =
-        partyConfigurationsByRoleName.get(OvsRole.SUBSCRIBER.getConfigName());
+        partyConfigurationsByRoleName.get(OvsRole.CONSUMER.getConfigName());
     if (subscriberConfiguration != null) {
       parties.add(
           new OvsSubscriber(
               standardVersion,
               subscriberConfiguration,
-              counterpartConfigurationsByRoleName.get(OvsRole.PUBLISHER.getConfigName()),
+              counterpartConfigurationsByRoleName.get(OvsRole.PRODUCER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
@@ -70,10 +75,11 @@ class OvsComponentFactory extends AbstractComponentFactory {
       boolean isWithNotifications) {
     return OvsScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        getReportRoleNames(partyConfigurations, counterpartConfigurations),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, OvsRole::isPublisher),
+            partyConfigurations, counterpartConfigurations, OvsRole::isProducer),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, OvsRole::isSubscriber));
+            partyConfigurations, counterpartConfigurations, OvsRole::isConsumer));
   }
 
   @Override
@@ -100,8 +106,7 @@ class OvsComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
     String schemaFilePath = "/standards/ovs/schemas/OVS_v%s.yaml".formatted(standardVersion);
-    String schemaName =
-        OvsRole.isPublisher(apiProviderRole) ? (forRequest ? null : "serviceSchedules") : null;
+    String schemaName = OvsRole.isProducer(apiProviderRole) ? (forRequest ? null : "serviceSchedules") : null;
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 }

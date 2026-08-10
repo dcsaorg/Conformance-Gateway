@@ -152,6 +152,10 @@ public abstract class ConformanceAction implements StatefulEntity {
     return matchedExchangeUuid == null;
   }
 
+  public boolean isMissingMatchedNotificationExchange() {
+    return expectsNotificationExchange() && matchedNotificationExchangeUuid == null;
+  }
+
   /**
    * Saves the matched UUIDs and captures dynamic parameters like document references.
    *

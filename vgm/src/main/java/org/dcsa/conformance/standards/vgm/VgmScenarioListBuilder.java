@@ -50,7 +50,8 @@ public class VgmScenarioListBuilder extends ScenarioListBuilder<VgmScenarioListB
           Map.entry(
             "GET scenario for optional query parameters (pagination) — Optional/report-only",
             supplyScenarioParameters(VgmQueryParameters.CBR, VgmQueryParameters.LIMIT)
-              .then(getVgmDeclaration(true).then(getVgmDeclaration()))))),
+              .then(getVgmDeclaration(true).then(getVgmDeclaration()))
+              .asOptionalReportOnlyScenario()))),
       Map.entry(
         VgmRole.CONSUMER.getConfigName(),
         MapUtils.orderedMap(

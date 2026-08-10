@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookingAction {
+public class UC11_Shipper_CancelBookingRequestAction extends ShipperNotificationBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;

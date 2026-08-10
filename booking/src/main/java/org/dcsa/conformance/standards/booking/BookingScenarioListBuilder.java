@@ -113,7 +113,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     scenarios.put("Additional required Reefer container scenarios (execute at least one of these two)", additionalRequiredScenarios(carrierPartyName, ScenarioType.REEFER));
     scenarios.put("Required Dangerous Goods scenario", requiredScenarios(carrierPartyName, ScenarioType.DG));
     scenarios.put("Additional required Dangerous Goods scenarios (execute at least one of these two)", additionalRequiredScenarios(carrierPartyName, ScenarioType.DG));
-    scenarios.put("Optional (report-only) scenarios", carrierOptionalScenarios(carrierPartyName));
+    scenarios.put("Optional (report-only) scenarios", carrierOptionalScenarios(carrierPartyName).asOptionalReportOnlyScenario());
     return scenarios;
   }
 
@@ -123,7 +123,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     scenarios.put("Required Dry Cargo scenario", requiredScenarios(carrierPartyName, ScenarioType.DRY_CARGO));
     scenarios.put("Required Reefer container scenario", requiredScenarios(carrierPartyName, ScenarioType.REEFER));
     scenarios.put("Required Dangerous Goods scenario", requiredScenarios(carrierPartyName, ScenarioType.DG));
-    scenarios.put("Optional (report-only) scenarios", shipperOptionalScenarios(carrierPartyName));
+    scenarios.put("Optional (report-only) scenarios", shipperOptionalScenarios(carrierPartyName).asOptionalReportOnlyScenario());
     return scenarios;
   }
 

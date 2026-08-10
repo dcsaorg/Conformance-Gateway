@@ -76,7 +76,9 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
             noAction()
               .thenEither(
                 supplyScenarioParameters(TntQueryParameters.CBR, TntQueryParameters.LIMIT)
-                  .then(getTntEvents(true).then(getTntEvents())))))),
+                  .then(getTntEvents(true)
+                    .then(getTntEvents())))
+              .asOptionalReportOnlyScenario()))),
       Map.entry(
         TntRole.CONSUMER.getConfigName(),
         MapUtils.orderedMap(postScenarioEntry, getByTypeScenarioEntry)));

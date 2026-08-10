@@ -72,8 +72,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.concat(
           Stream.of(
-            BookingChecks.requestContentChecks(
-              getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()),
+            BookingChecks.requestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()),
             new JsonSchemaCheck(
               BookingRole::isShipper,
               getMatchedExchangeUuid(),
@@ -81,8 +80,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
               requestSchemaValidator)),
           Stream.concat(
             createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
-            getNotificationChecks(
-              expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)));
+            getNotificationChecks(expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)));
       }
     };
   }

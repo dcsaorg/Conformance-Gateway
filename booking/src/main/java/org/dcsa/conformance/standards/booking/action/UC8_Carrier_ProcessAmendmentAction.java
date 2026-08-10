@@ -23,7 +23,7 @@ public class UC8_Carrier_ProcessAmendmentAction extends CarrierNotificationBooki
       carrierPartyName,
       shipperPartyName,
       previousAction,
-      "UC8(Approve)",
+      "UC8(Confirm)",
       204,
       isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;

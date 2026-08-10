@@ -54,10 +54,9 @@ public class PortCallScenarioListBuilder extends ScenarioListBuilder<PortCallSce
                     .then(getPortCallEvents()))),
             Map.entry(
               "GET scenario for pagination - optional/report-only",
-              supplyScenarioParameters(
-                PortCallFilterParameter.PORT_CALL_SERVICE_TYPE_CODE,
-                PortCallFilterParameter.LIMIT)
-                .then(getPortCallEvents(true).then(getPortCallEvents()))))),
+              supplyScenarioParameters(PortCallFilterParameter.PORT_CALL_SERVICE_TYPE_CODE, PortCallFilterParameter.LIMIT)
+                .then(getPortCallEvents(true).then(getPortCallEvents()))
+                .asOptionalReportOnlyScenario()))),
         Map.entry(
           PortCallRole.CONSUMER.getConfigName(),
           MapUtils.orderedMap(

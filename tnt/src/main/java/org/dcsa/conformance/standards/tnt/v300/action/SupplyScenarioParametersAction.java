@@ -62,37 +62,25 @@ public class SupplyScenarioParametersAction extends TntAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    Set<TntQueryParameters> parametersToDisplay =
-        tntQueryParameters.isEmpty()
-            ? new LinkedHashSet<>(Arrays.asList(TntQueryParameters.values()))
-            : tntQueryParameters;
+    Set<TntQueryParameters> parametersToDisplay = tntQueryParameters.isEmpty()
+      ? new LinkedHashSet<>(Arrays.asList(TntQueryParameters.values()))
+      : tntQueryParameters;
 
-    String parametersList =
-        parametersToDisplay.stream()
-            .map(param -> "  - " + param.getParameterName() + " (" + param.name() + ")")
-            .collect(Collectors.joining(System.lineSeparator()));
+    String parametersList = parametersToDisplay.stream()
+      .map(param -> "  - " + param.getParameterName() + " (" + param.name() + ")")
+      .collect(Collectors.joining(System.lineSeparator()));
 
-    if (tntQueryParameters.isEmpty()) {
-      return "Specify any combination of query parameters that the sandbox can use in a GET request to fetch events from your system."
-          + " The synthetic Event Consumer running in the sandbox will send a GET request built using the query parameters you provide."
-          + "%n%nThe available query parameters are:%n%s".formatted(parametersList);
-    }
+    String parameterNames = tntQueryParameters.stream()
+      .map(param -> "'" + param.getParameterName() + "'")
+      .collect(Collectors.joining(" and "));
 
-    // Create readable parameter names list for the prompt
-    String parameterNames =
-        tntQueryParameters.stream()
-            .map(param -> "'" + param.getParameterName() + "'")
-            .collect(Collectors.joining(" and "));
-
-    // Create parameter codes list for the action title example
-    String parameterCodes =
-        tntQueryParameters.stream().map(TntQueryParameters::name).collect(Collectors.joining(", "));
+    String parameterCodes = tntQueryParameters.stream().map(TntQueryParameters::name).collect(Collectors.joining(", "));
 
     return "Using the example format below, provide the query parameter filter(s) specified in the action title"
-        + " that the sandbox can use in a GET request to fetch events from your system."
-        + " The action 'Supply scenario parameters (%s)' requires you to provide values for the %s query parameter %s."
-            .formatted(parameterCodes, parameterNames, tntQueryParameters.size() > 1 ? "s" : "")
-        + "%n%nThe required query parameters are:%n%s".formatted(parametersList);
+      + " that the sandbox can use in a GET request to the endpoint '/events' to fetch events from your system."
+      + " The action 'SupplyScenarioParameters(%s)' requires you to provide values for the %s query parameter%s."
+      .formatted(parameterCodes, parameterNames, tntQueryParameters.size() > 1 ? "s" : "")
+      + "%n%nThe required query parameters are:%n%s".formatted(parametersList);
   }
 
   @Override

@@ -2,11 +2,11 @@ package org.dcsa.conformance.standards.tnt.v300;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.util.MapUtils;
 import org.dcsa.conformance.standards.tnt.v300.action.ConsumerGetEventsWithQueryParametersAction;
 import org.dcsa.conformance.standards.tnt.v300.action.ConsumerGetEventsWithTypeAction;
 import org.dcsa.conformance.standards.tnt.v300.action.ProducerPostEventsAction;
@@ -14,6 +14,7 @@ import org.dcsa.conformance.standards.tnt.v300.action.SupplyScenarioParametersAc
 import org.dcsa.conformance.standards.tnt.v300.action.TntAction;
 import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
 import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
+import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
 public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder> {
 
@@ -27,61 +28,65 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
   }
 
   public static Map<String, TntScenarioListBuilder> createModuleScenarioListBuilders(
-      TntComponentFactory componentFactory, String producerPartyName, String consumerPartyName) {
+      TntComponentFactory componentFactory,
+      Set<String> testedPartyRoleNames,
+      String producerPartyName,
+      String consumerPartyName) {
 
     threadLocalComponentFactory.set(componentFactory);
     threadLocalProducerPartyName.set(producerPartyName);
     threadLocalConsumerPartyName.set(consumerPartyName);
 
-    return Stream.of(
-            Map.entry(
-                "POST scenarios per event type — alternative required path for event push",
-                noAction()
-                    .thenEither(
-                        postTntEvents(TntEventType.SHIPMENT),
-                        postTntEvents(TntEventType.TRANSPORT),
-                        postTntEvents(TntEventType.EQUIPMENT),
-                        postTntEvents(TntEventType.IOT),
-                        postTntEvents(TntEventType.REEFER))),
-            Map.entry(
-                "GET scenarios per event type — alternative required path for event pull",
-                noAction()
-                    .thenEither(
-                        getTntEvents(TntEventType.SHIPMENT),
-                        getTntEvents(TntEventType.TRANSPORT),
-                        getTntEvents(TntEventType.EQUIPMENT),
-                        getTntEvents(TntEventType.IOT),
-                        getTntEvents(TntEventType.REEFER))),
-            Map.entry(
-                "Event Producer: GET scenarios for base required query parameter filter combinations — required once per GET endpoint implementation",
-                noAction()
-                    .thenEither(
-                        supplyScenarioParameters(TntQueryParameters.CBR).then(getTntEvents()),
-                        supplyScenarioParameters(TntQueryParameters.CBR, TntQueryParameters.ER)
-                            .then(getTntEvents()),
-                        supplyScenarioParameters(TntQueryParameters.TDR).then(getTntEvents()),
-                        supplyScenarioParameters(TntQueryParameters.TDR, TntQueryParameters.ER)
-                            .then(getTntEvents()),
-                        supplyScenarioParameters(TntQueryParameters.ER).then(getTntEvents()))),
-            Map.entry(
-                "Event Producer: GET scenarios for additional required query parameter combination — required once per GET endpoint implementation",
-                noAction()
-                    .thenEither(
-                        supplyScenarioParameters(
-                                TntQueryParameters.CBR,
-                                TntQueryParameters.ET,
-                                TntQueryParameters.E_UDT_MIN,
-                                TntQueryParameters.E_UDT_MAX)
-                            .then(getTntEvents()))),
-            Map.entry(
-                "Event Producer: GET scenario for pagination — optional/report-only",
-                noAction()
-                    .thenEither(
-                        supplyScenarioParameters(TntQueryParameters.CBR, TntQueryParameters.LIMIT)
-                            .then(getTntEvents(true).then(getTntEvents())))))
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (e1, _) -> e1, LinkedHashMap::new));
+    Map.Entry<String, TntScenarioListBuilder> postScenarioEntry = Map.entry(
+      "POST scenarios per event type - alternative required path for event push",
+      noAction()
+        .thenEither(
+          postTntEvents(TntEventType.SHIPMENT),
+          postTntEvents(TntEventType.TRANSPORT),
+          postTntEvents(TntEventType.EQUIPMENT),
+          postTntEvents(TntEventType.IOT),
+          postTntEvents(TntEventType.REEFER)));
+
+    Map.Entry<String, TntScenarioListBuilder> getByTypeScenarioEntry = Map.entry(
+      "GET scenarios per event type - alternative required path for event pull",
+      noAction()
+        .thenEither(
+          getTntEvents(TntEventType.SHIPMENT),
+          getTntEvents(TntEventType.TRANSPORT),
+          getTntEvents(TntEventType.EQUIPMENT),
+          getTntEvents(TntEventType.IOT),
+          getTntEvents(TntEventType.REEFER)));
+
+    Map<String, Map<String, TntScenarioListBuilder>> partyScenariosMap = MapUtils.orderedMap(
+      Map.entry(
+        TntRole.PRODUCER.getConfigName(),
+        MapUtils.orderedMap(
+          postScenarioEntry,
+          getByTypeScenarioEntry,
+          Map.entry("GET scenarios for required query parameter filters - required once per GET endpoint implementation",
+            noAction()
+              .thenEither(
+                supplyScenarioParameters(TntQueryParameters.CBR).then(getTntEvents()),
+                supplyScenarioParameters(TntQueryParameters.CBR, TntQueryParameters.ER).then(getTntEvents()),
+                supplyScenarioParameters(TntQueryParameters.TDR).then(getTntEvents()),
+                supplyScenarioParameters(TntQueryParameters.TDR, TntQueryParameters.ER).then(getTntEvents()),
+                supplyScenarioParameters(TntQueryParameters.ER).then(getTntEvents()),
+                supplyScenarioParameters(TntQueryParameters.CBR, TntQueryParameters.ET, TntQueryParameters.E_UDT_MIN, TntQueryParameters.E_UDT_MAX).then(getTntEvents()))),
+          Map.entry("GET scenario for pagination - optional/report-only",
+            noAction()
+              .thenEither(
+                supplyScenarioParameters(TntQueryParameters.CBR, TntQueryParameters.LIMIT)
+                  .then(getTntEvents(true)
+                    .then(getTntEvents())))
+              .asOptionalReportOnlyScenario()))),
+      Map.entry(
+        TntRole.CONSUMER.getConfigName(),
+        MapUtils.orderedMap(postScenarioEntry, getByTypeScenarioEntry)));
+
+    Map<String, TntScenarioListBuilder> scenarios = new LinkedHashMap<>();
+    testedPartyRoleNames.forEach(role -> scenarios.putAll(partyScenariosMap.get(role)));
+
+    return scenarios;
   }
 
   private static TntScenarioListBuilder noAction() {

@@ -85,6 +85,7 @@ public class TntComponentFactory extends AbstractComponentFactory {
       boolean isWithNotifications) {
     return TntScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        getReportRoleNames(partyConfigurations, counterpartConfigurations),
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, TntRole::isProducer),
         _findPartyOrCounterpartName(

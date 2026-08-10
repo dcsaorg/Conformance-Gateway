@@ -31,8 +31,7 @@ public class PayloadPaginationCheck extends ActionCheck {
   }
 
   @Override
-  protected ConformanceCheckResult performCheck(
-      Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected ConformanceCheckResult performCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) {
       return ConformanceCheckResult.simple(Collections.emptySet());

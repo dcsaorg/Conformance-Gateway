@@ -1,0 +1,190 @@
+{
+  "events": [
+    {
+      "eventID": "6c6f0a3b-2b0d-4a7d-9d3c-6e6d3a1f9b21",
+      "replyToEventID": "6c6f0a3b-2b0d-4a7d-9d3c-6e6d3a1f9b21",
+      "eventUpdatedDateTime": "2025-01-24T08:15:00Z",
+      "isFYI": false,
+      "portCall": {
+        "portCallID": "6c6f0a3b-2b0d-4a7d-9d3c-6e6d3a1f9b21",
+        "portVisitReference": "NLAMS7654321",
+        "UNLocationCode": "NLRTM",
+        "isOmitted": false
+      },
+      "terminalCall": {
+        "terminalCallID": "6c6f0a3b-2b0d-4a7d-9d3c-6e6d3a1f9b21",
+        "terminalCallReference": "15063402",
+        "sequenceNumber": 3,
+        "carrierServiceName": "Great Lion Service",
+        "serviceCodeOrReference": {
+          "carrierServiceCode": "FE1",
+          "universalServiceReference": "SR12345A"
+        },
+        "exportVoyageNumberOrReference": {
+          "carrierVoyageNumber": "2104S",
+          "universalVoyageReference": "2302W"
+        },
+        "importVoyageNumberOrReference": {
+          "carrierVoyageNumber": "2104S",
+          "universalVoyageReference": "2302W"
+        },
+        "isOmitted": false
+      },
+      "portCallService": {
+        "portCallServiceID": "6c6f0a3b-2b0d-4a7d-9d3c-6e6d3a1f9b21",
+        "portCallServiceTypeCode": "BERTH",
+        "portCallServiceEventTypeCode": "CMPL",
+        "portCallPhaseTypeCode": "ALGS",
+        "facilityTypeCode": "BRTH",
+        "serviceLocation": {
+          "locationName": "Port of Rotterdam",
+          "facilityTypeCode": "RAMP",
+          "address": {
+            "street": "Wilhelminakade",
+            "streetNumber": "909",
+            "floor": "N/A",
+            "postCode": "3072 AP",
+            "POBox": "456",
+            "city": "Rotterdam",
+            "stateRegion": "South Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLRTM",
+          "facility": {
+            "facilityCode": "ECT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "51.916477",
+            "longitude": "4.479999"
+          }
+        },
+        "isCanceled": false,
+        "isDeclined": false
+      },
+      "vessel": {
+        "vesselIMONumber": "9321483",
+        "vesselMMSINumber": "278111222",
+        "vesselName": "King of the Seas",
+        "vesselCallSign": "NCVV",
+        "vesselTypeCode": "CONT",
+        "vesselPosition": {
+          "locationName": "Port of Rotterdam",
+          "facilityTypeCode": "RAMP",
+          "address": {
+            "street": "Wilhelminakade",
+            "streetNumber": "909",
+            "floor": "N/A",
+            "postCode": "3072 AP",
+            "POBox": "456",
+            "city": "Rotterdam",
+            "stateRegion": "South Holland",
+            "countryCode": "NL"
+          },
+          "UNLocationCode": "NLRTM",
+          "facility": {
+            "facilityCode": "ECT",
+            "facilityCodeListProvider": "SMDG"
+          },
+          "geoCoordinate": {
+            "latitude": "51.916477",
+            "longitude": "4.479999"
+          }
+        },
+        "milesToDestinationPort": 120.75,
+        "vesselSizeUnit": "MTR",
+        "lengthOverall": 245.45,
+        "width": 37.33,
+        "draftUnit": "MTR",
+        "airDraft": 55,
+        "draft": 12.5,
+        "aftDraft": 37,
+        "forwardDraft": 35
+      },
+      "timestamp": {
+        "classifierCode": "ACT",
+        "serviceDateTime": "2025-01-24T08:15:00Z",
+        "delayReasonCodes": [],
+        "remark": "Berthing completed"
+      },
+      "movesForecasts": [
+        {
+          "carrierCode": "MAEU",
+          "carrierCodeListProvider": "SMDG",
+          "restowUnits": {
+            "totalUnits": 45,
+            "size20Units": 45,
+            "size40Units": 45,
+            "size45Units": 45
+          },
+          "loadUnits": {
+            "totalUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            },
+            "ladenUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            },
+            "emptyUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            },
+            "pluggedReeferUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            },
+            "outOfGaugeUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            }
+          },
+          "dischargeUnits": {
+            "totalUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            },
+            "ladenUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            },
+            "emptyUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            },
+            "pluggedReeferUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            },
+            "outOfGaugeUnits": {
+              "totalUnits": 45,
+              "size20Units": 45,
+              "size40Units": 45,
+              "size45Units": 45
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "feedbackElements": []
+}
+

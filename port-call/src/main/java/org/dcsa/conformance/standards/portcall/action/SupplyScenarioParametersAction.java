@@ -1,41 +1,63 @@
 package org.dcsa.conformance.standards.portcall.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.standards.portcall.party.PortCallFilterParameter;
 import org.dcsa.conformance.standards.portcall.party.ScenarioType;
 import org.dcsa.conformance.standards.portcall.party.SuppliedScenarioParameters;
 
 @Getter
 public class SupplyScenarioParametersAction extends PortCallAction {
 
+  private static final String SUPPLIED_SCENARIO_PARAMETERS = "suppliedScenarioParameters";
+
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private final ScenarioType scenarioType;
+  private final Set<PortCallFilterParameter> explicitFilterParameters;
 
-  public SupplyScenarioParametersAction(String publisherPartyName, ScenarioType scenarioType) {
-    super(
-        publisherPartyName,
-        null,
-        null,
-        "SupplyScenarioParameters(%s)".formatted(scenarioType.name()));
+  public SupplyScenarioParametersAction(String producerPartyName, ScenarioType scenarioType) {
+    super(producerPartyName, null, null, "Supply parameters (%s)".formatted(scenarioType.getLabel()));
     this.scenarioType = scenarioType;
+    this.explicitFilterParameters = Set.of();
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+  }
+
+  public SupplyScenarioParametersAction(String producerPartyName, PortCallFilterParameter... filterParameters) {
+    super(producerPartyName, null, null,
+        "Supply parameters (%s)"
+            .formatted(
+                Arrays.stream(filterParameters)
+                    .map(PortCallFilterParameter::getQueryParamName)
+                    .collect(Collectors.joining(" + "))));
+    this.scenarioType = null;
+    this.explicitFilterParameters = new LinkedHashSet<>(Arrays.asList(filterParameters));
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Using the example format below, provide one or more query parameters"
-        + " for which the internal sandbox can GET Port Call Events from your system";
+    return scenarioType != null
+        ? "Using the example format below, provide any optional query parameter for which your system returns, via GET '/events', at least one Port Call event that demonstrates %s."
+            .formatted(scenarioType.getLabel())
+        : "Using the example format below, provide the query parameters for which your system supports pagination on GET '/events'.";
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return examplePrompt();
+    return explicitFilterParameters.isEmpty()
+        ? examplePrompt()
+        : examplePrompt(explicitFilterParameters);
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
+  public void doHandlePartyInput(JsonNode partyInput) {
     JsonNode partyInputNode = partyInput.get("input");
     if (partyInputNode != null && !partyInputNode.isNull()) {
       suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInputNode);
@@ -44,7 +66,15 @@ public class SupplyScenarioParametersAction extends PortCallAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("scenarioType", scenarioType.name());
+    ObjectNode objectNode = super.asJsonNode();
+    if (scenarioType != null) {
+      objectNode.put("scenarioType", scenarioType.name());
+    }
+    if (!explicitFilterParameters.isEmpty()) {
+      ArrayNode filterParametersNode = objectNode.putArray("filterParameters");
+      explicitFilterParameters.forEach(param -> filterParametersNode.add(param.getQueryParamName()));
+    }
+    return objectNode;
   }
 
   @Override
@@ -60,7 +90,7 @@ public class SupplyScenarioParametersAction extends PortCallAction {
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (suppliedScenarioParameters != null) {
-      jsonState.set("suppliedScenarioParameters", suppliedScenarioParameters.toJson());
+      jsonState.set(SUPPLIED_SCENARIO_PARAMETERS, suppliedScenarioParameters.toJson());
     }
     return jsonState;
   }
@@ -68,9 +98,8 @@ public class SupplyScenarioParametersAction extends PortCallAction {
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    if (jsonState.has("suppliedScenarioParameters")) {
-      suppliedScenarioParameters =
-          SuppliedScenarioParameters.fromJson(jsonState.required("suppliedScenarioParameters"));
+    if (jsonState.has(SUPPLIED_SCENARIO_PARAMETERS)) {
+      suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(jsonState.required(SUPPLIED_SCENARIO_PARAMETERS));
     }
   }
 
@@ -105,4 +134,27 @@ public class SupplyScenarioParametersAction extends PortCallAction {
         .put("eventTimestampMax", "2025-01-23T01:23:45Z")
         .put("limit", "10");
   }
+
+  @Override
+  public Map<String, Boolean> getExpectedInputAttributes() {
+    if (explicitFilterParameters!=null && !explicitFilterParameters.isEmpty()) {
+      return super.getExpectedInputAttributes();
+    }
+    return Map.of();
+  }
+
+  public static ObjectNode examplePrompt(Set<PortCallFilterParameter> filterParameters) {
+    ObjectNode fullPrompt = examplePrompt();
+    ObjectNode promptNode = JsonToolkit.OBJECT_MAPPER.createObjectNode();
+    for (PortCallFilterParameter param : filterParameters) {
+      String queryParamName = param.getQueryParamName();
+      if (fullPrompt.has(queryParamName)) {
+        promptNode.set(queryParamName, fullPrompt.get(queryParamName));
+      } else if (param == PortCallFilterParameter.CURSOR) {
+        promptNode.put(queryParamName, "ExampleNextPageCursor");
+      }
+    }
+    return promptNode;
+  }
 }
+

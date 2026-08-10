@@ -1,88 +1,144 @@
 package org.dcsa.conformance.standards.portcall;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.util.MapUtils;
+import org.dcsa.conformance.standards.portcall.action.GetPortCallEventsAction;
 import org.dcsa.conformance.standards.portcall.action.PortCallAction;
-import org.dcsa.conformance.standards.portcall.action.PublisherPostPortCallEventsAction;
-import org.dcsa.conformance.standards.portcall.action.SubscriberGetPortCallEventsAction;
+import org.dcsa.conformance.standards.portcall.action.PostPortCallEventsAction;
 import org.dcsa.conformance.standards.portcall.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.portcall.party.PortCallFilterParameter;
+import org.dcsa.conformance.standards.portcall.party.PortCallRole;
 import org.dcsa.conformance.standards.portcall.party.ScenarioType;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.UnaryOperator;
 
 public class PortCallScenarioListBuilder extends ScenarioListBuilder<PortCallScenarioListBuilder> {
 
-  private static final ThreadLocal<PortCallComponentFactory> threadLocalComponentFactory =
-    new ThreadLocal<>();
-  private static final ThreadLocal<String> threadLocalPublisherPartyName = new ThreadLocal<>();
-  private static final ThreadLocal<String> threadLocalSubscriberPartyName = new ThreadLocal<>();
+  private static final ThreadLocal<PortCallComponentFactory> threadLocalComponentFactory = new ThreadLocal<>();
+  private static final ThreadLocal<String> threadLocalProducerPartyName = new ThreadLocal<>();
+  private static final ThreadLocal<String> threadLocalConsumerPartyName = new ThreadLocal<>();
 
   private PortCallScenarioListBuilder(UnaryOperator<ConformanceAction> actionBuilder) {
     super(actionBuilder);
   }
 
-  public static Map<String, PortCallScenarioListBuilder> createModuleScenarioListBuilders(PortCallComponentFactory portCallComponentFactory, String publisherPartyName,
-                                                                                          String subscriberPartyName) {
-    threadLocalComponentFactory.set(portCallComponentFactory);
-    threadLocalPublisherPartyName.set(publisherPartyName);
-    threadLocalSubscriberPartyName.set(subscriberPartyName);
+  public static Map<String, PortCallScenarioListBuilder> createModuleScenarioListBuilders(
+    PortCallComponentFactory portCallComponentFactory, Set<String> testedPartyRoleNames, String producerPartyName, String consumerPartyName) {
 
-    return Stream.of(
+    threadLocalComponentFactory.set(portCallComponentFactory);
+    threadLocalProducerPartyName.set(producerPartyName);
+    threadLocalConsumerPartyName.set(consumerPartyName);
+
+    Map<String, Map<String, PortCallScenarioListBuilder>> partyScenariosMap =
+      MapUtils.orderedMap(
+        Map.entry(
+          PortCallRole.PRODUCER.getConfigName(),
+          MapUtils.orderedMap(
             Map.entry(
-                "POST-only scenarios (for adopters only supporting POST)",
-                noAction()
-                    .thenEither(
-                        postPortCallEvents(ScenarioType.TIMESTAMP),
-                        postPortCallEvents(ScenarioType.MOVE_FORECAST))),
+              "POST scenarios - alternative required path for event push",
+              noAction()
+                .thenEither(
+                  postPortCallEvents(ScenarioType.TIMESTAMP),
+                  postPortCallEvents(ScenarioType.MOVE_FORECAST))),
             Map.entry(
-                "GET-only scenarios (for adopters only supporting GET)",
-                noAction()
-                    .thenEither(
-                        supplyScenarioParameters(ScenarioType.TIMESTAMP).then(getPortCallEvents()),
-                        supplyScenarioParameters(ScenarioType.MOVE_FORECAST)
-                            .then(getPortCallEvents()))))
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+              "GET scenarios - alternative required path for event pull",
+              noAction()
+                .thenEither(
+                  supplyScenarioParameters(ScenarioType.TIMESTAMP)
+                    .then(getPortCallEvents()),
+                  supplyScenarioParameters(ScenarioType.MOVE_FORECAST)
+                    .then(getPortCallEvents()))),
+            Map.entry(
+              "GET scenario for pagination - optional/report-only",
+              supplyScenarioParameters(PortCallFilterParameter.PORT_CALL_SERVICE_TYPE_CODE, PortCallFilterParameter.LIMIT)
+                .then(getPortCallEvents(true).then(getPortCallEvents()))
+                .asOptionalReportOnlyScenario()))),
+        Map.entry(
+          PortCallRole.CONSUMER.getConfigName(),
+          MapUtils.orderedMap(
+            Map.entry(
+              "POST scenarios - alternative required path for event push",
+              noAction()
+                .thenEither(
+                  postPortCallEvents(ScenarioType.TIMESTAMP),
+                  postPortCallEvents(ScenarioType.MOVE_FORECAST))),
+            Map.entry(
+              "GET scenarios - alternative required path for event pull",
+              noAction()
+                .thenEither(
+                  getPortCallEvents(ScenarioType.TIMESTAMP),
+                  getPortCallEvents(ScenarioType.MOVE_FORECAST))))));
+
+    Map<String, PortCallScenarioListBuilder> scenarios = new LinkedHashMap<>();
+    testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
+
+    return scenarios;
   }
 
   private static PortCallScenarioListBuilder supplyScenarioParameters(ScenarioType scenarioType) {
-    String publisherPartyName = threadLocalPublisherPartyName.get();
+    String producerPartyName = threadLocalProducerPartyName.get();
     return new PortCallScenarioListBuilder(
-        previousAction -> new SupplyScenarioParametersAction(publisherPartyName, scenarioType));
+      previousAction -> new SupplyScenarioParametersAction(producerPartyName, scenarioType));
   }
 
-  private static PortCallScenarioListBuilder postPortCallEvents(ScenarioType scenarioType) {
-    PortCallComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String publisherPartyName = threadLocalPublisherPartyName.get();
-    String subscriberPartyName = threadLocalSubscriberPartyName.get();
+  private static PortCallScenarioListBuilder supplyScenarioParameters(
+    PortCallFilterParameter... filterParameters) {
+    String producerPartyName = threadLocalProducerPartyName.get();
     return new PortCallScenarioListBuilder(
-        previousAction ->
-            new PublisherPostPortCallEventsAction(
-                publisherPartyName,
-                subscriberPartyName,
-                (PortCallAction) previousAction,
-                scenarioType,
-                componentFactory.getMessageSchemaValidator("PostEventsRequest")));
+      previousAction ->
+        new SupplyScenarioParametersAction(producerPartyName, filterParameters));
+  }
+
+  private static PortCallScenarioListBuilder postPortCallEvents(
+    ScenarioType scenarioType) {
+    PortCallComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String producerPartyName = threadLocalProducerPartyName.get();
+    String consumerPartyName = threadLocalConsumerPartyName.get();
+    return new PortCallScenarioListBuilder(
+      previousAction ->
+        new PostPortCallEventsAction(
+          producerPartyName,
+          consumerPartyName,
+          (PortCallAction) previousAction,
+          scenarioType,
+          componentFactory.getMessageSchemaValidator("PostEventsRequest")));
   }
 
   private static PortCallScenarioListBuilder getPortCallEvents() {
-    PortCallComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String publisherPartyName = threadLocalPublisherPartyName.get();
-    String subscriberPartyName = threadLocalSubscriberPartyName.get();
-    return new PortCallScenarioListBuilder(
-      previousAction ->
-        new SubscriberGetPortCallEventsAction(
-          subscriberPartyName,
-          publisherPartyName,
-          (PortCallAction) previousAction,
-          componentFactory.getMessageSchemaValidator("GetEventsResponse")));
+    return getPortCallEvents(false);
   }
 
+  private static PortCallScenarioListBuilder getPortCallEvents(boolean hasNextPage) {
+    PortCallComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String producerPartyName = threadLocalProducerPartyName.get();
+    String consumerPartyName = threadLocalConsumerPartyName.get();
+    return new PortCallScenarioListBuilder(
+      previousAction ->
+        new GetPortCallEventsAction(
+          consumerPartyName,
+          producerPartyName,
+          (PortCallAction) previousAction,
+          componentFactory.getMessageSchemaValidator("GetEventsResponse"),
+          hasNextPage));
+  }
 
+  private static PortCallScenarioListBuilder getPortCallEvents(ScenarioType scenarioType) {
+    PortCallComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String producerPartyName = threadLocalProducerPartyName.get();
+    String consumerPartyName = threadLocalConsumerPartyName.get();
+    return new PortCallScenarioListBuilder(
+      previousAction ->
+        new GetPortCallEventsAction(
+          consumerPartyName,
+          producerPartyName,
+          (PortCallAction) previousAction,
+          componentFactory.getMessageSchemaValidator("GetEventsResponse"),
+          scenarioType));
+  }
 
   private static PortCallScenarioListBuilder noAction() {
     return new PortCallScenarioListBuilder(null);

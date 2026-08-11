@@ -38,7 +38,7 @@ public class CsChecks {
       checks.add(paginationCheck(dspSupplier));
     }
     return JsonAttribute.contentChecks(
-        CsRole::isPublisher,
+        CsRole::isProducer,
         matchedExchangeUuid,
         HttpMessageType.RESPONSE,
         expectedApiVersion,
@@ -225,7 +225,7 @@ public class CsChecks {
       checks.add(paginationCheck(dspSupplier));
     }
     return JsonAttribute.contentChecks(
-        CsRole::isPublisher,
+        CsRole::isProducer,
         matchedExchangeUuid,
         HttpMessageType.RESPONSE,
         expectedApiVersion,
@@ -244,7 +244,7 @@ public class CsChecks {
       checks.add(paginationCheck(dspSupplier));
     }
     return JsonAttribute.contentChecks(
-        CsRole::isPublisher,
+        CsRole::isProducer,
         matchedExchangeUuid,
         HttpMessageType.RESPONSE,
         expectedApiVersion,

@@ -134,6 +134,7 @@ public class CsPublisher extends ConformanceParty {
                                   CsDateUtils.getEndDateAfter3Months();
                               case MAX_TRANSHIPMENT -> "1";
                               case RECEIPT_TYPE_AT_ORIGIN, DELIVERY_TYPE_AT_DESTINATION -> "CY";
+                              case CARGO_TYPE -> "FCL";
                               case LIMIT -> "100";
                             })));
 

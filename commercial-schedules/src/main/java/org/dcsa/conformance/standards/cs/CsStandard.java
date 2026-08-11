@@ -27,13 +27,13 @@ public class CsStandard extends AbstractStandard {
             SCENARIO_SUITE_CONFORMANCE,
             Map.ofEntries(
                 Map.entry(
-                    CsRole.PUBLISHER.getConfigName(),
+                    CsRole.PRODUCER.getConfigName(),
                     new TreeMap<>(
                         Map.ofEntries(
                             Map.entry("/v1/point-to-point-routes", new TreeSet<>(Set.of("GET"))),
                             Map.entry("/v1/port-schedules", new TreeSet<>(Set.of("GET"))),
                             Map.entry("/v1/vessel-schedules", new TreeSet<>(Set.of("GET")))))),
-                Map.entry(CsRole.SUBSCRIBER.getConfigName(), new TreeMap<>()))));
+                Map.entry(CsRole.CONSUMER.getConfigName(), new TreeMap<>()))));
   }
 
   @Override
@@ -44,6 +44,6 @@ public class CsStandard extends AbstractStandard {
 
   @Override
   protected Set<String> getExternalPartyRoleNamesAllowingEmptyUrl() {
-    return Set.of(CsRole.SUBSCRIBER.getConfigName());
+    return Set.of(CsRole.CONSUMER.getConfigName());
   }
 }

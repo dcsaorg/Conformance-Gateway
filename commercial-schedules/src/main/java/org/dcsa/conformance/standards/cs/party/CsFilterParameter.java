@@ -17,6 +17,7 @@ public enum CsFilterParameter {
   MAX_TRANSHIPMENT("maxTranshipment"),
   RECEIPT_TYPE_AT_ORIGIN("receiptTypeAtOrigin"),
   DELIVERY_TYPE_AT_DESTINATION("deliveryTypeAtDestination"),
+  CARGO_TYPE("cargoType"),
   DATE("date"),
   CARRIER_SERVICE_NAME("carrierServiceName"),
   CARRIER_SERVICE_CODE("carrierServiceCode"),

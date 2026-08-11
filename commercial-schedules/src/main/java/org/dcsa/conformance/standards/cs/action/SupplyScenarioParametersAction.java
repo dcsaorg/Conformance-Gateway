@@ -79,6 +79,7 @@ public class SupplyScenarioParametersAction extends CsAction {
                                   CsDateUtils.getCurrentDate();
                               case DEPARTURE_END_DATE, ARRIVAL_END_DATE ->
                                   CsDateUtils.getEndDateAfter3Months();
+                              case CARGO_TYPE -> "FCL";
                               default -> "TODO";
                             })))
         .toJson();

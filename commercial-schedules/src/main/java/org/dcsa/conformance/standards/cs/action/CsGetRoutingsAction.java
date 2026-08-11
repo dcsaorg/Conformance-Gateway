@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.cs.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
@@ -64,20 +63,20 @@ public class CsGetRoutingsAction extends CsAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new UrlPathCheck(
-                CsRole::isSubscriber, getMatchedExchangeUuid(), "/point-to-point-routes"),
-            new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+                CsRole::isConsumer, getMatchedExchangeUuid(), "/point-to-point-routes"),
+            new ResponseStatusCheck(CsRole::isProducer, getMatchedExchangeUuid(), expectedStatus),
             new JsonSchemaCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
             new ApiHeaderCheck(
-                CsRole::isSubscriber,
+                CsRole::isConsumer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             new ApiHeaderCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),

@@ -51,20 +51,20 @@ public class CsGetPortSchedulesAction extends CsAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/port-schedules"),
-            new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+            new UrlPathCheck(CsRole::isConsumer, getMatchedExchangeUuid(), "/port-schedules"),
+            new ResponseStatusCheck(CsRole::isProducer, getMatchedExchangeUuid(), expectedStatus),
             new JsonSchemaCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
             new ApiHeaderCheck(
-                CsRole::isSubscriber,
+                CsRole::isConsumer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             new ApiHeaderCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),

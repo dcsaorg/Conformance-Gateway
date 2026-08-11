@@ -178,11 +178,6 @@ public class PersistableCarrierBooking {
     }
   }
 
-  public void declineBookingAmendment(String reference) {
-    checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
-    changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
-  }
-
   public void requestUpdateToBooking(String reference, Consumer<ObjectNode> bookingMutator) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(PENDING_UPDATE);
     checkState(reference, getOriginalBookingState(), prerequisites);
@@ -251,11 +246,6 @@ public class PersistableCarrierBooking {
     }
     mutateBookingAndAmendment(
       b -> b.put(CANCELLATION_BOOKING_STATUS, CANCELLATION_RECEIVED.name()));
-  }
-
-  public void declineConfirmedBookingCancellation(String bookingReference) {
-    checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
-    changeState(CANCELLATION_DECLINED);
   }
 
   private void changeState(String attributeName, BookingState newState) {

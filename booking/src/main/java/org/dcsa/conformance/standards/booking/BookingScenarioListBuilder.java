@@ -286,8 +286,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           carrierPartyName,
           scenarioType,
           componentFactory.getStandardVersion(),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_API, CREATE_BOOKING_SCHEMA_NAME)));
+          componentFactory.getMessageSchemaValidator(BOOKING_API, CREATE_BOOKING_SCHEMA_NAME)));
   }
 
   private static BookingScenarioListBuilder shipperGetBooking(BookingState expectedBookingStatus) {
@@ -368,10 +367,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(BOOKING_API, CREATE_BOOKING_SCHEMA_NAME),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
           isWithNotifications));
   }
 
@@ -392,10 +388,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           (BookingAction) previousAction,
           BookingState.UPDATE_RECEIVED,
           componentFactory.getMessageSchemaValidator(BOOKING_API, UPDATE_BOOKING_SCHEMA_NAME),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
           isWithNotifications));
   }
 
@@ -425,10 +418,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           BookingState.CONFIRMED,
           BookingState.AMENDMENT_RECEIVED,
           componentFactory.getMessageSchemaValidator(BOOKING_API, UPDATE_BOOKING_SCHEMA_NAME),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
           isWithNotifications));
   }
 
@@ -450,10 +440,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           BookingState.CONFIRMED,
           BookingState.AMENDMENT_CANCELLED,
           componentFactory.getMessageSchemaValidator(BOOKING_API, CANCEL_SCHEMA_NAME),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
           isWithNotifications));
   }
 
@@ -486,10 +473,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           (BookingAction) previousAction,
           BookingState.CANCELLED,
           componentFactory.getMessageSchemaValidator(BOOKING_API, CANCEL_SCHEMA_NAME),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
           isWithNotifications));
   }
 
@@ -512,10 +496,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           null,
           BookingCancellationState.CANCELLATION_RECEIVED,
           componentFactory.getMessageSchemaValidator(BOOKING_API, CANCEL_SCHEMA_NAME),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
           isWithNotifications));
   }
 
@@ -535,8 +516,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           carrierPartyName,
           shipperPartyName,
           (BookingAction) previousAction,
-          componentFactory.getMessageSchemaValidator(
-            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
           isWithNotifications));
   }
 

@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 @Getter
 public class UC14CarrierProcessBookingCancellationAction extends CarrierNotificationBookingAction {
+
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC14CarrierProcessBookingCancellationAction(
@@ -51,10 +52,7 @@ public class UC14CarrierProcessBookingCancellationAction extends CarrierNotifica
         return getSimpleNotificationChecks(
           expectedApiVersion,
           requestSchemaValidator,
-          CarrierStatusScenario.from(
-            BookingState.CANCELLED,
-            null,
-            BookingCancellationState.CANCELLATION_CONFIRMED));
+          CarrierStatusScenario.from(BookingState.CANCELLED, null, BookingCancellationState.CANCELLATION_CONFIRMED));
       }
     };
   }

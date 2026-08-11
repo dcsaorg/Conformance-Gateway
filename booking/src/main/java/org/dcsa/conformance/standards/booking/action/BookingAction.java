@@ -162,7 +162,7 @@ public abstract class BookingAction extends BookingAndEblAction {
         "SCENARIO_TYPE_INSTRUCTION",
         scenarioType == ScenarioType.ANY
           ? "You may use any supported Booking cargo type."
-          : "Make sure the booking type remains %s.".formatted(scenarioType.displayName()));
+          : "Make sure the booking type remains %s.".formatted(scenarioType.getDisplayName()));
   }
 
   protected static String withCbrOrCbrr(String cbr, String cbrr) {

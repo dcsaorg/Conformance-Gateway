@@ -6,11 +6,14 @@ import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceError;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
@@ -54,7 +57,7 @@ public abstract class StateChangingBookingAction extends BookingAction {
   }
 
   protected Stream<ActionCheck> createPrimarySubChecks(
-    String httpMethod, String expectedApiVersion, String uri, String... uriReference) {
+    String httpMethod, String expectedApiVersion, String uri, JsonSchemaValidator requestSchemaValidator, String... uriReference) {
     return Stream.of(
       new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), httpMethod),
       new UrlPathCheck(
@@ -69,11 +72,16 @@ public abstract class StateChangingBookingAction extends BookingAction {
         BookingRole::isCarrier,
         getMatchedExchangeUuid(),
         HttpMessageType.RESPONSE,
-        expectedApiVersion));
+        expectedApiVersion),
+      new JsonSchemaCheck(
+        BookingRole::isShipper,
+        getMatchedExchangeUuid(),
+        HttpMessageType.REQUEST,
+        requestSchemaValidator));
   }
 
   protected Stream<ActionCheck> createPatchPrimarySubChecks(
-    String expectedApiVersion, String uri, String... uriReference) {
+    String expectedApiVersion, String uri, JsonSchemaValidator requestSchemaValidator, String... uriReference) {
     return Stream.of(
       new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
       new UrlPathCheck(
@@ -87,7 +95,12 @@ public abstract class StateChangingBookingAction extends BookingAction {
         BookingRole::isCarrier,
         getMatchedExchangeUuid(),
         HttpMessageType.RESPONSE,
-        expectedApiVersion));
+        expectedApiVersion),
+      new JsonSchemaCheck(
+        BookingRole::isShipper,
+        getMatchedExchangeUuid(),
+        HttpMessageType.REQUEST,
+        requestSchemaValidator));
   }
 
   protected ActionCheck createShipperPatchPreconditionCheck(

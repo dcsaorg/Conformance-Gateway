@@ -37,7 +37,7 @@ public class CarrierSupplyScenarioParametersAction extends BookingAction {
       carrierPartyName,
       null,
       null,
-      "SupplyCSP [%s]".formatted(scenarioType.displayName()),
+      "SupplyCSP [%s]".formatted(scenarioType.getDisplayName()),
       -1,
       true);
     this.scenarioType = scenarioType;

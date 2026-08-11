@@ -31,24 +31,6 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected static final String FEEDBACKS = "feedbacks";
 
   protected AbstractCarrierPayloadConformanceCheck(
-    UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
-    this(matchedExchangeUuid, httpMessageType, bookingState, null, null);
-  }
-
-  protected AbstractCarrierPayloadConformanceCheck(
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    BookingState bookingState,
-    BookingState expectedAmendedBookingStatus) {
-    this(
-      matchedExchangeUuid,
-      httpMessageType,
-      bookingState,
-      expectedAmendedBookingStatus,
-      null);
-  }
-
-  protected AbstractCarrierPayloadConformanceCheck(
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
     BookingState bookingState,

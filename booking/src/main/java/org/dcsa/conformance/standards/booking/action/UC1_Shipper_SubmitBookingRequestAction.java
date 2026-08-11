@@ -4,16 +4,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ConformanceCheck;
-import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
-import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
@@ -23,7 +20,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationBookingAction {
 
   private final JsonSchemaValidator requestSchemaValidator;
-  private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
   public UC1_Shipper_SubmitBookingRequestAction(
@@ -31,12 +27,10 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
     String shipperPartyName,
     BookingAction previousAction,
     JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator,
     JsonSchemaValidator notificationSchemaValidator,
     boolean isWithNotifications) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
-    this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
   }
 
@@ -49,7 +43,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
         "BOOKING_TYPE_PLACEHOLDER",
         scenarioType == ScenarioType.ANY
           ? "a booking request using any supported cargo type"
-          : "a %s booking request".formatted(scenarioType.displayName()));
+          : "a %s booking request".formatted(scenarioType.getDisplayName()));
   }
 
   @Override
@@ -70,17 +64,13 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.concat(
+        return Stream.of(
+          createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings", requestSchemaValidator),
           Stream.of(
-            BookingChecks.requestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()),
-            new JsonSchemaCheck(
-              BookingRole::isShipper,
-              getMatchedExchangeUuid(),
-              HttpMessageType.REQUEST,
-              requestSchemaValidator)),
-          Stream.concat(
-            createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
-            getNotificationChecks(expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)));
+            BookingChecks.requestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())
+          ),
+          getNotificationChecks(expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)
+        ).flatMap(Function.identity());
       }
     };
   }

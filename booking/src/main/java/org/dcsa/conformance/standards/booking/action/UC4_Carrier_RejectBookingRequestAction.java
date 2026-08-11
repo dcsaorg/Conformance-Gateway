@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 @Getter
 public class UC4_Carrier_RejectBookingRequestAction extends CarrierNotificationBookingAction {
+
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC4_Carrier_RejectBookingRequestAction(
@@ -41,8 +42,7 @@ public class UC4_Carrier_RejectBookingRequestAction extends CarrierNotificationB
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return getSimpleNotificationChecks(
-          expectedApiVersion, requestSchemaValidator, BookingState.REJECTED);
+        return getSimpleNotificationChecks(expectedApiVersion, requestSchemaValidator, BookingState.REJECTED);
       }
     };
   }

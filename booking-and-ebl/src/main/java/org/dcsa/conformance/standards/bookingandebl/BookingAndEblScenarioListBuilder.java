@@ -1,23 +1,5 @@
 package org.dcsa.conformance.standards.bookingandebl;
 
-import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_RECEIVED;
-import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_CONFIRMED;
-import static org.dcsa.conformance.standards.booking.party.BookingState.CONFIRMED;
-import static org.dcsa.conformance.standards.booking.party.BookingState.RECEIVED;
-import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.SI_ANY;
-import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_APPROVED;
-import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_DRAFT;
-import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_ISSUED;
-import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_PENDING_SURRENDER_FOR_AMENDMENT;
-import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_SURRENDERED_FOR_AMENDMENT;
-import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_VOIDED;
-
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
@@ -48,9 +30,28 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_CONFIRMED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.AMENDMENT_RECEIVED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.CONFIRMED;
+import static org.dcsa.conformance.standards.booking.party.BookingState.RECEIVED;
+import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.SI_ANY;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_APPROVED;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_DRAFT;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_ISSUED;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_PENDING_SURRENDER_FOR_AMENDMENT;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_SURRENDERED_FOR_AMENDMENT;
+import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.TD_VOIDED;
+
 @Slf4j
 public class BookingAndEblScenarioListBuilder
-    extends ScenarioListBuilder<BookingAndEblScenarioListBuilder> {
+  extends ScenarioListBuilder<BookingAndEblScenarioListBuilder> {
 
   private static final String BOOKING_ACTION_NAME_COMPLEMENT = "[Booking]";
   private static final String EBL_ACTION_NAME_COMPLEMENT = "[eBL]";
@@ -58,7 +59,7 @@ public class BookingAndEblScenarioListBuilder
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 
   private static final ThreadLocal<BookingAndEblComponentFactory> threadLocalComponentFactory =
-      new ThreadLocal<>();
+    new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
   private static final ThreadLocal<Boolean> threadLocalIsWithNotifications = new ThreadLocal<>();
@@ -68,10 +69,10 @@ public class BookingAndEblScenarioListBuilder
   }
 
   public static Map<String, BookingAndEblScenarioListBuilder> createModuleScenarioListBuilders(
-      BookingAndEblComponentFactory componentFactory,
-      boolean isWithNotifications,
-      String carrierPartyName,
-      String shipperPartyName) {
+    BookingAndEblComponentFactory componentFactory,
+    boolean isWithNotifications,
+    String carrierPartyName,
+    String shipperPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
@@ -82,99 +83,99 @@ public class BookingAndEblScenarioListBuilder
     }
 
     throw new IllegalArgumentException(
-        "Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
+      "Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
   }
 
   private static Map<String, BookingAndEblScenarioListBuilder> createConformanceScenarios(
-      String carrierPartyName) {
+    String carrierPartyName) {
     return Stream.of(
-            createSeaWaybillScenarios(carrierPartyName),
-            createStraightEBLScenarios(carrierPartyName))
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        createSeaWaybillScenarios(carrierPartyName),
+        createStraightEBLScenarios(carrierPartyName))
+      .collect(
+        Collectors.toMap(
+          Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
   private static Map.Entry<String, BookingAndEblScenarioListBuilder> createSeaWaybillScenarios(
-      String carrierPartyName) {
+    String carrierPartyName) {
     return Map.entry(
-        "Sea Waybill",
-        noAction()
-            .thenEither(
-                carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.REEFER)
+      "Sea Waybill",
+      noAction()
+        .thenEither(
+          carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.REEFER)
+            .then(
+              uc1BookingGet(
+                uc5BookingGet(
+                  carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB)
                     .then(
-                        uc1BookingGet(
-                            uc5BookingGet(
-                                carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB)
-                                    .then(
-                                        uc1SIGet(
-                                            uc6TDGetSIGet(
-                                                uc7TDGet(
-                                                    uc8TDGet(
-                                                        uc7BookingGet(
-                                                            uc8BookingGet(uc8TDGet())))))))))),
-                carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.DG)
+                      uc1SIGet(
+                        uc6TDGetSIGet(
+                          uc7TDGet(
+                            uc8TDGet(
+                              uc7BookingGet(
+                                uc8BookingGet(uc8TDGet())))))))))),
+          carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.DG)
+            .then(
+              uc1BookingGet(
+                uc5BookingGet(
+                  carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB)
                     .then(
-                        uc1BookingGet(
-                            uc5BookingGet(
-                                carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_SWB)
-                                    .then(
-                                        uc1SIGet(
-                                            uc6TDGetSIGet(
-                                                uc7TDGet(
-                                                    uc8TDGet(
-                                                        uc7BookingGet(
-                                                            uc8BookingGet(uc8TDGet()))))))))))));
+                      uc1SIGet(
+                        uc6TDGetSIGet(
+                          uc7TDGet(
+                            uc8TDGet(
+                              uc7BookingGet(
+                                uc8BookingGet(uc8TDGet()))))))))))));
   }
 
   private static Map.Entry<String, BookingAndEblScenarioListBuilder> createStraightEBLScenarios(
-      String carrierPartyName) {
+    String carrierPartyName) {
     return Map.entry(
-        "Straight eBL",
-        noAction()
-            .thenEither(
-                carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.REEFER)
+      "Straight eBL",
+      noAction()
+        .thenEither(
+          carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.REEFER)
+            .then(
+              uc1BookingGet(
+                uc5BookingGet(
+                  carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_STRAIGHT_BL)
                     .then(
-                        uc1BookingGet(
-                            uc5BookingGet(
-                                carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_STRAIGHT_BL)
-                                    .then(
-                                        uc1SIGet(
-                                            uc6TDGetSIGet(
-                                                uc7TDGet(
-                                                    uc8TDGet(
-                                                        uc7BookingGet(
-                                                            uc8BookingGet(
-                                                                uc9TDGet(uc10TDGet(uc11TDGet())))),
-                                                        uc9TDGet(
-                                                            uc7BookingGet(
-                                                                uc8BookingGet(
-                                                                    uc10TDGet(uc11TDGet()))),
-                                                            uc10TDGet(
-                                                                uc7BookingGet(
-                                                                    uc8BookingGet(
-                                                                        uc11TDGet())))))))))))),
-                carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.DG)
+                      uc1SIGet(
+                        uc6TDGetSIGet(
+                          uc7TDGet(
+                            uc8TDGet(
+                              uc7BookingGet(
+                                uc8BookingGet(
+                                  uc9TDGet(uc10TDGet(uc11TDGet())))),
+                              uc9TDGet(
+                                uc7BookingGet(
+                                  uc8BookingGet(
+                                    uc10TDGet(uc11TDGet()))),
+                                uc10TDGet(
+                                  uc7BookingGet(
+                                    uc8BookingGet(
+                                      uc11TDGet())))))))))))),
+          carrierSupplyBookingScenarioParameters(carrierPartyName, ScenarioType.DG)
+            .then(
+              uc1BookingGet(
+                uc5BookingGet(
+                  carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_STRAIGHT_BL)
                     .then(
-                        uc1BookingGet(
-                            uc5BookingGet(
-                                carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType.REGULAR_STRAIGHT_BL)
-                                    .then(
-                                        uc1SIGet(
-                                            uc6TDGetSIGet(
-                                                uc7TDGet(
-                                                    uc8TDGet(
-                                                        uc7BookingGet(
-                                                            uc8BookingGet(
-                                                                uc9TDGet(uc10TDGet(uc11TDGet())))),
-                                                        uc9TDGet(
-                                                            uc7BookingGet(
-                                                                uc8BookingGet(
-                                                                    uc10TDGet(uc11TDGet()))),
-                                                            uc10TDGet(
-                                                                uc7BookingGet(
-                                                                    uc8BookingGet(
-                                                                        uc11TDGet()))))))))))))));
+                      uc1SIGet(
+                        uc6TDGetSIGet(
+                          uc7TDGet(
+                            uc8TDGet(
+                              uc7BookingGet(
+                                uc8BookingGet(
+                                  uc9TDGet(uc10TDGet(uc11TDGet())))),
+                              uc9TDGet(
+                                uc7BookingGet(
+                                  uc8BookingGet(
+                                    uc10TDGet(uc11TDGet()))),
+                                uc10TDGet(
+                                  uc7BookingGet(
+                                    uc8BookingGet(
+                                      uc11TDGet()))))))))))))));
   }
 
   private static BookingAndEblScenarioListBuilder noAction() {
@@ -182,57 +183,57 @@ public class BookingAndEblScenarioListBuilder
   }
 
   private static BookingAndEblScenarioListBuilder shipperGetBooking(
-      BookingState expectedBookingStatus,
-      BookingState expectedAmendedBookingStatus,
-      boolean requestAmendedContent) {
+    BookingState expectedBookingStatus,
+    BookingState expectedAmendedBookingStatus,
+    boolean requestAmendedContent) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new ShipperGetBookingAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (BookingAction) previousAction,
-                    expectedBookingStatus,
-                    expectedAmendedBookingStatus,
-                    null,
-                    componentFactory.getBookingMessageSchemaValidator(
-                        BookingScenarioListBuilder.GET_BOOKING_SCHEMA_NAME),
-                    requestAmendedContent)
-                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new ShipperGetBookingAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          expectedBookingStatus,
+          expectedAmendedBookingStatus,
+          null,
+          componentFactory.getBookingMessageSchemaValidator(
+            BookingScenarioListBuilder.GET_BOOKING_SCHEMA_NAME),
+          requestAmendedContent)
+          .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder shipperGetBooking(
-      CarrierStatusScenario carrierStatusScenario) {
+    CarrierStatusScenario carrierStatusScenario) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new ShipperGetBookingAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (BookingAction) previousAction,
-                    carrierStatusScenario,
-                    componentFactory.getBookingMessageSchemaValidator(
-                        BookingScenarioListBuilder.GET_BOOKING_SCHEMA_NAME),
-                    false)
-                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new ShipperGetBookingAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          carrierStatusScenario,
+          componentFactory.getBookingMessageSchemaValidator(
+            BookingScenarioListBuilder.GET_BOOKING_SCHEMA_NAME),
+          false)
+          .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder carrierSupplyBookingScenarioParameters(
-      String carrierPartyName, ScenarioType scenarioType) {
+    String carrierPartyName, ScenarioType scenarioType) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     var version = componentFactory.getStandardVersion().split("-\\+-")[0];
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new CarrierSupplyScenarioParametersAction(
-                carrierPartyName,
-                scenarioType,
-                version,
-                componentFactory.getBookingMessageSchemaValidator(
-                    BookingScenarioListBuilder.CREATE_BOOKING_SCHEMA_NAME)));
+      previousAction ->
+        new CarrierSupplyScenarioParametersAction(
+          carrierPartyName,
+          scenarioType,
+          version,
+          componentFactory.getBookingMessageSchemaValidator(
+            BookingScenarioListBuilder.CREATE_BOOKING_SCHEMA_NAME)));
   }
 
   private static BookingAndEblScenarioListBuilder uc1ShipperSubmitBookingRequest() {
@@ -241,19 +242,17 @@ public class BookingAndEblScenarioListBuilder
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC1_Shipper_SubmitBookingRequestAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (BookingAction) previousAction,
-                    componentFactory.getBookingMessageSchemaValidator(
-                        BookingScenarioListBuilder.CREATE_BOOKING_SCHEMA_NAME),
-                    componentFactory.getBookingMessageSchemaValidator(
-                        BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
-                    componentFactory.getBookingMessageSchemaValidator(
-                        BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
-                    isWithNotifications)
-                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new UC1_Shipper_SubmitBookingRequestAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          componentFactory.getBookingMessageSchemaValidator(
+            BookingScenarioListBuilder.CREATE_BOOKING_SCHEMA_NAME),
+          componentFactory.getBookingMessageSchemaValidator(
+            BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
+          isWithNotifications)
+          .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc5CarrierConfirmBookingRequest() {
@@ -266,21 +265,17 @@ public class BookingAndEblScenarioListBuilder
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC7_Shipper_SubmitBookingAmendment(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (BookingAndEblAction) previousAction,
-                    BookingState.CONFIRMED,
-                    BookingState.AMENDMENT_RECEIVED,
-                    componentFactory.getBookingMessageSchemaValidator(
-                        BookingScenarioListBuilder.UPDATE_BOOKING_SCHEMA_NAME),
-                    componentFactory.getBookingMessageSchemaValidator(
-                        BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
-                    componentFactory.getBookingMessageSchemaValidator(
-                        BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
-                    isWithNotifications)
-                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new UC7_Shipper_SubmitBookingAmendment(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAndEblAction) previousAction,
+          BookingState.CONFIRMED,
+          BookingState.AMENDMENT_RECEIVED,
+          componentFactory.getBookingMessageSchemaValidator(BookingScenarioListBuilder.UPDATE_BOOKING_SCHEMA_NAME),
+          componentFactory.getBookingMessageSchemaValidator(BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
+          isWithNotifications)
+          .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc8CarrierProcessBookingAmendment() {
@@ -288,86 +283,86 @@ public class BookingAndEblScenarioListBuilder
   }
 
   private static BookingAndEblScenarioListBuilder carrierStateChange(
-      BookingScenarioListBuilder.CarrierNotificationUseCase constructor) {
+    BookingScenarioListBuilder.CarrierNotificationUseCase constructor) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            constructor
-                .newInstance(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (BookingAction) previousAction,
-                    componentFactory.getBookingMessageSchemaValidator(
-                        BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
-                    isWithNotifications)
-                .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        constructor
+          .newInstance(
+            carrierPartyName,
+            shipperPartyName,
+            (BookingAction) previousAction,
+            componentFactory.getBookingMessageSchemaValidator(
+              BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
+            isWithNotifications)
+          .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc1BookingGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc1ShipperSubmitBookingRequest()
-        .then(shipperGetBooking(RECEIVED, null, false).thenEither(thenEither));
+      .then(shipperGetBooking(RECEIVED, null, false).thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder uc5BookingGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc5CarrierConfirmBookingRequest()
-        .then(shipperGetBooking(CONFIRMED, null, false).thenEither(thenEither));
+      .then(shipperGetBooking(CONFIRMED, null, false).thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder uc7BookingGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc7ShipperSubmitBookingAmendment()
-        .then(shipperGetBooking(CONFIRMED, AMENDMENT_RECEIVED, true).thenEither(thenEither));
+      .then(shipperGetBooking(CONFIRMED, AMENDMENT_RECEIVED, true).thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder uc8BookingGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc8CarrierProcessBookingAmendment()
-        .then(
-            shipperGetBooking(CarrierStatusScenario.from(CONFIRMED, AMENDMENT_CONFIRMED, null))
-                .thenEither(thenEither));
+      .then(
+        shipperGetBooking(CarrierStatusScenario.from(CONFIRMED, AMENDMENT_CONFIRMED, null))
+          .thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder shipperGetShippingInstructions(
-      ShippingInstructionsStatus expectedUpdatedSiStatus, boolean recordTDR) {
+    ShippingInstructionsStatus expectedUpdatedSiStatus, boolean recordTDR) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new Shipper_GetShippingInstructionsAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (EblAction) previousAction,
-                    ShippingInstructionsStatus.SI_RECEIVED,
-                    expectedUpdatedSiStatus,
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.GET_EBL_SCHEMA_NAME),
-                    false,
-                    recordTDR,
-                    false)
-                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new Shipper_GetShippingInstructionsAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          ShippingInstructionsStatus.SI_RECEIVED,
+          expectedUpdatedSiStatus,
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.GET_EBL_SCHEMA_NAME),
+          false,
+          recordTDR,
+          false)
+          .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder shipperGetTransportDocument(
-      TransportDocumentStatus... expectedTdStatus) {
+    TransportDocumentStatus... expectedTdStatus) {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new Shipper_GetTransportDocumentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (EblAction) previousAction,
-                    Arrays.stream(expectedTdStatus).toList(),
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.GET_TD_SCHEMA_NAME))
-                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new Shipper_GetTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          Arrays.stream(expectedTdStatus).toList(),
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.GET_TD_SCHEMA_NAME))
+          .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder carrierEblSupplyScenarioParameters(org.dcsa.conformance.standards.ebl.checks.ScenarioType eblScenarioType) {
@@ -375,15 +370,15 @@ public class BookingAndEblScenarioListBuilder
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String standardVersion = componentFactory.getStandardVersion().split("-\\+-")[1];
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new CarrierSupplyPayloadAction(
-                carrierPartyName,
-                (BookingAndEblAction) previousAction,
-                eblScenarioType,
-                standardVersion,
-                componentFactory.getEblMessageSchemaValidator(
-                    EblScenarioListBuilder.POST_EBL_SCHEMA_NAME),
-                false));
+      previousAction ->
+        new CarrierSupplyPayloadAction(
+          carrierPartyName,
+          (BookingAndEblAction) previousAction,
+          eblScenarioType,
+          standardVersion,
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.POST_EBL_SCHEMA_NAME),
+          false));
   }
 
   private static BookingAndEblScenarioListBuilder uc1ShipperSubmitShippingInstructions() {
@@ -392,19 +387,19 @@ public class BookingAndEblScenarioListBuilder
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC1_Shipper_SubmitShippingInstructionsAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (EblAction) previousAction,
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.POST_EBL_SCHEMA_NAME),
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.EBL_SI_NOTIFICATION_SCHEMA_NAME),
-                    isWithNotifications)
-                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new UC1_Shipper_SubmitShippingInstructionsAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.POST_EBL_SCHEMA_NAME),
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.EBL_SI_NOTIFICATION_SCHEMA_NAME),
+          isWithNotifications)
+          .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc6CarrierPublishDraftTransportDocument() {
@@ -413,16 +408,16 @@ public class BookingAndEblScenarioListBuilder
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC6_Carrier_PublishDraftTransportDocumentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (EblAction) previousAction,
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                    false,
-                    isWithNotifications)
-                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new UC6_Carrier_PublishDraftTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          false,
+          isWithNotifications)
+          .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc7ShipperApproveDraftTransportDocument() {
@@ -431,17 +426,17 @@ public class BookingAndEblScenarioListBuilder
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC7_Shipper_ApproveDraftTransportDocumentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (EblAction) previousAction,
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.PATCH_TD_SCHEMA_NAME),
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                    isWithNotifications)
-                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new UC7_Shipper_ApproveDraftTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.PATCH_TD_SCHEMA_NAME),
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          isWithNotifications)
+          .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc8CarrierIssueTransportDocument() {
@@ -450,15 +445,15 @@ public class BookingAndEblScenarioListBuilder
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC8_Carrier_IssueTransportDocumentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (BookingAndEblAction) previousAction,
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                    isWithNotifications)
-                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new UC8_Carrier_IssueTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAndEblAction) previousAction,
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          isWithNotifications)
+          .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc9CarrierAwaitSurrenderRequestForAmendment() {
@@ -467,15 +462,15 @@ public class BookingAndEblScenarioListBuilder
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (BookingAndEblAction) previousAction,
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                    isWithNotifications)
-                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAndEblAction) previousAction,
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          isWithNotifications)
+          .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc10aCarrierAcceptSurrenderRequestForAmendment() {
@@ -484,78 +479,78 @@ public class BookingAndEblScenarioListBuilder
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC10_Carrier_ProcessSurrenderRequestForAmendmentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (BookingAndEblAction) previousAction,
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                    true,
-                    isWithNotifications)
-                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new UC10_Carrier_ProcessSurrenderRequestForAmendmentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAndEblAction) previousAction,
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          true,
+          isWithNotifications)
+          .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder
-      uc11CarrierVoidTDAndIssueAmendedTransportDocument() {
+  uc11CarrierVoidTDAndIssueAmendedTransportDocument() {
     BookingAndEblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingAndEblScenarioListBuilder(
-        previousAction ->
-            new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (BookingAndEblAction) previousAction,
-                    componentFactory.getEblMessageSchemaValidator(
-                        EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                    isWithNotifications)
-                .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
+      previousAction ->
+        new UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAndEblAction) previousAction,
+          componentFactory.getEblMessageSchemaValidator(
+            EblScenarioListBuilder.EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          isWithNotifications)
+          .withTitleComplement(EBL_ACTION_NAME_COMPLEMENT));
   }
 
   private static BookingAndEblScenarioListBuilder uc1SIGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc1ShipperSubmitShippingInstructions()
-        .then(shipperGetShippingInstructions(null, false).thenEither(thenEither));
+      .then(shipperGetShippingInstructions(null, false).thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder uc6TDGetSIGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc6CarrierPublishDraftTransportDocument()
-        .then(
-            shipperGetTransportDocument(TD_DRAFT)
-                .then(shipperGetShippingInstructions(SI_ANY, true).thenEither(thenEither)));
+      .then(
+        shipperGetTransportDocument(TD_DRAFT)
+          .then(shipperGetShippingInstructions(SI_ANY, true).thenEither(thenEither)));
   }
 
   private static BookingAndEblScenarioListBuilder uc7TDGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc7ShipperApproveDraftTransportDocument()
-        .then(shipperGetTransportDocument(TD_APPROVED).thenEither(thenEither));
+      .then(shipperGetTransportDocument(TD_APPROVED).thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder uc8TDGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc8CarrierIssueTransportDocument()
-        .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither));
+      .then(shipperGetTransportDocument(TD_ISSUED).thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder uc9TDGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc9CarrierAwaitSurrenderRequestForAmendment()
-        .then(
-            shipperGetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT).thenEither(thenEither));
+      .then(
+        shipperGetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT).thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder uc10TDGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc10aCarrierAcceptSurrenderRequestForAmendment()
-        .then(shipperGetTransportDocument(TD_SURRENDERED_FOR_AMENDMENT).thenEither(thenEither));
+      .then(shipperGetTransportDocument(TD_SURRENDERED_FOR_AMENDMENT).thenEither(thenEither));
   }
 
   private static BookingAndEblScenarioListBuilder uc11TDGet(
-      BookingAndEblScenarioListBuilder... thenEither) {
+    BookingAndEblScenarioListBuilder... thenEither) {
     return uc11CarrierVoidTDAndIssueAmendedTransportDocument()
-        .then(shipperGetTransportDocument(TD_ISSUED,TD_VOIDED).thenEither(thenEither));
+      .then(shipperGetTransportDocument(TD_ISSUED, TD_VOIDED).thenEither(thenEither));
   }
 }

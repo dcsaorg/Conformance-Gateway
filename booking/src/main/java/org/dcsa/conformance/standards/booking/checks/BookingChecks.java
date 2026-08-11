@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -989,13 +990,7 @@ public class BookingChecks {
     boolean validateCargoType = scenario.isCargoTypeValidationRequired();
     boolean isScenarioReefer = validateCargoType && ScenarioType.REEFER.equals(scenario);
     boolean isScenarioDG = validateCargoType && ScenarioType.DG.equals(scenario);
-    boolean isScenarioDryCargo =
-      validateCargoType && Set.of(
-          ScenarioType.DRY_CARGO,
-          ScenarioType.ROUTING_REFERENCE,
-          ScenarioType.STORE_DOOR_AT_ORIGIN,
-          ScenarioType.STORE_DOOR_AT_DESTINATION)
-        .contains(scenario);
+    boolean isScenarioDryCargo = validateCargoType && ScenarioType.DRY_CARGO.equals(scenario);
 
     checks.add(
       JsonAttribute.customValidator(

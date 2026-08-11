@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.booking.party;
 
 public enum BookingState {
-  START,
   RECEIVED,
   PENDING_UPDATE,
   UPDATE_RECEIVED,

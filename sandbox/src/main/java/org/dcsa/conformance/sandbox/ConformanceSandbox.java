@@ -747,7 +747,7 @@ public class ConformanceSandbox {
           new ConformanceRequest(
             webRequest.method(),
             webRequest.url(),
-            webRequest.queryParameters(),
+            decodeQueryParameters(webRequest.queryParameters()),
             new ConformanceMessage(
               party.getCounterpartName(),
               party.getCounterpartRole(),
@@ -780,6 +780,32 @@ public class ConformanceSandbox {
       JsonToolkit.JSON_UTF_8,
       conformanceResponse.message().headers(),
       conformanceResponse.message().body().getStringBody());
+  }
+
+  private static Map<String, Collection<String>> decodeQueryParameters(
+    Map<String, ? extends Collection<String>> queryParameters) {
+    if (queryParameters == null || queryParameters.isEmpty()) {
+      return Collections.emptyMap();
+    }
+
+    Map<String, Collection<String>> decodedQueryParameters = new LinkedHashMap<>();
+    queryParameters.forEach(
+      (key, values) -> {
+        String decodedKey = URLDecoder.decode(key, StandardCharsets.UTF_8);
+        Collection<String> decodedValues = values == null
+          ? Collections.emptyList()
+          : values.stream()
+          .map(value -> value == null
+              ? null
+              : URLDecoder.decode(value, StandardCharsets.UTF_8))
+          .toList();
+
+        decodedQueryParameters
+          .computeIfAbsent(decodedKey, ignored -> new ArrayList<>())
+          .addAll(decodedValues);
+      });
+
+    return decodedQueryParameters;
   }
 
   private static void _asyncHandleOutboundRequest(

@@ -791,13 +791,11 @@ public class ConformanceSandbox {
     Map<String, Collection<String>> decodedQueryParameters = new LinkedHashMap<>();
     queryParameters.forEach(
       (key, values) -> {
-        String decodedKey = URLDecoder.decode(key, StandardCharsets.UTF_8);
+        String decodedKey = percentDecode(key);
         Collection<String> decodedValues = values == null
           ? Collections.emptyList()
           : values.stream()
-          .map(value -> value == null
-              ? null
-              : URLDecoder.decode(value, StandardCharsets.UTF_8))
+          .map(value -> value == null ? null : percentDecode(value))
           .toList();
 
         decodedQueryParameters
@@ -806,6 +804,10 @@ public class ConformanceSandbox {
       });
 
     return decodedQueryParameters;
+  }
+
+  private static String percentDecode(String value) {
+    return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8);
   }
 
   private static void _asyncHandleOutboundRequest(

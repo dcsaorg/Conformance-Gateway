@@ -14,13 +14,25 @@ import org.dcsa.conformance.standards.cs.party.CsRole;
 @Slf4j
 public class CsGetVesselSchedulesAction extends CsAction {
 
+  private static final String NEXT_PAGE_CURSOR = "Next-Page-Cursor";
+
   private final JsonSchemaValidator responseSchemaValidator;
+  private final boolean expectNextPageCursor;
 
   public CsGetVesselSchedulesAction(
       String subscriberPartyName,
       String publisherPartyName,
       CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
+    this(subscriberPartyName, publisherPartyName, previousAction, responseSchemaValidator, false);
+  }
+
+  public CsGetVesselSchedulesAction(
+      String subscriberPartyName,
+      String publisherPartyName,
+      CsAction previousAction,
+      JsonSchemaValidator responseSchemaValidator,
+      boolean expectNextPageCursor) {
     super(
         subscriberPartyName,
         publisherPartyName,
@@ -30,6 +42,7 @@ public class CsGetVesselSchedulesAction extends CsAction {
             : "GetVesselSchedules",
         200);
     this.responseSchemaValidator = responseSchemaValidator;
+    this.expectNextPageCursor = expectNextPageCursor;
   }
 
 
@@ -74,11 +87,22 @@ public class CsGetVesselSchedulesAction extends CsAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            CsChecks.getPayloadChecksForVs(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                getDspSupplier(),
-                previousAction instanceof CsGetVesselSchedulesAction));
+            new HeaderCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    NEXT_PAGE_CURSOR)
+                .withApplicability(expectNextPageCursor),
+            new PayloadPaginationCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    getDspSupplier().get().firstPage(),
+                    getDspSupplier().get().secondPage())
+                .withApplicability(
+                    previousAction instanceof CsGetVesselSchedulesAction previous
+                        && previous.expectNextPageCursor),
+            CsChecks.getPayloadChecksForVs(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

@@ -11,13 +11,18 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.cs.party.CsPublisher;
+import org.dcsa.conformance.standards.cs.party.CsConsumer;
+import org.dcsa.conformance.standards.cs.party.CsProducer;
 import org.dcsa.conformance.standards.cs.party.CsRole;
-import org.dcsa.conformance.standards.cs.party.CsSubscriber;
 
 public class CsComponentFactory extends AbstractComponentFactory {
   protected CsComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
-    super(standardName, standardVersion, scenarioSuite, "Publisher", "Subscriber");
+    super(
+        standardName,
+        standardVersion,
+        scenarioSuite,
+        CsRole.PRODUCER.getConfigName(),
+        CsRole.CONSUMER.getConfigName());
   }
 
   public List<ConformanceParty> createParties(
@@ -39,7 +44,7 @@ public class CsComponentFactory extends AbstractComponentFactory {
         partyConfigurationsByRoleName.get(CsRole.PRODUCER.getConfigName());
     if (publisherConfiguration != null) {
       parties.add(
-          new CsPublisher(
+          new CsProducer(
               standardVersion,
               publisherConfiguration,
               counterpartConfigurationsByRoleName.get(CsRole.CONSUMER.getConfigName()),
@@ -52,7 +57,7 @@ public class CsComponentFactory extends AbstractComponentFactory {
         partyConfigurationsByRoleName.get(CsRole.CONSUMER.getConfigName());
     if (consumerConfiguration != null) {
       parties.add(
-          new CsSubscriber(
+          new CsConsumer(
               standardVersion,
               consumerConfiguration,
               counterpartConfigurationsByRoleName.get(CsRole.PRODUCER.getConfigName()),

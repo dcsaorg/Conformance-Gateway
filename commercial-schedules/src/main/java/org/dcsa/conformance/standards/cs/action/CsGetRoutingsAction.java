@@ -10,13 +10,25 @@ import org.dcsa.conformance.standards.cs.party.CsRole;
 
 public class CsGetRoutingsAction extends CsAction {
 
+  private static final String NEXT_PAGE_CURSOR = "Next-Page-Cursor";
+
   private final JsonSchemaValidator responseSchemaValidator;
+  private final boolean expectNextPageCursor;
 
   public CsGetRoutingsAction(
       String subscriberPartyName,
       String publisherPartyName,
       CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator1) {
+    this(subscriberPartyName, publisherPartyName, previousAction, responseSchemaValidator1, false);
+  }
+
+  public CsGetRoutingsAction(
+      String subscriberPartyName,
+      String publisherPartyName,
+      CsAction previousAction,
+      JsonSchemaValidator responseSchemaValidator1,
+      boolean expectNextPageCursor) {
     super(
         subscriberPartyName,
         publisherPartyName,
@@ -24,6 +36,7 @@ public class CsGetRoutingsAction extends CsAction {
         (previousAction instanceof CsGetRoutingsAction) ? "GetRoutings (second page)" : "GetRoutings",
         200);
     this.responseSchemaValidator = responseSchemaValidator1;
+    this.expectNextPageCursor = expectNextPageCursor;
   }
 
   @Override
@@ -80,11 +93,22 @@ public class CsGetRoutingsAction extends CsAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            CsChecks.getPayloadChecksForPtp(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                getDspSupplier(),
-                previousAction instanceof CsGetRoutingsAction));
+            new HeaderCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    NEXT_PAGE_CURSOR)
+                .withApplicability(expectNextPageCursor),
+            new PayloadPaginationCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    getDspSupplier().get().firstPage(),
+                    getDspSupplier().get().secondPage())
+                .withApplicability(
+                    previousAction instanceof CsGetRoutingsAction previous
+                        && previous.expectNextPageCursor),
+            CsChecks.getPayloadChecksForPtp(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

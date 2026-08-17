@@ -14,6 +14,7 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
@@ -22,9 +23,9 @@ import org.dcsa.conformance.standards.cs.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.cs.model.CsDateUtils;
 
 @Slf4j
-public class CsPublisher extends ConformanceParty {
+public class CsProducer extends ConformanceParty {
 
-  public CsPublisher(
+  public CsProducer(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
@@ -89,7 +90,9 @@ public class CsPublisher extends ConformanceParty {
     } else if (url.endsWith("v1/port-schedules")) {
       CsDateUtils.handleSingleDate(entryMap, request.queryParams());
     }
-    return JsonToolkit.templateFileToJsonNode(filePath, entryMap);
+    // Keep empty values from templates so optional-content validations can assert present-but-empty
+    // cases.
+    return JsonToolkit.stringToJsonNode(IOToolkit.templateFileToText(filePath, entryMap));
   }
 
   @Override
@@ -132,6 +135,9 @@ public class CsPublisher extends ConformanceParty {
                                   CsDateUtils.getCurrentDate();
                               case DEPARTURE_END_DATE, ARRIVAL_END_DATE ->
                                   CsDateUtils.getEndDateAfter3Months();
+                              case START_DATE -> CsDateUtils.getCurrentDate();
+                              case END_DATE -> CsDateUtils.getEndDateAfter3Months();
+                              case RESPONSE_SCOPE -> "FULL_VOYAGE";
                               case MAX_TRANSHIPMENT -> "1";
                               case RECEIPT_TYPE_AT_ORIGIN, DELIVERY_TYPE_AT_DESTINATION -> "CY";
                               case CARGO_TYPE -> "FCL";

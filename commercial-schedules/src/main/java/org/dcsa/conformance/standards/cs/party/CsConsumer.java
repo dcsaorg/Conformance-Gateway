@@ -19,10 +19,10 @@ import org.dcsa.conformance.standards.cs.action.CsGetRoutingsAction;
 import org.dcsa.conformance.standards.cs.action.CsGetVesselSchedulesAction;
 
 @Slf4j
-public class CsSubscriber extends ConformanceParty {
+public class CsConsumer extends ConformanceParty {
   private static final String CURSOR = "cursor";
 
-  public CsSubscriber(
+  public CsConsumer(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,

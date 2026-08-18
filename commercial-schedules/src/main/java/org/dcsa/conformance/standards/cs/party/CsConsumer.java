@@ -19,10 +19,10 @@ import org.dcsa.conformance.standards.cs.action.CsGetRoutingsAction;
 import org.dcsa.conformance.standards.cs.action.CsGetVesselSchedulesAction;
 
 @Slf4j
-public class CsSubscriber extends ConformanceParty {
+public class CsConsumer extends ConformanceParty {
   private static final String CURSOR = "cursor";
 
-  public CsSubscriber(
+  public CsConsumer(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
@@ -56,7 +56,7 @@ public class CsSubscriber extends ConformanceParty {
   }
 
   private void getVesselSchedules(JsonNode actionPrompt) {
-    log.info("CsSubscriber.getVesselSchedules(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("CsConsumer.getVesselSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
     Map<String, Collection<String>> queryParams = getQueryParams(actionPrompt, ssp);
@@ -82,7 +82,7 @@ public class CsSubscriber extends ConformanceParty {
   }
 
   private void getPortSchedules(JsonNode actionPrompt) {
-    log.info("CsSubscriber.getPortSchedules(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("CsConsumer.getPortSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
     Map<String, Collection<String>> queryParams = getQueryParams(actionPrompt, ssp);
@@ -94,7 +94,7 @@ public class CsSubscriber extends ConformanceParty {
   }
 
   private void getPointToPointRoutings(JsonNode actionPrompt) {
-    log.info("CsSubscriber.getPointToPointRoutings(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("CsConsumer.getPointToPointRoutings(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
@@ -108,7 +108,7 @@ public class CsSubscriber extends ConformanceParty {
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    log.info("CsSubscriber.handleRequest(%s)".formatted(request));
+    log.info("CsConsumer.handleRequest(%s)".formatted(request));
     throw new UnsupportedOperationException();
   }
 

@@ -22,9 +22,9 @@ import org.dcsa.conformance.standards.cs.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.cs.model.CsDateUtils;
 
 @Slf4j
-public class CsPublisher extends ConformanceParty {
+public class CsProducer extends ConformanceParty {
 
-  public CsPublisher(
+  public CsProducer(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
@@ -52,7 +52,7 @@ public class CsPublisher extends ConformanceParty {
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    log.info("CsPublisher.handleRequest(%s)".formatted(request));
+    log.info("CsProducer.handleRequest(%s)".formatted(request));
     String filePath;
     Map<String, List<String>> initialIMap = Map.of(API_VERSION, List.of(apiVersion));
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
@@ -104,7 +104,7 @@ public class CsPublisher extends ConformanceParty {
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
-    log.info("CsPublisher.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("CsProducer.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
 
     SuppliedScenarioParameters responseSsp =
         SuppliedScenarioParameters.fromMap(
@@ -132,8 +132,12 @@ public class CsPublisher extends ConformanceParty {
                                   CsDateUtils.getCurrentDate();
                               case DEPARTURE_END_DATE, ARRIVAL_END_DATE ->
                                   CsDateUtils.getEndDateAfter3Months();
+                              case START_DATE -> CsDateUtils.getCurrentDate();
+                              case END_DATE -> CsDateUtils.getEndDateAfter3Months();
+                              case RESPONSE_SCOPE -> "FULL_VOYAGE";
                               case MAX_TRANSHIPMENT -> "1";
                               case RECEIPT_TYPE_AT_ORIGIN, DELIVERY_TYPE_AT_DESTINATION -> "CY";
+                              case CARGO_TYPE -> "FCL";
                               case LIMIT -> "100";
                             })));
 

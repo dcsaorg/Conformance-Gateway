@@ -10,13 +10,25 @@ import org.dcsa.conformance.standards.cs.party.CsRole;
 
 public class CsGetPortSchedulesAction extends CsAction {
 
+  private static final String NEXT_PAGE_CURSOR = "Next-Page-Cursor";
+
   private final JsonSchemaValidator responseSchemaValidator;
+  private final boolean expectNextPageCursor;
 
   public CsGetPortSchedulesAction(
       String subscriberPartyName,
       String publisherPartyName,
       CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
+    this(subscriberPartyName, publisherPartyName, previousAction, responseSchemaValidator, false);
+  }
+
+  public CsGetPortSchedulesAction(
+      String subscriberPartyName,
+      String publisherPartyName,
+      CsAction previousAction,
+      JsonSchemaValidator responseSchemaValidator,
+      boolean expectNextPageCursor) {
     super(
         subscriberPartyName,
         publisherPartyName,
@@ -26,6 +38,7 @@ public class CsGetPortSchedulesAction extends CsAction {
             : "GetPortSchedules",
         200);
     this.responseSchemaValidator = responseSchemaValidator;
+    this.expectNextPageCursor = expectNextPageCursor;
   }
 
   @Override
@@ -33,16 +46,16 @@ public class CsGetPortSchedulesAction extends CsAction {
     return previousAction instanceof CsGetPortSchedulesAction
         ? getMarkdownHumanReadablePrompt(
             Map.of("API_PLACEHOLDER", "port schedules"),
-            "prompt-subscriber-get-secondpage.md",
-            "prompt-subscriber-refresh-complete.md")
+            "prompt-consumer-get-secondpage.md",
+            "prompt-consumer-refresh-complete.md")
         : getMarkdownHumanReadablePrompt(
             Map.of(
                 "API_PLACEHOLDER",
                 "port schedules",
                 "PARAMETERS_PLACEHOLDER",
                 sspSupplier.get().toJson().toPrettyString()),
-            "prompt-subscriber-get.md",
-            "prompt-subscriber-refresh-complete.md");
+            "prompt-consumer-get.md",
+            "prompt-consumer-refresh-complete.md");
   }
 
   @Override
@@ -51,28 +64,39 @@ public class CsGetPortSchedulesAction extends CsAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/port-schedules"),
-            new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+            new UrlPathCheck(CsRole::isConsumer, getMatchedExchangeUuid(), "/port-schedules"),
+            new ResponseStatusCheck(CsRole::isProducer, getMatchedExchangeUuid(), expectedStatus),
             new JsonSchemaCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
             new ApiHeaderCheck(
-                CsRole::isSubscriber,
+                CsRole::isConsumer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             new ApiHeaderCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            CsChecks.getPayloadChecksForPs(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                getDspSupplier(),
-                previousAction instanceof CsGetPortSchedulesAction));
+            new HeaderCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    NEXT_PAGE_CURSOR)
+                .withApplicability(expectNextPageCursor),
+            new PayloadPaginationCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    getDspSupplier().get().firstPage(),
+                    getDspSupplier().get().secondPage())
+                .withApplicability(
+                    previousAction instanceof CsGetPortSchedulesAction previous
+                        && previous.expectNextPageCursor),
+            CsChecks.getPayloadChecksForPs(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

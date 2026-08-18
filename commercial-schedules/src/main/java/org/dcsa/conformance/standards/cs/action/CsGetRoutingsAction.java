@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.cs.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
@@ -11,13 +10,25 @@ import org.dcsa.conformance.standards.cs.party.CsRole;
 
 public class CsGetRoutingsAction extends CsAction {
 
+  private static final String NEXT_PAGE_CURSOR = "Next-Page-Cursor";
+
   private final JsonSchemaValidator responseSchemaValidator;
+  private final boolean expectNextPageCursor;
 
   public CsGetRoutingsAction(
       String subscriberPartyName,
       String publisherPartyName,
       CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator1) {
+    this(subscriberPartyName, publisherPartyName, previousAction, responseSchemaValidator1, false);
+  }
+
+  public CsGetRoutingsAction(
+      String subscriberPartyName,
+      String publisherPartyName,
+      CsAction previousAction,
+      JsonSchemaValidator responseSchemaValidator1,
+      boolean expectNextPageCursor) {
     super(
         subscriberPartyName,
         publisherPartyName,
@@ -25,6 +36,7 @@ public class CsGetRoutingsAction extends CsAction {
         (previousAction instanceof CsGetRoutingsAction) ? "GetRoutings (second page)" : "GetRoutings",
         200);
     this.responseSchemaValidator = responseSchemaValidator1;
+    this.expectNextPageCursor = expectNextPageCursor;
   }
 
   @Override
@@ -44,16 +56,16 @@ public class CsGetRoutingsAction extends CsAction {
     return previousAction instanceof CsGetRoutingsAction
         ? getMarkdownHumanReadablePrompt(
             Map.of("API_PLACEHOLDER", "point to point"),
-            "prompt-subscriber-get-secondpage.md",
-            "prompt-subscriber-refresh-complete.md")
+            "prompt-consumer-get-secondpage.md",
+            "prompt-consumer-refresh-complete.md")
         : getMarkdownHumanReadablePrompt(
             Map.of(
                 "API_PLACEHOLDER",
                 "point to point",
                 "PARAMETERS_PLACEHOLDER",
                 sspSupplier.get().toJson().toPrettyString()),
-            "prompt-subscriber-get.md",
-            "prompt-subscriber-refresh-complete.md");
+            "prompt-consumer-get.md",
+            "prompt-consumer-refresh-complete.md");
   }
 
 
@@ -64,28 +76,39 @@ public class CsGetRoutingsAction extends CsAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new UrlPathCheck(
-                CsRole::isSubscriber, getMatchedExchangeUuid(), "/point-to-point-routes"),
-            new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+                CsRole::isConsumer, getMatchedExchangeUuid(), "/point-to-point-routes"),
+            new ResponseStatusCheck(CsRole::isProducer, getMatchedExchangeUuid(), expectedStatus),
             new JsonSchemaCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
             new ApiHeaderCheck(
-                CsRole::isSubscriber,
+                CsRole::isConsumer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             new ApiHeaderCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            CsChecks.getPayloadChecksForPtp(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                getDspSupplier(),
-                previousAction instanceof CsGetRoutingsAction));
+            new HeaderCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    NEXT_PAGE_CURSOR)
+                .withApplicability(expectNextPageCursor),
+            new PayloadPaginationCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    getDspSupplier().get().firstPage(),
+                    getDspSupplier().get().secondPage())
+                .withApplicability(
+                    previousAction instanceof CsGetRoutingsAction previous
+                        && previous.expectNextPageCursor),
+            CsChecks.getPayloadChecksForPtp(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.cs.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -15,13 +14,25 @@ import org.dcsa.conformance.standards.cs.party.CsRole;
 @Slf4j
 public class CsGetVesselSchedulesAction extends CsAction {
 
+  private static final String NEXT_PAGE_CURSOR = "Next-Page-Cursor";
+
   private final JsonSchemaValidator responseSchemaValidator;
+  private final boolean expectNextPageCursor;
 
   public CsGetVesselSchedulesAction(
       String subscriberPartyName,
       String publisherPartyName,
       CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
+    this(subscriberPartyName, publisherPartyName, previousAction, responseSchemaValidator, false);
+  }
+
+  public CsGetVesselSchedulesAction(
+      String subscriberPartyName,
+      String publisherPartyName,
+      CsAction previousAction,
+      JsonSchemaValidator responseSchemaValidator,
+      boolean expectNextPageCursor) {
     super(
         subscriberPartyName,
         publisherPartyName,
@@ -31,6 +42,7 @@ public class CsGetVesselSchedulesAction extends CsAction {
             : "GetVesselSchedules",
         200);
     this.responseSchemaValidator = responseSchemaValidator;
+    this.expectNextPageCursor = expectNextPageCursor;
   }
 
 
@@ -39,16 +51,16 @@ public class CsGetVesselSchedulesAction extends CsAction {
     return previousAction instanceof CsGetVesselSchedulesAction
         ? getMarkdownHumanReadablePrompt(
             Map.of("API_PLACEHOLDER", "vessel schedules"),
-            "prompt-subscriber-get-secondpage.md",
-            "prompt-subscriber-refresh-complete.md")
+            "prompt-consumer-get-secondpage.md",
+            "prompt-consumer-refresh-complete.md")
         : getMarkdownHumanReadablePrompt(
             Map.of(
                 "API_PLACEHOLDER",
                 "vessel schedules",
                 "PARAMETERS_PLACEHOLDER",
                 sspSupplier.get().toJson().toPrettyString()),
-            "prompt-subscriber-get.md",
-            "prompt-subscriber-refresh-complete.md");
+            "prompt-consumer-get.md",
+            "prompt-consumer-refresh-complete.md");
   }
 
 
@@ -58,28 +70,39 @@ public class CsGetVesselSchedulesAction extends CsAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/vessel-schedules"),
-            new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+            new UrlPathCheck(CsRole::isConsumer, getMatchedExchangeUuid(), "/vessel-schedules"),
+            new ResponseStatusCheck(CsRole::isProducer, getMatchedExchangeUuid(), expectedStatus),
             new JsonSchemaCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
             new ApiHeaderCheck(
-                CsRole::isSubscriber,
+                CsRole::isConsumer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             new ApiHeaderCheck(
-                CsRole::isPublisher,
+                CsRole::isProducer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            CsChecks.getPayloadChecksForVs(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                getDspSupplier(),
-                previousAction instanceof CsGetVesselSchedulesAction));
+            new HeaderCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    NEXT_PAGE_CURSOR)
+                .withApplicability(expectNextPageCursor),
+            new PayloadPaginationCheck(
+                    CsRole::isProducer,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.RESPONSE,
+                    getDspSupplier().get().firstPage(),
+                    getDspSupplier().get().secondPage())
+                .withApplicability(
+                    previousAction instanceof CsGetVesselSchedulesAction previous
+                        && previous.expectNextPageCursor),
+            CsChecks.getPayloadChecksForVs(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

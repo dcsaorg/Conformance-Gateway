@@ -46,16 +46,16 @@ public class CsGetPortSchedulesAction extends CsAction {
     return previousAction instanceof CsGetPortSchedulesAction
         ? getMarkdownHumanReadablePrompt(
             Map.of("API_PLACEHOLDER", "port schedules"),
-            "prompt-subscriber-get-secondpage.md",
-            "prompt-subscriber-refresh-complete.md")
+            "prompt-consumer-get-secondpage.md",
+            "prompt-consumer-refresh-complete.md")
         : getMarkdownHumanReadablePrompt(
             Map.of(
                 "API_PLACEHOLDER",
                 "port schedules",
                 "PARAMETERS_PLACEHOLDER",
                 sspSupplier.get().toJson().toPrettyString()),
-            "prompt-subscriber-get.md",
-            "prompt-subscriber-refresh-complete.md");
+            "prompt-consumer-get.md",
+            "prompt-consumer-refresh-complete.md");
   }
 
   @Override

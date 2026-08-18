@@ -53,7 +53,7 @@ public class CsProducer extends ConformanceParty {
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    log.info("CsPublisher.handleRequest(%s)".formatted(request));
+    log.info("CsProducer.handleRequest(%s)".formatted(request));
     String filePath;
     Map<String, List<String>> initialIMap = Map.of(API_VERSION, List.of(apiVersion));
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
@@ -107,7 +107,7 @@ public class CsProducer extends ConformanceParty {
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
-    log.info("CsPublisher.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("CsProducer.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
 
     SuppliedScenarioParameters responseSsp =
         SuppliedScenarioParameters.fromMap(

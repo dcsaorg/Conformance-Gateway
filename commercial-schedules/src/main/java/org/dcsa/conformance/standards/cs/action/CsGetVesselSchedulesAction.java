@@ -51,16 +51,16 @@ public class CsGetVesselSchedulesAction extends CsAction {
     return previousAction instanceof CsGetVesselSchedulesAction
         ? getMarkdownHumanReadablePrompt(
             Map.of("API_PLACEHOLDER", "vessel schedules"),
-            "prompt-subscriber-get-secondpage.md",
-            "prompt-subscriber-refresh-complete.md")
+            "prompt-consumer-get-secondpage.md",
+            "prompt-consumer-refresh-complete.md")
         : getMarkdownHumanReadablePrompt(
             Map.of(
                 "API_PLACEHOLDER",
                 "vessel schedules",
                 "PARAMETERS_PLACEHOLDER",
                 sspSupplier.get().toJson().toPrettyString()),
-            "prompt-subscriber-get.md",
-            "prompt-subscriber-refresh-complete.md");
+            "prompt-consumer-get.md",
+            "prompt-consumer-refresh-complete.md");
   }
 
 

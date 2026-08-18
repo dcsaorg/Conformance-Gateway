@@ -1,4 +1,6 @@
-The DCSA reference implementation of a subscriber running in the sandbox needs to call the GET API calls of your publisher application in order to measure its conformance. This scenario tests support for optional query parameters in addition to the required ones.
+The DCSA reference implementation of a consumer running in the sandbox needs to make GET API calls to your producer
+application in order to measure its conformance. This scenario tests support for optional query parameters in addition
+to the required ones.
 
 **Required parameters** (shown first in the JSON below) — these MUST be provided with valid values. The scenario will not proceed if any required parameter is missing or blank.
 

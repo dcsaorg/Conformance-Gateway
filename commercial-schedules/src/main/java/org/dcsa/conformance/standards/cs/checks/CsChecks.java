@@ -29,8 +29,6 @@ public class CsChecks {
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE_PTP);
-    // checks.add(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP);
-    // checks.add(VALIDATE_CUTOFF_TIME_CODE);
     checks.add(VALIDATE_PTP_CUTOFF_TIMES_AT_ROUTING_OR_LEG_LEVEL);
     checks.add(VALIDATE_PTP_ROUTING_REFERENCE);
     checks.add(VALIDATE_PTP_SOLUTION_FOOTPRINT);
@@ -59,6 +57,7 @@ public class CsChecks {
               int currentIndex = index.getAndIncrement();
               JsonNode cutOffTimes = routing.path("cutOffTimes");
               boolean routingHasCutOffTimes = !JsonUtil.isMissingOrEmpty(cutOffTimes);
+              boolean hasAnyCutOffTimes = routingHasCutOffTimes;
 
               if (routingHasCutOffTimes) {
                 cutOffTimes.forEach(
@@ -82,6 +81,7 @@ public class CsChecks {
                   int currentLegIndex = legIndex.getAndIncrement();
                   JsonNode legCutOffTimes = leg.path("cutOffTimes");
                   if (!JsonUtil.isMissingOrEmpty(legCutOffTimes)) {
+                    hasAnyCutOffTimes = true;
                     legCutOffTimes.forEach(
                         cutOffTime -> {
                           JsonNode cutOffDateTimeCode = cutOffTime.path("cutOffDateTimeCode");
@@ -100,7 +100,7 @@ public class CsChecks {
                 }
               }
 
-              if (!routingHasCutOffTimes) {
+              if (!hasAnyCutOffTimes) {
                 errors.add(ConformanceError.irrelevant(currentIndex));
               }
             }

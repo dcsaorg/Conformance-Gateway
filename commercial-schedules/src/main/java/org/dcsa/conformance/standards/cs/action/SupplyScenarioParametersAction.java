@@ -89,9 +89,9 @@ public class SupplyScenarioParametersAction extends CsAction {
   @Override
   public String getHumanReadablePrompt() {
     if (optionalCsFilterParameters.isEmpty()) {
-      return getMarkdownHumanReadablePrompt(null, "prompt-publisher-ssp.md");
+      return getMarkdownHumanReadablePrompt(null, "prompt-producer-ssp.md");
     }
-    return getMarkdownHumanReadablePrompt(null, "prompt-publisher-ssp-optional.md");
+    return getMarkdownHumanReadablePrompt(null, "prompt-producer-ssp-optional.md");
   }
 
   @Override
@@ -119,8 +119,22 @@ public class SupplyScenarioParametersAction extends CsAction {
   }
 
   @Override
+  public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
+    requireInputNode(partyInput);
+    super.handlePartyInput(partyInput);
+  }
+
+  private JsonNode requireInputNode(JsonNode partyInput) {
+    JsonNode inputNode = partyInput == null ? null : partyInput.get("input");
+    if (inputNode == null || inputNode.isNull() || inputNode.isMissingNode() || !inputNode.isObject()) {
+      throw new UserFacingException("The input must contain a non-null object at \"input\".");
+    }
+    return inputNode;
+  }
+
+  @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
-    JsonNode inputNode = partyInput.get("input");
+    JsonNode inputNode = requireInputNode(partyInput);
     List<String> missingRequired =
         requiredCsFilterParameters.stream()
             .filter(

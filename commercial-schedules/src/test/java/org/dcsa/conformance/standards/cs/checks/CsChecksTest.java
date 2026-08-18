@@ -87,6 +87,24 @@ class CsChecksTest {
   }
 
   @Test
+  void testValidateCutoffTimeCode_legLevelOnly_passesWithoutIrrelevant() {
+    ObjectNode r = objectMapper.createObjectNode();
+    ArrayNode legs = r.putArray("legs");
+    ObjectNode leg = legs.addObject();
+    ArrayNode legCutOffTimes = leg.putArray("cutOffTimes");
+    ObjectNode ct = legCutOffTimes.addObject();
+    ct.put("cutOffDateTimeCode", "VCO");
+    ct.put("cutOffDateTime", "2025-01-11T12:00:00+01:00");
+    rootNodeArray.add(r);
+
+    Set<ConformanceError> errors =
+        ((ConformanceCheckResult.ErrorsWithRelevance) VALIDATE_CUTOFF_TIME_CODE.validate(rootNodeArray))
+            .errors();
+
+    assertTrue(errors.isEmpty(), "Expected pass when cutOffTimes is present only at leg level");
+  }
+
+  @Test
   void testValidatePtpCutoffTimesAtRoutingOrLegLevel_nonEmptyAtLegLevel_passes() {
     ObjectNode r = objectMapper.createObjectNode();
     ArrayNode legs = r.putArray("legs");

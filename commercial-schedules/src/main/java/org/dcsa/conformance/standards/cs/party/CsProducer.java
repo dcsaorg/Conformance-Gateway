@@ -14,7 +14,6 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
@@ -90,9 +89,7 @@ public class CsProducer extends ConformanceParty {
     } else if (url.endsWith("v1/port-schedules")) {
       CsDateUtils.handleSingleDate(entryMap, request.queryParams());
     }
-    // Keep empty values from templates so optional-content validations can assert present-but-empty
-    // cases.
-    return JsonToolkit.stringToJsonNode(IOToolkit.templateFileToText(filePath, entryMap));
+    return JsonToolkit.templateFileToJsonNode(filePath, entryMap);
   }
 
   @Override

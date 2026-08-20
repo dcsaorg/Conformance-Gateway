@@ -250,6 +250,18 @@ class BookingChecksTest {
     }
 
     @Test
+    void givenDryCargoScenario_whenNonOperatingReeferIsNonBoolean_thenErrorIsReported() {
+      JsonNode payload = body("""
+        {"requestedEquipments":[{"isNonOperatingReefer":"false"}]}
+        """);
+
+      assertErrorReported(
+        scenarioCheck(DRY_CARGO_PARAMETERS, DRY_CONTAINER_FRAGMENT),
+        payload,
+        "The scenario requires 'requestedEquipments[0].isNonOperatingReefer' to be absent or set to false");
+    }
+
+    @Test
     void givenDryCargoScenario_whenNoReeferAttributesPresent_thenCheckPasses() {
       JsonNode payload = body("""
         {"requestedEquipments":[{"ISOEquipmentCode":"22G1"}]}

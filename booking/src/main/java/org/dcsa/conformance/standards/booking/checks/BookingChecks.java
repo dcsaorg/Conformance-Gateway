@@ -1117,7 +1117,8 @@ public class BookingChecks {
         "The scenario requires %s to be absent"
           .formatted(jsonPath(contextPath, ACTIVE_REEFER_SETTINGS)));
     }
-    if (!nonOperatingReeferNode.isMissingNode() && nonOperatingReeferNode.asBoolean(false)) {
+    if (!nonOperatingReeferNode.isMissingNode()
+      && (!nonOperatingReeferNode.isBoolean() || nonOperatingReeferNode.booleanValue())) {
       issues.add(
         "The scenario requires %s to be absent or set to false"
           .formatted(jsonPath(contextPath, IS_NON_OPERATING_REEFER)));

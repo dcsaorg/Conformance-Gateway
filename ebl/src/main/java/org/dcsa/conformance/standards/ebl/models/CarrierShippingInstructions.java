@@ -368,6 +368,13 @@ public class CarrierShippingInstructions {
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_CANCELLED);
   }
 
+  public void cancelShippingInstructions(String documentReference) {
+    checkState(documentReference, getOriginalShippingInstructionState(), s -> s == SI_RECEIVED);
+    clearUpdatedShippingInstructions();
+    changeSIState(UPDATED_SI_STATUS, null);
+    changeSIState(SI_STATUS, SI_CANCELLED);
+  }
+
   public void provideFeedbackToShippingInstructions(
       String documentReference, Consumer<ArrayNode> feedbackGenerator) {
     checkState(
@@ -395,6 +402,14 @@ public class CarrierShippingInstructions {
     checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
     mutateShippingInstructionsAndUpdate(siData -> siData.remove(FEEDBACKS));
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_DECLINED);
+  }
+
+  public void declineShippingInstructions(String documentReference) {
+    checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
+    clearUpdatedShippingInstructions();
+    mutateShippingInstructionsAndUpdate(siData -> siData.remove(FEEDBACKS));
+    changeSIState(UPDATED_SI_STATUS, null);
+    changeSIState(SI_STATUS, SI_DECLINED);
   }
 
   public void confirmShippingInstructionsComplete(String documentReference) {

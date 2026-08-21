@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.ebl.action.*;
+import org.dcsa.conformance.standards.ebl.action.ShipperGetShippingInstructionsSkippableAction;
 import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 
 @Slf4j
@@ -68,6 +69,8 @@ public class EblShipper extends ConformanceParty {
             this::sendShippingInstructionsRequest),
         Map.entry(
             Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
+        Map.entry(
+            ShipperGetShippingInstructionsSkippableAction.class, this::getShippingInstructionsRequest),
         Map.entry(Shipper_GetTransportDocumentAction.class, this::getTransportDocument),
         Map.entry(AUC_Shipper_SendOutOfOrderSIMessageAction.class, this::sendOutOfOrderMessage),
         Map.entry(
@@ -76,6 +79,9 @@ public class EblShipper extends ConformanceParty {
         Map.entry(
             UC5_Shipper_CancelUpdateToShippingInstructionsAction.class,
             this::cancelUpdateToShippingInstructions),
+        Map.entry(
+            UC15_Shipper_CancelShippingInstructionsAction.class,
+            this::cancelShippingInstructions),
         Map.entry(
             UC7_Shipper_ApproveDraftTransportDocumentAction.class,
             this::approveDraftTransportDocument),
@@ -167,6 +173,21 @@ public class EblShipper extends ConformanceParty {
     addOperatorLogEntry(
         "Cancelled update to shipping instructions the parameters: %s"
             .formatted(actionPrompt.toPrettyString()));
+  }
+
+  private void cancelShippingInstructions(JsonNode actionPrompt) {
+    log.info("Shipper.cancelShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    syncCounterpartPatch(
+        "/v3/shipping-instructions/%s"
+            .formatted(URLEncoder.encode(documentReference, StandardCharsets.UTF_8)),
+        Collections.emptyMap(),
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("shippingInstructionsStatus", ShippingInstructionsStatus.SI_CANCELLED.wireName()));
+    addOperatorLogEntry(
+        "Cancelled shipping instructions with documentReference: %s".formatted(documentReference));
   }
 
   private void sendOutOfOrderMessage(JsonNode actionPrompt) {

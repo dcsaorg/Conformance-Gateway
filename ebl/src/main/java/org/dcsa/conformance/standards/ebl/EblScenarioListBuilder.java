@@ -17,6 +17,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
@@ -60,6 +61,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   public static LinkedHashMap<String, EblScenarioListBuilder> createModuleScenarioListBuilders(
       EblComponentFactory componentFactory,
+      Set<String> testedPartyRoleNames,
       boolean isWithNotifications,
       String standardVersion,
       String carrierPartyName,
@@ -70,7 +72,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     threadLocalIsWithNotifications.set(isWithNotifications);
 
     if (SCENARIO_SUITE_CONFORMANCE_SI_ONLY.equals(componentFactory.getScenarioSuite())) {
-      return createConformanceSiOnlyScenarios(false);
+      return createConformanceSiOnlyScenarios(testedPartyRoleNames, false);
     }
     if (SCENARIO_SUITE_CONFORMANCE_TD_ONLY.equals(componentFactory.getScenarioSuite())) {
       return createConformanceTdOnlyScenarios();
@@ -86,44 +88,130 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceSiOnlyScenarios(
-      boolean isTd) {
-    return Stream.of(
-            Map.entry(
-                "Supported shipment types scenarios",
-                noAction()
-                    .thenEither(
-                        Arrays.stream(ScenarioType.values())
-                            .filter(EblScenarioListBuilder::isSupportedScenarioType)
-                            .map(
-                                scenarioType ->
-                                    carrierSupplyScenarioParameters(scenarioType, isTd)
+      Set<String> testedPartyRoleNames, boolean isTd) {
+    Map<String, Map<String, EblScenarioListBuilder>> partyScenarios = new LinkedHashMap<>();
+    partyScenarios.put(EblRole.CARRIER.getConfigName(), carrierConformanceSiOnlyScenarios(isTd));
+    partyScenarios.put(EblRole.SHIPPER.getConfigName(), shipperConformanceSiOnlyScenarios(isTd));
+
+    var scenarios = new LinkedHashMap<String, EblScenarioListBuilder>();
+    testedPartyRoleNames.forEach(role -> scenarios.putAll(partyScenarios.get(role)));
+    return scenarios;
+  }
+
+  private static Map<String, EblScenarioListBuilder> carrierConformanceSiOnlyScenarios(boolean isTd) {
+    var scenarios = new LinkedHashMap<String, EblScenarioListBuilder>();
+    scenarios.put("Required Sea Waybill scenario", requiredSiScenarios(ScenarioType.REGULAR_SWB, isTd));
+    scenarios.put("Required Straight B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_STRAIGHT_BL, isTd));
+    scenarios.put("Required Negotiable B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_NEGOTIABLE_BL, isTd));
+    scenarios.put("Optional (report-only) scenarios", carrierOptionalSiScenarios(isTd).asOptionalReportOnlyScenario());
+    return scenarios;
+  }
+
+  private static Map<String, EblScenarioListBuilder> shipperConformanceSiOnlyScenarios(boolean isTd) {
+    var scenarios = new LinkedHashMap<String, EblScenarioListBuilder>();
+    scenarios.put("Required Sea Waybill scenario", requiredSiScenarios(ScenarioType.REGULAR_SWB, isTd));
+    scenarios.put("Required Straight B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_STRAIGHT_BL, isTd));
+    scenarios.put("Required Negotiable B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_NEGOTIABLE_BL, isTd));
+    scenarios.put("Optional (report-only) scenarios", shipperOptionalSiScenarios(isTd).asOptionalReportOnlyScenario());
+    return scenarios;
+  }
+
+  private static EblScenarioListBuilder requiredSiScenarios(ScenarioType scenarioType, boolean isTd) {
+    return carrierSupplyScenarioParameters(scenarioType, isTd)
+        .then(
+            uc1ShipperSubmitShippingInstructions()
+                .then(
+                    shipperGetShippingInstructions(SI_RECEIVED, false)
+                        .then(
+                            uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
+                                .then(
+                                    shipperGetShippingInstructionsSkippable(
+                                            SI_RECEIVED, SI_UPDATE_RECEIVED, false, false)
                                         .then(
-                                            uc1Get(
-                                                SI_RECEIVED, false, uc14Get(SI_COMPLETED, false))))
-                            .toList()
-                            .toArray(new EblScenarioListBuilder[] {}))),
-            Map.entry(
-                "Carrier requested update scenarios",
-                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(
-                        uc1Get(
-                            SI_RECEIVED,
-                            false,
-                            uc2Get(
-                                SI_PENDING_UPDATE, uc3AndAllSiOnlyPathsFrom(SI_PENDING_UPDATE))))),
-            Map.entry(
-                "Shipper initiated update scenarios",
-                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(uc1Get(SI_RECEIVED, false, uc3AndAllSiOnlyPathsFrom(SI_RECEIVED)))),
-            Map.entry(
-                "Carrier error response conformance",
-                carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
-                    .then(
-                        uc1ShipperSubmitShippingInstructions()
-                            .then(shipperGetShippingInstructionsErrorScenario()))))
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                                            uc4aCarrierAcceptUpdatedShippingInstructions()
+                                                .then(
+                                                    shipperGetShippingInstructionsSkippable(
+                                                        SI_RECEIVED,
+                                                        SI_UPDATE_CONFIRMED,
+                                                        false,
+                                                        false)))))));
+  }
+
+  private static EblScenarioListBuilder carrierOptionalSiScenarios(boolean isTd) {
+    return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+        .then(
+            uc1ShipperSubmitShippingInstructions()
+                .then(
+                    shipperGetShippingInstructionsSkippable(SI_RECEIVED, false)
+                        .thenEither(
+                uc2CarrierRequestedUpdatePath(),
+                retriveUpdatedSiContentPath(),
+                uc5UpdateCancelledPath(),
+                uc16DeclinedSiPath(),
+                uc15CancelledSiPath())));
+  }
+
+  private static EblScenarioListBuilder shipperOptionalSiScenarios(boolean isTd) {
+    return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
+        .then(
+            uc1ShipperSubmitShippingInstructions()
+                .then(
+                    shipperGetShippingInstructionsSkippable(SI_RECEIVED, false)
+                        .thenEither(
+                uc2CarrierRequestedThenShipperUpdatePath(),
+                retriveUpdatedSiContentPath(),
+                uc5UpdateCancelledPath(),
+                uc15CancelledSiPath())));
+  }
+
+  private static EblScenarioListBuilder uc2CarrierRequestedUpdatePath() {
+    return uc2CarrierRequestUpdateToShippingInstruction()
+        .then(shipperGetShippingInstructionsSkippable(SI_PENDING_UPDATE, false));
+  }
+
+  private static EblScenarioListBuilder uc2CarrierRequestedThenShipperUpdatePath() {
+    return uc2CarrierRequestUpdateToShippingInstruction()
+        .then(
+            shipperGetShippingInstructionsSkippable(SI_PENDING_UPDATE, false)
+                .then(
+                    uc3ShipperSubmitUpdatedShippingInstructions(SI_PENDING_UPDATE, false)
+                        .then(
+                            shipperGetShippingInstructionsSkippable(
+                                SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, false, false))));
+  }
+
+  private static EblScenarioListBuilder retriveUpdatedSiContentPath() {
+    return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
+        .then(
+            shipperGetShippingInstructionsSkippable(SI_RECEIVED, SI_UPDATE_RECEIVED, false, false)
+                .then(
+                    shipperGetShippingInstructionsSkippable(
+                        SI_RECEIVED, SI_UPDATE_RECEIVED, true, false)));
+  }
+
+  private static EblScenarioListBuilder uc5UpdateCancelledPath() {
+    return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
+        .then(
+            shipperGetShippingInstructionsSkippable(SI_RECEIVED, SI_UPDATE_RECEIVED, false, false)
+                .then(
+                    uc5ShipperCancelUpdateToShippingInstructions(SI_RECEIVED, false)
+                        .then(
+                            shipperGetShippingInstructionsSkippable(
+                                SI_RECEIVED, SI_UPDATE_CANCELLED, false))));
+  }
+
+  private static EblScenarioListBuilder uc16DeclinedSiPath() {
+    return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
+        .then(
+            shipperGetShippingInstructionsSkippable(SI_RECEIVED, SI_UPDATE_RECEIVED, false, false)
+                .then(
+                    uc16CarrierDeclineShippingInstructions()
+                        .then(shipperGetShippingInstructionsSkippable(SI_DECLINED, false))));
+  }
+
+  private static EblScenarioListBuilder uc15CancelledSiPath() {
+    return uc15ShipperCancelShippingInstructions()
+        .then(shipperGetShippingInstructionsSkippable(SI_CANCELLED, false));
   }
 
   private static boolean isSupportedScenarioType(ScenarioType scenarioType) {
@@ -360,6 +448,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             uc3Get(originalSiState, SI_UPDATE_RECEIVED, false, uc4aUc14(false))));
   }
 
+  // ── Mandatory GET helpers (used in required scenarios) ──────────────────────
+
   private static EblScenarioListBuilder uc1Get(
       ShippingInstructionsStatus siState,
       boolean useBothRef,
@@ -379,7 +469,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       ShippingInstructionsStatus modifiedSiState,
       boolean useBothRef,
       EblScenarioListBuilder... thenEither) {
-    // Calling both amemded SI GET and original SI GET after a UC3
+    // Calling both amended SI GET and original SI GET after a UC3
     return uc3ShipperSubmitUpdatedShippingInstructions(originalSiState, useBothRef)
         .then(
             shipperGetShippingInstructions(originalSiState, modifiedSiState, true, useBothRef)
@@ -410,8 +500,55 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 .thenEither(thenEither));
   }
 
+  // ── Skippable GET helpers (used in optional scenarios) ───────────────────────
+
+  private static EblScenarioListBuilder uc1GetSkippable(
+      ShippingInstructionsStatus siState,
+      boolean useBothRef,
+      EblScenarioListBuilder... thenEither) {
+    return uc1ShipperSubmitShippingInstructions()
+        .then(shipperGetShippingInstructionsSkippable(siState, useBothRef).thenEither(thenEither));
+  }
+
+  private static EblScenarioListBuilder uc2GetSkippable(
+      ShippingInstructionsStatus siState, EblScenarioListBuilder... thenEither) {
+    return uc2CarrierRequestUpdateToShippingInstruction()
+        .then(shipperGetShippingInstructionsSkippable(siState, false).thenEither(thenEither));
+  }
+
+  private static EblScenarioListBuilder uc3GetSkippable(
+      ShippingInstructionsStatus originalSiState,
+      ShippingInstructionsStatus modifiedSiState,
+      boolean useBothRef,
+      EblScenarioListBuilder... thenEither) {
+    // Calling both amended SI GET and original SI GET after a UC3 — both skippable
+    return uc3ShipperSubmitUpdatedShippingInstructions(originalSiState, useBothRef)
+        .then(
+            shipperGetShippingInstructionsSkippable(originalSiState, modifiedSiState, true, useBothRef)
+                .then(
+                    shipperGetShippingInstructionsSkippable(
+                            originalSiState, modifiedSiState, false, useBothRef)
+                        .thenEither(thenEither)));
+  }
+
+  private static EblScenarioListBuilder uc4aGetSkippable(
+      ShippingInstructionsStatus originalSiState,
+      ShippingInstructionsStatus modifiedSiState,
+      boolean useBothRef,
+      EblScenarioListBuilder... thenEither) {
+    return uc4aCarrierAcceptUpdatedShippingInstructions()
+        .then(
+            shipperGetShippingInstructionsSkippable(originalSiState, modifiedSiState, useBothRef)
+                .thenEither(thenEither));
+  }
+
   private static EblScenarioListBuilder uc4aUc14(boolean useBothRef) {
     return uc4aGet(SI_RECEIVED, SI_UPDATE_CONFIRMED, useBothRef, uc14Get(SI_COMPLETED, useBothRef));
+  }
+
+  /** Skippable variant of uc4aUc14 — used in optional scenarios */
+  private static EblScenarioListBuilder uc4aUc14Skippable(boolean useBothRef) {
+    return uc4aGetSkippable(SI_RECEIVED, SI_UPDATE_CONFIRMED, useBothRef, uc14Get(SI_COMPLETED, useBothRef));
   }
 
   private static EblScenarioListBuilder uc5Get(
@@ -551,17 +688,61 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 useBothRef));
   }
 
-  private static EblScenarioListBuilder shipperGetShippingInstructionsErrorScenario() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new ShipperGetShippingInstructionsErrorAction(
-                shipperPartyName,
-                carrierPartyName,
-                (EblAction) previousAction,
-                resolveMessageSchemaValidator(EBL_API, ERROR_RESPONSE_SCHEMA_NAME)));
-  }
+   private static EblScenarioListBuilder shipperGetShippingInstructionsSkippable(
+       ShippingInstructionsStatus expectedSiStatus, boolean useBothRef) {
+     return shipperGetShippingInstructionsSkippable(expectedSiStatus, null, useBothRef);
+   }
+
+   private static EblScenarioListBuilder shipperGetShippingInstructionsSkippable(
+       ShippingInstructionsStatus expectedSiStatus,
+       ShippingInstructionsStatus expectedUpdatedSiStatus,
+       boolean requestAmendedSI,
+       boolean useBothRef) {
+     return shipperGetShippingInstructionsSkippable(
+         expectedSiStatus, expectedUpdatedSiStatus, requestAmendedSI, false, useBothRef);
+   }
+
+   private static EblScenarioListBuilder shipperGetShippingInstructionsSkippable(
+       ShippingInstructionsStatus expectedSiStatus,
+       ShippingInstructionsStatus expectedUpdatedSiStatus,
+       boolean useBothRef) {
+     return shipperGetShippingInstructionsSkippable(
+         expectedSiStatus, expectedUpdatedSiStatus, false, false, useBothRef);
+   }
+
+   private static EblScenarioListBuilder shipperGetShippingInstructionsSkippable(
+       ShippingInstructionsStatus expectedSiStatus,
+       ShippingInstructionsStatus expectedUpdatedSiStatus,
+       boolean requestAmendedSI,
+       boolean recordTDR,
+       boolean useBothRef) {
+     String carrierPartyName = threadLocalCarrierPartyName.get();
+     String shipperPartyName = threadLocalShipperPartyName.get();
+     return new EblScenarioListBuilder(
+         previousAction ->
+             new ShipperGetShippingInstructionsSkippableAction(
+                 carrierPartyName,
+                 shipperPartyName,
+                 (EblAction) previousAction,
+                 expectedSiStatus,
+                 expectedUpdatedSiStatus,
+                 resolveMessageSchemaValidator(EBL_API, GET_EBL_SCHEMA_NAME),
+                 requestAmendedSI,
+                 recordTDR,
+                 useBothRef));
+   }
+
+   private static EblScenarioListBuilder shipperGetShippingInstructionsErrorScenario() {
+     String carrierPartyName = threadLocalCarrierPartyName.get();
+     String shipperPartyName = threadLocalShipperPartyName.get();
+     return new EblScenarioListBuilder(
+         previousAction ->
+             new ShipperGetShippingInstructionsErrorAction(
+                 shipperPartyName,
+                 carrierPartyName,
+                 (EblAction) previousAction,
+                 resolveMessageSchemaValidator(EBL_API, ERROR_RESPONSE_SCHEMA_NAME)));
+   }
 
   private static EblScenarioListBuilder shipperGetTransportDocument(
       TransportDocumentStatus... expectedTdStatus) {
@@ -837,22 +1018,53 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 isWithNotifications));
   }
 
-  private static EblScenarioListBuilder uc14CarrierConfirmShippingInstructionsComplete() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    boolean isWithNotifications = threadLocalIsWithNotifications.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new UC14_Carrier_ConfirmShippingInstructionsCompleteAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                resolveMessageSchemaValidator(
-                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
-                isWithNotifications));
-  }
+   private static EblScenarioListBuilder uc14CarrierConfirmShippingInstructionsComplete() {
+     String carrierPartyName = threadLocalCarrierPartyName.get();
+     String shipperPartyName = threadLocalShipperPartyName.get();
+     boolean isWithNotifications = threadLocalIsWithNotifications.get();
+     return new EblScenarioListBuilder(
+         previousAction ->
+             new UC14_Carrier_ConfirmShippingInstructionsCompleteAction(
+                 carrierPartyName,
+                 shipperPartyName,
+                 (EblAction) previousAction,
+                 resolveMessageSchemaValidator(
+                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
+                 isWithNotifications));
+   }
 
-  private static EblScenarioListBuilder oobCarrierProcessOutOfBoundTDUpdateRequest() {
+   private static EblScenarioListBuilder uc15ShipperCancelShippingInstructions() {
+     String carrierPartyName = threadLocalCarrierPartyName.get();
+     String shipperPartyName = threadLocalShipperPartyName.get();
+     boolean isWithNotifications = threadLocalIsWithNotifications.get();
+     return new EblScenarioListBuilder(
+         previousAction ->
+             new UC15_Shipper_CancelShippingInstructionsAction(
+                 carrierPartyName,
+                 shipperPartyName,
+                 (EblAction) previousAction,
+                 resolveMessageSchemaValidator(EBL_API, PATCH_SI_SCHEMA_NAME),
+                 resolveMessageSchemaValidator(
+                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
+                 isWithNotifications));
+   }
+
+   private static EblScenarioListBuilder uc16CarrierDeclineShippingInstructions() {
+     String carrierPartyName = threadLocalCarrierPartyName.get();
+     String shipperPartyName = threadLocalShipperPartyName.get();
+     boolean isWithNotifications = threadLocalIsWithNotifications.get();
+     return new EblScenarioListBuilder(
+         previousAction ->
+             new UC16_Carrier_DeclineShippingInstructionsAction(
+                 carrierPartyName,
+                 shipperPartyName,
+                 (EblAction) previousAction,
+                 resolveMessageSchemaValidator(
+                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
+                 isWithNotifications));
+   }
+
+   private static EblScenarioListBuilder oobCarrierProcessOutOfBoundTDUpdateRequest() {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(

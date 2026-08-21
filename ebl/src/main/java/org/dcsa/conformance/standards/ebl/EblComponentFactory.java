@@ -68,8 +68,20 @@ class EblComponentFactory extends AbstractComponentFactory {
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
       boolean isWithNotifications) {
+    Set<String> testedPartyRoleNames =
+        (partyConfigurations.length == EblRole.values().length
+                ? Arrays.stream(EblRole.values()).map(EblRole::getConfigName)
+                : Arrays.stream(counterpartConfigurations)
+                    .map(CounterpartConfiguration::getRole)
+                    .filter(
+                        counterpartRole ->
+                            Arrays.stream(partyConfigurations)
+                                .map(PartyConfiguration::getRole)
+                                .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
+            .collect(Collectors.toSet());
     return EblScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        testedPartyRoleNames,
         isWithNotifications,
         this.standardVersion,
         _findPartyOrCounterpartName(

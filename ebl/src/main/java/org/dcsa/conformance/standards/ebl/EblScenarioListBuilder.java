@@ -89,37 +89,49 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceSiOnlyScenarios(
       Set<String> testedPartyRoleNames, boolean isTd) {
-    Map<String, Map<String, EblScenarioListBuilder>> partyScenarios = new LinkedHashMap<>();
-    partyScenarios.put(EblRole.CARRIER.getConfigName(), carrierConformanceSiOnlyScenarios(isTd));
-    partyScenarios.put(EblRole.SHIPPER.getConfigName(), shipperConformanceSiOnlyScenarios(isTd));
-
     var scenarios = new LinkedHashMap<String, EblScenarioListBuilder>();
-    testedPartyRoleNames.forEach(role -> scenarios.putAll(partyScenarios.get(role)));
+    boolean includeCarrier = testedPartyRoleNames.contains(EblRole.CARRIER.getConfigName());
+    boolean includeShipper = testedPartyRoleNames.contains(EblRole.SHIPPER.getConfigName());
+    boolean includeBoth = includeCarrier && includeShipper;
+
+    if (includeCarrier) {
+      carrierConformanceSiOnlyScenarios(isTd)
+          .forEach(
+              (name, builder) ->
+                  scenarios.put(includeBoth ? "Carrier - " + name : name, builder));
+    }
+    if (includeShipper) {
+      shipperConformanceSiOnlyScenarios(isTd)
+          .forEach(
+              (name, builder) ->
+                  scenarios.put(includeBoth ? "Shipper - " + name : name, builder));
+    }
     return scenarios;
   }
 
   private static Map<String, EblScenarioListBuilder> carrierConformanceSiOnlyScenarios(boolean isTd) {
     var scenarios = new LinkedHashMap<String, EblScenarioListBuilder>();
-    scenarios.put("Required Sea Waybill scenario", requiredSiScenarios(ScenarioType.REGULAR_SWB, isTd));
-    scenarios.put("Required Straight B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_STRAIGHT_BL, isTd));
-    scenarios.put("Required Negotiable B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_NEGOTIABLE_BL, isTd));
+    scenarios.put("Required Sea Waybill scenario", requiredSiScenarios(ScenarioType.REGULAR_SWB, isTd, "Carrier"));
+    scenarios.put("Required Straight B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_STRAIGHT_BL, isTd, "Carrier"));
+    scenarios.put("Required Negotiable B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_NEGOTIABLE_BL, isTd, "Carrier"));
     scenarios.put("Optional (report-only) scenarios", carrierOptionalSiScenarios(isTd).asOptionalReportOnlyScenario());
     return scenarios;
   }
 
   private static Map<String, EblScenarioListBuilder> shipperConformanceSiOnlyScenarios(boolean isTd) {
     var scenarios = new LinkedHashMap<String, EblScenarioListBuilder>();
-    scenarios.put("Required Sea Waybill scenario", requiredSiScenarios(ScenarioType.REGULAR_SWB, isTd));
-    scenarios.put("Required Straight B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_STRAIGHT_BL, isTd));
-    scenarios.put("Required Negotiable B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_NEGOTIABLE_BL, isTd));
+    scenarios.put("Required Sea Waybill scenario", requiredSiScenarios(ScenarioType.REGULAR_SWB, isTd, "Shipper"));
+    scenarios.put("Required Straight B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_STRAIGHT_BL, isTd, "Shipper"));
+    scenarios.put("Required Negotiable B/L scenario", requiredSiScenarios(ScenarioType.REGULAR_NEGOTIABLE_BL, isTd, "Shipper"));
     scenarios.put("Optional (report-only) scenarios", shipperOptionalSiScenarios(isTd).asOptionalReportOnlyScenario());
     return scenarios;
   }
 
-  private static EblScenarioListBuilder requiredSiScenarios(ScenarioType scenarioType, boolean isTd) {
+  private static EblScenarioListBuilder requiredSiScenarios(
+      ScenarioType scenarioType, boolean isTd, String roleTitlePrefix) {
     return carrierSupplyScenarioParameters(scenarioType, isTd)
         .then(
-            uc1ShipperSubmitShippingInstructions()
+            uc1ShipperSubmitShippingInstructions(roleTitlePrefix)
                 .then(
                     shipperGetShippingInstructions(SI_RECEIVED, false)
                         .then(
@@ -140,7 +152,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static EblScenarioListBuilder carrierOptionalSiScenarios(boolean isTd) {
     return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
         .then(
-            uc1ShipperSubmitShippingInstructions()
+            uc1ShipperSubmitShippingInstructions("Carrier")
                 .then(
                     shipperGetShippingInstructionsSkippable(SI_RECEIVED, false)
                         .thenEither(
@@ -154,7 +166,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static EblScenarioListBuilder shipperOptionalSiScenarios(boolean isTd) {
     return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
         .then(
-            uc1ShipperSubmitShippingInstructions()
+            uc1ShipperSubmitShippingInstructions("Shipper")
                 .then(
                     shipperGetShippingInstructionsSkippable(SI_RECEIVED, false)
                         .thenEither(
@@ -786,6 +798,26 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 resolveMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
                 isWithNotifications));
+  }
+
+  private static EblScenarioListBuilder uc1ShipperSubmitShippingInstructions(
+      String roleTitlePrefix) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC1_Shipper_SubmitShippingInstructionsAction(
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    resolveMessageSchemaValidator(EBL_API, POST_EBL_SCHEMA_NAME),
+                    resolveMessageSchemaValidator(
+                        EBL_API, RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
+                    resolveMessageSchemaValidator(
+                        EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
+                    isWithNotifications)
+                .withTitleComplement(roleTitlePrefix));
   }
 
   private static EblScenarioListBuilder uc3ShipperSubmitUpdatedShippingInstructions(

@@ -78,7 +78,7 @@ class EblComponentFactory extends AbstractComponentFactory {
                             Arrays.stream(partyConfigurations)
                                 .map(PartyConfiguration::getRole)
                                 .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     return EblScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         testedPartyRoleNames,

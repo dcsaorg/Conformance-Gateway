@@ -108,7 +108,10 @@ public class CsGetRoutingsAction extends CsAction {
                 .withApplicability(
                     previousAction instanceof CsGetRoutingsAction previous
                         && previous.expectNextPageCursor),
-            CsChecks.getPayloadChecksForPtp(getMatchedExchangeUuid(), expectedApiVersion));
+            CsChecks.mandatoryResponseContentChecksForPtp(
+                getMatchedExchangeUuid(), expectedApiVersion),
+            CsChecks.optionalResponseContentChecksForPtp(
+                getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

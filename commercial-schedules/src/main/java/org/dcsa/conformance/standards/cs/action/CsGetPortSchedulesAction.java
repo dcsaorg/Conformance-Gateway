@@ -96,7 +96,10 @@ public class CsGetPortSchedulesAction extends CsAction {
                 .withApplicability(
                     previousAction instanceof CsGetPortSchedulesAction previous
                         && previous.expectNextPageCursor),
-            CsChecks.getPayloadChecksForPs(getMatchedExchangeUuid(), expectedApiVersion));
+            CsChecks.mandatoryResponseContentChecksForPs(
+                getMatchedExchangeUuid(), expectedApiVersion),
+            CsChecks.optionalResponseContentChecksForPs(
+                getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

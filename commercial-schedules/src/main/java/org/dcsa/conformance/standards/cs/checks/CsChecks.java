@@ -25,15 +25,28 @@ import org.dcsa.conformance.standards.cs.party.DynamicScenarioParameters;
 @UtilityClass
 public class CsChecks {
 
-  public static ActionCheck getPayloadChecksForPtp(
+  public static ActionCheck mandatoryResponseContentChecksForPtp(
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE_PTP);
+    return JsonAttribute.contentChecks(
+        CsRole::isProducer,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion,
+        checks);
+  }
+
+  public static ActionCheck optionalResponseContentChecksForPtp(
+      UUID matchedExchangeUuid, String expectedApiVersion) {
+    var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_PTP_CUTOFF_TIMES_AT_ROUTING_OR_LEG_LEVEL);
     checks.add(VALIDATE_PTP_ROUTING_REFERENCE);
     checks.add(VALIDATE_PTP_SOLUTION_FOOTPRINT);
     checks.add(VALIDATE_PTP_LEG_FOOTPRINT);
     return JsonAttribute.contentChecks(
+        "",
+        "The HTTP response has valid content (optional response-content validations)",
         CsRole::isProducer,
         matchedExchangeUuid,
         HttpMessageType.RESPONSE,
@@ -490,15 +503,26 @@ public class CsChecks {
         });
   }
 
-  public static ActionCheck getPayloadChecksForPs(
+  public static ActionCheck mandatoryResponseContentChecksForPs(
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE_PS);
     checks.add(VALIDATE_PS_VESSEL_SCHEDULES_EXISTS);
-    // checks.add(VALIDATE_CUTOFF_TIME_CODE_PS);
-    checks.add(VALIDATE_PS_CUTOFF_INFORMATION_OPTIONAL);
-
     return JsonAttribute.contentChecks(
+        CsRole::isProducer,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion,
+        checks);
+  }
+
+  public static ActionCheck optionalResponseContentChecksForPs(
+      UUID matchedExchangeUuid, String expectedApiVersion) {
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(VALIDATE_PS_CUTOFF_INFORMATION_OPTIONAL);
+    return JsonAttribute.contentChecks(
+        "",
+        "The HTTP response has valid content (optional response-content validations)",
         CsRole::isProducer,
         matchedExchangeUuid,
         HttpMessageType.RESPONSE,
@@ -616,18 +640,30 @@ public class CsChecks {
             return ConformanceCheckResult.withRelevance(errors);
           });
 
-  public static ActionCheck getPayloadChecksForVs(
+  public static ActionCheck mandatoryResponseContentChecksForVs(
       UUID matchedExchangeUuid, String expectedApiVersion) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(VALIDATE_NON_EMPTY_RESPONSE_VS);
     checks.add(VALIDATE_VS_VESSEL_SCHEDULES_EXISTS);
     checks.add(VALIDATE_VS_TRANSPORT_CALLS_EXISTS);
     checks.add(VALIDATE_VS_TRANSPORT_CALL_LOCATION_EXISTS);
+    return JsonAttribute.contentChecks(
+        CsRole::isProducer,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion,
+        checks);
+  }
+
+  public static ActionCheck optionalResponseContentChecksForVs(
+      UUID matchedExchangeUuid, String expectedApiVersion) {
+    var checks = new ArrayList<JsonContentCheck>();
     // Optional response-content validation is evaluated for all VS producer scenarios.
     // It reports irrelevant when not demonstrated, and fails only when present-but-invalid.
     checks.add(VALIDATE_VS_CUTOFF_INFORMATION_OPTIONAL);
-
     return JsonAttribute.contentChecks(
+        "",
+        "The HTTP response has valid content (optional response-content validations)",
         CsRole::isProducer,
         matchedExchangeUuid,
         HttpMessageType.RESPONSE,

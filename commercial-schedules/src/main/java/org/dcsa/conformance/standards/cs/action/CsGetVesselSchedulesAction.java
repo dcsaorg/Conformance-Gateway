@@ -102,7 +102,10 @@ public class CsGetVesselSchedulesAction extends CsAction {
                 .withApplicability(
                     previousAction instanceof CsGetVesselSchedulesAction previous
                         && previous.expectNextPageCursor),
-            CsChecks.getPayloadChecksForVs(getMatchedExchangeUuid(), expectedApiVersion));
+            CsChecks.mandatoryResponseContentChecksForVs(
+                getMatchedExchangeUuid(), expectedApiVersion),
+            CsChecks.optionalResponseContentChecksForVs(
+                getMatchedExchangeUuid(), expectedApiVersion));
       }
     };
   }

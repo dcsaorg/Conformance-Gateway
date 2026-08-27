@@ -9,6 +9,7 @@ import org.dcsa.conformance.core.check.HeaderCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.PayloadPaginationCheck;
+import org.dcsa.conformance.core.check.ResponseLimitCheck;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -182,6 +183,13 @@ public class GetPortCallEventsAction extends PortCallAction {
             getDspSupplier().get().firstPage(),
             getDspSupplier().get().secondPage())
             .withApplicability(previousAction instanceof GetPortCallEventsAction previous && previous.hasNextPage),
+          new ResponseLimitCheck(
+            PortCallRole::isProducer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            () -> sspSupplier.get().getMap().get(PortCallFilterParameter.LIMIT),
+            "Event",
+            "events"),
           PortCallChecks.getGetResponsePayloadChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()));
       }
     };

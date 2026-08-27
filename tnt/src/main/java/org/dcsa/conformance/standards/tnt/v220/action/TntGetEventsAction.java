@@ -9,6 +9,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.tnt.v220.checks.TntChecks;
 import org.dcsa.conformance.standards.tnt.v220.checks.TntSchemaConformanceCheck;
+import org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter;
 import org.dcsa.conformance.standards.tnt.v220.party.TntRole;
 
 @Getter
@@ -57,6 +58,12 @@ public class TntGetEventsAction extends TntAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             new TntSchemaConformanceCheck(getMatchedExchangeUuid(), eventSchemaValidators),
+            new ResponseLimitCheck(
+              TntRole::isPublisher,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              () -> sspSupplier.get().getMap().get(TntFilterParameter.LIMIT),
+              "Event"),
             TntChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };

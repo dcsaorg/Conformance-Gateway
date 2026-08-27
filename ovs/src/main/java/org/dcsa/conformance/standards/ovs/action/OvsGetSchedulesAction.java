@@ -10,8 +10,10 @@ import org.dcsa.conformance.core.check.HeaderCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.PayloadPaginationCheck;
+import org.dcsa.conformance.core.check.ResponseLimitCheck;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
+import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -162,6 +164,12 @@ public class OvsGetSchedulesAction extends OvsAction {
             getDspSupplier().get().firstPage(),
             getDspSupplier().get().secondPage())
             .withApplicability(previousAction instanceof OvsGetSchedulesAction previous && previous.hasNextPage),
+          new ResponseLimitCheck(
+            OvsRole::isProducer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            () -> sspSupplier.get().getMap().get(OvsFilterParameter.LIMIT),
+            "Service Schedule"),
           OvsChecks.mandatoryResponseContentChecks(getMatchedExchangeUuid(), expectedApiVersion),
           OvsChecks.optionalResponseContentChecks(getMatchedExchangeUuid(), expectedApiVersion));
       }

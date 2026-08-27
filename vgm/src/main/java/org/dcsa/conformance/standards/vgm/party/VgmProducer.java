@@ -21,6 +21,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.vgm.action.ProducerPostVgmDeclarationAction;
 import org.dcsa.conformance.standards.vgm.action.SupplyScenarioParametersAction;
@@ -111,6 +112,9 @@ public class VgmProducer extends ConformanceParty {
             Map.of(
                 "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
                 "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
+
+    String limitValue = JsonUtil.getFirstQueryParamValue(request.queryParams(), VgmQueryParameters.LIMIT.getParameterName());
+    jsonResponseBody = JsonUtil.trimNestedArrayByLimit(jsonResponseBody, "VGMDeclarations", limitValue);
 
     Map<String, Collection<String>> responseHeaders = new LinkedHashMap<>();
     responseHeaders.put(API_VERSION, List.of(apiVersion));

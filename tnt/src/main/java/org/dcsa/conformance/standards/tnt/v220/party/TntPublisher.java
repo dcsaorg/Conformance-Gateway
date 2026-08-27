@@ -23,6 +23,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.tnt.v220.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.tnt.v220.checks.TntSchemaConformanceCheck;
 
@@ -153,15 +154,9 @@ public class TntPublisher extends ConformanceParty {
               .collect(Collectors.toList());
       filteredArray = sortJsonArray(filteredArray, sortCriteria);
     }
-    int limit =
-        Integer.parseInt(
-            request.queryParams().containsKey("limit")
-                ? request.queryParams().get("limit").iterator().next()
-                : "100");
-    String cursor =
-        request.queryParams().containsKey("cursor")
-            ? request.queryParams().get("cursor").iterator().next()
-            : null;
+    String limitStr = JsonUtil.getFirstQueryParamValue(request.queryParams(), TntFilterParameter.LIMIT.getQueryParamName());
+    int limit = limitStr != null ? Integer.parseInt(limitStr) : 100;
+    String cursor = JsonUtil.getFirstQueryParamValue(request.queryParams(), "cursor");
     String cursorKey = "cursorKey";
 
     ArrayNode limitedArray = applyCursorLogic(filteredArray, cursor, cursorKey, limit, headers);

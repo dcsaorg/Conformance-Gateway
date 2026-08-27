@@ -15,13 +15,32 @@ public class ResponseLimitCheck extends ActionCheck {
 
   private final Supplier<String> limitSupplier;
   private final String rootObjectLabel;
+  private final String arrayFieldName;
 
+  /**
+   * Constructs a ResponseLimitCheck that validates against the root response array.
+   */
   public ResponseLimitCheck(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
     @NonNull Supplier<String> limitSupplier,
     @NonNull String rootObjectLabel) {
+    this(isRelevantForRoleName, matchedExchangeUuid, httpMessageType, limitSupplier, rootObjectLabel, null);
+  }
+
+  /**
+   * Constructs a ResponseLimitCheck that validates against a named array field in the response body.
+   *
+   * @param arrayFieldName the name of the array field to check, or {@code null} to check the root array
+   */
+  public ResponseLimitCheck(
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    @NonNull Supplier<String> limitSupplier,
+    @NonNull String rootObjectLabel,
+    String arrayFieldName) {
     super(
       "The HTTP response body does not exceed the supplied limit",
       isRelevantForRoleName,
@@ -29,6 +48,7 @@ public class ResponseLimitCheck extends ActionCheck {
       httpMessageType);
     this.limitSupplier = limitSupplier;
     this.rootObjectLabel = rootObjectLabel;
+    this.arrayFieldName = arrayFieldName;
   }
 
   @Override
@@ -53,11 +73,22 @@ public class ResponseLimitCheck extends ActionCheck {
     }
 
     JsonNode body = exchange.getMessage(httpMessageType).body().getJsonBody();
-    if (!body.isArray()) {
-      return ConformanceCheckResult.simple(Set.of("The response body must be a root JSON array to validate pagination limits."));
+    JsonNode arrayToCheck;
+
+    if (arrayFieldName != null) {
+      arrayToCheck = body.path(arrayFieldName);
+      if (arrayToCheck.isMissingNode() || !arrayToCheck.isArray()) {
+        return ConformanceCheckResult.simple(Set.of(
+          "The response body field '%s' must be a JSON array to validate pagination limits.".formatted(arrayFieldName)));
+      }
+    } else {
+      if (!body.isArray()) {
+        return ConformanceCheckResult.simple(Set.of("The response body must be a root JSON array to validate pagination limits."));
+      }
+      arrayToCheck = body;
     }
 
-    int actualCount = body.size();
+    int actualCount = arrayToCheck.size();
     if (actualCount > limit) {
       return ConformanceCheckResult.simple(Set.of("The response contained %d %s object(s), which exceeds the supplied limit of %d."
         .formatted(actualCount, rootObjectLabel, limit)));

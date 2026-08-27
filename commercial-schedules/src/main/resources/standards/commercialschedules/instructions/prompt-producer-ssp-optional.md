@@ -1,10 +1,12 @@
-The DCSA reference implementation of a consumer running in the sandbox needs to make GET API calls to your producer
-application in order to measure its conformance. This scenario tests support for optional query parameters in addition
-to the required ones.
+Provide values that the sandbox can use when it sends GET requests to your Commercial Schedules producer.
 
-**Required parameters** (shown first in the JSON below) — these MUST be provided with valid values. The scenario will not proceed if any required parameter is missing or blank.
+You must provide valid values for all mandatory query parameters.
 
-**Optional parameters** (shown after the required ones) — these may be removed from the JSON if your implementation does not support them. You may include any supported combination. The scenario will exercise whichever optional parameters you include.
+**Mandatory query parameters**
+REQUIRED_PARAMETERS_PLACEHOLDER
 
-Provide the values of the parameters your party can successfully process, and remove any optional parameters that your implementation does not support.
+**Optional query parameters**
+OPTIONAL_PARAMETERS_PLACEHOLDER
+
+You may remove any optional query parameter that your implementation does not support. The sandbox will test only the optional parameters that you keep in the example JSON below.
 

@@ -2,7 +2,9 @@ package org.dcsa.conformance.core.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -145,5 +147,38 @@ class JsonUtilTest {
   void testIsMissing_withBooleanValue() throws Exception {
     JsonNode booleanNode = objectMapper.readTree("true");
     assertFalse(JsonUtil.isMissing(booleanNode));
+  }
+
+  @Test
+  void testTrimRootArrayByLimit_trimsWhenArrayExceedsLimit() {
+    ArrayNode array = objectMapper.createArrayNode();
+    array.add(objectMapper.createObjectNode().put("id", 1));
+    array.add(objectMapper.createObjectNode().put("id", 2));
+    array.add(objectMapper.createObjectNode().put("id", 3));
+
+    JsonNode trimmed = JsonUtil.trimRootArrayByLimit(array, "2");
+
+    assertEquals(2, trimmed.size());
+    assertEquals(1, trimmed.get(0).path("id").asInt());
+    assertEquals(2, trimmed.get(1).path("id").asInt());
+  }
+
+  @Test
+  void testTrimRootArrayByLimit_returnsOriginalWhenBodyIsNotArray() {
+    ObjectNode objectNode = objectMapper.createObjectNode().put("a", 1);
+
+    JsonNode result = JsonUtil.trimRootArrayByLimit(objectNode, "1");
+
+    assertSame(objectNode, result);
+  }
+
+  @Test
+  void testTrimRootArrayByLimit_returnsOriginalWhenLimitIsInvalid() {
+    ArrayNode array = objectMapper.createArrayNode();
+    array.add(objectMapper.createObjectNode());
+
+    assertSame(array, JsonUtil.trimRootArrayByLimit(array, ""));
+    assertSame(array, JsonUtil.trimRootArrayByLimit(array, "abc"));
+    assertSame(array, JsonUtil.trimRootArrayByLimit(array, "-1"));
   }
 }

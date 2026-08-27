@@ -285,10 +285,10 @@ public class TntChecks {
                 String modeOfTransport =
                   transportCall.path(MODE_OF_TRANSPORT).asText(null);
                 boolean hasVessel =
-                  !JsonUtil.isMissing(transportCall.path(VESSEL_TRANSPORT));
-                boolean hasRail = !JsonUtil.isMissing(transportCall.path(RAIL_TRANSPORT));
+                  !JsonUtil.isMissingOrEmpty(transportCall.path(VESSEL_TRANSPORT));
+                boolean hasRail = !JsonUtil.isMissingOrEmpty(transportCall.path(RAIL_TRANSPORT));
                 boolean hasTruck =
-                  !JsonUtil.isMissing(transportCall.path(TRUCK_TRANSPORT));
+                  !JsonUtil.isMissingOrEmpty(transportCall.path(TRUCK_TRANSPORT));
 
                 if (modeOfTransport == null || modeOfTransport.isEmpty()) {
                   return ConformanceCheckResult.simple(

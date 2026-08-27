@@ -1,7 +1,8 @@
-The DCSA reference implementation of a consumer running in the sandbox needs to call the GET API calls of your producer
-application in order to measure its conformance, but out of the box the DCSA consumer does not have any information
-about your organization's data. Therefore, at the beginning of the scenario you need to provide a number of filter
-parameters, which the DCSA consumer will use to execute the GET requests that it sends to your producer application
-throughout the scenario.
+Provide values that the sandbox can use when it sends GET requests to your Commercial Schedules producer.
 
-Provide the values of the specified query parameters for which your party can successfully process a GET request.
+You must provide valid values for all mandatory query parameters listed below.
+
+**Mandatory query parameters**
+REQUIRED_PARAMETERS_PLACEHOLDER
+
+Use the example JSON below and replace the example values with values that your system can successfully process.

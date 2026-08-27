@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import org.dcsa.conformance.core.UserFacingException;
@@ -88,10 +89,22 @@ public class SupplyScenarioParametersAction extends CsAction {
 
   @Override
   public String getHumanReadablePrompt() {
+    Map<String, String> replacements =
+        Map.of(
+            "REQUIRED_PARAMETERS_PLACEHOLDER", formatParameterList(requiredCsFilterParameters),
+            "OPTIONAL_PARAMETERS_PLACEHOLDER", formatParameterList(optionalCsFilterParameters));
     if (optionalCsFilterParameters.isEmpty()) {
-      return getMarkdownHumanReadablePrompt(null, "prompt-producer-ssp.md");
+      return getMarkdownHumanReadablePrompt(replacements, "prompt-producer-ssp.md");
     }
-    return getMarkdownHumanReadablePrompt(null, "prompt-producer-ssp-optional.md");
+    return getMarkdownHumanReadablePrompt(replacements, "prompt-producer-ssp-optional.md");
+  }
+
+  @Override
+  public Map<String, Boolean> getExpectedInputAttributes() {
+    LinkedHashMap<String, Boolean> expectedAttributes = new LinkedHashMap<>();
+    requiredCsFilterParameters.forEach(parameter -> expectedAttributes.put(parameter.getQueryParamName(), true));
+    optionalCsFilterParameters.forEach(parameter -> expectedAttributes.put(parameter.getQueryParamName(), false));
+    return expectedAttributes;
   }
 
   @Override
@@ -135,18 +148,18 @@ public class SupplyScenarioParametersAction extends CsAction {
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
     JsonNode inputNode = requireInputNode(partyInput);
-    List<String> missingRequired =
-        requiredCsFilterParameters.stream()
+    List<String> blankParameters =
+        getCsFilterParameters().stream()
             .filter(
                 p ->
-                    !inputNode.has(p.getQueryParamName())
-                        || inputNode.get(p.getQueryParamName()).asText().isBlank())
+                    inputNode.has(p.getQueryParamName())
+                        && inputNode.get(p.getQueryParamName()).asText().isBlank())
             .map(CsFilterParameter::getQueryParamName)
             .collect(Collectors.toList());
-    if (!missingRequired.isEmpty()) {
+    if (!blankParameters.isEmpty()) {
       throw new UserFacingException(
-          "The following required query parameters are missing or blank: "
-              + String.join(", ", missingRequired));
+          "The following query parameters must not be blank: "
+              + String.join(", ", blankParameters));
     }
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(inputNode);
   }
@@ -160,5 +173,15 @@ public class SupplyScenarioParametersAction extends CsAction {
   @Override
   public boolean isInputRequired() {
     return true;
+  }
+
+  private String formatParameterList(LinkedHashSet<CsFilterParameter> parameters) {
+    if (parameters.isEmpty()) {
+      return "- None";
+    }
+    return parameters.stream()
+        .map(CsFilterParameter::getQueryParamName)
+        .map(parameterName -> "- `%s`".formatted(parameterName))
+        .collect(Collectors.joining(System.lineSeparator()));
   }
 }

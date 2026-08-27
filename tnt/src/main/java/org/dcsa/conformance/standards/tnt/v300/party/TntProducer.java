@@ -23,6 +23,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.tnt.TntStandard;
 import org.dcsa.conformance.standards.tnt.v300.action.ProducerPostEventsAction;
@@ -134,12 +135,14 @@ public class TntProducer extends ConformanceParty {
             "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
             "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
 
+    String limitValue = JsonUtil.getFirstQueryParamValue(request.queryParams(), TntQueryParameters.LIMIT.getParameterName());
+    JsonNode finalResponse = responseObject;
     if (!eventTypes.isEmpty() && responseObject.has(TntConstants.EVENTS)) {
-      JsonNode filteredResponse = filterEventsByType(responseObject, eventTypes);
-      return request.createResponse(200, headers, new ConformanceMessageBody(filteredResponse));
+      finalResponse = filterEventsByType(responseObject, eventTypes);
     }
+    finalResponse = JsonUtil.trimNestedArrayByLimit(finalResponse, TntConstants.EVENTS, limitValue);
 
-    return request.createResponse(200, headers, new ConformanceMessageBody(responseObject));
+    return request.createResponse(200, headers, new ConformanceMessageBody(finalResponse));
   }
 
   private String getTntEventPayloadFilepath(TntEventType eventType) {

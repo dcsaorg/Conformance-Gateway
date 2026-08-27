@@ -10,7 +10,7 @@ import org.dcsa.conformance.core.check.HeaderCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.PayloadPaginationCheck;
-import org.dcsa.conformance.core.check.QueryParamCheck;
+import org.dcsa.conformance.core.check.ResponseLimitCheck;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -95,6 +95,13 @@ public class ConsumerGetEventsWithQueryParametersAction extends TntAction {
             getDspSupplier().get().firstPage(),
             getDspSupplier().get().secondPage())
             .withApplicability(previousAction instanceof ConsumerGetEventsWithQueryParametersAction previous && previous.hasNextPage),
+          new ResponseLimitCheck(
+            TntRole::isProducer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            () -> sspSupplier.get().getMap().get(TntQueryParameters.LIMIT),
+            "Event",
+            TntConstants.EVENTS),
           TntChecks.getTntGetResponseChecks(getMatchedExchangeUuid(), expectedApiVersion, null));
       }
     };

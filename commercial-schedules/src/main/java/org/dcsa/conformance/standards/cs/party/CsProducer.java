@@ -76,7 +76,7 @@ public class CsProducer extends ConformanceParty {
     filePath = baseFilePath + routeType + suffix;
 
     JsonNode jsonResponseBody = replacePlaceHolders(filePath, request);
-    String limit = request.queryParams().containsKey("limit") ? request.queryParams().get("limit").stream().findFirst().orElse(null) : null;
+    String limit = JsonUtil.getFirstQueryParamValue(request.queryParams(), "limit");
     jsonResponseBody = JsonUtil.trimRootArrayByLimit(jsonResponseBody, limit);
     return request.createResponse(200, headers, new ConformanceMessageBody(jsonResponseBody));
   }

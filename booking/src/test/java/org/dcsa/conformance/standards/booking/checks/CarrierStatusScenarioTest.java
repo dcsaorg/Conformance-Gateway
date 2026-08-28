@@ -6,6 +6,7 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.dcsa.conformance.standards.booking.party.BookingCancellationState.CANCELLATION_CONFIRMED;
@@ -102,6 +103,19 @@ class CarrierStatusScenarioTest {
     assertTrue(scenario.validateAmendedBookingStatus(payload).isConformant());
     assertTrue(scenario.validateBookingCancellationStatus(payload).isConformant());
     assertFalse(scenario.shouldValidateSecondaryStatuses());
+  }
+
+  @Test
+  void bookingStatusOnlyPreservesStatusForCarrierReferenceRequirement() {
+    ObjectNode payloadWithoutCbr = OBJECT_MAPPER.createObjectNode();
+    var receivedCheck = new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
+      UUID.randomUUID(), CarrierStatusScenario.bookingStatusOnly(RECEIVED), () -> null);
+    var confirmedCheck = new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
+      UUID.randomUUID(), CarrierStatusScenario.bookingStatusOnly(CONFIRMED), () -> null);
+
+    assertTrue(receivedCheck.ensureCarrierBookingReferenceCompliance(payloadWithoutCbr).isConformant());
+    assertFalse(receivedCheck.ensureCarrierBookingReferenceCompliance(payloadWithoutCbr).isRelevant());
+    assertFalse(confirmedCheck.ensureCarrierBookingReferenceCompliance(payloadWithoutCbr).isConformant());
   }
 
   @Test

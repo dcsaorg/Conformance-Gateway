@@ -23,6 +23,7 @@ public final class CarrierStatusScenario {
       BookingState.AMENDMENT_CANCELLED);
 
   private final Set<BookingState> bookingStatuses;
+  private final BookingState expectedBookingStatus;
   private final Set<BookingState> amendedBookingStatuses;
   private final boolean amendedBookingStatusRequired;
   private final Set<BookingCancellationState> bookingCancellationStatuses;
@@ -30,12 +31,14 @@ public final class CarrierStatusScenario {
   private final boolean validateSecondaryStatuses;
 
   private CarrierStatusScenario(
+    BookingState expectedBookingStatus,
     Set<BookingState> bookingStatuses,
     Set<BookingState> amendedBookingStatuses,
     boolean amendedBookingStatusRequired,
     Set<BookingCancellationState> bookingCancellationStatuses,
     boolean bookingCancellationStatusRequired,
     boolean validateSecondaryStatuses) {
+    this.expectedBookingStatus = Objects.requireNonNull(expectedBookingStatus);
     this.bookingStatuses = immutableEnumSet(bookingStatuses, BookingState.class);
     this.amendedBookingStatuses = immutableEnumSet(amendedBookingStatuses, BookingState.class);
     this.amendedBookingStatusRequired = amendedBookingStatusRequired;
@@ -78,6 +81,7 @@ public final class CarrierStatusScenario {
     Set<BookingCancellationState> allowedCancellationStatuses =
       bookingCancellationStatus == null ? Set.of() : Set.of(bookingCancellationStatus);
     return new CarrierStatusScenario(
+      bookingStatus,
       allowedBookingStatuses,
       allowedAmendedBookingStatuses,
       amendmentRequired,
@@ -89,7 +93,11 @@ public final class CarrierStatusScenario {
   public static CarrierStatusScenario bookingStatusOnly(BookingState bookingStatus) {
     Objects.requireNonNull(bookingStatus, "bookingStatus");
     return new CarrierStatusScenario(
-      Set.of(bookingStatus), Set.of(), false, Set.of(), false, false);
+      bookingStatus, Set.of(bookingStatus), Set.of(), false, Set.of(), false, false);
+  }
+
+  BookingState expectedBookingStatus() {
+    return expectedBookingStatus;
   }
 
   ConformanceCheckResult validateBookingStatus(JsonNode payload) {

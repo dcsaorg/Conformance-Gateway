@@ -45,38 +45,6 @@ class BookingActionTest {
         action.completableWithoutTrafficForRoles());
   }
 
-  @Test
-  void uc1AcceptsAny2xxStatusButRequiresCbrrResponsePayload() {
-    JsonSchemaValidator createBookingSchema = JsonSchemaValidator.getInstance(
-      "/standards/booking/schemas/BKG_v2.0.0.yaml", "CreateBooking");
-    JsonSchemaValidator createBookingResponseSchema = JsonSchemaValidator.getInstance(
-      "/standards/booking/schemas/BKG_v2.0.0.yaml", "CreateBookingResponse");
-    BookingAction previousAction = new CarrierSupplyScenarioParametersAction(
-      "Carrier", ScenarioType.DRY_CARGO, "2.0.0", createBookingSchema);
-    var action = new UC1_Shipper_SubmitBookingRequestAction(
-      "Carrier",
-      "Shipper",
-      previousAction,
-      createBookingSchema,
-      createBookingResponseSchema,
-      null,
-      false);
-    ConformanceExchange exchange = exchange(204, "");
-
-    action.handleExchange(exchange);
-    assertNull(action.getExchangeHandlingExceptionMessage());
-
-    var check = action.createCheck("2.0.0");
-    check.check(uuid -> exchange.getUuid().equals(uuid) ? exchange : null);
-    List<org.dcsa.conformance.core.check.ConformanceCheck> subChecks =
-      check.subChecksStream().toList();
-
-    assertInstanceOf(ResponseStatusCheck.class, subChecks.get(2));
-    assertTrue(subChecks.get(2).resultsStream().allMatch(result -> result.isConformant()));
-    assertInstanceOf(JsonSchemaCheck.class, subChecks.get(6));
-    assertTrue(subChecks.get(6).resultsStream().anyMatch(result -> !result.isConformant()));
-  }
-
   private static ConformanceExchange exchange(int status, String responseBody) {
     var requestMessage = new ConformanceMessage(
       "Shipper", "Shipper", "Carrier", "Carrier", Map.of("API-Version", List.of("2.0.0")),

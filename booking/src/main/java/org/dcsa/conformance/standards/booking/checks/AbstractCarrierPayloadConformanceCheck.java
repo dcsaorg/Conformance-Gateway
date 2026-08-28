@@ -106,11 +106,17 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   }
 
   protected ConformanceCheckResult ensureAmendedBookingStatusCodeCompliance(JsonNode payload) {
+    if (!carrierStatusScenario.shouldValidateSecondaryStatuses()) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
     return ensureStatusCodeCompliance(
       payload, "amendedBookingStatus", BookingDataSets.AMENDED_BOOKING_STATUS);
   }
 
   protected ConformanceCheckResult ensureBookingCancellationStatusCodeCompliance(JsonNode payload) {
+    if (!carrierStatusScenario.shouldValidateSecondaryStatuses()) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
     return ensureStatusCodeCompliance(
       payload, "bookingCancellationStatus", BookingDataSets.BOOKING_CANCELLATION_STATUS);
   }

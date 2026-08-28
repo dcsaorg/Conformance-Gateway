@@ -15,12 +15,10 @@ import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
-import java.util.Set;
 import java.util.stream.Stream;
 
 public class ShipperGetBookingAction extends BookingAction {
 
-  private final BookingState expectedBookingStatus;
   private final CarrierStatusScenario carrierStatusScenario;
   private final JsonSchemaValidator responseSchemaValidator;
   protected final boolean requestAmendedContent;
@@ -41,7 +39,6 @@ public class ShipperGetBookingAction extends BookingAction {
       requestAmendedStatus ? "GET (amended content)" : "GET",
       200,
       true);
-    this.expectedBookingStatus = expectedBookingStatus;
     this.carrierStatusScenario =
       CarrierStatusScenario.from(
         expectedBookingStatus,
@@ -65,7 +62,6 @@ public class ShipperGetBookingAction extends BookingAction {
       requestAmendedContent ? "GET (amended content)" : "GET",
       200,
       true);
-    this.expectedBookingStatus = BookingState.CONFIRMED;
     this.carrierStatusScenario = carrierStatusScenario;
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestAmendedContent = requestAmendedContent;
@@ -100,16 +96,12 @@ public class ShipperGetBookingAction extends BookingAction {
         var dsp = getDspSupplier().get();
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
-        Set<Integer> expectedStatuses = BookingState.PENDING_AMENDMENT.equals(expectedBookingStatus)
-          ? Set.of(expectedStatus, 202)
-          : Set.of(expectedStatus);
         return Stream.of(
           new UrlPathCheck(
             BookingRole::isShipper,
             getMatchedExchangeUuid(),
             buildFullUris("/v2/bookings/", cbrr, cbr)),
-          new ResponseStatusCheck(
-            BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatuses),
+          new ResponseStatusCheck(BookingRole::isCarrier, getMatchedExchangeUuid(), 200),
           new ApiHeaderCheck(
             BookingRole::isShipper,
             getMatchedExchangeUuid(),

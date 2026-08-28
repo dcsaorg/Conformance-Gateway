@@ -250,6 +250,8 @@ public class BookingAndEblScenarioListBuilder
           componentFactory.getBookingMessageSchemaValidator(
             BookingScenarioListBuilder.CREATE_BOOKING_SCHEMA_NAME),
           componentFactory.getBookingMessageSchemaValidator(
+            BookingScenarioListBuilder.BOOKING_202_RESPONSE_SCHEMA),
+          componentFactory.getBookingMessageSchemaValidator(
             BookingScenarioListBuilder.BOOKING_NOTIFICATION_SCHEMA_NAME),
           isWithNotifications)
           .withTitleComplement(BOOKING_ACTION_NAME_COMPLEMENT));

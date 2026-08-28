@@ -69,7 +69,11 @@ public class UC7_Shipper_SubmitBookingAmendment extends ShipperNotificationBooki
             Stream.of(
               BookingChecks.updateRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())
             ),
-            getNotificationChecks(expectedApiVersion, notificationSchemaValidator, expectedBookingStatus, expectedAmendedBookingStatus)
+            getNotificationChecks(
+              expectedApiVersion,
+              notificationSchemaValidator,
+              expectedBookingStatus,
+              expectedAmendedBookingStatus)
           ).flatMap(Function.identity());
       }
     };

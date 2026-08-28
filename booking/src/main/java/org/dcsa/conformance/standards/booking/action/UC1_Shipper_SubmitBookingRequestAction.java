@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
+import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.function.Function;
@@ -20,6 +23,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationBookingAction {
 
   private final JsonSchemaValidator requestSchemaValidator;
+  private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
   public UC1_Shipper_SubmitBookingRequestAction(
@@ -27,10 +31,12 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
     String shipperPartyName,
     BookingAction previousAction,
     JsonSchemaValidator requestSchemaValidator,
+    JsonSchemaValidator responseSchemaValidator,
     JsonSchemaValidator notificationSchemaValidator,
     boolean isWithNotifications) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
+    this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
   }
 

@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 public class UC14CarrierProcessBookingCancellationAction extends CarrierNotificationBookingAction {
 
   private final JsonSchemaValidator requestSchemaValidator;
+  private final boolean confirmCancellation;
 
   public UC14CarrierProcessBookingCancellationAction(
     String carrierPartyName,
@@ -21,27 +22,47 @@ public class UC14CarrierProcessBookingCancellationAction extends CarrierNotifica
     BookingAction previousAction,
     JsonSchemaValidator requestSchemaValidator,
     boolean isWithNotifications) {
+    this(
+      carrierPartyName,
+      shipperPartyName,
+      previousAction,
+      requestSchemaValidator,
+      isWithNotifications,
+      true);
+  }
+
+  public UC14CarrierProcessBookingCancellationAction(
+    String carrierPartyName,
+    String shipperPartyName,
+    BookingAction previousAction,
+    JsonSchemaValidator requestSchemaValidator,
+    boolean isWithNotifications,
+    boolean confirmCancellation) {
     super(
       carrierPartyName,
       shipperPartyName,
       previousAction,
-      "UC14(Confirm)",
+      confirmCancellation ? "UC14 (Confirm)" : "UC14 (Decline)",
       204,
       isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
+    this.confirmCancellation = confirmCancellation;
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-      "prompt-carrier-uc14.md", "prompt-carrier-notification.md");
+      confirmCancellation ? "prompt-carrier-uc14.md" : "prompt-carrier-uc14-decline.md",
+      "prompt-carrier-notification.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     var dsp = getDspSupplier().get();
-    return jsonNode.put("cbr", dsp.carrierBookingReference());
+    return jsonNode
+      .put("cbr", dsp.carrierBookingReference())
+      .put("confirmCancellation", confirmCancellation);
   }
 
   @Override
@@ -52,7 +73,11 @@ public class UC14CarrierProcessBookingCancellationAction extends CarrierNotifica
         return getSimpleNotificationChecks(
           expectedApiVersion,
           requestSchemaValidator,
-          CarrierStatusScenario.from(BookingState.CANCELLED, null, BookingCancellationState.CANCELLATION_CONFIRMED));
+          CarrierStatusScenario.from(
+            confirmCancellation ? BookingState.CANCELLED : BookingState.CONFIRMED,
+            null,
+            confirmCancellation ? BookingCancellationState.CANCELLATION_CONFIRMED : BookingCancellationState.CANCELLATION_DECLINED
+          ));
       }
     };
   }

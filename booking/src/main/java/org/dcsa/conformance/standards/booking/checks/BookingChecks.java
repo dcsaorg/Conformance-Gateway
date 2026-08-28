@@ -1750,9 +1750,7 @@ public class BookingChecks {
       FEEDBACKS_PRESENCE,
       VALID_FEEDBACK_SEVERITY,
       VALID_FEEDBACK_CODE,
-      BOOKING_STATUS_CODE_VALIDATION,
-      AMENDED_BOOKING_STATUS_CODE_VALIDATION,
-      BOOKING_CANCELLATION_STATUS_CODE_VALIDATION);
+      BOOKING_STATUS_CODE_VALIDATION);
 
   public static ActionCheck responseContentChecks(
     UUID matched,
@@ -1826,6 +1824,10 @@ public class BookingChecks {
     checks.addAll(BOOKING_RESPONSE_CONTENT_CHECKS);
     if (includeResponseEnvelopeChecks) {
       checks.addAll(RESPONSE_ENVELOPE_CHECKS);
+      if (carrierStatusScenario.shouldValidateSecondaryStatuses()) {
+        checks.add(AMENDED_BOOKING_STATUS_CODE_VALIDATION);
+        checks.add(BOOKING_CANCELLATION_STATUS_CODE_VALIDATION);
+      }
     }
 
     checks.add(

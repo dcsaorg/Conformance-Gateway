@@ -35,6 +35,7 @@ public abstract class BookingAction extends BookingAndEblAction {
 
   protected final int expectedStatus;
   private final boolean isWithNotifications;
+  private boolean validateSecondaryStatuses = true;
 
   protected BookingAction(
     String sourcePartyName,
@@ -94,6 +95,29 @@ public abstract class BookingAction extends BookingAndEblAction {
     return getBookingDspReference()::set;
   }
 
+  public BookingAction withoutSecondaryStatusValidation() {
+    this.validateSecondaryStatuses = false;
+    return this;
+  }
+
+  public BookingAction withoutSecondaryStatusValidationIf(boolean condition) {
+    return condition ? withoutSecondaryStatusValidation() : this;
+  }
+
+  public boolean isSecondaryStatusValidationEnabled() {
+    return validateSecondaryStatuses;
+  }
+
+  private CarrierStatusScenario carrierStatusScenario(
+    BookingState bookingState,
+    BookingState amendedBookingState,
+    BookingCancellationState bookingCancellationState) {
+    return validateSecondaryStatuses
+      ? CarrierStatusScenario.from(
+          bookingState, amendedBookingState, bookingCancellationState)
+      : CarrierStatusScenario.bookingStatusOnly(bookingState);
+  }
+
   private <T> BookingDynamicScenarioParameters updateIfNotNull(
     BookingDynamicScenarioParameters dsp,
     T value,
@@ -110,8 +134,12 @@ public abstract class BookingAction extends BookingAndEblAction {
     String newCbr =
       getCbrFromNotificationPayload(requestJsonNode) != null
         ? getCbrFromNotificationPayload(requestJsonNode)
-        : responseJsonNode.path("carrierBookingReference").asText(null);
-    var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
+        : responseJsonNode == null
+          ? null
+          : responseJsonNode.path("carrierBookingReference").asText(null);
+    var newCbrr = responseJsonNode == null
+      ? null
+      : responseJsonNode.path("carrierBookingRequestReference").asText(null);
 
     BookingDynamicScenarioParameters dsp = getBookingDspReference().get();
     var updatedDsp = dsp;
@@ -125,7 +153,9 @@ public abstract class BookingAction extends BookingAndEblAction {
   }
 
   private String getCbrFromNotificationPayload(JsonNode requestJsonNode) {
-    return requestJsonNode.path("data").path("carrierBookingReference").asText(null);
+    return requestJsonNode == null
+      ? null
+      : requestJsonNode.path("data").path("carrierBookingReference").asText(null);
   }
 
   protected String getMarkdownHumanReadablePrompt(String... fileNames) {
@@ -194,7 +224,7 @@ public abstract class BookingAction extends BookingAndEblAction {
     return Stream.of(
       new HttpMethodCheck(titlePrefix, BookingRole::isCarrier, getMatchedNotificationExchangeUuid(), "POST"),
       new UrlPathCheck(titlePrefix, BookingRole::isCarrier, getMatchedNotificationExchangeUuid(), "/v2/booking-notifications"),
-      new ResponseStatusCheck(titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204)
+      ResponseStatusCheck.forSuccessfulResponse(titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid())
         .withRelevance(isWithNotifications),
       new JsonSchemaCheck(titlePrefix, BookingRole::isCarrier, getMatchedNotificationExchangeUuid(), HttpMessageType.REQUEST, notificationSchemaValidator),
       ApiHeaderCheck.createNotificationCheck(titlePrefix, BookingRole::isCarrier, getMatchedNotificationExchangeUuid(), HttpMessageType.REQUEST, expectedApiVersion),
@@ -202,9 +232,7 @@ public abstract class BookingAction extends BookingAndEblAction {
         .withRelevance(isWithNotifications),
       new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
         getMatchedNotificationExchangeUuid(),
-        bookingState,
-        amendedBookingState,
-        bookingCancellationState,
+        carrierStatusScenario(bookingState, amendedBookingState, bookingCancellationState),
         getDspSupplier()));
   }
 
@@ -235,7 +263,7 @@ public abstract class BookingAction extends BookingAndEblAction {
     return Stream.of(
       new HttpMethodCheck(titlePrefix, BookingRole::isCarrier, getMatchedExchangeUuid(), "POST"),
       new UrlPathCheck(titlePrefix, BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-      new ResponseStatusCheck(titlePrefix, BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
+      ResponseStatusCheck.forSuccessfulResponse(titlePrefix, BookingRole::isShipper, getMatchedExchangeUuid())
         .withRelevance(isWithNotifications()),
       new JsonSchemaCheck(
         titlePrefix,
@@ -258,9 +286,7 @@ public abstract class BookingAction extends BookingAndEblAction {
         .withRelevance(isWithNotifications()),
       new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
         getMatchedExchangeUuid(),
-        bookingState,
-        amendedBookingState,
-        cancellationState,
+        carrierStatusScenario(bookingState, amendedBookingState, cancellationState),
         getDspSupplier()));
   }
 
@@ -272,7 +298,7 @@ public abstract class BookingAction extends BookingAndEblAction {
     return Stream.of(
       new HttpMethodCheck(titlePrefix, BookingRole::isCarrier, getMatchedExchangeUuid(), "POST"),
       new UrlPathCheck(titlePrefix, BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
-      new ResponseStatusCheck(titlePrefix, BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus)
+      ResponseStatusCheck.forSuccessfulResponse(titlePrefix, BookingRole::isShipper, getMatchedExchangeUuid())
         .withRelevance(isWithNotifications()),
       new JsonSchemaCheck(
         titlePrefix,

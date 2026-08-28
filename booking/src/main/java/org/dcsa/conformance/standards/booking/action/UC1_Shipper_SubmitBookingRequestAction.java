@@ -73,7 +73,6 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
         return Stream.of(
           createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings", requestSchemaValidator),
           Stream.of(
-            new JsonSchemaCheck(BookingRole::isCarrier, getMatchedExchangeUuid(), HttpMessageType.RESPONSE, responseSchemaValidator),
             BookingChecks.requestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())
           ),
           getNotificationChecks(expectedApiVersion, notificationSchemaValidator, BookingState.RECEIVED, null)

@@ -135,6 +135,12 @@ public class PersistableCarrierBooking {
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
   }
 
+  public void declineBookingAmendment(String reference) {
+    checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
+    changeState(BOOKING_STATUS, CONFIRMED);
+    changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
+  }
+
   public void confirmBooking(String reference, Supplier<String> cbrGenerator) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CONFIRMED);
     checkState(reference, getOriginalBookingState(), prerequisites);
@@ -231,6 +237,12 @@ public class PersistableCarrierBooking {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_CONFIRMED);
     changeState(BOOKING_STATUS, CANCELLED);
+  }
+
+  public void declineConfirmedBookingCancellation(String bookingReference) {
+    checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
+    changeState(CANCELLATION_DECLINED);
+    changeState(BOOKING_STATUS, CONFIRMED);
   }
 
   public void updateCancelConfirmedBooking(String bookingReference) {

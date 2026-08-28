@@ -91,6 +91,20 @@ class CarrierStatusScenarioTest {
   }
 
   @Test
+  void bookingStatusOnlyScenarioIgnoresSecondaryStatusValues() {
+    CarrierStatusScenario scenario = CarrierStatusScenario.bookingStatusOnly(CONFIRMED);
+    ObjectNode payload = OBJECT_MAPPER.createObjectNode()
+      .put("bookingStatus", CONFIRMED.name())
+      .put("amendedBookingStatus", "SYSTEM_LIMITATION_VALUE")
+      .put("bookingCancellationStatus", "SYSTEM_LIMITATION_VALUE");
+
+    assertTrue(scenario.validateBookingStatus(payload).isConformant());
+    assertTrue(scenario.validateAmendedBookingStatus(payload).isConformant());
+    assertTrue(scenario.validateBookingCancellationStatus(payload).isConformant());
+    assertFalse(scenario.shouldValidateSecondaryStatuses());
+  }
+
+  @Test
   void uc8OnlyAcceptsApprovedOutcome() {
     CarrierStatusScenario scenario =
       CarrierStatusScenario.from(CONFIRMED, AMENDMENT_CONFIRMED, null);

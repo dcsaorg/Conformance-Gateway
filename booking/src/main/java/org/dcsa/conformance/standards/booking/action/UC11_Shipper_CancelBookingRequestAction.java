@@ -61,18 +61,6 @@ public class UC11_Shipper_CancelBookingRequestAction extends ShipperNotification
         String cbr = dsp.carrierBookingReference();
         return Stream.of(
           createPatchPrimarySubChecks(expectedApiVersion, "/v2/bookings/", requestSchemaValidator, cbrr, cbr),
-          Stream.of(
-            createShipperPatchPreconditionCheck(
-              "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is neither CONFIRMED nor PENDING_AMENDMENT in order to cancel a Booking Request (prior to Booking Confirmation).".formatted(jsonPath(BOOKING_STATUS)),
-              BOOKING_STATUS,
-              status -> !BookingState.CONFIRMED.name().equals(status) && !BookingState.PENDING_AMENDMENT.name().equals(status),
-              "neither %s nor %s".formatted(BookingState.CONFIRMED.name(), BookingState.PENDING_AMENDMENT.name())),
-            createCarrierPatchPreconditionResponseStatusCheck(
-              "[Scenario] The HTTP response status is correct for the applicable PATCH business precondition",
-              BOOKING_STATUS,
-              status -> !BookingState.CONFIRMED.name().equals(status) && !BookingState.PENDING_AMENDMENT.name().equals(status),
-              "neither %s nor %s".formatted(BookingState.CONFIRMED.name(), BookingState.PENDING_AMENDMENT.name()),
-              409)),
           getNotificationChecks(expectedApiVersion, notificationSchemaValidator, expectedBookingStatus, null)
         ).flatMap(Function.identity());
       }

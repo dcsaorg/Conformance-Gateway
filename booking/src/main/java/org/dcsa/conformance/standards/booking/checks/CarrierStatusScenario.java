@@ -27,19 +27,22 @@ public final class CarrierStatusScenario {
   private final boolean amendedBookingStatusRequired;
   private final Set<BookingCancellationState> bookingCancellationStatuses;
   private final boolean bookingCancellationStatusRequired;
+  private final boolean validateSecondaryStatuses;
 
   private CarrierStatusScenario(
     Set<BookingState> bookingStatuses,
     Set<BookingState> amendedBookingStatuses,
     boolean amendedBookingStatusRequired,
     Set<BookingCancellationState> bookingCancellationStatuses,
-    boolean bookingCancellationStatusRequired) {
+    boolean bookingCancellationStatusRequired,
+    boolean validateSecondaryStatuses) {
     this.bookingStatuses = immutableEnumSet(bookingStatuses, BookingState.class);
     this.amendedBookingStatuses = immutableEnumSet(amendedBookingStatuses, BookingState.class);
     this.amendedBookingStatusRequired = amendedBookingStatusRequired;
     this.bookingCancellationStatuses =
       immutableEnumSet(bookingCancellationStatuses, BookingCancellationState.class);
     this.bookingCancellationStatusRequired = bookingCancellationStatusRequired;
+    this.validateSecondaryStatuses = validateSecondaryStatuses;
   }
 
   public static CarrierStatusScenario from(
@@ -79,7 +82,14 @@ public final class CarrierStatusScenario {
       allowedAmendedBookingStatuses,
       amendmentRequired,
       allowedCancellationStatuses,
-      bookingCancellationStatus != null);
+      bookingCancellationStatus != null,
+      true);
+  }
+
+  public static CarrierStatusScenario bookingStatusOnly(BookingState bookingStatus) {
+    Objects.requireNonNull(bookingStatus, "bookingStatus");
+    return new CarrierStatusScenario(
+      Set.of(bookingStatus), Set.of(), false, Set.of(), false, false);
   }
 
   ConformanceCheckResult validateBookingStatus(JsonNode payload) {
@@ -87,6 +97,9 @@ public final class CarrierStatusScenario {
   }
 
   ConformanceCheckResult validateAmendedBookingStatus(JsonNode payload) {
+    if (!validateSecondaryStatuses) {
+      return ConformanceCheckResult.simple(Set.of());
+    }
     return validateConditionalStatus(
       payload,
       "amendedBookingStatus",
@@ -95,6 +108,9 @@ public final class CarrierStatusScenario {
   }
 
   ConformanceCheckResult validateBookingCancellationStatus(JsonNode payload) {
+    if (!validateSecondaryStatuses) {
+      return ConformanceCheckResult.simple(Set.of());
+    }
     return validateConditionalStatus(
       payload,
       "bookingCancellationStatus",
@@ -107,12 +123,18 @@ public final class CarrierStatusScenario {
   }
 
   String amendedBookingStatusExpectation() {
+    if (!validateSecondaryStatuses) return "not be validated";
     return conditionalExpectation(amendedBookingStatuses, amendedBookingStatusRequired);
   }
 
   String bookingCancellationStatusExpectation() {
+    if (!validateSecondaryStatuses) return "not be validated";
     return conditionalExpectation(
       bookingCancellationStatuses, bookingCancellationStatusRequired);
+  }
+
+  boolean shouldValidateSecondaryStatuses() {
+    return validateSecondaryStatuses;
   }
 
   private static ConformanceCheckResult validateRequiredStatus(

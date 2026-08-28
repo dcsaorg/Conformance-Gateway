@@ -36,16 +36,16 @@ class BookingScenarioListBuilderTest {
         "SupplyCSP [any BKG] - UC1 - UC2 - GET",
         "SupplyCSP [any BKG] - UC1 - UC4 - GET",
         "SupplyCSP [any BKG] - UC1 - UC5 - UC6 - GET",
-        "SupplyCSP [any BKG] - UC1 - UC5 - UC7 - UC8(Confirm) - GET",
-        "SupplyCSP [any BKG] - UC1 - UC5 - UC7 - UC8(Decline) - GET",
+        "SupplyCSP [any BKG] - UC1 - UC5 - UC7 - UC8 (Confirm) - GET",
+        "SupplyCSP [any BKG] - UC1 - UC5 - UC7 - UC8 (Decline) - GET",
         "SupplyCSP [any BKG] - UC1 - UC5 - UC7 - GET (amended content)",
         "SupplyCSP [any BKG] - UC1 - UC5 - UC7 - UC9 - GET",
         "SupplyCSP [any BKG] - UC1 - UC5 - UC10 - GET",
         "SupplyCSP [any BKG] - UC1 - UC11 - GET",
         "SupplyCSP [any BKG] - UC1 - UC5 - UC12 - GET",
         "SupplyCSP [any BKG] - UC1 - UC5 - UC13 - GET",
-        "SupplyCSP [any BKG] - UC1 - UC5 - UC13 - UC14(Confirm) - GET",
-        "SupplyCSP [any BKG] - UC1 - UC5 - UC13 - UC14(Decline) - GET"),
+        "SupplyCSP [any BKG] - UC1 - UC5 - UC13 - UC14 (Confirm) - GET",
+        "SupplyCSP [any BKG] - UC1 - UC5 - UC13 - UC14 (Decline) - GET"),
       titles(builders.get(OPTIONAL_SCENARIOS)));
   }
 

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
-import org.dcsa.conformance.standards.booking.checks.CarrierStatusScenario;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
@@ -21,7 +20,6 @@ public class UC7_Shipper_SubmitBookingAmendment extends ShipperNotificationBooki
   private final JsonSchemaValidator notificationSchemaValidator;
   private final BookingState expectedBookingStatus;
   private final BookingState expectedAmendedBookingStatus;
-  private final boolean validateSecondaryStatuses;
 
   public UC7_Shipper_SubmitBookingAmendment(
     String carrierPartyName,
@@ -32,34 +30,11 @@ public class UC7_Shipper_SubmitBookingAmendment extends ShipperNotificationBooki
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator notificationSchemaValidator,
     boolean isWithNotifications) {
-    this(
-      carrierPartyName,
-      shipperPartyName,
-      previousAction,
-      expectedBookingStatus,
-      expectedAmendedBookingStatus,
-      requestSchemaValidator,
-      notificationSchemaValidator,
-      isWithNotifications,
-      true);
-  }
-
-  public UC7_Shipper_SubmitBookingAmendment(
-    String carrierPartyName,
-    String shipperPartyName,
-    BookingAndEblAction previousAction,
-    BookingState expectedBookingStatus,
-    BookingState expectedAmendedBookingStatus,
-    JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator notificationSchemaValidator,
-    boolean isWithNotifications,
-    boolean validateSecondaryStatuses) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC7", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.expectedBookingStatus = expectedBookingStatus;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
-    this.validateSecondaryStatuses = validateSecondaryStatuses;
   }
 
   @Override
@@ -94,16 +69,11 @@ public class UC7_Shipper_SubmitBookingAmendment extends ShipperNotificationBooki
             Stream.of(
               BookingChecks.updateRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())
             ),
-            validateSecondaryStatuses
-              ? getNotificationChecks(
-                  expectedApiVersion,
-                  notificationSchemaValidator,
-                  expectedBookingStatus,
-                  expectedAmendedBookingStatus)
-              : getNotificationChecks(
-                  expectedApiVersion,
-                  notificationSchemaValidator,
-                  CarrierStatusScenario.bookingStatusOnly(expectedBookingStatus))
+            getNotificationChecks(
+              expectedApiVersion,
+              notificationSchemaValidator,
+              expectedBookingStatus,
+              expectedAmendedBookingStatus)
           ).flatMap(Function.identity());
       }
     };

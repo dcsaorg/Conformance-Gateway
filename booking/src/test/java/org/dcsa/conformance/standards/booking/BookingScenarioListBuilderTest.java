@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioConformanceType;
+import org.dcsa.conformance.standards.booking.action.BookingAction;
+import org.dcsa.conformance.standards.booking.action.CarrierNotificationBookingAction;
+import org.dcsa.conformance.standards.booking.action.ShipperNotificationBookingAction;
 import org.dcsa.conformance.standards.booking.action.ShipperGetBookingSkippableAction;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.junit.jupiter.api.Test;
@@ -83,6 +86,23 @@ class BookingScenarioListBuilderTest {
             scenario.allActionsStream()
               .anyMatch(ShipperGetBookingSkippableAction.class::isInstance));
         }));
+    }
+  }
+
+  @Test
+  void mandatoryNotificationsIgnoreSecondaryStatusesButOptionalNotificationsRemainStrict() {
+    for (BookingRole role : BookingRole.values()) {
+      buildersFor(role).forEach((section, builder) ->
+        builder.buildScenarioList(0).forEach(scenario ->
+          scenario.allActionsStream()
+            .filter(action ->
+              action instanceof CarrierNotificationBookingAction
+                || action instanceof ShipperNotificationBookingAction)
+            .map(BookingAction.class::cast)
+            .forEach(action -> assertEquals(
+              section.equals(OPTIONAL_SCENARIOS),
+              action.isSecondaryStatusValidationEnabled(),
+              scenario.getTitle() + " / " + action.getActionTitle()))));
     }
   }
 

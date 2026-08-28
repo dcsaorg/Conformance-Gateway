@@ -1,6 +1,13 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
+import org.dcsa.conformance.core.check.ResponseStatusCheck;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.ConformanceMessage;
+import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
+import org.dcsa.conformance.core.traffic.ConformanceRequest;
+import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.junit.jupiter.api.Test;
@@ -8,10 +15,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Set;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BookingActionTest {
 
@@ -31,6 +43,50 @@ class BookingActionTest {
     assertEquals(
         Set.of(BookingRole.CARRIER.getConfigName()),
         action.completableWithoutTrafficForRoles());
+  }
+
+  @Test
+  void uc1AcceptsAny2xxStatusButRequiresCbrrResponsePayload() {
+    JsonSchemaValidator createBookingSchema = JsonSchemaValidator.getInstance(
+      "/standards/booking/schemas/BKG_v2.0.0.yaml", "CreateBooking");
+    JsonSchemaValidator createBookingResponseSchema = JsonSchemaValidator.getInstance(
+      "/standards/booking/schemas/BKG_v2.0.0.yaml", "CreateBookingResponse");
+    BookingAction previousAction = new CarrierSupplyScenarioParametersAction(
+      "Carrier", ScenarioType.DRY_CARGO, "2.0.0", createBookingSchema);
+    var action = new UC1_Shipper_SubmitBookingRequestAction(
+      "Carrier",
+      "Shipper",
+      previousAction,
+      createBookingSchema,
+      createBookingResponseSchema,
+      null,
+      false);
+    ConformanceExchange exchange = exchange(204, "");
+
+    action.handleExchange(exchange);
+    assertNull(action.getExchangeHandlingExceptionMessage());
+
+    var check = action.createCheck("2.0.0");
+    check.check(uuid -> exchange.getUuid().equals(uuid) ? exchange : null);
+    List<org.dcsa.conformance.core.check.ConformanceCheck> subChecks =
+      check.subChecksStream().toList();
+
+    assertInstanceOf(ResponseStatusCheck.class, subChecks.get(2));
+    assertTrue(subChecks.get(2).resultsStream().allMatch(result -> result.isConformant()));
+    assertInstanceOf(JsonSchemaCheck.class, subChecks.get(6));
+    assertTrue(subChecks.get(6).resultsStream().anyMatch(result -> !result.isConformant()));
+  }
+
+  private static ConformanceExchange exchange(int status, String responseBody) {
+    var requestMessage = new ConformanceMessage(
+      "Shipper", "Shipper", "Carrier", "Carrier", Map.of("API-Version", List.of("2.0.0")),
+      new ConformanceMessageBody("{}"), 0);
+    var responseMessage = new ConformanceMessage(
+      "Carrier", "Carrier", "Shipper", "Shipper", Map.of("API-Version", List.of("2.0.0")),
+      new ConformanceMessageBody(responseBody), 0);
+    return new ConformanceExchange(
+      new ConformanceRequest("POST", "https://example.test/v2/bookings", Map.of(), requestMessage),
+      new ConformanceResponse(status, responseMessage));
   }
 
   private static Stream<BookingAction> carrierNotificationActions() {

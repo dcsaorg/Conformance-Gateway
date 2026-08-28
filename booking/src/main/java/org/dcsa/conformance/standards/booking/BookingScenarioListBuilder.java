@@ -124,36 +124,38 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static BookingScenarioListBuilder carrierRequiredScenario(
     String carrierPartyName, ScenarioType scenarioType) {
     return carrierSupplyScenarioParameters(carrierPartyName, scenarioType)
-      .then(uc1ShipperSubmitBookingRequest().then(confirmedBookingScenario()));
+      .then(uc1ShipperSubmitBookingRequest(false).then(confirmedBookingScenario(false)));
   }
 
   private static BookingScenarioListBuilder shipperRequiredScenarios(
     String carrierPartyName, ScenarioType scenarioType) {
     return carrierSupplyScenarioParameters(carrierPartyName, scenarioType)
       .then(
-        uc1ShipperSubmitBookingRequest()
+        uc1ShipperSubmitBookingRequest(false)
           .thenEither(
             shipperGetBookingStatusOnly(RECEIVED),
-            uc2CarrierRequestUpdateToBookingRequest()
-              .then(uc3ShipperSubmitUpdatedBookingRequest()),
-            uc5CarrierConfirmBookingRequest()
+            uc2CarrierRequestUpdateToBookingRequest(false)
+              .then(uc3ShipperSubmitUpdatedBookingRequest(false)),
+            uc5CarrierConfirmBookingRequest(false)
               .then(
-                uc6CarrierRequestToAmendConfirmedBooking()
+                uc6CarrierRequestToAmendConfirmedBooking(false)
                   .then(uc7ShipperSubmitBookingAmendment(false)))));
   }
 
   private static BookingScenarioListBuilder additionalRequiredScenarios(String carrierPartyName, ScenarioType scenarioType) {
     return carrierSupplyScenarioParameters(carrierPartyName, scenarioType)
       .then(
-        uc1ShipperSubmitBookingRequest()
+        uc1ShipperSubmitBookingRequest(false)
           .thenEither(
-            uc3ShipperSubmitUpdatedBookingRequest(),
-            uc5CarrierConfirmBookingRequest()
+            uc3ShipperSubmitUpdatedBookingRequest(false),
+            uc5CarrierConfirmBookingRequest(false)
               .then(uc7ShipperSubmitBookingAmendment(false))));
   }
 
-  private static BookingScenarioListBuilder confirmedBookingScenario() {
-    return uc5CarrierConfirmBookingRequest().then(shipperGetBookingStatusOnly(CONFIRMED));
+  private static BookingScenarioListBuilder confirmedBookingScenario(
+    boolean validateSecondaryStatuses) {
+    return uc5CarrierConfirmBookingRequest(validateSecondaryStatuses)
+      .then(shipperGetBookingStatusOnly(CONFIRMED));
   }
 
   private static BookingScenarioListBuilder carrierOptionalScenarios(String carrierPartyName) {
@@ -276,6 +278,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder uc1ShipperSubmitBookingRequest() {
+    return uc1ShipperSubmitBookingRequest(true);
+  }
+
+  private static BookingScenarioListBuilder uc1ShipperSubmitBookingRequest(
+    boolean validateSecondaryStatuses) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -287,15 +294,28 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(BOOKING_API, CREATE_BOOKING_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
           componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          isWithNotifications));
+          isWithNotifications)
+          .withoutSecondaryStatusValidationIf(!validateSecondaryStatuses));
   }
 
   private static BookingScenarioListBuilder uc2CarrierRequestUpdateToBookingRequest() {
-    return carrierStateChange(UC2_Carrier_RequestUpdateToBookingRequestAction::new);
+    return uc2CarrierRequestUpdateToBookingRequest(true);
+  }
+
+  private static BookingScenarioListBuilder uc2CarrierRequestUpdateToBookingRequest(
+    boolean validateSecondaryStatuses) {
+    return carrierStateChange(
+      UC2_Carrier_RequestUpdateToBookingRequestAction::new, validateSecondaryStatuses);
   }
 
   private static BookingScenarioListBuilder uc3ShipperSubmitUpdatedBookingRequest() {
+    return uc3ShipperSubmitUpdatedBookingRequest(true);
+  }
+
+  private static BookingScenarioListBuilder uc3ShipperSubmitUpdatedBookingRequest(
+    boolean validateSecondaryStatuses) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -309,7 +329,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           BookingState.UPDATE_RECEIVED,
           componentFactory.getMessageSchemaValidator(BOOKING_API, UPDATE_BOOKING_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          isWithNotifications));
+          isWithNotifications)
+          .withoutSecondaryStatusValidationIf(!validateSecondaryStatuses));
   }
 
   private static BookingScenarioListBuilder uc4CarrierRejectBookingRequest() {
@@ -317,11 +338,23 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder uc5CarrierConfirmBookingRequest() {
-    return carrierStateChange(UC5_Carrier_ConfirmBookingRequestAction::new);
+    return uc5CarrierConfirmBookingRequest(true);
+  }
+
+  private static BookingScenarioListBuilder uc5CarrierConfirmBookingRequest(
+    boolean validateSecondaryStatuses) {
+    return carrierStateChange(
+      UC5_Carrier_ConfirmBookingRequestAction::new, validateSecondaryStatuses);
   }
 
   private static BookingScenarioListBuilder uc6CarrierRequestToAmendConfirmedBooking() {
-    return carrierStateChange(UC6_Carrier_RequestToAmendConfirmedBookingAction::new);
+    return uc6CarrierRequestToAmendConfirmedBooking(true);
+  }
+
+  private static BookingScenarioListBuilder uc6CarrierRequestToAmendConfirmedBooking(
+    boolean validateSecondaryStatuses) {
+    return carrierStateChange(
+      UC6_Carrier_RequestToAmendConfirmedBookingAction::new, validateSecondaryStatuses);
   }
 
   private static BookingScenarioListBuilder uc7ShipperSubmitBookingAmendment(
@@ -340,8 +373,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           BookingState.AMENDMENT_RECEIVED,
           componentFactory.getMessageSchemaValidator(BOOKING_API, UPDATE_BOOKING_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          isWithNotifications,
-          validateSecondaryStatuses));
+          isWithNotifications)
+          .withoutSecondaryStatusValidationIf(!validateSecondaryStatuses));
   }
 
   private static BookingScenarioListBuilder uc8CarrierProcessBookingAmendment(boolean confirm) {
@@ -452,6 +485,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
 
   private static BookingScenarioListBuilder carrierStateChange(
     CarrierNotificationUseCase constructor) {
+    return carrierStateChange(constructor, true);
+  }
+
+  private static BookingScenarioListBuilder carrierStateChange(
+    CarrierNotificationUseCase constructor, boolean validateSecondaryStatuses) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -463,7 +501,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          isWithNotifications));
+          isWithNotifications)
+          .withoutSecondaryStatusValidationIf(!validateSecondaryStatuses));
   }
 
   public interface CarrierNotificationUseCase {

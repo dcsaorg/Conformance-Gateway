@@ -37,7 +37,7 @@ class EblIssuanceContractTest {
   void buildsTheDocumentedCarrierScenario() {
     var factory =
         new EblIssuanceComponentFactory(
-            "eBL Issuance", "3.0.3", EblIssuanceStandard.SCENARIO_SUITE_CONFORMANCE);
+            "eBL Issuance", "3.0.0", EblIssuanceStandard.SCENARIO_SUITE_CONFORMANCE);
     var modules =
         EblIssuanceScenarioListBuilder.createModuleScenarioListBuilders(
             factory,
@@ -57,7 +57,7 @@ class EblIssuanceContractTest {
   void buildsTheDocumentedPlatformScenario() {
     var factory =
         new EblIssuanceComponentFactory(
-            "eBL Issuance", "3.0.3", EblIssuanceStandard.SCENARIO_SUITE_CONFORMANCE);
+            "eBL Issuance", "3.0.0", EblIssuanceStandard.SCENARIO_SUITE_CONFORMANCE);
     var modules =
         EblIssuanceScenarioListBuilder.createModuleScenarioListBuilders(
             factory,

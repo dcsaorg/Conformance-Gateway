@@ -112,7 +112,7 @@ class IssuanceChecksTest {
     var issuanceManifestChecks =
         IssuanceChecks.issuanceRequestSignatureChecks(
             exchangeId,
-            "3.0.3",
+            "3.0.0",
             MANIFEST_SCHEMA,
             () ->
                 PayloadSignerFactory.verifierFromPemEncodedCertificate(
@@ -121,7 +121,7 @@ class IssuanceChecksTest {
     assertEquals(
         "Complex validations of 'issuanceManifest'", issuanceManifestChecks.getTitle().trim());
     assertTrue(issuanceManifestChecks.isRelevant());
-    assertTrue(IssuanceChecks.tdContentChecks(exchangeId, "3.0.3").isRelevant());
+    assertTrue(IssuanceChecks.tdContentChecks(exchangeId, "3.0.0").isRelevant());
   }
 
   private static List<JsonContentCheck> issuanceChecks() {

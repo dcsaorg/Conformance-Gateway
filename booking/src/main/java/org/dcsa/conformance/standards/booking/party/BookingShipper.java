@@ -129,17 +129,21 @@ public class BookingShipper extends ConformanceParty {
 
   private void sendConfirmedBookingCancellationRequest(JsonNode actionPrompt) {
     log.info("Shipper.sendConfirmedBookingCancellationRequest(%s)".formatted(actionPrompt.toPrettyString()));
-    String cbr = actionPrompt.path("cbr").asText();
+    String cbr = actionPrompt.path("cbr").asText(null);
+    String cbrr = actionPrompt.path("cbrr").asText(null);
+    // The CBR is only known to the shipper when notifications are enabled; fall back to the CBRR,
+    // as the booking reference in the URL may be either of them.
+    String reference = getBookingReference(actionPrompt);
 
     syncCounterpartPatch(
-      "/v2/bookings/%s".formatted(cbr),
+      "/v2/bookings/%s".formatted(reference),
       Collections.emptyMap(),
       OBJECT_MAPPER.createObjectNode()
         .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
         .put("reason", "Cancelling due to internal issues"));
 
     addOperatorLogEntry(
-      BookingAction.createMessageForUIPrompt("Sent a confirmed booking cancellation of booking", cbr, null));
+      BookingAction.createMessageForUIPrompt("Sent a confirmed booking cancellation of booking", cbr, cbrr));
   }
 
   private void sendCancelBookingAmendment(JsonNode actionPrompt) {

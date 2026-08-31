@@ -2,7 +2,13 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
+    /* 'baseUrl' is deprecated in TypeScript 6 and removed in 7; 'paths' entries are
+       resolved relative to this tsconfig, which keeps the existing "src/..." imports working. */
+    "paths": {
+      "src/*": [
+        "./src/*"
+      ]
+    },
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,

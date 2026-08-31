@@ -155,23 +155,25 @@ public class BookingCarrier extends ConformanceParty {
     log.info(
       "Carrier.processConfirmedBookingCancellation(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbr = actionPrompt.required("cbr").asText();
+    String cbr = actionPrompt.path("cbr").asText(null);
+    String cbrrFromPrompt = actionPrompt.path("cbrr").asText(null);
     boolean confirmCancellation = actionPrompt.path("confirmCancellation").asBoolean(true);
     addOperatorLogEntry(
       BookingAction.createMessageForUIPrompt(
         (confirmCancellation ? "Confirmed" : "Declined") + " cancellation of Confirmed booking",
         cbr,
-        null));
+        cbrrFromPrompt));
 
-    // bookingReference can either be a CBR or CBRR.
-    var cbrr = cbrToCbrr.getOrDefault(cbr, cbr);
+    // The CBR is only known to the orchestrator when notifications are enabled; fall back to the
+    // CBRR, as the booking reference can either be a CBR or a CBRR.
+    var bookingReference = cbr != null ? cbr : cbrrFromPrompt;
+    var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
 
-    var persistableCarrierBooking =
-      PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     if (confirmCancellation) {
-      persistableCarrierBooking.cancelConfirmedBooking(cbr);
+      persistableCarrierBooking.cancelConfirmedBooking(bookingReference);
     } else {
-      persistableCarrierBooking.declineConfirmedBookingCancellation(cbr);
+      persistableCarrierBooking.declineConfirmedBookingCancellation(bookingReference);
     }
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);

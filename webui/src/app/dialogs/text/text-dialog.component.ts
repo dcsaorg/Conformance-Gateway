@@ -1,4 +1,4 @@
-import {Component, Inject, ElementRef, OnDestroy} from "@angular/core";
+import {Component, Inject, ElementRef, OnDestroy, ChangeDetectionStrategy} from "@angular/core";
 import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {firstValueFrom} from "rxjs";
 
@@ -12,6 +12,7 @@ export interface TextDialogData {
   selector: 'app-text-dialog',
   templateUrl: './text-dialog.component.html',
   styleUrls: ['./text-dialog.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class TextDialog implements OnDestroy {

@@ -1,127 +1,80 @@
 package org.dcsa.conformance.standards.eblsurrender;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.util.MapUtils;
 import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersErrorAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseAction;
-import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseErrorAction;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
-@Slf4j
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
 class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderScenarioListBuilder> {
   private static final ThreadLocal<EblSurrenderComponentFactory> threadLocalComponentFactory =
-      new ThreadLocal<>();
+    new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalPlatformPartyName = new ThreadLocal<>();
 
   private EblSurrenderScenarioListBuilder(
-      Function<ConformanceAction, ConformanceAction> actionBuilder) {
+    Function<ConformanceAction, ConformanceAction> actionBuilder) {
     super(actionBuilder);
   }
 
   public static Map<String, EblSurrenderScenarioListBuilder> createModuleScenarioListBuilders(
-      EblSurrenderComponentFactory componentFactory,
-      String carrierPartyName,
-      String platformPartyName) {
+    EblSurrenderComponentFactory componentFactory,
+    Set<String> testedPartyRoleNames,
+    String carrierPartyName,
+    String platformPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
-    return Stream.of(
-            Map.entry(
-                "Surrender Accepted",
-                noAction()
-                    .thenEither(
-                        supplyAvailableTdrAction("SURR")
-                            .thenEither(
-                                requestSurrenderForDeliveryAnd(true),
-                                requestSurrenderForAmendmentAnd(true)))),
-            Map.entry(
-                "Surrender Rejected",
-                noAction()
-                    .thenEither(
-                        supplyAvailableTdrAction("SREJ")
-                            .thenEither(
-                                requestSurrenderForDeliveryAnd(false),
-                                requestSurrenderForAmendmentAnd(false)))),
-            Map.entry(
-                "Carrier error response conformance",
-                supplyAvailableTdrErrorAction().then(requestSurrenderError())))
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+    Map<String, Map<String, EblSurrenderScenarioListBuilder>> partyScenariosMap = MapUtils.orderedMap(
+      Map.entry(
+        EblSurrenderRole.CARRIER.getConfigName(),
+        MapUtils.orderedMap(
+          Map.entry("Required scenario", supplyAvailableTdrAction().then(requestSurrender(false))),
+          Map.entry("Optional (report-only) scenario", supplyAvailableTdrAction().then(requestSurrender(true)).asOptionalReportOnlyScenario()))),
+      Map.entry(
+        EblSurrenderRole.PLATFORM.getConfigName(),
+        MapUtils.orderedMap(
+          Map.entry("Required scenario", requestSurrender(false)),
+          Map.entry("Optional (report-only) scenario", requestSurrender(true).asOptionalReportOnlyScenario())))
+    );
+
+    Map<String, EblSurrenderScenarioListBuilder> scenarios = new LinkedHashMap<>();
+    testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
+
+    return scenarios;
   }
 
-  private static EblSurrenderScenarioListBuilder noAction() {
-    return new EblSurrenderScenarioListBuilder(null);
-  }
-
-  private static EblSurrenderScenarioListBuilder supplyAvailableTdrErrorAction() {
-    log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrErrorAction()");
-
+  private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction() {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblSurrenderScenarioListBuilder(
-      _ -> new SupplyScenarioParametersErrorAction(carrierPartyName));
+      previousAction -> new SupplyScenarioParametersAction(carrierPartyName, previousAction));
   }
 
-  private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction(String response) {
-    log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrAction()");
-
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    return new EblSurrenderScenarioListBuilder(
-        _ -> new SupplyScenarioParametersAction(carrierPartyName, null, response, false));
-  }
-
-  private static EblSurrenderScenarioListBuilder requestSurrenderForAmendmentAnd(boolean accept) {
-    log.debug("EblSurrenderScenarioListBuilder.requestSurrenderForAmendment");
-
-    String titleSuffix = accept ? "Accepted" : "Rejected";
-    return _surrenderRequestBuilder(true, accept, "SurrenderForAmendment" + titleSuffix);
-  }
-
-  private static EblSurrenderScenarioListBuilder requestSurrenderForDeliveryAnd(boolean accept) {
-    log.debug("EblSurrenderScenarioListBuilder.requestSurrenderForDelivery");
-    String titleSuffix = accept ? "Accepted" : "Rejected";
-    return _surrenderRequestBuilder(false, accept, "SurrenderForDelivery" + titleSuffix);
-  }
-
-  private static EblSurrenderScenarioListBuilder _surrenderRequestBuilder(
-      boolean forAmendment, boolean accept, String title) {
+  private static EblSurrenderScenarioListBuilder requestSurrender(boolean forAmendment) {
     EblSurrenderComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblSurrenderScenarioListBuilder(
-        previousAction ->
-            new SurrenderRequestResponseAction(
-                forAmendment,
-                platformPartyName,
-                carrierPartyName,
-                204,
-                previousAction,
-                componentFactory.getMessageSchemaValidator(
-                    EblSurrenderRole.CARRIER.getConfigName(), true),
-                componentFactory.getMessageSchemaValidator(
-                    EblSurrenderRole.PLATFORM.getConfigName(), true),
-                accept,
-                title));
-  }
-
-  private static EblSurrenderScenarioListBuilder requestSurrenderError() {
-    EblSurrenderComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String platformPartyName = threadLocalPlatformPartyName.get();
-    return new EblSurrenderScenarioListBuilder(
-        previousAction ->
-            new SurrenderRequestResponseErrorAction(
-                platformPartyName,
-                carrierPartyName,
-                previousAction,
-                componentFactory.getMessageSchemaValidator("ErrorResponse")));
+      previousAction ->
+        new SurrenderRequestResponseAction(
+          forAmendment,
+          platformPartyName,
+          carrierPartyName,
+          204,
+          previousAction,
+          componentFactory.getMessageSchemaValidator(
+            EblSurrenderRole.CARRIER.getConfigName(), true),
+          componentFactory.getMessageSchemaValidator(
+            EblSurrenderRole.PLATFORM.getConfigName(), true),
+          forAmendment
+            ? "Surrender request(Amendment) - Surrender response"
+            : "Surrender request(Delivery) - Surrender response"));
   }
 }

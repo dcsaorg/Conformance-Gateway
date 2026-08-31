@@ -74,6 +74,25 @@ class EblIssuanceContractTest {
   }
 
   @Test
+  void buildsSeparateScenarioMapsWhenTestingBothRoles() {
+    var factory =
+        new EblIssuanceComponentFactory(
+            "eBL Issuance", "3.0.0", EblIssuanceStandard.SCENARIO_SUITE_CONFORMANCE);
+
+    var modules =
+        EblIssuanceScenarioListBuilder.createModuleScenarioListBuilders(
+            factory,
+            Set.of(
+                EblIssuanceRole.CARRIER.getConfigName(),
+                EblIssuanceRole.PLATFORM.getConfigName()),
+            "Carrier under test",
+            "eBL Platform under test");
+
+    assertEquals(
+        Set.of("Carrier required scenario", "eBL Platform required scenario"), modules.keySet());
+  }
+
+  @Test
   void syntheticCarrierRequestPassesSchemaAndAllReusedTdChecks() {
     ObjectNode request =
         (ObjectNode)

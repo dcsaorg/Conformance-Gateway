@@ -31,8 +31,8 @@ broader compatibility.
 
 ### 2. Scenario Parameters
 
-Supply the following parameters so that when your platform system receives the issuance request, it sends back an
-asynchronous response by making a POST request to `/ebl-issuance-responses` with the code **RESPONSE_CODE**.
+Supply the following parameters so that when your platform receives the issuance request, it can send an asynchronous
+response by making a POST request to `/v3/ebl-issuance-responses`.
 
 These parameters customize the requests sent to your platform application throughout the scenario.
 

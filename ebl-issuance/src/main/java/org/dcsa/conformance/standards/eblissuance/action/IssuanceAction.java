@@ -1,87 +1,42 @@
 package org.dcsa.conformance.standards.eblissuance.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
+import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
+import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.scenario.OverwritingReference;
-import org.dcsa.conformance.core.toolkit.IOToolkit;
-import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
-import org.dcsa.conformance.standards.eblissuance.party.DynamicScenarioParameters;
-import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
 public abstract class IssuanceAction extends ConformanceAction {
-  private OverwritingReference<DynamicScenarioParameters> dspReference;
+
   protected final int expectedStatus;
 
   protected IssuanceAction(
-      String sourcePartyName,
-      String targetPartyName,
-      IssuanceAction previousAction,
-      String actionTitle,
-      int expectedStatus) {
+    String sourcePartyName,
+    String targetPartyName,
+    IssuanceAction previousAction,
+    String actionTitle,
+    int expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
-    this.initializeDsp();
-  }
-
-  private void initializeDsp() {
-    if (previousAction == null) {
-      this.dspReference =
-          new OverwritingReference<>(null, new DynamicScenarioParameters(EblType.STRAIGHT_EBL));
-    } else {
-      this.dspReference =
-          new OverwritingReference<>(getPreviousIssuanceAction().dspReference, null);
-    }
-  }
-
-  @Override
-  public void reset() {
-    super.reset();
-    this.initializeDsp();
   }
 
   protected IssuanceAction getPreviousIssuanceAction() {
     return (IssuanceAction) previousAction;
   }
 
-  public DynamicScenarioParameters getDsp() {
-    return this.dspReference.get();
-  }
-
-  public void setDsp(DynamicScenarioParameters dsp) {
-    this.dspReference.set(dsp);
-  }
-
-  @Override
-  public ObjectNode exportJsonState() {
-    var state = super.exportJsonState();
-    if (dspReference.hasCurrentValue()) {
-      state.set("dsp", getDsp().toJson());
-    }
-    return state;
-  }
-
-  @Override
-  public void importJsonState(JsonNode jsonState) {
-    super.importJsonState(jsonState);
-    if (jsonState.has("dsp")) {
-      this.setDsp(DynamicScenarioParameters.fromJson(jsonState.path("dsp")));
-    }
-  }
-
   protected String getMarkdownHumanReadablePrompt(
-      Map<String, String> replacements, String... fileNames) {
+    Map<String, String> replacements, String... fileNames) {
     return Arrays.stream(fileNames)
-        .map(
-            fileName ->
-                IOToolkit.templateFileToText(
-                    "/standards/eblissuance/instructions/" + fileName, replacements))
-        .collect(Collectors.joining());
+      .map(
+        fileName ->
+          IOToolkit.templateFileToText(
+            "/standards/eblissuance/instructions/" + fileName, replacements))
+      .collect(Collectors.joining());
   }
 
   protected Consumer<SuppliedScenarioParameters> getSspConsumer() {
@@ -102,11 +57,4 @@ public abstract class IssuanceAction extends ConformanceAction {
 
   protected abstract Supplier<String> getTdrSupplier();
 
-  public static PlatformScenarioParametersAction latestPlatformScenarioParametersAction(
-      IssuanceAction previousAction) {
-    return previousAction
-            instanceof PlatformScenarioParametersAction platformScenarioParametersAction
-        ? platformScenarioParametersAction
-        : latestPlatformScenarioParametersAction(previousAction.getPreviousIssuanceAction());
-  }
 }

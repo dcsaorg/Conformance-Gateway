@@ -11,14 +11,18 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceCarrier;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuancePlatform;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 class EblIssuanceComponentFactory extends AbstractComponentFactory {
   EblIssuanceComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
-    super(standardName, standardVersion, scenarioSuite, "Carrier", "Platform");
+    super(
+        standardName,
+        standardVersion,
+        scenarioSuite,
+        EblIssuanceRole.CARRIER.getConfigName(),
+        EblIssuanceRole.PLATFORM.getConfigName());
   }
 
   public List<ConformanceParty> createParties(
@@ -71,6 +75,7 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
       boolean isWithNotifications) {
     return EblIssuanceScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        getReportRoleNames(partyConfigurations, counterpartConfigurations),
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, EblIssuanceRole::isCarrier),
         _findPartyOrCounterpartName(
@@ -101,8 +106,7 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(
       String apiProviderRole, boolean forRequest, boolean issuanceManifest) {
-    String schemaFilePath =
-        "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml".formatted(standardVersion);
+    String schemaFilePath = "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml".formatted(standardVersion);
     String schemaName =
         EblIssuanceRole.isCarrier(apiProviderRole)
             ? (forRequest ? "IssuanceRequest" : null)
@@ -110,12 +114,6 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
     if (issuanceManifest) {
       schemaName = "IssuanceManifest";
     }
-    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
-  }
-
-  public JsonSchemaValidator getMessageSchemaValidator(String schemaName) {
-    String schemaFilePath =
-        "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 }

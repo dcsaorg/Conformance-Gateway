@@ -3,32 +3,21 @@ package org.dcsa.conformance.standards.eblissuance.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import lombok.Getter;
+import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceCarrier;
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
 public class PlatformScenarioParametersAction extends IssuanceAction {
-  private final EblType eblType;
-  @Getter private IssuanceResponseCode responseCode;
+
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
 
   public PlatformScenarioParametersAction(
       String sourcePartyName,
       String targetPartyName,
-      IssuanceAction previousAction,
-      EblType eblType,
-      IssuanceResponseCode code) {
-    super(
-        sourcePartyName,
-        targetPartyName,
-        previousAction,
-        "Platform scenario parameters [%s %s]".formatted(eblType.name(), code.standardCode),
-        -1);
-    this.eblType = eblType;
-    this.responseCode = code;
+      IssuanceAction previousAction) {
+    super(sourcePartyName, targetPartyName, previousAction, "SupplyCSP [Document Parties]", -1);
   }
 
   @Override
@@ -43,9 +32,6 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
     if (suppliedScenarioParameters != null) {
       jsonState.set("suppliedScenarioParameters", suppliedScenarioParameters.toJson());
     }
-    if (responseCode != null) {
-      jsonState.put("responseCode", responseCode.toString());
-    }
     return jsonState;
   }
 
@@ -56,17 +42,12 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
     if (cspNode != null) {
       suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(cspNode);
     }
-    if (jsonState.get("responseCode") != null) {
-      responseCode = IssuanceResponseCode.valueOf(jsonState.required("responseCode").asText());
-    }
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
         Map.of(
-            "RESPONSE_CODE",
-            responseCode.standardCode,
             "PUBLIC_KEY",
             EblIssuanceCarrier.getCarrierPublicKey(),
             "KEY_ID",
@@ -76,29 +57,8 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    String sendToPlatform = responseCode.sendToPlatform;
-    boolean includeConsignee = responseCode.requiresConsigneeData();
-    return (Objects.equals(eblType, EblType.BLANK_EBL)
-            ? new SuppliedScenarioParameters(
-                sendToPlatform,
-                "Legal name of issueTo party",
-                "Code list provider of issue to party",
-                "Party code of issueTo party",
-                "DCSA (code list name for issueTo party)",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null)
-            : new SuppliedScenarioParameters(
-                sendToPlatform,
+    return new SuppliedScenarioParameters(
+                "DCSA",
                 "Legal name of issue to party",
                 "Code list provider of issue to party",
                 "Party code of issue to party",
@@ -107,14 +67,14 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
                 "Code list provider of shipper",
                 "Party code of shipper",
                 "DCSA (code list name for shipper)",
-                includeConsignee ? "Legal name of consignee/endorsee" : null,
-                includeConsignee ? "Code list provider of consignee/endorsee" : null,
-                includeConsignee ? "Party code of consignee/endorsee" : null,
-                includeConsignee ? "DCSA (code list name for consignee/endorsee)" : null,
+                "Legal name of consignee",
+                "Code list provider of consignee",
+                "Party code of consignee",
+                "DCSA (code list name for consignee)",
                 "Legal name of issuing party",
                 "Code list provider of issuing party",
                 "Party code of issuing party",
-                "DCSA (code list name for issuing party)"))
+                "DCSA (code list name for issuing party)")
         .toJson();
   }
 
@@ -144,16 +104,9 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
 
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
-    setDsp(getDsp().withEblType(eblType));
     getSspConsumer().accept(SuppliedScenarioParameters.fromJson(partyInput.get("input")));
   }
 
-  @Override
-  public ObjectNode asJsonNode() {
-    return super.asJsonNode()
-        .put("eblType", eblType.name())
-        .put("responseCode", responseCode.standardCode);
-  }
 
   @Override
   protected Consumer<SuppliedScenarioParameters> getSspConsumer() {
@@ -163,6 +116,11 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
   @Override
   protected Supplier<SuppliedScenarioParameters> getSspSupplier() {
     return () -> suppliedScenarioParameters;
+  }
+
+  @Override
+  protected Supplier<CarrierScenarioParameters> getCspSupplier() {
+    return () -> new CarrierScenarioParameters(EblIssuanceCarrier.getCarrierPublicKey());
   }
 
   @Override

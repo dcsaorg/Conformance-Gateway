@@ -10,8 +10,8 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EblChecks;
+import org.dcsa.conformance.standards.ebl.checks.TransportDocumentStatusScenario;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
-import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
 @Slf4j
@@ -104,14 +104,14 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
                     getMatchedExchangeUuid(),
                     expectedApiVersion,
                     getDspSupplier(),
-                    TransportDocumentStatus.TD_APPROVED));
+                    TransportDocumentStatusScenario.uc7()));
         return Stream.concat(
             primaryExchangeChecks,
             getTDNotificationChecks(
                     getMatchedNotificationExchangeUuid(),
                 expectedApiVersion,
                 notificationSchemaValidator,
-                TransportDocumentStatus.TD_APPROVED));
+                TransportDocumentStatusScenario.uc7()));
       }
     };
   }

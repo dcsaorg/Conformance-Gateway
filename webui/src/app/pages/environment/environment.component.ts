@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from "@angular/core";
+import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -8,6 +8,7 @@ import { Sandbox } from "../../model/sandbox";
     selector: 'app-environment',
     templateUrl: './environment.component.html',
     styleUrls: ['../../shared-styles.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EnvironmentComponent {

@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ChangeDetectionStrategy} from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -17,6 +17,7 @@ import {TextDialog} from "../../dialogs/text/text-dialog.component";
     selector: 'app-scenario',
     templateUrl: './scenario.component.html',
     styleUrls: ['../../shared-styles.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ScenarioComponent implements OnInit, OnDestroy {

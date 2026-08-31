@@ -55,7 +55,7 @@
       },
       "identifyingCodes": [
         {
-          "codeListProvider": "SMDG",
+          "codeListProvider": "ZZZ",
           "codeListName": "LCL",
           "partyCode": "HMM"
         }
@@ -118,6 +118,7 @@
   ],
   "isShippedOnBoardType": true,
   "transportDocumentStatus": "ISSUED",
+  "issueDate": "2023-12-19",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
   "receiptTypeAtOrigin": "CY",

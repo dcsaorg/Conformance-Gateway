@@ -272,7 +272,7 @@ public class TntChecks {
 
     checks.add(
       JsonAttribute.allIndividualMatchesMustBeValid(
-        "When '%s.%s.%s' is VESSEL or BARGE / TRUCK / RAIL, every applicable Transport event must demonstrate the correct use of the corresponding transport sub-object."
+        "When '%s.%s.%s' is VESSEL or BARGE / TRUCK / RAIL, every applicable Transport event must demonstrate the correct use of the corresponding transport sub-object: it must be present and not empty."
           .formatted(TRANSPORT_DETAILS, TRANSPORT_CALL, MODE_OF_TRANSPORT),
         mav -> mav.submitAllMatching(EVENTS + ".*"),
         JsonAttribute.ifMatchedThen(

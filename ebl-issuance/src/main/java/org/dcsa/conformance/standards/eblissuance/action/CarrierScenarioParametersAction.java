@@ -6,9 +6,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
+import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
 public class CarrierScenarioParametersAction extends IssuanceAction {
-  public static final String ACTION_TITLE = "Carrier scenario parameters";
+
+  public static final String ACTION_TITLE = "SupplyCSP [Certificate]";
+
   private CarrierScenarioParameters carrierScenarioParameters = null;
 
   public CarrierScenarioParametersAction(
@@ -76,6 +79,11 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
   @Override
   protected Supplier<CarrierScenarioParameters> getCspSupplier() {
     return () -> carrierScenarioParameters;
+  }
+
+  @Override
+  protected Supplier<SuppliedScenarioParameters> getSspSupplier() {
+    return SuppliedScenarioParameters::sandboxDefaults;
   }
 
   @Override

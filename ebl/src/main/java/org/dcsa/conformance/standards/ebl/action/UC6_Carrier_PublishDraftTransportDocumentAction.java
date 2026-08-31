@@ -5,7 +5,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -13,7 +12,7 @@ import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
-import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
+import org.dcsa.conformance.standards.ebl.checks.TransportDocumentStatusScenario;
 
 @Getter
 public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangingSIAction {
@@ -145,7 +144,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
             getMatchedExchangeUuid(),
             expectedApiVersion,
             notificationSchemaValidator,
-            List.of(TransportDocumentStatus.TD_DRAFT),
+            TransportDocumentStatusScenario.uc6(),
             false);
       }
     };

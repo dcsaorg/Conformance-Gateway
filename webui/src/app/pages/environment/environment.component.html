@@ -12,9 +12,22 @@
 
 @if (isLoading) {
   <app-text-waiting text="Retrieving existing sandboxes..."></app-text-waiting>
+} @else {
+  <mat-form-field class="fullWidth entityCard">
+    <mat-label>Search sandboxes by name</mat-label>
+    <input
+      id="sandbox_search_input"
+      matInput
+      type="search"
+      autocomplete="off"
+      [ngModel]="searchTerm"
+      (ngModelChange)="onSearchTermChange($event)"
+    />
+    <mat-icon matPrefix>search</mat-icon>
+  </mat-form-field>
 }
 
-@for (sandbox of sandboxes; track sandbox.id) {
+@for (sandbox of filteredSandboxes; track sandbox.id) {
   <mat-card
   [ngClass]="'entityCard withContentPadding withPointerCursor'"
   (click)="onSandboxClick(sandbox)">
@@ -23,4 +36,8 @@
     </div>
     <div class="wrappingText" style="color: grey">{{sandbox.name}}</div>
   </mat-card>
+}
+
+@if (!isLoading && searchTerm.trim() && filteredSandboxes.length === 0) {
+  <div class="waiting" role="status">No sandboxes match “{{searchTerm.trim()}}”.</div>
 }

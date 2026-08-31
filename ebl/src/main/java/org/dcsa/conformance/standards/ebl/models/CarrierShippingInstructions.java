@@ -89,7 +89,7 @@ public class CarrierShippingInstructions {
       issuingCarrier
           .putArray("identifyingCodes")
           .addObject()
-          .put("codeListProvider", "SMDG")
+          .put("codeListProvider", "ZZZ")
           .put("codeListName", "LCL")
           .put("partyCode", smdgCode);
       return issuingCarrier;
@@ -198,7 +198,7 @@ public class CarrierShippingInstructions {
           var identifyingPartyCode =
               o.path("documentParties").path("issuingParty").path("identifyingCodes").path(0);
           ensureTrue(
-              Objects.equals(identifyingPartyCode.path("codeListProvider").asText(), "SMDG"),
+              Objects.equals(identifyingPartyCode.path("codeListProvider").asText(), "ZZZ"),
               "Unexpected 'codeListProvider' for issuingParty");
           ensureTrue(
               Objects.equals(identifyingPartyCode.path("codeListName").asText(), "LCL"),
@@ -235,7 +235,7 @@ public class CarrierShippingInstructions {
                     var outerPackaging = ((ObjectNode) cargoItemNode).putObject("outerPackaging");
                     outerPackaging
                         .put("description", "Jerrican, steel")
-                        .put("woodDeclaration", "Not Applicable")
+                        .put("woodDeclaration", "NOT_APPLICABLE")
                         .put("imoPackagingCode", "3A1")
                         .put("numberOfPackages", 400);
                     var dg = outerPackaging.putArray("dangerousGoods").addObject();

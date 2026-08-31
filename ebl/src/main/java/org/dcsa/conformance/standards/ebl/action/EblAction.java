@@ -19,6 +19,7 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.CarrierSiNotificationPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.ebl.checks.CarrierTdNotificationPayloadRequestConformanceCheck;
+import org.dcsa.conformance.standards.ebl.checks.TransportDocumentStatusScenario;
 import org.dcsa.conformance.standards.ebl.party.*;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
@@ -232,7 +233,20 @@ public abstract class EblAction extends BookingAndEblAction {
         notificationExchangeUuid,
         expectedApiVersion,
         notificationSchemaValidator,
-        List.of(transportDocumentStatus),
+        TransportDocumentStatusScenario.primaryStatusesOnly(Set.of(transportDocumentStatus)),
+        true);
+  }
+
+  protected Stream<ActionCheck> getTDNotificationChecks(
+      UUID notificationExchangeUuid,
+      String expectedApiVersion,
+      JsonSchemaValidator notificationSchemaValidator,
+      TransportDocumentStatusScenario statusScenario) {
+    return getTDNotificationChecks(
+        notificationExchangeUuid,
+        expectedApiVersion,
+        notificationSchemaValidator,
+        statusScenario,
         true);
   }
 
@@ -241,6 +255,21 @@ public abstract class EblAction extends BookingAndEblAction {
       String expectedApiVersion,
       JsonSchemaValidator notificationSchemaValidator,
       List<TransportDocumentStatus> transportDocumentStatus,
+      boolean tdrIsKnown) {
+    return getTDNotificationChecks(
+        notificationExchangeUuid,
+        expectedApiVersion,
+        notificationSchemaValidator,
+        TransportDocumentStatusScenario.primaryStatusesOnly(
+            new java.util.LinkedHashSet<>(transportDocumentStatus)),
+        tdrIsKnown);
+  }
+
+  protected Stream<ActionCheck> getTDNotificationChecks(
+      UUID notificationExchangeUuid,
+      String expectedApiVersion,
+      JsonSchemaValidator notificationSchemaValidator,
+      TransportDocumentStatusScenario statusScenario,
       boolean tdrIsKnown) {
     String titlePrefix = "[Notification]";
     return Stream.of(
@@ -272,6 +301,6 @@ public abstract class EblAction extends BookingAndEblAction {
             HttpMessageType.REQUEST,
             notificationSchemaValidator),
         new CarrierTdNotificationPayloadRequestConformanceCheck(
-            notificationExchangeUuid, transportDocumentStatus, tdrIsKnown, getDspSupplier()));
+            notificationExchangeUuid, statusScenario, tdrIsKnown, getDspSupplier()));
   }
 }

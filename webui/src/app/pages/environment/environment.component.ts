@@ -14,6 +14,8 @@ export class EnvironmentComponent {
 
   isLoading: boolean = true;
   sandboxes: Sandbox[] = [];
+  filteredSandboxes: Sandbox[] = [];
+  searchTerm: string = '';
 
   constructor(
     public authService: AuthService,
@@ -31,8 +33,21 @@ export class EnvironmentComponent {
       return;
     }
     this.sandboxes = await this.conformanceService.getAllSandboxes();
+    this.filterSandboxes();
     this.isLoading = false;
     this.cdr.detectChanges();
+  }
+
+  onSearchTermChange(searchTerm: string) {
+    this.searchTerm = searchTerm;
+    this.filterSandboxes();
+  }
+
+  private filterSandboxes() {
+    const normalizedSearchTerm = this.searchTerm.trim().toLowerCase();
+    this.filteredSandboxes = normalizedSearchTerm
+      ? this.sandboxes.filter(sandbox => sandbox.name.toLowerCase().includes(normalizedSearchTerm))
+      : this.sandboxes;
   }
 
   onSandboxClick(sandbox: Sandbox) {

@@ -34,17 +34,22 @@ public class EblDatasets {
 
   public static final KeywordDataset WOOD_DECLARATION_VALUES =
       KeywordDataset.staticDataset(
-          "Not Applicable", "Not treated and not certified", "Processed", "Treated and certified");
+          "NOT_APPLICABLE",
+          "NOT_TREATED_AND_NOT_CERTIFIED",
+          "PROCESSED",
+          "TREATED_AND_CERTIFIED");
   public static final KeywordDataset MODE_OF_TRANSPORT =
       KeywordDataset.staticDataset("VESSEL", "RAIL", "TRUCK", "BARGE", "MULTIMODAL");
   public static final KeywordDataset NATIONAL_COMMODITY_CODES_SET =
-      KeywordDataset.staticDataset("NCM", "HTS", "Schedule B", "TARIC", "CN", "CUS");
+      KeywordDataset.staticDataset("NCM", "HTS", "SCHEDULE_B", "TARIC", "CN", "CUS");
+  public static final KeywordDataset VESSEL_VOYAGE_ROLES =
+      KeywordDataset.staticDataset("FIRST_SEA_GOING", "MOTHER");
 
   public static final KeywordDataset DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES =
       KeywordDataset.staticDataset(
           "WAVE", "CARX", "ESSD", "IDT", "BOLE", "EDOX", "IQAX", "SECR", "TRGO", "ETEU", "TRAC",
-          "BRIT", "GSBN", "WISE", "GLEIF", "W3C", "DNB", "FMC", "DCSA", "ZZZ", "DOCU", "AEOT",
-          "SGTD");
+          "BRIT", "COVA", "ETIT", "KTNE", "CRED", "BLOC", "DOCU", "AEOT", "SGTD", "GSBN", "WISE",
+          "GLEIF", "W3C", "DNB", "FMC", "DCSA", "ZZZ");
 
   public static final KeywordDataset SURRENDER_DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES =
       KeywordDataset.staticDataset(

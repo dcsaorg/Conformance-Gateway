@@ -27,6 +27,27 @@ public record SuppliedScenarioParameters(
     String issuingPartyCodeListName)
     implements ScenarioParameters {
 
+  public static SuppliedScenarioParameters sandboxDefaults() {
+    return new SuppliedScenarioParameters(
+        "DCSA",
+        "DCSA issue to party",
+        "W3C",
+        "1234-issue-to",
+        "DCSA",
+        "DCSA Shipper",
+        "W3C",
+        "5677-cn-or-end",
+        "DCSA",
+        "DCSA Consignee/Endorsee",
+        "W3C",
+        "5678-cn-or-end",
+        "DCSA",
+        "DCSA Issuing Party",
+        "W3C",
+        "5679-cn-or-end",
+        "DCSA");
+  }
+
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {
     return OBJECT_MAPPER.convertValue(jsonNode, SuppliedScenarioParameters.class);
   }

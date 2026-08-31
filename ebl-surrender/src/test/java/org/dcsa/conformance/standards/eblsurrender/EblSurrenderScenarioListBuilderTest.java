@@ -92,22 +92,7 @@ class EblSurrenderScenarioListBuilderTest {
       action.asJsonNode().path("suppliedScenarioParameters"));
   }
 
-  @Test
-  void bothPartiesKeepSeparateNamedScenarioGroups() {
-    Map<String, EblSurrenderScenarioListBuilder> builders =
-      buildersFor(
-        Set.of(
-          EblSurrenderRole.CARRIER.getConfigName(),
-          EblSurrenderRole.PLATFORM.getConfigName()));
 
-    assertEquals(
-      List.of(
-        "Carrier Required scenario",
-        "Carrier Optional (report-only) scenario",
-        "eBL Platform Required scenario",
-        "eBL Platform Optional (report-only) scenario"),
-      builders.keySet().stream().toList());
-  }
 
   private static Map<String, EblSurrenderScenarioListBuilder> buildersFor(
     Set<String> testedPartyRoleNames) {

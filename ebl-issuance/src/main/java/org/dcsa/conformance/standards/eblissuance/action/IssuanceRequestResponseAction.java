@@ -169,6 +169,10 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
               matchedNotificationExchangeUuid,
               HttpMessageType.REQUEST,
               notificationSchemaValidator),
+            IssuanceChecks.issuanceResponseChecks(
+              matchedNotificationExchangeUuid,
+              expectedApiVersion,
+              getTdrSupplier()),
             ApiHeaderCheck.createNotificationCheck(
               asyncResponseChecksPrefix,
               EblIssuanceRole::isPlatform,

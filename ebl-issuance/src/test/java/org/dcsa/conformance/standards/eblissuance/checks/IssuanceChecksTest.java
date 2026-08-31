@@ -107,6 +107,28 @@ class IssuanceChecksTest {
   }
 
   @Test
+  void issuanceResponseMustMatchTheRequestAndConfirmSuccessfulIssuance() {
+    List<JsonContentCheck> checks =
+        IssuanceChecks.issuanceResponseContentChecks(() -> "TDR-1");
+    ObjectNode response =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("transportDocumentReference", "TDR-1")
+            .put("issuanceResponseCode", "ISSU");
+
+    checks.forEach(check -> assertValid(check, response));
+
+    response.put("transportDocumentReference", "UNRELATED-TDR");
+    assertInvalid(checks.getFirst(), response);
+    response.put("transportDocumentReference", "TDR-1");
+
+    response.put("issuanceResponseCode", "BREQ");
+    assertInvalid(checks.get(1), response);
+    response.put("issuanceResponseCode", "REFU");
+    assertInvalid(checks.get(1), response);
+  }
+
+  @Test
   void createsRuntimeActionChecks() {
     UUID exchangeId = UUID.randomUUID();
     var issuanceManifestChecks =

@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.eblissuance.checks;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ActionCheck;
@@ -38,6 +39,9 @@ public class IssuanceChecks {
   private static final String EBL_VISUALISATION_BY_CARRIER = "eBLVisualisationByCarrier";
   private static final String EBL_VISUALISATION_BY_CARRIER_CHECKSUM = "eBLVisualisationByCarrierChecksum";
   private static final String CONTENT = "content";
+  private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
+  private static final String ISSUANCE_RESPONSE_CODE = "issuanceResponseCode";
+  private static final String SUCCESSFUL_ISSUANCE_RESPONSE_CODE = "ISSU";
 
   public static ActionCheck issuanceRequestSignatureChecks(
     UUID matched,
@@ -86,6 +90,28 @@ public class IssuanceChecks {
           EBL_VISUALISATION_BY_CARRIER,
           EBL_VISUALISATION_BY_CARRIER_CHECKSUM,
           IssuanceChecks::checksumSupportingDocument)));
+  }
+
+  public static ActionCheck issuanceResponseChecks(UUID matched, String standardsVersion, Supplier<String> transportDocumentReferenceSupplier) {
+    return JsonAttribute.contentChecks(
+        "[Response]",
+        null,
+        EblIssuanceRole::isPlatform,
+        matched,
+        HttpMessageType.REQUEST,
+        standardsVersion,
+        issuanceResponseContentChecks(transportDocumentReferenceSupplier));
+  }
+
+  static List<JsonContentCheck> issuanceResponseContentChecks(Supplier<String> transportDocumentReferenceSupplier) {
+    return List.of(
+        JsonAttribute.mustEqual(
+            JsonPointer.compile("/" + TRANSPORT_DOCUMENT_REFERENCE),
+            transportDocumentReferenceSupplier),
+        JsonAttribute.mustEqual(
+            JsonPointer.compile("/" + ISSUANCE_RESPONSE_CODE),
+            () -> SUCCESSFUL_ISSUANCE_RESPONSE_CODE)
+    );
   }
 
   private static String checksumSupportingDocument(JsonNode node) {

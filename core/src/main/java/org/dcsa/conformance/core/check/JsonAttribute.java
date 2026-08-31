@@ -48,6 +48,17 @@ public class JsonAttribute {
 
   public static ActionCheck contentChecks(
     String titlePrefix,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    String standardsVersion,
+    List<JsonContentCheck> checks
+  ) {
+    return contentChecks(titlePrefix, null, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, checks);
+  }
+
+  public static ActionCheck contentChecks(
+    String titlePrefix,
     String title,
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,

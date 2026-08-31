@@ -1,8 +1,8 @@
 package org.dcsa.conformance.standards.eblissuance;
 
-import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.util.MapUtils;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestResponseAction;
@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-@Slf4j
 class EblIssuanceScenarioListBuilder extends ScenarioListBuilder<EblIssuanceScenarioListBuilder> {
 
   private static final ThreadLocal<EblIssuanceComponentFactory> threadLocalComponentFactory = new ThreadLocal<>();
@@ -30,20 +29,27 @@ class EblIssuanceScenarioListBuilder extends ScenarioListBuilder<EblIssuanceScen
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
 
+    boolean testsBothRoles = testedPartyRoleNames.containsAll(
+      Set.of(EblIssuanceRole.CARRIER.getConfigName(), EblIssuanceRole.PLATFORM.getConfigName()));
+
+    Map<String, Map<String, EblIssuanceScenarioListBuilder>> partyScenariosMap =
+      MapUtils.orderedMap(
+        Map.entry(
+          EblIssuanceRole.CARRIER.getConfigName(),
+          MapUtils.orderedMap(
+            Map.entry(
+              testsBothRoles ? "Carrier required scenario" : "Required scenario",
+              carrierScenarioParameters().then(issuanceRequestResponse())))),
+        Map.entry(
+          EblIssuanceRole.PLATFORM.getConfigName(),
+          MapUtils.orderedMap(
+            Map.entry(
+              testsBothRoles ? "eBL Platform required scenario" : "Required scenario",
+              platformScenarioParameters().then(issuanceRequestResponse())))));
+
     Map<String, EblIssuanceScenarioListBuilder> scenarios = new LinkedHashMap<>();
-    boolean testsCarrier = testedPartyRoleNames.contains(EblIssuanceRole.CARRIER.getConfigName());
-    boolean testsPlatform = testedPartyRoleNames.contains(EblIssuanceRole.PLATFORM.getConfigName());
-    boolean testsBothRoles = testsCarrier && testsPlatform;
-    if (testsCarrier) {
-      scenarios.put(
-        testsBothRoles ? "Carrier required scenario" : "Required scenario",
-        carrierScenarioParameters().then(issuanceRequestResponse()));
-    }
-    if (testsPlatform) {
-      scenarios.put(
-        testsBothRoles ? "eBL Platform required scenario" : "Required scenario",
-        platformScenarioParameters().then(issuanceRequestResponse()));
-    }
+    testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
+
     return scenarios;
   }
 

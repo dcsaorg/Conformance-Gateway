@@ -70,6 +70,7 @@ class EblSurrenderComponentFactory extends AbstractComponentFactory {
       boolean isWithNotifications) {
     return EblSurrenderScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        getReportRoleNames(partyConfigurations, counterpartConfigurations),
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, EblSurrenderRole::isCarrier),
         _findPartyOrCounterpartName(
@@ -113,9 +114,4 @@ class EblSurrenderComponentFactory extends AbstractComponentFactory {
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 
-  public JsonSchemaValidator getMessageSchemaValidator(String schemaName) {
-    String schemaFilePath =
-        "/standards/eblsurrender/schemas/EBL_SUR_v%s.yaml".formatted(standardVersion);
-    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
-  }
 }

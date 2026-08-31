@@ -62,6 +62,7 @@ public class UC14CarrierProcessBookingCancellationAction extends CarrierNotifica
     var dsp = getDspSupplier().get();
     return jsonNode
       .put("cbr", dsp.carrierBookingReference())
+      .put("cbrr", dsp.carrierBookingRequestReference())
       .put("confirmCancellation", confirmCancellation);
   }
 

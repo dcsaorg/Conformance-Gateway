@@ -21,7 +21,9 @@ import org.dcsa.conformance.standards.tnt.v300.action.SupplyScenarioParametersAc
 import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,17 +78,32 @@ public class TntProducer extends ConformanceParty {
       getClass().getSimpleName(),
       actionPrompt.toPrettyString());
 
-    JsonNode queryParametersNode = actionPrompt.required(TntConstants.TNT_QUERY_PARAMETERS);
-    Set<TntQueryParameters> queryParameters =
-      StreamSupport.stream(queryParametersNode.spliterator(), false)
-        .map(JsonNode::asText)
-        .map(TntQueryParameters::fromParameterName)
-        .collect(Collectors.toSet());
+    Set<TntQueryParameters> requiredQueryParameters =
+      parsePromptQueryParameters(actionPrompt.get(TntConstants.REQUIRED_TNT_QUERY_PARAMETERS));
+    Set<TntQueryParameters> optionalQueryParameters =
+      parsePromptQueryParameters(actionPrompt.get(TntConstants.OPTIONAL_TNT_QUERY_PARAMETERS));
 
-    ObjectNode ssp = SupplyScenarioParametersAction.examplePrompt(queryParameters);
+    Set<TntQueryParameters> queryParametersToAutoSupply =
+      !requiredQueryParameters.isEmpty()
+        ? requiredQueryParameters
+        : optionalQueryParameters.isEmpty()
+          ? parsePromptQueryParameters(actionPrompt.required(TntConstants.TNT_QUERY_PARAMETERS))
+          : Collections.emptySet();
+
+    ObjectNode ssp = SupplyScenarioParametersAction.examplePrompt(queryParametersToAutoSupply);
     asyncOrchestratorPostPartyInput(actionPrompt.required(TntConstants.ACTION_ID).asText(), ssp);
 
     addOperatorLogEntry("Supplying scenario parameters: %s".formatted(ssp.toPrettyString()));
+  }
+
+  private Set<TntQueryParameters> parsePromptQueryParameters(JsonNode queryParametersNode) {
+    if (queryParametersNode == null || !queryParametersNode.isArray()) {
+      return Collections.emptySet();
+    }
+    return StreamSupport.stream(queryParametersNode.spliterator(), false)
+      .map(JsonNode::asText)
+      .map(TntQueryParameters::fromParameterName)
+      .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private void sendTntEvents(JsonNode actionPrompt) {

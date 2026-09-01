@@ -122,6 +122,18 @@
         "eventClassifier": "ACTUAL",
         "equipmentEventType": "GATED_IN"
       },
+      "shipmentDetails": {
+        "documentReference": {
+          "type": "BOOKING",
+          "reference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER"
+        },
+        "additionalDocumentReferences": [
+          {
+            "type": "TRANSPORT_DOCUMENT",
+            "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
+          }
+        ]
+      },
       "equipmentDetails": {
         "equipmentReference": "APZU4812090",
         "ISOEquipmentCode": "45G1",

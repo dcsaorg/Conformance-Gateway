@@ -158,10 +158,7 @@ public class TntEventQueryFilter {
     if (minDateTime != null && eventUpdatedDateTime.isBefore(minDateTime)) {
       return false;
     }
-    if (maxDateTime != null && eventUpdatedDateTime.isAfter(maxDateTime)) {
-      return false;
-    }
-    return true;
+    return maxDateTime == null || !eventUpdatedDateTime.isAfter(maxDateTime);
   }
 }
 

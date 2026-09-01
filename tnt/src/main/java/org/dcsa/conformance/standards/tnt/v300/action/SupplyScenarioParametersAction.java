@@ -94,10 +94,10 @@ public class SupplyScenarioParametersAction extends TntAction {
     ArrayNode jsonTntQueryParameters = objectNode.putArray(TntConstants.TNT_QUERY_PARAMETERS);
     allQueryParameters.forEach(tntQueryParameter -> jsonTntQueryParameters.add(tntQueryParameter.getParameterName()));
 
-    ArrayNode required = objectNode.putArray("requiredTntQueryParameters");
+    ArrayNode required = objectNode.putArray(TntConstants.REQUIRED_TNT_QUERY_PARAMETERS);
     requiredQueryParameters.forEach(param -> required.add(param.getParameterName()));
 
-    ArrayNode optional = objectNode.putArray("optionalTntQueryParameters");
+    ArrayNode optional = objectNode.putArray(TntConstants.OPTIONAL_TNT_QUERY_PARAMETERS);
     optionalQueryParameters.forEach(param -> optional.add(param.getParameterName()));
 
     return objectNode;

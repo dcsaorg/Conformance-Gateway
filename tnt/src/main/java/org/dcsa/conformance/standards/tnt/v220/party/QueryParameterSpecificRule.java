@@ -1,10 +1,5 @@
 package org.dcsa.conformance.standards.tnt.v220.party;
 
-import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_DOCUMENT_TYPE_CODES;
-import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_EQUIPMENT_EVENT_TYPES;
-import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_EVENT_TYPES;
-import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_SHIPMENT_EVENT_TYPES;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -12,18 +7,23 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class QueryParameterSpecificRule implements QueryParamRule{
+import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_DOCUMENT_TYPE_CODES;
+import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_EQUIPMENT_EVENT_TYPES;
+import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_EVENT_TYPES;
+import static org.dcsa.conformance.standards.tnt.v220.checks.TntDataSets.VALID_SHIPMENT_EVENT_TYPES;
+
+public class QueryParameterSpecificRule implements QueryParamRule {
 
   private static final String EVENT_TYPE = "eventType";
 
   private static final Map<String, Set<String>> allowedQueryParamForEventTypeMap = Map.of(
-      "SHIPMENT", Set.of("shipmentEventTypeCode", "documentTypeCode", "carrierBookingReference",
+    "SHIPMENT", Set.of("shipmentEventTypeCode", "documentTypeCode", "carrierBookingReference",
       "transportDocumentID", "transportDocumentReference", "equipmentReference", "eventCreatedDateTime"),
-      "TRANSPORT", Set.of("transportDocumentReference", "transportEventTypeCode", "transportCallID", "vesselIMONumber",
+    "TRANSPORT", Set.of("transportDocumentReference", "transportEventTypeCode", "transportCallID", "vesselIMONumber",
       "exportVoyageNumber", "carrierServiceCode", "UNLocationCode", "equipmentReference", "eventCreatedDateTime", "carrierBookingReference"),
-      "EQUIPMENT", Set.of("carrierBookingReference", "transportDocumentReference", "transportCallID",
+    "EQUIPMENT", Set.of("carrierBookingReference", "transportDocumentReference", "transportCallID",
       "vesselIMONumber", "exportVoyageNumber", "carrierServiceCode", "UNLocationCode", "equipmentEventTypeCode", "equipmentReference", "eventCreatedDateTime")
-    );
+  );
   private static final Set<String> excludedQueryParams = Set.of(EVENT_TYPE, "cursor", "limit", "eventCreatedDateTime:gte",
     "eventCreatedDateTime:gt", "eventCreatedDateTime:lt", "eventCreatedDateTime:lte", "eventCreatedDateTime:eq", "eventCreatedDateTime");
 
@@ -73,11 +73,13 @@ public class QueryParameterSpecificRule implements QueryParamRule{
       .flatMap(eventType -> Arrays.stream(eventType.split(",")))
       .allMatch(VALID_SHIPMENT_EVENT_TYPES::contains);
   }
+
   private boolean validateDocumentTypeCode(Collection<String> documentTypeCodes) {
     return documentTypeCodes.stream()
       .flatMap(eventType -> Arrays.stream(eventType.split(",")))
       .allMatch(VALID_DOCUMENT_TYPE_CODES::contains);
   }
+
   private boolean validateEquipmentEventTypeCode(Collection<String> equipmentTypeCodes) {
     return equipmentTypeCodes.stream()
       .flatMap(eventType -> Arrays.stream(eventType.split(",")))

@@ -9,13 +9,13 @@ public enum TntEventType {
 
   public String tntEventPayload(String version) {
     String suffix =
-        switch (this) {
-          case SHIPMENT -> "shipment";
-          case TRANSPORT -> "transport";
-          case EQUIPMENT -> "equipment";
-          case IOT -> "iot";
-          case REEFER -> "reefer";
-        };
+      switch (this) {
+        case SHIPMENT -> "shipment";
+        case TRANSPORT -> "transport";
+        case EQUIPMENT -> "equipment";
+        case IOT -> "iot";
+        case REEFER -> "reefer";
+      };
     return "tnt-" + version + "-request-" + suffix + ".json";
   }
 }

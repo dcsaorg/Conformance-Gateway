@@ -1,8 +1,6 @@
 package org.dcsa.conformance.standards.tnt.v300.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Map;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -20,24 +18,28 @@ import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
 import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
+import java.util.Map;
+import java.util.stream.Stream;
+
 public class ConsumerGetEventsWithQueryParametersAction extends TntAction {
 
-  @Getter private final boolean hasNextPage;
+  @Getter
+  private final boolean hasNextPage;
   private final JsonSchemaValidator responseSchemaValidator;
 
   public ConsumerGetEventsWithQueryParametersAction(
-      String sourcePartyName,
-      String targetPartyName,
-      TntAction previousAction,
-      boolean hasNextPage,
-      JsonSchemaValidator schemaValidator) {
+    String sourcePartyName,
+    String targetPartyName,
+    TntAction previousAction,
+    boolean hasNextPage,
+    JsonSchemaValidator schemaValidator) {
     super(
-        sourcePartyName,
-        targetPartyName,
-        previousAction,
-        previousAction instanceof ConsumerGetEventsWithQueryParametersAction
-            ? "GET Events (next page)"
-            : "GET Events");
+      sourcePartyName,
+      targetPartyName,
+      previousAction,
+      previousAction instanceof ConsumerGetEventsWithQueryParametersAction
+        ? "GET Events (next page)"
+        : "GET Events");
     this.responseSchemaValidator = schemaValidator;
     this.hasNextPage = hasNextPage;
   }

@@ -2,16 +2,6 @@ package org.dcsa.conformance.standards.tnt.v300.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -30,23 +20,32 @@ import org.dcsa.conformance.standards.tnt.v300.action.ProducerPostEventsAction;
 import org.dcsa.conformance.standards.tnt.v300.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 @Slf4j
 public class TntProducer extends ConformanceParty {
 
   public TntProducer(
-      String apiVersion,
-      PartyConfiguration partyConfiguration,
-      CounterpartConfiguration counterpartConfiguration,
-      JsonNodeMap persistentMap,
-      PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    String apiVersion,
+    PartyConfiguration partyConfiguration,
+    CounterpartConfiguration counterpartConfiguration,
+    JsonNodeMap persistentMap,
+    PartyWebClient webClient,
+    Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
-        apiVersion,
-        partyConfiguration,
-        counterpartConfiguration,
-        persistentMap,
-        webClient,
-        orchestratorAuthHeader);
+      apiVersion,
+      partyConfiguration,
+      counterpartConfiguration,
+      persistentMap,
+      webClient,
+      orchestratorAuthHeader);
   }
 
   @Override
@@ -67,22 +66,22 @@ public class TntProducer extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-        Map.entry(ProducerPostEventsAction.class, this::sendTntEvents));
+      Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+      Map.entry(ProducerPostEventsAction.class, this::sendTntEvents));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info(
-        "{}.supplyScenarioParameters({})",
-        getClass().getSimpleName(),
-        actionPrompt.toPrettyString());
+      "{}.supplyScenarioParameters({})",
+      getClass().getSimpleName(),
+      actionPrompt.toPrettyString());
 
     JsonNode queryParametersNode = actionPrompt.required(TntConstants.TNT_QUERY_PARAMETERS);
     Set<TntQueryParameters> queryParameters =
-        StreamSupport.stream(queryParametersNode.spliterator(), false)
-            .map(JsonNode::asText)
-            .map(TntQueryParameters::fromParameterName)
-            .collect(Collectors.toSet());
+      StreamSupport.stream(queryParametersNode.spliterator(), false)
+        .map(JsonNode::asText)
+        .map(TntQueryParameters::fromParameterName)
+        .collect(Collectors.toSet());
 
     ObjectNode ssp = SupplyScenarioParametersAction.examplePrompt(queryParameters);
     asyncOrchestratorPostPartyInput(actionPrompt.required(TntConstants.ACTION_ID).asText(), ssp);
@@ -97,9 +96,9 @@ public class TntProducer extends ConformanceParty {
     String filePath = getTntEventPayloadFilepath(eventType);
 
     JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath,
-        Map.of(
-            "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
-            "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
+      Map.of(
+        "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
+        "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
     syncCounterpartPost(TntStandard.API_PATH, jsonRequestBody);
 
     addOperatorLogEntry("Sent TnT Events %s".formatted(jsonRequestBody.toPrettyString()));
@@ -112,34 +111,30 @@ public class TntProducer extends ConformanceParty {
     Map<String, List<String>> initialIMap = Map.of(API_VERSION, List.of(apiVersion));
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
     if (request.queryParams().containsKey(TntQueryParameters.LIMIT.getParameterName())
-        && !request.queryParams().containsKey(TntQueryParameters.CURSOR.getParameterName())) {
+      && !request.queryParams().containsKey(TntQueryParameters.CURSOR.getParameterName())) {
       String cursor = "fE9mZnNldHw9MTAmbGltaXQ9MTA"; // example value for a cursor
       headers.put(TntConstants.HEADER_CURSOR_NAME, List.of(cursor));
     }
 
     boolean hasCursor = request.queryParams().containsKey(TntQueryParameters.CURSOR.getParameterName());
 
-    Collection<String> eventTypesValues = request.queryParams().get(TntQueryParameters.ET.getParameterName());
-    List<TntEventType> eventTypes =
-        eventTypesValues == null
-            ? Collections.emptyList()
-            : eventTypesValues.stream().findFirst().map(str -> str.split(",")).stream()
-                .flatMap(Arrays::stream)
-                .map(String::trim)
-                .map(TntEventType::valueOf)
-                .toList();
+    String carrierBookingReference =
+      JsonUtil.getFirstQueryParamValue(
+        request.queryParams(), TntQueryParameters.CBR.getParameterName());
+    String transportDocumentReference =
+      JsonUtil.getFirstQueryParamValue(
+        request.queryParams(), TntQueryParameters.TDR.getParameterName());
 
     String filePath = getTntEventResponseFilepath(hasCursor);
     JsonNode responseObject = JsonToolkit.templateFileToJsonNode(filePath,
-        Map.of(
-            "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
-            "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
+      Map.of(
+        "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+        carrierBookingReference == null ? ReferenceGenerator.newReference() : carrierBookingReference,
+        "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
+        transportDocumentReference == null ? ReferenceGenerator.newReference() : transportDocumentReference));
 
     String limitValue = JsonUtil.getFirstQueryParamValue(request.queryParams(), TntQueryParameters.LIMIT.getParameterName());
-    JsonNode finalResponse = responseObject;
-    if (!eventTypes.isEmpty() && responseObject.has(TntConstants.EVENTS)) {
-      finalResponse = filterEventsByType(responseObject, eventTypes);
-    }
+    JsonNode finalResponse = TntEventQueryFilter.filterEvents(responseObject, request.queryParams());
     finalResponse = JsonUtil.trimNestedArrayByLimit(finalResponse, TntConstants.EVENTS, limitValue);
 
     return request.createResponse(200, headers, new ConformanceMessageBody(finalResponse));
@@ -149,29 +144,6 @@ public class TntProducer extends ConformanceParty {
     return "/standards/tnt/messages/" + eventType.tntEventPayload(getFormattedVersion());
   }
 
-  private JsonNode filterEventsByType(JsonNode responseObject, List<TntEventType> eventTypes) {
-    ObjectNode filteredResponse = responseObject.deepCopy();
-    JsonNode eventsArray = filteredResponse.get(TntConstants.EVENTS);
-
-    if (eventsArray != null && eventsArray.isArray()) {
-      var filteredEvents =
-          StreamSupport.stream(eventsArray.spliterator(), false)
-              .filter(
-                  event -> {
-                    JsonNode eventClassification = event.path(TntConstants.EVENT_CLASSIFICATION);
-                    if (eventClassification.isMissingNode()) {
-                      return false;
-                    }
-                    String eventType = eventClassification.path(TntConstants.EVENT_TYPE).asText();
-                    return eventTypes.stream().anyMatch(type -> type.name().equals(eventType));
-                  })
-              .toList();
-
-      filteredResponse.putArray(TntConstants.EVENTS).addAll(filteredEvents);
-    }
-
-    return filteredResponse;
-  }
 
   private String getTntEventResponseFilepath(boolean hasCursor) {
     if (hasCursor) {

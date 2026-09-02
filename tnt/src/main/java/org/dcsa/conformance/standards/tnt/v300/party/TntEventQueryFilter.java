@@ -8,8 +8,10 @@ import org.dcsa.conformance.core.util.JsonUtil;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,6 +19,17 @@ import java.util.stream.StreamSupport;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
+/**
+ * Filters the events of a simulated {@code GET /events} response according to the query parameters
+ * of the request.
+ *
+ * <p>An event matches a reference filter only when it actually carries that reference: {@code
+ * carrierBookingReference} and {@code transportDocumentReference} are matched against the document
+ * references of {@code shipmentDetails}, and {@code equipmentReference} against {@code
+ * equipmentDetails}. Consequently a filter that an event type cannot carry never matches, which is
+ * why each per-event-type scenario only offers the filters applicable to it (see {@code
+ * TntEventType#applicableBaseFilters()}).
+ */
 @UtilityClass
 public class TntEventQueryFilter {
 
@@ -103,42 +116,51 @@ public class TntEventQueryFilter {
   }
 
   private static boolean matchesCarrierBookingReference(JsonNode event, String carrierBookingReference) {
-    if (carrierBookingReference == null || carrierBookingReference.isBlank()) {
-      return true;
-    }
-
-    JsonNode docRef = event.path(SHIPMENT_DETAILS).path(DOCUMENT_REFERENCE);
-    String type = docRef.path(DOCUMENT_REFERENCE_TYPE).asText("");
-    String value = docRef.path(DOCUMENT_REFERENCE_VALUE).asText("");
-    return BOOKING_DOCUMENT_TYPE.equals(type) && carrierBookingReference.equals(value);
+    return matchesDocumentReference(event, BOOKING_DOCUMENT_TYPE, carrierBookingReference);
   }
 
   private static boolean matchesTransportDocumentReference(
     JsonNode event, String transportDocumentReference) {
-    if (transportDocumentReference == null || transportDocumentReference.isBlank()) {
+    return matchesDocumentReference(event, TRANSPORT_DOCUMENT_TYPE, transportDocumentReference);
+  }
+  
+  private static boolean matchesDocumentReference(
+    JsonNode event, String documentReferenceType, String requestedReference) {
+    if (requestedReference == null || requestedReference.isBlank()) {
       return true;
     }
 
-    JsonNode additionalDocumentReferences =
-      event.path(SHIPMENT_DETAILS).path(ADDITIONAL_DOCUMENT_REFERENCES);
-    if (!additionalDocumentReferences.isArray()) {
-      return false;
-    }
+    return collectDocumentReferences(event.path(SHIPMENT_DETAILS), documentReferenceType)
+      .contains(requestedReference);
+  }
 
-    return StreamSupport.stream(additionalDocumentReferences.spliterator(), false)
-      .anyMatch(
-        docRef ->
-          TRANSPORT_DOCUMENT_TYPE.equals(docRef.path(DOCUMENT_REFERENCE_TYPE).asText(""))
-            && transportDocumentReference.equals(
-            docRef.path(DOCUMENT_REFERENCE_VALUE).asText("")));
+  private static List<String> collectDocumentReferences(
+    JsonNode shipmentDetails, String documentReferenceType) {
+    List<String> references = new ArrayList<>();
+    addDocumentReferenceIfOfType(
+      references, shipmentDetails.path(DOCUMENT_REFERENCE), documentReferenceType);
+    shipmentDetails
+      .path(ADDITIONAL_DOCUMENT_REFERENCES)
+      .forEach(docRef -> addDocumentReferenceIfOfType(references, docRef, documentReferenceType));
+    return references;
+  }
+
+  private static void addDocumentReferenceIfOfType(
+    List<String> references, JsonNode documentReference, String documentReferenceType) {
+    if (documentReferenceType.equals(documentReference.path(DOCUMENT_REFERENCE_TYPE).asText(""))) {
+      String value = documentReference.path(DOCUMENT_REFERENCE_VALUE).asText("");
+      if (!value.isBlank()) {
+        references.add(value);
+      }
+    }
   }
 
   private static boolean matchesEquipmentReference(JsonNode event, String equipmentReference) {
     if (equipmentReference == null || equipmentReference.isBlank()) {
       return true;
     }
-    String value = event.path(EQUIPMENT_DETAILS).path(EQUIPMENT_REFERENCE).asText("");
-    return equipmentReference.equals(value);
+    return equipmentReference.equals(
+      event.path(EQUIPMENT_DETAILS).path(EQUIPMENT_REFERENCE).asText(""));
   }
 
   private static boolean matchesEventUpdatedDateTimeRange(

@@ -10,6 +10,7 @@ import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
 import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -45,10 +46,14 @@ public class SupplyScenarioParametersAction extends TntAction {
   }
 
   public static SupplyScenarioParametersAction optional(String sourcePartyName, TntQueryParameters... optionalQueryParameters) {
+    return optional(sourcePartyName, Arrays.asList(optionalQueryParameters));
+  }
+
+  public static SupplyScenarioParametersAction optional(String sourcePartyName, Collection<TntQueryParameters> optionalQueryParameters) {
     return new SupplyScenarioParametersAction(
       sourcePartyName,
       Collections.emptySet(),
-      new LinkedHashSet<>(Arrays.asList(optionalQueryParameters)));
+      new LinkedHashSet<>(optionalQueryParameters));
   }
 
   private static String formatActionTitle(Set<TntQueryParameters> requiredQueryParameters, Set<TntQueryParameters> optionalQueryParameters) {

@@ -34,6 +34,13 @@ import java.util.stream.StreamSupport;
 @Slf4j
 public class TntProducer extends ConformanceParty {
 
+  private static final String CARRIER_BOOKING_REFERENCE_PLACEHOLDER =
+    "CARRIER_BOOKING_REFERENCE_PLACEHOLDER";
+  private static final String TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER =
+    "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER";
+  private static final String EQUIPMENT_REFERENCE_PLACEHOLDER = "EQUIPMENT_REFERENCE_PLACEHOLDER";
+  private static final String DEFAULT_EQUIPMENT_REFERENCE = "APZU4812090";
+
   public TntProducer(
     String apiVersion,
     PartyConfiguration partyConfiguration,
@@ -87,8 +94,8 @@ public class TntProducer extends ConformanceParty {
       !requiredQueryParameters.isEmpty()
         ? requiredQueryParameters
         : optionalQueryParameters.isEmpty()
-          ? parsePromptQueryParameters(actionPrompt.required(TntConstants.TNT_QUERY_PARAMETERS))
-          : Collections.emptySet();
+        ? parsePromptQueryParameters(actionPrompt.required(TntConstants.TNT_QUERY_PARAMETERS))
+        : Collections.emptySet();
 
     ObjectNode ssp = SupplyScenarioParametersAction.examplePrompt(queryParametersToAutoSupply);
     asyncOrchestratorPostPartyInput(actionPrompt.required(TntConstants.ACTION_ID).asText(), ssp);
@@ -114,8 +121,8 @@ public class TntProducer extends ConformanceParty {
 
     JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath,
       Map.of(
-        "CARRIER_BOOKING_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference(),
-        "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
+        CARRIER_BOOKING_REFERENCE_PLACEHOLDER, ReferenceGenerator.newReference(),
+        TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER, ReferenceGenerator.newReference()));
     syncCounterpartPost(TntStandard.API_PATH, jsonRequestBody);
 
     addOperatorLogEntry("Sent TnT Events %s".formatted(jsonRequestBody.toPrettyString()));
@@ -141,14 +148,19 @@ public class TntProducer extends ConformanceParty {
     String transportDocumentReference =
       JsonUtil.getFirstQueryParamValue(
         request.queryParams(), TntQueryParameters.TDR.getParameterName());
+    String equipmentReference =
+      JsonUtil.getFirstQueryParamValue(
+        request.queryParams(), TntQueryParameters.ER.getParameterName());
 
     String filePath = getTntEventResponseFilepath(hasCursor);
     JsonNode responseObject = JsonToolkit.templateFileToJsonNode(filePath,
       Map.of(
-        "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+        CARRIER_BOOKING_REFERENCE_PLACEHOLDER,
         carrierBookingReference == null ? ReferenceGenerator.newReference() : carrierBookingReference,
-        "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
-        transportDocumentReference == null ? ReferenceGenerator.newReference() : transportDocumentReference));
+        TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER,
+        transportDocumentReference == null ? ReferenceGenerator.newReference() : transportDocumentReference,
+        EQUIPMENT_REFERENCE_PLACEHOLDER,
+        equipmentReference == null ? DEFAULT_EQUIPMENT_REFERENCE : equipmentReference));
 
     String limitValue = JsonUtil.getFirstQueryParamValue(request.queryParams(), TntQueryParameters.LIMIT.getParameterName());
     JsonNode finalResponse = TntEventQueryFilter.filterEvents(responseObject, request.queryParams());

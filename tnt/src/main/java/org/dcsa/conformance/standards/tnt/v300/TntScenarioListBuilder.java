@@ -12,6 +12,7 @@ import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
 import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -111,17 +112,14 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
       _ -> new SupplyScenarioParametersAction(producerPartyName, queryParameters));
   }
 
-  private static TntScenarioListBuilder supplyOptionalScenarioParameters(
-    TntQueryParameters... queryParameters) {
+  private static TntScenarioListBuilder supplyOptionalScenarioParameters(Collection<TntQueryParameters> queryParameters) {
     String producerPartyName = threadLocalProducerPartyName.get();
     return new TntScenarioListBuilder(
       _ -> SupplyScenarioParametersAction.optional(producerPartyName, queryParameters));
   }
 
-  private static TntScenarioListBuilder getTntEventsByTypeWithOptionalBaseFilters(
-    TntEventType eventType) {
-    return supplyOptionalScenarioParameters(
-      TntQueryParameters.CBR, TntQueryParameters.TDR, TntQueryParameters.ER)
+  private static TntScenarioListBuilder getTntEventsByTypeWithOptionalBaseFilters(TntEventType eventType) {
+    return supplyOptionalScenarioParameters(eventType.applicableBaseFilters())
       .then(getTntEvents(eventType));
   }
 

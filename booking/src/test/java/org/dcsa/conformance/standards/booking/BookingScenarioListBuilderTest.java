@@ -1,19 +1,23 @@
 package org.dcsa.conformance.standards.booking;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioConformanceType;
 import org.dcsa.conformance.standards.booking.action.BookingAction;
 import org.dcsa.conformance.standards.booking.action.CarrierNotificationBookingAction;
-import org.dcsa.conformance.standards.booking.action.ShipperNotificationBookingAction;
 import org.dcsa.conformance.standards.booking.action.ShipperGetBookingSkippableAction;
+import org.dcsa.conformance.standards.booking.action.ShipperNotificationBookingAction;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BookingScenarioListBuilderTest {
 
@@ -58,16 +62,16 @@ class BookingScenarioListBuilderTest {
 
     assertEquals(
       List.of(
-        "SupplyCSP [Dry cargo] - UC1 - GET",
-        "SupplyCSP [Dry cargo] - UC1 - UC2 - UC3",
-        "SupplyCSP [Dry cargo] - UC1 - UC5 - UC6 - UC7"),
+        "[Dry cargo] UC1 - GET",
+        "[Dry cargo] UC1 - UC2 - UC3",
+        "[Dry cargo] UC1 - UC5 - UC6 - UC7"),
       titles(builders.get("Required Dry Cargo scenario")));
     assertEquals(
       List.of(
-        "SupplyCSP [any BKG] - UC1 - UC5 - UC7 - GET (amended content)",
-        "SupplyCSP [any BKG] - UC1 - UC5 - UC7 - UC9",
-        "SupplyCSP [any BKG] - UC1 - UC5 - UC13",
-        "SupplyCSP [any BKG] - UC1 - UC11"),
+        "UC1 - UC5 - UC7 - GET (amended content)",
+        "UC1 - UC5 - UC7 - UC9",
+        "UC1 - UC5 - UC13",
+        "UC1 - UC11"),
       titles(builders.get(OPTIONAL_SCENARIOS)));
   }
 
@@ -104,6 +108,21 @@ class BookingScenarioListBuilderTest {
               action.isSecondaryStatusValidationEnabled(),
               scenario.getTitle() + " / " + action.getActionTitle()))));
     }
+  }
+
+  @Test
+  void shipperScenarioTitlesAreUniqueAcrossAllSections() {
+    Map<String, BookingScenarioListBuilder> builders = buildersFor(BookingRole.SHIPPER);
+    List<String> allTitles = builders.values().stream()
+      .flatMap(builder -> titles(builder).stream())
+      .toList();
+    assertEquals(
+      allTitles.size(),
+      new HashSet<>(allTitles).size(),
+      "Shipper scenario titles must be unique");
+    assertTrue(
+      allTitles.stream().anyMatch(title -> title.startsWith("[Dry cargo] UC1")),
+      "Expected dry cargo shipper title prefix");
   }
 
   private static Map<String, BookingScenarioListBuilder> buildersFor(BookingRole role) {

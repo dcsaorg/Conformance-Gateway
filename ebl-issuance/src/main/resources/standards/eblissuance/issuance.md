@@ -1,22 +1,25 @@
 # DCSA Interface Standard for EBL (ISS) 3.x - Conformance Scenarios (CEP26)
 
-- [0. Document metadata](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-0.Documentmetadata)
-- [1. What is Conformance?](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-1.WhatisConformance?)
-  - [1.1 Scope](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-1.1Scope)
-- [2. Conformance Criteria](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-2.ConformanceCriteria)
-- [3. Conformance Scenarios](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-3.ConformanceScenarios)
-  - [3.1 Carrier Conformance Scenarios](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-3.1CarrierConformanceScenarios)
-  - [Required scenario](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-Requiredscenario)
-  - [3.2 eBL Platform Conformance Scenarios](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-3.2eBLPlatformConformanceScenarios)
-  - [Required scenario](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-Requiredscenario.1)
-- [4. Conformance Validations](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-4.ConformanceValidations)
-  - [4.1 Carrier Validations](#DCSAInterfaceStandardforEBL(ISS)3.x-ConformanceScenarios(CEP26)-4.1CarrierValidations)
+* [0. Document metadata](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-0.Documentmetadata)
+* [1. What is Conformance?](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-1.WhatisConformance?)
+
+  * [1.1 Scope](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-1.1Scope)
+* [2. Conformance Criteria](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-2.ConformanceCriteria)
+* [3. Conformance Scenarios](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-3.ConformanceScenarios)
+
+  * [3.1 Carrier Conformance Scenarios](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-3.1CarrierConformanceScenarios)
+  * [Required scenario](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-Requiredscenario)
+  * [3.2 eBL Platform Conformance Scenarios](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-3.2eBLPlatformConformanceScenarios)
+  * [Required scenario](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-Requiredscenario.1)
+* [4. Conformance Validations](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-4.ConformanceValidations)
+
+  * [4.1 Carrier Validations](#DCSAInterfaceStandardforEBL%28ISS%293.x-ConformanceScenarios%28CEP26%29-4.1CarrierValidations)
 
 # **0. Document metadata**
 
-- **Applicable EBL Issuance API version:** 3.0.3
-- **Document revision date:** 10 Aug 2026
-- **Carrier Validation workbook revision:** 30 Jul 2026
+* **Applicable EBL Issuance API version:** 3.0.3
+* **Document revision date:** 10 Aug 2026
+* **Carrier Validation workbook revision:** 30 Jul 2026
 
 # **1. What is Conformance?**
 
@@ -34,15 +37,15 @@ Conformance testing validates the **minimum interoperability requirements** exer
 
 Two conformance certification badges are available, one for each standard role:
 
-- Carrier
-- eBL Platform
+* Carrier
+* eBL Platform
 
 To receive a badge, adopters implementing either role must support the required eBL Issuance capabilities for that role.
 
-| Standard role | Business type (example) | Mandatory features to get a badge 🏅 | Optional features | Scope qualifiers |
-| --- | --- | --- | --- | --- |
-| Carrier | Ocean Carrier | It is mandatory to support all of the following eBL Issuance capabilities:<br>1. Can send issuance requests by calling the **PUT** `/v3/ebl-issuance-requests` endpoint implemented by the eBL Platform<br>2. Can receive issuance responses from the eBL Platform through **POST** `/v3/ebl-issuance-responses` | None | None |
-| eBL Platform | Solution Provider | It is mandatory to support all of the following eBL Issuance capabilities:<br>1. Can receive issuance requests from the Carrier through **PUT** `/v3/ebl-issuance-requests`<br>2. Can send issuance responses by calling the **POST** `/v3/ebl-issuance-responses` endpoint implemented by the Carrier | None | None |
+| Standard role | Business type (example) | Mandatory features to get a badge 🏅                                                                                                                                                                                                                                                                                 | Optional features | Scope qualifiers |
+| ------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ---------------- |
+| Carrier       | Ocean Carrier           | It is mandatory to support all of the following eBL Issuance capabilities:<br><br>1. Can send issuance requests by calling the **PUT** `/v3/ebl-issuance-requests` endpoint implemented by the eBL Platform<br>2. Can receive issuance responses from the eBL Platform through **POST** `/v3/ebl-issuance-responses` | None              | None             |
+| eBL Platform  | Solution Provider       | It is mandatory to support all of the following eBL Issuance capabilities:<br><br>1. Can receive issuance requests from the Carrier through **PUT** `/v3/ebl-issuance-requests`<br>2. Can send issuance responses by calling the **POST** `/v3/ebl-issuance-responses` endpoint implemented by the Carrier           | None              | None             |
 
 **Standard role**
 
@@ -68,9 +71,9 @@ The features of the standard that are meaningful enough to be mentioned in the c
 
 Qualifiers indicate the supported scope of a certified implementation. Scope qualifiers are used when certification can apply to different subsets of the standard, for example:
 
-- supported service types
-- supported modules
-- supported business sub-scopes
+* supported service types
+* supported modules
+* supported business sub-scopes
 
 This allows an adopter to be certified as conformant for correctly implementing the mandatory features, while making clear that the certification applies only to a defined subset of the standard.
 
@@ -78,36 +81,36 @@ This allows an adopter to be certified as conformant for correctly implementing 
 
 This section is organised into **Carrier scenarios** and **eBL Platform scenarios.**
 
-- **Carrier** scenarios measure the conformance of adopters who implement the **POST** `/v3/ebl-issuance-responses` endpoint.
-- **eBL Platform** scenarios measure the conformance of adopters who implement the **PUT** `/v3/ebl-issuance-requests` endpoint.
+* **Carrier** scenarios measure the conformance of adopters who implement the **POST** `/v3/ebl-issuance-responses` endpoint.
+* **eBL Platform** scenarios **measure the conformance of adopters who implement the **PUT** `/v3/ebl-issuance-requests` endpoint.
 
 ## 3.1 Carrier Conformance Scenarios
 
 ## Required scenario
 
-|  |  |
-| --- | --- |
-| **SupplyCSP[Certificate] - Issuance request - Issuance response** | This scenario verifies that a Carrier can issue an eBL via an eBL Platform and receive a response. |
+|                                                                       |                                                                                                      |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **SupplyCSP[Certificate] - Issuance request & asynchronous response** | This scenario verifies that the Carrier can issue an eBL via an eBL Platform and receive a response. |
 
-> **SupplyCSP** prompts the Carrier to provide the sandbox with the relevant certificate data to be used in the scenario.
+**SupplyCSP** prompts the Carrier to provide the sandbox with the relevant certificate data to be used in the scenario.
 
 ## 3.2 eBL Platform Conformance Scenarios
 
 ## Required scenario
 
-|  |  |
-| --- | --- |
-| **SupplyCSP [Document Parties] - Issuance request - Issuance response** | This scenario verifies that an eBL Platform can receive an eBL issuance request and send an issuance response. |
+|                                                                             |                                                                                                                 |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **SupplyCSP [Document Parties] - Issuance request & asynchronous response** | This scenario verifies that the eBL Platform can receive an eBL issuance request and send an issuance response. |
 
-> **SupplyCSP** prompts the eBL Platform to provide the sandbox with the relevant document parties data to be used in the scenario.
+**SupplyCSP** prompts the eBL Platform to provide the sandbox with the relevant document parties data to be used in the scenario.
 
 # 4. Conformance Validations
 
 Conformance reports indicate whether validations succeeded or failed.
 
-- **Default validations** (URL, response code, schema) are included in all communication between the sandbox and the testing party
-- **Carrier validations**: standard-defined rules that apply when a carrier sends an eBL issuance request
-- **eBL Platform validations**: no standard-defined rules
+* **Default validations** (URL, response code, schema) are included in all communication between the sandbox and the testing party
+* **Carrier validations**: standard-defined rules that apply when a carrier sends an eBL issuance request
+* **eBL Platform validations**: no standard-defined rules
 
 ## 4.1 Carrier Validations
 
@@ -115,9 +118,9 @@ Carrier validations apply when the Carrier sends an eBL issuance request.
 
 The following validations apply:
 
-- Signature of the `issuanceManifestSignedContent` is valid
-- Schema validation of the payload of `issuanceManifestSignedManifest`
-- Checksum of `transportDocument` vs. the checksum provided in the `issuanceManifest`
-- Checksum of `issueTo` vs. the checksum provided in the `issuanceManifest`
-- Checksum of `eBLVisualisationByCarrier` vs. the checksum provided in the `issuanceManifest` (if provided)
-- All Transport Document validations apply to the `transportDocument` object, please refer to the section 4.2 Carrier Validations on [https://dcsa.atlassian.net/wiki/x/VwBGdg](https://dcsa.atlassian.net/wiki/x/VwBGdg)
+* Signature of the `issuanceManifestSignedContent` is valid
+* Schema validation of the payload of `issuanceManifestSignedManifest`
+* Checksum of `transportDocument` vs. the checksum provided in the `issuanceManifest`
+* Checksum of `issueTo` vs. the checksum provided in the `issuanceManifest`
+* Checksum of `eBLVisualisationByCarrier` vs. the checksum provided in the `issuanceManifest` (if provided)
+* All Transport Document validations apply to the `transportDocument` object, please refer to the section 4.2 Carrier Validations on https://dcsa.atlassian.net/wiki/x/VwBGdg

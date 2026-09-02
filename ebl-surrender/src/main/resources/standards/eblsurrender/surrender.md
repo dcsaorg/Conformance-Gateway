@@ -1,22 +1,22 @@
 # DCSA Interface Standard for EBL (SUR) 3.x - Conformance Scenarios (CEP26)
 
-* [0. Document metadata](#0-document-metadata)
-* [1. What is Conformance?](#1-what-is-conformance)
+* [0. Document metadata](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-0.Documentmetadata)
+* [1. What is Conformance?](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-1.WhatisConformance?)
 
-  * [1.1 Scope](#11-scope)
-* [2. Conformance Criteria](#2-conformance-criteria)
-* [3. Conformance Scenarios](#3-conformance-scenarios)
+  * [1.1 Scope](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-1.1Scope)
+* [2. Conformance Criteria](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-2.ConformanceCriteria)
+* [3. Conformance Scenarios](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-3.ConformanceScenarios)
 
-  * [3.1 Carrier Conformance Scenarios](#31-carrier-conformance-scenarios)
-  * [Required scenario](#required-scenario)
-  * [Optional (report-only) scenarios](#optional-report-only-scenarios)
-  * [3.2 eBL Platform Conformance Scenarios](#32-ebl-platform-conformance-scenarios)
-  * [Required scenario](#required-scenario-1)
-  * [Optional (report-only) scenarios](#optional-report-only-scenarios-1)
-* [4. Conformance Validations](#4-conformance-validations)
+  * [3.1 Carrier Conformance Scenarios](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-3.1CarrierConformanceScenarios)
+  * [Required scenario](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-Requiredscenario)
+  * [Optional (report-only) scenarios](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-Optional%28report-only%29scenarios)
+  * [3.2 eBL Platform Conformance Scenarios](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-3.2eBLPlatformConformanceScenarios)
+  * [Required scenario](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-Requiredscenario.1)
+  * [Optional (report-only) scenarios](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-Optional%28report-only%29scenarios.1)
+* [4. Conformance Validations](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-4.ConformanceValidations)
 
-  * [4.2 Carrier Validations](#42-carrier-validations)
-  * [4.3 eBL Platform Validations](#43-ebl-platform-validations)
+  * [4.2 Carrier Validations](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-4.2CarrierValidations)
+  * [4.3 eBL Platform Validations](#DCSAInterfaceStandardforEBL%28SUR%293.x-ConformanceScenarios%28CEP26%29-4.3eBLPlatformValidations)
 
 # **0. Document metadata**
 
@@ -27,7 +27,7 @@
 
 # **1. What is Conformance?**
 
-Conformance refers to the validation process used to assess whether an adopter's implementation of the **Surrender (SUR) **module of the **DCSA electronic Bill of Lading (EBL) API** adheres to the expected technical and business requirements defined by DCSA.
+Conformance refers to the validation process used to assess whether an adopter's implementation of the **Surrender (SUR)** module of the **DCSA electronic Bill of Lading (EBL) API** adheres to the expected technical and business requirements defined by DCSA.
 
 The objective is to ensure interoperability across adopters and systems by demonstrating that APIs behave correctly in realistic, standards-based scenarios.
 
@@ -35,7 +35,7 @@ These conformance scenarios define the certification test set for eBL Surrender 
 
 ## 1.1 Scope
 
-Conformance testing validates the** minimum interoperability requirements** exercised by the certification scenarios. Optional enrichments, implementation-specific extensions, and broader semantic completeness beyond the tested scenarios are out of scope.
+Conformance testing validates the **minimum interoperability requirements** exercised by the certification scenarios. Optional enrichments, implementation-specific extensions, and broader semantic completeness beyond the tested scenarios are out of scope.
 
 # 2. Conformance Criteria
 
@@ -49,7 +49,7 @@ To receive a badge, adopters implementing either role must support the required 
 | Standard role | Business type (example) | Mandatory features to get a badge 🏅                                                                                                                                                                                                                                                                                      | Optional features | Scope qualifiers |
 | ------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ---------------- |
 | Carrier       | Ocean Carrier           | It is mandatory to support all of the following eBL Surrender capabilities:<br><br>1. Can receive surrender requests from the eBL Platform through **POST** `/v3/ebl-surrender-requests`<br>2. Can send surrender responses by calling the **POST** `/v3/ebl-surrender-response` endpoint implemented by the eBL Platform | None              | None             |
-| eBL Platform  | Solution Provider       | It is mandatory to support all of the following eBL Surrender capabilities:<br><br>1.  Can send surrender requests by calling the **POST** `/v3/ebl-surrender-requests` endpoint implemented by the Carrier<br>2. Can receive surrender responses from the Carrier through **POST** `/v3/ebl-surrender-responses`         | None              | None             |
+| eBL Platform  | Solution Provider       | It is mandatory to support all of the following eBL Surrender capabilities:<br><br>1. Can send surrender requests by calling the **POST** `/v3/ebl-surrender-requests` endpoint implemented by the Carrier<br>2. Can receive surrender responses from the Carrier through **POST** `/v3/ebl-surrender-responses`          | None              | None             |
 
 **Standard role**
 
@@ -59,7 +59,7 @@ The criteria are defined per standard role. Unless explicitly stated otherwise, 
 
 **Business type**
 
-The type of business of an example adopter that may typically implement the standard role, for example: **Ocean Carrier**, **Terminal Operator**, **Freight Forwarder**, **BCO**, **Shipper**, **Solution Provider, **etc.
+The type of business of an example adopter that may typically implement the standard role, for example: **Ocean Carrier**, **Terminal Operator**, **Freight Forwarder**, **BCO**, **Shipper**, **Solution Provider,** etc.
 
 This column is illustrative only. It helps readers understand which kinds of organizations may implement a given role, but it does not change the certification logic.
 
@@ -88,41 +88,41 @@ This section is organised into **Carrier scenarios** and **eBL Platform scenario
 * **Carrier** scenarios measure the conformance of adopters who implement the **POST** `/v3/ebl-surrender-requests` endpoint.
 * **eBL Platform** scenarios measure the conformance of adopters who implement the **POST** `/v3/ebl-surrender-responses` endpoint.
 
-> **SupplyCSP **prompts the Carrier to provide the sandbox with the relevant Straight or Negotiable Transport Document data to be used in the scenario.
+**SupplyCSP** prompts the Carrier to provide the sandbox with the relevant Straight or Negotiable Transport Document data to be used in the scenario.
 
 ## 3.1 Carrier Conformance Scenarios
 
 ## Required scenario
 
-|                                                                                           |                                                                                                                             |
-| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **SupplyCSP[Transport Document data] - Surrender request(Delivery) - Surrender response** | This scenario verifies that a Carrier can receive an eBL surrender request for delivery and send an eBL surrender response. |
+|                                                                                               |                                                                                                                               |
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **SupplyCSP[Transport Document data] - Surrender request (delivery) & asynchronous response** | This scenario verifies that the Carrier can receive an eBL surrender request for delivery and send an eBL surrender response. |
 
 ## Optional (report-only) scenarios
 
-|                                                                                            |                                                                                                                              |
-| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| **SupplyCSP[Transport Document data] - Surrender request(Amendment) - Surrender response** | This scenario verifies that a Carrier can receive an eBL surrender request for amendment and send an eBL surrender response. |
+|                                                                                                |                                                                                                                                |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **SupplyCSP[Transport Document data] - Surrender request (amendment) & asynchronous response** | This scenario verifies that the Carrier can receive an eBL surrender request for amendment and send an eBL surrender response. |
 
 ## 3.2 eBL Platform Conformance Scenarios
 
 ## Required scenario
 
-|                                                      |                                                                                                                                   |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Surrender request(Delivery) - Surrender response** | This scenario verifies that an eBL Platform can send an eBL surrender request for delivery and receive an eBL surrender response. |
+|                                                          |                                                                                                                                    |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Surrender request (delivery) & asynchronous response** | This scenario verifies that the eBL Platform can send an eBL surrender request for delivery and receive an eBL surrender response. |
 
 ## Optional (report-only) scenarios
 
-|                                                       |                                                                                                                                    |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Surrender request(Amendment) - Surrender response** | This scenario verifies that an eBL Platform can send an eBL surrender request for amendment and receive an eBL surrender response. |
+|                                                           |                                                                                                                                     |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Surrender request (amendment) & asynchronous response** | This scenario verifies that the eBL Platform can send an eBL surrender request for amendment and receive an eBL surrender response. |
 
 # 4. Conformance Validations
 
 Conformance reports indicate whether validations succeeded or failed.
 
-* **Default validations **(URL, response code, schema) are included in all communication between the sandbox and the testing party
+* **Default validations** (URL, response code, schema) are included in all communication between the sandbox and the testing party
 * **Carrier validations**: standard-defined rules that apply when a Carrier replies to a surrender request
 * **eBL Platform validations**: standard-defined rules that apply when an eBL Platform requests a surrender
 

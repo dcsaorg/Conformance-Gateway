@@ -91,10 +91,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       Map.entry(BookingRole.SHIPPER.getConfigName(), shipperConformanceScenarios(carrierPartyName))
     );
 
-    var scenarios = new LinkedHashMap<String, BookingScenarioListBuilder>();
-    testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
-
-    return scenarios;
+    return MapUtils.mergePartyScenarioModules(partyScenariosMap, testedPartyRoleNames);
   }
 
   private static Map<String, BookingScenarioListBuilder> carrierConformanceScenarios(String carrierPartyName) {

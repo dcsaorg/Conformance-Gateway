@@ -11,7 +11,6 @@ import org.dcsa.conformance.standards.portcall.party.PortCallFilterParameter;
 import org.dcsa.conformance.standards.portcall.party.PortCallRole;
 import org.dcsa.conformance.standards.portcall.party.ScenarioType;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -73,10 +72,12 @@ public class PortCallScenarioListBuilder extends ScenarioListBuilder<PortCallSce
                   getPortCallEvents(ScenarioType.TIMESTAMP),
                   getPortCallEvents(ScenarioType.MOVE_FORECAST))))));
 
-    Map<String, PortCallScenarioListBuilder> scenarios = new LinkedHashMap<>();
-    testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
-
-    return scenarios;
+      if (testedPartyRoleNames.size() > 1) {
+        testedPartyRoleNames.forEach(role ->
+          partyScenariosMap.getOrDefault(role, Map.of()).values()
+            .forEach(builder -> builder.withScenarioTitlePrefix(role + ": ")));
+      }
+    return MapUtils.mergePartyScenarioModules(partyScenariosMap, testedPartyRoleNames);
   }
 
   private static PortCallScenarioListBuilder supplyScenarioParameters(ScenarioType scenarioType) {

@@ -75,6 +75,25 @@ class BookingScenarioListBuilderTest {
   }
 
   @Test
+  void allInOneScenarioModulesPreserveCollidingLabelsForBothRoles() {
+    Map<String, BookingScenarioListBuilder> builders =
+      BookingScenarioListBuilder.createModuleScenarioListBuilders(
+        COMPONENT_FACTORY,
+        Set.of(BookingRole.CARRIER.getConfigName(), BookingRole.SHIPPER.getConfigName()),
+        false,
+        "Carrier",
+        "Shipper");
+
+    assertEquals(11, builders.size());
+    assertTrue(builders.containsKey("Carrier: Required Dry Cargo scenario"));
+    assertTrue(builders.containsKey("Shipper: Required Dry Cargo scenario"));
+    assertTrue(builders.containsKey("Carrier: Required Dangerous Goods scenario"));
+    assertTrue(builders.containsKey("Shipper: Required Dangerous Goods scenario"));
+    assertTrue(builders.containsKey("Carrier: " + OPTIONAL_SCENARIOS));
+    assertTrue(builders.containsKey("Shipper: " + OPTIONAL_SCENARIOS));
+  }
+
+  @Test
   void optionalScenariosAreReportOnlyAndNoScenarioUsesSkippableGet() {
     for (BookingRole role : BookingRole.values()) {
       Map<String, BookingScenarioListBuilder> builders = buildersFor(role);

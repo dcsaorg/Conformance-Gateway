@@ -4,6 +4,7 @@
   "description": "Console scripts for AWS operations on the Conformance Gateway project",
   "private": true,
   "scripts": {
+    "build": "tsc",
     "get-cognito-user": "ts-node src/scripts/get-cognito-user.ts",
     "get-current-sandbox-session": "ts-node src/scripts/get-current-sandbox-session.ts",
     "get-sandbox-metadata": "ts-node src/scripts/get-sandbox-metadata.ts",
@@ -15,7 +16,9 @@
     "list-cognito-users": "ts-node src/scripts/list-cognito-users.ts",
     "list-user-sandbox-reports": "ts-node src/scripts/list-user-sandbox-reports.ts",
     "list-user-sandboxes": "ts-node src/scripts/list-user-sandboxes.ts",
-    "query-dynamodb": "ts-node src/scripts/query-dynamodb.ts"
+    "query-dynamodb": "ts-node src/scripts/query-dynamodb.ts",
+    "run-conformance-suite": "ts-node src/scripts/run-conformance-suite.ts",
+    "test": "npm run build && node --test 'dist/**/*.test.js'"
   },
   "overrides": {
     "fast-xml-parser": "^5.7.0",

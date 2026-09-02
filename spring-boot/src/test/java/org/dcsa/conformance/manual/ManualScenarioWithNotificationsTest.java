@@ -23,7 +23,20 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
   @SuppressWarnings("unused")
   private static Stream<String> testStandards() {
     return Stream.of(
-        "Booking");
+        "Adoption",
+        "AN",
+        "Booking",
+        "CS",
+        "Ebl",
+        "PortCall",
+        "OVS",
+        "PINT",
+        "TnT",
+        "eBL Issuance",
+        "eBL Surrender",
+        "Ebl Endorsement Chain",
+        "Booking + eBL",
+        "VGM");
   }
 
   @ParameterizedTest(name = "Standard: {0}")

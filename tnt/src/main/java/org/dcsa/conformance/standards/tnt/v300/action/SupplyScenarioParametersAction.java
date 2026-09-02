@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.tnt.v300.party.SuppliedScenarioParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
@@ -138,6 +139,17 @@ public class SupplyScenarioParametersAction extends TntAction {
     JsonNode inputNode = partyInput.get(TntConstants.INPUT);
     if (inputNode == null || inputNode.isNull()) {
       inputNode = JsonToolkit.OBJECT_MAPPER.createObjectNode();
+    }
+    if (requiredQueryParameters.isEmpty()
+      && !optionalQueryParameters.isEmpty()
+      && optionalQueryParameters.stream()
+      .map(TntQueryParameters::getParameterName)
+      .noneMatch(inputNode::has)) {
+      throw new UserFacingException(
+        "The input must contain at least one of: %s"
+          .formatted(optionalQueryParameters.stream()
+            .map(TntQueryParameters::getParameterName)
+            .collect(Collectors.joining(", "))));
     }
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(inputNode);
   }

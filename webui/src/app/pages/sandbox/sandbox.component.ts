@@ -19,7 +19,7 @@ import {MessageDialog} from "../../dialogs/message/message-dialog.component";
 @Component({
     selector: 'app-sandbox',
     templateUrl: './sandbox.component.html',
-    styleUrls: ['../../shared-styles.css'],
+    styleUrls: ['../../shared-styles.css', './sandbox.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
@@ -102,6 +102,10 @@ export class SandboxComponent implements OnInit, OnDestroy {
 
   isInternalSandbox(): boolean {
     return !!this.sandbox?.canNotifyParty;
+  }
+
+  shouldShowNoScenarios(): boolean {
+    return !this.isLoading && !this.isInternalSandbox() && this.standardModules.length === 0;
   }
 
   getActionIconName(scenario: ScenarioDigest): string {

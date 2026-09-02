@@ -1,0 +1,111 @@
+.sandboxPageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.sandboxPageHeader .pageTitle {
+  margin-top: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.sandboxPageHeader button {
+  flex: 0 0 auto;
+}
+
+.sandboxPageDescription {
+  margin-top: 0.25rem;
+  color: #666;
+}
+
+.sandboxSearch {
+  margin-top: 1.5rem;
+}
+
+.sandboxListToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  background-color: #fafafa;
+  color: #555;
+}
+
+.sandboxCard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  border: 2px solid transparent;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.sandboxCard:hover {
+  box-shadow: 0 3px 10px rgb(0 0 0 / 12%);
+}
+
+.selectedEntityCard {
+  border-color: #3f51b5;
+  background-color: #f3f4fb;
+}
+
+.sandboxCheckbox {
+  flex: 0 0 auto;
+}
+
+.sandboxCardContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.sandboxCardLink {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sandboxCardLink:focus-visible {
+  outline: 2px solid #3f51b5;
+  outline-offset: 4px;
+}
+
+.sandboxCardLink:disabled {
+  cursor: default;
+}
+
+.sandboxName {
+  margin-top: 0.25rem;
+  color: grey;
+}
+
+@media (max-width: 600px) {
+  .sandboxPageHeader {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sandboxPageHeader button {
+    width: 100%;
+  }
+
+  .sandboxListToolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sandboxListToolbar button {
+    width: 100%;
+  }
+}

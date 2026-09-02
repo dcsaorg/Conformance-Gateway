@@ -3,30 +3,29 @@
 }
 
 @if (sandbox) {
-  <div>
-    <div class="pageTitle">
-        <span>Sandbox: {{sandbox.name}}</span>
-
-        <span style="vertical-align: middle;">
-            <button
-            mat-icon-button
-            color="primary"
-            title="Settings"
-            (click)="onClickSettings()"
-            ><mat-icon>settings</mat-icon></button>
-        </span>
-        <span style="vertical-align: middle;">
-            <button
-                    testId="deleteSandboxButton"
-                    mat-icon-button
-                    color="primary"
-                    title="Delete Sandbox"
-                    (click)="onClickDeleteSandbox()"
-            ><mat-icon>delete</mat-icon></button>
-        </span>
-    </div>
-    <div class="paragraph">
+  <div class="sandboxDetailHeader">
+    <div class="sandboxIdentity">
+      <div class="pageTitle">Sandbox: {{sandbox.name}}</div>
+      <div class="sandboxType">
         <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>
+      </div>
+    </div>
+    <div class="sandboxHeaderActions">
+      <button
+        mat-stroked-button
+        color="primary"
+        (click)="onClickSettings()">
+        <mat-icon>settings</mat-icon>
+        Settings
+      </button>
+      <button
+        testId="deleteSandboxButton"
+        mat-stroked-button
+        color="warn"
+        (click)="onClickDeleteSandbox()">
+        <mat-icon>delete</mat-icon>
+        Delete
+      </button>
     </div>
   </div>
 }
@@ -35,7 +34,7 @@
   <app-text-waiting text="Retrieving scenarios..."></app-text-waiting>
 }
 
-@if (!isLoading && standardModules.length == 0) {
+@if (shouldShowNoScenarios()) {
   <div class="pageSubtitle">No scenarios</div>
 }
 
@@ -62,24 +61,27 @@
                     </div>
 
                     @for (scenario of standardModule.scenarios; track scenario.id) {
-                      <mat-card [ngClass]="'entityCard'">
-                        <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
-                            <button
+                      <mat-card class="entityCard detailEntityCard">
+                        <div class="cardContent">
+                          <button
                             class="scenarioActionButton"
                             mat-icon-button
                             color="primary"
                             [disabled]="cannotPerformAction(scenario)"
                             [title]="getActionTitle(scenario)"
                             (click)="onScenarioAction($event, scenario)"
-                            ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
-
+                          ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
+                          <button
+                            type="button"
+                            class="detailEntityLink"
+                            [attr.aria-label]="'Open scenario ' + scenario.name"
+                            (click)="onScenarioClick(scenario)">
                             <span
-                            id="conformanceStatus"
-                            class="conformanceStatus"
-                            [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
+                              class="conformanceStatus"
+                              [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
                             >{{getConformanceStatusEmoji(scenario.conformanceStatus)}}</span>
-
                             <span class="wrappingText">{{scenario.name}}</span>
+                          </button>
                         </div>
                       </mat-card>
                     }
@@ -109,14 +111,18 @@
                     mat-raised-button
                     color="primary"
                     (click)="onClickCreateReport()"
-                    >Create report</button>
+                    ><mat-icon>description</mat-icon> Create report</button>
                 </div>
 
                 @for (reportDigest of reportDigests; track reportDigest.dateTime) {
-                  <mat-card [ngClass]="'entityCard'">
-                    <div class="cardContent withPointerCursor" (click)="onReportClick(reportDigest)">
-                      <span style="margin: 8px" class="wrappingText">📜 {{reportDigest.dateTime}} {{reportDigest.title}}</span>
-                    </div>
+                  <mat-card class="entityCard detailEntityCard">
+                    <button
+                      type="button"
+                      class="detailEntityLink reportEntityLink"
+                      [attr.aria-label]="'Open report ' + reportDigest.title"
+                      (click)="onReportClick(reportDigest)">
+                      <span class="wrappingText">📜 {{reportDigest.dateTime}} {{reportDigest.title}}</span>
+                    </button>
                   </mat-card>
                 }
               </div>
@@ -124,8 +130,11 @@
 
             @if (displayedReportDigest) {
               <div>
-                <div class="paragraph withPointerCursor">
-                  <a (click)="onClickBackToAllReports()">⬅️ Back to all reports</a>
+                <div class="paragraph">
+                  <button mat-button color="primary" (click)="onClickBackToAllReports()">
+                    <mat-icon>arrow_back</mat-icon>
+                    Back to all reports
+                  </button>
                 </div>
 
                 @if (displayedReportContent) {
@@ -144,45 +153,56 @@
 }
 
 @if (isInternalSandbox()) {
-  <div>
-    <div class="paragraph">
+  <div class="internalSandboxContent">
+    <mat-card class="operationPanel">
+      <div class="operationPanelTitle">Party controls</div>
+      <div class="operationPanelDescription">Manage communication and state for this internal sandbox.</div>
+      <div class="internalSandboxActions">
         <button
         id="notifyPartyButton"
         mat-raised-button
         color="primary"
         (click)="onClickNotifyParty()"
-        >Notify party</button>
-        &nbsp;
+        ><mat-icon>send</mat-icon> Notify party</button>
         <button
           id="toggleNotificationsButton"
-          mat-raised-button
-          [ngClass]="sandbox?.notificationsSuppressed ? 'green-button' : 'red-button'"
+          mat-stroked-button
+          [color]="sandbox?.notificationsSuppressed ? 'primary' : 'warn'"
           [title]="sandbox?.notificationsSuppressed ? 'Enable outbound notifications to counterpart' : 'Disable outbound notifications to counterpart'"
           (click)="onClickToggleNotifications()"
-        >{{sandbox?.notificationsSuppressed ? 'Enable notifications' : 'Disable notifications'}}</button>
-        &nbsp;
+        ><mat-icon>{{sandbox?.notificationsSuppressed ? 'notifications_active' : 'notifications_off'}}</mat-icon>
+          {{sandbox?.notificationsSuppressed ? 'Enable notifications' : 'Disable notifications'}}</button>
         <button
           testId="resetPartyButton"
-        mat-raised-button
-        (click)="onClickResetParty()"
-        >Reset party</button>
+          mat-stroked-button
+          color="warn"
+          (click)="onClickResetParty()"
+        ><mat-icon>restart_alt</mat-icon> Reset party</button>
+      </div>
+    </mat-card>
 
-    </div>
-
-    <div class="pageSubtitle">Activity</div>
-    <div>(latest message at the top)</div>
-    <div class="paragraph">
+    <div class="activityHeader">
+      <div>
+        <div class="pageSubtitle">Activity</div>
+        <div class="activityDescription">Latest message first</div>
+      </div>
+      <div>
         <button
-        mat-raised-button
-        testId="refreshButton"
-        color="primary"
-        (click)="onClickRefresh()"
-        >Refresh</button>
+          mat-stroked-button
+          testId="refreshButton"
+          color="primary"
+          (click)="onClickRefresh()"
+        ><mat-icon>refresh</mat-icon> Refresh</button>
+      </div>
     </div>
-    @if (sandbox && sandbox.operatorLog) {
-      @for (logEntry of sandbox.operatorLog; track logEntry) {
-        <div class="paragraph" testId="operatorLog">{{logEntry}}</div>
-      }
+    @if (sandbox?.operatorLog?.length) {
+      <div class="activityLog" role="log" aria-label="Sandbox activity">
+        @for (logEntry of sandbox?.operatorLog; track $index) {
+          <div class="activityLogEntry" testId="operatorLog">{{logEntry}}</div>
+        }
+      </div>
+    } @else {
+      <div class="emptyActivity" role="status">No activity recorded yet.</div>
     }
   </div>
 }

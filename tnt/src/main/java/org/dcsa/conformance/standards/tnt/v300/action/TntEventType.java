@@ -27,12 +27,10 @@ public enum TntEventType {
 
 
   public Set<TntQueryParameters> applicableBaseFilters() {
-    List<TntQueryParameters> baseFilters =
-      switch (this) {
-        case SHIPMENT, TRANSPORT -> List.of(TntQueryParameters.CBR, TntQueryParameters.TDR);
-        case EQUIPMENT -> List.of(TntQueryParameters.CBR, TntQueryParameters.TDR, TntQueryParameters.ER);
-        case IOT, REEFER -> List.of(TntQueryParameters.ER);
-      };
+    List<TntQueryParameters> baseFilters = List.of(
+      TntQueryParameters.CBR,
+      TntQueryParameters.TDR,
+      TntQueryParameters.ER);
     return new LinkedHashSet<>(baseFilters);
   }
 }

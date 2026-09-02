@@ -95,7 +95,9 @@ public class TntProducer extends ConformanceParty {
         ? requiredQueryParameters
         : optionalQueryParameters.isEmpty()
         ? parsePromptQueryParameters(actionPrompt.required(TntConstants.TNT_QUERY_PARAMETERS))
-        : Collections.emptySet();
+        : optionalQueryParameters.stream()
+          .limit(1)
+          .collect(Collectors.toCollection(LinkedHashSet::new));
 
     ObjectNode ssp = SupplyScenarioParametersAction.examplePrompt(queryParametersToAutoSupply);
     asyncOrchestratorPostPartyInput(actionPrompt.required(TntConstants.ACTION_ID).asText(), ssp);

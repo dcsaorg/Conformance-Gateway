@@ -30,6 +30,10 @@
             "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
           }
         ]
+      },
+      "equipmentDetails": {
+        "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+        "ISOEquipmentCode": "22GP"
       }
     },
     {
@@ -67,6 +71,10 @@
             "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
           }
         ]
+      },
+      "equipmentDetails": {
+        "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+        "ISOEquipmentCode": "22GP"
       },
       "transportDetails": {
         "transportCall": {
@@ -167,6 +175,18 @@
         "eventClassifier": "ACTUAL",
         "iotEventType": "GEOFENCE_ENTRY"
       },
+      "shipmentDetails": {
+        "documentReference": {
+          "type": "BOOKING",
+          "reference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER"
+        },
+        "additionalDocumentReferences": [
+          {
+            "type": "TRANSPORT_DOCUMENT",
+            "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
+          }
+        ]
+      },
       "equipmentDetails": {
         "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
         "ISOEquipmentCode": "22GP"
@@ -198,6 +218,18 @@
         "eventType": "REEFER",
         "eventClassifier": "ACTUAL",
         "reeferEventType": "MEASURED"
+      },
+      "shipmentDetails": {
+        "documentReference": {
+          "type": "BOOKING",
+          "reference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER"
+        },
+        "additionalDocumentReferences": [
+          {
+            "type": "TRANSPORT_DOCUMENT",
+            "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
+          }
+        ]
       },
       "equipmentDetails": {
         "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",

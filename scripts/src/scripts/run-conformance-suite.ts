@@ -24,8 +24,11 @@ export interface RunnerResult {
 }
 
 const PASSING_STATUSES = new Set(['CONFORMANT', 'COMPLETED WITHOUT OPTIONAL TRAFFIC']);
+const TOP_LEVEL_ROLE_PATTERN = /<h2>(.*?) conformance<\/h2>/g;
 const STATUS_PATTERN =
   /<h2>(.*?) conformance<\/h2><details open><summary>.*? (CONFORMANT|PARTIALLY CONFORMANT|COMPLETED WITHOUT OPTIONAL TRAFFIC|SKIPPED|NON-CONFORMANT|IRRELEVANT|NO TRAFFIC) <\/summary>/g;
+const REQUEST_TIMEOUT_MS = 30_000;
+const EXPECTED_ALL_IN_ONE_ROLE_RESULTS = 2;
 
 function usage(): string {
   return `Run one local all-in-one conformance suite and save its HTML report.
@@ -52,14 +55,36 @@ export function sandboxIdFor(standard: string, version: string, suite: string): 
 }
 
 export function parseRoleResults(report: string): RoleResult[] {
-  return Array.from(report.matchAll(STATUS_PATTERN), match => ({
+  const roleHeadings = Array.from(report.matchAll(TOP_LEVEL_ROLE_PATTERN), match => match[1]);
+  const results = Array.from(report.matchAll(STATUS_PATTERN), match => ({
     role: match[1],
     status: match[2],
   }));
+  if (roleHeadings.length !== results.length) {
+    const parsedRoles = new Set(results.map(result => result.role));
+    const malformedRoles = roleHeadings.filter(role => !parsedRoles.has(role));
+    throw new Error(
+      `Malformed or missing top-level role result${malformedRoles.length === 1 ? '' : 's'}: ` +
+        (malformedRoles.join(', ') || 'unknown role'),
+    );
+  }
+  if (new Set(results.map(result => result.role)).size !== results.length) {
+    throw new Error('Report contains duplicate top-level role results');
+  }
+  return results;
 }
 
-async function requestText(url: string): Promise<string> {
-  const response = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+async function requestText(url: string, deadline: number): Promise<string> {
+  const remainingMs = deadline - Date.now();
+  if (remainingMs <= 0) throw new Error(`Overall timeout reached before requesting ${url}`);
+  const requestTimeoutMs = Math.min(REQUEST_TIMEOUT_MS, remainingMs);
+  let response: Response;
+  try {
+    response = await fetch(url, { signal: AbortSignal.timeout(requestTimeoutMs) });
+  } catch (error) {
+    if (Date.now() >= deadline) throw new Error(`Overall timeout reached while requesting ${url}`);
+    throw error;
+  }
   const body = await response.text();
   if (!response.ok) {
     throw new Error(`HTTP ${response.status} from ${url}: ${body.slice(0, 500)}`);
@@ -89,10 +114,10 @@ async function waitForGateway(baseUrl: string, deadline: number): Promise<string
   let lastError: unknown;
   while (Date.now() < deadline) {
     try {
-      return await requestText(`${baseUrl}/`);
+      return await requestText(`${baseUrl}/`, deadline);
     } catch (error) {
       lastError = error;
-      await sleep(250);
+      await sleep(Math.min(250, Math.max(0, deadline - Date.now())));
     }
   }
   throw new Error(`Gateway did not become ready at ${baseUrl}: ${String(lastError)}`);
@@ -107,7 +132,7 @@ async function waitForCompletion(
 ): Promise<void> {
   let previousScenariosLeft: number | undefined;
   while (Date.now() < deadline) {
-    const body = await requestText(endpoint(baseUrl, token, sandboxId, 'status'));
+    const body = await requestText(endpoint(baseUrl, token, sandboxId, 'status'), deadline);
     let scenariosLeft: unknown;
     try {
       scenariosLeft = (JSON.parse(body) as { scenariosLeft?: unknown }).scenariosLeft;
@@ -122,7 +147,7 @@ async function waitForCompletion(
       console.log(`Scenarios remaining: ${scenariosLeft}`);
       previousScenariosLeft = scenariosLeft as number;
     }
-    await sleep(pollIntervalMs);
+    await sleep(Math.min(pollIntervalMs, Math.max(0, deadline - Date.now())));
   }
   throw new Error(`Timed out waiting for '${sandboxId}' to complete`);
 }
@@ -142,19 +167,24 @@ function startApplication(command: string): ChildProcess {
   });
 }
 
-async function stopApplication(child: ChildProcess | undefined): Promise<void> {
-  if (!child || child.exitCode !== null || child.pid === undefined) return;
+export async function stopApplication(
+  child: ChildProcess | undefined,
+  gracePeriodMs = 5_000,
+): Promise<void> {
+  if (!child || child.exitCode !== null || child.signalCode !== null || child.pid === undefined) return;
   console.log('Stopping application...');
+  const exited = new Promise<void>(resolve => child.once('exit', () => resolve()));
   if (process.platform === 'win32') child.kill('SIGTERM');
   else process.kill(-child.pid, 'SIGTERM');
-  await Promise.race([
-    new Promise<void>(resolve => child.once('exit', () => resolve())),
-    sleep(5_000),
+  const stoppedDuringGracePeriod = await Promise.race([
+    exited.then(() => true),
+    sleep(gracePeriodMs).then(() => false),
   ]);
-  if (child.exitCode === null) {
-    if (process.platform === 'win32') child.kill('SIGKILL');
-    else process.kill(-child.pid, 'SIGKILL');
-  }
+  if (stoppedDuringGracePeriod) return;
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  if (process.platform === 'win32') child.kill('SIGKILL');
+  else process.kill(-child.pid, 'SIGKILL');
+  await exited;
 }
 
 export async function runConformanceSuite(options: RunnerOptions): Promise<RunnerResult> {
@@ -167,7 +197,7 @@ export async function runConformanceSuite(options: RunnerOptions): Promise<Runne
     const token = discoverToken(homepage, options.sandboxId);
 
     console.log(`Running conformance suite: ${options.sandboxId}`);
-    await requestText(endpoint(options.baseUrl, token, options.sandboxId, 'reset'));
+    await requestText(endpoint(options.baseUrl, token, options.sandboxId, 'reset'), deadline);
     await waitForCompletion(
       options.baseUrl,
       token,
@@ -176,12 +206,21 @@ export async function runConformanceSuite(options: RunnerOptions): Promise<Runne
       options.pollIntervalMs,
     );
 
-    const report = await requestText(endpoint(options.baseUrl, token, options.sandboxId, 'report'));
+    const report = await requestText(
+      endpoint(options.baseUrl, token, options.sandboxId, 'report'),
+      deadline,
+    );
     await mkdir(path.dirname(options.outputPath), { recursive: true });
     await writeFile(options.outputPath, report, 'utf8');
     const roles = parseRoleResults(report);
     if (roles.length === 0) {
       throw new Error(`Report contains no top-level role results; saved diagnostic report to ${options.outputPath}`);
+    }
+    if (roles.length !== EXPECTED_ALL_IN_ONE_ROLE_RESULTS) {
+      throw new Error(
+        `Expected ${EXPECTED_ALL_IN_ONE_ROLE_RESULTS} top-level role results but parsed ${roles.length}; ` +
+          `saved diagnostic report to ${options.outputPath}`,
+      );
     }
     const failures = roles.filter(result => !PASSING_STATUSES.has(result.status));
     if (failures.length > 0) {

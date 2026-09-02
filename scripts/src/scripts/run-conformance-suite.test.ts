@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { mkdtemp, readFile } from 'node:fs/promises';
 import { createServer, Server } from 'node:http';
 import { tmpdir } from 'node:os';
@@ -9,6 +11,7 @@ import {
   parseRoleResults,
   runConformanceSuite,
   sandboxIdFor,
+  stopApplication,
 } from './run-conformance-suite';
 
 const SANDBOX_ID = 'booking-200-conformance-auto-all-in-one';
@@ -25,8 +28,9 @@ function report(statuses: Array<[string, string]>): string {
 }
 
 async function mockGateway(
-  statuses: number[],
+  statuses: unknown[],
   htmlReport: string,
+  statusDelayMs = 0,
 ): Promise<{ baseUrl: string; requests: string[] }> {
   const requests: string[] = [];
   const server = createServer((request, response) => {
@@ -39,7 +43,9 @@ async function mockGateway(
     } else if (url.endsWith('/reset')) {
       response.end('{}');
     } else if (url.endsWith('/status')) {
-      response.end(JSON.stringify({ scenariosLeft: statuses.shift() ?? 0 }));
+      const statusBody = JSON.stringify({ scenariosLeft: statuses.shift() ?? 0 });
+      if (statusDelayMs > 0) setTimeout(() => response.end(statusBody), statusDelayMs);
+      else response.end(statusBody);
     } else if (url.endsWith('/report')) {
       response.setHeader('content-type', 'text/html');
       response.end(htmlReport);
@@ -93,6 +99,13 @@ test('parses top-level role statuses only', () => {
   ]);
 });
 
+test('rejects a malformed top-level role result even when another role is conformant', () => {
+  const html = `${report([['Carrier', 'CONFORMANT']])}
+    <h2>Shipper conformance</h2><details open><summary>✅ UNKNOWN </summary></details>`;
+
+  assert.throws(() => parseRoleResults(html), /Malformed or missing top-level role result: Shipper/);
+});
+
 test('runs reset, polls completion, validates roles, and saves the HTML report', async () => {
   const htmlReport = report([['Carrier', 'CONFORMANT'], ['Shipper', 'CONFORMANT']]);
   const gateway = await mockGateway([2, 2, 1, 0], htmlReport);
@@ -136,6 +149,65 @@ test('saves a failing report and rejects the run', async () => {
   assert.equal(await readFile(outputPath, 'utf8'), htmlReport);
 });
 
+test('rejects and saves a report containing only one role result', async () => {
+  const htmlReport = report([['Carrier', 'CONFORMANT']]);
+  const gateway = await mockGateway([0], htmlReport);
+  const directory = await mkdtemp(path.join(tmpdir(), 'conformance-runner-'));
+  const outputPath = path.join(directory, 'missing-role.html');
+
+  await assert.rejects(
+    runConformanceSuite({
+      baseUrl: gateway.baseUrl,
+      sandboxId: SANDBOX_ID,
+      outputPath,
+      timeoutMs: 2_000,
+      pollIntervalMs: 5,
+    }),
+    /Expected 2 top-level role results but parsed 1/,
+  );
+  assert.equal(await readFile(outputPath, 'utf8'), htmlReport);
+});
+
+test('rejects an invalid scenariosLeft polling status', async () => {
+  const gateway = await mockGateway(['not-a-number'], report([
+    ['Carrier', 'CONFORMANT'],
+    ['Shipper', 'CONFORMANT'],
+  ]));
+  const directory = await mkdtemp(path.join(tmpdir(), 'conformance-runner-'));
+
+  await assert.rejects(
+    runConformanceSuite({
+      baseUrl: gateway.baseUrl,
+      sandboxId: SANDBOX_ID,
+      outputPath: path.join(directory, 'invalid-status.html'),
+      timeoutMs: 2_000,
+      pollIntervalMs: 5,
+    }),
+    /Invalid scenariosLeft status/,
+  );
+});
+
+test('a stalled status request cannot exceed the overall run deadline', async () => {
+  const gateway = await mockGateway([0], report([
+    ['Carrier', 'CONFORMANT'],
+    ['Shipper', 'CONFORMANT'],
+  ]), 500);
+  const directory = await mkdtemp(path.join(tmpdir(), 'conformance-runner-'));
+  const startedAt = Date.now();
+
+  await assert.rejects(
+    runConformanceSuite({
+      baseUrl: gateway.baseUrl,
+      sandboxId: SANDBOX_ID,
+      outputPath: path.join(directory, 'timeout.html'),
+      timeoutMs: 75,
+      pollIntervalMs: 5,
+    }),
+    /Overall timeout reached while requesting/,
+  );
+  assert.ok(Date.now() - startedAt < 400);
+});
+
 test('rejects a missing sandbox without resetting another suite', async () => {
   const gateway = await mockGateway([0], report([['Carrier', 'CONFORMANT']]));
   const directory = await mkdtemp(path.join(tmpdir(), 'conformance-runner-'));
@@ -151,6 +223,25 @@ test('rejects a missing sandbox without resetting another suite', async () => {
     /was not found/,
   );
   assert.equal(gateway.requests.some(url => url.endsWith('/reset')), false);
+});
+
+test('waits for a managed application to exit after SIGKILL', async () => {
+  const child = spawn(
+    process.execPath,
+    ['-e', "process.on('SIGTERM', () => {}); console.log('ready'); setInterval(() => {}, 1000)"],
+    {
+      detached: process.platform !== 'win32',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    },
+  );
+
+  try {
+    await once(child.stdout!, 'data');
+    await stopApplication(child, 20);
+    assert.notEqual(child.signalCode, null);
+  } finally {
+    if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+  }
 });
 
 

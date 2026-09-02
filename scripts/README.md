@@ -44,10 +44,10 @@ standard/version/suite, wait for all scenarios, save the HTML report, and verify
 party result. It exits non-zero for a non-conformant, partial, missing, malformed, or timed-out
 result. The report is still saved when conformance validation fails.
 
-Start the application separately, then run:
+Start the application separately. From the repository root, run:
 
 ```bash
-npm run run-conformance-suite -- \
+npm --prefix scripts run run-conformance-suite -- \
   --standard Booking \
   --version 2.0.0 \
   --suite Conformance
@@ -58,7 +58,7 @@ The default report is written to
 For suite names containing shell metacharacters or spaces, quote the value:
 
 ```bash
-npm run run-conformance-suite -- \
+npm --prefix scripts run run-conformance-suite -- \
   --standard eBL \
   --version 3.0.0 \
   --suite 'Conformance SI + TD'
@@ -67,7 +67,7 @@ npm run run-conformance-suite -- \
 The runner can also start and stop the application itself. Quote the whole start command:
 
 ```bash
-npm run run-conformance-suite -- \
+npm --prefix scripts run run-conformance-suite -- \
   --standard Booking \
   --version 2.0.0 \
   --suite Conformance \
@@ -77,7 +77,7 @@ npm run run-conformance-suite -- \
 Useful overrides:
 
 ```bash
-npm run run-conformance-suite -- \
+npm --prefix scripts run run-conformance-suite -- \
   --sandbox-id booking-200-conformance-auto-all-in-one \
   --base-url http://localhost:8080 \
   --output ../target/conformance-reports/booking.html \
@@ -87,7 +87,7 @@ npm run run-conformance-suite -- \
 Run the scripts module checks with:
 
 ```bash
-npm test
+npm --prefix scripts test
 ```
 
 ---

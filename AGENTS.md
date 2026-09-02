@@ -106,10 +106,10 @@ Useful test layers:
 
 ## Required end-to-end report validation
 
-For an affected standard, start the backend and run from `scripts/`:
+For an affected standard, start the backend and run from the repository root:
 
 ```bash
-npm run run-conformance-suite -- \
+npm --prefix scripts run run-conformance-suite -- \
   --standard Booking \
   --version 2.0.0 \
   --suite Conformance
@@ -118,7 +118,7 @@ npm run run-conformance-suite -- \
 Or let the runner own the backend lifecycle:
 
 ```bash
-npm run run-conformance-suite -- \
+npm --prefix scripts run run-conformance-suite -- \
   --standard Booking \
   --version 2.0.0 \
   --suite Conformance \

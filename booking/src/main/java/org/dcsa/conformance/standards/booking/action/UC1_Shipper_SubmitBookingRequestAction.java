@@ -11,6 +11,7 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParameters;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -41,7 +42,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
       : JsonToolkit.templateFileToJsonNode(
       "/standards/booking/messages/" + seedScenarioType.bookingPayload(standardVersion),
       Map.of());
-    getDspConsumer().accept(getDspSupplier().get().withScenarioType(seedScenarioType.name()));
+    getDspConsumer().accept(new BookingDynamicScenarioParameters(seedScenarioType.name(), null, null));
   }
 
   public UC1_Shipper_SubmitBookingRequestAction(
@@ -127,13 +128,6 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
           : "a %s booking request".formatted(scenarioType.getDisplayName()));
   }
 
-  @Override
-  public JsonNode getJsonForHumanReadablePrompt() {
-    if (previousAction != null) {
-      return super.getJsonForHumanReadablePrompt();
-    }
-    return getBookingPayloadSupplier().get();
-  }
 
   @Override
   public ObjectNode asJsonNode() {

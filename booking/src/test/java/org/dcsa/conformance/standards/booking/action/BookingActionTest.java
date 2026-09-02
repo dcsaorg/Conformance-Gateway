@@ -8,6 +8,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -19,6 +20,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BookingActionTest {
@@ -136,11 +139,62 @@ class BookingActionTest {
     assertTrue(seededPayload.has("requestedEquipments"));
 
     action.handleExchange(bookingExchange());
+    assertEquals(
+      "CBRR-1",
+      action.getBookingDspReference().get().carrierBookingRequestReference());
+    var downstreamGet = new ShipperGetBookingAction(
+      "Carrier",
+      "Shipper",
+      action,
+      BookingState.RECEIVED,
+      null,
+      null,
+      null,
+      false);
+    assertEquals("CBRR-1", downstreamGet.asJsonNode().path("cbrr").asText());
     assertEquals(0, action.asJsonNode().path("bookingPayload").size());
 
     action.reset();
 
     assertEquals(seededPayload, action.asJsonNode().path("bookingPayload"));
     assertEquals(ScenarioType.DRY_CARGO.name(), action.asJsonNode().path("scenarioType").asText());
+    assertNull(action.getBookingDspReference().get().carrierBookingRequestReference());
+    assertNull(action.getBookingDspReference().get().carrierBookingReference());
+  }
+
+  @Test
+  void standaloneUc1RemainsTrafficDrivenAndSuppliesPayloadInActionJson() {
+    var standaloneAction = new UC1_Shipper_SubmitBookingRequestAction(
+      "Carrier",
+      "Shipper",
+      null,
+      JsonSchemaValidator.getInstance(
+        "/schemas/dcsaorg-DCSA_BKG-2.0.0-resolved.yaml", "CreateBooking"),
+      JsonSchemaValidator.getInstance(
+        "/schemas/dcsaorg-DCSA_BKG-2.0.0-resolved.yaml", "CreateBookingResponse"),
+      JsonSchemaValidator.getInstance(
+        "/schemas/dcsaorg-DCSA_BKG-2.0.0-resolved.yaml", "BookingNotification"),
+      false,
+      ScenarioType.DRY_CARGO,
+      "2.0.0",
+      "UC1[Dry cargo]");
+
+    assertFalse(standaloneAction.isInputRequired());
+    assertNull(standaloneAction.getJsonForHumanReadablePrompt());
+    assertTrue(standaloneAction.asJsonNode().path("bookingPayload").has("requestedEquipments"));
+
+    BookingAction chainedAction = new UC1_Shipper_SubmitBookingRequestAction(
+      "Carrier",
+      "Shipper",
+      new CarrierSupplyScenarioParametersAction("Carrier", ScenarioType.DRY_CARGO, "2.0.0", null),
+      JsonSchemaValidator.getInstance(
+        "/schemas/dcsaorg-DCSA_BKG-2.0.0-resolved.yaml", "CreateBooking"),
+      JsonSchemaValidator.getInstance(
+        "/schemas/dcsaorg-DCSA_BKG-2.0.0-resolved.yaml", "CreateBookingResponse"),
+      JsonSchemaValidator.getInstance(
+        "/schemas/dcsaorg-DCSA_BKG-2.0.0-resolved.yaml", "BookingNotification"),
+      false);
+
+    assertFalse(chainedAction.isInputRequired());
   }
 }

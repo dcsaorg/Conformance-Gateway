@@ -39,7 +39,7 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
     JsonSchemaValidator notificationSchemaValidator,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator issuanceManifestSchemaValidator) {
-    super(carrierPartyName, platformPartyName, previousAction, "Issuance request/response", 204);
+    super(carrierPartyName, platformPartyName, previousAction, "Issuance request & asynchronous response", 204);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.requestSchemaValidator = requestSchemaValidator;
     this.issuanceManifestSchemaValidator = issuanceManifestSchemaValidator;

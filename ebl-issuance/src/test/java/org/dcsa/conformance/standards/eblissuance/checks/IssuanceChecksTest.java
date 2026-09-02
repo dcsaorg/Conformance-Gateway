@@ -1,13 +1,6 @@
 package org.dcsa.conformance.standards.eblissuance.checks;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.List;
-import java.util.UUID;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
@@ -15,13 +8,21 @@ import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.UUID;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class IssuanceChecksTest {
 
   private static final String SCHEMA_PATH =
     "/standards/eblissuance/schemas/EBL_ISS_v3.0.0.yaml";
   private static final PayloadSignerWithKey SIGNER = PayloadSignerFactory.carrierPayloadSigner();
   private static final JsonSchemaValidator MANIFEST_SCHEMA =
-      JsonSchemaValidator.getInstance(SCHEMA_PATH, "IssuanceManifest");
+    JsonSchemaValidator.getInstance(SCHEMA_PATH, "IssuanceManifest");
 
   @Test
   void validIssuanceRequestPassesEveryIssuanceCheck() {
@@ -33,13 +34,13 @@ class IssuanceChecksTest {
   @Test
   void usesDocumentedIssuanceManifestValidationDescriptions() {
     assertEquals(
-        List.of(
-            "Signature of the 'issuanceManifestSignedContent' is valid",
-            "Schema validation of the payload of 'issuanceManifestSignedManifest'",
-            "Checksum of 'transportDocument' vs. the checksum provided in the 'issuanceManifest'",
-            "Checksum of 'issueTo' vs. the checksum provided in the 'issuanceManifest'",
-            "Checksum of 'eBLVisualisationByCarrier' vs. the checksum provided in the 'issuanceManifest' (if provided)"),
-        issuanceChecks().stream().map(JsonContentCheck::description).toList());
+      List.of(
+        "Signature of the 'issuanceManifestSignedContent' is valid",
+        "Schema validation of the payload of 'issuanceManifestSignedManifest'",
+        "Checksum of 'transportDocument' vs. the checksum provided in the 'issuanceManifest'",
+        "Checksum of 'issueTo' vs. the checksum provided in the 'issuanceManifest'",
+        "Checksum of 'eBLVisualisationByCarrier' vs. the checksum provided in the 'issuanceManifest' (if provided)"),
+      issuanceChecks().stream().map(JsonContentCheck::description).toList());
   }
 
   @Test
@@ -50,10 +51,10 @@ class IssuanceChecksTest {
     int tamperIndex = signatureStart + 5;
     char replacement = signature.charAt(tamperIndex) == 'A' ? 'B' : 'A';
     request.put(
-        "issuanceManifestSignedContent",
-        signature.substring(0, tamperIndex)
-            + replacement
-            + signature.substring(tamperIndex + 1));
+      "issuanceManifestSignedContent",
+      signature.substring(0, tamperIndex)
+        + replacement
+        + signature.substring(tamperIndex + 1));
 
     assertInvalid(issuanceChecks().get(0), request);
   }
@@ -109,12 +110,12 @@ class IssuanceChecksTest {
   @Test
   void issuanceResponseMustMatchTheRequestAndConfirmSuccessfulIssuance() {
     List<JsonContentCheck> checks =
-        IssuanceChecks.issuanceResponseContentChecks(() -> "TDR-1");
+      IssuanceChecks.issuanceResponseContentChecks(() -> "TDR-1");
     ObjectNode response =
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("transportDocumentReference", "TDR-1")
-            .put("issuanceResponseCode", "ISSU");
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("transportDocumentReference", "TDR-1")
+        .put("issuanceResponseCode", "ISSU");
 
     checks.forEach(check -> assertValid(check, response));
 
@@ -132,59 +133,59 @@ class IssuanceChecksTest {
   void createsRuntimeActionChecks() {
     UUID exchangeId = UUID.randomUUID();
     var issuanceManifestChecks =
-        IssuanceChecks.issuanceRequestSignatureChecks(
-            exchangeId,
-            "3.0.0",
-            MANIFEST_SCHEMA,
-            () ->
-                PayloadSignerFactory.verifierFromPemEncodedCertificate(
-                    SIGNER.getPublicKeyInPemFormat(), "certificate"));
+      IssuanceChecks.issuanceRequestSignatureChecks(
+        exchangeId,
+        "3.0.0",
+        MANIFEST_SCHEMA,
+        () ->
+          PayloadSignerFactory.verifierFromPemEncodedCertificate(
+            SIGNER.getPublicKeyInPemFormat(), "certificate"));
 
     assertEquals(
-        "Complex validations of 'issuanceManifest'", issuanceManifestChecks.getTitle().trim());
+      "Complex validations of 'issuanceManifest'", issuanceManifestChecks.getTitle().trim());
     assertTrue(issuanceManifestChecks.isRelevant());
     assertTrue(IssuanceChecks.tdContentChecks(exchangeId, "3.0.0").isRelevant());
   }
 
   private static List<JsonContentCheck> issuanceChecks() {
     return IssuanceChecks.issuanceRequestContentChecks(
-        MANIFEST_SCHEMA,
-        () ->
-            PayloadSignerFactory.verifierFromPemEncodedCertificate(
-                SIGNER.getPublicKeyInPemFormat(), "certificate"));
+      MANIFEST_SCHEMA,
+      () ->
+        PayloadSignerFactory.verifierFromPemEncodedCertificate(
+          SIGNER.getPublicKeyInPemFormat(), "certificate"));
   }
 
   private static ObjectNode validRequest(boolean includeVisualization) {
     ObjectNode request = OBJECT_MAPPER.createObjectNode();
     request
-        .putObject("document")
-        .put("transportDocumentReference", "TDR-1")
-        .put("transportDocumentStatus", "ISSUED");
+      .putObject("document")
+      .put("transportDocumentReference", "TDR-1")
+      .put("transportDocumentStatus", "ISSUED");
     request.putObject("issueTo").put("partyName", "Issue-to party");
     if (includeVisualization) {
       request
-          .putObject("eBLVisualisationByCarrier")
-          .put("name", "eBL.pdf")
-          .put("content", new byte[] {1, 2, 3});
+        .putObject("eBLVisualisationByCarrier")
+        .put("name", "eBL.pdf")
+        .put("content", new byte[]{1, 2, 3});
     }
     request.put(
-        "issuanceManifestSignedContent",
-        SIGNER.sign(manifestFor(request, includeVisualization).toString()));
+      "issuanceManifestSignedContent",
+      SIGNER.sign(manifestFor(request, includeVisualization).toString()));
     return request;
   }
 
   private static ObjectNode manifestFor(ObjectNode request, boolean includeVisualization) {
     ObjectNode manifest =
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("documentChecksum", Checksums.sha256CanonicalJson(request.path("document")))
-            .put("issueToChecksum", Checksums.sha256CanonicalJson(request.path("issueTo")));
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("documentChecksum", Checksums.sha256CanonicalJson(request.path("document")))
+        .put("issueToChecksum", Checksums.sha256CanonicalJson(request.path("issueTo")));
     if (includeVisualization) {
       try {
         manifest.put(
-            "eBLVisualisationByCarrierChecksum",
-            Checksums.sha256(
-                request.path("eBLVisualisationByCarrier").path("content").binaryValue()));
+          "eBLVisualisationByCarrierChecksum",
+          Checksums.sha256(
+            request.path("eBLVisualisationByCarrier").path("content").binaryValue()));
       } catch (java.io.IOException e) {
         throw new IllegalArgumentException(e);
       }

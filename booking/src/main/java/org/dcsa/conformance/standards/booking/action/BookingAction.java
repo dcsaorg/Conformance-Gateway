@@ -114,7 +114,7 @@ public abstract class BookingAction extends BookingAndEblAction {
     BookingCancellationState bookingCancellationState) {
     return validateSecondaryStatuses
       ? CarrierStatusScenario.from(
-          bookingState, amendedBookingState, bookingCancellationState)
+      bookingState, amendedBookingState, bookingCancellationState)
       : CarrierStatusScenario.bookingStatusOnly(bookingState);
   }
 
@@ -135,8 +135,8 @@ public abstract class BookingAction extends BookingAndEblAction {
       getCbrFromNotificationPayload(requestJsonNode) != null
         ? getCbrFromNotificationPayload(requestJsonNode)
         : responseJsonNode == null
-          ? null
-          : responseJsonNode.path("carrierBookingReference").asText(null);
+        ? null
+        : responseJsonNode.path("carrierBookingReference").asText(null);
     var newCbrr = responseJsonNode == null
       ? null
       : responseJsonNode.path("carrierBookingRequestReference").asText(null);

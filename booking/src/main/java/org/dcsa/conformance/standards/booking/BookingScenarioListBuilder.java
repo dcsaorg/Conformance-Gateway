@@ -48,8 +48,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
 
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 
-  private static final ThreadLocal<BookingComponentFactory> threadLocalComponentFactory =
-    new ThreadLocal<>();
+  private static final ThreadLocal<BookingComponentFactory> threadLocalComponentFactory = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
   private static final ThreadLocal<Boolean> threadLocalIsWithNotifications = new ThreadLocal<>();
@@ -98,48 +97,42 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return scenarios;
   }
 
-  private static Map<String, BookingScenarioListBuilder> carrierConformanceScenarios(
-    String carrierPartyName) {
+  private static Map<String, BookingScenarioListBuilder> carrierConformanceScenarios(String carrierPartyName) {
     var scenarios = new LinkedHashMap<String, BookingScenarioListBuilder>();
     scenarios.put("Required Dry Cargo scenario", carrierRequiredScenario(carrierPartyName, ScenarioType.DRY_CARGO));
     scenarios.put("Additional required Dry Cargo scenarios (execute at least one of these two)", additionalRequiredScenarios(carrierPartyName, ScenarioType.DRY_CARGO));
-    scenarios.put("Required Reefer container scenario", carrierRequiredScenario(carrierPartyName, ScenarioType.REEFER));
-    scenarios.put("Additional required Reefer container scenarios (execute at least one of these two)", additionalRequiredScenarios(carrierPartyName, ScenarioType.REEFER));
+    scenarios.put("Required Reefer scenario", carrierRequiredScenario(carrierPartyName, ScenarioType.REEFER));
+    scenarios.put("Additional required Reefer scenarios (execute at least one of these two)", additionalRequiredScenarios(carrierPartyName, ScenarioType.REEFER));
     scenarios.put("Required Dangerous Goods scenario", carrierRequiredScenario(carrierPartyName, ScenarioType.DG));
     scenarios.put("Additional required Dangerous Goods scenarios (execute at least one of these two)", additionalRequiredScenarios(carrierPartyName, ScenarioType.DG));
     scenarios.put("Optional (report-only) scenarios", carrierOptionalScenarios(carrierPartyName).asOptionalReportOnlyScenario());
     return scenarios;
   }
 
-  private static Map<String, BookingScenarioListBuilder> shipperConformanceScenarios(
-    String carrierPartyName) {
+  private static Map<String, BookingScenarioListBuilder> shipperConformanceScenarios(String carrierPartyName) {
     var scenarios = new LinkedHashMap<String, BookingScenarioListBuilder>();
-    scenarios.put("Required Dry Cargo scenario", shipperRequiredScenarios(carrierPartyName, ScenarioType.DRY_CARGO));
-    scenarios.put("Required Reefer container scenario", shipperRequiredScenarios(carrierPartyName, ScenarioType.REEFER));
-    scenarios.put("Required Dangerous Goods scenario", shipperRequiredScenarios(carrierPartyName, ScenarioType.DG));
+    scenarios.put("Required Dry Cargo scenario", shipperRequiredScenarios(ScenarioType.DRY_CARGO));
+    scenarios.put("Required Reefer container scenario", shipperRequiredScenarios(ScenarioType.REEFER));
+    scenarios.put("Required Dangerous Goods scenario", shipperRequiredScenarios(ScenarioType.DG));
     scenarios.put("Optional (report-only) scenarios", shipperOptionalScenarios(carrierPartyName).asOptionalReportOnlyScenario());
     return scenarios;
   }
 
-  private static BookingScenarioListBuilder carrierRequiredScenario(
-    String carrierPartyName, ScenarioType scenarioType) {
+  private static BookingScenarioListBuilder carrierRequiredScenario(String carrierPartyName, ScenarioType scenarioType) {
     return carrierSupplyScenarioParameters(carrierPartyName, scenarioType)
       .then(uc1ShipperSubmitBookingRequest(false).then(confirmedBookingScenario(false)));
   }
 
-  private static BookingScenarioListBuilder shipperRequiredScenarios(
-    String carrierPartyName, ScenarioType scenarioType) {
-    return carrierSupplyScenarioParameters(carrierPartyName, scenarioType)
-      .then(
-        uc1ShipperSubmitBookingRequest(false)
-          .thenEither(
-            shipperGetBookingStatusOnly(RECEIVED),
-            uc2CarrierRequestUpdateToBookingRequest(false)
-              .then(uc3ShipperSubmitUpdatedBookingRequest(false)),
-            uc5CarrierConfirmBookingRequest(false)
-              .then(
-                uc6CarrierRequestToAmendConfirmedBooking(false)
-                  .then(uc7ShipperSubmitBookingAmendment(false)))));
+  private static BookingScenarioListBuilder shipperRequiredScenarios(ScenarioType scenarioType) {
+    return uc1ShipperSubmitBookingRequest(false, scenarioType)
+      .thenEither(
+        shipperGetBookingStatusOnly(RECEIVED),
+        uc2CarrierRequestUpdateToBookingRequest(false)
+          .then(uc3ShipperSubmitUpdatedBookingRequest(false)),
+        uc5CarrierConfirmBookingRequest(false)
+          .then(
+            uc6CarrierRequestToAmendConfirmedBooking(false)
+              .then(uc7ShipperSubmitBookingAmendment(false))));
   }
 
   private static BookingScenarioListBuilder additionalRequiredScenarios(String carrierPartyName, ScenarioType scenarioType) {
@@ -152,8 +145,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
               .then(uc7ShipperSubmitBookingAmendment(false))));
   }
 
-  private static BookingScenarioListBuilder confirmedBookingScenario(
-    boolean validateSecondaryStatuses) {
+  private static BookingScenarioListBuilder confirmedBookingScenario(boolean validateSecondaryStatuses) {
     return uc5CarrierConfirmBookingRequest(validateSecondaryStatuses)
       .then(shipperGetBookingStatusOnly(CONFIRMED));
   }
@@ -187,15 +179,13 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder shipperOptionalScenarios(String carrierPartyName) {
-    return carrierSupplyScenarioParameters(carrierPartyName, ScenarioType.ANY)
-      .then(
-        uc1ShipperSubmitBookingRequest()
-          .thenEither(
-            retrieveAmendedBookingContentScenario(),
-            uc5CarrierConfirmBookingRequest()
-              .then(uc7ShipperSubmitBookingAmendment(true).then(uc9ShipperCancelBookingAmendment())),
-            uc5CarrierConfirmBookingRequest().then(uc13ShipperCancelConfirmedBooking()),
-            uc11ShipperCancelBooking()));
+    return uc1ShipperSubmitBookingRequest(true, ScenarioType.ANY)
+      .thenEither(
+        retrieveAmendedBookingContentScenario(),
+        uc5CarrierConfirmBookingRequest()
+          .then(uc7ShipperSubmitBookingAmendment(true).then(uc9ShipperCancelBookingAmendment())),
+        uc5CarrierConfirmBookingRequest().then(uc13ShipperCancelConfirmedBooking()),
+        uc11ShipperCancelBooking());
   }
 
   private static BookingScenarioListBuilder retrieveAmendedBookingContentScenario() {
@@ -283,21 +273,34 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
 
   private static BookingScenarioListBuilder uc1ShipperSubmitBookingRequest(
     boolean validateSecondaryStatuses) {
+    return uc1ShipperSubmitBookingRequest(validateSecondaryStatuses, null);
+  }
+
+  private static BookingScenarioListBuilder uc1ShipperSubmitBookingRequest(
+    boolean validateSecondaryStatuses, ScenarioType scenarioType) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
     return new BookingScenarioListBuilder(
-      previousAction ->
-        new UC1_Shipper_SubmitBookingRequestAction(
+      previousAction -> {
+        String actionTitle = "UC1";
+        if (scenarioType != null && scenarioType != ScenarioType.ANY) {
+          actionTitle = "UC1[%s]".formatted(scenarioType.getDisplayName());
+        }
+        return new UC1_Shipper_SubmitBookingRequestAction(
           carrierPartyName,
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(BOOKING_API, CREATE_BOOKING_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_202_RESPONSE_SCHEMA),
           componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          isWithNotifications)
-          .withoutSecondaryStatusValidationIf(!validateSecondaryStatuses));
+          isWithNotifications,
+          scenarioType,
+          componentFactory.getStandardVersion(),
+          actionTitle)
+          .withoutSecondaryStatusValidationIf(!validateSecondaryStatuses);
+      });
   }
 
   private static BookingScenarioListBuilder uc2CarrierRequestUpdateToBookingRequest() {
@@ -308,10 +311,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     boolean validateSecondaryStatuses) {
     return carrierStateChange(
       UC2_Carrier_RequestUpdateToBookingRequestAction::new, validateSecondaryStatuses);
-  }
-
-  private static BookingScenarioListBuilder uc3ShipperSubmitUpdatedBookingRequest() {
-    return uc3ShipperSubmitUpdatedBookingRequest(true);
   }
 
   private static BookingScenarioListBuilder uc3ShipperSubmitUpdatedBookingRequest(
@@ -497,11 +496,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return new BookingScenarioListBuilder(
       previousAction ->
         constructor.newInstance(
-          carrierPartyName,
-          shipperPartyName,
-          (BookingAction) previousAction,
-          componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          isWithNotifications)
+            carrierPartyName,
+            shipperPartyName,
+            (BookingAction) previousAction,
+            componentFactory.getMessageSchemaValidator(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+            isWithNotifications)
           .withoutSecondaryStatusValidationIf(!validateSecondaryStatuses));
   }
 

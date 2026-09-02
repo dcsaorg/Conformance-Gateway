@@ -132,8 +132,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
     log.info("EblIssuanceCarrier.sendIssuanceRequest(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("ssp"));
     String tdr = actionPrompt.has("tdr")
-        ? actionPrompt.path("tdr").asText()
-        : ReferenceGenerator.newReference();
+      ? actionPrompt.path("tdr").asText()
+      : ReferenceGenerator.newReference();
     String tdsr = ReferenceGenerator.newReference();
     String sir = sirsByTdr.computeIfAbsent(tdr, ignoredTdr -> ReferenceGenerator.newReference());
     String br = brsByTdr.computeIfAbsent(tdr, ignoredTdr -> ReferenceGenerator.newReference());
@@ -208,10 +208,10 @@ public class EblIssuanceCarrier extends ConformanceParty {
     jsonRequestBody.set("eBLVisualisationByCarrier", wrapInSupportingDocumentObject(eblVisualization));
     var eBLVisualisationByCarrierChecksum = Checksums.sha256(eblVisualization);
     var issuanceManifest = OBJECT_MAPPER
-        .createObjectNode()
-        .put("documentChecksum", tdChecksum)
-        .put("issueToChecksum", issueToChecksum)
-        .put("eBLVisualisationByCarrierChecksum", eBLVisualisationByCarrierChecksum);
+      .createObjectNode()
+      .put("documentChecksum", tdChecksum)
+      .put("issueToChecksum", issueToChecksum)
+      .put("eBLVisualisationByCarrierChecksum", eBLVisualisationByCarrierChecksum);
 
     jsonRequestBody.put("issuanceManifestSignedContent", PAYLOAD_SIGNER.sign(issuanceManifest.toString()));
 

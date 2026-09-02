@@ -61,12 +61,12 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends ShipperNotifi
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
         return Stream.of(
-            createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", requestSchemaValidator, cbrr, cbr),
-            Stream.of(
-              BookingChecks.updateRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())
-            ),
-            getNotificationChecks(expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)
-          ).flatMap(Function.identity());
+          createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", requestSchemaValidator, cbrr, cbr),
+          Stream.of(
+            BookingChecks.updateRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())
+          ),
+          getNotificationChecks(expectedApiVersion, notificationSchemaValidator, expectedBookingState, null)
+        ).flatMap(Function.identity());
       }
     };
   }

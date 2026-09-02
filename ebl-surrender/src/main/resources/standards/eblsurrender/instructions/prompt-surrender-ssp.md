@@ -1,6 +1,7 @@
 Please provide the required information for a Straight or Negotiable eBL that your system can process:
 
 ### Required Information:
+
 - **Transport Document Reference**: A valid eBL reference in your system
 - **Carrier Party**: Your carrier party details
 - **Issue To Party**: The party to whom the eBL was issued
@@ -9,11 +10,13 @@ Please provide the required information for a Straight or Negotiable eBL that yo
 ### Party Object Structure:
 
 Each party object **`carrierParty`**, **`issueToParty`** and **`surrendereeParty`** requires:
+
 - `partyName`
 - `eblPlatform`
 - `identifyingCodes`, containing at least `codeListProvider` and `partyCode`.
 
 If your carrier system requires additional fields to process the surrender request, you can add:
+
 - `taxLegalReferences`
 - `representedParty`
 

@@ -4,7 +4,9 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 
 import java.util.Set;
 
-/** A Carrier state-changing use case whose booking notification exchange is optional. */
+/**
+ * A Carrier state-changing use case whose booking notification exchange is optional.
+ */
 public abstract class CarrierNotificationBookingAction extends StateChangingBookingAction {
 
   protected CarrierNotificationBookingAction(

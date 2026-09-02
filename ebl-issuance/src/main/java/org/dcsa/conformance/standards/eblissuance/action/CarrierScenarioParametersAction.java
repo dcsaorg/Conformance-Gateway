@@ -2,20 +2,21 @@ package org.dcsa.conformance.standards.eblissuance.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 public class CarrierScenarioParametersAction extends IssuanceAction {
 
-  public static final String ACTION_TITLE = "SupplyCSP [Certificate]";
+  public static final String ACTION_TITLE = "SupplyCSP[Certificate]";
 
   private CarrierScenarioParameters carrierScenarioParameters = null;
 
   public CarrierScenarioParametersAction(
-      String sourcePartyName, String targetPartyName, IssuanceAction previousAction) {
+    String sourcePartyName, String targetPartyName, IssuanceAction previousAction) {
     super(sourcePartyName, targetPartyName, previousAction, ACTION_TITLE, -1);
   }
 
@@ -51,8 +52,8 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return new CarrierScenarioParameters(
-            "-----BEGIN CERTIFICATE-----\r\nREPLACE_THIS_WITH_THE_BASE64_PEM_CONTENT\r\n-----END CERTIFICATE-----")
-        .toJson();
+      "-----BEGIN CERTIFICATE-----\r\nREPLACE_THIS_WITH_THE_BASE64_PEM_CONTENT\r\n-----END CERTIFICATE-----")
+      .toJson();
   }
 
   @Override

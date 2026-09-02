@@ -56,8 +56,7 @@ public class PersistableCarrierBooking {
       Map.entry(COMPLETED, Set.of(CONFIRMED)::contains),
       Map.entry(
         CANCELLED,
-        Set.of(RECEIVED, UPDATE_RECEIVED, PENDING_UPDATE, CONFIRMED, PENDING_AMENDMENT)
-          ::contains));
+        Set.of(RECEIVED, UPDATE_RECEIVED, PENDING_UPDATE)::contains));
 
   private static final Set<BookingState> PREREQUISITE_BOOKING_STATES_FOR_CANCELLATION =
     Set.of(
@@ -237,6 +236,9 @@ public class PersistableCarrierBooking {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_CONFIRMED);
     changeState(BOOKING_STATUS, CANCELLED);
+    if (getBookingAmendedState() != null) {
+      changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CANCELLED);
+    }
   }
 
   public void declineConfirmedBookingCancellation(String bookingReference) {
@@ -310,6 +312,7 @@ public class PersistableCarrierBooking {
     }
 
     if (isAmendment) {
+      changeState(BOOKING_STATUS, BookingState.CONFIRMED);
       changeState(AMENDED_BOOKING_STATUS, BookingState.AMENDMENT_RECEIVED);
     } else {
       changeState(BOOKING_STATUS, BookingState.UPDATE_RECEIVED);

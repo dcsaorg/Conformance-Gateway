@@ -49,8 +49,8 @@ class EblIssuanceContractTest {
     var scenarios = modules.get("Required scenario").buildScenarioList(0);
     assertEquals(1, scenarios.size());
     var scenario = scenarios.getFirst();
-    assertEquals("SupplyCSP [Certificate]", scenario.popNextAction().getActionTitle());
-    assertEquals("Issuance request/response", scenario.popNextAction().getActionTitle());
+    assertEquals("SupplyCSP[Certificate]", scenario.popNextAction().getActionTitle());
+    assertEquals("Issuance request & asynchronous response", scenario.popNextAction().getActionTitle());
   }
 
   @Test
@@ -70,7 +70,7 @@ class EblIssuanceContractTest {
     assertEquals(1, scenarios.size());
     var scenario = scenarios.getFirst();
     assertEquals("SupplyCSP [Document Parties]", scenario.popNextAction().getActionTitle());
-    assertEquals("Issuance request/response", scenario.popNextAction().getActionTitle());
+    assertEquals("Issuance request & asynchronous response", scenario.popNextAction().getActionTitle());
   }
 
   @Test

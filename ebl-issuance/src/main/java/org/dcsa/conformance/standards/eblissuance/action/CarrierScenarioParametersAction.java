@@ -10,7 +10,7 @@ import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParamete
 
 public class CarrierScenarioParametersAction extends IssuanceAction {
 
-  public static final String ACTION_TITLE = "SupplyCSP [Certificate]";
+  public static final String ACTION_TITLE = "SupplyCSP[Certificate]";
 
   private CarrierScenarioParameters carrierScenarioParameters = null;
 

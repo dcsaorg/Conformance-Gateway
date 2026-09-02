@@ -30,9 +30,15 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
     int expectedStatus,
     ConformanceAction previousAction,
     JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator,
-    String title) {
-    super(platformPartyName, carrierPartyName, expectedStatus, previousAction, title);
+    JsonSchemaValidator responseSchemaValidator) {
+    super(
+      platformPartyName,
+      carrierPartyName,
+      expectedStatus,
+      previousAction,
+      forAmendment
+        ? "Surrender request (amendment) & asynchronous response"
+        : "Surrender request (delivery) & asynchronous response");
     this.forAmendment = forAmendment;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;

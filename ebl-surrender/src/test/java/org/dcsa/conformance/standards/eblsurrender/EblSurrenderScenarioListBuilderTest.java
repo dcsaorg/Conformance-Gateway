@@ -35,21 +35,21 @@ class EblSurrenderScenarioListBuilderTest {
     Map<String, EblSurrenderScenarioListBuilder> builders =
       buildersFor(Set.of(EblSurrenderRole.CARRIER.getConfigName()));
 
-    assertEquals(List.of("Required scenario", "Optional (report-only) scenario"), builders.keySet().stream().toList());
+    assertEquals(List.of("Required scenario", "Optional (report-only) scenarios"), builders.keySet().stream().toList());
 
     ConformanceScenario required = builders.get("Required scenario").buildScenarioList(0).getFirst();
     assertScenario(
       required,
-      "SupplyCSP[Transport Document data] - Surrender request(Delivery) - Surrender response",
+      "SupplyCSP[Transport Document data] - Surrender request (delivery) & asynchronous response",
       ScenarioConformanceType.REQUIRED,
       SupplyScenarioParametersAction.class,
       SurrenderRequestResponseAction.class);
 
     ConformanceScenario optional =
-      builders.get("Optional (report-only) scenario").buildScenarioList(1).getFirst();
+      builders.get("Optional (report-only) scenarios").buildScenarioList(1).getFirst();
     assertScenario(
       optional,
-      "SupplyCSP[Transport Document data] - Surrender request(Amendment) - Surrender response",
+      "SupplyCSP[Transport Document data] - Surrender request (amendment) & asynchronous response",
       ScenarioConformanceType.OPTIONAL,
       SupplyScenarioParametersAction.class,
       SurrenderRequestResponseAction.class);
@@ -60,20 +60,20 @@ class EblSurrenderScenarioListBuilderTest {
     Map<String, EblSurrenderScenarioListBuilder> builders =
       buildersFor(Set.of(EblSurrenderRole.PLATFORM.getConfigName()));
 
-    assertEquals(List.of("Required scenario", "Optional (report-only) scenario"), builders.keySet().stream().toList());
+    assertEquals(List.of("Required scenario", "Optional (report-only) scenarios"), builders.keySet().stream().toList());
 
     ConformanceScenario required = builders.get("Required scenario").buildScenarioList(0).getFirst();
     assertScenario(
       required,
-      "Surrender request(Delivery) - Surrender response",
+      "Surrender request (delivery) & asynchronous response",
       ScenarioConformanceType.REQUIRED,
       SurrenderRequestResponseAction.class);
 
     ConformanceScenario optional =
-      builders.get("Optional (report-only) scenario").buildScenarioList(1).getFirst();
+      builders.get("Optional (report-only) scenarios").buildScenarioList(1).getFirst();
     assertScenario(
       optional,
-      "Surrender request(Amendment) - Surrender response",
+      "Surrender request (amendment) & asynchronous response",
       ScenarioConformanceType.OPTIONAL,
       SurrenderRequestResponseAction.class);
   }

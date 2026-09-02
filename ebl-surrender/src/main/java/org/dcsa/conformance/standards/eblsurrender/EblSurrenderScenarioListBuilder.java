@@ -37,12 +37,12 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
         EblSurrenderRole.CARRIER.getConfigName(),
         MapUtils.orderedMap(
           Map.entry("Required scenario", supplyAvailableTdrAction().then(requestSurrender(false))),
-          Map.entry("Optional (report-only) scenario", supplyAvailableTdrAction().then(requestSurrender(true)).asOptionalReportOnlyScenario()))),
+          Map.entry("Optional (report-only) scenarios", supplyAvailableTdrAction().then(requestSurrender(true)).asOptionalReportOnlyScenario()))),
       Map.entry(
         EblSurrenderRole.PLATFORM.getConfigName(),
         MapUtils.orderedMap(
           Map.entry("Required scenario", requestSurrender(false)),
-          Map.entry("Optional (report-only) scenario", requestSurrender(true).asOptionalReportOnlyScenario())))
+          Map.entry("Optional (report-only) scenarios", requestSurrender(true).asOptionalReportOnlyScenario())))
     );
 
     Map<String, EblSurrenderScenarioListBuilder> scenarios = new LinkedHashMap<>();
@@ -72,9 +72,6 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
           componentFactory.getMessageSchemaValidator(
             EblSurrenderRole.CARRIER.getConfigName(), true),
           componentFactory.getMessageSchemaValidator(
-            EblSurrenderRole.PLATFORM.getConfigName(), true),
-          forAmendment
-            ? "Surrender request(Amendment) - Surrender response"
-            : "Surrender request(Delivery) - Surrender response"));
+            EblSurrenderRole.PLATFORM.getConfigName(), true)));
   }
 }

@@ -50,7 +50,15 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
   }
 
   protected T asOptionalReportOnlyScenario() {
-    this.conformanceType = ScenarioConformanceType.OPTIONAL;
+    return withConformanceType(ScenarioConformanceType.OPTIONAL);
+  }
+
+  protected T asInterchangeableScenarios() {
+    return withConformanceType(ScenarioConformanceType.INTERCHANGEABLE);
+  }
+
+  private T withConformanceType(ScenarioConformanceType conformanceType) {
+    this.conformanceType = conformanceType;
     return thisAsT();
   }
 

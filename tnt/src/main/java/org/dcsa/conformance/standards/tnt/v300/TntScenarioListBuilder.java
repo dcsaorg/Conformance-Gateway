@@ -47,7 +47,8 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
           postTntEvents(TntEventType.TRANSPORT),
           postTntEvents(TntEventType.EQUIPMENT),
           postTntEvents(TntEventType.IOT),
-          postTntEvents(TntEventType.REEFER)));
+          postTntEvents(TntEventType.REEFER))
+        .asInterchangeableScenarios());
 
     Map.Entry<String, TntScenarioListBuilder> producerGetByTypeScenarioEntry = Map.entry(
       "GET scenarios per event type - alternative required path for event pull",
@@ -57,7 +58,8 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
           getTntEventsByTypeWithOptionalBaseFilters(TntEventType.TRANSPORT),
           getTntEventsByTypeWithOptionalBaseFilters(TntEventType.EQUIPMENT),
           getTntEventsByTypeWithOptionalBaseFilters(TntEventType.IOT),
-          getTntEventsByTypeWithOptionalBaseFilters(TntEventType.REEFER)));
+          getTntEventsByTypeWithOptionalBaseFilters(TntEventType.REEFER))
+        .asInterchangeableScenarios());
 
     Map.Entry<String, TntScenarioListBuilder> consumerGetByTypeScenarioEntry = Map.entry(
       "GET scenarios per event type - alternative required path for event pull",
@@ -67,7 +69,8 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
           getTntEvents(TntEventType.TRANSPORT),
           getTntEvents(TntEventType.EQUIPMENT),
           getTntEvents(TntEventType.IOT),
-          getTntEvents(TntEventType.REEFER)));
+          getTntEvents(TntEventType.REEFER))
+        .asInterchangeableScenarios());
 
     Map<String, Map<String, TntScenarioListBuilder>> partyScenariosMap = MapUtils.orderedMap(
       Map.entry(

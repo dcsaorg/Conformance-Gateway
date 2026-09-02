@@ -412,6 +412,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
             scenarioNode.put("name", scenario.getTitle());
             scenarioNode.put("isRunning", scenario.getId().equals(currentScenarioId));
             scenarioNode.put("conformanceStatus", scenario.getLatestComputedStatus().name());
+            scenarioNode.put("conformanceType", scenario.getConformanceType().name());
           });
       });
     return allModulesNode;

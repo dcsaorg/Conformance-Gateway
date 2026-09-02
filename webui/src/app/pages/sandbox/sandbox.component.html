@@ -54,6 +54,10 @@
                   <div>
                     <div class="pageSubtitle">{{standardModule.moduleName}}</div>
 
+                    @if (hasInterchangeableScenarios(standardModule)) {
+                      <div class="wrappingText">ℹ️ Running any one of the scenarios below is sufficient for conformance.</div>
+                    }
+
                     @for (scenario of standardModule.scenarios; track scenario.id) {
                       <mat-card [ngClass]="'entityCard'">
                         <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">

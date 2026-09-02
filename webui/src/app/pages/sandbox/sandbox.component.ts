@@ -87,6 +87,12 @@ export class SandboxComponent implements OnInit, OnDestroy {
     }
   }
 
+  hasInterchangeableScenarios(standardModule: StandardModule): boolean {
+    return standardModule.scenarios.some(
+      scenario => scenario.conformanceType === "INTERCHANGEABLE"
+    );
+  }
+
   isInternalSandbox(): boolean {
     return !!this.sandbox?.canNotifyParty;
   }

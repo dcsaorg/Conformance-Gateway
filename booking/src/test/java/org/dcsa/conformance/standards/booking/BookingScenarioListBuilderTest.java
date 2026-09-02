@@ -62,9 +62,9 @@ class BookingScenarioListBuilderTest {
 
     assertEquals(
       List.of(
-        "[Dry cargo] UC1 - GET",
-        "[Dry cargo] UC1 - UC2 - UC3",
-        "[Dry cargo] UC1 - UC5 - UC6 - UC7"),
+        "UC1[Dry cargo] - GET",
+        "UC1[Dry cargo] - UC2 - UC3",
+        "UC1[Dry cargo] - UC5 - UC6 - UC7"),
       titles(builders.get("Required Dry Cargo scenario")));
     assertEquals(
       List.of(
@@ -121,7 +121,7 @@ class BookingScenarioListBuilderTest {
       new HashSet<>(allTitles).size(),
       "Shipper scenario titles must be unique");
     assertTrue(
-      allTitles.stream().anyMatch(title -> title.startsWith("[Dry cargo] UC1")),
+      allTitles.stream().anyMatch(title -> title.startsWith("UC1[Dry cargo]")),
       "Expected dry cargo shipper title prefix");
   }
 

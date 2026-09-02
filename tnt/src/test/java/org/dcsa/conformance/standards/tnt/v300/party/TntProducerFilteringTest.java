@@ -102,13 +102,14 @@ class TntProducerFilteringTest {
             TntQueryParameters.ER.getParameterName(), List.of("APZU4812090"))));
 
     JsonNode events = response.message().body().getJsonBody().path(TntConstants.EVENTS);
-    assertEquals(1, events.size());
-    JsonNode event = events.get(0);
-    assertEquals(
-      "EQUIPMENT",
-      event.path(TntConstants.EVENT_CLASSIFICATION).path(TntConstants.EVENT_TYPE).asText());
-    assertEquals("CBR-456", event.path("shipmentDetails").path("documentReference").path("reference").asText());
-    assertEquals("APZU4812090", event.path("equipmentDetails").path("equipmentReference").asText());
+    assertEquals(TntEventType.values().length, events.size());
+    assertTrue(
+      StreamSupport.stream(events.spliterator(), false)
+        .allMatch(event ->
+          "CBR-456".equals(
+            event.path("shipmentDetails").path("documentReference").path("reference").asText())
+            && "APZU4812090".equals(
+            event.path("equipmentDetails").path("equipmentReference").asText())));
   }
 
   @ParameterizedTest
@@ -116,6 +117,9 @@ class TntProducerFilteringTest {
   void shouldReturnEventsForEveryBaseFilterOfferedPerEventType(TntEventType eventType) {
     TntProducer producer = createProducer();
 
+    assertEquals(
+      Set.of(TntQueryParameters.CBR, TntQueryParameters.TDR, TntQueryParameters.ER),
+      eventType.applicableBaseFilters());
     Map<String, Collection<String>> queryParams =
       exampleQueryParams(eventType.applicableBaseFilters());
     queryParams.put(TntQueryParameters.ET.getParameterName(), List.of(eventType.name()));
@@ -270,7 +274,7 @@ class TntProducerFilteringTest {
   }
 
   @Test
-  void shouldAutoSupplyEmptyInputForOptionalOnlyScenarioParameters() {
+  void shouldAutoSupplyOneInputForOptionalOnlyScenarioParameters() {
     CapturingTntProducer producer = createCapturingProducer();
 
     ObjectNode actionPrompt = JsonToolkit.OBJECT_MAPPER.createObjectNode();
@@ -287,7 +291,13 @@ class TntProducerFilteringTest {
     producer.getActionPromptHandlers().get(SupplyScenarioParametersAction.class).accept(actionPrompt);
 
     assertEquals("action-1", producer.capturedActionId);
-    assertTrue(producer.capturedInput.isEmpty());
+    assertEquals(1, producer.capturedInput.size());
+    assertTrue(
+      Set.of(
+          TntQueryParameters.CBR.getParameterName(),
+          TntQueryParameters.TDR.getParameterName(),
+          TntQueryParameters.ER.getParameterName())
+        .contains(producer.capturedInput.fieldNames().next()));
   }
 
   private TntProducer createProducer() {

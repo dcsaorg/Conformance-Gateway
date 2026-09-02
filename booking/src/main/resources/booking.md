@@ -237,6 +237,13 @@ results will be part of the Conformance report, whether they are required or opt
   is optional and does not affect badge eligibility. If demonstrated, the validation results are included in the
   Conformance report.
 
+**Required-scenario status validation exception:** In required scenarios, including the additional required Carrier
+scenarios, Booking notification status-combination checks intentionally validate only the primary `bookingStatus`.
+Validation of the secondary `amendedBookingStatus` and `bookingCancellationStatus` fields is bypassed for those
+scenarios. Optional (report-only) scenarios apply the complete status combination validation defined by the Carrier
+Validation workbook. This exception affects only the status-combination checks; default HTTP, API header, JSON schema,
+and other applicable payload validations continue to run.
+
 ## 4.1 Scope-defined validations
 
 Depending on which scenario and scope is being run in **Section 3 Conformance Scenarios**, the following requirements

@@ -2,17 +2,15 @@
   "surrenderRequestReference": "SURRENDER_REQUEST_REFERENCE_PLACEHOLDER",
   "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
   "surrenderRequestCode": "SURRENDER_REQUEST_CODE_PLACEHOLDER",
-  "reasonCode": "REASON_CODE",
-  "comments": "As requested...",
   "endorsementChain": [
     {
-      "actionDateTime": "2024-06-11T13:54:00Z",
+      "actionDateTime": "ISSUE_ACTION_DATE_TIME_PLACEHOLDER",
       "actionCode": "ISSUE",
       "actor": CARRIER_PARTY,
       "recipient": ISSUE_TO_PARTY
     },
     {
-      "actionDateTime": "2024-06-12T14:54:00Z",
+      "actionDateTime": "SURRENDER_ACTION_DATE_TIME_PLACEHOLDER",
       "actionCode": "SURRENDER_ACTION_CODE_PLACEHOLDER",
       "actor": SURRENDEREE_PARTY,
       "recipient": CARRIER_PARTY

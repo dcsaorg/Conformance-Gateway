@@ -21,6 +21,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.vgm.action.ConsumerGetVgmDeclarationAction;
+import org.dcsa.conformance.standards.vgm.checks.VgmQueryParameters;
 
 @Slf4j
 public class VgmConsumer extends ConformanceParty {
@@ -72,6 +73,10 @@ public class VgmConsumer extends ConformanceParty {
             .collect(
                 Collectors.toMap(
                     entry -> entry.getKey().getParameterName(), entry -> Set.of(entry.getValue())));
+
+    if (actionPrompt.hasNonNull(VgmQueryParameters.CURSOR.getParameterName())) {
+      queryParams.put(VgmQueryParameters.CURSOR.getParameterName(), List.of(actionPrompt.required(VgmQueryParameters.CURSOR.getParameterName()).asText()));
+    }
 
     syncCounterpartGet("/vgm-declarations", queryParams);
 

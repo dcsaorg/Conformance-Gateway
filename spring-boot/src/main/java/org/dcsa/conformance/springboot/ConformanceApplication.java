@@ -34,6 +34,7 @@ import org.dcsa.conformance.core.state.MemorySortedPartitionsLockingMap;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.sandbox.ConformanceAccessChecker;
+import org.dcsa.conformance.sandbox.ConformanceErrorResponses;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebResponse;
@@ -269,71 +270,84 @@ public class ConformanceApplication {
   @CrossOrigin(origins = "http://localhost:4200")
   @RequestMapping(value = "/conformance/webui/**")
   public void handleWebuiRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-    String requestBody = _getRequestBody(servletRequest);
-    _addSimulatedLambdaDelay();
-    _writeResponse(
-      servletResponse,
-      200,
-      "application/json;charset=utf-8",
-      Collections.emptyMap(),
-      webuiHandler.handleRequest(USER_ID, JsonToolkit.stringToJsonNode(requestBody)).toPrettyString());
+    try {
+      String requestBody = _getRequestBody(servletRequest);
+      _addSimulatedLambdaDelay();
+      _writeResponse(
+          servletResponse,
+          200,
+          "application/json;charset=utf-8",
+          Collections.emptyMap(),
+          webuiHandler.handleRequest(USER_ID, JsonToolkit.stringToJsonNode(requestBody)).toPrettyString());
+    } catch (RuntimeException e) {
+      _writeResponse(
+        servletResponse,
+        200,
+        "application/json;charset=utf-8",
+        Collections.emptyMap(),
+        ConformanceErrorResponses
+          .unexpectedWebuiResponse(log, "handling the Spring Boot Web UI endpoint", e)
+          .toPrettyString());
+    }
   }
 
   @RequestMapping(value = "/conformance/**")
   public void handleRequest(
       HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-    _addSimulatedLambdaDelay();
-    String requestUrl = servletRequest.getRequestURL().toString();
-    Map<String, List<String>> requestHeaders = _getRequestHeaders(servletRequest);
-    String uriAuthPrefix = "/conformance/" + localhostAuthUrlToken + "/sandbox/";
-    ConformanceWebResponse conformanceWebResponse = null;
-    if (requestUrl.contains(uriAuthPrefix)) {
-      int sandboxIdStart = requestUrl.indexOf(uriAuthPrefix) + uriAuthPrefix.length();
-      int sandboxIdEnd = requestUrl.indexOf("/", sandboxIdStart);
-      String sandboxId = requestUrl.substring(sandboxIdStart, sandboxIdEnd);
+    try {
+      _addSimulatedLambdaDelay();
+      String requestUrl = servletRequest.getRequestURL().toString();
+      Map<String, List<String>> requestHeaders = _getRequestHeaders(servletRequest);
+      String uriAuthPrefix = "/conformance/" + localhostAuthUrlToken + "/sandbox/";
+      ConformanceWebResponse conformanceWebResponse = null;
+      if (requestUrl.contains(uriAuthPrefix)) {
+        int sandboxIdStart = requestUrl.indexOf(uriAuthPrefix) + uriAuthPrefix.length();
+        int sandboxIdEnd = requestUrl.indexOf("/", sandboxIdStart);
+        String sandboxId = requestUrl.substring(sandboxIdStart, sandboxIdEnd);
 
-      requestUrl = requestUrl.replaceAll(localhostAuthUrlToken + "/", "");
+        requestUrl = requestUrl.replaceAll(localhostAuthUrlToken + "/", "");
 
-      requestHeaders = new HashMap<>(requestHeaders);
-      SandboxConfiguration sandboxConfiguration =
-          ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
-      if (!sandboxConfiguration.getAuthHeaderName().isBlank()) {
-        requestHeaders.put(
-            sandboxConfiguration.getAuthHeaderName(),
-            List.of(sandboxConfiguration.getAuthHeaderValue()));
+        requestHeaders = new HashMap<>(requestHeaders);
+        SandboxConfiguration sandboxConfiguration =
+            ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
+        if (!sandboxConfiguration.getAuthHeaderName().isBlank()) {
+          requestHeaders.put(
+              sandboxConfiguration.getAuthHeaderName(),
+              List.of(sandboxConfiguration.getAuthHeaderValue()));
+        }
+      } else if (requestUrl.contains("/conformance/")
+          && requestUrl.contains("/sandbox/")
+          && !requestUrl.contains("/conformance/sandbox/")) {
+        conformanceWebResponse =
+            new ConformanceWebResponse(
+                404,
+                JsonToolkit.JSON_UTF_8,
+                Collections.emptyMap(),
+                OBJECT_MAPPER
+                    .createObjectNode()
+                    .put("error", "Forgot to refresh the Spring Boot home page?")
+                    .toPrettyString());
       }
-    } else if (requestUrl.contains("/conformance/")
-        && requestUrl.contains("/sandbox/")
-        && !requestUrl.contains("/conformance/sandbox/")) {
-      conformanceWebResponse =
-          new ConformanceWebResponse(
-              404,
-              JsonToolkit.JSON_UTF_8,
-              Collections.emptyMap(),
-              OBJECT_MAPPER
-                  .createObjectNode()
-                  .put("error", "Forgot to refresh the Spring Boot home page?")
-                  .toPrettyString());
-    }
 
-    if (conformanceWebResponse == null) {
-      conformanceWebResponse = ConformanceSandbox.handleRequest(
-          persistenceProvider,
-          new ConformanceWebRequest(
-              servletRequest.getMethod(),
-              requestUrl,
-              _getQueryParameters(servletRequest),
-              requestHeaders,
-              _getRequestBody(servletRequest)),
-          deferredSandboxTaskConsumer);
-    }
+      if (conformanceWebResponse == null) {
+        conformanceWebResponse = ConformanceSandbox.handleRequest(
+            persistenceProvider,
+            new ConformanceWebRequest(
+                servletRequest.getMethod(),
+                requestUrl,
+                _getQueryParameters(servletRequest),
+                requestHeaders,
+                _getRequestBody(servletRequest)),
+            deferredSandboxTaskConsumer);
+      }
 
-    _writeResponse(
-        servletResponse,
-        conformanceWebResponse.statusCode(),
-        conformanceWebResponse.contentType(),
-        conformanceWebResponse.headers(),
-        conformanceWebResponse.body());
+      _writeResponse(servletResponse, conformanceWebResponse.statusCode(), conformanceWebResponse.contentType(),
+        conformanceWebResponse.headers(), conformanceWebResponse.body());
+    } catch (RuntimeException e) {
+      ConformanceWebResponse conformanceWebResponse = ConformanceErrorResponses.unexpectedApiResponse(log, "handling the Spring Boot conformance endpoint", e);
+      _writeResponse(servletResponse, conformanceWebResponse.statusCode(), conformanceWebResponse.contentType(),
+        conformanceWebResponse.headers(), conformanceWebResponse.body());
+    }
   }
 
   private static Map<String, List<String>> _getQueryParameters(HttpServletRequest request) {

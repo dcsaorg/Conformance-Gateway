@@ -1,15 +1,14 @@
 package org.dcsa.conformance.standards.cs.party;
 
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.Getter;
 
 @Getter
 public enum CsRole {
-  PUBLISHER("Publisher"),
-  SUBSCRIBER("Subscriber");
+  PRODUCER("Producer"),
+  CONSUMER("Consumer");
 
   private final String configName;
 
@@ -17,12 +16,12 @@ public enum CsRole {
     this.configName = configName;
   }
 
-  public static boolean isPublisher(String configName) {
-    return CsRole.PUBLISHER.configName.equals(configName);
+  public static boolean isProducer(String configName) {
+    return CsRole.PRODUCER.configName.equals(configName);
   }
 
-  public static boolean isSubscriber(String configName) {
-    return CsRole.SUBSCRIBER.configName.equals(configName);
+  public static boolean isConsumer(String configName) {
+    return CsRole.CONSUMER.configName.equals(configName);
   }
 
   public static Set<String> getRoleNames() {

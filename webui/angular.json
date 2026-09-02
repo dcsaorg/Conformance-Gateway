@@ -11,7 +11,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "outputPath": {
               "base": "dist/webui"
@@ -32,6 +32,9 @@
             ],
             "scripts": [],
             "browser": "src/main.ts",
+            "externalDependencies": [
+              "marked-katex-extension"
+            ],
             "allowedCommonJsDependencies": [
               "buffer",
               "@aws-crypto/sha256-js",
@@ -128,7 +131,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "webui:build:production"
@@ -140,7 +143,7 @@
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "builder": "@angular/build:extract-i18n",
           "options": {
             "buildTarget": "webui:build"
           }

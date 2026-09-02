@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.springboot.ConformanceApplication;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -18,19 +17,13 @@ import org.springframework.boot.test.context.SpringBootTest;
     classes = ConformanceApplication.class)
 class ManualScenarioWithoutNotificationsTest extends ManualTestBase {
 
-  private static Stream<Arguments> testStandards() {
-    return Stream.of(
-        Arguments.of("Booking", false),
-        Arguments.of("Booking", true),
-        Arguments.of("Ebl", false),
-        Arguments.of("Ebl", true),
-        Arguments.of("Booking + eBL", false),
-        Arguments.of("Booking + eBL", true));
+  private static Stream<String> testStandards() {
+    return Stream.of("Booking", "Ebl", "Booking + eBL");
   }
 
-  @ParameterizedTest(name = "Standard: {0} - 2nd run: {1}")
+  @ParameterizedTest(name = "Standard: {0}")
   @MethodSource("testStandards")
-  void testStandards(String standardName, boolean secondRun) {
+  void testStandards(String standardName) {
     app.setSimulatedLambdaDelay(lambdaDelay);
     getAllSandboxes();
     List<Standard> availableStandards = getAvailableStandards();
@@ -56,8 +49,7 @@ class ManualScenarioWithoutNotificationsTest extends ManualTestBase {
                                             standard1.name(),
                                             version.number(),
                                             suite,
-                                            role.name(),
-                                            secondRun))));
+                                            role.name()))));
   }
 
   @Override

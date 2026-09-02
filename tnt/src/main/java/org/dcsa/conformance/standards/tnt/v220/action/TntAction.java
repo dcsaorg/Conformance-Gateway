@@ -2,6 +2,13 @@ package org.dcsa.conformance.standards.tnt.v220.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.standards.tnt.v220.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.tnt.v220.party.SuppliedScenarioParameters;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
@@ -10,12 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.scenario.OverwritingReference;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standards.tnt.v220.party.DynamicScenarioParameters;
-import org.dcsa.conformance.standards.tnt.v220.party.SuppliedScenarioParameters;
 
 @Slf4j
 public abstract class TntAction extends ConformanceAction {
@@ -24,11 +25,11 @@ public abstract class TntAction extends ConformanceAction {
   private final OverwritingReference<DynamicScenarioParameters> dsp;
 
   protected TntAction(
-      String sourcePartyName,
-      String targetPartyName,
-      TntAction previousAction,
-      String actionTitle,
-      int expectedStatus) {
+    String sourcePartyName,
+    String targetPartyName,
+    TntAction previousAction,
+    String actionTitle,
+    int expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.sspSupplier = getSspSupplier(previousAction);
     this.expectedStatus = expectedStatus;

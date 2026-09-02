@@ -2,7 +2,8 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 
 // Load .env from the scripts/ root (one level up from src/)
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+// quiet: true suppresses dotenv v17's startup banner and promotional tips
+dotenv.config({ path: path.resolve(__dirname, '..', '.env'), quiet: true });
 
 function requireEnv(name: string): string {
   const value = process.env[name];

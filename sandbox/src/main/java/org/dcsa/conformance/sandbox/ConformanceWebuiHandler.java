@@ -36,7 +36,6 @@ public class ConformanceWebuiHandler {
   private final String environmentBaseUrl;
   private final ConformancePersistenceProvider persistenceProvider;
   private final Consumer<JsonNode> deferredSandboxTaskConsumer;
-  private final boolean developerMode;
 
   private final SortedMap<String, ? extends AbstractStandard> standardsByName =
       new TreeMap<>(
@@ -52,25 +51,13 @@ public class ConformanceWebuiHandler {
     this.environmentBaseUrl = environmentBaseUrl;
     this.persistenceProvider = persistenceProvider;
     this.deferredSandboxTaskConsumer = deferredSandboxTaskConsumer;
-    developerMode = environmentBaseUrl.startsWith("http://localhost");
   }
 
   public JsonNode handleRequest(String userId, JsonNode requestNode) {
     try {
       return _doHandleRequest(userId, requestNode);
-    } catch (Exception e) {
-      if (e instanceof UserFacingException userFacingException) {
-        return OBJECT_MAPPER.createObjectNode().put("error", userFacingException.getMessage());
-      } else {
-        ObjectNode node = OBJECT_MAPPER.createObjectNode().put("error", "Internal Server Error");
-        if (developerMode) {
-          node.put("exception", e.getClass().getName()).put("message", e.getMessage());
-          log.warn("Internal Server Error: {}", e.getMessage());
-        } else {
-          log.warn("Internal Server Error: {}", e, e);
-        }
-        return node;
-      }
+    } catch (RuntimeException e) {
+      return ConformanceErrorResponses.webuiResponse(log, "handling a Web UI request", e);
     }
   }
 
@@ -411,7 +398,7 @@ public class ConformanceWebuiHandler {
       var extPartyUrl = externalPartyCounterpartConfig.getUrl();
       if (extPartyUrl != null && !extPartyUrl.isBlank()) {
         String expectedSuffix = "/party/%s/api"
-            .formatted(externalPartyCounterpartConfig.getName());
+            .formatted(URLEncoder.encode(externalPartyCounterpartConfig.getName(), StandardCharsets.UTF_8));
         String urlValue = extPartyUrl.getValue();
         if (!urlValue.endsWith(expectedSuffix)) {
           throw new UserFacingException(

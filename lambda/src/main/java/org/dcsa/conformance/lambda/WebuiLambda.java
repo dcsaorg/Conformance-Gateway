@@ -11,6 +11,7 @@ import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.sandbox.ConformanceAccessException;
+import org.dcsa.conformance.sandbox.ConformanceErrorResponses;
 import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 
@@ -65,9 +66,14 @@ public class WebuiLambda
           .withMultiValueHeaders(Map.of("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))
           .withStatusCode(200)
           .withBody(responseBody);
-    } catch (RuntimeException | Error e) {
-      log.error("Unhandled exception: {}", e, e);
-      throw e;
+    } catch (RuntimeException e) {
+      return new APIGatewayProxyResponseEvent()
+        .withMultiValueHeaders(Map.of("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))
+        .withStatusCode(200)
+        .withBody(
+          ConformanceErrorResponses
+            .unexpectedWebuiResponse(log, "handling the Web UI Lambda request", e)
+            .toPrettyString());
     }
   }
 

@@ -9,7 +9,7 @@ import org.dcsa.conformance.core.party.ScenarioParameters;
 
 @With
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record DynamicScenarioParameters(String scenarioType) implements ScenarioParameters {
+public record DynamicScenarioParameters(String scenarioType, String firstPage, String secondPage) implements ScenarioParameters {
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
     return OBJECT_MAPPER.convertValue(jsonNode, DynamicScenarioParameters.class);

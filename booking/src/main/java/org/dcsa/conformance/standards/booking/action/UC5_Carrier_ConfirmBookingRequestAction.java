@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 @Getter
 public class UC5_Carrier_ConfirmBookingRequestAction extends CarrierNotificationBookingAction {
+
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC5_Carrier_ConfirmBookingRequestAction(
@@ -41,8 +42,7 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends CarrierNotification
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return getSimpleNotificationChecks(
-          expectedApiVersion, requestSchemaValidator, BookingState.CONFIRMED);
+        return getSimpleNotificationChecks(expectedApiVersion, requestSchemaValidator, BookingState.CONFIRMED);
       }
     };
   }

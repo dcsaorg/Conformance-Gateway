@@ -61,49 +61,29 @@ public abstract class ManualTestBase {
       String standardName,
       String standardVersion,
       String suiteName,
-      String roleName,
-      boolean secondRun) {
-    SandboxConfig sandbox1;
-    SandboxConfig sandbox2;
-    if (!secondRun) {
-      sandbox1 =
-          createSandbox(
-              new Sandbox(
-                  standardName,
-                  standardVersion,
-                  suiteName,
-                  roleName,
-                  true,
-                  getSandboxName(standardName, standardVersion, suiteName, roleName, 0)));
-      sandbox2 =
-          createSandbox(
-              new Sandbox(
-                  standardName,
-                  standardVersion,
-                  suiteName,
-                  roleName,
-                  false,
-                  getSandboxName(standardName, standardVersion, suiteName, roleName, 1)));
-      updateTestedPartySandboxConfigBeforeStarting(sandbox1, sandbox2);
-      updateCounterPartySandboxConfigBeforeStarting(sandbox1, sandbox2);
-    } else {
-      sandbox1 =
-          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 0));
-      sandbox2 =
-          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 1));
-      log.info("Run for the 2nd time, and verify it still works.");
-      log.info(
-          "Using sandboxes: {} v{}, suite: {}, role: {}",
-          standardName,
-          standardVersion,
-          suiteName,
-          roleName);
-      resetSandbox(
-          sandbox2); // Make sure the sandbox does not keep an optional state from the first run
-
-      createdSandboxes.add(sandbox1);
-      createdSandboxes.add(sandbox2);
-    }
+      String roleName) {
+    SandboxConfig sandbox1 =
+        createSandbox(
+            new Sandbox(
+                standardName,
+                standardVersion,
+                suiteName,
+                roleName,
+                true,
+                getSandboxName(standardName, standardVersion, suiteName, roleName, 0)));
+    createdSandboxes.add(sandbox1);
+    SandboxConfig sandbox2 =
+        createSandbox(
+            new Sandbox(
+                standardName,
+                standardVersion,
+                suiteName,
+                roleName,
+                false,
+                getSandboxName(standardName, standardVersion, suiteName, roleName, 1)));
+    createdSandboxes.add(sandbox2);
+    updateTestedPartySandboxConfigBeforeStarting(sandbox1, sandbox2);
+    updateCounterPartySandboxConfigBeforeStarting(sandbox1, sandbox2);
 
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
     assertFalse(sandbox1Digests.isEmpty(), "No scenarios found!");
@@ -413,28 +393,6 @@ public abstract class ManualTestBase {
     return getSandboxConfig(sandboxId);
   }
 
-  void resetSandbox(SandboxConfig sandbox) {
-    log.info("Reset state of sandbox: {}", sandbox.sandboxName);
-    JsonNode node =
-        mapper
-            .createObjectNode()
-            .put("operation", "resetParty")
-            .put("sandboxId", sandbox.sandboxId);
-    JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
-    assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
-  }
-
-  SandboxConfig getSandboxByName(String sandboxName) {
-    SandboxItem sandboxItem1 =
-        getAllSandboxes().stream()
-            .filter(sandboxItem -> sandboxItem.name().equals(sandboxName))
-            .findFirst()
-            .orElse(null);
-    if (sandboxItem1 == null) {
-      return null;
-    }
-    return getSandboxConfig(sandboxItem1.id());
-  }
 
   SandboxConfig getSandboxConfig(String sandboxId) {
     JsonNode node;
@@ -646,7 +604,7 @@ public abstract class ManualTestBase {
 
   record ScenarioDigest(String moduleName, List<Scenario> scenarios) {}
 
-  record Scenario(String id, String name, boolean isRunning, String conformanceStatus) {}
+  record Scenario(String id, String name, boolean isRunning, String conformanceStatus, String conformanceType) {}
 
   record SubReport(String title, String status, List<SubReport> subReports, List<String> errorMessages) {}
 

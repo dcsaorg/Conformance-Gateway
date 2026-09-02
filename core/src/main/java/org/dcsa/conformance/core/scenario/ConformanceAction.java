@@ -152,6 +152,10 @@ public abstract class ConformanceAction implements StatefulEntity {
     return matchedExchangeUuid == null;
   }
 
+  public boolean isMissingMatchedNotificationExchange() {
+    return expectsNotificationExchange() && matchedNotificationExchangeUuid == null;
+  }
+
   /**
    * Saves the matched UUIDs and captures dynamic parameters like document references.
    *
@@ -297,11 +301,8 @@ public abstract class ConformanceAction implements StatefulEntity {
         .collect(Collectors.toSet());
   }
 
-  private void validateMandatoryAttributes(
-      Map<String, Boolean> expectedAttributes, Set<String> providedAttributes)
-      throws UserFacingException {
-    Set<String> missingAttributes =
-        expectedAttributes.entrySet().stream()
+  private void validateMandatoryAttributes(Map<String, Boolean> expectedAttributes, Set<String> providedAttributes) throws UserFacingException {
+    Set<String> missingAttributes = expectedAttributes.entrySet().stream()
             .filter(Map.Entry::getValue)
             .map(Map.Entry::getKey)
             .filter(attr -> !providedAttributes.contains(attr))
@@ -313,11 +314,8 @@ public abstract class ConformanceAction implements StatefulEntity {
     }
   }
 
-  private void validateUnexpectedAttributes(
-      Set<String> allExpectedAttributes, Set<String> providedAttributes)
-      throws UserFacingException {
-    Set<String> unexpectedAttributes =
-        providedAttributes.stream()
+  private void validateUnexpectedAttributes(Set<String> allExpectedAttributes, Set<String> providedAttributes) throws UserFacingException {
+    Set<String> unexpectedAttributes = providedAttributes.stream()
             .filter(attr -> !allExpectedAttributes.contains(attr))
             .collect(Collectors.toSet());
 

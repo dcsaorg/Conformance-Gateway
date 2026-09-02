@@ -8,7 +8,7 @@ describe("conformance status presentation", () => {
   it.each([
     [ConformanceStatus.CONFORMANT, "✅", "Conformant"],
     [ConformanceStatus.NON_CONFORMANT, "🚫", "Non-conformant"],
-    [ConformanceStatus.COMPLETED_WITHOUT_TRAFFIC, "✔️", "Completed without optional traffic"],
+    [ConformanceStatus.COMPLETED_WITHOUT_TRAFFIC, "✅", "Completed without optional traffic"],
     [ConformanceStatus.SKIPPED, "↪️", "Skipped"],
     [ConformanceStatus.NO_TRAFFIC, "❔", "No traffic"],
     [ConformanceStatus.IRRELEVANT, "➖", "Irrelevant"],

@@ -23,7 +23,9 @@ The private key must be kept securely and never shared. You will use it to sign 
 
 **Step 3: Sign your API requests** *(for future use after certificate submission)*
 
-When making API requests to our platform, you will need to sign the payload using your private key with one of these JWS algorithms:
+When making API requests to our platform, you will need to sign the payload using your private key with one of these JWS
+algorithms:
+
 - For RSA keys: RS256, RS384, RS512, PS256, PS384, or PS512
 - For ECDSA keys: ES256, ES384, or ES512
 
@@ -42,7 +44,7 @@ Follow these steps:
 3. Keep the header and footer exactly unchanged.
 
 4. Insert the literal characters `\r\n`:
-    - immediately after the header
-    - and immediately before the footer
+  - immediately after the header
+  - and immediately before the footer
 
 5. The final result must be provided as one single line.

@@ -22,8 +22,8 @@ The DCSA synthetic carrier will sign all issuance request payloads using JWS (JS
 PUBLIC_KEY
 ```
 
-**Key ID (kid):** The JWS header will include a `kid` parameter with the value: **`KEY_ID`**. If your platform manages keys
-from multiple carriers, use this `kid` to identify which public key to use for signature verification.
+**Key ID (kid):** The JWS header will include a `kid` parameter with the value: **`KEY_ID`**. If your platform manages
+keys from multiple carriers, use this `kid` to identify which public key to use for signature verification.
 
 **Note:** The synthetic carrier will use **PS256** (RSA-PSS with SHA-256) for signing. However, your platform could
 support all standard JWS algorithms for RSA (RS256/384/512, PS256/384/512) and ECDSA (ES256/384/512) key types to ensure
@@ -31,8 +31,8 @@ broader compatibility.
 
 ### 2. Scenario Parameters
 
-Supply the following parameters so that when your platform system receives the issuance request, it sends back an
-asynchronous response by making a POST request to `/ebl-issuance-responses` with the code **RESPONSE_CODE**.
+Supply the following parameters so that when your platform receives the issuance request, it can send an asynchronous
+response by making a POST request to `/v3/ebl-issuance-responses`.
 
 These parameters customize the requests sent to your platform application throughout the scenario.
 
@@ -41,8 +41,7 @@ These parameters customize the requests sent to your platform application throug
 - `issueToSendToPlatform` - Copied into the `/issueTo` object as the value of `issueTo/sendToPlatform`
 - `issueToPartyName` - Copied into the `/issueTo` object as the value of `issueTo/partyName`
 - `issueToCodeListProvider` - Copied into the first element of the `identifyingCodes` array in `/issueTo` object as the
-  value
-  of `codeListProvider`
+  value of `codeListProvider`
 - `issueToPartyCode` - Copied into the first element of the `identifyingCodes` array in `/issueTo` object as the value
   of `partyCode`
 

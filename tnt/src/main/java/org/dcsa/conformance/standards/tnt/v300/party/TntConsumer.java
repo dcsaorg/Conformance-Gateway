@@ -1,15 +1,7 @@
 package org.dcsa.conformance.standards.tnt.v300.party;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -25,23 +17,33 @@ import org.dcsa.conformance.standards.tnt.v300.action.ConsumerGetEventsWithQuery
 import org.dcsa.conformance.standards.tnt.v300.action.ConsumerGetEventsWithTypeAction;
 import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 @Slf4j
 public class TntConsumer extends ConformanceParty {
 
   public TntConsumer(
-      String apiVersion,
-      PartyConfiguration partyConfiguration,
-      CounterpartConfiguration counterpartConfiguration,
-      JsonNodeMap persistentMap,
-      PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    String apiVersion,
+    PartyConfiguration partyConfiguration,
+    CounterpartConfiguration counterpartConfiguration,
+    JsonNodeMap persistentMap,
+    PartyWebClient webClient,
+    Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
-        apiVersion,
-        partyConfiguration,
-        counterpartConfiguration,
-        persistentMap,
-        webClient,
-        orchestratorAuthHeader);
+      apiVersion,
+      partyConfiguration,
+      counterpartConfiguration,
+      persistentMap,
+      webClient,
+      orchestratorAuthHeader);
   }
 
   @Override
@@ -62,10 +64,10 @@ public class TntConsumer extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(ConsumerGetEventsWithTypeAction.class, this::getTntEvents),
-        Map.entry(
-            ConsumerGetEventsWithQueryParametersAction.class,
-            this::getTntEventsWithQueryParameters));
+      Map.entry(ConsumerGetEventsWithTypeAction.class, this::getTntEvents),
+      Map.entry(
+        ConsumerGetEventsWithQueryParametersAction.class,
+        this::getTntEventsWithQueryParameters));
   }
 
   private void getTntEvents(JsonNode actionPrompt) {
@@ -73,30 +75,35 @@ public class TntConsumer extends ConformanceParty {
 
     var eventType = TntEventType.valueOf(actionPrompt.required(TntConstants.EVENT_TYPE).asText());
 
-    syncCounterpartGet(TntStandard.API_PATH, Map.of(TntQueryParameters.ET.getParameterName(), List.of(eventType.toString())));
+    Map<String, Collection<String>> queryParams = new LinkedHashMap<>();
+    if (actionPrompt.has(TntConstants.SUPPLIED_SCENARIO_PARAMETERS)) {
+      SuppliedScenarioParameters ssp =
+        SuppliedScenarioParameters.fromJson(
+          actionPrompt.get(TntConstants.SUPPLIED_SCENARIO_PARAMETERS));
+      ssp.getMap().forEach(
+        (parameter, value) -> queryParams.put(parameter.getParameterName(), List.of(value)));
+    }
 
-    addOperatorLogEntry("Sent GET TNT Events request with event type %s".formatted(eventType));
+    queryParams.put(TntQueryParameters.ET.getParameterName(), List.of(eventType.toString()));
+
+    syncCounterpartGet(TntStandard.API_PATH, queryParams);
+
+    addOperatorLogEntry("Sent GET TNT Events request with parameters %s".formatted(queryParams));
   }
 
   private void getTntEventsWithQueryParameters(JsonNode actionPrompt) {
-    log.info(
-        "{}.getTntEventsWithQueryParameters({})",
-        getClass().getSimpleName(),
-        actionPrompt.toPrettyString());
+    log.info("{}.getTntEventsWithQueryParameters({})", getClass().getSimpleName(), actionPrompt.toPrettyString());
 
-    SuppliedScenarioParameters ssp =
-        SuppliedScenarioParameters.fromJson(actionPrompt.get(TntConstants.SUPPLIED_SCENARIO_PARAMETERS));
+    SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get(TntConstants.SUPPLIED_SCENARIO_PARAMETERS));
 
     Map<String, Collection<String>> queryParams =
-        ssp.getMap().entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    entry -> entry.getKey().getParameterName(), entry -> Set.of(entry.getValue())));
+      ssp.getMap().entrySet().stream()
+        .collect(
+          Collectors.toMap(
+            entry -> entry.getKey().getParameterName(), entry -> Set.of(entry.getValue())));
 
     if (actionPrompt.hasNonNull(TntQueryParameters.CURSOR.getParameterName())) {
-      queryParams.put(
-          TntQueryParameters.CURSOR.getParameterName(),
-          List.of(actionPrompt.path(TntQueryParameters.CURSOR.getParameterName()).asText()));
+      queryParams.put(TntQueryParameters.CURSOR.getParameterName(), List.of(actionPrompt.path(TntQueryParameters.CURSOR.getParameterName()).asText()));
     }
 
     syncCounterpartGet(TntStandard.API_PATH, queryParams);
@@ -110,13 +117,13 @@ public class TntConsumer extends ConformanceParty {
     responseNode.putArray(TntConstants.FEEDBACK_ELEMENTS);
 
     ConformanceResponse response =
-        request.createResponse(
-            200,
-            Map.of(API_VERSION, List.of(apiVersion)),
-            new ConformanceMessageBody(responseNode));
+      request.createResponse(
+        200,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(responseNode));
 
     addOperatorLogEntry(
-        "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
+      "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
 }

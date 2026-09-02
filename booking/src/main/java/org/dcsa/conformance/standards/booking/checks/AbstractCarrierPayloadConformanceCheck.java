@@ -31,24 +31,6 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected static final String FEEDBACKS = "feedbacks";
 
   protected AbstractCarrierPayloadConformanceCheck(
-    UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
-    this(matchedExchangeUuid, httpMessageType, bookingState, null, null);
-  }
-
-  protected AbstractCarrierPayloadConformanceCheck(
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    BookingState bookingState,
-    BookingState expectedAmendedBookingStatus) {
-    this(
-      matchedExchangeUuid,
-      httpMessageType,
-      bookingState,
-      expectedAmendedBookingStatus,
-      null);
-  }
-
-  protected AbstractCarrierPayloadConformanceCheck(
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
     BookingState bookingState,
@@ -124,11 +106,17 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   }
 
   protected ConformanceCheckResult ensureAmendedBookingStatusCodeCompliance(JsonNode payload) {
+    if (!carrierStatusScenario.shouldValidateSecondaryStatuses()) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
     return ensureStatusCodeCompliance(
       payload, "amendedBookingStatus", BookingDataSets.AMENDED_BOOKING_STATUS);
   }
 
   protected ConformanceCheckResult ensureBookingCancellationStatusCodeCompliance(JsonNode payload) {
+    if (!carrierStatusScenario.shouldValidateSecondaryStatuses()) {
+      return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+    }
     return ensureStatusCodeCompliance(
       payload, "bookingCancellationStatus", BookingDataSets.BOOKING_CANCELLATION_STATUS);
   }

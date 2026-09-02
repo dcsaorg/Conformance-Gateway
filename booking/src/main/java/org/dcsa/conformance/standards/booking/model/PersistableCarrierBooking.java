@@ -56,8 +56,7 @@ public class PersistableCarrierBooking {
       Map.entry(COMPLETED, Set.of(CONFIRMED)::contains),
       Map.entry(
         CANCELLED,
-        Set.of(RECEIVED, UPDATE_RECEIVED, PENDING_UPDATE, CONFIRMED, PENDING_AMENDMENT)
-          ::contains));
+        Set.of(RECEIVED, UPDATE_RECEIVED, PENDING_UPDATE)::contains));
 
   private static final Set<BookingState> PREREQUISITE_BOOKING_STATES_FOR_CANCELLATION =
     Set.of(
@@ -135,6 +134,12 @@ public class PersistableCarrierBooking {
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
   }
 
+  public void declineBookingAmendment(String reference) {
+    checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
+    changeState(BOOKING_STATUS, CONFIRMED);
+    changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
+  }
+
   public void confirmBooking(String reference, Supplier<String> cbrGenerator) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CONFIRMED);
     checkState(reference, getOriginalBookingState(), prerequisites);
@@ -176,11 +181,6 @@ public class PersistableCarrierBooking {
     if (getAmendedBooking().isPresent()) {
       changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
     }
-  }
-
-  public void declineBookingAmendment(String reference) {
-    checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
-    changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
   }
 
   public void requestUpdateToBooking(String reference, Consumer<ObjectNode> bookingMutator) {
@@ -236,6 +236,15 @@ public class PersistableCarrierBooking {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_CONFIRMED);
     changeState(BOOKING_STATUS, CANCELLED);
+    if (getBookingAmendedState() != null) {
+      changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CANCELLED);
+    }
+  }
+
+  public void declineConfirmedBookingCancellation(String bookingReference) {
+    checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
+    changeState(CANCELLATION_DECLINED);
+    changeState(BOOKING_STATUS, CONFIRMED);
   }
 
   public void updateCancelConfirmedBooking(String bookingReference) {
@@ -251,11 +260,6 @@ public class PersistableCarrierBooking {
     }
     mutateBookingAndAmendment(
       b -> b.put(CANCELLATION_BOOKING_STATUS, CANCELLATION_RECEIVED.name()));
-  }
-
-  public void declineConfirmedBookingCancellation(String bookingReference) {
-    checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
-    changeState(CANCELLATION_DECLINED);
   }
 
   private void changeState(String attributeName, BookingState newState) {
@@ -308,6 +312,7 @@ public class PersistableCarrierBooking {
     }
 
     if (isAmendment) {
+      changeState(BOOKING_STATUS, BookingState.CONFIRMED);
       changeState(AMENDED_BOOKING_STATUS, BookingState.AMENDMENT_RECEIVED);
     } else {
       changeState(BOOKING_STATUS, BookingState.UPDATE_RECEIVED);

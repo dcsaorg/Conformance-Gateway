@@ -67,7 +67,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck
     super(
       matchedExchangeUuid,
       HttpMessageType.REQUEST,
-      BookingState.CONFIRMED,
+      carrierStatusScenario.expectedBookingStatus(),
       carrierStatusScenario);
     this.dspSupplier = dspSupplier;
   }

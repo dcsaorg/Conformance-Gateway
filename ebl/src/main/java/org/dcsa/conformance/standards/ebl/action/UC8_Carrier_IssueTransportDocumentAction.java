@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
+import org.dcsa.conformance.standards.ebl.checks.TransportDocumentStatusScenario;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 @Getter
@@ -54,7 +54,7 @@ public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAct
             getMatchedExchangeUuid(),
             expectedApiVersion,
             requestSchemaValidator,
-            TransportDocumentStatus.TD_ISSUED);
+            TransportDocumentStatusScenario.uc8());
       }
     };
   }

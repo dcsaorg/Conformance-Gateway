@@ -8,6 +8,8 @@ public class TntConstants {
   public static final String SUPPLIED_SCENARIO_PARAMETERS = "suppliedScenarioParameters";
   public static final String EVENT_TYPE = "eventType";
   public static final String TNT_QUERY_PARAMETERS = "tntQueryParameters";
+  public static final String REQUIRED_TNT_QUERY_PARAMETERS = "requiredTntQueryParameters";
+  public static final String OPTIONAL_TNT_QUERY_PARAMETERS = "optionalTntQueryParameters";
   public static final String INPUT = "input";
   public static final String CURRENT_DSP = "currentDsp";
   public static final String ACTION_ID = "actionId";

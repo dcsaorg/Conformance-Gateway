@@ -81,6 +81,7 @@ class BookingComponentFactory extends AbstractComponentFactory {
     boolean isWithNotifications) {
     return BookingScenarioListBuilder.createModuleScenarioListBuilders(
       this,
+      getReportRoleNames(partyConfigurations, counterpartConfigurations),
       isWithNotifications,
       _findPartyOrCounterpartName(
         partyConfigurations, counterpartConfigurations, BookingRole::isCarrier),

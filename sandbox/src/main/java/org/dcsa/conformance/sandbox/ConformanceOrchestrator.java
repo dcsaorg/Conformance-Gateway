@@ -373,6 +373,9 @@ public class ConformanceOrchestrator implements StatefulEntity {
       nextAction.markSkipped();
     } else if (nextAction.isMissingMatchedExchange()) {
       nextAction.markCompletedWithoutTraffic();
+    } else if (nextAction.completableWithoutTrafficForRoles().contains(externalPartyRole)
+      && nextAction.isMissingMatchedNotificationExchange()) {
+      nextAction.markCompletedWithoutTraffic();
     }
 
     currentScenario.popNextAction();
@@ -409,6 +412,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
             scenarioNode.put("name", scenario.getTitle());
             scenarioNode.put("isRunning", scenario.getId().equals(currentScenarioId));
             scenarioNode.put("conformanceStatus", scenario.getLatestComputedStatus().name());
+            scenarioNode.put("conformanceType", scenario.getConformanceType().name());
           });
       });
     return allModulesNode;

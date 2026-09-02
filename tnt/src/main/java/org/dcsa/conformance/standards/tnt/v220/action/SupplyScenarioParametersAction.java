@@ -3,6 +3,10 @@ package org.dcsa.conformance.standards.tnt.v220.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Getter;
+import org.dcsa.conformance.core.UserFacingException;
+import org.dcsa.conformance.standards.tnt.v220.party.SuppliedScenarioParameters;
+import org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
@@ -10,33 +14,28 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import lombok.Getter;
-import org.dcsa.conformance.core.UserFacingException;
-import org.dcsa.conformance.standards.tnt.v220.party.SuppliedScenarioParameters;
-import org.dcsa.conformance.standards.tnt.v220.party.TntFilterParameter;
-
 @Getter
 public class SupplyScenarioParametersAction extends TntAction {
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
-  private final Map<TntFilterParameter,String> tntFilterParameterMap;
+  private final Map<TntFilterParameter, String> tntFilterParameterMap;
 
   public SupplyScenarioParametersAction(
-      String publisherPartyName, Map<TntFilterParameter, String> parameters) {
+    String publisherPartyName, Map<TntFilterParameter, String> parameters) {
     super(
-        publisherPartyName,
-        null,
-        null,
-        "SupplyScenarioParameters(%s)"
-            .formatted(
-                parameters.keySet().stream()
-                    .map(
-                        parameter ->
-                            parameter.getQueryParamName()
-                                + (parameter.equals(TntFilterParameter.EVENT_TYPE)
-                                    ? "=" + parameters.get(parameter) // the scenario title must be unique!
-                                    : ""))
-                    .collect(Collectors.joining(", "))),
-        -1);
+      publisherPartyName,
+      null,
+      null,
+      "SupplyScenarioParameters(%s)"
+        .formatted(
+          parameters.keySet().stream()
+            .map(
+              parameter ->
+                parameter.getQueryParamName()
+                  + (parameter.equals(TntFilterParameter.EVENT_TYPE)
+                  ? "=" + parameters.get(parameter) // the scenario title must be unique!
+                  : ""))
+            .collect(Collectors.joining(", "))),
+      -1);
     this.tntFilterParameterMap = parameters;
   }
 
@@ -60,7 +59,7 @@ public class SupplyScenarioParametersAction extends TntAction {
     super.importJsonState(jsonState);
     if (jsonState.has("suppliedScenarioParameters")) {
       suppliedScenarioParameters =
-          SuppliedScenarioParameters.fromJson(jsonState.required("suppliedScenarioParameters"));
+        SuppliedScenarioParameters.fromJson(jsonState.required("suppliedScenarioParameters"));
     }
   }
 
@@ -79,7 +78,7 @@ public class SupplyScenarioParametersAction extends TntAction {
   @Override
   public String getHumanReadablePrompt() {
     return "Use the following format to provide the values of the specified query parameters"
-        + " for which your party can successfully process a GET request:";
+      + " for which your party can successfully process a GET request:";
   }
 
   @Override
@@ -99,24 +98,24 @@ public class SupplyScenarioParametersAction extends TntAction {
   protected void doHandlePartyInput(JsonNode partyInput) {
     JsonNode inputNode = partyInput.get("input");
     Arrays.stream(TntFilterParameter.values())
-        .map(TntFilterParameter::getQueryParamName)
-        .filter(
-            queryParamName ->
-                queryParamName.startsWith(
-                    TntFilterParameter.EVENT_CREATED_DATE_TIME.getQueryParamName()))
-        .filter(inputNode::hasNonNull)
-        .forEach(
-            queryParamName -> {
-              String dateValue = inputNode.path(queryParamName).asText();
-              try {
-                OffsetDateTime.parse(dateValue);
-              } catch (DateTimeParseException e) {
-                throw new UserFacingException(
-                    "Invalid date-time format '%s' for input parameter '%s'"
-                        .formatted(dateValue, queryParamName),
-                    e);
-              }
-            });
+      .map(TntFilterParameter::getQueryParamName)
+      .filter(
+        queryParamName ->
+          queryParamName.startsWith(
+            TntFilterParameter.EVENT_CREATED_DATE_TIME.getQueryParamName()))
+      .filter(inputNode::hasNonNull)
+      .forEach(
+        queryParamName -> {
+          String dateValue = inputNode.path(queryParamName).asText();
+          try {
+            OffsetDateTime.parse(dateValue);
+          } catch (DateTimeParseException e) {
+            throw new UserFacingException(
+              "Invalid date-time format '%s' for input parameter '%s'"
+                .formatted(dateValue, queryParamName),
+              e);
+          }
+        });
 
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(inputNode);
   }

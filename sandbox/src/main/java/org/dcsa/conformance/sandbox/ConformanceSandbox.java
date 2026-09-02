@@ -258,6 +258,18 @@ public class ConformanceSandbox {
       ConformancePersistenceProvider persistenceProvider,
       ConformanceWebRequest webRequest,
       Consumer<JsonNode> deferredSandboxTaskConsumer) {
+    try {
+      return _doHandleRequest(persistenceProvider, webRequest, deferredSandboxTaskConsumer);
+    } catch (RuntimeException e) {
+      return ConformanceErrorResponses.unexpectedApiResponse(
+        log, "handling sandbox request '%s %s'".formatted(webRequest.method(), webRequest.url()), e);
+    }
+  }
+
+  private static ConformanceWebResponse _doHandleRequest(
+      ConformancePersistenceProvider persistenceProvider,
+      ConformanceWebRequest webRequest,
+      Consumer<JsonNode> deferredSandboxTaskConsumer) {
     log.info(
         "ConformanceSandbox.handleRequest() {}",
         OBJECT_MAPPER.valueToTree(webRequest).toPrettyString());
@@ -735,7 +747,7 @@ public class ConformanceSandbox {
           new ConformanceRequest(
             webRequest.method(),
             webRequest.url(),
-            webRequest.queryParameters(),
+            decodeQueryParameters(webRequest.queryParameters()),
             new ConformanceMessage(
               party.getCounterpartName(),
               party.getCounterpartRole(),
@@ -768,6 +780,34 @@ public class ConformanceSandbox {
       JsonToolkit.JSON_UTF_8,
       conformanceResponse.message().headers(),
       conformanceResponse.message().body().getStringBody());
+  }
+
+  private static Map<String, Collection<String>> decodeQueryParameters(
+    Map<String, ? extends Collection<String>> queryParameters) {
+    if (queryParameters == null || queryParameters.isEmpty()) {
+      return Collections.emptyMap();
+    }
+
+    Map<String, Collection<String>> decodedQueryParameters = new LinkedHashMap<>();
+    queryParameters.forEach(
+      (key, values) -> {
+        String decodedKey = percentDecode(key);
+        Collection<String> decodedValues = values == null
+          ? Collections.emptyList()
+          : values.stream()
+          .map(value -> value == null ? null : percentDecode(value))
+          .toList();
+
+        decodedQueryParameters
+          .computeIfAbsent(decodedKey, ignored -> new ArrayList<>())
+          .addAll(decodedValues);
+      });
+
+    return decodedQueryParameters;
+  }
+
+  private static String percentDecode(String value) {
+    return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8);
   }
 
   private static void _asyncHandleOutboundRequest(

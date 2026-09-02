@@ -1,26 +1,87 @@
-<div class="pageTitle">Sandboxes</div>
-
-<div class="pageSubtitle">
-    <button
-        id="create_sandbox_button"
-        mat-raised-button
-        color="primary"
-        title="Create sandbox"
-        (click)="onCreateSandbox()"
-        >Create sandbox</button>
+<div class="sandboxPageHeader">
+  <div>
+    <div class="pageTitle">Sandboxes</div>
+    <div class="sandboxPageDescription">Create and manage conformance testing sandboxes.</div>
+  </div>
+  <button
+    id="create_sandbox_button"
+    mat-raised-button
+    color="primary"
+    [disabled]="isDeleting"
+    (click)="onCreateSandbox()">
+    <mat-icon>add</mat-icon>
+    Create sandbox
+  </button>
 </div>
 
 @if (isLoading) {
   <app-text-waiting text="Retrieving existing sandboxes..."></app-text-waiting>
+} @else {
+  <mat-form-field class="fullWidth sandboxSearch">
+    <mat-label>Search sandboxes by name</mat-label>
+    <input
+      id="sandbox_search_input"
+      matInput
+      type="search"
+      autocomplete="off"
+      [ngModel]="searchTerm"
+      (ngModelChange)="onSearchTermChange($event)"
+    />
+    <mat-icon matPrefix>search</mat-icon>
+  </mat-form-field>
+
+  @if (sandboxes.length > 0) {
+    <div class="sandboxListToolbar">
+      <mat-checkbox
+        id="select_all_sandboxes_checkbox"
+        [checked]="areAllFilteredSandboxesSelected()"
+        [indeterminate]="areSomeFilteredSandboxesSelected()"
+        [disabled]="isDeleting || filteredSandboxes.length === 0"
+        (change)="toggleAllFilteredSandboxes($event.checked)">
+        Select all
+      </mat-checkbox>
+      <button
+        id="delete_selected_sandboxes_button"
+        mat-stroked-button
+        color="warn"
+        title="Delete selected sandboxes"
+        [disabled]="selectedSandboxIds.size === 0 || isDeleting"
+        (click)="onDeleteSelectedSandboxes()">
+        <mat-icon>delete</mat-icon>
+        {{isDeleting ? 'Deleting...' : 'Delete selected'}}
+      </button>
+    </div>
+  }
 }
 
-@for (sandbox of sandboxes; track sandbox.id) {
+@for (sandbox of filteredSandboxes; track sandbox.id) {
   <mat-card
-  [ngClass]="'entityCard withContentPadding withPointerCursor'"
-  (click)="onSandboxClick(sandbox)">
-    <div>
-      <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>
-    </div>
-    <div class="wrappingText" style="color: grey">{{sandbox.name}}</div>
+    class="entityCard withContentPadding sandboxCard"
+    [class.selectedEntityCard]="isSandboxSelected(sandbox.id)">
+    <mat-checkbox
+      class="sandboxCheckbox"
+      [attr.aria-label]="'Select sandbox ' + sandbox.name"
+      [checked]="isSandboxSelected(sandbox.id)"
+      [disabled]="isDeleting"
+      (click)="$event.stopPropagation()"
+      (change)="toggleSandboxSelection(sandbox.id, $event.checked)">
+    </mat-checkbox>
+    <button
+      type="button"
+      class="sandboxCardContent sandboxCardLink"
+      [attr.aria-label]="'Open sandbox ' + sandbox.name"
+      [disabled]="isDeleting"
+      (click)="onSandboxClick(sandbox)">
+      <div>
+        <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>
+      </div>
+      <div class="wrappingText sandboxName">{{sandbox.name}}</div>
+    </button>
   </mat-card>
+}
+
+@if (!isLoading && searchTerm.trim() && filteredSandboxes.length === 0) {
+  <div class="waiting" role="status">No sandboxes match “{{searchTerm.trim()}}”.</div>
+} @else if (!isLoading && sandboxes.length === 0) {
+  <div class="waiting" role="status">No sandboxes have been created yet.</div>
 }

@@ -11,13 +11,18 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.cs.party.CsPublisher;
+import org.dcsa.conformance.standards.cs.party.CsConsumer;
+import org.dcsa.conformance.standards.cs.party.CsProducer;
 import org.dcsa.conformance.standards.cs.party.CsRole;
-import org.dcsa.conformance.standards.cs.party.CsSubscriber;
 
 public class CsComponentFactory extends AbstractComponentFactory {
   protected CsComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
-    super(standardName, standardVersion, scenarioSuite, "Publisher", "Subscriber");
+    super(
+        standardName,
+        standardVersion,
+        scenarioSuite,
+        CsRole.PRODUCER.getConfigName(),
+        CsRole.CONSUMER.getConfigName());
   }
 
   public List<ConformanceParty> createParties(
@@ -36,29 +41,29 @@ public class CsComponentFactory extends AbstractComponentFactory {
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration publisherConfiguration =
-      partyConfigurationsByRoleName.get(CsRole.PUBLISHER.getConfigName());
+        partyConfigurationsByRoleName.get(CsRole.PRODUCER.getConfigName());
     if (publisherConfiguration != null) {
       parties.add(
-        new CsPublisher(
-          standardVersion,
-          publisherConfiguration,
-          counterpartConfigurationsByRoleName.get(CsRole.SUBSCRIBER.getConfigName()),
-          persistentMap,
-          webClient,
-          orchestratorAuthHeader));
+          new CsProducer(
+              standardVersion,
+              publisherConfiguration,
+              counterpartConfigurationsByRoleName.get(CsRole.CONSUMER.getConfigName()),
+              persistentMap,
+              webClient,
+              orchestratorAuthHeader));
     }
 
     PartyConfiguration consumerConfiguration =
-      partyConfigurationsByRoleName.get(CsRole.SUBSCRIBER.getConfigName());
+        partyConfigurationsByRoleName.get(CsRole.CONSUMER.getConfigName());
     if (consumerConfiguration != null) {
       parties.add(
-        new CsSubscriber(
-          standardVersion,
-          consumerConfiguration,
-          counterpartConfigurationsByRoleName.get(CsRole.PUBLISHER.getConfigName()),
-          persistentMap,
-          webClient,
-          orchestratorAuthHeader));
+          new CsConsumer(
+              standardVersion,
+              consumerConfiguration,
+              counterpartConfigurationsByRoleName.get(CsRole.PRODUCER.getConfigName()),
+              persistentMap,
+              webClient,
+              orchestratorAuthHeader));
     }
     return parties;
   }
@@ -69,11 +74,12 @@ public class CsComponentFactory extends AbstractComponentFactory {
     CounterpartConfiguration[] counterpartConfigurations,
     boolean isWithNotifications) {
     return CsScenarioListBuilder.createModuleScenarioListBuilders(
-      this,
-      _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, CsRole::isPublisher),
-      _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, CsRole::isSubscriber));
+        this,
+        getReportRoleNames(partyConfigurations, counterpartConfigurations),
+        _findPartyOrCounterpartName(
+            partyConfigurations, counterpartConfigurations, CsRole::isProducer),
+        _findPartyOrCounterpartName(
+            partyConfigurations, counterpartConfigurations, CsRole::isConsumer));
   }
 
   @Override

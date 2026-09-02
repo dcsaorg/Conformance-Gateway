@@ -25,6 +25,9 @@ public abstract class ConformanceCheck {
 
   private boolean isRelevant = true;
   private boolean isApplicable = true;
+  private boolean relevantForAggregation = true;
+  private boolean interchangeable = false;
+
   private ConformanceStatus statusOverride;
   private boolean statusOverridePropagated;
 
@@ -88,8 +91,7 @@ public abstract class ConformanceCheck {
     return ignoredStatus -> {};
   }
 
-  public ConformanceCheck withStatusOverride(
-      ConformanceStatus statusOverride, boolean propagateToSubChecks) {
+  public ConformanceCheck withStatusOverride(ConformanceStatus statusOverride, boolean propagateToSubChecks) {
     this.statusOverride = statusOverride;
     this.statusOverridePropagated = propagateToSubChecks;
     return this;

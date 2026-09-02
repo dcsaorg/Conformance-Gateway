@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum PortCallRole {
-  PUBLISHER("Publisher"),
-  SUBSCRIBER("Subscriber");
+  PRODUCER("Producer"),
+  CONSUMER("Consumer");
 
   private final String configName;
 
@@ -13,11 +13,11 @@ public enum PortCallRole {
     this.configName = configName;
   }
 
-  public static boolean isPublisher(String configName) {
-    return PortCallRole.PUBLISHER.configName.equals(configName);
+  public static boolean isProducer(String configName) {
+    return PortCallRole.PRODUCER.configName.equals(configName);
   }
 
-  public static boolean isSubscriber(String configName) {
-    return PortCallRole.SUBSCRIBER.configName.equals(configName);
+  public static boolean isConsumer(String configName) {
+    return PortCallRole.CONSUMER.configName.equals(configName);
   }
 }

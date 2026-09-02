@@ -19,11 +19,13 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
 
   private static final String DATA_PATH = "/data";
   private static final String TRANSPORT_DOCUMENT_PATH = "/data/transportDocument";
+  private static final String AMENDED_TRANSPORT_DOCUMENT_PATH = "/data/amendedTransportDocument";
 
   private static final String ROOT_LABEL = "";
   private static final String TRANSPORT_DOCUMENT_LABEL = "[Transport Document]";
+  private static final String AMENDED_TRANSPORT_DOCUMENT_LABEL = "[Amended Transport Document]";
 
-  private final List<TransportDocumentStatus> transportDocumentStatus;
+  private final TransportDocumentStatusScenario statusScenario;
   private final Boolean tdrIsKnown;
   private final Supplier<EblDynamicScenarioParameters> dspSupplier;
 
@@ -32,9 +34,22 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
       List<TransportDocumentStatus> transportDocumentStatus,
       Boolean tdrIsKnown,
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
+    this(
+        matchedExchangeUuid,
+        TransportDocumentStatusScenario.primaryStatusesOnly(
+            new java.util.LinkedHashSet<>(transportDocumentStatus)),
+        tdrIsKnown,
+        dspSupplier);
+  }
+
+  public CarrierTdNotificationPayloadRequestConformanceCheck(
+      UUID matchedExchangeUuid,
+      TransportDocumentStatusScenario statusScenario,
+      Boolean tdrIsKnown,
+      Supplier<EblDynamicScenarioParameters> dspSupplier) {
 
     super(EblRole::isCarrier, matchedExchangeUuid, HttpMessageType.REQUEST);
-    this.transportDocumentStatus = transportDocumentStatus;
+    this.statusScenario = statusScenario;
     this.tdrIsKnown = Boolean.TRUE.equals(tdrIsKnown);
     this.dspSupplier = dspSupplier;
   }
@@ -47,7 +62,7 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
                 DATA_PATH,
                 () -> {
                   List<JsonContentCheck> checks =
-                      new ArrayList<>(EblChecks.getTdNotificationChecks(transportDocumentStatus));
+                      new ArrayList<>(EblChecks.getTdNotificationChecks(statusScenario));
                   getTdrCheck().ifPresent(checks::add);
                   return checks;
                 }),
@@ -57,7 +72,24 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
                 () -> {
                   List<JsonContentCheck> checks = new ArrayList<>();
                   getTdrCheck().ifPresent(checks::add);
-                  checks.addAll(EblChecks.getTdPayloadChecks(transportDocumentStatus, dspSupplier));
+                  checks.addAll(
+                      EblChecks.getTdPayloadChecks(
+                          List.copyOf(statusScenario.transportDocumentStatuses()),
+                          dspSupplier,
+                          EblChecks.TdPayloadContext.TRANSPORT_DOCUMENT_NOTIFICATION));
+                  return checks;
+                }),
+            buildChecks(
+                AMENDED_TRANSPORT_DOCUMENT_LABEL,
+                AMENDED_TRANSPORT_DOCUMENT_PATH,
+                () -> {
+                  List<JsonContentCheck> checks = new ArrayList<>();
+                  getTdrCheck().ifPresent(checks::add);
+                  checks.addAll(
+                      EblChecks.getTdPayloadChecks(
+                          List.copyOf(statusScenario.transportDocumentStatuses()),
+                          dspSupplier,
+                          EblChecks.TdPayloadContext.AMENDED_TRANSPORT_DOCUMENT_NOTIFICATION));
                   return checks;
                 }))
         .flatMap(Function.identity());

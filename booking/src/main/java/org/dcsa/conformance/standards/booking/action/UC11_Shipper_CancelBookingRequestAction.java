@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ConformanceCheck;
-import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.function.Function;
@@ -15,9 +12,9 @@ import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookingAction {
+public class UC11_Shipper_CancelBookingRequestAction extends ShipperNotificationBookingAction {
+
   private final JsonSchemaValidator requestSchemaValidator;
-  private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
   private final BookingState expectedBookingStatus;
 
@@ -27,12 +24,10 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
     BookingAction previousAction,
     BookingState expectedBookingStatus,
     JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator,
     JsonSchemaValidator notificationSchemaValidator,
     boolean isWithNotifications) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC11", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
-    this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.expectedBookingStatus = expectedBookingStatus;
   }
@@ -65,20 +60,7 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
         return Stream.of(
-          createPatchPrimarySubChecks(expectedApiVersion, "/v2/bookings/", cbrr, cbr),
-          Stream.of(
-            new JsonSchemaCheck(BookingRole::isShipper, getMatchedExchangeUuid(), HttpMessageType.REQUEST, requestSchemaValidator),
-            createShipperPatchPreconditionCheck(
-              "[Scenario] The Booking cancellation request must demonstrate that this precondition is respected: It is a precondition that %s is neither CONFIRMED nor PENDING_AMENDMENT in order to cancel a Booking Request (prior to Booking Confirmation).".formatted(jsonPath(BOOKING_STATUS)),
-              BOOKING_STATUS,
-              status -> !BookingState.CONFIRMED.name().equals(status) && !BookingState.PENDING_AMENDMENT.name().equals(status),
-              "neither %s nor %s".formatted(BookingState.CONFIRMED.name(), BookingState.PENDING_AMENDMENT.name())),
-            createCarrierPatchPreconditionResponseStatusCheck(
-              "[Scenario] The HTTP response status is correct for the applicable PATCH business precondition",
-              BOOKING_STATUS,
-              status -> !BookingState.CONFIRMED.name().equals(status) && !BookingState.PENDING_AMENDMENT.name().equals(status),
-              "neither %s nor %s".formatted(BookingState.CONFIRMED.name(), BookingState.PENDING_AMENDMENT.name()),
-              409)),
+          createPatchPrimarySubChecks(expectedApiVersion, "/v2/bookings/", requestSchemaValidator, cbrr, cbr),
           getNotificationChecks(expectedApiVersion, notificationSchemaValidator, expectedBookingStatus, null)
         ).flatMap(Function.identity());
       }

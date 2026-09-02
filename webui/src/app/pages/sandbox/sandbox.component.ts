@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ChangeDetectionStrategy} from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -19,7 +19,8 @@ import {MessageDialog} from "../../dialogs/message/message-dialog.component";
 @Component({
     selector: 'app-sandbox',
     templateUrl: './sandbox.component.html',
-    styleUrls: ['../../shared-styles.css'],
+    styleUrls: ['../../shared-styles.css', './sandbox.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SandboxComponent implements OnInit, OnDestroy {
@@ -39,6 +40,9 @@ export class SandboxComponent implements OnInit, OnDestroy {
 
   getConformanceStatusEmoji = getConformanceStatusEmoji;
   getConformanceStatusTitle = getConformanceStatusTitle;
+
+  readonly interchangeableScenariosHint =
+    "Running any one of the scenarios of this module is sufficient for conformance.";
 
   constructor(
     public activatedRoute: ActivatedRoute,
@@ -86,8 +90,22 @@ export class SandboxComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * True when the module's scenarios are interchangeable alternatives, of which the tested party
+   * only has to run one.
+   */
+  hasInterchangeableScenarios(standardModule: StandardModule): boolean {
+    return standardModule.scenarios.some(
+      scenario => scenario.conformanceType === "INTERCHANGEABLE"
+    );
+  }
+
   isInternalSandbox(): boolean {
     return !!this.sandbox?.canNotifyParty;
+  }
+
+  shouldShowNoScenarios(): boolean {
+    return !this.isLoading && !this.isInternalSandbox() && this.standardModules.length === 0;
   }
 
   getActionIconName(scenario: ScenarioDigest): string {

@@ -4,21 +4,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ConformanceCheck;
-import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingAction {
+public class UC7_Shipper_SubmitBookingAmendment extends ShipperNotificationBookingAction {
+
   private final JsonSchemaValidator requestSchemaValidator;
-  private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
   private final BookingState expectedBookingStatus;
   private final BookingState expectedAmendedBookingStatus;
@@ -30,12 +28,10 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
     BookingState expectedBookingStatus,
     BookingState expectedAmendedBookingStatus,
     JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator,
     JsonSchemaValidator notificationSchemaValidator,
     boolean isWithNotifications) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC7", 202, isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
-    this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.expectedBookingStatus = expectedBookingStatus;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
@@ -68,22 +64,17 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
         var dsp = getDspSupplier().get();
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
-        return Stream.concat(
-          Stream.concat(
-            createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", cbrr, cbr),
-            Stream.of(
-              new JsonSchemaCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator),
-              BookingChecks.updateRequestContentChecks(
-                getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier()))),
+        return Stream.of(
+          createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", requestSchemaValidator, cbrr, cbr),
+          Stream.of(
+            BookingChecks.updateRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())
+          ),
           getNotificationChecks(
             expectedApiVersion,
             notificationSchemaValidator,
             expectedBookingStatus,
-            expectedAmendedBookingStatus));
+            expectedAmendedBookingStatus)
+        ).flatMap(Function.identity());
       }
     };
   }

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from "@angular/core";
+import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -11,6 +11,7 @@ import { MatDialog } from "@angular/material/dialog";
     selector: 'app-edit-sandbox',
     templateUrl: './edit-sandbox.component.html',
     styleUrls: ['../../shared-styles.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EditSandboxComponent {

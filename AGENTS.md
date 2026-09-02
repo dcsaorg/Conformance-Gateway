@@ -36,6 +36,17 @@ Do not hardcode the random local auth token.
 
 Do not temporarily comment out parameterized standards/scenarios or remove `@Disabled` and commit that change. Use focused Maven selectors or IDE run configurations instead.
 
+## Standard specifications are authoritative
+
+Before changing a standard module, locate and read its standard-specific Markdown resources (for example, `booking.md`). When such documentation is present, treat it as the source of truth for that standard's conformance behavior. Scenario coverage and sequencing, actions, checks, validation applicability, role behavior, synthetic-party state transitions, prompts, and tests must all agree with the documented requirements. Do not alter or weaken documented behavior merely to make an existing test pass.
+
+If the Markdown references an Excel workbook for validations, the workbook is an authoritative part of the specification and must be analyzed directly; filenames or summaries are not sufficient. Inspect every relevant worksheet, including notes, merged cells, formulas or displayed values, alternatives such as “A or B,” optional or conditional fields, and state-dependent rules. Then trace every applicable workbook row and condition to both:
+
+- the conformance checks and validators that accept and reject exchanges; and
+- the internal synthetic-party implementation that creates payloads and performs state transitions.
+
+The implementation must map exactly to the workbook within the applicability and exceptions defined by the Markdown. Preserve distinctions between required and optional scenarios and any explicitly documented validation bypasses. Add table-driven regression coverage where practical for every allowed combination, required/forbidden field, conditional branch, and representative invalid combination. If documentation, workbook, code, and tests disagree, resolve the discrepancy against the documented specification and workbook rather than assuming the current implementation is correct, and record any genuine ambiguity that cannot be resolved from those sources.
+
 ## Scenario builder correctness
 
 `AbstractComponentFactory.generateConformanceScenarios` requires globally unique scenario titles. Module labels are also significant because they become report sections.
@@ -167,6 +178,8 @@ This starts backend port `8080` and frontend port `4200`. Prefer the manual Spri
 Before finishing a change, verify:
 
 - [ ] Existing user changes were preserved.
+- [ ] The affected standard's Markdown was reviewed and scenarios, checks, parties, and tests match it.
+- [ ] Every referenced validation workbook was directly analyzed and its applicable rows and conditions map exactly to validators, synthetic-party behavior, and regression tests.
 - [ ] New behavior has a focused regression test.
 - [ ] No role-specific scenario modules are lost to key collisions.
 - [ ] Scenario titles remain globally unique.

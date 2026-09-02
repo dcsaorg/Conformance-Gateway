@@ -10,7 +10,6 @@ import org.dcsa.conformance.standards.vgm.action.VgmAction;
 import org.dcsa.conformance.standards.vgm.checks.VgmQueryParameters;
 import org.dcsa.conformance.standards.vgm.party.VgmRole;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -58,10 +57,12 @@ public class VgmScenarioListBuilder extends ScenarioListBuilder<VgmScenarioListB
           Map.entry("POST scenario - Alternative required path for VGM push", postVgmDeclaration()),
           Map.entry("GET scenario - Alternative required path for VGM pull", getVgmDeclaration()))));
 
-    Map<String, VgmScenarioListBuilder> scenarios = new LinkedHashMap<>();
-    testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
-
-    return scenarios;
+    if (testedPartyRoleNames.size() > 1) {
+      testedPartyRoleNames.forEach(role ->
+        partyScenariosMap.getOrDefault(role, Map.of()).values()
+          .forEach(builder -> builder.withScenarioTitlePrefix(role + ": ")));
+    }
+    return MapUtils.mergePartyScenarioModules(partyScenariosMap, testedPartyRoleNames);
   }
 
   private static VgmScenarioListBuilder supplyScenarioParameters(

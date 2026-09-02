@@ -13,9 +13,9 @@ import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder> {
@@ -39,16 +39,17 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
     threadLocalProducerPartyName.set(producerPartyName);
     threadLocalConsumerPartyName.set(consumerPartyName);
 
-    Map.Entry<String, TntScenarioListBuilder> postScenarioEntry = Map.entry(
-      "POST scenarios per event type - alternative required path for event push",
-      noAction()
-        .thenEither(
-          postTntEvents(TntEventType.SHIPMENT),
-          postTntEvents(TntEventType.TRANSPORT),
-          postTntEvents(TntEventType.EQUIPMENT),
-          postTntEvents(TntEventType.IOT),
-          postTntEvents(TntEventType.REEFER))
-        .asInterchangeableScenarios());
+    Supplier<Map.Entry<String, TntScenarioListBuilder>> postScenarioEntry = () ->
+      Map.entry(
+        "POST scenarios per event type - alternative required path for event push",
+        noAction()
+          .thenEither(
+            postTntEvents(TntEventType.SHIPMENT),
+            postTntEvents(TntEventType.TRANSPORT),
+            postTntEvents(TntEventType.EQUIPMENT),
+            postTntEvents(TntEventType.IOT),
+            postTntEvents(TntEventType.REEFER))
+          .asInterchangeableScenarios());
 
     Map.Entry<String, TntScenarioListBuilder> producerGetByTypeScenarioEntry = Map.entry(
       "GET scenarios per event type - alternative required path for event pull",
@@ -76,7 +77,7 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
       Map.entry(
         TntRole.PRODUCER.getConfigName(),
         MapUtils.orderedMap(
-          postScenarioEntry,
+          postScenarioEntry.get(),
           producerGetByTypeScenarioEntry,
           Map.entry("GET scenarios for required query parameter filters - required once per GET endpoint implementation",
             noAction()
@@ -96,12 +97,14 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
               .asOptionalReportOnlyScenario()))),
       Map.entry(
         TntRole.CONSUMER.getConfigName(),
-        MapUtils.orderedMap(postScenarioEntry, consumerGetByTypeScenarioEntry)));
+        MapUtils.orderedMap(postScenarioEntry.get(), consumerGetByTypeScenarioEntry)));
 
-    Map<String, TntScenarioListBuilder> scenarios = new LinkedHashMap<>();
-    testedPartyRoleNames.forEach(role -> scenarios.putAll(partyScenariosMap.get(role)));
-
-    return scenarios;
+    if (testedPartyRoleNames.size() > 1) {
+      testedPartyRoleNames.forEach(role ->
+        partyScenariosMap.getOrDefault(role, Map.of()).values()
+          .forEach(builder -> builder.withScenarioTitlePrefix(role + ": ")));
+    }
+    return MapUtils.mergePartyScenarioModules(partyScenariosMap, testedPartyRoleNames);
   }
 
   private static TntScenarioListBuilder noAction() {

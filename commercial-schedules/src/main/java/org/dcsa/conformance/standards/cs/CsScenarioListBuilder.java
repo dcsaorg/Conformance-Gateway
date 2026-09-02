@@ -144,11 +144,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
                         "Vessel Schedules: GET scenario - Required",
                         noAction().then(getVesselSchedules())))));
 
-    LinkedHashMap<String, CsScenarioListBuilder> scenarios = new LinkedHashMap<>();
-    testedPartyRoleNames.forEach(
-        party -> scenarios.putAll(partyScenariosMap.getOrDefault(party, Map.of())));
-
-    return scenarios;
+    return MapUtils.mergePartyScenarioModules(partyScenariosMap, testedPartyRoleNames);
   }
 
   private static CsScenarioListBuilder scenarioWithParametersPtpForPagination(

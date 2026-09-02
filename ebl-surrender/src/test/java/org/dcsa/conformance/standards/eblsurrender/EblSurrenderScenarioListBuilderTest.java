@@ -9,6 +9,7 @@ import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,6 +77,21 @@ class EblSurrenderScenarioListBuilderTest {
       "Surrender request (amendment) & asynchronous response",
       ScenarioConformanceType.OPTIONAL,
       SurrenderRequestResponseAction.class);
+  }
+
+  @Test
+  void allInOneSelectionPreservesAndQualifiesBothRoleModuleSets() {
+    Map<String, EblSurrenderScenarioListBuilder> builders =
+      buildersFor(new LinkedHashSet<>(List.of(
+        EblSurrenderRole.CARRIER.getConfigName(), EblSurrenderRole.PLATFORM.getConfigName())));
+
+    assertEquals(
+      List.of(
+        "Carrier: Required scenario",
+        "Carrier: Optional (report-only) scenarios",
+        "Platform: Required scenario",
+        "Platform: Optional (report-only) scenarios"),
+      List.copyOf(builders.keySet()));
   }
 
   @Test

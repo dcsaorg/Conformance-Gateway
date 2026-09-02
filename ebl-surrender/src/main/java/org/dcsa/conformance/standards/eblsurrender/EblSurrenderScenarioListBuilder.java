@@ -45,10 +45,7 @@ class EblSurrenderScenarioListBuilder extends ScenarioListBuilder<EblSurrenderSc
           Map.entry("Optional (report-only) scenarios", requestSurrender(true).asOptionalReportOnlyScenario())))
     );
 
-    Map<String, EblSurrenderScenarioListBuilder> scenarios = new LinkedHashMap<>();
-    testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
-
-    return scenarios;
+    return MapUtils.mergePartyScenarioModules(partyScenariosMap, testedPartyRoleNames);
   }
 
   private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction() {

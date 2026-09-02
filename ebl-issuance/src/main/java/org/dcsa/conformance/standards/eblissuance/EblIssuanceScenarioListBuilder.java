@@ -38,19 +38,16 @@ class EblIssuanceScenarioListBuilder extends ScenarioListBuilder<EblIssuanceScen
           EblIssuanceRole.CARRIER.getConfigName(),
           MapUtils.orderedMap(
             Map.entry(
-              testsBothRoles ? "Carrier required scenario" : "Required scenario",
+                testsBothRoles ? "Carrier required scenario" : "Required scenario",
               carrierScenarioParameters().then(issuanceRequestResponse())))),
         Map.entry(
           EblIssuanceRole.PLATFORM.getConfigName(),
           MapUtils.orderedMap(
             Map.entry(
-              testsBothRoles ? "eBL Platform required scenario" : "Required scenario",
+                testsBothRoles ? "eBL Platform required scenario" : "Required scenario",
               platformScenarioParameters().then(issuanceRequestResponse())))));
 
-    Map<String, EblIssuanceScenarioListBuilder> scenarios = new LinkedHashMap<>();
-    testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
-
-    return scenarios;
+    return MapUtils.mergePartyScenarioModules(partyScenariosMap, testedPartyRoleNames);
   }
 
   private static EblIssuanceScenarioListBuilder platformScenarioParameters() {

@@ -1,9 +1,5 @@
 package org.dcsa.conformance.standards.tnt.v300;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.UnaryOperator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.util.MapUtils;
@@ -16,10 +12,16 @@ import org.dcsa.conformance.standards.tnt.v300.action.TntEventType;
 import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.UnaryOperator;
+
 public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder> {
 
   private static final ThreadLocal<TntComponentFactory> threadLocalComponentFactory =
-      new ThreadLocal<>();
+    new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalProducerPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalConsumerPartyName = new ThreadLocal<>();
 
@@ -28,10 +30,10 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
   }
 
   public static Map<String, TntScenarioListBuilder> createModuleScenarioListBuilders(
-      TntComponentFactory componentFactory,
-      Set<String> testedPartyRoleNames,
-      String producerPartyName,
-      String consumerPartyName) {
+    TntComponentFactory componentFactory,
+    Set<String> testedPartyRoleNames,
+    String producerPartyName,
+    String consumerPartyName) {
 
     threadLocalComponentFactory.set(componentFactory);
     threadLocalProducerPartyName.set(producerPartyName);
@@ -45,9 +47,21 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
           postTntEvents(TntEventType.TRANSPORT),
           postTntEvents(TntEventType.EQUIPMENT),
           postTntEvents(TntEventType.IOT),
-          postTntEvents(TntEventType.REEFER)));
+          postTntEvents(TntEventType.REEFER))
+        .asInterchangeableScenarios());
 
-    Map.Entry<String, TntScenarioListBuilder> getByTypeScenarioEntry = Map.entry(
+    Map.Entry<String, TntScenarioListBuilder> producerGetByTypeScenarioEntry = Map.entry(
+      "GET scenarios per event type - alternative required path for event pull",
+      noAction()
+        .thenEither(
+          getTntEventsByTypeWithOptionalBaseFilters(TntEventType.SHIPMENT),
+          getTntEventsByTypeWithOptionalBaseFilters(TntEventType.TRANSPORT),
+          getTntEventsByTypeWithOptionalBaseFilters(TntEventType.EQUIPMENT),
+          getTntEventsByTypeWithOptionalBaseFilters(TntEventType.IOT),
+          getTntEventsByTypeWithOptionalBaseFilters(TntEventType.REEFER))
+        .asInterchangeableScenarios());
+
+    Map.Entry<String, TntScenarioListBuilder> consumerGetByTypeScenarioEntry = Map.entry(
       "GET scenarios per event type - alternative required path for event pull",
       noAction()
         .thenEither(
@@ -55,14 +69,15 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
           getTntEvents(TntEventType.TRANSPORT),
           getTntEvents(TntEventType.EQUIPMENT),
           getTntEvents(TntEventType.IOT),
-          getTntEvents(TntEventType.REEFER)));
+          getTntEvents(TntEventType.REEFER))
+        .asInterchangeableScenarios());
 
     Map<String, Map<String, TntScenarioListBuilder>> partyScenariosMap = MapUtils.orderedMap(
       Map.entry(
         TntRole.PRODUCER.getConfigName(),
         MapUtils.orderedMap(
           postScenarioEntry,
-          getByTypeScenarioEntry,
+          producerGetByTypeScenarioEntry,
           Map.entry("GET scenarios for required query parameter filters - required once per GET endpoint implementation",
             noAction()
               .thenEither(
@@ -81,7 +96,7 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
               .asOptionalReportOnlyScenario()))),
       Map.entry(
         TntRole.CONSUMER.getConfigName(),
-        MapUtils.orderedMap(postScenarioEntry, getByTypeScenarioEntry)));
+        MapUtils.orderedMap(postScenarioEntry, consumerGetByTypeScenarioEntry)));
 
     Map<String, TntScenarioListBuilder> scenarios = new LinkedHashMap<>();
     testedPartyRoleNames.forEach(role -> scenarios.putAll(partyScenariosMap.get(role)));
@@ -94,10 +109,21 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
   }
 
   private static TntScenarioListBuilder supplyScenarioParameters(
-      TntQueryParameters... queryParameters) {
+    TntQueryParameters... queryParameters) {
     String producerPartyName = threadLocalProducerPartyName.get();
     return new TntScenarioListBuilder(
-        _ -> new SupplyScenarioParametersAction(producerPartyName, queryParameters));
+      _ -> new SupplyScenarioParametersAction(producerPartyName, queryParameters));
+  }
+
+  private static TntScenarioListBuilder supplyOptionalScenarioParameters(Collection<TntQueryParameters> queryParameters) {
+    String producerPartyName = threadLocalProducerPartyName.get();
+    return new TntScenarioListBuilder(
+      _ -> SupplyScenarioParametersAction.optional(producerPartyName, queryParameters));
+  }
+
+  private static TntScenarioListBuilder getTntEventsByTypeWithOptionalBaseFilters(TntEventType eventType) {
+    return supplyOptionalScenarioParameters(eventType.applicableBaseFilters())
+      .then(getTntEvents(eventType));
   }
 
   private static TntScenarioListBuilder getTntEvents(TntEventType eventType) {
@@ -105,13 +131,13 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
     String producerPartyName = threadLocalProducerPartyName.get();
     String consumerPartyName = threadLocalConsumerPartyName.get();
     return new TntScenarioListBuilder(
-        previousAction ->
-            new ConsumerGetEventsWithTypeAction(
-                consumerPartyName,
-                producerPartyName,
-                (TntAction) previousAction,
-                eventType,
-                componentFactory.getMessageSchemaValidator("GetEventsResponse")));
+      previousAction ->
+        new ConsumerGetEventsWithTypeAction(
+          consumerPartyName,
+          producerPartyName,
+          (TntAction) previousAction,
+          eventType,
+          componentFactory.getMessageSchemaValidator("GetEventsResponse")));
   }
 
   private static TntScenarioListBuilder getTntEvents() {
@@ -123,13 +149,13 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
     String producerPartyName = threadLocalProducerPartyName.get();
     String consumerPartyName = threadLocalConsumerPartyName.get();
     return new TntScenarioListBuilder(
-        previousAction ->
-            new ConsumerGetEventsWithQueryParametersAction(
-                consumerPartyName,
-                producerPartyName,
-                (TntAction) previousAction,
-                hasNextPage,
-                componentFactory.getMessageSchemaValidator("GetEventsResponse")));
+      previousAction ->
+        new ConsumerGetEventsWithQueryParametersAction(
+          consumerPartyName,
+          producerPartyName,
+          (TntAction) previousAction,
+          hasNextPage,
+          componentFactory.getMessageSchemaValidator("GetEventsResponse")));
   }
 
   private static TntScenarioListBuilder postTntEvents(TntEventType eventType) {
@@ -137,13 +163,13 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
     String producerPartyName = threadLocalProducerPartyName.get();
     String consumerPartyName = threadLocalConsumerPartyName.get();
     return new TntScenarioListBuilder(
-        previousAction ->
-            new ProducerPostEventsAction(
-                producerPartyName,
-                consumerPartyName,
-                (TntAction) previousAction,
-                eventType,
-                componentFactory.getMessageSchemaValidator("PostEventsRequest"),
-                componentFactory.getMessageSchemaValidator("PostEventsResponse")));
+      previousAction ->
+        new ProducerPostEventsAction(
+          producerPartyName,
+          consumerPartyName,
+          (TntAction) previousAction,
+          eventType,
+          componentFactory.getMessageSchemaValidator("PostEventsRequest"),
+          componentFactory.getMessageSchemaValidator("PostEventsResponse")));
   }
 }

@@ -41,6 +41,9 @@ export class SandboxComponent implements OnInit, OnDestroy {
   getConformanceStatusEmoji = getConformanceStatusEmoji;
   getConformanceStatusTitle = getConformanceStatusTitle;
 
+  readonly interchangeableScenariosHint =
+    "Running any one of the scenarios of this module is sufficient for conformance.";
+
   constructor(
     public activatedRoute: ActivatedRoute,
     public authService: AuthService,
@@ -85,6 +88,16 @@ export class SandboxComponent implements OnInit, OnDestroy {
     if (this.activatedRouteSubscription) {
       this.activatedRouteSubscription.unsubscribe();
     }
+  }
+
+  /**
+   * True when the module's scenarios are interchangeable alternatives, of which the tested party
+   * only has to run one.
+   */
+  hasInterchangeableScenarios(standardModule: StandardModule): boolean {
+    return standardModule.scenarios.some(
+      scenario => scenario.conformanceType === "INTERCHANGEABLE"
+    );
   }
 
   isInternalSandbox(): boolean {

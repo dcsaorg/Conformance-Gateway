@@ -604,7 +604,7 @@ public abstract class ManualTestBase {
 
   record ScenarioDigest(String moduleName, List<Scenario> scenarios) {}
 
-  record Scenario(String id, String name, boolean isRunning, String conformanceStatus) {}
+  record Scenario(String id, String name, boolean isRunning, String conformanceStatus, String conformanceType) {}
 
   record SubReport(String title, String status, List<SubReport> subReports, List<String> errorMessages) {}
 

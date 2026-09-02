@@ -2,6 +2,15 @@ package org.dcsa.conformance.standards.tnt.v300.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.standards.tnt.v300.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.tnt.v300.party.SuppliedScenarioParameters;
+import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -12,14 +21,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.scenario.OverwritingReference;
-import org.dcsa.conformance.core.toolkit.IOToolkit;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standards.tnt.v300.party.DynamicScenarioParameters;
-import org.dcsa.conformance.standards.tnt.v300.party.SuppliedScenarioParameters;
-import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
 
 @Slf4j
 public abstract class TntAction extends ConformanceAction {
@@ -28,10 +29,10 @@ public abstract class TntAction extends ConformanceAction {
   private final OverwritingReference<DynamicScenarioParameters> dsp;
 
   protected TntAction(
-      String sourcePartyName,
-      String targetPartyName,
-      TntAction previousAction,
-      String actionTitle) {
+    String sourcePartyName,
+    String targetPartyName,
+    TntAction previousAction,
+    String actionTitle) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.sspSupplier = getSspSupplier(previousAction);
     this.dsp = getDspSupplier(previousAction);
@@ -79,7 +80,7 @@ public abstract class TntAction extends ConformanceAction {
     DynamicScenarioParameters dspRef = dsp.get();
 
     Collection<String> paginationHeaders =
-        exchange.getResponse().message().headers().get(TntConstants.HEADER_CURSOR_NAME);
+      exchange.getResponse().message().headers().get(TntConstants.HEADER_CURSOR_NAME);
     var updatedDsp = dspRef;
     if (paginationHeaders != null) {
       Optional<String> cursor = paginationHeaders.stream().findFirst();
@@ -113,7 +114,7 @@ public abstract class TntAction extends ConformanceAction {
   }
 
   protected <T> DynamicScenarioParameters updateIfNotNull(
-      DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+    DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }
@@ -122,25 +123,25 @@ public abstract class TntAction extends ConformanceAction {
 
   private Supplier<SuppliedScenarioParameters> getSspSupplier(ConformanceAction previousAction) {
     return previousAction
-            instanceof SupplyScenarioParametersAction supplyScenarioParametersActionAction
-        ? supplyScenarioParametersActionAction::getSuppliedScenarioParameters
-        : previousAction == null
-            ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
-            : getSspSupplier(previousAction.getPreviousAction());
+      instanceof SupplyScenarioParametersAction supplyScenarioParametersActionAction
+      ? supplyScenarioParametersActionAction::getSuppliedScenarioParameters
+      : previousAction == null
+      ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
+      : getSspSupplier(previousAction.getPreviousAction());
   }
 
   private OverwritingReference<DynamicScenarioParameters> getDspSupplier(TntAction previousAction) {
     return previousAction == null
-        ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null, null))
-        : new OverwritingReference<>(previousAction.dsp, null);
+      ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null, null))
+      : new OverwritingReference<>(previousAction.dsp, null);
   }
 
   protected String getMarkdownHumanReadablePrompt(Map<String, String> replacements, String... fileNames) {
     return Arrays.stream(fileNames)
-        .map(
-            fileName ->
-                IOToolkit.templateFileToText(
-                    "/standards/tnt/instructions/" + fileName, replacements))
-        .collect(Collectors.joining());
+      .map(
+        fileName ->
+          IOToolkit.templateFileToText(
+            "/standards/tnt/instructions/" + fileName, replacements))
+      .collect(Collectors.joining());
   }
 }

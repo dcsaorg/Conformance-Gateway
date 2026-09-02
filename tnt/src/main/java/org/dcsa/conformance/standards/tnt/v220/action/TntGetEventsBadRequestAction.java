@@ -1,14 +1,18 @@
 package org.dcsa.conformance.standards.tnt.v220.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.util.*;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.check.ApiHeaderCheck;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.core.check.ResponseStatusCheck;
+import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.tnt.v220.party.TntRole;
+
+import java.util.Map;
+import java.util.stream.Stream;
 
 @Getter
 @Slf4j

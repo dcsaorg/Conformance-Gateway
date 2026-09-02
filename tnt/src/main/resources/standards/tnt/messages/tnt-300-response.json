@@ -12,7 +12,7 @@
         ]
       },
       "eventID": "evt-resp-ship-001",
-      "eventDateTime": "2026-01-15T09:00:00Z",
+      "eventDateTime": "2025-01-23T01:00:00Z",
       "eventUpdatedDateTime": "2025-01-23T01:23:45Z",
       "eventClassification": {
         "eventType": "SHIPMENT",
@@ -44,7 +44,7 @@
         ]
       },
       "eventID": "evt-resp-trans-001",
-      "eventDateTime": "2026-01-16T11:30:00Z",
+      "eventDateTime": "2025-01-25T00:45:00Z",
       "eventUpdatedDateTime": "2025-01-25T01:23:45Z",
       "eventLocation": {
         "locationName": "Example Terminal Alpha",
@@ -103,7 +103,7 @@
         ]
       },
       "eventID": "evt-resp-equip-001",
-      "eventDateTime": "2026-01-17T13:45:00Z",
+      "eventDateTime": "2025-01-27T00:30:00Z",
       "eventUpdatedDateTime": "2025-01-27T01:23:45Z",
       "eventLocation": {
         "locationName": "Example Warehouse Facility",
@@ -122,8 +122,20 @@
         "eventClassifier": "ACTUAL",
         "equipmentEventType": "GATED_IN"
       },
+      "shipmentDetails": {
+        "documentReference": {
+          "type": "BOOKING",
+          "reference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER"
+        },
+        "additionalDocumentReferences": [
+          {
+            "type": "TRANSPORT_DOCUMENT",
+            "reference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER"
+          }
+        ]
+      },
       "equipmentDetails": {
-        "equipmentReference": "APZU4812090",
+        "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
         "ISOEquipmentCode": "45G1",
         "emptyIndicatorCode": "EMPTY",
         "movementType": "IMPORT"
@@ -141,7 +153,7 @@
         ]
       },
       "eventID": "evt-resp-iot-001",
-      "eventDateTime": "2026-01-18T15:20:00Z",
+      "eventDateTime": "2025-01-29T01:00:00Z",
       "eventUpdatedDateTime": "2025-01-29T01:23:45Z",
       "eventLocation": {
         "locationName": "Monitoring Station Alpha",
@@ -156,7 +168,7 @@
         "iotEventType": "GEOFENCE_ENTRY"
       },
       "equipmentDetails": {
-        "equipmentReference": "APZU4812090",
+        "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
         "ISOEquipmentCode": "22GP"
       },
       "iotDetails": {
@@ -175,7 +187,7 @@
         ]
       },
       "eventID": "evt-resp-reefer-001",
-      "eventDateTime": "2026-01-19T17:00:00Z",
+      "eventDateTime": "2025-02-01T01:00:00Z",
       "eventUpdatedDateTime": "2025-02-01T01:23:45Z",
       "eventLocation": {
         "locationName": "Cold Storage Facility",
@@ -188,7 +200,7 @@
         "reeferEventType": "MEASURED"
       },
       "equipmentDetails": {
-        "equipmentReference": "APZU4812090",
+        "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
         "ISOEquipmentCode": "42R1"
       },
       "reeferDetails": {

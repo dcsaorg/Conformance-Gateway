@@ -18,19 +18,19 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 2.2.0
 servers:
-- url: /
+  - url: /
 tags:
-- name: Events
-  description: Event operations
-- name: Subscriptions
-  description: Subscription operations
-- name: Secret
-  description: Update secret
+  - name: Events
+    description: Event operations
+  - name: Subscriptions
+    description: Subscription operations
+  - name: Secret
+    description: Update secret
 paths:
   /v2/events:
     get:
       tags:
-      - Events
+        - Events
       summary: Find events.
       description: |
         Returns all events filtered by the queryParameters.
@@ -41,304 +41,304 @@ paths:
 
         Since there is no event that can be a ShipmentEvent <u>and</u> an EquipmentEvent at the same time <b>this will return an empty list<b>!
       parameters:
-      - name: eventType
-        in: query
-        description: |
-          The type of event(s) to filter by. Possible values are
+        - name: eventType
+          in: query
+          description: |
+            The type of event(s) to filter by. Possible values are
 
-          - SHIPMENT (Shipment events)
-          - TRANSPORT (Transport events)
-          - EQUIPMENT (Equipment events)
+            - SHIPMENT (Shipment events)
+            - TRANSPORT (Transport events)
+            - EQUIPMENT (Equipment events)
 
-          It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example eventType=SHIPMENT,EQUIPMENT matches both Shipment- and Equipment-events.
+            It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example eventType=SHIPMENT,EQUIPMENT matches both Shipment- and Equipment-events.
 
-          Default value is all event types.
-        required: false
-        style: form
-        explode: false
-        schema:
-          type: array
-          items:
+            Default value is all event types.
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - SHIPMENT
+                - TRANSPORT
+                - EQUIPMENT
+        - name: shipmentEventTypeCode
+          in: query
+          description: |
+            The status of the document in the process to filter by. Possible values are
+            - RECE (Received)
+            - DRFT (Drafted)
+            - PENA (Pending Approval)
+            - PENU (Pending Update)
+            - REJE (Rejected)
+            - APPR (Approved)
+            - ISSU (Issued)
+            - SURR (Surrendered)
+            - SUBM (Submitted)
+            - VOID (Void)
+            - CONF (Confirmed)
+            - REQS (Requested)
+            - CMPL (Completed)
+            - HOLD (On Hold)
+            - RELS (Released)
+
+            It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example <i>shipmentEventTypeCode=RECE,DRFT</i>  Matches <b>both</b> Received (RECE) and Drafted (DRFT) shipment events.
+
+            Default is all shipmentEventTypeCodes.
+
+            This filter is only relevant when filtering on ShipmentEvents
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/shipmentEventTypeCode'
+            default: "RECE,DRFT,PENA,PENU,REJE,APPR,ISSU,SURR,SUBM,VOID,CONF,REQS,CMPL,HOLD,RELS"
+          example: "RECE,DRFT"
+        - name: documentTypeCode
+          in: query
+          description: |
+            The documentTypeCode to filter by. Possible values are
+            - CBR (Carrier Booking Request Reference)
+            - BKG (Booking)
+            - SHI (Shipping Instruction)
+            - SRM (Shipment Release Message)
+            - TRD (Transport Document)
+            - ARN (Arrival Notice)
+            - VGM (Verified Gross Mass)
+            - CAS (Cargo Survey)
+            - CUS (Customs Inspection)
+            - DGD (Dangerous Goods Declaration)
+            - OOG (Out of Gauge)
+
+            It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example <i>documentTypeCode=SHI,TRD</i> Matches <b>both</b> ShippingInstruction (SHI) and TransportDocument (TRD) shipment events.
+
+            Default is all documentTypeCodes.
+
+            This filter is only relevant when filtering on ShipmentEvents
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/documentTypeCode'
+            default: "CBR,BKG,SHI,SRM,TRD,ARN,VGM,CAS,CUS,DGD,OOG"
+          example: "SHI,TRD"
+        - name: carrierBookingReference
+          in: query
+          description: |
+            A set of unique characters provided by carrier to identify a booking.
+
+            Specifying this filter will only return events related to this particular carrierBookingReference.
+          schema:
+            $ref: '#/components/schemas/carrierBookingReference'
+        - name: bookingReference
+          in: query
+          description: Deprecated - use carrierBookingReference instead.
+          required: false
+          deprecated: true
+          schema:
             type: string
-            enum:
-            - SHIPMENT
-            - TRANSPORT
-            - EQUIPMENT
-      - name: shipmentEventTypeCode
-        in: query
-        description: |
-          The status of the document in the process to filter by. Possible values are
-          - RECE (Received)
-          - DRFT (Drafted)
-          - PENA (Pending Approval)
-          - PENU (Pending Update)
-          - REJE (Rejected)
-          - APPR (Approved)
-          - ISSU (Issued)
-          - SURR (Surrendered)
-          - SUBM (Submitted)
-          - VOID (Void)
-          - CONF (Confirmed)
-          - REQS (Requested)
-          - CMPL (Completed)
-          - HOLD (On Hold)
-          - RELS (Released)
+        - name: transportDocumentID
+          in: query
+          description: |
+            A unique id to identify a transport document.
 
-          It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example <i>shipmentEventTypeCode=RECE,DRFT</i>  Matches <b>both</b> Received (RECE) and Drafted (DRFT) shipment events.
+            Deprecated - use transportDocumentReference instead transportDocumentReference
+          deprecated: true
+          schema:
+            type: string
+            format: uuid
+        - name: transportDocumentReference
+          in: query
+          description: |
+            A unique number reference allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.
 
-          Default is all shipmentEventTypeCodes.
+            Specifying this filter will only return events related to this particular transportDocumentReference
+          required: false
+          schema:
+            $ref: '#/components/schemas/transportDocumentReference'
+        - name: transportEventTypeCode
+          in: query
+          description: |
+            Identifier for type of Transport event to filter by
+            - ARRI (Arrived)
+            - DEPA (Departed)
 
-          This filter is only relevant when filtering on ShipmentEvents
-        style: form
-        explode: false
-        schema:
-          type: array
-          items:
-            $ref: '#/components/schemas/shipmentEventTypeCode'
-          default: "RECE,DRFT,PENA,PENU,REJE,APPR,ISSU,SURR,SUBM,VOID,CONF,REQS,CMPL,HOLD,RELS"
-        example: "RECE,DRFT"
-      - name: documentTypeCode
-        in: query
-        description: |
-          The documentTypeCode to filter by. Possible values are
-          - CBR (Carrier Booking Request Reference)
-          - BKG (Booking)
-          - SHI (Shipping Instruction)
-          - SRM (Shipment Release Message)
-          - TRD (Transport Document)
-          - ARN (Arrival Notice)
-          - VGM (Verified Gross Mass)
-          - CAS (Cargo Survey)
-          - CUS (Customs Inspection)
-          - DGD (Dangerous Goods Declaration)
-          - OOG (Out of Gauge)
+            It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example <i>transportEventTypeCode=ARRI,DEPA</i> matches <b>both</b> Arrived (ARRI) and Departed (DEPA) transport events.
 
-          It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example <i>documentTypeCode=SHI,TRD</i> Matches <b>both</b> ShippingInstruction (SHI) and TransportDocument (TRD) shipment events.
+            Default is all transportEventTypeCodes.
 
-          Default is all documentTypeCodes.
+            This filter is only relevant when filtering on TransportEvents
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/transportEventTypeCode'
+            default: "ARRI,DEPA"
+          example: "ARRI,DEPA"
+        - name: scheduleID
+          in: query
+          description: |
+            ID uniquely identifying a schedule, to filter events by.
 
-          This filter is only relevant when filtering on ShipmentEvents
-        style: form
-        explode: false
-        schema:
-          type: array
-          items:
-            $ref: '#/components/schemas/documentTypeCode'
-          default: "CBR,BKG,SHI,SRM,TRD,ARN,VGM,CAS,CUS,DGD,OOG"
-        example: "SHI,TRD"
-      - name: carrierBookingReference
-        in: query
-        description: |
-          A set of unique characters provided by carrier to identify a booking.
+            This filter was added by mistake and is thus deprecated.
+          required: false
+          deprecated: true
+          schema:
+            $ref: '#/components/schemas/scheduleID'
+        - name: transportCallID
+          in: query
+          description: |
+            ID uniquely identifying a transport call, to filter events by.
 
-          Specifying this filter will only return events related to this particular carrierBookingReference.
-        schema:
-          $ref: '#/components/schemas/carrierBookingReference'
-      - name: bookingReference
-        in: query
-        description: Deprecated - use carrierBookingReference instead.
-        required: false
-        deprecated: true
-        schema:
-          type: string
-      - name: transportDocumentID
-        in: query
-        description: |
-          A unique id to identify a transport document.
+            Specifying this filter will only return events related to this particular transportCallID
+          required: false
+          schema:
+            $ref: '#/components/schemas/transportCallID'
+        - name: vesselIMONumber
+          in: query
+          description: |
+            The identifier of vessel for which schedule details are published. Depending on schedule type, this may not be available yet.
 
-          Deprecated - use transportDocumentReference instead transportDocumentReference
-        deprecated: true
-        schema:
-          type: string
-          format: uuid
-      - name: transportDocumentReference
-        in: query
-        description: |
-          A unique number reference allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.
+            Specifying this filter will only return events related to this particular vesselIMONumber.
+          required: false
+          schema:
+            $ref: '#/components/schemas/vesselIMONumber'
+        - name: carrierVoyageNumber
+          in: query
+          description: |
+            Filter on the vessel operator-specific identifier of the Voyage.
 
-          Specifying this filter will only return events related to this particular transportDocumentReference
-        required: false
-        schema:
-          $ref: '#/components/schemas/transportDocumentReference'
-      - name: transportEventTypeCode
-        in: query
-        description: |
-          Identifier for type of Transport event to filter by
-          - ARRI (Arrived)
-          - DEPA (Departed)
+            Specifying this filter will only return events related to this particular carrierVoyageNumber.
 
-          It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example <i>transportEventTypeCode=ARRI,DEPA</i> matches <b>both</b> Arrived (ARRI) and Departed (DEPA) transport events.
+            <b>Deprecated:</b> Use exportVoyageNumber instead
+          required: false
+          deprecated: true
+          schema:
+            $ref: '#/components/schemas/carrierVoyageNumber'
+        - name: exportVoyageNumber
+          in: query
+          description: |
+            Filter on the vessel operator-specific identifier of the export Voyage.
 
-          Default is all transportEventTypeCodes.
+            Specifying this filter will only return events related to this particular exportVoyageNumber.
+          required: false
+          schema:
+            $ref: '#/components/schemas/exportVoyageNumber'
+        - name: carrierServiceCode
+          in: query
+          description: |
+            Filter on the carrier specific identifier of the service.
 
-          This filter is only relevant when filtering on TransportEvents
-        style: form
-        explode: false
-        schema:
-          type: array
-          items:
-            $ref: '#/components/schemas/transportEventTypeCode'
-          default: "ARRI,DEPA"
-        example: "ARRI,DEPA"
-      - name: scheduleID
-        in: query
-        description: |
-          ID uniquely identifying a schedule, to filter events by.
+            Specifying this filter will only return events related to this particular carrierServiceCode.
+          required: false
+          schema:
+            $ref: '#/components/schemas/carrierServiceCode'
+        - name: UNLocationCode
+          in: query
+          description: |
+            The UN Location code specifying where the place is located.
 
-          This filter was added by mistake and is thus deprecated.
-        required: false
-        deprecated: true
-        schema:
-          $ref: '#/components/schemas/scheduleID'
-      - name: transportCallID
-        in: query
-        description: |
-          ID uniquely identifying a transport call, to filter events by.
+            Specifying this filter will only return events related to this particular UN Location code.
+          required: false
+          schema:
+            $ref: '#/components/schemas/UNLocationCode'
+        - name: equipmentEventTypeCode
+          in: query
+          description: |
+            Unique identifier for equipmentEventTypeCode.
+            - LOAD (Loaded)
+            - DISC (Discharged)
+            - GTIN (Gated in)
+            - GTOT (Gated out)
+            - STUF (Stuffed)
+            - STRP (Stripped)
+            - PICK (Pick-up)
+            - DROP (Drop-off)
+            - INSP (Inspected)
+            - RSEA (Resealed)
+            - RMVD (Removed)
 
-          Specifying this filter will only return events related to this particular transportCallID
-        required: false
-        schema:
-          $ref: '#/components/schemas/transportCallID'
-      - name: vesselIMONumber
-        in: query
-        description: |
-          The identifier of vessel for which schedule details are published. Depending on schedule type, this may not be available yet.
+            It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example <i>equipmentEventTypeCode=GTIN,GTOT</i> matches <b>both</b> Gated in (GTIN) and Gated out (GTOT) equipment events.
 
-          Specifying this filter will only return events related to this particular vesselIMONumber.
-        required: false
-        schema:
-          $ref: '#/components/schemas/vesselIMONumber'
-      - name: carrierVoyageNumber
-        in: query
-        description: |
-          Filter on the vessel operator-specific identifier of the Voyage.
+            Default is all equipmentEventTypeCodes.
 
-          Specifying this filter will only return events related to this particular carrierVoyageNumber.
+            This filter is only relevant when filtering on EquipmentEvents
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/equipmentEventTypeCode'
+            default: "LOAD,DISC,GTIN,GTOT,STUF,STRP,PICK,DROP,INSP,RSEA,RMVD"
+          example: "GTIN,GTOT"
+        - name: equipmentReference
+          in: query
+          description: |
+            Will filter by the unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
 
-          <b>Deprecated:</b> Use exportVoyageNumber instead
-        required: false
-        deprecated: true
-        schema:
-          $ref: '#/components/schemas/carrierVoyageNumber'
-      - name: exportVoyageNumber
-        in: query
-        description: |
-          Filter on the vessel operator-specific identifier of the export Voyage.
+            Specifying this filter will only return events related to this particular equipmentReference
+          required: false
+          schema:
+            $ref: '#/components/schemas/equipmentReference'
+        - name: eventCreatedDateTime
+          in: query
+          description: |
+            Limit the result based on the creating date of the event. It is possible to use operators on this query parameter. This is done by adding a colon followed by an operator at the end of the queryParameterName (before the =)
 
-          Specifying this filter will only return events related to this particular exportVoyageNumber.
-        required: false
-        schema:
-          $ref: '#/components/schemas/exportVoyageNumber'
-      - name: carrierServiceCode
-        in: query
-        description: |
-          Filter on the carrier specific identifier of the service.
+            <i>eventCreatedDateTime<b>&#58;gte</b>=2021-04-01T14&#58;12&#58;56+01&#58;00</i>
 
-          Specifying this filter will only return events related to this particular carrierServiceCode.
-        required: false
-        schema:
-          $ref: '#/components/schemas/carrierServiceCode'
-      - name: UNLocationCode
-        in: query
-        description: |
-          The UN Location code specifying where the place is located.
+            would result in all events created &#8805; 2021-04-01T14&#58;12&#58;56+01&#58;00
 
-          Specifying this filter will only return events related to this particular UN Location code.
-        required: false
-        schema:
-          $ref: '#/components/schemas/UNLocationCode'
-      - name: equipmentEventTypeCode
-        in: query
-        description: |
-          Unique identifier for equipmentEventTypeCode.
-          - LOAD (Loaded)
-          - DISC (Discharged)
-          - GTIN (Gated in)
-          - GTOT (Gated out)
-          - STUF (Stuffed)
-          - STRP (Stripped)
-          - PICK (Pick-up)
-          - DROP (Drop-off)
-          - INSP (Inspected)
-          - RSEA (Resealed)
-          - RMVD (Removed)
+            The following operators are supported
+            - &#58;gte (&#8805; Greater than or equal)
+            - &#58;gt (&#62; Greater than)
+            - &#58;lte (&#8804; Less than or equal)
+            - &#58;lt (&#60; Less than)
+            - &#58;eq (&#61; Equal to)
 
-          It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example <i>equipmentEventTypeCode=GTIN,GTOT</i> matches <b>both</b> Gated in (GTIN) and Gated out (GTOT) equipment events.
-
-          Default is all equipmentEventTypeCodes.
-
-          This filter is only relevant when filtering on EquipmentEvents
-        style: form
-        explode: false
-        schema:
-          type: array
-          items:
-            $ref: '#/components/schemas/equipmentEventTypeCode'
-          default: "LOAD,DISC,GTIN,GTOT,STUF,STRP,PICK,DROP,INSP,RSEA,RMVD"
-        example: "GTIN,GTOT"
-      - name: equipmentReference
-        in: query
-        description: |
-          Will filter by the unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
-
-          Specifying this filter will only return events related to this particular equipmentReference
-        required: false
-        schema:
-          $ref: '#/components/schemas/equipmentReference'
-      - name: eventCreatedDateTime
-        in: query
-        description: |
-          Limit the result based on the creating date of the event. It is possible to use operators on this query parameter. This is done by adding a colon followed by an operator at the end of the queryParameterName (before the =)
-
-          <i>eventCreatedDateTime<b>&#58;gte</b>=2021-04-01T14&#58;12&#58;56+01&#58;00</i>
-
-          would result in all events created &#8805; 2021-04-01T14&#58;12&#58;56+01&#58;00
-
-          The following operators are supported
-          - &#58;gte (&#8805; Greater than or equal)
-          - &#58;gt (&#62; Greater than)
-          - &#58;lte (&#8804; Less than or equal)
-          - &#58;lt (&#60; Less than)
-          - &#58;eq (&#61; Equal to)
-
-          If no operator is provided, a <b>strictly equal</b> is used (this is equivalent to <b>&#58;eq</b> operator).
-        required: false
-        schema:
-          $ref: '#/components/schemas/eventCreatedDateTime'
-        example: 2021-04-01T14:12:56+01:00
-      - name: limit
-        in: query
-        description: Maximum number of items to return.
-        required: false
-        schema:
-          minimum: 1
-          type: integer
-          format: int32
-          default: 100
-        example: 100
-      - name: cursor
-        in: query
-        description: "A server generated value to specify a specific point in a collection result, used for pagination."
-        required: false
-        schema:
-          type: string
-        example: fE9mZnNldHw9MTAmbGltaXQ9MTA=
-      - name: sort
-        in: query
-        description: |
-          A comma-separated list of field names to define the sort order. Field names should be suffixed by a (:) followed by either the keyword ASC (for ascending order) or DESC (for descening order) to specify direction. <b>:ASC</b> may be omitted, in which case ascending order will be used.
-        required: false
-        schema:
-          type: string
-        example: carrierBookingReference:DESC
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
-        required: false
-        schema:
-          type: string
-          example: "1"
+            If no operator is provided, a <b>strictly equal</b> is used (this is equivalent to <b>&#58;eq</b> operator).
+          required: false
+          schema:
+            $ref: '#/components/schemas/eventCreatedDateTime'
+          example: 2021-04-01T14:12:56+01:00
+        - name: limit
+          in: query
+          description: Maximum number of items to return.
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+            default: 100
+          example: 100
+        - name: cursor
+          in: query
+          description: "A server generated value to specify a specific point in a collection result, used for pagination."
+          required: false
+          schema:
+            type: string
+          example: fE9mZnNldHw9MTAmbGltaXQ9MTA=
+        - name: sort
+          in: query
+          description: |
+            A comma-separated list of field names to define the sort order. Field names should be suffixed by a (:) followed by either the keyword ASC (for ascending order) or DESC (for descening order) to specify direction. <b>:ASC</b> may be omitted, in which case ascending order will be used.
+          required: false
+          schema:
+            type: string
+          example: carrierBookingReference:DESC
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
+          required: false
+          schema:
+            type: string
+            example: "1"
       responses:
         "200":
           description: Successful operation
@@ -361,9 +361,9 @@ paths:
                 type: array
                 items:
                   anyOf:
-                  - $ref: '#/components/schemas/transportEvent'
-                  - $ref: '#/components/schemas/shipmentEvent'
-                  - $ref: '#/components/schemas/equipmentEvent'
+                    - $ref: '#/components/schemas/transportEvent'
+                    - $ref: '#/components/schemas/shipmentEvent'
+                    - $ref: '#/components/schemas/equipmentEvent'
         default:
           description: Unexpected error
           headers:
@@ -376,18 +376,18 @@ paths:
   /v2/events/{eventID}:
     get:
       tags:
-      - Events
+        - Events
       summary: Find events by eventID.
       description: Returns event with the specified eventID.
       parameters:
-      - name: eventID
-        in: path
-        description: The ID of the event to receive
-        required: true
-        deprecated: true
-        schema:
-          $ref: '#/components/schemas/eventID'
-        example: 123e4567-e89b-12d3-a456-426614174000
+        - name: eventID
+          in: path
+          description: The ID of the event to receive
+          required: true
+          deprecated: true
+          schema:
+            $ref: '#/components/schemas/eventID'
+          example: 123e4567-e89b-12d3-a456-426614174000
       responses:
         "200":
           description: Successful operation
@@ -411,42 +411,42 @@ paths:
   /v2/event-subscriptions:
     get:
       tags:
-      - Subscriptions
+        - Subscriptions
       summary: Receive a list of your active subscriptions
       parameters:
-      - name: limit
-        in: query
-        description: Maximum number of items to return.
-        required: false
-        schema:
-          minimum: 1
-          type: integer
-          format: int32
-          default: 100
-        example: 100
-      - name: cursor
-        in: query
-        description: "A server generated value to specify a specific point in a collection result, used for pagination."
-        required: false
-        schema:
-          type: string
-        example: fE9mZnNldHw9MTAmbGltaXQ9MTA=
-      - name: sort
-        in: query
-        description: |
-          A comma-separated list of field names to define the sort order. Field names should be suffixed by a (:) followed by either the keyword ASC (for ascending order) or DESC (for descening order) to specify direction. <b>:ASC</b> may be omitted, in which case ascending order will be used.
-        required: false
-        schema:
-          type: string
-        example: carrierBookingReference:DESC
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
-        required: false
-        schema:
-          type: string
-          example: "1"
+        - name: limit
+          in: query
+          description: Maximum number of items to return.
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+            default: 100
+          example: 100
+        - name: cursor
+          in: query
+          description: "A server generated value to specify a specific point in a collection result, used for pagination."
+          required: false
+          schema:
+            type: string
+          example: fE9mZnNldHw9MTAmbGltaXQ9MTA=
+        - name: sort
+          in: query
+          description: |
+            A comma-separated list of field names to define the sort order. Field names should be suffixed by a (:) followed by either the keyword ASC (for ascending order) or DESC (for descening order) to specify direction. <b>:ASC</b> may be omitted, in which case ascending order will be used.
+          required: false
+          schema:
+            type: string
+          example: carrierBookingReference:DESC
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
+          required: false
+          schema:
+            type: string
+            example: "1"
       responses:
         "200":
           description: Returns a list of subscriptions
@@ -480,17 +480,17 @@ paths:
                 $ref: '#/components/schemas/inline_response_default_2'
     post:
       tags:
-      - Subscriptions
+        - Subscriptions
       summary: Create a subscription
       parameters:
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
-        required: false
-        schema:
-          type: string
-          example: "1"
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
+          required: false
+          schema:
+            type: string
+            example: "1"
       requestBody:
         description: |
           Parameters used to configure the subscription. It is possible to only receive cirtain types of events by adding filter values to the subscription.
@@ -535,52 +535,52 @@ paths:
           '{$request.body.callbackUrl}':
             post:
               parameters:
-              - name: Signature
-                in: header
-                description: |
-                  The signature certifying the request originates from the carrier.
-                required: true
-                deprecated: true
-                schema:
-                  type: object
-                  properties:
-                    keyId:
-                      type: string
-                      format: uuid
-                      example: 4fb682bc-3cd1-43a9-a23a-618a61bd87ca
-                    created:
-                      type: integer
-                      example: 1591960384
-                    headers:
-                      type: string
-                      example: (request-target) (created) date host
-                    signature:
-                      type: string
-                      example: aGkgZnJvbSBkZW5tYXJr
-              - name: Subscription-ID
-                in: header
-                description: The ID of the subscription triggering the event being sent.
-                required: true
-                schema:
-                  type: string
-                  format: uuid
-                  example: b80d923d-e8ac-4c34-9506-55d3de347034
-              - name: Notification-Signature
-                in: header
-                description: "the Notification-Signature is used to sign the notification. The header has the following format: \n\n<i>Notification-Signature&#58; &lt;signature-type&gt;=&lt;signature&gt;</i>\n\nThe <i>&lt;signature-type&gt;</i> part is a keyword that determines which algorithm was used to compute the signature.\n\nThe signature <b>MUST</b> cover the entire request body of the request including whitespace and newlines. The content <b>MUST</b> decoded into bytes using the UTF-8 encoding before computing the signature. None of the HTTP headers nor the request URL is covered by the signature.\n\nSupported signature typies are&#58;\n- sha256\n\nExample&#58; sha256=ae688919f5e31f4c210ca6af362ce4d9ed87acfb51c1721a8507ee395de5e2de\n"
-                required: true
-                schema:
-                  pattern: "\\s*([a-zA-Z0-9-_+]+=[0-9a-fA-F]+)\\s*"
-                  type: string
-                  example: sha256=ae688919f5e31f4c210ca6af362ce4d9ed87acfb51c1721a8507ee395de5e2de
-              - name: API-Version
-                in: header
-                description: |
-                  SemVer used to indicate the version of the contract (API version) returned.
-                required: true
-                schema:
-                  type: string
-                  example: 1.0.0
+                - name: Signature
+                  in: header
+                  description: |
+                    The signature certifying the request originates from the carrier.
+                  required: true
+                  deprecated: true
+                  schema:
+                    type: object
+                    properties:
+                      keyId:
+                        type: string
+                        format: uuid
+                        example: 4fb682bc-3cd1-43a9-a23a-618a61bd87ca
+                      created:
+                        type: integer
+                        example: 1591960384
+                      headers:
+                        type: string
+                        example: (request-target) (created) date host
+                      signature:
+                        type: string
+                        example: aGkgZnJvbSBkZW5tYXJr
+                - name: Subscription-ID
+                  in: header
+                  description: The ID of the subscription triggering the event being sent.
+                  required: true
+                  schema:
+                    type: string
+                    format: uuid
+                    example: b80d923d-e8ac-4c34-9506-55d3de347034
+                - name: Notification-Signature
+                  in: header
+                  description: "the Notification-Signature is used to sign the notification. The header has the following format: \n\n<i>Notification-Signature&#58; &lt;signature-type&gt;=&lt;signature&gt;</i>\n\nThe <i>&lt;signature-type&gt;</i> part is a keyword that determines which algorithm was used to compute the signature.\n\nThe signature <b>MUST</b> cover the entire request body of the request including whitespace and newlines. The content <b>MUST</b> decoded into bytes using the UTF-8 encoding before computing the signature. None of the HTTP headers nor the request URL is covered by the signature.\n\nSupported signature typies are&#58;\n- sha256\n\nExample&#58; sha256=ae688919f5e31f4c210ca6af362ce4d9ed87acfb51c1721a8507ee395de5e2de\n"
+                  required: true
+                  schema:
+                    pattern: "\\s*([a-zA-Z0-9-_+]+=[0-9a-fA-F]+)\\s*"
+                    type: string
+                    example: sha256=ae688919f5e31f4c210ca6af362ce4d9ed87acfb51c1721a8507ee395de5e2de
+                - name: API-Version
+                  in: header
+                  description: |
+                    SemVer used to indicate the version of the contract (API version) returned.
+                  required: true
+                  schema:
+                    type: string
+                    example: 1.0.0
               requestBody:
                 content:
                   application/json:
@@ -588,9 +588,9 @@ paths:
                       type: array
                       items:
                         anyOf:
-                        - $ref: '#/components/schemas/transportEvent'
-                        - $ref: '#/components/schemas/shipmentEvent'
-                        - $ref: '#/components/schemas/equipmentEvent'
+                          - $ref: '#/components/schemas/transportEvent'
+                          - $ref: '#/components/schemas/shipmentEvent'
+                          - $ref: '#/components/schemas/equipmentEvent'
                 required: true
               responses:
                 "204":
@@ -598,24 +598,24 @@ paths:
   /v2/event-subscriptions/{subscriptionID}:
     get:
       tags:
-      - Subscriptions
+        - Subscriptions
       summary: Find a subscription by subscription ID
       parameters:
-      - name: subscriptionID
-        in: path
-        description: The universal unique ID of the subscription.
-        required: true
-        schema:
-          $ref: '#/components/schemas/subscriptionID'
-        example: 123e4567-e89b-12d3-a456-426614174000
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
-        required: false
-        schema:
-          type: string
-          example: "1"
+        - name: subscriptionID
+          in: path
+          description: The universal unique ID of the subscription.
+          required: true
+          schema:
+            $ref: '#/components/schemas/subscriptionID'
+          example: 123e4567-e89b-12d3-a456-426614174000
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
+          required: false
+          schema:
+            type: string
+            example: "1"
       responses:
         "200":
           description: Subscription returned
@@ -637,24 +637,24 @@ paths:
                 $ref: '#/components/schemas/inline_response_default_4'
     put:
       tags:
-      - Subscriptions
+        - Subscriptions
       summary: Alter a subscription
       parameters:
-      - name: subscriptionID
-        in: path
-        description: The universal unique ID of the subscription.
-        required: true
-        schema:
-          $ref: '#/components/schemas/subscriptionID'
-        example: 123e4567-e89b-12d3-a456-426614174000
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
-        required: false
-        schema:
-          type: string
-          example: "1"
+        - name: subscriptionID
+          in: path
+          description: The universal unique ID of the subscription.
+          required: true
+          schema:
+            $ref: '#/components/schemas/subscriptionID'
+          example: 123e4567-e89b-12d3-a456-426614174000
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
+          required: false
+          schema:
+            type: string
+            example: "1"
       requestBody:
         description: Parameters used to configure the subscription
         content:
@@ -683,24 +683,24 @@ paths:
                 $ref: '#/components/schemas/inline_response_default_5'
     delete:
       tags:
-      - Subscriptions
+        - Subscriptions
       summary: "Stop a subscription, using the subscription ID"
       parameters:
-      - name: subscriptionID
-        in: path
-        description: The universal unique ID of the subscription.
-        required: true
-        schema:
-          $ref: '#/components/schemas/subscriptionID'
-        example: 123e4567-e89b-12d3-a456-426614174000
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
-        required: false
-        schema:
-          type: string
-          example: "1"
+        - name: subscriptionID
+          in: path
+          description: The universal unique ID of the subscription.
+          required: true
+          schema:
+            $ref: '#/components/schemas/subscriptionID'
+          example: 123e4567-e89b-12d3-a456-426614174000
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
+          required: false
+          schema:
+            type: string
+            example: "1"
       responses:
         "204":
           description: Subscription stopped
@@ -719,24 +719,24 @@ paths:
   /v2/event-subscriptions/{subscriptionID}/secret:
     put:
       tags:
-      - Secret
+        - Secret
       summary: Resets the Secret on an existing subscription.
       parameters:
-      - name: subscriptionID
-        in: path
-        description: The universal unique ID of the subscription.
-        required: true
-        schema:
-          $ref: '#/components/schemas/subscriptionID'
-        example: 123e4567-e89b-12d3-a456-426614174000
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
-        required: false
-        schema:
-          type: string
-          example: "1"
+        - name: subscriptionID
+          in: path
+          description: The universal unique ID of the subscription.
+          required: true
+          schema:
+            $ref: '#/components/schemas/subscriptionID'
+          example: 123e4567-e89b-12d3-a456-426614174000
+        - name: API-Version
+          in: header
+          description: |
+            An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
+          required: false
+          schema:
+            type: string
+            example: "1"
       requestBody:
         description: Parameters used to configure the subscription
         content:
@@ -773,50 +773,50 @@ components:
 
         Default is none as it will not filter on eventType if not specified.
       example:
-      - TRANSPORT
-      - EQUIPMENT
+        - TRANSPORT
+        - EQUIPMENT
       items:
         type: string
         enum:
-        - SHIPMENT
-        - TRANSPORT
-        - EQUIPMENT
+          - SHIPMENT
+          - TRANSPORT
+          - EQUIPMENT
     subscriptionBody:
       required:
-      - callbackUrl
+        - callbackUrl
       type: object
       allOf:
-      - type: object
-        properties:
-          callbackUrl:
-            $ref: '#/components/schemas/callbackUrl'
-      - type: object
-        properties:
-          eventType:
-            $ref: '#/components/schemas/eventTypes'
-      - $ref: '#/components/schemas/shipmentSubscriptionBody'
-      - $ref: '#/components/schemas/transportSubscriptionBody'
-      - $ref: '#/components/schemas/equipmentSubscriptionBody'
+        - type: object
+          properties:
+            callbackUrl:
+              $ref: '#/components/schemas/callbackUrl'
+        - type: object
+          properties:
+            eventType:
+              $ref: '#/components/schemas/eventTypes'
+        - $ref: '#/components/schemas/shipmentSubscriptionBody'
+        - $ref: '#/components/schemas/transportSubscriptionBody'
+        - $ref: '#/components/schemas/equipmentSubscriptionBody'
     subscriptionBodyWithSecret:
       required:
-      - secret
+        - secret
       type: object
       allOf:
-      - $ref: '#/components/schemas/subscriptionBody'
-      - type: object
-        properties:
-          secret:
-            allOf:
-            - $ref: '#/components/schemas/secret'
-            - description: A shared secret shared between the Publisher and the Subscriber. It is used to compute the contents of the Notification-Signature header. <b>Only</b> valid in POST calls - anywhere else must be omitted!
+        - $ref: '#/components/schemas/subscriptionBody'
+        - type: object
+          properties:
+            secret:
+              allOf:
+                - $ref: '#/components/schemas/secret'
+                - description: A shared secret shared between the Publisher and the Subscriber. It is used to compute the contents of the Notification-Signature header. <b>Only</b> valid in POST calls - anywhere else must be omitted!
     subscription:
       type: object
       allOf:
-      - type: object
-        properties:
-          subscriptionID:
-            $ref: '#/components/schemas/subscriptionID'
-      - $ref: '#/components/schemas/subscriptionBody'
+        - type: object
+          properties:
+            subscriptionID:
+              $ref: '#/components/schemas/subscriptionID'
+        - $ref: '#/components/schemas/subscriptionBody'
     shipmentEventTypeCode:
       type: string
       description: |
@@ -840,21 +840,21 @@ components:
         More details can be found on <a href="https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/shipmenteventtypecodes.csv">GitHub</a>
       example: DRFT
       enum:
-      - RECE
-      - DRFT
-      - PENA
-      - PENU
-      - REJE
-      - APPR
-      - ISSU
-      - SURR
-      - SUBM
-      - VOID
-      - CONF
-      - REQS
-      - CMPL
-      - HOLD
-      - RELS
+        - RECE
+        - DRFT
+        - PENA
+        - PENU
+        - REJE
+        - APPR
+        - ISSU
+        - SURR
+        - SUBM
+        - VOID
+        - CONF
+        - REQS
+        - CMPL
+        - HOLD
+        - RELS
     documentTypeCode:
       maxLength: 3
       type: string
@@ -875,17 +875,17 @@ components:
         More details can be found on <a href="https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/documenttypecodes.csv">GitHub</a>
       example: SHI
       enum:
-      - CBR
-      - BKG
-      - SHI
-      - SRM
-      - TRD
-      - ARN
-      - VGM
-      - CAS
-      - CUS
-      - DGD
-      - OOG
+        - CBR
+        - BKG
+        - SHI
+        - SRM
+        - TRD
+        - ARN
+        - VGM
+        - CAS
+        - CUS
+        - DGD
+        - OOG
     carrierBookingReference:
       maxLength: 35
       type: string
@@ -906,8 +906,8 @@ components:
         More details can be found on <a href="https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/transporteventtypecodes.csv">GitHub</a>
       example: ARRI
       enum:
-      - ARRI
-      - DEPA
+        - ARRI
+        - DEPA
     scheduleID:
       type: string
       description: ID uniquely identifying a schedule
@@ -964,17 +964,17 @@ components:
         More details can be found on <a href="https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/equipmenteventtypecodes.csv">GitHub</a>
       example: LOAD
       enum:
-      - LOAD
-      - DISC
-      - GTIN
-      - GTOT
-      - STUF
-      - STRP
-      - PICK
-      - DROP
-      - INSP
-      - RSEA
-      - RMVD
+        - LOAD
+        - DISC
+        - GTIN
+        - GTOT
+        - STUF
+        - STRP
+        - PICK
+        - DROP
+        - INSP
+        - RSEA
+        - RMVD
     equipmentReference:
       maxLength: 15
       type: string
@@ -993,31 +993,31 @@ components:
     transportEvent:
       type: object
       allOf:
-      - $ref: '#/components/schemas/operationsTransportEvent'
-      - type: object
-        properties:
-          documentReferences:
-            $ref: '#/components/schemas/documentReferences'
-      - $ref: '#/components/schemas/references'
+        - $ref: '#/components/schemas/operationsTransportEvent'
+        - type: object
+          properties:
+            documentReferences:
+              $ref: '#/components/schemas/documentReferences'
+        - $ref: '#/components/schemas/references'
     operationsTransportEvent:
       type: object
       allOf:
-      - $ref: '#/components/schemas/baseEvent'
-      - $ref: '#/components/schemas/baseTransportEvent'
+        - $ref: '#/components/schemas/baseEvent'
+        - $ref: '#/components/schemas/baseTransportEvent'
     baseEvent:
       required:
-      - eventCreatedDateTime
+        - eventCreatedDateTime
       type: object
       allOf:
-      - type: object
-        properties:
-          eventID:
-            $ref: '#/components/schemas/eventID'
-      - type: object
-        properties:
-          eventCreatedDateTime:
-            $ref: '#/components/schemas/eventCreatedDateTime'
-      - $ref: '#/components/schemas/baseEventBody'
+        - type: object
+          properties:
+            eventID:
+              $ref: '#/components/schemas/eventID'
+        - type: object
+          properties:
+            eventCreatedDateTime:
+              $ref: '#/components/schemas/eventCreatedDateTime'
+        - $ref: '#/components/schemas/baseEventBody'
     eventID:
       type: string
       description: |
@@ -1028,25 +1028,25 @@ components:
       example: 3cecb101-7a1a-43a4-9d62-e88a131651e2
     baseEventBody:
       required:
-      - eventClassifierCode
-      - eventDateTime
-      - eventType
+        - eventClassifierCode
+        - eventDateTime
+        - eventType
       type: object
       description: |
         The Event entity is described as a generalization of all the specific event categories. An event always takes place in relation to a shipment and can additionally be linked to a transport or an equipment
       allOf:
-      - type: object
-        properties:
-          eventType:
-            $ref: '#/components/schemas/eventType'
-      - type: object
-        properties:
-          eventClassifierCode:
-            $ref: '#/components/schemas/eventClassifierCode'
-      - type: object
-        properties:
-          eventDateTime:
-            $ref: '#/components/schemas/eventDateTime'
+        - type: object
+          properties:
+            eventType:
+              $ref: '#/components/schemas/eventType'
+        - type: object
+          properties:
+            eventClassifierCode:
+              $ref: '#/components/schemas/eventClassifierCode'
+        - type: object
+          properties:
+            eventDateTime:
+              $ref: '#/components/schemas/eventDateTime'
     eventType:
       type: string
       description: |
@@ -1064,78 +1064,78 @@ components:
       example: 2019-11-12T07:41:00+08:30
     baseTransportEvent:
       required:
-      - transportCall
-      - transportEventTypeCode
+        - transportCall
+        - transportEventTypeCode
       type: object
       description: |
         The transport event entity is a specialization of the event entity to support specification of data that only applies to a transport event.
       allOf:
-      - type: object
-        properties:
-          eventType:
-            type: string
-            example: TRANSPORT
-            enum:
-            - TRANSPORT
-      - type: object
-        properties:
-          eventClassifierCode:
-            type: string
-            description: |
-              Code for the event classifier can be
-              - ACT (Actual)
-              - PLN (Planned)
-              - EST (Estimated)
-            example: ACT
-            enum:
-            - ACT
-            - PLN
-            - EST
-      - type: object
-        properties:
-          transportEventTypeCode:
-            $ref: '#/components/schemas/transportEventTypeCode'
-      - type: object
-        properties:
-          delayReasonCode:
-            $ref: '#/components/schemas/delayReasonCode'
-      - type: object
-        properties:
-          vesselScheduleChangeRemark:
-            $ref: '#/components/schemas/vesselScheduleChangeRemark'
-      - type: object
-        properties:
-          changeRemark:
-            $ref: '#/components/schemas/changeRemark'
-      - type: object
-        properties:
-          transportCallID:
-            allOf:
-            - $ref: '#/components/schemas/transportCallID'
-            - deprecated: true
-            - description: The unique identifier for a transport call<br><br>Deprecated - not needed as the TransportCall object is included
-      - type: object
-        properties:
-          transportCall:
-            $ref: '#/components/schemas/transportCall'
-      - type: object
-        properties:
-          eventTypeCode:
-            $ref: '#/components/schemas/eventTypeCode'
-      - type: object
-        properties:
-          eventTypeCode:
-            type: string
-            description: |
-              Unique identifier for Event Type Code, for transport events this is either
-              - ARRI (Arrival)
-              - DEPA (Departure)
+        - type: object
+          properties:
+            eventType:
+              type: string
+              example: TRANSPORT
+              enum:
+                - TRANSPORT
+        - type: object
+          properties:
+            eventClassifierCode:
+              type: string
+              description: |
+                Code for the event classifier can be
+                - ACT (Actual)
+                - PLN (Planned)
+                - EST (Estimated)
+              example: ACT
+              enum:
+                - ACT
+                - PLN
+                - EST
+        - type: object
+          properties:
+            transportEventTypeCode:
+              $ref: '#/components/schemas/transportEventTypeCode'
+        - type: object
+          properties:
+            delayReasonCode:
+              $ref: '#/components/schemas/delayReasonCode'
+        - type: object
+          properties:
+            vesselScheduleChangeRemark:
+              $ref: '#/components/schemas/vesselScheduleChangeRemark'
+        - type: object
+          properties:
+            changeRemark:
+              $ref: '#/components/schemas/changeRemark'
+        - type: object
+          properties:
+            transportCallID:
+              allOf:
+                - $ref: '#/components/schemas/transportCallID'
+                - deprecated: true
+                - description: The unique identifier for a transport call<br><br>Deprecated - not needed as the TransportCall object is included
+        - type: object
+          properties:
+            transportCall:
+              $ref: '#/components/schemas/transportCall'
+        - type: object
+          properties:
+            eventTypeCode:
+              $ref: '#/components/schemas/eventTypeCode'
+        - type: object
+          properties:
+            eventTypeCode:
+              type: string
+              description: |
+                Unique identifier for Event Type Code, for transport events this is either
+                - ARRI (Arrival)
+                - DEPA (Departure)
 
-              Deprecated - use transportEventTypeCode instead
-            deprecated: true
-            enum:
-            - ARRI
-            - DEPA
+                Deprecated - use transportEventTypeCode instead
+              deprecated: true
+              enum:
+                - ARRI
+                - DEPA
     delayReasonCode:
       maxLength: 3
       type: string
@@ -1157,78 +1157,78 @@ components:
       example: Bad weather
     transportCall:
       required:
-      - modeOfTransport
-      - transportCallID
+        - modeOfTransport
+        - transportCallID
       type: object
       allOf:
-      - type: object
-        properties:
-          transportCallID:
-            $ref: '#/components/schemas/transportCallID'
-      - type: object
-        properties:
-          carrierServiceCode:
-            $ref: '#/components/schemas/carrierServiceCode'
-      - type: object
-        properties:
-          carrierVoyageNumber:
-            $ref: '#/components/schemas/carrierVoyageNumber'
-      - type: object
-        properties:
-          carrierVoyageNumber:
-            description: |
-              The vessel operator-specific identifier of the Voyage.
+        - type: object
+          properties:
+            transportCallID:
+              $ref: '#/components/schemas/transportCallID'
+        - type: object
+          properties:
+            carrierServiceCode:
+              $ref: '#/components/schemas/carrierServiceCode'
+        - type: object
+          properties:
+            carrierVoyageNumber:
+              $ref: '#/components/schemas/carrierVoyageNumber'
+        - type: object
+          properties:
+            carrierVoyageNumber:
+              description: |
+                The vessel operator-specific identifier of the Voyage.
 
-              In case there are multiple voyages the export voyage is chosen.
-            deprecated: true
-      - type: object
-        properties:
-          exportVoyageNumber:
-            $ref: '#/components/schemas/exportVoyageNumber'
-      - type: object
-        properties:
-          importVoyageNumber:
-            $ref: '#/components/schemas/importVoyageNumber'
-      - type: object
-        properties:
-          transportCallSequenceNumber:
-            $ref: '#/components/schemas/transportCallSequenceNumber'
-      - type: object
-        properties:
-          UNLocationCode:
-            $ref: '#/components/schemas/UNLocationCode'
-      - type: object
-        properties:
-          facilityCode:
-            $ref: '#/components/schemas/facilityCode'
-      - type: object
-        properties:
-          facilityCodeListProvider:
-            $ref: '#/components/schemas/facilityCodeListProvider'
-      - type: object
-        properties:
-          facilityTypeCode:
-            $ref: '#/components/schemas/facilityTypeCodeTRN'
-      - type: object
-        properties:
-          otherFacility:
-            $ref: '#/components/schemas/otherFacility'
-      - type: object
-        properties:
-          modeOfTransport:
-            $ref: '#/components/schemas/modeOfTransport'
-      - type: object
-        properties:
-          location:
-            allOf:
-            - $ref: '#/components/schemas/location'
-            - type: object
-              description: Location of the facility. Can often be omitted when it is just repeating the contents of the UNLocationCode field.
-              example: null
-      - type: object
-        properties:
-          vessel:
-            $ref: '#/components/schemas/vessel'
+                In case there are multiple voyages the export voyage is chosen.
+              deprecated: true
+        - type: object
+          properties:
+            exportVoyageNumber:
+              $ref: '#/components/schemas/exportVoyageNumber'
+        - type: object
+          properties:
+            importVoyageNumber:
+              $ref: '#/components/schemas/importVoyageNumber'
+        - type: object
+          properties:
+            transportCallSequenceNumber:
+              $ref: '#/components/schemas/transportCallSequenceNumber'
+        - type: object
+          properties:
+            UNLocationCode:
+              $ref: '#/components/schemas/UNLocationCode'
+        - type: object
+          properties:
+            facilityCode:
+              $ref: '#/components/schemas/facilityCode'
+        - type: object
+          properties:
+            facilityCodeListProvider:
+              $ref: '#/components/schemas/facilityCodeListProvider'
+        - type: object
+          properties:
+            facilityTypeCode:
+              $ref: '#/components/schemas/facilityTypeCodeTRN'
+        - type: object
+          properties:
+            otherFacility:
+              $ref: '#/components/schemas/otherFacility'
+        - type: object
+          properties:
+            modeOfTransport:
+              $ref: '#/components/schemas/modeOfTransport'
+        - type: object
+          properties:
+            location:
+              allOf:
+                - $ref: '#/components/schemas/location'
+                - type: object
+                  description: Location of the facility. Can often be omitted when it is just repeating the contents of the UNLocationCode field.
+                  example: null
+        - type: object
+          properties:
+            vessel:
+              $ref: '#/components/schemas/vessel'
     importVoyageNumber:
       maxLength: 50
       type: string
@@ -1251,8 +1251,8 @@ components:
         The provider used for identifying the facility Code
       example: SMDG
       enum:
-      - BIC
-      - SMDG
+        - BIC
+        - SMDG
     facilityTypeCodeTRN:
       type: string
       description: |
@@ -1268,15 +1268,15 @@ components:
         - RAMP (Ramp)
       example: POTE
       enum:
-      - BOCR
-      - CLOC
-      - COFS
-      - COYA
-      - OFFD
-      - DEPO
-      - INTE
-      - POTE
-      - RAMP
+        - BOCR
+        - CLOC
+        - COFS
+        - COYA
+        - OFFD
+        - DEPO
+        - INTE
+        - POTE
+        - RAMP
     otherFacility:
       maxLength: 50
       type: string
@@ -1287,45 +1287,45 @@ components:
       description: |
         The mode of transport as defined by DCSA.
       enum:
-      - VESSEL
-      - RAIL
-      - TRUCK
-      - BARGE
+        - VESSEL
+        - RAIL
+        - TRUCK
+        - BARGE
     location:
       type: object
       description: |
         generally used to capture location-related data, also for locations without UN Location Codes.
       allOf:
-      - type: object
-        properties:
-          locationName:
-            $ref: '#/components/schemas/locationName'
-      - type: object
-        properties:
-          latitude:
-            $ref: '#/components/schemas/latitude'
-      - type: object
-        properties:
-          longitude:
-            $ref: '#/components/schemas/longitude'
-      - type: object
-        properties:
-          UNLocationCode:
-            $ref: '#/components/schemas/UNLocationCode'
-      - type: object
-        properties:
-          facilityCode:
-            $ref: '#/components/schemas/facilityCode'
-      - type: object
-        properties:
-          facilityCodeListProvider:
-            $ref: '#/components/schemas/facilityCodeListProvider'
-      - type: object
-        properties:
-          address:
-            description: Address related information
-            allOf:
-            - $ref: '#/components/schemas/address'
+        - type: object
+          properties:
+            locationName:
+              $ref: '#/components/schemas/locationName'
+        - type: object
+          properties:
+            latitude:
+              $ref: '#/components/schemas/latitude'
+        - type: object
+          properties:
+            longitude:
+              $ref: '#/components/schemas/longitude'
+        - type: object
+          properties:
+            UNLocationCode:
+              $ref: '#/components/schemas/UNLocationCode'
+        - type: object
+          properties:
+            facilityCode:
+              $ref: '#/components/schemas/facilityCode'
+        - type: object
+          properties:
+            facilityCodeListProvider:
+              $ref: '#/components/schemas/facilityCodeListProvider'
+        - type: object
+          properties:
+            address:
+              description: Address related information
+              allOf:
+                - $ref: '#/components/schemas/address'
     locationName:
       maxLength: 100
       type: string
@@ -1345,38 +1345,38 @@ components:
       type: object
       description: An object for storing address related information
       allOf:
-      - type: object
-        properties:
-          name:
-            $ref: '#/components/schemas/addressName'
-      - type: object
-        properties:
-          street:
-            $ref: '#/components/schemas/streetName'
-      - type: object
-        properties:
-          streetNumber:
-            $ref: '#/components/schemas/streetNumber'
-      - type: object
-        properties:
-          floor:
-            $ref: '#/components/schemas/floor'
-      - type: object
-        properties:
-          postCode:
-            $ref: '#/components/schemas/postCode'
-      - type: object
-        properties:
-          city:
-            $ref: '#/components/schemas/cityName'
-      - type: object
-        properties:
-          stateRegion:
-            $ref: '#/components/schemas/stateRegion'
-      - type: object
-        properties:
-          country:
-            $ref: '#/components/schemas/country'
+        - type: object
+          properties:
+            name:
+              $ref: '#/components/schemas/addressName'
+        - type: object
+          properties:
+            street:
+              $ref: '#/components/schemas/streetName'
+        - type: object
+          properties:
+            streetNumber:
+              $ref: '#/components/schemas/streetNumber'
+        - type: object
+          properties:
+            floor:
+              $ref: '#/components/schemas/floor'
+        - type: object
+          properties:
+            postCode:
+              $ref: '#/components/schemas/postCode'
+        - type: object
+          properties:
+            city:
+              $ref: '#/components/schemas/cityName'
+        - type: object
+          properties:
+            stateRegion:
+              $ref: '#/components/schemas/stateRegion'
+        - type: object
+          properties:
+            country:
+              $ref: '#/components/schemas/country'
     addressName:
       maxLength: 100
       type: string
@@ -1419,34 +1419,34 @@ components:
       example: Denmark
     vessel:
       required:
-      - vesselIMONumber
+        - vesselIMONumber
       type: object
       description: "describes a floating, sea going structure (mother vessels and feeder vessels) with either an internal or external mode of propulsion designed for the transport of cargo and/or passengers. Ocean vessels are uniquely identified by an IMO number consisting of 7 digits, or alternatively by their AIS signal with an MMSI number. \n"
       allOf:
-      - type: object
-        properties:
-          vesselIMONumber:
-            $ref: '#/components/schemas/vesselIMONumber'
-      - type: object
-        properties:
-          vesselName:
-            $ref: '#/components/schemas/vesselName'
-      - type: object
-        properties:
-          vesselFlag:
-            $ref: '#/components/schemas/vesselFlag'
-      - type: object
-        properties:
-          vesselCallSignNumber:
-            $ref: '#/components/schemas/vesselCallSignNumber'
-      - type: object
-        properties:
-          vesselOperatorCarrierCode:
-            $ref: '#/components/schemas/vesselOperatorCarrierCode'
-      - type: object
-        properties:
-          vesselOperatorCarrierCodeListProvider:
-            $ref: '#/components/schemas/vesselOperatorCarrierCodeListProvider'
+        - type: object
+          properties:
+            vesselIMONumber:
+              $ref: '#/components/schemas/vesselIMONumber'
+        - type: object
+          properties:
+            vesselName:
+              $ref: '#/components/schemas/vesselName'
+        - type: object
+          properties:
+            vesselFlag:
+              $ref: '#/components/schemas/vesselFlag'
+        - type: object
+          properties:
+            vesselCallSignNumber:
+              $ref: '#/components/schemas/vesselCallSignNumber'
+        - type: object
+          properties:
+            vesselOperatorCarrierCode:
+              $ref: '#/components/schemas/vesselOperatorCarrierCode'
+        - type: object
+          properties:
+            vesselOperatorCarrierCodeListProvider:
+              $ref: '#/components/schemas/vesselOperatorCarrierCodeListProvider'
     vesselName:
       maxLength: 35
       type: string
@@ -1478,8 +1478,8 @@ components:
       nullable: false
       example: NMFTA
       enum:
-      - SMDG
-      - NMFTA
+        - SMDG
+        - NMFTA
     eventTypeCode:
       maxLength: 4
       type: string
@@ -1491,10 +1491,10 @@ components:
       type: array
       description: An optional list of key-value (documentReferenceType-documentReferenceValue) pairs representing links to objects relevant to the event. The <b>documentReferenceType</b>-field is used to describe where the <b>documentReferenceValue</b>-field is pointing to.
       example:
-      - documentReferenceType: BKG
-        documentReferenceValue: ABC123123123
-      - documentReferenceType: TRD
-        documentReferenceValue: 85943567-eedb-98d3-f4ed-aed697474ed4
+        - documentReferenceType: BKG
+          documentReferenceValue: ABC123123123
+        - documentReferenceType: TRD
+          documentReferenceValue: 85943567-eedb-98d3-f4ed-aed697474ed4
       items:
         $ref: '#/components/schemas/documentReferences_inner'
     references:
@@ -1506,20 +1506,20 @@ components:
             $ref: '#/components/schemas/reference'
     reference:
       required:
-      - referenceType
-      - referenceValue
+        - referenceType
+        - referenceValue
       type: object
       description: |
         references provided by the shipper or freight forwarder at the time of booking or at the time of providing shipping instruction. Carriers share it back when providing track and trace event updates, some are also printed on the B/L. Customers can use these references to track shipments in their internal systems.
       allOf:
-      - type: object
-        properties:
-          referenceType:
-            $ref: '#/components/schemas/referenceType'
-      - type: object
-        properties:
-          referenceValue:
-            $ref: '#/components/schemas/referenceValue'
+        - type: object
+          properties:
+            referenceType:
+              $ref: '#/components/schemas/referenceType'
+        - type: object
+          properties:
+            referenceValue:
+              $ref: '#/components/schemas/referenceValue'
     referenceType:
       type: string
       description: |
@@ -1532,12 +1532,12 @@ components:
         - EQ (Equipment Reference)
       example: FF
       enum:
-      - FF
-      - SI
-      - PO
-      - CR
-      - AAO
-      - EQ
+        - FF
+        - SI
+        - PO
+        - CR
+        - AAO
+        - EQ
     referenceValue:
       maxLength: 100
       type: string
@@ -1545,107 +1545,107 @@ components:
     shipmentEvent:
       type: object
       allOf:
-      - $ref: '#/components/schemas/baseEvent'
-      - $ref: '#/components/schemas/baseShipmentEvent'
+        - $ref: '#/components/schemas/baseEvent'
+        - $ref: '#/components/schemas/baseShipmentEvent'
     baseShipmentEvent:
       required:
-      - documentID
-      - documentTypeCode
-      - shipmentEventTypeCode
+        - documentID
+        - documentTypeCode
+        - shipmentEventTypeCode
       type: object
       description: |
         The shipment event entity is a specialization of the event entity to support specification of data that only applies to a shipment event.
       allOf:
-      - type: object
-        properties:
-          eventType:
-            type: string
-            example: SHIPMENT
-            enum:
-            - SHIPMENT
-      - type: object
-        properties:
-          eventDateTime:
-            description: |
-              Value for eventDateTime must be the same value as eventCreatedDateTime
-      - type: object
-        properties:
-          eventClassifierCode:
-            type: string
-            description: |
-              Code for the event classifier can be
-              - ACT (Actual)
-              - PLN (Planned)
-              - EST (Estimated)
-            example: ACT
-            enum:
-            - ACT
-            - PLN
-            - EST
-      - type: object
-        properties:
-          shipmentEventTypeCode:
-            $ref: '#/components/schemas/shipmentEventTypeCode'
-      - type: object
-        properties:
-          documentID:
-            $ref: '#/components/schemas/documentID'
-      - type: object
-        properties:
-          documentTypeCode:
-            $ref: '#/components/schemas/documentTypeCode'
-      - type: object
-        properties:
-          shipmentInformationTypeCode:
-            $ref: '#/components/schemas/shipmentInformationType'
-      - type: object
-        properties:
-          reason:
-            $ref: '#/components/schemas/reason'
-      - type: object
-        properties:
-          eventTypeCode:
-            $ref: '#/components/schemas/eventTypeCode'
-      - type: object
-        properties:
-          eventTypeCode:
-            type: string
-            description: |
-              Unique identifier for Event Type Code. For shipment events this can be
-              - RECE (Received)
-              - CONF (Confirmed)
-              - ISSU (Issued)
-              - APPR (Approved)
-              - SUBM (Submitted)
-              - SURR (Surrendered)
-              - REJE (Rejected)
-              - PENA (Pending approval)
+        - type: object
+          properties:
+            eventType:
+              type: string
+              example: SHIPMENT
+              enum:
+                - SHIPMENT
+        - type: object
+          properties:
+            eventDateTime:
+              description: |
+                Value for eventDateTime must be the same value as eventCreatedDateTime
+        - type: object
+          properties:
+            eventClassifierCode:
+              type: string
+              description: |
+                Code for the event classifier can be
+                - ACT (Actual)
+                - PLN (Planned)
+                - EST (Estimated)
+              example: ACT
+              enum:
+                - ACT
+                - PLN
+                - EST
+        - type: object
+          properties:
+            shipmentEventTypeCode:
+              $ref: '#/components/schemas/shipmentEventTypeCode'
+        - type: object
+          properties:
+            documentID:
+              $ref: '#/components/schemas/documentID'
+        - type: object
+          properties:
+            documentTypeCode:
+              $ref: '#/components/schemas/documentTypeCode'
+        - type: object
+          properties:
+            shipmentInformationTypeCode:
+              $ref: '#/components/schemas/shipmentInformationType'
+        - type: object
+          properties:
+            reason:
+              $ref: '#/components/schemas/reason'
+        - type: object
+          properties:
+            eventTypeCode:
+              $ref: '#/components/schemas/eventTypeCode'
+        - type: object
+          properties:
+            eventTypeCode:
+              type: string
+              description: |
+                Unique identifier for Event Type Code. For shipment events this can be
+                - RECE (Received)
+                - CONF (Confirmed)
+                - ISSU (Issued)
+                - APPR (Approved)
+                - SUBM (Submitted)
+                - SURR (Surrendered)
+                - REJE (Rejected)
+                - PENA (Pending approval)
 
-              Deprecated - use shipmentEventTypeCode instead
-            example: RECE
-            deprecated: true
-            enum:
-            - RECE
-            - CONF
-            - ISSU
-            - APPR
-            - SUBM
-            - SURR
-            - REJE
-            - PENA
-      - type: object
-        properties:
-          shipmentID:
-            $ref: '#/components/schemas/shipmentID'
-      - type: object
-        properties:
-          shipmentID:
-            description: |
-              ID uniquely identifying a shipment.
+                Deprecated - use shipmentEventTypeCode instead
+              example: RECE
+              deprecated: true
+              enum:
+                - RECE
+                - CONF
+                - ISSU
+                - APPR
+                - SUBM
+                - SURR
+                - REJE
+                - PENA
+        - type: object
+          properties:
+            shipmentID:
+              $ref: '#/components/schemas/shipmentID'
+        - type: object
+          properties:
+            shipmentID:
+              description: |
+                ID uniquely identifying a shipment.
 
-              Deprecated - this is replaced by documentID which can contain different values depending on the value of the documentTypeCode field
-            deprecated: true
-      - $ref: '#/components/schemas/references'
+                Deprecated - this is replaced by documentID which can contain different values depending on the value of the documentTypeCode field
+              deprecated: true
+        - $ref: '#/components/schemas/references'
     documentID:
       type: string
       description: |
@@ -1668,13 +1668,13 @@ components:
       example: SHI
       deprecated: true
       enum:
-      - BOK
-      - BKG
-      - SHI
-      - VGM
-      - SRM
-      - TRD
-      - ARN
+        - BOK
+        - BKG
+        - SHI
+        - VGM
+        - SRM
+        - TRD
+        - ARN
     reason:
       type: string
       description: Reason field in a Shipment event. This field can be used to explain why a specific event has been sent.
@@ -1687,100 +1687,100 @@ components:
     equipmentEvent:
       type: object
       allOf:
-      - $ref: '#/components/schemas/baseEvent'
-      - $ref: '#/components/schemas/baseEquipmentEvent'
+        - $ref: '#/components/schemas/baseEvent'
+        - $ref: '#/components/schemas/baseEquipmentEvent'
     baseEquipmentEvent:
       required:
-      - emptyIndicatorCode
-      - equipmentEventTypeCode
+        - emptyIndicatorCode
+        - equipmentEventTypeCode
       type: object
       description: |
         The equipment event entity is a specialization of the event entity to support specification of data that only applies to an equipment event.
       allOf:
-      - type: object
-        properties:
-          eventType:
-            type: string
-            example: EQUIPMENT
-            enum:
-            - EQUIPMENT
-      - type: object
-        properties:
-          eventClassifierCode:
-            type: string
-            description: |
-              Code for the event classifier can be
-              - PLN (Planned)
-              - ACT (Actual)
-              - EST (Estimated)
-            example: EST
-            enum:
-            - PLN
-            - ACT
-            - EST
-      - type: object
-        properties:
-          equipmentEventTypeCode:
-            $ref: '#/components/schemas/equipmentEventTypeCode'
-      - type: object
-        properties:
-          equipmentReference:
-            $ref: '#/components/schemas/equipmentReference'
-      - type: object
-        properties:
-          ISOEquipmentCode:
-            $ref: '#/components/schemas/ISOEquipmentCode'
-      - type: object
-        properties:
-          emptyIndicatorCode:
-            $ref: '#/components/schemas/emptyIndicatorCode'
-      - type: object
-        properties:
-          eventLocation:
-            $ref: '#/components/schemas/location'
-      - type: object
-        properties:
-          transportCallID:
-            allOf:
-            - $ref: '#/components/schemas/transportCallID'
-            - deprecated: true
-            - description: The unique identifier for a transport call<br><br>Deprecated - not needed as the TransportCall object is included
-      - type: object
-        properties:
-          transportCall:
-            $ref: '#/components/schemas/transportCall'
-      - type: object
-        properties:
-          documentReferences:
-            $ref: '#/components/schemas/documentReferences'
-      - $ref: '#/components/schemas/references'
-      - $ref: '#/components/schemas/seals'
-      - type: object
-        properties:
-          eventTypeCode:
-            $ref: '#/components/schemas/eventTypeCode'
-      - type: object
-        properties:
-          eventTypeCode:
-            type: string
-            description: |
-              Unique identifier for Event Type Code, for transport events this is either
-              - LOAD (Loaded)
-              - DISC (Discharged)
-              - GTIN (Gated in)
-              - GTOT (Gated out)
-              - STUF (Stuffed)
-              - STRP (Stripped)
+        - type: object
+          properties:
+            eventType:
+              type: string
+              example: EQUIPMENT
+              enum:
+                - EQUIPMENT
+        - type: object
+          properties:
+            eventClassifierCode:
+              type: string
+              description: |
+                Code for the event classifier can be
+                - PLN (Planned)
+                - ACT (Actual)
+                - EST (Estimated)
+              example: EST
+              enum:
+                - PLN
+                - ACT
+                - EST
+        - type: object
+          properties:
+            equipmentEventTypeCode:
+              $ref: '#/components/schemas/equipmentEventTypeCode'
+        - type: object
+          properties:
+            equipmentReference:
+              $ref: '#/components/schemas/equipmentReference'
+        - type: object
+          properties:
+            ISOEquipmentCode:
+              $ref: '#/components/schemas/ISOEquipmentCode'
+        - type: object
+          properties:
+            emptyIndicatorCode:
+              $ref: '#/components/schemas/emptyIndicatorCode'
+        - type: object
+          properties:
+            eventLocation:
+              $ref: '#/components/schemas/location'
+        - type: object
+          properties:
+            transportCallID:
+              allOf:
+                - $ref: '#/components/schemas/transportCallID'
+                - deprecated: true
+                - description: The unique identifier for a transport call<br><br>Deprecated - not needed as the TransportCall object is included
+        - type: object
+          properties:
+            transportCall:
+              $ref: '#/components/schemas/transportCall'
+        - type: object
+          properties:
+            documentReferences:
+              $ref: '#/components/schemas/documentReferences'
+        - $ref: '#/components/schemas/references'
+        - $ref: '#/components/schemas/seals'
+        - type: object
+          properties:
+            eventTypeCode:
+              $ref: '#/components/schemas/eventTypeCode'
+        - type: object
+          properties:
+            eventTypeCode:
+              type: string
+              description: |
+                Unique identifier for Event Type Code, for transport events this is either
+                - LOAD (Loaded)
+                - DISC (Discharged)
+                - GTIN (Gated in)
+                - GTOT (Gated out)
+                - STUF (Stuffed)
+                - STRP (Stripped)
 
-              Deprecated - use equipmentEventTypeCode instead
-            deprecated: true
-            enum:
-            - LOAD
-            - DISC
-            - GTIN
-            - GTOT
-            - STUF
-            - STRP
+                Deprecated - use equipmentEventTypeCode instead
+              deprecated: true
+              enum:
+                - LOAD
+                - DISC
+                - GTIN
+                - GTOT
+                - STUF
+                - STRP
     ISOEquipmentCode:
       maxLength: 4
       type: string
@@ -1791,8 +1791,8 @@ components:
       description: Code to denote whether the equipment is empty or laden.
       example: EMPTY
       enum:
-      - EMPTY
-      - LADEN
+        - EMPTY
+        - LADEN
     seals:
       type: object
       properties:
@@ -1802,23 +1802,23 @@ components:
             $ref: '#/components/schemas/seal'
     seal:
       required:
-      - sealNumber
-      - sealType
+        - sealNumber
+        - sealType
       type: object
       description: addresses the seal-related information associated with the shipment equipment. A seal is put on a shipment equipment once it is loaded. This seal is meant to stay on until the shipment equipment reaches its final destination.
       allOf:
-      - type: object
-        properties:
-          sealNumber:
-            $ref: '#/components/schemas/sealNumber'
-      - type: object
-        properties:
-          sealSource:
-            $ref: '#/components/schemas/sealSource'
-      - type: object
-        properties:
-          sealType:
-            $ref: '#/components/schemas/sealType'
+        - type: object
+          properties:
+            sealNumber:
+              $ref: '#/components/schemas/sealNumber'
+        - type: object
+          properties:
+            sealSource:
+              $ref: '#/components/schemas/sealSource'
+        - type: object
+          properties:
+            sealType:
+              $ref: '#/components/schemas/sealType'
     sealNumber:
       maxLength: 15
       type: string
@@ -1834,11 +1834,11 @@ components:
         - CUS (Customs)
       example: CUS
       enum:
-      - CAR
-      - SHI
-      - PHY
-      - VET
-      - CUS
+        - CAR
+        - SHI
+        - PHY
+        - VET
+        - CUS
     sealType:
       type: string
       description: |
@@ -1848,17 +1848,17 @@ components:
         - WIR (Wire)
       example: WIR
       enum:
-      - KLP
-      - BLT
-      - WIR
+        - KLP
+        - BLT
+        - WIR
     error:
       required:
-      - errorDateTime
-      - errors
-      - httpMethod
-      - requestUri
-      - statusCode
-      - statusCodeText
+        - errorDateTime
+        - errors
+        - httpMethod
+        - requestUri
+        - statusCode
+        - statusCodeText
       type: object
       properties:
         httpMethod:
@@ -1909,55 +1909,55 @@ components:
     shipmentSubscriptionBody:
       type: object
       allOf:
-      - type: object
-        properties:
-          shipmentEventTypeCode:
-            $ref: '#/components/schemas/shipmentEventTypeCodes'
-      - type: object
-        properties:
-          documentTypeCode:
-            $ref: '#/components/schemas/documentTypeCodes'
-      - type: object
-        properties:
-          carrierBookingReference:
-            $ref: '#/components/schemas/carrierBookingReference'
-      - type: object
-        properties:
-          bookingReference:
-            maxLength: 35
-            type: string
-            description: |
-              The identifier for a shipment, which is issued by and unique within each of the carriers.
+        - type: object
+          properties:
+            shipmentEventTypeCode:
+              $ref: '#/components/schemas/shipmentEventTypeCodes'
+        - type: object
+          properties:
+            documentTypeCode:
+              $ref: '#/components/schemas/documentTypeCodes'
+        - type: object
+          properties:
+            carrierBookingReference:
+              $ref: '#/components/schemas/carrierBookingReference'
+        - type: object
+          properties:
+            bookingReference:
+              maxLength: 35
+              type: string
+              description: |
+                The identifier for a shipment, which is issued by and unique within each of the carriers.
 
-              Deprecated - use carrierBookingReference instead
-            example: ABC709951
-            deprecated: true
-      - type: object
-        properties:
-          transportDocumentID:
-            type: string
-            description: |
-              Uniquely identify a transport document.
+                Deprecated - use carrierBookingReference instead
+              example: ABC709951
+              deprecated: true
+        - type: object
+          properties:
+            transportDocumentID:
+              type: string
+              description: |
+                Uniquely identify a transport document.
 
-              Deprecated - use transportDocumentReference instead
-            format: uuid
-            deprecated: true
-      - type: object
-        properties:
-          transportDocumentReference:
-            $ref: '#/components/schemas/transportDocumentReference'
-      - type: object
-        properties:
-          transportDocumentTypeCode:
-            allOf:
-            - $ref: '#/components/schemas/transportDocumentTypeCodes'
-            - deprecated: true
-            - description: |
-                List of transportDocumentType to filter by. If multiple values are selected - the OR-operator will be used.
+                Deprecated - use transportDocumentReference instead
+              format: uuid
+              deprecated: true
+        - type: object
+          properties:
+            transportDocumentReference:
+              $ref: '#/components/schemas/transportDocumentReference'
+        - type: object
+          properties:
+            transportDocumentTypeCode:
+              allOf:
+                - $ref: '#/components/schemas/transportDocumentTypeCodes'
+                - deprecated: true
+                - description: |
+                    List of transportDocumentType to filter by. If multiple values are selected - the OR-operator will be used.
 
-                Default is none as it will not filter on transportDocumentType if not specified.
+                    Default is none as it will not filter on transportDocumentType if not specified.
 
-                <b>Deprecated:</b> Not to be used any more
+                    <b>Deprecated:</b> Not to be used any more
     shipmentEventTypeCodes:
       type: array
       description: |
@@ -1965,8 +1965,8 @@ components:
 
         Default is none as it will not filter on shipmentEventTypeCode if not specified.
       example:
-      - RECE
-      - DRFT
+        - RECE
+        - DRFT
       items:
         $ref: '#/components/schemas/shipmentEventTypeCode'
     documentTypeCodes:
@@ -1976,8 +1976,8 @@ components:
 
         Default is none as it will not filter on documentTypeCode if not specified.
       example:
-      - SHI
-      - TRD
+        - SHI
+        - TRD
       items:
         $ref: '#/components/schemas/documentTypeCode'
     transportDocumentTypeCodes:
@@ -1987,7 +1987,7 @@ components:
 
         Default is none as it will not filter on transportDocumentType if not specified.
       example:
-      - BOL
+        - BOL
       items:
         $ref: '#/components/schemas/transportDocumentType'
     transportDocumentType:
@@ -1995,48 +1995,48 @@ components:
       description: Specifies the type of the transport document (a Bill of Lading (BOL) or a Sea Waybill (SWB)).
       example: SWB
       enum:
-      - BOL
-      - SWB
+        - BOL
+        - SWB
     transportSubscriptionBody:
       type: object
       allOf:
-      - type: object
-        properties:
-          transportEventTypeCode:
-            $ref: '#/components/schemas/transportEventTypeCodes'
-      - type: object
-        properties:
-          scheduleID:
-            allOf:
-            - $ref: '#/components/schemas/scheduleID'
-            - deprecated: true
-            - description: ID uniquely identifying a schedul.<br>Deprecated as this was added by mistake
-      - type: object
-        properties:
-          transportCallID:
-            $ref: '#/components/schemas/transportCallID'
-      - type: object
-        properties:
-          vesselIMONumber:
-            $ref: '#/components/schemas/vesselIMONumber'
-      - type: object
-        properties:
-          carrierVoyageNumber:
-            allOf:
-            - $ref: '#/components/schemas/carrierVoyageNumber'
-            - deprecated: true
-      - type: object
-        properties:
-          exportVoyageNumber:
-            $ref: '#/components/schemas/exportVoyageNumber'
-      - type: object
-        properties:
-          carrierServiceCode:
-            $ref: '#/components/schemas/carrierServiceCode'
-      - type: object
-        properties:
-          UNLocationCode:
-            $ref: '#/components/schemas/UNLocationCode'
+        - type: object
+          properties:
+            transportEventTypeCode:
+              $ref: '#/components/schemas/transportEventTypeCodes'
+        - type: object
+          properties:
+            scheduleID:
+              allOf:
+                - $ref: '#/components/schemas/scheduleID'
+                - deprecated: true
+                - description: ID uniquely identifying a schedul.<br>Deprecated as this was added by mistake
+        - type: object
+          properties:
+            transportCallID:
+              $ref: '#/components/schemas/transportCallID'
+        - type: object
+          properties:
+            vesselIMONumber:
+              $ref: '#/components/schemas/vesselIMONumber'
+        - type: object
+          properties:
+            carrierVoyageNumber:
+              allOf:
+                - $ref: '#/components/schemas/carrierVoyageNumber'
+                - deprecated: true
+        - type: object
+          properties:
+            exportVoyageNumber:
+              $ref: '#/components/schemas/exportVoyageNumber'
+        - type: object
+          properties:
+            carrierServiceCode:
+              $ref: '#/components/schemas/carrierServiceCode'
+        - type: object
+          properties:
+            UNLocationCode:
+              $ref: '#/components/schemas/UNLocationCode'
     transportEventTypeCodes:
       type: array
       description: |
@@ -2044,25 +2044,25 @@ components:
 
         Default is none as it will not filter on transportEventTypeCode if not specified.
       example:
-      - ARRI
-      - DEPA
+        - ARRI
+        - DEPA
       items:
         $ref: '#/components/schemas/transportEventTypeCode'
     equipmentSubscriptionBody:
       type: object
       allOf:
-      - type: object
-        properties:
-          equipmentEventTypeCode:
-            $ref: '#/components/schemas/equipmentEventTypeCodes'
-      - type: object
-        properties:
-          equipmentReference:
-            $ref: '#/components/schemas/equipmentReference'
-      - type: object
-        properties:
-          UNLocationCode:
-            $ref: '#/components/schemas/UNLocationCode'
+        - type: object
+          properties:
+            equipmentEventTypeCode:
+              $ref: '#/components/schemas/equipmentEventTypeCodes'
+        - type: object
+          properties:
+            equipmentReference:
+              $ref: '#/components/schemas/equipmentReference'
+        - type: object
+          properties:
+            UNLocationCode:
+              $ref: '#/components/schemas/UNLocationCode'
     equipmentEventTypeCodes:
       type: array
       description: |
@@ -2070,21 +2070,21 @@ components:
 
         Default is none as it will not filter on equipmentEventTypeCode if not specified.
       example:
-      - GTIN
-      - GTOT
+        - GTIN
+        - GTOT
       items:
         $ref: '#/components/schemas/equipmentEventTypeCode'
     inline_response_default:
       allOf:
-      - $ref: '#/components/schemas/error'
-      - type: object
-        properties:
-          httpMethod:
-            example: GET
-      - type: object
-        properties:
-          requestUri:
-            example: https://dcsa.org/dcsa/tnt/v2/events
+        - $ref: '#/components/schemas/error'
+        - type: object
+          properties:
+            httpMethod:
+              example: GET
+        - type: object
+          properties:
+            requestUri:
+              example: https://dcsa.org/dcsa/tnt/v2/events
     inline_response_200:
       example:
         eventID: 84db923d-2a19-4eb0-beb5-446c1ec57d34
@@ -2097,92 +2097,92 @@ components:
       discriminator:
         propertyName: eventType
       oneOf:
-      - $ref: '#/components/schemas/shipmentEvent'
-      - $ref: '#/components/schemas/transportEvent'
-      - $ref: '#/components/schemas/equipmentEvent'
+        - $ref: '#/components/schemas/shipmentEvent'
+        - $ref: '#/components/schemas/transportEvent'
+        - $ref: '#/components/schemas/equipmentEvent'
     inline_response_default_1:
       allOf:
-      - $ref: '#/components/schemas/error'
-      - type: object
-        properties:
-          httpMethod:
-            example: GET
-      - type: object
-        properties:
-          requestUri:
-            example: https://dcsa.org/dcsa/tnt/v2/events/123e4567-e89b-12d3-a456-426614174000
+        - $ref: '#/components/schemas/error'
+        - type: object
+          properties:
+            httpMethod:
+              example: GET
+        - type: object
+          properties:
+            requestUri:
+              example: https://dcsa.org/dcsa/tnt/v2/events/123e4567-e89b-12d3-a456-426614174000
     inline_response_default_2:
       allOf:
-      - $ref: '#/components/schemas/error'
-      - type: object
-        properties:
-          httpMethod:
-            example: GET
-      - type: object
-        properties:
-          requestUri:
-            example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions
+        - $ref: '#/components/schemas/error'
+        - type: object
+          properties:
+            httpMethod:
+              example: GET
+        - type: object
+          properties:
+            requestUri:
+              example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions
     inline_response_default_3:
       allOf:
-      - $ref: '#/components/schemas/error'
-      - type: object
-        properties:
-          httpMethod:
-            example: POST
-      - type: object
-        properties:
-          requestUri:
-            example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions
+        - $ref: '#/components/schemas/error'
+        - type: object
+          properties:
+            httpMethod:
+              example: POST
+        - type: object
+          properties:
+            requestUri:
+              example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions
     inline_response_default_4:
       allOf:
-      - $ref: '#/components/schemas/error'
-      - type: object
-        properties:
-          httpMethod:
-            example: GET
-      - type: object
-        properties:
-          requestUri:
-            example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions/8fbdc2d8-57c8-48b9-a04b-18fd8ec1d809
+        - $ref: '#/components/schemas/error'
+        - type: object
+          properties:
+            httpMethod:
+              example: GET
+        - type: object
+          properties:
+            requestUri:
+              example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions/8fbdc2d8-57c8-48b9-a04b-18fd8ec1d809
     inline_response_default_5:
       allOf:
-      - $ref: '#/components/schemas/error'
-      - type: object
-        properties:
-          httpMethod:
-            example: PUT
-      - type: object
-        properties:
-          requestUri:
-            example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions/8fbdc2d8-57c8-48b9-a04b-18fd8ec1d809
+        - $ref: '#/components/schemas/error'
+        - type: object
+          properties:
+            httpMethod:
+              example: PUT
+        - type: object
+          properties:
+            requestUri:
+              example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions/8fbdc2d8-57c8-48b9-a04b-18fd8ec1d809
     inline_response_default_6:
       allOf:
-      - $ref: '#/components/schemas/error'
-      - type: object
-        properties:
-          httpMethod:
-            example: DELETE
-      - type: object
-        properties:
-          requestUri:
-            example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions/8fbdc2d8-57c8-48b9-a04b-18fd8ec1d809
+        - $ref: '#/components/schemas/error'
+        - type: object
+          properties:
+            httpMethod:
+              example: DELETE
+        - type: object
+          properties:
+            requestUri:
+              example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions/8fbdc2d8-57c8-48b9-a04b-18fd8ec1d809
     subscriptionID_secret_body:
       allOf:
-      - type: object
-        properties:
-          secret:
-            $ref: '#/components/schemas/secret'
+        - type: object
+          properties:
+            secret:
+              $ref: '#/components/schemas/secret'
     inline_response_default_7:
       allOf:
-      - $ref: '#/components/schemas/error'
-      - type: object
-        properties:
-          httpMethod:
-            example: PUT
-      - type: object
-        properties:
-          requestUri:
-            example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions/8fbdc2d8-57c8-48b9-a04b-18fd8ec1d809/secret
+        - $ref: '#/components/schemas/error'
+        - type: object
+          properties:
+            httpMethod:
+              example: PUT
+        - type: object
+          properties:
+            requestUri:
+              example: https://dcsa.org/dcsa/tnt/v2/event-subscriptions/8fbdc2d8-57c8-48b9-a04b-18fd8ec1d809/secret
     documentReferences_inner:
       type: object
       properties:
@@ -2191,16 +2191,16 @@ components:
           description: Describes where the documentReferenceValue is pointing to
           example: BKG
           enum:
-          - BKG
-          - TRD
+            - BKG
+            - TRD
         documentReferenceValue:
           type: string
           description: The value of the identifier the documentReferenceType is describing
           example: 123e4567-e89b-12d3-a456-426614174000
     subErrors_inner:
       required:
-      - message
-      - reason
+        - message
+        - reason
       type: object
       properties:
         reason:

@@ -61,17 +61,13 @@ public class ConformanceReport {
                             : null))
             .toList();
     ConformanceStatus computedStatus =
-        this.subReports.stream()
-            .map(subReport ->
-                    subReport.conformanceCheck.isRelevantForAggregation()
-                        ? subReport.conformanceStatus
-                        : ConformanceStatus.IRRELEVANT)
-            .reduce(ConformanceStatusReducer::reduce)
-            .orElse(
-                ConformanceStatus.forExchangeCounts(
-                    conformantExchangeCount,
-                    nonConformantExchangeCount,
-                    conformanceCheck.isRelevant()));
+        aggregateSubReportStatuses()
+            .orElseGet(
+                () ->
+                    ConformanceStatus.forExchangeCounts(
+                        conformantExchangeCount,
+                        nonConformantExchangeCount,
+                        conformanceCheck.isRelevant()));
     this.conformanceStatus =
         Objects.requireNonNullElse(
             inheritedStatusOverride,
@@ -83,6 +79,35 @@ public class ConformanceReport {
     }
 
     conformanceCheck.computedStatusConsumer().accept(this.conformanceStatus);
+  }
+
+  /**
+   * Aggregates the statuses of the sub-reports, if any.
+   *
+   * <p>Sub-checks that are not relevant for aggregation do not influence the result. Sub-checks
+   * marked as {@link ConformanceCheck#isInterchangeable() interchangeable} are first reduced among
+   * themselves with {@link ConformanceStatusReducer#reduceInterchangeable(Collection)}, so that
+   * executing one of them conformantly is enough, and the resulting status is then aggregated with
+   * the status of the remaining sub-checks.
+   */
+  private Optional<ConformanceStatus> aggregateSubReportStatuses() {
+    List<ConformanceStatus> statuses = new ArrayList<>();
+    List<ConformanceStatus> interchangeableStatuses = new ArrayList<>();
+    subReports.forEach(
+        subReport -> {
+          ConformanceCheck subCheck = subReport.conformanceCheck;
+          if (!subCheck.isRelevantForAggregation()) {
+            statuses.add(ConformanceStatus.IRRELEVANT);
+          } else if (subCheck.isInterchangeable()) {
+            interchangeableStatuses.add(subReport.conformanceStatus);
+          } else {
+            statuses.add(subReport.conformanceStatus);
+          }
+        });
+    if (!interchangeableStatuses.isEmpty()) {
+      statuses.add(ConformanceStatusReducer.reduceInterchangeable(interchangeableStatuses));
+    }
+    return statuses.stream().reduce(ConformanceStatusReducer::reduce);
   }
 
   public static Map<String, ConformanceReport> createForRoles(

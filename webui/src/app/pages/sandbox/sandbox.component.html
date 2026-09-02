@@ -52,11 +52,14 @@
               <div>
                 @for (standardModule of standardModules; track standardModule.moduleName) {
                   <div>
-                    <div class="pageSubtitle">{{standardModule.moduleName}}</div>
-
-                    @if (hasInterchangeableScenarios(standardModule)) {
-                      <div class="wrappingText">ℹ️ Running any one of the scenarios below is sufficient for conformance.</div>
-                    }
+                    <div class="pageSubtitle">
+                      {{standardModule.moduleName}}@if (hasInterchangeableScenarios(standardModule)) {<span
+                        class="infoHintIcon"
+                        [matTooltip]="interchangeableScenariosHint"
+                        [matTooltipShowDelay]="0"
+                        [matTooltipHideDelay]="0"
+                      >&nbsp;ℹ️</span>}
+                    </div>
 
                     @for (scenario of standardModule.scenarios; track scenario.id) {
                       <mat-card [ngClass]="'entityCard'">

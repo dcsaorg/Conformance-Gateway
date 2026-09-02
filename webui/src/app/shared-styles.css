@@ -71,6 +71,10 @@
     cursor: pointer;
 }
 
+.infoHintIcon {
+    vertical-align: text-top;
+}
+
 .wrappingText {
     white-space: normal;
 }

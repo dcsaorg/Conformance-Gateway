@@ -93,7 +93,6 @@ class EblSurrenderScenarioListBuilderTest {
   }
 
 
-
   private static Map<String, EblSurrenderScenarioListBuilder> buildersFor(
     Set<String> testedPartyRoleNames) {
     return EblSurrenderScenarioListBuilder.createModuleScenarioListBuilders(

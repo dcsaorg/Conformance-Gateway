@@ -94,23 +94,23 @@ public class IssuanceChecks {
 
   public static ActionCheck issuanceResponseChecks(UUID matched, String standardsVersion, Supplier<String> transportDocumentReferenceSupplier) {
     return JsonAttribute.contentChecks(
-        "[Response]",
-        null,
-        EblIssuanceRole::isPlatform,
-        matched,
-        HttpMessageType.REQUEST,
-        standardsVersion,
-        issuanceResponseContentChecks(transportDocumentReferenceSupplier));
+      "[Response]",
+      null,
+      EblIssuanceRole::isPlatform,
+      matched,
+      HttpMessageType.REQUEST,
+      standardsVersion,
+      issuanceResponseContentChecks(transportDocumentReferenceSupplier));
   }
 
   static List<JsonContentCheck> issuanceResponseContentChecks(Supplier<String> transportDocumentReferenceSupplier) {
     return List.of(
-        JsonAttribute.mustEqual(
-            JsonPointer.compile("/" + TRANSPORT_DOCUMENT_REFERENCE),
-            transportDocumentReferenceSupplier),
-        JsonAttribute.mustEqual(
-            JsonPointer.compile("/" + ISSUANCE_RESPONSE_CODE),
-            () -> SUCCESSFUL_ISSUANCE_RESPONSE_CODE)
+      JsonAttribute.mustEqual(
+        JsonPointer.compile("/" + TRANSPORT_DOCUMENT_REFERENCE),
+        transportDocumentReferenceSupplier),
+      JsonAttribute.mustEqual(
+        JsonPointer.compile("/" + ISSUANCE_RESPONSE_CODE),
+        () -> SUCCESSFUL_ISSUANCE_RESPONSE_CODE)
     );
   }
 
@@ -131,8 +131,8 @@ public class IssuanceChecks {
         checksumValidator = JsonAttribute.combine(JsonAttribute.matchedMustBePresent(), matchedMustEqual(() -> actualChecksum));
       }
       var c = path(
-          ISSUANCE_MANIFEST_SIGNED_CONTENT,
-          SignatureChecks.signedContentValidation(path(manifestChecksumAttribute, checksumValidator)));
+        ISSUANCE_MANIFEST_SIGNED_CONTENT,
+        SignatureChecks.signedContentValidation(path(manifestChecksumAttribute, checksumValidator)));
       return c.validate(nodeToValidate, contextPath);
     };
   }

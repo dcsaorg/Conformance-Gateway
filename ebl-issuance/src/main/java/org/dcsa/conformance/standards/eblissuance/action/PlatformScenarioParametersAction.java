@@ -2,21 +2,22 @@ package org.dcsa.conformance.standards.eblissuance.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceCarrier;
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
+
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class PlatformScenarioParametersAction extends IssuanceAction {
 
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
 
   public PlatformScenarioParametersAction(
-      String sourcePartyName,
-      String targetPartyName,
-      IssuanceAction previousAction) {
+    String sourcePartyName,
+    String targetPartyName,
+    IssuanceAction previousAction) {
     super(sourcePartyName, targetPartyName, previousAction, "SupplyCSP [Document Parties]", -1);
   }
 
@@ -47,35 +48,35 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of(
-            "PUBLIC_KEY",
-            EblIssuanceCarrier.getCarrierPublicKey(),
-            "KEY_ID",
-            EblIssuanceCarrier.getCarrierKeyId()),
-        "prompt-platform-psp.md");
+      Map.of(
+        "PUBLIC_KEY",
+        EblIssuanceCarrier.getCarrierPublicKey(),
+        "KEY_ID",
+        EblIssuanceCarrier.getCarrierKeyId()),
+      "prompt-platform-psp.md");
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return new SuppliedScenarioParameters(
-                "DCSA",
-                "Legal name of issue to party",
-                "Code list provider of issue to party",
-                "Party code of issue to party",
-                "DCSA (code list name for issue to party)",
-                "Legal name of shipper",
-                "Code list provider of shipper",
-                "Party code of shipper",
-                "DCSA (code list name for shipper)",
-                "Legal name of consignee",
-                "Code list provider of consignee",
-                "Party code of consignee",
-                "DCSA (code list name for consignee)",
-                "Legal name of issuing party",
-                "Code list provider of issuing party",
-                "Party code of issuing party",
-                "DCSA (code list name for issuing party)")
-        .toJson();
+      "DCSA",
+      "Legal name of issue to party",
+      "Code list provider of issue to party",
+      "Party code of issue to party",
+      "DCSA (code list name for issue to party)",
+      "Legal name of shipper",
+      "Code list provider of shipper",
+      "Party code of shipper",
+      "DCSA (code list name for shipper)",
+      "Legal name of consignee",
+      "Code list provider of consignee",
+      "Party code of consignee",
+      "DCSA (code list name for consignee)",
+      "Legal name of issuing party",
+      "Code list provider of issuing party",
+      "Party code of issuing party",
+      "DCSA (code list name for issuing party)")
+      .toJson();
   }
 
   @Override

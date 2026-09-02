@@ -31,6 +31,19 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
   private final String standardVersion;
   private JsonNode bookingPayload;
 
+  private void seedStandaloneState() {
+    if (previousAction != null) {
+      return;
+    }
+    ScenarioType seedScenarioType = configuredScenarioType == null ? ScenarioType.ANY : configuredScenarioType;
+    this.bookingPayload = standardVersion == null
+      ? OBJECT_MAPPER.createObjectNode()
+      : JsonToolkit.templateFileToJsonNode(
+      "/standards/booking/messages/" + seedScenarioType.bookingPayload(standardVersion),
+      Map.of());
+    getDspConsumer().accept(getDspSupplier().get().withScenarioType(seedScenarioType.name()));
+  }
+
   public UC1_Shipper_SubmitBookingRequestAction(
     String carrierPartyName,
     String shipperPartyName,
@@ -60,51 +73,6 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
     JsonSchemaValidator responseSchemaValidator,
     JsonSchemaValidator notificationSchemaValidator,
     boolean isWithNotifications,
-    ScenarioType configuredScenarioType) {
-    this(
-      carrierPartyName,
-      shipperPartyName,
-      previousAction,
-      requestSchemaValidator,
-      responseSchemaValidator,
-      notificationSchemaValidator,
-      isWithNotifications,
-      configuredScenarioType,
-      null,
-      "UC1");
-  }
-
-  public UC1_Shipper_SubmitBookingRequestAction(
-    String carrierPartyName,
-    String shipperPartyName,
-    BookingAction previousAction,
-    JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator,
-    JsonSchemaValidator notificationSchemaValidator,
-    boolean isWithNotifications,
-    ScenarioType configuredScenarioType,
-    String actionTitle) {
-    this(
-      carrierPartyName,
-      shipperPartyName,
-      previousAction,
-      requestSchemaValidator,
-      responseSchemaValidator,
-      notificationSchemaValidator,
-      isWithNotifications,
-      configuredScenarioType,
-      null,
-      actionTitle);
-  }
-
-  public UC1_Shipper_SubmitBookingRequestAction(
-    String carrierPartyName,
-    String shipperPartyName,
-    BookingAction previousAction,
-    JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator,
-    JsonSchemaValidator notificationSchemaValidator,
-    boolean isWithNotifications,
     ScenarioType configuredScenarioType,
     String standardVersion,
     String actionTitle) {
@@ -114,16 +82,13 @@ public class UC1_Shipper_SubmitBookingRequestAction extends ShipperNotificationB
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.configuredScenarioType = configuredScenarioType;
     this.standardVersion = standardVersion;
+    seedStandaloneState();
+  }
 
-    if (previousAction == null) {
-      ScenarioType seedScenarioType = configuredScenarioType == null ? ScenarioType.ANY : configuredScenarioType;
-      this.bookingPayload = standardVersion == null
-        ? OBJECT_MAPPER.createObjectNode()
-        : JsonToolkit.templateFileToJsonNode(
-          "/standards/booking/messages/" + seedScenarioType.bookingPayload(standardVersion),
-          Map.of());
-      getDspConsumer().accept(getDspSupplier().get().withScenarioType(seedScenarioType.name()));
-    }
+  @Override
+  public void reset() {
+    super.reset();
+    seedStandaloneState();
   }
 
   private ScenarioType resolvedScenarioType() {

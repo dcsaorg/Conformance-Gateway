@@ -14,6 +14,7 @@ import lombok.NonNull;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standards.ebl.party.AmendedTransportDocumentStatus;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
@@ -30,6 +31,7 @@ public class CarrierShippingInstructions {
   private static final String SHIPPING_INSTRUCTIONS_REFERENCE = "shippingInstructionsReference";
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
   private static final String TRANSPORT_DOCUMENT_STATUS = "transportDocumentStatus";
+  private static final String AMENDED_TRANSPORT_DOCUMENT_STATUS = "amendedTransportDocumentStatus";
 
   private static final String[] METADATA_FIELDS_TO_PRESERVE = {
     SHIPPING_INSTRUCTIONS_REFERENCE, TRANSPORT_DOCUMENT_REFERENCE, SI_STATUS, UPDATED_SI_STATUS,
@@ -308,6 +310,7 @@ public class CarrierShippingInstructions {
   private static final String UPDATED_SI_DATA_FIELD = "updatedSi";
 
   private static final String TD_DATA_FIELD = "td";
+  private static final String AMENDED_TD_DATA_FIELD = "amendedTd";
 
   private final ObjectNode state;
 
@@ -345,6 +348,26 @@ public class CarrierShippingInstructions {
 
   public Optional<ObjectNode> getTransportDocument() {
     return Optional.ofNullable((ObjectNode) state.get(TD_DATA_FIELD));
+  }
+
+  public Optional<ObjectNode> getAmendedTransportDocument() {
+    return Optional.ofNullable((ObjectNode) state.get(AMENDED_TD_DATA_FIELD));
+  }
+
+  public Optional<AmendedTransportDocumentStatus> getAmendedTransportDocumentStatus() {
+    JsonNode status = state.get(AMENDED_TRANSPORT_DOCUMENT_STATUS);
+    return status == null
+        ? Optional.empty()
+        : Optional.of(AmendedTransportDocumentStatus.valueOf(status.asText()));
+  }
+
+  public ObjectNode getTransportDocumentAmendment() {
+    ObjectNode wrapper = OBJECT_MAPPER.createObjectNode();
+    wrapper.put(
+        AMENDED_TRANSPORT_DOCUMENT_STATUS,
+        getAmendedTransportDocumentStatus().orElseThrow().name());
+    wrapper.set("amendedTransportDocument", getAmendedTransportDocument().orElseThrow());
+    return wrapper;
   }
 
   public Optional<ObjectNode> getUpdatedShippingInstructions() {
@@ -482,6 +505,55 @@ public class CarrierShippingInstructions {
         getTransportDocumentState(),
         s -> s == TD_DRAFT || s == TD_APPROVED || s == TD_ISSUED);
     updateTDForIssuance();
+  }
+
+  public void receiveDirectTransportDocumentAmendment(
+      String documentReference, ObjectNode amendment) {
+    checkState(
+        documentReference,
+        getTransportDocumentState(),
+        status ->
+            status == TD_DRAFT
+                || status == TD_ISSUED
+                || status == TD_PENDING_SURRENDER_FOR_AMENDMENT);
+    String amendmentReference = amendment.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
+    ensureTrue(
+        documentReference.equals(amendmentReference),
+        "The amendment transportDocumentReference does not match the URL");
+    ensureTrue(
+        amendment.required(TRANSPORT_DOCUMENT_STATUS).asText().equals(getTransportDocumentState().wireName()),
+        "The amendment must retain the original transportDocumentStatus");
+    state.set(AMENDED_TD_DATA_FIELD, amendment.deepCopy());
+    changeAmendmentState(AmendedTransportDocumentStatus.AMENDMENT_RECEIVED);
+  }
+
+  public void cancelDirectTransportDocumentAmendment(String documentReference) {
+    checkAmendmentState(documentReference, AmendedTransportDocumentStatus.AMENDMENT_RECEIVED);
+    changeAmendmentState(AmendedTransportDocumentStatus.AMENDMENT_CANCELLED);
+  }
+
+  public void processDirectTransportDocumentAmendment(
+      String documentReference, boolean confirm) {
+    checkAmendmentState(documentReference, AmendedTransportDocumentStatus.AMENDMENT_RECEIVED);
+    changeAmendmentState(
+        confirm
+            ? AmendedTransportDocumentStatus.AMENDMENT_CONFIRMED
+            : AmendedTransportDocumentStatus.AMENDMENT_DECLINED);
+  }
+
+  private void changeAmendmentState(AmendedTransportDocumentStatus status) {
+    state.put(AMENDED_TRANSPORT_DOCUMENT_STATUS, status.name());
+  }
+
+  private void checkAmendmentState(
+      String documentReference, AmendedTransportDocumentStatus expectedStatus) {
+    AmendedTransportDocumentStatus actualStatus =
+        getAmendedTransportDocumentStatus()
+            .orElseThrow(() -> new IllegalStateException("TD '%s' has no amendment".formatted(documentReference)));
+    if (actualStatus != expectedStatus) {
+      throw new IllegalStateException(
+          "TD '%s' amendment is in state '%s'".formatted(documentReference, actualStatus));
+    }
   }
 
   private void updateTDForIssuance() {
@@ -719,6 +791,34 @@ public class CarrierShippingInstructions {
             .put(STD_VERSION_FIELD, standardsVersion)
             .put(SUBSCRIPTION_REFERENCE, ReferenceGenerator.newReference());
     state.set(SI_DATA_FIELD, siRequest);
+    return new CarrierShippingInstructions(state);
+  }
+
+  public static ObjectNode createTransportDocumentFromShippingInstructions(
+      ObjectNode shippingInstructions, String standardsVersion, ScenarioType scenarioType) {
+    CarrierShippingInstructions model =
+        initializeFromShippingInstructionsRequest(shippingInstructions.deepCopy(), standardsVersion);
+    model.publishDraftTransportDocument(model.getShippingInstructionsReference(), scenarioType);
+    return model.getTransportDocument().orElseThrow().deepCopy();
+  }
+
+  public static CarrierShippingInstructions initializeFromTransportDocument(
+      ObjectNode transportDocument, String standardsVersion) {
+    String tdr = transportDocument.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
+    String sir = transportDocument.path(SHIPPING_INSTRUCTIONS_REFERENCE).asText(tdr);
+    ObjectNode si =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put(SHIPPING_INSTRUCTIONS_REFERENCE, sir)
+            .put(TRANSPORT_DOCUMENT_REFERENCE, tdr)
+            .put(SI_STATUS, SI_RECEIVED.wireName());
+    ObjectNode state =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put(STD_VERSION_FIELD, standardsVersion)
+            .put(SUBSCRIPTION_REFERENCE, ReferenceGenerator.newReference());
+    state.set(SI_DATA_FIELD, si);
+    state.set(TD_DATA_FIELD, transportDocument.deepCopy());
     return new CarrierShippingInstructions(state);
   }
 

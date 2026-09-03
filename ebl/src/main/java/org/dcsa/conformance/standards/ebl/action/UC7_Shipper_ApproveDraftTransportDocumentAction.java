@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,7 @@ import org.dcsa.conformance.standards.ebl.party.EblRole;
 
 @Getter
 @Slf4j
-public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangingSIAction {
+public class UC7_Shipper_ApproveDraftTransportDocumentAction extends ShipperNotificationEblAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
@@ -31,7 +30,7 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
         carrierPartyName,
         previousAction,
         "UC7",
-        Set.of(200, 202),
+        202,
         isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -83,8 +82,8 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
                     "/v3/transport-documents/%s".formatted(tdr)),
-                new ResponseStatusCheck(
-                    EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+                ResponseStatusCheck.forSuccessfulResponse(
+                    EblRole::isCarrier, getMatchedExchangeUuid()),
                 new ApiHeaderCheck(
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
@@ -100,6 +99,8 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
                     requestSchemaValidator),
+                EblChecks.shipperApprovalContentChecks(
+                    getMatchedExchangeUuid(), expectedApiVersion),
                 EblChecks.tdRefStatusChecks(
                     getMatchedExchangeUuid(),
                     expectedApiVersion,

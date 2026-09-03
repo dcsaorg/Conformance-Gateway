@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -21,19 +20,8 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
-      TransportDocumentStatus expectedTdStatus,
+      List<TransportDocumentStatus> expectedTdStatus,
       JsonSchemaValidator responseSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "GET TD", 200, true);
-    this.expectedTdStatus = List.of(expectedTdStatus);
-    this.responseSchemaValidator = responseSchemaValidator;
-  }
-
-  public Shipper_GetTransportDocumentAction(
-          String carrierPartyName,
-          String shipperPartyName,
-          EblAction previousAction,
-          List<TransportDocumentStatus> expectedTdStatus,
-          JsonSchemaValidator responseSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "GET TD", 200, true);
     this.expectedTdStatus = expectedTdStatus;
     this.responseSchemaValidator = responseSchemaValidator;
@@ -59,10 +47,6 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
     getDspConsumer().accept(dsp);
   }
 
-  @Override
-  public Set<String> skippableForRoles() {
-    return Set.of(EblRole.SHIPPER.getConfigName());
-  }
 
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {

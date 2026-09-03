@@ -9,7 +9,7 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
-public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends StateChangingSIAction {
+public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends CarrierNotificationEblAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean acceptDeliveryRequest;
 
@@ -56,7 +56,6 @@ public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends State
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDspSupplier().get();
-    // Clear the flag if set.
     if (dsp.newTransportDocumentContent()) {
       getDspConsumer().accept(dsp.withNewTransportDocumentContent(false));
     }

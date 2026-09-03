@@ -195,7 +195,8 @@ public abstract class EblAction extends BookingAndEblAction {
             EblRole::isCarrier,
             notificationExchangeUuid,
             "/v3/shipping-instructions-notifications"),
-        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204)
+        ResponseStatusCheck.forSuccessfulResponse(
+                titlePrefix, EblRole::isShipper, notificationExchangeUuid)
             .withRelevance(isWithNotifications),
         ApiHeaderCheck.createNotificationCheck(
             titlePrefix,
@@ -279,7 +280,8 @@ public abstract class EblAction extends BookingAndEblAction {
             EblRole::isCarrier,
             notificationExchangeUuid,
             "/v3/transport-document-notifications"),
-        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204)
+        ResponseStatusCheck.forSuccessfulResponse(
+                titlePrefix, EblRole::isShipper, notificationExchangeUuid)
             .withRelevance(isWithNotifications),
         ApiHeaderCheck.createNotificationCheck(
             titlePrefix,

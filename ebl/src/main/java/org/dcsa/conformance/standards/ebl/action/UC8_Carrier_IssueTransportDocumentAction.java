@@ -10,7 +10,8 @@ import org.dcsa.conformance.standards.ebl.checks.TransportDocumentStatusScenario
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 @Getter
-public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAction {
+public class UC8_Carrier_IssueTransportDocumentAction extends CarrierNotificationEblAction {
+
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC8_Carrier_IssueTransportDocumentAction(
@@ -41,7 +42,6 @@ public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAct
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDspSupplier().get();
-    // Issuance can bump the issuance date.
     getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
   }
 

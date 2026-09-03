@@ -15,7 +15,7 @@ import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.checks.TransportDocumentStatusScenario;
 
 @Getter
-public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangingSIAction {
+public class UC6_Carrier_PublishDraftTransportDocumentAction extends CarrierNotificationEblAction {
   public static final String ACTION_TITLE = "UC6";
   private final JsonSchemaValidator notificationSchemaValidator;
   private final boolean skipSI;
@@ -29,11 +29,31 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       JsonSchemaValidator notificationSchemaValidator,
       boolean skipSI,
       boolean isWithNotifications) {
+    this(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        scenarioType,
+        notificationSchemaValidator,
+        skipSI,
+        isWithNotifications,
+        true);
+  }
+
+  public UC6_Carrier_PublishDraftTransportDocumentAction(
+      String carrierPartyName,
+      String shipperPartyName,
+      EblAction previousAction,
+      ScenarioType scenarioType,
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean skipSI,
+      boolean isWithNotifications,
+      boolean includeScenarioTypeInTitle) {
     super(
         carrierPartyName,
         shipperPartyName,
         previousAction,
-        "UC6 [%s]".formatted(scenarioType.name()),
+        includeScenarioTypeInTitle ? "UC6 [%s]".formatted(scenarioType.name()) : ACTION_TITLE,
         204,
         isWithNotifications);
     this.notificationSchemaValidator = notificationSchemaValidator;

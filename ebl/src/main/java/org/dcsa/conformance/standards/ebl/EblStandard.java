@@ -50,7 +50,10 @@ public class EblStandard extends AbstractStandard {
                         Map.ofEntries(
                             Map.entry(
                                 "/v3/transport-documents/{transportDocumentReference}",
-                                new TreeSet<>(Set.of("GET", "PATCH")))))),
+                                new TreeSet<>(Set.of("GET", "PATCH"))),
+                            Map.entry(
+                                "/v3/transport-documents/{transportDocumentReference}/amendment",
+                                new TreeSet<>(Set.of("GET", "PUT", "DELETE")))))),
                 Map.entry(
                     EblRole.SHIPPER.getConfigName(),
                     new TreeMap<>(

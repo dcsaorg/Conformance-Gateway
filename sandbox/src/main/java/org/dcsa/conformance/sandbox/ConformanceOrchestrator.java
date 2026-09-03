@@ -240,6 +240,11 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   public void handlePartyInput(JsonNode partyInput) {
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
+    JsonNode completionRoleNode = partyInput.get("completeCurrentActionWithoutNotification");
+    if (completionRoleNode != null && completionRoleNode.isTextual()) {
+      _completeCurrentActionWithoutNotification(completionRoleNode.asText());
+      return;
+    }
     if (currentScenarioId == null) {
       log.info("Ignoring party input: no scenario is currently active");
       return;
@@ -260,16 +265,59 @@ public class ConformanceOrchestrator implements StatefulEntity {
       return;
     }
 
+    JsonNode completionWithoutTrafficRoleNode =
+        partyInput.get("completeCurrentActionWithoutTraffic");
+    String completionWithoutTrafficRole = null;
+    if (completionWithoutTrafficRoleNode != null) {
+      if (!completionWithoutTrafficRoleNode.isTextual()
+          || !nextAction.isMissingMatchedExchange()
+          || !nextAction
+              .completableWithoutTrafficForRoles()
+              .contains(completionWithoutTrafficRoleNode.asText())) {
+        throw new UserFacingException(
+            "Action '%s' cannot be completed without traffic by role '%s'"
+                .formatted(nextAction.getActionTitle(), completionWithoutTrafficRoleNode.asText()));
+      }
+      completionWithoutTrafficRole = completionWithoutTrafficRoleNode.asText();
+    }
+
     waitingForBiConsumer.accept(nextAction.getSourcePartyName(), null);
 
     currentScenario.popNextAction();
     try {
       nextAction.handlePartyInput(partyInput);
+      if (completionWithoutTrafficRole != null) {
+        nextAction.markCompletedWithoutTraffic();
+      }
     } catch (UserFacingException e) {
       throw new UserFacingException(e.getMessage(), e);
     } catch (Exception e) {
       throw new UserFacingException(e);
     }
+    notifyNextActionParty();
+  }
+
+  private void _completeCurrentActionWithoutNotification(String notificationSourceRole) {
+    if (currentScenarioId == null) {
+      log.info("Ignoring suppressed notification completion: no scenario is currently active");
+      return;
+    }
+    ConformanceScenario currentScenario = _getCurrentScenario();
+    ConformanceAction nextAction = currentScenario.peekNextAction();
+    if (nextAction == null
+        || nextAction.isMissingMatchedExchange()
+        || !nextAction.isMissingMatchedNotificationExchange()
+        || !nextAction
+            .completableWithoutTrafficForRoles()
+            .contains(notificationSourceRole)) {
+      log.info(
+          "Ignoring suppressed notification completion from role {}: the current action is not awaiting an optional notification from that role",
+          notificationSourceRole);
+      return;
+    }
+    waitingForBiConsumer.accept(nextAction.getSourcePartyName(), null);
+    nextAction.markCompletedWithoutTraffic();
+    currentScenario.popNextAction();
     notifyNextActionParty();
   }
 

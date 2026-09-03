@@ -908,7 +908,7 @@ class EblChecksTest {
   }
 
   @Test
-  void testIssuedDateRiderPagesAndShipmentDateRules() {
+  void testIssuedDateAndRiderPagesRules() {
     rootNode.put("transportDocumentStatus", "ISSUED");
     assertInvalid(EblChecks.ISSUE_DATE_REQUIRED_WHEN_ISSUED);
     rootNode.put("issueDate", "2026-08-28");
@@ -918,17 +918,6 @@ class EblChecksTest {
     assertInvalid(EblChecks.RIDER_PAGES_NOT_ALLOWED_FOR_ELECTRONIC_TD);
     rootNode.remove("numberOfRiderPages");
     assertValid(EblChecks.RIDER_PAGES_NOT_ALLOWED_FOR_ELECTRONIC_TD);
-
-    rootNode.put("isShippedOnBoardType", true);
-    assertInvalid(EblChecks.SHIPMENT_DATE_REQUIRED_WHEN_TYPE_PRESENT);
-    rootNode.put("shippedOnBoardDate", "2026-08-28");
-    assertValid(EblChecks.SHIPMENT_DATE_REQUIRED_WHEN_TYPE_PRESENT);
-    rootNode.put("isShippedOnBoardType", false).remove("shippedOnBoardDate");
-    assertInvalid(EblChecks.SHIPMENT_DATE_REQUIRED_WHEN_TYPE_PRESENT);
-    rootNode.put("receivedForShipmentDate", "2026-08-28");
-    assertValid(EblChecks.SHIPMENT_DATE_REQUIRED_WHEN_TYPE_PRESENT);
-    rootNode.put("isShippedOnBoardType", true);
-    assertValid(EblChecks.SHIPMENT_DATE_REQUIRED_WHEN_TYPE_PRESENT);
   }
 
   @Test
@@ -982,7 +971,7 @@ class EblChecksTest {
   }
 
   @Test
-  void workbookReeferRuleRemainsRelevantForEitherBooleanBranch() {
+  void workbookReeferRuleOnlyProhibitsSettingsForNonOperatingReefers() {
     JsonContentCheck reeferCheck =
         EblChecks.transportDocumentCarrierContentChecks().stream()
             .filter(
@@ -995,13 +984,11 @@ class EblChecksTest {
 
     equipment.put("isNonOperatingReefer", false);
     var result = reeferCheck.validate(rootNode);
-    assertTrue(result.isRelevant());
-    assertFalse(result.isConformant());
+    assertFalse(result.isRelevant());
 
     equipment.putObject("activeReeferSettings");
     result = reeferCheck.validate(rootNode);
-    assertTrue(result.isRelevant());
-    assertTrue(result.isConformant());
+    assertFalse(result.isRelevant());
 
     equipment.put("isNonOperatingReefer", true);
     result = reeferCheck.validate(rootNode);
@@ -1034,7 +1021,6 @@ class EblChecksTest {
             "If transportDocumentTypeCode='SWB', then numberOfOriginalsWithCharges and numberOfOriginalsWithoutCharges must be absent",
             "`transportDocumentStatus` must equal `DRAFT`, `APPROVED`, `ISSUED`, `PENDING_SURRENDER_FOR_AMENDMENT`, `SURRENDERED_FOR_AMENDMENT`, `PENDING_SURRENDER_FOR_DELIVERY`, `SURRENDERED_FOR_DELIVERY`, or `VOIDED`.",
             "If `transportDocumentStatus='ISSUED'`, then `issueDate` must be present",
-            "If isShippedOnBoardType is present then shippedOnBoardDate or receivedForShipmentDate must be present",
             "shippedOnBoardDate and receivedForShipmentDate must not both be present.",
             "`declaredValue` and `declaredValueCurrency` must either both be present or both be absent.",
             "If `isElectronic=true`, then `numberOfRiderPages` must not be present.",
@@ -1046,7 +1032,6 @@ class EblChecksTest {
             "For every item in `transports.vesselVoyages[]`, `role` must equal `FIRST_SEA_GOING` or `MOTHER`.",
             "If `onCarriageBy` is present, then `placeOfDelivery` must be present.",
             "For each `documentParty`—`shipper`, `consignee`, `endorsee`, `notifyParties`, `other`, `onBehalfOfShipper`—at least one of `address`, `addressLines`, or `identifyingCodes` must be provided.",
-            "For every provided `displayedAddress[]`, a physical B/L (`isElectronic=false`) must contain no more than 2 lines and an electronic B/L  (`isElectronic=true`) must contain no more than 6 lines; every line must contain no more than 35 characters.",
             "If isToOrder=false, consignee must be present and endorsee must be absent. If endorsee is present, isToOrder must be true.",
             "Consignee and endorsee must never both be present (mutually exclusive).",
             "If `isToOrder=true`, then at least one notify party must exist: `documentParties.notifyParties` must be present.",
@@ -1063,7 +1048,7 @@ class EblChecksTest {
             "If present, `segregationGroups[]` must be an integer from 1 through 18.",
             "If `inhalationZone` is present, then it must equal `A`, `B`, `C`, or `D`",
             "For every `innerPackaging` object, `quantity` must be a positive integer greater than 0.",
-            "For every item in `utilizedTransportEquipments[]`, if `isNonOperatingReefer=true`, then `activeReeferSettings` must not be present; if `isNonOperatingReefer=false`, then `activeReeferSettings` must be present.",
+            "For every item in `utilizedTransportEquipments[]`, if `isNonOperatingReefer=true`, then `activeReeferSettings` must not be present.",
             "`temperatureSetpoint` and `temperatureUnit` must either both be present or both be absent.",
             "`airExchangeSetpoint` and `airExchangeUnit` must either both be present or both be absent.",
             "Every cargo gross-weight and cargo net-weight value must contain no more than 3 decimal places, and every cargo gross-volume value must contain no more than 4 decimal places.",
@@ -1075,7 +1060,7 @@ class EblChecksTest {
             .map(JsonContentCheck::description)
             .toList();
 
-    assertEquals(40, actualDescriptions.size());
+    assertEquals(38, actualDescriptions.size());
     assertEquals(expectedDescriptions, Set.copyOf(actualDescriptions));
   }
 
@@ -1146,6 +1131,16 @@ class EblChecksTest {
           primaryStatus,
           "AMENDMENT_CANCELLED",
           true);
+      assertStatusScenario(
+          TransportDocumentStatusScenario.uc19(true),
+          primaryStatus,
+          "AMENDMENT_CONFIRMED",
+          true);
+      assertStatusScenario(
+          TransportDocumentStatusScenario.uc19(false),
+          primaryStatus,
+          "AMENDMENT_DECLINED",
+          true);
     }
 
     assertStatusScenario(
@@ -1191,7 +1186,7 @@ class EblChecksTest {
                     title.contains("[Transport Document]")
                         && title.contains(
                             "If `transportDocumentStatus='ISSUED'`, then `issueDate` must be present")));
-    assertFalse(
+    assertTrue(
         titles.stream()
             .anyMatch(
                 title ->
@@ -1211,7 +1206,22 @@ class EblChecksTest {
   }
 
   @Test
-  void amendedNotificationUsesTheWorkbookSpecificNationalCommodityCodePath() {
+  void uc6NotificationChecksExcludeAmendedTransportDocumentPayload() {
+    var dsp =
+        new EblDynamicScenarioParameters(
+            ScenarioType.REGULAR_STRAIGHT_BL.name(), null, "TDR-1", null, null, false, false);
+    var notificationCheck =
+        new CarrierTdNotificationPayloadRequestConformanceCheck(
+            UUID.randomUUID(), TransportDocumentStatusScenario.uc6(), true, () -> dsp);
+
+    List<String> titles = notificationCheck.createSubChecks().map(check -> check.getTitle()).toList();
+
+    assertTrue(titles.stream().anyMatch(title -> title.contains("[Transport Document]")));
+    assertFalse(titles.stream().anyMatch(title -> title.contains("[Amended Transport Document]")));
+  }
+
+  @Test
+  void amendedNotificationValidatesEveryWorkbookNationalCommodityCodePath() {
     var dsp =
         new EblDynamicScenarioParameters(
             ScenarioType.REGULAR_STRAIGHT_BL.name(), null, "TDR-1", null, null, false, false);
@@ -1219,7 +1229,7 @@ class EblChecksTest {
         EblChecks.getTdPayloadChecks(
                 List.of(TransportDocumentStatus.TD_DRAFT),
                 () -> dsp,
-                EblChecks.TdPayloadContext.AMENDED_TRANSPORT_DOCUMENT_NOTIFICATION)
+                EblChecks.TdPayloadContext.AMENDED_TRANSPORT_DOCUMENT)
             .stream()
             .filter(
                 check ->
@@ -1233,8 +1243,11 @@ class EblChecksTest {
         .addObject()
         .put("type", "UNKNOWN");
 
-    var result = nationalCommodityCodeCheck.validate(rootNode);
-    assertTrue(result.isConformant(), result.getErrorMessages()::toString);
+    assertInvalid(nationalCommodityCodeCheck);
+
+    ((ObjectNode) consignmentItem.path("nationalCommodityCodes").path(0))
+        .put("type", "NCM");
+    assertValid(nationalCommodityCodeCheck);
 
     consignmentItem
         .putArray("cargoItems")

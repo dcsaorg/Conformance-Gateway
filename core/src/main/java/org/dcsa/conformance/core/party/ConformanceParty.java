@@ -198,6 +198,10 @@ public abstract class ConformanceParty implements StatefulEntity {
           jsonPartyInput.toPrettyString());
       return;
     }
+    _asyncOrchestratorPost(jsonPartyInput);
+  }
+
+  private void _asyncOrchestratorPost(ObjectNode jsonPartyInput) {
     webClient.asyncRequest(
         new ConformanceRequest(
             "POST",
@@ -237,6 +241,11 @@ public abstract class ConformanceParty implements StatefulEntity {
         _createConformanceRequest(false, "PUT", path, Collections.emptyMap(), jsonBody));
   }
 
+  protected ConformanceResponse syncCounterpartDelete(String path) {
+    return _syncWebClientRequest(
+        _createConformanceRequest(false, "DELETE", path, Collections.emptyMap(), null));
+  }
+
   private ConformanceResponse _syncWebClientRequest(ConformanceRequest conformanceRequest) {
     waitingForBiConsumer.accept(
         counterpartConfiguration.getName(),
@@ -251,8 +260,19 @@ public abstract class ConformanceParty implements StatefulEntity {
   }
 
   protected void asyncCounterpartNotification(String actionId, String path, JsonNode jsonBody) {
+    asyncCounterpartNotification(
+        actionId, path, jsonBody, OBJECT_MAPPER.createObjectNode());
+  }
+
+  protected void asyncCounterpartNotification(
+      String actionId, String path, JsonNode jsonBody, ObjectNode completionInput) {
     if (suppressNotifications) {
       log.info("Party {} NOT sending a notification for action {}: notifications are suppressed for this request", partyConfiguration.getName(), actionId);
+      if (actionId == null) {
+        _notifyOrchestratorOfSuppressedFollowUpNotification();
+      } else {
+        _notifyOrchestratorOfActionCompletion(actionId, completionInput);
+      }
       return;
     }
     var counterpartUrl = counterpartConfiguration.getUrl();
@@ -260,24 +280,39 @@ public abstract class ConformanceParty implements StatefulEntity {
       webClient.asyncRequest(
           _createConformanceRequest(true, "POST", path, Collections.emptyMap(), jsonBody));
     } else {
-      if (actionId != null) {
-        log.info(
-            "Party {} notifying orchestrator that action {} is completed instead of sending notification: no counterpart URL is configured",
-            actionId,
-            partyConfiguration.getName());
-        webClient.asyncRequest(
-            _createConformanceRequest(
-                true,
-                "POST",
-                partyConfiguration.getOrchestratorUrl() + "/dev/null",
-                Collections.emptyMap(),
-                jsonBody));
-      } else {
+      if (actionId == null) {
         log.info(
             "Party {} NOT sending a notification and NOT notifying orchestrator either: no counterpart URL is configured",
             partyConfiguration.getName());
+      } else {
+        log.info(
+            "Party {} notifying orchestrator that action {} is completed instead of sending notification: no counterpart URL is configured",
+            partyConfiguration.getName(),
+            actionId);
+        _notifyOrchestratorOfActionCompletion(actionId, completionInput);
       }
     }
+  }
+
+  private void _notifyOrchestratorOfActionCompletion(
+      String actionId, ObjectNode completionInput) {
+    if (actionId == null) return;
+    if (partyConfiguration.isInManualMode()) return;
+    ObjectNode partyInput =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("actionId", actionId)
+            .put("completeCurrentActionWithoutTraffic", partyConfiguration.getRole());
+    partyInput.set("input", completionInput);
+    _asyncOrchestratorPost(partyInput);
+  }
+
+  private void _notifyOrchestratorOfSuppressedFollowUpNotification() {
+    if (partyConfiguration.isInManualMode()) return;
+    _asyncOrchestratorPost(
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("completeCurrentActionWithoutNotification", partyConfiguration.getRole()));
   }
 
   private ConformanceRequest _createConformanceRequest(

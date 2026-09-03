@@ -6,7 +6,7 @@ import org.dcsa.conformance.end.EblEndorsementChainStandard;
 import org.dcsa.conformance.standards.adoption.AdoptionStandard;
 import org.dcsa.conformance.standards.an.AnStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
-import org.dcsa.conformance.standards.bookingandebl.BookingAndEblStandard;
+// import org.dcsa.conformance.standards.bookingandebl.BookingAndEblStandard;
 import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
@@ -26,7 +26,7 @@ public enum SupportedStandard {
   EBL_ENDORSEMENT_CHAIN(EblEndorsementChainStandard.INSTANCE),
   EBL_ISSUANCE(EblIssuanceStandard.INSTANCE),
   EBL_SURRENDER(EblSurrenderStandard.INSTANCE),
-  BOOKING_AND_EBL(BookingAndEblStandard.INSTANCE),
+  // BOOKING_AND_EBL(BookingAndEblStandard.INSTANCE), // Disabled legacy combined standard
   OVS(OvsStandard.INSTANCE),
   PINT(PintStandard.INSTANCE),
   PORT_CALL(PortCallStandard.INSTANCE),

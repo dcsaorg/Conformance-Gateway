@@ -41,8 +41,12 @@ Known environment values:
 
 This command uses the gateway's existing auto all-in-one sandbox API to reset one complete
 standard/version/suite, wait for all scenarios, save the HTML report, and verify every top-level
-party result. It exits non-zero for a non-conformant, partial, missing, malformed, or timed-out
-result. The report is still saved when conformance validation fails.
+party result. For standards with optional notifications (currently Booking and eBL), it runs the
+suite twice by default and writes separate `-with-notifications.html` and
+`-without-notifications.html` reports. The latter suppresses synthetic-party notifications before
+scenario execution starts. Other standards produce one report. The runner exits non-zero for a
+non-conformant, partial, missing, malformed, or timed-out result. A report is still saved when its
+conformance validation fails.
 
 Start the application separately. From the repository root, run:
 
@@ -53,15 +57,16 @@ npm --prefix scripts run run-conformance-suite -- \
   --suite Conformance
 ```
 
-The default report is written to
-`target/conformance-reports/booking-200-conformance-auto-all-in-one.html` at repository root.
+The default Booking reports are written under `target/conformance-reports/` as
+`booking-200-conformance-auto-all-in-one-with-notifications.html` and
+`booking-200-conformance-auto-all-in-one-without-notifications.html`.
 For suite names containing shell metacharacters or spaces, quote the value:
 
 ```bash
 npm --prefix scripts run run-conformance-suite -- \
   --standard eBL \
   --version 3.0.0 \
-  --suite 'Conformance SI + TD'
+  --suite 'Conformance TD-only'
 ```
 
 The runner can also start and stop the application itself. Quote the whole start command:
@@ -83,6 +88,10 @@ npm --prefix scripts run run-conformance-suite -- \
   --output ../target/conformance-reports/booking.html \
   --timeout-seconds 1200
 ```
+
+Use `--notification-mode with`, `--notification-mode without`, or
+`--notification-mode both` to override automatic mode selection. When only one mode is selected,
+the exact `--output` path is used without adding a mode suffix.
 
 Run the scripts module checks with:
 

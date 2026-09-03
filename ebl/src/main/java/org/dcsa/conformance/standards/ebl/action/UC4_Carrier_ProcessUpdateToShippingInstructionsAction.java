@@ -9,7 +9,7 @@ import org.dcsa.conformance.standards.ebl.checks.EblChecks;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
-public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends StateChangingSIAction {
+public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends CarrierNotificationEblAction {
   private final ShippingInstructionsStatus expectedSIStatus;
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean acceptChanges;

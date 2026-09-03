@@ -10,8 +10,10 @@ import {
   parseArguments,
   parseRoleResults,
   runConformanceSuite,
+  runConformanceSuites,
   sandboxIdFor,
   stopApplication,
+  supportsOptionalNotifications,
 } from './run-conformance-suite';
 
 const SANDBOX_ID = 'booking-200-conformance-auto-all-in-one';
@@ -40,7 +42,7 @@ async function mockGateway(
     if (url === '/') {
       response.setHeader('content-type', 'text/html');
       response.end(`<a href="/conformance/${TOKEN}/sandbox/${SANDBOX_ID}/reset">Reset</a>`);
-    } else if (url.endsWith('/reset')) {
+    } else if (url.includes('/reset')) {
       response.end('{}');
     } else if (url.endsWith('/status')) {
       const statusBody = JSON.stringify({ scenariosLeft: statuses.shift() ?? 0 });
@@ -69,12 +71,12 @@ afterEach(async () => {
 
 test('derives the same all-in-one sandbox identifier as the Java application', () => {
   assert.equal(
-    sandboxIdFor('Booking + eBL', '2.0.0+3.0.0', 'Conformance'),
-    'booking+ebl-200+300-conformance-auto-all-in-one',
+    sandboxIdFor('Example + Standard', '2.0.0+3.0.0', 'Conformance'),
+    'example+standard-200+300-conformance-auto-all-in-one',
   );
   assert.equal(
-    sandboxIdFor('eBL', '3.0.0', 'Conformance SI + TD'),
-    'ebl-300-conformance-si-+-td-auto-all-in-one',
+    sandboxIdFor('eBL', '3.0.0', 'Conformance TD-only'),
+    'ebl-300-conformance-td-only-auto-all-in-one',
   );
 });
 
@@ -83,6 +85,21 @@ test('parses CLI selection and rejects incomplete selectors', () => {
     '--standard', 'Booking', '--version', '2.0.0', '--suite', 'Conformance',
   ]);
   assert.equal(options?.sandboxId, SANDBOX_ID);
+  assert.equal(options?.notificationMode, 'both');
+  assert.equal(
+    parseArguments([
+      '--standard', 'eBL', '--version', '3.0.0', '--suite', 'Conformance TD-only',
+    ])?.notificationMode,
+    'both',
+  );
+  assert.equal(
+    parseArguments([
+      '--sandbox-id', 'ovs-300-conformance-auto-all-in-one',
+    ])?.notificationMode,
+    'with',
+  );
+  assert.equal(supportsOptionalNotifications(SANDBOX_ID), true);
+  assert.equal(supportsOptionalNotifications('ovs-300-conformance-auto-all-in-one'), false);
   assert.throws(() => parseArguments(['--standard', 'Booking']), /Provide --sandbox-id/);
   assert.throws(
     () => parseArguments(['--sandbox-id', SANDBOX_ID, '--standard', 'Booking']),
@@ -128,6 +145,38 @@ test('runs reset, polls completion, validates roles, and saves the HTML report',
   assert.equal(gateway.requests.filter(url => url.endsWith('/reset')).length, 1);
   assert.equal(gateway.requests.filter(url => url.endsWith('/status')).length, 4);
   assert.equal(gateway.requests.filter(url => url.endsWith('/report')).length, 1);
+});
+
+test('runs optional-notification suites in both modes and saves distinct reports', async () => {
+  const htmlReport = report([
+    ['Carrier', 'CONFORMANT'],
+    ['Shipper', 'COMPLETED WITHOUT OPTIONAL TRAFFIC'],
+  ]);
+  const gateway = await mockGateway([0, 0], htmlReport);
+  const directory = await mkdtemp(path.join(tmpdir(), 'conformance-runner-'));
+  const outputPath = path.join(directory, 'booking.html');
+
+  const results = await runConformanceSuites({
+    baseUrl: gateway.baseUrl,
+    sandboxId: SANDBOX_ID,
+    outputPath,
+    timeoutMs: 2_000,
+    pollIntervalMs: 5,
+    notificationMode: 'both',
+  });
+
+  assert.deepEqual(results.map(result => result.notificationMode), ['with', 'without']);
+  assert.deepEqual(
+    results.map(result => path.basename(result.outputPath)),
+    ['booking-with-notifications.html', 'booking-without-notifications.html'],
+  );
+  assert.equal(await readFile(results[0].outputPath, 'utf8'), htmlReport);
+  assert.equal(await readFile(results[1].outputPath, 'utf8'), htmlReport);
+  assert.equal(gateway.requests.filter(url => url.endsWith('/reset')).length, 1);
+  assert.equal(
+    gateway.requests.filter(url => url.endsWith('/reset?suppressNotifications=true')).length,
+    1,
+  );
 });
 
 test('saves a failing report and rejects the run', async () => {

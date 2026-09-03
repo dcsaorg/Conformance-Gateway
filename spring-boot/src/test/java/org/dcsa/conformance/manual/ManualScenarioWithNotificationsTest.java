@@ -35,7 +35,7 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
         "eBL Issuance",
         "eBL Surrender",
         "Ebl Endorsement Chain",
-        "Booking + eBL",
+        // "Booking + eBL", // Disabled legacy combined standard
         "VGM");
   }
 

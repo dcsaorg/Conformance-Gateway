@@ -87,8 +87,8 @@ class EblScenarioListBuilderTest {
     assertEquals(
         List.of(
             "SupplyCSP [any TD + any TD amendment] - UC17 - GET TD (amended content)",
-            "SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (confirm) - GET TD",
-            "SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (decline) - GET TD",
+            "SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (confirm) - GET TD (amended content)",
+            "SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (decline) - GET TD (amended content)",
             "SupplyCSP [any TD + any TD amendment] - UC17 - UC18"),
         titles(modules.get("Optional (report-only) scenarios")));
     assertTrue(

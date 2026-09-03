@@ -1093,17 +1093,18 @@ public class ConformanceSandbox {
 
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
-    if (suppressNotifications) {
-      for (var partyConfiguration : sandboxConfiguration.getParties()) {
-        new PartyTask(
-                persistenceProvider,
-                deferredSandboxTaskConsumer,
-                sandboxId,
-                partyConfiguration.getName(),
-                "suppressing notifications for party " + partyConfiguration.getName(),
-                party -> party.setSuppressNotifications(true))
-            .run();
-      }
+    for (var partyConfiguration : sandboxConfiguration.getParties()) {
+      new PartyTask(
+              persistenceProvider,
+              deferredSandboxTaskConsumer,
+              sandboxId,
+              partyConfiguration.getName(),
+              "configuring notification mode for party " + partyConfiguration.getName(),
+              party -> {
+                party.setCurrentSessionId(newSessionId);
+                party.setSuppressNotifications(suppressNotifications);
+              })
+          .run();
     }
     if (sandboxConfiguration.getOrchestrator().isActive()) {
       new OrchestratorTask(
@@ -1113,7 +1114,7 @@ public class ConformanceSandbox {
                       deferredSandboxTaskConsumer, conformanceWebRequest),
               sandboxId,
               "starting session",
-              ConformanceOrchestrator::notifyNextActionParty)
+              orchestrator -> orchestrator.startSession(newSessionId))
           .run();
     }
 

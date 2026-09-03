@@ -38,6 +38,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   private final LinkedHashMap<UUID, ConformanceScenario> _scenariosById = new LinkedHashMap<>();
   private final Map<UUID, UUID> latestRunIdsByScenarioId = new HashMap<>();
   private UUID currentScenarioId;
+  private String currentSessionId;
 
   @Setter private BiConsumer<String, String> waitingForBiConsumer = (forWhom, toDoWhat) -> {};
 
@@ -83,6 +84,9 @@ public class ConformanceOrchestrator implements StatefulEntity {
       jsonState.put("currentScenarioId", currentScenarioId.toString());
       jsonState.set("currentScenario", _getCurrentScenario().exportJsonState());
     }
+    if (currentSessionId != null) {
+      jsonState.put("currentSessionId", currentSessionId);
+    }
     return jsonState;
   }
 
@@ -99,6 +103,15 @@ public class ConformanceOrchestrator implements StatefulEntity {
       currentScenarioId = UUID.fromString(jsonState.get("currentScenarioId").asText());
       _getCurrentScenario().importJsonState(jsonState.get("currentScenario"));
     }
+    currentSessionId =
+        jsonState.path("currentSessionId").isTextual()
+            ? jsonState.path("currentSessionId").asText()
+            : null;
+  }
+
+  public void startSession(String sessionId) {
+    currentSessionId = Objects.requireNonNull(sessionId);
+    notifyNextActionParty();
   }
 
   private void _saveInactiveScenario(ConformanceScenario scenario) {
@@ -242,7 +255,8 @@ public class ConformanceOrchestrator implements StatefulEntity {
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
     JsonNode completionRoleNode = partyInput.get("completeCurrentActionWithoutNotification");
     if (completionRoleNode != null && completionRoleNode.isTextual()) {
-      _completeCurrentActionWithoutNotification(completionRoleNode.asText());
+      _completeCurrentActionWithoutNotification(
+          completionRoleNode.asText(), partyInput.path("sessionId").asText(null));
       return;
     }
     if (currentScenarioId == null) {
@@ -297,7 +311,15 @@ public class ConformanceOrchestrator implements StatefulEntity {
     notifyNextActionParty();
   }
 
-  private void _completeCurrentActionWithoutNotification(String notificationSourceRole) {
+  private void _completeCurrentActionWithoutNotification(
+      String notificationSourceRole, String sessionId) {
+    if (currentSessionId == null || !Objects.equals(currentSessionId, sessionId)) {
+      log.info(
+          "Ignoring suppressed notification completion from role {} for stale or missing session {}",
+          notificationSourceRole,
+          sessionId);
+      return;
+    }
     if (currentScenarioId == null) {
       log.info("Ignoring suppressed notification completion: no scenario is currently active");
       return;

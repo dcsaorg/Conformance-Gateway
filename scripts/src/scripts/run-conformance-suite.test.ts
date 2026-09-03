@@ -179,6 +179,42 @@ test('runs optional-notification suites in both modes and saves distinct reports
   );
 });
 
+test("single-result runner rejects notificationMode 'both' instead of silently running one mode", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'conformance-runner-'));
+
+  await assert.rejects(
+    runConformanceSuite({
+      baseUrl: 'http://127.0.0.1:1',
+      sandboxId: SANDBOX_ID,
+      outputPath: path.join(directory, 'booking.html'),
+      timeoutMs: 2_000,
+      pollIntervalMs: 5,
+      notificationMode: 'both',
+    }),
+    /use runConformanceSuites/,
+  );
+});
+
+test('both notification modes share one overall timeout', async () => {
+  const htmlReport = report([['Carrier', 'CONFORMANT'], ['Shipper', 'CONFORMANT']]);
+  const gateway = await mockGateway([0, 0], htmlReport, 50);
+  const directory = await mkdtemp(path.join(tmpdir(), 'conformance-runner-'));
+  const startedAt = Date.now();
+
+  await assert.rejects(
+    runConformanceSuites({
+      baseUrl: gateway.baseUrl,
+      sandboxId: SANDBOX_ID,
+      outputPath: path.join(directory, 'booking.html'),
+      timeoutMs: 80,
+      pollIntervalMs: 5,
+      notificationMode: 'both',
+    }),
+    /Overall timeout reached/,
+  );
+  assert.ok(Date.now() - startedAt < 400);
+});
+
 test('saves a failing report and rejects the run', async () => {
   const htmlReport = report([['Carrier', 'CONFORMANT'], ['Shipper', 'NON-CONFORMANT']]);
   const gateway = await mockGateway([0], htmlReport);

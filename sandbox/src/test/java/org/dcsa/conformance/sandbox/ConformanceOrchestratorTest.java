@@ -98,7 +98,8 @@ class ConformanceOrchestratorTest {
     orchestrator.handlePartyInput(
       OBJECT_MAPPER
         .createObjectNode()
-        .put("completeCurrentActionWithoutNotification", "Carrier"));
+        .put("completeCurrentActionWithoutNotification", "Carrier")
+        .put("sessionId", "session-1"));
 
     assertEquals(
       ConformanceAction.CompletionOutcome.COMPLETED_WITHOUT_TRAFFIC,
@@ -117,7 +118,27 @@ class ConformanceOrchestratorTest {
     orchestrator.handlePartyInput(
       OBJECT_MAPPER
         .createObjectNode()
-        .put("completeCurrentActionWithoutNotification", "Shipper"));
+        .put("completeCurrentActionWithoutNotification", "Shipper")
+        .put("sessionId", "session-1"));
+
+    assertEquals(ConformanceAction.CompletionOutcome.NONE, shipperAction.getCompletionOutcome());
+    assertSame(shipperAction, scenario.peekNextAction());
+  }
+
+  @Test
+  void staleSuppressedFollowUpCannotCompleteAnActionInANewerSession() {
+    var shipperAction =
+      new TestAction(
+        "Shipper", "Carrier", null, "UC7", Set.of(), Set.of("Carrier"), true, true);
+    var scenario = new ConformanceScenario(0, 0, List.of(shipperAction));
+    var orchestrator = orchestrator(scenario, "Shipper");
+    orchestrator.startSession("session-2");
+
+    orchestrator.handlePartyInput(
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("completeCurrentActionWithoutNotification", "Carrier")
+        .put("sessionId", "session-1"));
 
     assertEquals(ConformanceAction.CompletionOutcome.NONE, shipperAction.getCompletionOutcome());
     assertSame(shipperAction, scenario.peekNextAction());
@@ -167,6 +188,7 @@ class ConformanceOrchestratorTest {
       new EmptyJsonNodeMap(),
       ignored -> {});
     orchestrator.startOrStopScenario(scenario.getId().toString());
+    orchestrator.startSession("session-1");
     return orchestrator;
   }
 

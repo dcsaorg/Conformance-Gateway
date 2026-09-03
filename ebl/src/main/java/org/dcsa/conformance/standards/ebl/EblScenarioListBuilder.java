@@ -224,10 +224,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 .then(
                     uc19CarrierProcessTransportDocumentAmendment(confirm)
                         .then(
-                            shipperGetTransportDocument(
-                                TD_DRAFT,
-                                TD_ISSUED,
-                                TD_PENDING_SURRENDER_FOR_AMENDMENT))));
+                            shipperGetTransportDocumentAmendment(
+                                confirm
+                                    ? AmendedTransportDocumentStatus.AMENDMENT_CONFIRMED
+                                    : AmendedTransportDocumentStatus.AMENDMENT_DECLINED))));
   }
 
   private static EblScenarioListBuilder carrierCancelDirectAmendmentScenario() {

@@ -212,9 +212,9 @@ async function runConformanceSuiteMode(
   options: RunnerOptions,
   notificationMode: Exclude<NotificationMode, 'both'>,
   outputPath: string,
+  deadline: number,
 ): Promise<RunnerResult> {
   const startedAt = Date.now();
-  const deadline = startedAt + options.timeoutMs;
   const homepage = await waitForGateway(options.baseUrl, deadline);
   const token = discoverToken(homepage, options.sandboxId);
 
@@ -264,17 +264,22 @@ async function runConformanceSuiteMode(
 }
 
 export async function runConformanceSuite(options: RunnerOptions): Promise<RunnerResult> {
+  if (options.notificationMode === 'both') {
+    throw new Error("runConformanceSuite cannot return notificationMode 'both'; use runConformanceSuites");
+  }
+  const deadline = Date.now() + options.timeoutMs;
   let application: ChildProcess | undefined;
   try {
     if (options.startCommand) application = startApplication(options.startCommand);
     const mode = options.notificationMode === 'without' ? 'without' : 'with';
-    return await runConformanceSuiteMode(options, mode, options.outputPath);
+    return await runConformanceSuiteMode(options, mode, options.outputPath, deadline);
   } finally {
     await stopApplication(application);
   }
 }
 
 export async function runConformanceSuites(options: RunnerOptions): Promise<RunnerResult[]> {
+  const deadline = Date.now() + options.timeoutMs;
   let application: ChildProcess | undefined;
   try {
     if (options.startCommand) application = startApplication(options.startCommand);
@@ -288,6 +293,7 @@ export async function runConformanceSuites(options: RunnerOptions): Promise<Runn
           options,
           mode,
           outputPathForMode(options.outputPath, mode, modes.length > 1),
+          deadline,
         ),
       );
     }

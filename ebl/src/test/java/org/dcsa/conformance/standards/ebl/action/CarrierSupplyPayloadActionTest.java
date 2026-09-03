@@ -3,11 +3,13 @@ package org.dcsa.conformance.standards.ebl.action;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Set;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.standards.ebl.checks.EblInputPayloadValidations;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
@@ -56,6 +58,24 @@ class CarrierSupplyPayloadActionTest {
             tdPair("BOL", false, "TDR-1", "BOL", false, "TDR-1"));
 
     assertEquals(Set.of("The amended Transport Document must differ from the original."), errors);
+  }
+
+  @Test
+  void missingOrNullInputProducesAUserFacingError() {
+    UserFacingException missingInputError =
+        assertThrows(
+            UserFacingException.class,
+            () -> action.handlePartyInput(OBJECT_MAPPER.createObjectNode()));
+    UserFacingException nullInputError =
+        assertThrows(
+            UserFacingException.class,
+            () ->
+                action.handlePartyInput(
+                    OBJECT_MAPPER.createObjectNode().putNull("input")));
+
+    assertEquals(
+        "The party input must contain a non-null 'input' value.", missingInputError.getMessage());
+    assertEquals(missingInputError.getMessage(), nullInputError.getMessage());
   }
 
   @Test

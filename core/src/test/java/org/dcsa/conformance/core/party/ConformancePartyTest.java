@@ -60,6 +60,7 @@ class ConformancePartyTest {
     PartyWebClient webClient = mock(PartyWebClient.class);
     TestParty party = testParty(webClient);
     party.setSuppressNotifications(true);
+    party.setCurrentSessionId("session-1");
 
     party.sendNotification(
         null,
@@ -80,6 +81,9 @@ class ConformancePartyTest {
             .getJsonBody()
             .required("completeCurrentActionWithoutNotification")
             .asText());
+    assertEquals(
+        "session-1",
+        completionRequest.message().body().getJsonBody().required("sessionId").asText());
   }
 
   private static TestParty testParty(PartyWebClient webClient) {

@@ -67,6 +67,7 @@ public abstract class ConformanceParty implements StatefulEntity {
    */
   @Getter
   private boolean suppressNotifications = false;
+  private String currentSessionId;
 
   private static final int MAX_OPERATOR_LOG_RECORDS = 12;
   private final List<TimestampedLogEntry> operatorLog = new LinkedList<>();
@@ -98,6 +99,9 @@ public abstract class ConformanceParty implements StatefulEntity {
     ObjectNode jsonPartyState = OBJECT_MAPPER.createObjectNode();
     jsonPartyState.set("actionPromptsQueue", actionPromptsQueue.exportJsonState());
     jsonPartyState.put("suppressNotifications", suppressNotifications);
+    if (currentSessionId != null) {
+      jsonPartyState.put("currentSessionId", currentSessionId);
+    }
 
     ArrayNode operatorLogNode = jsonPartyState.putArray(operatorLogName);
     operatorLog.forEach(
@@ -118,6 +122,10 @@ public abstract class ConformanceParty implements StatefulEntity {
   public void importJsonState(JsonNode jsonState) {
     actionPromptsQueue.importJsonState(jsonState.get("actionPromptsQueue"));
     suppressNotifications = jsonState.path("suppressNotifications").asBoolean(false);
+    currentSessionId =
+        jsonState.path("currentSessionId").isTextual()
+            ? jsonState.path("currentSessionId").asText()
+            : null;
 
     JsonNode operatorLogNode = jsonState.get(operatorLogName);
     if (operatorLogNode != null) {
@@ -171,6 +179,10 @@ public abstract class ConformanceParty implements StatefulEntity {
         partyConfiguration.getName(),
         suppressNotifications);
     this.suppressNotifications = suppressNotifications;
+  }
+
+  public void setCurrentSessionId(String currentSessionId) {
+    this.currentSessionId = Objects.requireNonNull(currentSessionId);
   }
 
   /**
@@ -309,10 +321,17 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   private void _notifyOrchestratorOfSuppressedFollowUpNotification() {
     if (partyConfiguration.isInManualMode()) return;
+    if (currentSessionId == null) {
+      log.warn(
+          "Party {} cannot complete a suppressed follow-up notification without a session id",
+          partyConfiguration.getName());
+      return;
+    }
     _asyncOrchestratorPost(
         OBJECT_MAPPER
             .createObjectNode()
-            .put("completeCurrentActionWithoutNotification", partyConfiguration.getRole()));
+            .put("completeCurrentActionWithoutNotification", partyConfiguration.getRole())
+            .put("sessionId", currentSessionId));
   }
 
   private ConformanceRequest _createConformanceRequest(

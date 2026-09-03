@@ -107,24 +107,24 @@ All conformance scenarios performed and validation results will be part of the C
 
 |                                                                 |                                                                                                                                                                                                               |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **SupplyCSP [Sea Waybill] - UC6 - UC7 - UC8 - GET TD (ISSUED)** | This scenario verifies that the Carrier can publish a draft Sea Waybill; it can accept the approval of the draft; it can mark the Sea Waybill as issued; it can return the content of the issued Sea Waybill. |
+| **SupplyCSP [Sea Waybill] - UC6 - UC7 - UC8 - GET TD** | This scenario verifies that the Carrier can publish a draft Sea Waybill; it can accept the approval of the draft; it can mark the Sea Waybill as issued; it can return the content of the issued Sea Waybill with `transportDocumentStatus` equal to `ISSUED`. |
 
 ## Required Straight B/L scenario
 
-Same as “Required Sea Waybill scenarios” but with “Straight B/L” instead of “Sea Waybill”.
+**SupplyCSP [Straight B/L] - UC6 - UC7 - UC8 - GET TD** — Same as the required Sea Waybill scenario, but for a Straight B/L.
 
 ## Required Negotiable B/L scenario
 
-Same as “Required Sea Waybill scenarios” but with “Negotiable B/L” instead of “Sea Waybill”.
+**SupplyCSP [Negotiable B/L] - UC6 - UC7 - UC8 - GET TD** — Same as the required Sea Waybill scenario, but for a Negotiable B/L.
 
 ## Optional (report-only) scenarios
 
 |                                                                                                                                 |                                                                                                                                                          |
 | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **SupplyCSP [any TD + any TD amendment] - UC17 - GET TD (amended content) (2xx)**                                               | This scenario verifies that the Carrier can return the content of a direct Transport Document amendment request (UC17 introduced in EBL v3.0.3).         |
-| **SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (confirm) - GET TD (DRAFT or ISSUED or PENDING_SURRENDER_FOR_AMENDMENT)** | This scenario verifies that the Carrier can confirm a direct Transport Document amendment (UC17 and UC19 introduced in EBL v3.0.3).                      |
-| **SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (decline) - GET TD (DRAFT or ISSUED or PENDING_SURRENDER_FOR_AMENDMENT)** | This scenario verifies that the Carrier can decline a direct Transport Document amendment (UC17 and UC19 introduced in EBL v3.0.3).                      |
-| **SupplyCSP [any TD + any TD amendment] - UC17 - UC18 (2xx)**                                                                   | This scenario verifies that the Carrier can process the cancellation of a direct Transport Document amendment (UC17 and UC 18 introduced in EBL v3.0.3). |
+| **SupplyCSP [any TD + any TD amendment] - UC17 - GET TD (amended content)** | This scenario verifies that the Carrier can return the content of a direct Transport Document amendment request with a successful `2xx` response (UC17 introduced in EBL v3.0.3). |
+| **SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (confirm) - GET TD (amended content)** | This scenario verifies that the Carrier can confirm a direct Transport Document amendment and return the amended content with `amendedTransportDocumentStatus` equal to `AMENDMENT_CONFIRMED` (UC17 and UC19 introduced in EBL v3.0.3). |
+| **SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (decline) - GET TD (amended content)** | This scenario verifies that the Carrier can decline a direct Transport Document amendment and return the amended content with `amendedTransportDocumentStatus` equal to `AMENDMENT_DECLINED` (UC17 and UC19 introduced in EBL v3.0.3). |
+| **SupplyCSP [any TD + any TD amendment] - UC17 - UC18** | This scenario verifies that the Carrier can process the cancellation of a direct Transport Document amendment with a successful `2xx` response (UC17 and UC18 introduced in EBL v3.0.3). |
 
 **Transport Document notifications:** Checked by verifying the presence and conformance of at least one Transport Document notification sent by the Carrier in any of the executed scenarios above.
 
@@ -134,15 +134,15 @@ Same as “Required Sea Waybill scenarios” but with “Negotiable B/L” inste
 
 |                        |                                                                                       |
 | ---------------------- | ------------------------------------------------------------------------------------- |
-| **UC6 - UC7 - GET TD** | This scenario verifies that the Shipper can approve and retrieve a draft Sea Waybill. |
+| **UC6 [REGULAR_SWB] - UC7 - GET TD** | This scenario verifies that the Shipper can approve and retrieve a Sea Waybill with `transportDocumentStatus` equal to `APPROVED`. |
 
 ## Required Straight B/L scenario
 
-Same as “Required Sea Waybill scenario” but with “Straight B/L” instead of “Sea Waybill”.
+**UC6 [REGULAR_STRAIGHT_BL] - UC7 - GET TD** — Same as the required Sea Waybill scenario, but for a Straight B/L.
 
 ## Required Negotiable B/L scenario
 
-Same as “Required Sea Waybill scenario” but with “Negotiable B/L” instead of “Sea Waybill”.
+**UC6 [REGULAR_NEGOTIABLE_BL] - UC7 - GET TD** — Same as the required Sea Waybill scenario, but for a Negotiable B/L.
 
 ## Optional (report-only) scenarios
 

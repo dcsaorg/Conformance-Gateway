@@ -182,6 +182,9 @@ public class CarrierSupplyPayloadAction extends EblAction {
   @Override
   public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
     JsonNode inputNode = partyInput.get(INPUT);
+    if (inputNode == null || inputNode.isNull()) {
+      throw new UserFacingException("The party input must contain a non-null 'input' value.");
+    }
     ScenarioType inputScenarioType = inputScenarioType(inputNode);
     List<JsonNode> payloads =
         includeAmendment

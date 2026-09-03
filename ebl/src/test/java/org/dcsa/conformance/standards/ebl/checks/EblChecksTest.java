@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceErrorSeverity;
 import org.dcsa.conformance.core.check.JsonContentCheck;
@@ -977,7 +979,7 @@ class EblChecksTest {
             .filter(
                 check ->
                     check.description()
-                        .startsWith("For every item in `utilizedTransportEquipments[]`"))
+                        .startsWith("For every item in 'utilizedTransportEquipments[]'"))
             .findFirst()
             .orElseThrow();
     ObjectNode equipment = rootNode.putArray("utilizedTransportEquipments").addObject();
@@ -1055,13 +1057,18 @@ class EblChecksTest {
             "For every item in `feedbacks[]`, `severity` must equal `INFO`, `WARN`, or `ERROR`.",
             "For every item in `feedbacks[]`, `code` must equal `INFORMATIONAL_MESSAGE`, `PROPERTY_WILL_BE_IGNORED`, `PROPERTY_VALUE_MUST_CHANGE`, `PROPERTY_VALUE_HAS_BEEN_CHANGED`, `PROPERTY_VALUE_MAY_CHANGE`, or `PROPERTY_HAS_BEEN_DELETED`.");
 
+    Set<String> expectedDisplayDescriptions =
+        expectedDescriptions.stream()
+            .map(description -> description.replace('`', '\''))
+            .collect(Collectors.toSet());
     List<String> actualDescriptions =
         EblChecks.transportDocumentCarrierContentChecks().stream()
             .map(JsonContentCheck::description)
             .toList();
 
     assertEquals(38, actualDescriptions.size());
-    assertEquals(expectedDescriptions, Set.copyOf(actualDescriptions));
+    assertEquals(expectedDisplayDescriptions, Set.copyOf(actualDescriptions));
+    assertTrue(actualDescriptions.stream().noneMatch(description -> description.contains("`")));
   }
 
   @Test
@@ -1070,7 +1077,7 @@ class EblChecksTest {
         EblChecks.getTdNotificationChecks(List.of(TransportDocumentStatus.TD_DRAFT));
     JsonContentCheck amendedStatusCheck =
         checks.stream()
-            .filter(check -> check.description().startsWith("If `amendedTransportDocumentStatus`"))
+            .filter(check -> check.description().startsWith("If 'amendedTransportDocumentStatus'"))
             .findFirst()
             .orElseThrow();
 
@@ -1080,7 +1087,7 @@ class EblChecksTest {
                 check ->
                     check.description()
                         .equals(
-                            "`data.transportDocumentStatus` must equal `DRAFT`, `APPROVED`, `ISSUED`, `PENDING_SURRENDER_FOR_AMENDMENT`, `SURRENDER_FOR_AMENDMENT`, `VOID`, `PENDING_SURRENDER_FOR_DELIVERY`, or `SURRENDER_FOR_DELIVERY`.")));
+                            "'data.transportDocumentStatus' must equal 'DRAFT', 'APPROVED', 'ISSUED', 'PENDING_SURRENDER_FOR_AMENDMENT', 'SURRENDER_FOR_AMENDMENT', 'VOID', 'PENDING_SURRENDER_FOR_DELIVERY', or 'SURRENDER_FOR_DELIVERY'.")));
     rootNode.put("amendedTransportDocumentStatus", "AMENDMENT_RECEIVED");
     assertValid(amendedStatusCheck);
     rootNode.put("amendedTransportDocumentStatus", "UNKNOWN");
@@ -1171,28 +1178,28 @@ class EblChecksTest {
             .anyMatch(
                 title ->
                     title.contains("[Amended Transport Document]")
-                        && title.contains("When `isElectronic` is `true`")));
+                        && title.contains("When 'isElectronic' is 'true'")));
     assertTrue(
         titles.stream()
             .anyMatch(
                 title ->
                     title.contains("[Amended Transport Document]")
                         && title.contains(
-                            "If present,`segregationGroups[]` must be an integer from 1 through 18.")));
+                            "If present,'segregationGroups[]' must be an integer from 1 through 18.")));
     assertTrue(
         titles.stream()
             .anyMatch(
                 title ->
                     title.contains("[Transport Document]")
                         && title.contains(
-                            "If `transportDocumentStatus='ISSUED'`, then `issueDate` must be present")));
+                            "If 'transportDocumentStatus='ISSUED'', then 'issueDate' must be present")));
     assertTrue(
         titles.stream()
             .anyMatch(
                 title ->
                     title.contains("[Amended Transport Document]")
                         && title.contains(
-                            "If `transportDocumentStatus='ISSUED'`, then `issueDate` must be present")));
+                            "If 'transportDocumentStatus='ISSUED'', then 'issueDate' must be present")));
     assertTrue(
         titles.stream()
             .anyMatch(title -> title.contains("After UC17, the 'transportDocumentStatus'")));
@@ -1234,7 +1241,7 @@ class EblChecksTest {
             .filter(
                 check ->
                     check.description()
-                        .startsWith("For every `NationalCommodityCode` object"))
+                        .startsWith("For every 'NationalCommodityCode' object"))
             .findFirst()
             .orElseThrow();
     ObjectNode consignmentItem = rootNode.putArray("consignmentItems").addObject();
@@ -1256,6 +1263,47 @@ class EblChecksTest {
         .addObject()
         .put("type", "UNKNOWN");
     assertInvalid(nationalCommodityCodeCheck);
+  }
+
+  @Test
+  void tdWorkbookRulesApplyOnlyToTheirDocumentTypeScopes() {
+    List<String> straightBlDescriptions = tdDescriptionsFor(ScenarioType.REGULAR_STRAIGHT_BL);
+    List<String> negotiableBlDescriptions = tdDescriptionsFor(ScenarioType.REGULAR_NEGOTIABLE_BL);
+    List<String> seaWaybillDescriptions = tdDescriptionsFor(ScenarioType.REGULAR_SWB);
+
+    assertTrue(
+        Stream.of(straightBlDescriptions, negotiableBlDescriptions, seaWaybillDescriptions)
+            .flatMap(List::stream)
+            .noneMatch(description -> description.contains("`")));
+    assertTrue(
+        straightBlDescriptions.stream()
+            .anyMatch(description -> description.startsWith("When 'isElectronic' is 'true'")));
+    assertFalse(
+        seaWaybillDescriptions.stream()
+            .anyMatch(description -> description.startsWith("When 'isElectronic' is 'true'")));
+    assertFalse(
+        straightBlDescriptions.stream()
+            .anyMatch(description -> description.startsWith("If 'isToOrder=true'")));
+    assertTrue(
+        negotiableBlDescriptions.stream()
+            .anyMatch(description -> description.startsWith("If 'isToOrder=true'")));
+    assertFalse(
+        straightBlDescriptions.contains(
+            "Consignee and endorsee must never both be present (mutually exclusive)."));
+    assertTrue(
+        negotiableBlDescriptions.contains(
+            "Consignee and endorsee must never both be present (mutually exclusive)."));
+  }
+
+  private List<String> tdDescriptionsFor(ScenarioType scenarioType) {
+    var dsp =
+        new EblDynamicScenarioParameters(
+            scenarioType.name(), null, "TDR-1", null, null, false, false);
+    return EblChecks.getTdPayloadChecks(
+            List.of(TransportDocumentStatus.TD_DRAFT), () -> dsp)
+        .stream()
+        .map(JsonContentCheck::description)
+        .toList();
   }
 
   private void assertStatusScenario(

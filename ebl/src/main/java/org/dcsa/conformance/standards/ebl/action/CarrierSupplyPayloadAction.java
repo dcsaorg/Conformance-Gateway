@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -194,7 +195,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
                 payload ->
                     EblInputPayloadValidations.validateEblSchema(payload, requestSchemaValidator)
                         .stream())
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
     Set<String> contentChecksErrors =
         payloads.stream()
@@ -281,15 +282,22 @@ public class CarrierSupplyPayloadAction extends EblAction {
     }
     JsonNode transportDocument = input.path("transportDocument");
     JsonNode amendedTransportDocument = input.path("amendedTransportDocument");
-    return Stream.of("transportDocumentTypeCode", "isToOrder", "transportDocumentReference")
-        .filter(
-            fieldName ->
-                !transportDocument.path(fieldName).equals(amendedTransportDocument.path(fieldName)))
-        .map(
-            fieldName ->
-                "The original and amended Transport Documents must have the same `%s` value."
-                    .formatted(fieldName))
-        .collect(Collectors.toSet());
+    Set<String> errors =
+        Stream.of("transportDocumentTypeCode", "isToOrder", "transportDocumentReference")
+            .filter(
+                fieldName ->
+                    !transportDocument
+                        .path(fieldName)
+                        .equals(amendedTransportDocument.path(fieldName)))
+            .map(
+                fieldName ->
+                    "The original and amended Transport Documents must have the same `%s` value."
+                        .formatted(fieldName))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    if (transportDocument.equals(amendedTransportDocument)) {
+      errors.add("The amended Transport Document must differ from the original.");
+    }
+    return errors;
   }
 
   private String getCbrValue() {

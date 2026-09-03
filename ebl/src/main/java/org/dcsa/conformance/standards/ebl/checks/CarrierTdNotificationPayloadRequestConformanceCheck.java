@@ -66,37 +66,36 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
                   getTdrCheck().ifPresent(checks::add);
                   return checks;
                 }),
-            buildChecks(
+            buildTransportDocumentChecks(
                 TRANSPORT_DOCUMENT_LABEL,
                 TRANSPORT_DOCUMENT_PATH,
-                () -> {
-                  List<JsonContentCheck> checks = new ArrayList<>();
-                  getTdrCheck().ifPresent(checks::add);
-                  checks.addAll(
-                      EblChecks.getTdPayloadChecks(
-                          List.copyOf(statusScenario.transportDocumentStatuses()),
-                          dspSupplier,
-                          EblChecks.TdPayloadContext.TRANSPORT_DOCUMENT_NOTIFICATION));
-                  return checks;
-                }));
+                EblChecks.TdPayloadContext.TRANSPORT_DOCUMENT_NOTIFICATION));
     if (statusScenario.amendedTransportDocumentStatus() == null) {
       return subChecks;
     }
     return Stream.concat(
         subChecks,
-        buildChecks(
-                AMENDED_TRANSPORT_DOCUMENT_LABEL,
-                AMENDED_TRANSPORT_DOCUMENT_PATH,
-                () -> {
-                  List<JsonContentCheck> checks = new ArrayList<>();
-                  getTdrCheck().ifPresent(checks::add);
-                  checks.addAll(
-                      EblChecks.getTdPayloadChecks(
-                          List.copyOf(statusScenario.transportDocumentStatuses()),
-                          dspSupplier,
-                          EblChecks.TdPayloadContext.AMENDED_TRANSPORT_DOCUMENT));
-                  return checks;
-                }));
+        buildTransportDocumentChecks(
+            AMENDED_TRANSPORT_DOCUMENT_LABEL,
+            AMENDED_TRANSPORT_DOCUMENT_PATH,
+            EblChecks.TdPayloadContext.AMENDED_TRANSPORT_DOCUMENT));
+  }
+
+  private Stream<? extends ConformanceCheck> buildTransportDocumentChecks(
+      String label, String path, EblChecks.TdPayloadContext payloadContext) {
+    return buildChecks(
+        label,
+        path,
+        () -> {
+          List<JsonContentCheck> checks = new ArrayList<>();
+          getTdrCheck().ifPresent(checks::add);
+          checks.addAll(
+              EblChecks.getTdPayloadChecks(
+                  List.copyOf(statusScenario.transportDocumentStatuses()),
+                  dspSupplier,
+                  payloadContext));
+          return checks;
+        });
   }
 
   private Optional<JsonContentCheck> getTdrCheck() {

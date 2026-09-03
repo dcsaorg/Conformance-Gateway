@@ -165,6 +165,11 @@ Conformance reports indicate whether validations succeeded or failed. All confor
 * **Shipper validations:** standard-defined rules that apply when a Shipper approves a draft Transport Document, submits or cancels a Transport Document amendment.
 * **Transport Document notification validations:** standard-defined rules that apply to Transport Document notifications. Notification support is optional and does not affect badge eligibility. If demonstrated, the validation results are included in the Conformance report.
 
+Successful responses to **GET** actions must use HTTP status `200`. For Shipper actions that
+submit, approve, or cancel data, and for Shipper acknowledgements of Carrier notifications, any
+valid successful `2xx` HTTP status is accepted. Negative scenarios continue to require their exact
+documented error status.
+
 ## 4.1 Scope-defined validations
 
 Depending on which scenario and scope is being run in **Section 3 Conformance Scenarios**, the following requirements are mandatory. Each scenario is seeded from a dedicated Transport Document payload and enforces extra rules on top of the **Carrier validations (Section 4.2)** and **Shipper validations (Section 4.3).**

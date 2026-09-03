@@ -27,15 +27,14 @@ public class UC8_Carrier_IssueTransportDocumentAction extends CarrierNotificatio
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        Map.of("REFERENCE", getTransportDocumentReference()),
         "prompt-carrier-uc8.md",
         "prompt-carrier-notification.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode()
-        .put("documentReference", getDspSupplier().get().transportDocumentReference());
+    return super.asJsonNode().put("documentReference", getTransportDocumentReference());
   }
 
   @Override

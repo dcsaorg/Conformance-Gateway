@@ -39,15 +39,14 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends ShipperNoti
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        Map.of("REFERENCE", getTransportDocumentReference()),
         "prompt-shipper-uc7.md",
         "prompt-shipper-refresh-complete.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode()
-        .put("documentReference", getDspSupplier().get().transportDocumentReference());
+    return super.asJsonNode().put("documentReference", getTransportDocumentReference());
   }
 
   @Override
@@ -70,18 +69,13 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends ShipperNoti
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var dsp = getDspSupplier().get();
-        var tdr =
-            dsp.transportDocumentReference() != null
-                ? dsp.transportDocumentReference()
-                : "<DSP MISSING TD REFERENCE>";
         Stream<ActionCheck> primaryExchangeChecks =
             Stream.of(
                 new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
                 new UrlPathCheck(
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
-                    "/v3/transport-documents/%s".formatted(tdr)),
+                    getTransportDocumentEndpoint()),
                 ResponseStatusCheck.forSuccessfulResponse(
                     EblRole::isCarrier, getMatchedExchangeUuid()),
                 new ApiHeaderCheck(

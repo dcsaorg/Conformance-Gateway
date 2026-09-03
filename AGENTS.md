@@ -140,9 +140,9 @@ Or let the runner own the backend lifecycle:
 
 ```bash
 npm --prefix scripts run run-conformance-suite -- \
-  --standard Booking \
-  --version 2.0.0 \
-  --suite Conformance \
+  --standard eBL \
+  --version 3.0.0 \
+  --suite 'Conformance TD-only' \
   --start-command './mvnw -pl spring-boot -am spring-boot:run'
 ```
 

@@ -52,13 +52,13 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("tdr", getDspSupplier().get().transportDocumentReference());
+    return super.asJsonNode().put("tdr", getTransportDocumentReference());
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        Map.of("REFERENCE", getTransportDocumentReference()),
         "prompt-shipper-get-td-amendment.md",
         "prompt-shipper-refresh-complete.md");
   }
@@ -68,7 +68,6 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        String tdr = getDspSupplier().get().transportDocumentReference();
         List<JsonRebasableContentCheck> nestedChecks =
             new ArrayList<>(EblChecks.amendedTransportDocumentCarrierContentChecks(getDspSupplier()));
         nestedChecks.addAll(
@@ -78,7 +77,7 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
             new UrlPathCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
-                "/v3/transport-documents/%s/amendment".formatted(tdr)),
+                getTransportDocumentAmendmentEndpoint()),
             new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,

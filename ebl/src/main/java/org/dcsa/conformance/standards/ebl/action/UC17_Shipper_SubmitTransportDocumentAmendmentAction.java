@@ -51,7 +51,7 @@ public class UC17_Shipper_SubmitTransportDocumentAmendmentAction extends Shipper
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of("REFERENCE", String.valueOf(getDSP().transportDocumentReference())),
+        Map.of("REFERENCE", String.valueOf(getTransportDocumentReference())),
         "prompt-shipper-uc17.md",
         "prompt-shipper-refresh-complete.md");
   }
@@ -61,7 +61,7 @@ public class UC17_Shipper_SubmitTransportDocumentAmendmentAction extends Shipper
     initializeStandaloneScenarioParameters();
     ObjectNode prompt =
         super.asJsonNode()
-        .put("tdr", getDspSupplier().get().transportDocumentReference())
+        .put("tdr", getTransportDocumentReference())
         .put("scenarioType", getDspSupplier().get().scenarioType());
     if (standaloneAmendedTransportDocument != null) {
       prompt.set("amendedTransportDocument", standaloneAmendedTransportDocument.deepCopy());
@@ -127,14 +127,13 @@ public class UC17_Shipper_SubmitTransportDocumentAmendmentAction extends Shipper
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        String tdr = getDspSupplier().get().transportDocumentReference();
         Stream<ConformanceCheck> requestChecks =
             Stream.of(
                 new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PUT"),
                 new UrlPathCheck(
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
-                    "/v3/transport-documents/%s/amendment".formatted(tdr)),
+                    getTransportDocumentAmendmentEndpoint()),
                 ResponseStatusCheck.forSuccessfulResponse(
                     EblRole::isCarrier, getMatchedExchangeUuid()),
                 new ApiHeaderCheck(

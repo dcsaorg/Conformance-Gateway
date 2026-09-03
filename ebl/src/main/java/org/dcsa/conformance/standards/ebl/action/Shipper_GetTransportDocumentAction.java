@@ -29,13 +29,13 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("tdr", getDspSupplier().get().transportDocumentReference());
+    return super.asJsonNode().put("tdr", getTransportDocumentReference());
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        Map.of("REFERENCE", getTransportDocumentReference()),
         "prompt-shipper-get-td.md",
         "prompt-shipper-refresh-complete.md");
   }
@@ -50,17 +50,13 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
 
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {
-    var dsp = getDspSupplier().get();
-    var tdr =
-        dsp.transportDocumentReference() != null
-            ? dsp.transportDocumentReference()
-            : "<UNKNOWN-TDR>";
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
+            new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "GET"),
             new UrlPathCheck(
-                EblRole::isShipper, getMatchedExchangeUuid(), "/v3/transport-documents/" + tdr),
+                EblRole::isShipper, getMatchedExchangeUuid(), getTransportDocumentEndpoint()),
             new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,

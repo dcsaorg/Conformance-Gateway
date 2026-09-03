@@ -35,14 +35,14 @@ public class UC18_Shipper_CancelTransportDocumentAmendmentAction extends Shipper
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        Map.of("REFERENCE", getTransportDocumentReference()),
         "prompt-shipper-uc18.md",
         "prompt-shipper-refresh-complete.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("tdr", getDspSupplier().get().transportDocumentReference());
+    return super.asJsonNode().put("tdr", getTransportDocumentReference());
   }
 
   @Override
@@ -55,14 +55,13 @@ public class UC18_Shipper_CancelTransportDocumentAmendmentAction extends Shipper
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        String tdr = getDspSupplier().get().transportDocumentReference();
         Stream<ConformanceCheck> requestChecks =
             Stream.of(
                 new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "DELETE"),
                 new UrlPathCheck(
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
-                    "/v3/transport-documents/%s/amendment".formatted(tdr)),
+                    getTransportDocumentAmendmentEndpoint()),
                 ResponseStatusCheck.forSuccessfulResponse(
                     EblRole::isCarrier, getMatchedExchangeUuid()),
                 new ApiHeaderCheck(

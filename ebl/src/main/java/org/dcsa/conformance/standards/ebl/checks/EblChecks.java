@@ -1438,18 +1438,18 @@ public class EblChecks {
   private static JsonRebasableContentCheck describedTdCheck(
       String description, JsonRebasableContentCheck validation) {
     return JsonAttribute.customValidator(
-        description, (JsonContentMatchedValidation) validation::validate);
+        tdDisplayDescription(description), (JsonContentMatchedValidation) validation::validate);
   }
 
   private static JsonRebasableContentCheck describedTdCheck(
       String description, JsonContentMatchedValidation validation) {
-    return JsonAttribute.customValidator(description, validation);
+    return JsonAttribute.customValidator(tdDisplayDescription(description), validation);
   }
 
   private static JsonRebasableContentCheck describedTdCheck(
       String description, JsonRebasableContentCheck... validations) {
     return JsonAttribute.customValidator(
-        description,
+        tdDisplayDescription(description),
         (body, contextPath) -> {
           Set<ConformanceCheckResult> results =
               Arrays.stream(validations)
@@ -1462,6 +1462,10 @@ public class EblChecks {
           return ConformanceCheckResult.from(
               relevantResults.isEmpty() ? results : relevantResults);
         });
+  }
+
+  private static String tdDisplayDescription(String workbookDescription) {
+    return workbookDescription.replace('`', '\'');
   }
 
   private static final Set<String> TRANSPORT_DOCUMENT_STATUSES =
@@ -1708,8 +1712,8 @@ public class EblChecks {
           describedTdCheck(
               "For every item in `documentParties.other[]`, `partyFunction` must equal `SCO`, `DDR`, `DDS`, `COW`, or `COX`.",
               VALID_TD_PARTY_FUNCTION),
-          VALID_TD_TYPE_OF_PERSON,
-          VALID_TD_EBL_PLATFORMS,
+          describedTdCheck(VALID_TD_TYPE_OF_PERSON.description(), VALID_TD_TYPE_OF_PERSON),
+          describedTdCheck(VALID_TD_EBL_PLATFORMS.description(), VALID_TD_EBL_PLATFORMS),
           describedTdCheck(
               "If present, `codeListProvider` must equal  `WAVE`, `CARX`, `ESSD`, `IDT`, `BOLE`, `EDOX`, `IQAX`, `SECR`, `TRGO`, `ETEU`, `TRAC`, `BRIT`, `COVA`, `ETIT`, `KTNE`, `CRED`, `BLOC`, `DOCU`, `AEOT`, `SGTD`, `GSBN`, `WISE`, `GLEIF`, `W3C`, `DNB`, `FMC`, `DCSA`, or `ZZZ`.",
               TD_DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS),
@@ -1719,8 +1723,12 @@ public class EblChecks {
           describedTdCheck(
               "For every item in a consignment-item `references[]` collection, `type` must equal `CR`, `AKG`, `SPO`, or `CPO`.",
               VALID_CONSIGNMENT_ITEMS_REFERENCE_TYPES),
-          VALID_NATIONAL_COMMODITY_CODE_TYPES,
-          VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES,
+          describedTdCheck(
+              VALID_NATIONAL_COMMODITY_CODE_TYPES.description(),
+              VALID_NATIONAL_COMMODITY_CODE_TYPES),
+          describedTdCheck(
+              VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES.description(),
+              VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES),
           describedTdCheck(
               "For every cargo item containing `dangerousGoods`, `imoPackagingCode` or `packageCode` must be present.",
               JsonAttribute.allIndividualMatchesMustBeValid(
@@ -2134,14 +2142,17 @@ public class EblChecks {
     addTransportDocumentCarrierChecks(jsonContentChecks, payloadContext);
   }
 
-  private static void addTransportDocumentCarrierChecks(List<? super JsonRebasableContentCheck> jsonContentChecks, TdPayloadContext payloadContext) {
+  private static void addTransportDocumentCarrierChecks(
+      List<? super JsonRebasableContentCheck> jsonContentChecks, TdPayloadContext payloadContext) {
     STATIC_TD_CHECKS.stream()
-      .map(check -> {
-        return payloadContext != TdPayloadContext.STANDARD && SEGREGATION_GROUPS_DESCRIPTION.equals(check.description())
-          ? describedTdCheck(AMENDMENT_SEGREGATION_GROUPS_DESCRIPTION, check)
-          : check;
-      })
-      .forEach(jsonContentChecks::add);
+        .map(
+            check ->
+                payloadContext != TdPayloadContext.STANDARD
+                        && tdDisplayDescription(SEGREGATION_GROUPS_DESCRIPTION)
+                            .equals(check.description())
+                    ? describedTdCheck(AMENDMENT_SEGREGATION_GROUPS_DESCRIPTION, check)
+                    : check)
+        .forEach(jsonContentChecks::add);
   }
 
   public static List<JsonRebasableContentCheck> genericTDContentChecks(
@@ -2156,6 +2167,14 @@ public class EblChecks {
 
   public static List<JsonRebasableContentCheck> transportDocumentCarrierContentChecks() {
     return List.copyOf(STATIC_TD_CHECKS);
+  }
+
+  public static List<JsonContentCheck> transportDocumentCarrierContentChecks(
+      ScenarioType scenarioType) {
+    List<JsonContentCheck> checks = new ArrayList<>(STATIC_TD_CHECKS);
+    checks.removeIf(check -> !tdCheckAppliesToScenario(check, scenarioType));
+    checks.addAll(tdScopeChecks(scenarioType));
+    return List.copyOf(checks);
   }
 
   public static ActionCheck tdPlusScenarioContentChecks(
@@ -2204,12 +2223,12 @@ public class EblChecks {
 
   private static boolean tdCheckAppliesToScenario(JsonContentCheck check, ScenarioType scenarioType) {
     String description = check.description();
-    if (description.startsWith("When `isElectronic` is `true`, no more than one original")
+    if (description.startsWith("When 'isElectronic' is 'true', no more than one original")
         || description.startsWith("When isElectronic is true and transportDocumentTypeCode is BOL")) {
       return !scenarioType.isSWB();
     }
     if (description.equals("Consignee and endorsee must never both be present (mutually exclusive).")
-        || description.startsWith("If `isToOrder=true`, then at least one notify party")) {
+        || description.startsWith("If 'isToOrder=true', then at least one notify party")) {
       return scenarioType.isToOrder();
     }
     return true;
@@ -2219,8 +2238,9 @@ public class EblChecks {
     List<JsonContentCheck> checks = new ArrayList<>();
     checks.add(
         JsonAttribute.mustEqual(
-            "[Scope] `transportDocumentTypeCode` must equal `%s`."
-                .formatted(scenarioType.transportDocumentTypeCode()),
+            tdDisplayDescription(
+                "[Scope] `transportDocumentTypeCode` must equal `%s`."
+                    .formatted(scenarioType.transportDocumentTypeCode())),
             TRANSPORT_DOCUMENT_TYPE_CODE,
             scenarioType::transportDocumentTypeCode));
     checks.add(
@@ -2263,7 +2283,7 @@ public class EblChecks {
     List<JsonContentCheck> checks = new ArrayList<>(STATIC_TD_CHECKS);
     checks.removeIf(
         check ->
-            check.description().startsWith("`transportDocumentStatus` must equal")
+            check.description().startsWith("'transportDocumentStatus' must equal")
                 || (scenarioType != null && !tdCheckAppliesToScenario(check, scenarioType)));
     checks.add(
         describedTdCheck(

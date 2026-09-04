@@ -62,7 +62,8 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
                 DATA_PATH,
                 () -> {
                   List<JsonContentCheck> checks =
-                      new ArrayList<>(EblChecks.getTdNotificationChecks(statusScenario));
+                      new ArrayList<>(
+                          EblChecks.getTdNotificationChecks(statusScenario, dspSupplier));
                   getTdrCheck().ifPresent(checks::add);
                   return checks;
                 }),

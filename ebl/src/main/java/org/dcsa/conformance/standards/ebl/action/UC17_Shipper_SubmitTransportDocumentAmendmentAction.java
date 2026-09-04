@@ -96,6 +96,10 @@ public class UC17_Shipper_SubmitTransportDocumentAmendmentAction extends Shipper
               getDspSupplier()
                   .get()
                   .withScenarioType(STANDALONE_SCENARIO_TYPE.name())
+                  .withTransportDocumentStatus(
+                      standaloneAmendedTransportDocument
+                          .required("transportDocumentStatus")
+                          .asText())
                   .withTransportDocumentReference(
                       standaloneAmendedTransportDocument
                           .required("transportDocumentReference")

@@ -1023,7 +1023,7 @@ class EblChecksTest {
             "If transportDocumentTypeCode='SWB', then numberOfOriginalsWithCharges and numberOfOriginalsWithoutCharges must be absent",
             "`transportDocumentStatus` must equal `DRAFT`, `APPROVED`, `ISSUED`, `PENDING_SURRENDER_FOR_AMENDMENT`, `SURRENDERED_FOR_AMENDMENT`, `PENDING_SURRENDER_FOR_DELIVERY`, `SURRENDERED_FOR_DELIVERY`, or `VOIDED`.",
             "If `transportDocumentStatus='ISSUED'`, then `issueDate` must be present",
-            "shippedOnBoardDate and receivedForShipmentDate must not both be present.",
+            "Exactly one of `shippedOnBoardDate` and `receivedForShipmentDate` must be present.",
             "`declaredValue` and `declaredValueCurrency` must either both be present or both be absent.",
             "If `isElectronic=true`, then `numberOfRiderPages` must not be present.",
             "`cargoMovementTypeAtOrigin` must equal `FCL` or `LCL`.",
@@ -1069,6 +1069,50 @@ class EblChecksTest {
     assertEquals(38, actualDescriptions.size());
     assertEquals(expectedDisplayDescriptions, Set.copyOf(actualDescriptions));
     assertTrue(actualDescriptions.stream().noneMatch(description -> description.contains("`")));
+  }
+
+  @Test
+  void exactlyOneShipmentDateMustBePresent() {
+    JsonContentCheck shipmentDateCheck =
+        EblChecks.transportDocumentCarrierContentChecks().stream()
+            .filter(check -> check.description().startsWith("Exactly one of 'shippedOnBoardDate'"))
+            .findFirst()
+            .orElseThrow();
+
+    assertInvalid(shipmentDateCheck);
+    rootNode.put("shippedOnBoardDate", "2026-09-04");
+    assertValid(shipmentDateCheck);
+    rootNode.put("receivedForShipmentDate", "2026-09-03");
+    assertInvalid(shipmentDateCheck);
+    rootNode.remove("shippedOnBoardDate");
+    assertValid(shipmentDateCheck);
+  }
+
+  @Test
+  void uc17AndUc18NotificationStatusesMustRemainUnchanged() {
+    var dsp =
+        new EblDynamicScenarioParameters(
+            ScenarioType.REGULAR_STRAIGHT_BL.name(),
+            null,
+            "TDR-1",
+            "DRAFT",
+            null,
+            null,
+            false,
+            false);
+
+    for (TransportDocumentStatusScenario scenario :
+        List.of(TransportDocumentStatusScenario.uc17(), TransportDocumentStatusScenario.uc18())) {
+      JsonContentCheck unchangedStatusCheck =
+          EblChecks.getTdNotificationChecks(scenario, () -> dsp).stream()
+              .filter(check -> check.description().contains("equal its value from before the action"))
+              .findFirst()
+              .orElseThrow();
+      rootNode.put("transportDocumentStatus", "DRAFT");
+      assertValid(unchangedStatusCheck);
+      rootNode.put("transportDocumentStatus", "ISSUED");
+      assertInvalid(unchangedStatusCheck);
+    }
   }
 
   @Test
@@ -1166,7 +1210,7 @@ class EblChecksTest {
   void notificationChecksIncludeAmendedTransportDocumentPayload() {
     var dsp =
         new EblDynamicScenarioParameters(
-            ScenarioType.REGULAR_STRAIGHT_BL.name(), null, "TDR-1", null, null, false, false);
+            ScenarioType.REGULAR_STRAIGHT_BL.name(), null, "TDR-1", "DRAFT", null, null, false, false);
     var notificationCheck =
         new CarrierTdNotificationPayloadRequestConformanceCheck(
             UUID.randomUUID(), TransportDocumentStatusScenario.uc17(), true, () -> dsp);
@@ -1185,7 +1229,7 @@ class EblChecksTest {
                 title ->
                     title.contains("[Amended Transport Document]")
                         && title.contains(
-                            "If present,'segregationGroups[]' must be an integer from 1 through 18.")));
+                            "If present, 'segregationGroups[]' must be an integer from 1 through 18.")));
     assertTrue(
         titles.stream()
             .anyMatch(
@@ -1216,7 +1260,7 @@ class EblChecksTest {
   void uc6NotificationChecksExcludeAmendedTransportDocumentPayload() {
     var dsp =
         new EblDynamicScenarioParameters(
-            ScenarioType.REGULAR_STRAIGHT_BL.name(), null, "TDR-1", null, null, false, false);
+            ScenarioType.REGULAR_STRAIGHT_BL.name(), null, "TDR-1", "DRAFT", null, null, false, false);
     var notificationCheck =
         new CarrierTdNotificationPayloadRequestConformanceCheck(
             UUID.randomUUID(), TransportDocumentStatusScenario.uc6(), true, () -> dsp);
@@ -1231,7 +1275,7 @@ class EblChecksTest {
   void amendedNotificationValidatesEveryWorkbookNationalCommodityCodePath() {
     var dsp =
         new EblDynamicScenarioParameters(
-            ScenarioType.REGULAR_STRAIGHT_BL.name(), null, "TDR-1", null, null, false, false);
+            ScenarioType.REGULAR_STRAIGHT_BL.name(), null, "TDR-1", "DRAFT", null, null, false, false);
     JsonContentCheck nationalCommodityCodeCheck =
         EblChecks.getTdPayloadChecks(
                 List.of(TransportDocumentStatus.TD_DRAFT),
@@ -1276,6 +1320,13 @@ class EblChecksTest {
             .flatMap(List::stream)
             .noneMatch(description -> description.contains("`")));
     assertTrue(
+        Stream.of(straightBlDescriptions, negotiableBlDescriptions, seaWaybillDescriptions)
+            .flatMap(List::stream)
+            .noneMatch(description -> description.contains(".: Must equal")));
+    assertTrue(
+        seaWaybillDescriptions.contains(
+            "[Scope] 'transportDocumentTypeCode' must equal 'SWB'."));
+    assertTrue(
         straightBlDescriptions.stream()
             .anyMatch(description -> description.startsWith("When 'isElectronic' is 'true'")));
     assertFalse(
@@ -1298,7 +1349,7 @@ class EblChecksTest {
   private List<String> tdDescriptionsFor(ScenarioType scenarioType) {
     var dsp =
         new EblDynamicScenarioParameters(
-            scenarioType.name(), null, "TDR-1", null, null, false, false);
+            scenarioType.name(), null, "TDR-1", "DRAFT", null, null, false, false);
     return EblChecks.getTdPayloadChecks(
             List.of(TransportDocumentStatus.TD_DRAFT), () -> dsp)
         .stream()

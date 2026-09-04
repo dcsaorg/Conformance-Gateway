@@ -1500,7 +1500,7 @@ public class EblChecks {
   private static final String SEGREGATION_GROUPS_DESCRIPTION =
       "If present, `segregationGroups[]` must be an integer from 1 through 18.";
   private static final String AMENDMENT_SEGREGATION_GROUPS_DESCRIPTION =
-      "If present,`segregationGroups[]` must be an integer from 1 through 18.";
+      "If present, `segregationGroups[]` must be an integer from 1 through 18.";
 
   enum TdPayloadContext {
     STANDARD,
@@ -1648,7 +1648,10 @@ public class EblChecks {
               "If `transportDocumentStatus='ISSUED'`, then `issueDate` must be present",
               ISSUE_DATE_REQUIRED_WHEN_ISSUED),
           describedTdCheck(
-              "shippedOnBoardDate and receivedForShipmentDate must not both be present.",
+              "Exactly one of `shippedOnBoardDate` and `receivedForShipmentDate` must be present.",
+              JsonAttribute.atLeastOneOf(
+                  JsonPointer.compile(S.formatted(SHIPPED_ON_BOARD_DATE)),
+                  JsonPointer.compile(S.formatted(RECEIVED_FOR_SHIPMENT_DATE))),
               JsonAttribute.atMostOneOf(
                   JsonPointer.compile(S.formatted(SHIPPED_ON_BOARD_DATE)),
                   JsonPointer.compile(S.formatted(RECEIVED_FOR_SHIPMENT_DATE)))),
@@ -2088,6 +2091,13 @@ public class EblChecks {
 
   public static List<JsonContentCheck> getTdNotificationChecks(
       TransportDocumentStatusScenario statusScenario, JsonContentCheck... extraChecks) {
+    return getTdNotificationChecks(statusScenario, null, extraChecks);
+  }
+
+  public static List<JsonContentCheck> getTdNotificationChecks(
+      TransportDocumentStatusScenario statusScenario,
+      Supplier<EblDynamicScenarioParameters> dspSupplier,
+      JsonContentCheck... extraChecks) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>(Arrays.asList(extraChecks));
 
     jsonContentChecks.add(
@@ -2104,6 +2114,15 @@ public class EblChecks {
                     KeywordDataset.staticDataset(
                         AMENDED_TRANSPORT_DOCUMENT_STATUSES.toArray(String[]::new))))));
     jsonContentChecks.addAll(statusScenario.checks(true));
+    if (statusScenario.requiresUnchangedPrimaryStatus() && dspSupplier != null) {
+      jsonContentChecks.add(
+          describedTdCheck(
+              "After `%s`, `transportDocumentStatus` must equal its value from before the action."
+                  .formatted(statusScenario.useCase()),
+              JsonAttribute.mustEqual(
+                  TD_TRANSPORT_DOCUMENT_STATUS,
+                  () -> dspSupplier.get().transportDocumentStatus())));
+    }
 
     jsonContentChecks.add(
         describedTdCheck(
@@ -2237,12 +2256,12 @@ public class EblChecks {
   private static List<JsonContentCheck> tdScopeChecks(ScenarioType scenarioType) {
     List<JsonContentCheck> checks = new ArrayList<>();
     checks.add(
-        JsonAttribute.mustEqual(
-            tdDisplayDescription(
-                "[Scope] `transportDocumentTypeCode` must equal `%s`."
-                    .formatted(scenarioType.transportDocumentTypeCode())),
-            TRANSPORT_DOCUMENT_TYPE_CODE,
-            scenarioType::transportDocumentTypeCode));
+        describedTdCheck(
+            "[Scope] `transportDocumentTypeCode` must equal `%s`."
+                .formatted(scenarioType.transportDocumentTypeCode()),
+            JsonAttribute.path(
+                TRANSPORT_DOCUMENT_TYPE_CODE,
+                JsonAttribute.matchedMustEqual(scenarioType::transportDocumentTypeCode))));
     checks.add(
         describedTdCheck(
             "[Scope] `isToOrder` must equal `%s`.".formatted(scenarioType.isToOrder()),
@@ -2269,7 +2288,7 @@ public class EblChecks {
         standardVersion,
         List.of(
             describedTdCheck(
-                "`transportDocumentStatus`must equal `APPROVED`.",
+                "`transportDocumentStatus` must equal `APPROVED`.",
                 JsonAttribute.mustEqual(TD_TRANSPORT_DOCUMENT_STATUS, "APPROVED"))));
   }
 
@@ -2291,6 +2310,12 @@ public class EblChecks {
             JsonAttribute.mustBeOneOf(
                 TD_TRANSPORT_DOCUMENT_STATUS,
                 Set.of("DRAFT", "ISSUED", "PENDING_SURRENDER_FOR_AMENDMENT"))));
+    checks.add(
+        describedTdCheck(
+            "`transportDocumentStatus` must equal its value from before the action.",
+            JsonAttribute.mustEqual(
+                TD_TRANSPORT_DOCUMENT_STATUS,
+                () -> dspSupplier.get().transportDocumentStatus())));
     if (scenarioType != null) {
       checks.addAll(tdScopeChecks(scenarioType));
     }

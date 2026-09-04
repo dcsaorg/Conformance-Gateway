@@ -41,7 +41,6 @@ class ConformanceApplicationTest {
         "booking-200-conformance-auto-all-in-one",
         // "booking+ebl-200+300-conformance-auto-all-in-one", // Disabled legacy combined standard
         "cs-100-conformance-auto-all-in-one",
-        // Disabled legacy EBL suites:
         // "ebl-300-conformance-si-+-td-auto-all-in-one",
         // "ebl-300-conformance-td-amendments-auto-all-in-one",
         "ebl-300-conformance-si-auto-all-in-one",

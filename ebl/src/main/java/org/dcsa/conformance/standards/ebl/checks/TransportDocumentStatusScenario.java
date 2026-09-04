@@ -83,6 +83,10 @@ public record TransportDocumentStatusScenario(
         null, transportDocumentStatuses, null, false);
   }
 
+  public boolean requiresUnchangedPrimaryStatus() {
+    return "UC17".equals(useCase) || "UC18".equals(useCase);
+  }
+
   public List<JsonRebasableContentCheck> checks(boolean notification) {
     var checks = new java.util.ArrayList<JsonRebasableContentCheck>();
     Set<String> primaryStatuses =

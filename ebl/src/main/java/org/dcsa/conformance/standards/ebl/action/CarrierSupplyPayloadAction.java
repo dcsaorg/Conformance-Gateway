@@ -28,6 +28,8 @@ public class CarrierSupplyPayloadAction extends EblAction {
   private static final String INPUT = "input";
   private static final String CBR_PLACEHOLDER = "{CBR}";
   private static final String DEFAULT_CBR = "BOOKING202507041234567890123456";
+  private static final Set<String> DIRECT_AMENDMENT_STATUSES =
+      Set.of("DRAFT", "ISSUED", "PENDING_SURRENDER_FOR_AMENDMENT");
 
   private ScenarioType scenarioType;
   private JsonNode carrierPayload;
@@ -239,6 +241,13 @@ public class CarrierSupplyPayloadAction extends EblAction {
                   .withTransportDocumentReference(
                       td.required("transportDocumentReference").asText()));
     }
+    if (includeAmendment && td.hasNonNull("transportDocumentStatus")) {
+      getDspConsumer()
+          .accept(
+              getDspSupplier()
+                  .get()
+                  .withTransportDocumentStatus(td.required("transportDocumentStatus").asText()));
+    }
   }
 
   @Override
@@ -286,7 +295,11 @@ public class CarrierSupplyPayloadAction extends EblAction {
     JsonNode transportDocument = input.path("transportDocument");
     JsonNode amendedTransportDocument = input.path("amendedTransportDocument");
     Set<String> errors =
-        Stream.of("transportDocumentTypeCode", "isToOrder", "transportDocumentReference")
+        Stream.of(
+                "transportDocumentTypeCode",
+                "isToOrder",
+                "transportDocumentReference",
+                "transportDocumentStatus")
             .filter(
                 fieldName ->
                     !transportDocument
@@ -297,6 +310,11 @@ public class CarrierSupplyPayloadAction extends EblAction {
                     "The original and amended Transport Documents must have the same `%s` value."
                         .formatted(fieldName))
             .collect(Collectors.toCollection(LinkedHashSet::new));
+    String originalStatus = transportDocument.path("transportDocumentStatus").asText(null);
+    if (!DIRECT_AMENDMENT_STATUSES.contains(originalStatus)) {
+      errors.add(
+          "The original Transport Document `transportDocumentStatus` must equal `DRAFT`, `ISSUED`, or `PENDING_SURRENDER_FOR_AMENDMENT`.");
+    }
     if (transportDocument.equals(amendedTransportDocument)) {
       errors.add("The amended Transport Document must differ from the original.");
     }

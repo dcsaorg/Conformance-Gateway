@@ -68,7 +68,7 @@ public abstract class EblAction extends BookingAndEblAction {
       getEblDspReference().set(null);
     } else {
       getEblDspReference()
-          .set(new EblDynamicScenarioParameters(null, null, null, null, null, false, false));
+          .set(new EblDynamicScenarioParameters(null, null, null, null, null, null, false, false));
     }
   }
 

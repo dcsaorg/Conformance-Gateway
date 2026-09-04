@@ -1,34 +1,8 @@
 # DCSA TNT 3.0.0 - Conformance Scenarios
 
--
-  1. What is Conformance?
-
-  - 1.1. Scope
--
-  2. Conformance Criteria
--
-  3. Conformance Scenarios
-
-  - 3.1. Event Producer
-    - 3.1.1. Event Producer: POST scenarios per event type — alternative required path for event push
-    - 3.1.2. Event Producer: GET scenarios per event type — alternative required path for event pull
-    - 3.1.3. Event Producer: GET scenarios for required query parameter filters — required once per GET endpoint
-      implementation
-      - 3.1.3.1. Base required query parameter filter combinations
-      - 3.1.3.2. Additional required query parameter combination
-    - 3.1.4. Event Producer: GET scenario for pagination — optional/report-only
-  - 3.2. Event Consumer
-    - 3.2.1. Event Consumer: POST scenarios per event type — alternative required path for event push
-    - 3.2.2. Event Consumer: GET scenarios per event type — alternative required path for event pull
--
-  4. Conformance Validations
-
-  - 4.1. Custom validations: Event Producer
-    - 4.1.1. Common validations for all event types
-    - 4.1.2. Shipment event validations
-    - 4.1.3. Transport event validations
-    - 4.1.4. Equipment, IoT, and Reefer event validations
-  - 4.2. Event Consumer validations
+- Confluence page id: `983040229`
+- Confluence version: `44`
+- Synced at: `2026-09-04T12:38:25.332013Z`
 
 # 1. What is Conformance?
 
@@ -73,10 +47,10 @@ The badge for each role records the following event-type scope qualifiers indepe
 The applicable scenario must be completed separately for every event-type qualifier claimed. A scenario demonstrates
 only its explicitly targeted event type.
 
-| Standard role  | Business type (example)                               | Mandatory features to get a badge 🏅                                                                                                                                                                                                                 | Optional features                                                     | Scope qualifiers                                                |
-|----------------|-------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------|
-| Event Producer | Ocean Carrier / Terminal Operator / Solution Provider | Must implement at least one alternative mandatory path:<br>- **Event push:** can send T&T events to an Event Consumer through POST `/events`; or<br>- **Event pull:** can make T&T events available to an Event Consumer through GET `/events`.      | Pagination support on GET `/events` may be demonstrated and reported. | **Shipment**; **Transport**; **Equipment**; **IoT**; **Reefer** |
-| Event Consumer | Solution Provider / Freight Forwarder / BCO           | Must implement at least one alternative mandatory path:<br>- **Event push:** exposes POST `/events` through which Event Producers can send T&T events; or<br>- **Event pull:** can retrieve T&T events from an Event Producer through GET `/events`. | None                                                                  | **Shipment**; **Transport**; **Equipment**; **IoT**; **Reefer** |
+| Standard role  | Business type (example)                               | Mandatory features to get a badge 🏅                                                                                                                                                                                                             | Optional features                                                     | Scope qualifiers                                                |
+|----------------|-------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------|
+| Event Producer | Ocean Carrier / Terminal Operator / Solution Provider | Must implement at least one alternative mandatory path:   - **Event push:** can send T&T events to an Event Consumer through POST `/events`; or - **Event pull:** can make T&T events available to an Event Consumer through GET `/events`.      | Pagination support on GET `/events` may be demonstrated and reported. | **Shipment**; **Transport**; **Equipment**; **IoT**; **Reefer** |
+| Event Consumer | Solution Provider / Freight Forwarder / BCO           | Must implement at least one alternative mandatory path:   - **Event push:** exposes POST `/events` through which Event Producers can send T&T events; or - **Event pull:** can retrieve T&T events from an Event Producer through GET `/events`. | None                                                                  | **Shipment**; **Transport**; **Equipment**; **IoT**; **Reefer** |
 
 **Standard role**
 
@@ -193,7 +167,7 @@ All of the following scenarios must pass for the GET endpoint to be considered c
 - **Supply parameters (**`carrierBookingReference`) + **GET events**
 - **Supply parameters (**`carrierBookingReference` + `equipmentReference`) + **GET events**
 - **Supply parameters (**`transportDocumentReference`) + **GET events**
-- **Supply parameters (**`transportDocumentReference` + `equipmentReference`) +** GET events**
+- **Supply parameters (**`transportDocumentReference` + `equipmentReference`) + **GET events**
 - **Supply parameters (**`equipmentReference`) + **GET events**
 
 #### 3.1.3.2. Additional required query parameter combination
@@ -221,7 +195,7 @@ combinations remain implementation requirements even where no separate certifica
 
 This scenario measures the conformance of Event Producers that implement pagination on GET `/events`.
 
-- **Supply parameters (**`carrierBookingReference` + `limit`) +** GET events** +** GET events**
+- **Supply parameters (**`carrierBookingReference` + `limit`) + **GET events** + **GET events**
   (`carrierBookingReference` + `limit` + `cursor`)
 
 For this scenario, the adopter provides `carrierBookingReference` and `limit` values that allow the sandbox to retrieve

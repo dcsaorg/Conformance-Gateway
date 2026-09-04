@@ -1,0 +1,259 @@
+{
+  "description": "Confluence pages to sync to repository markdown",
+  "output_dir": "specifications/confluence-sync",
+  "index_file": "INDEX.md",
+  "standards": {
+    "adoption": {
+      "enabled": false,
+      "versions": {
+        "1.0.0": {
+          "enabled": false,
+          "pages": [
+            {
+              "id": "REPLACE_WITH_PAGE_ID",
+              "name": "Adoption Spec",
+              "slug": "conformance-scenarios",
+              "enabled": false,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "arrival-notice": {
+      "enabled": true,
+      "versions": {
+        "1.0.1": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "1812430849",
+              "name": "Arrival Notice Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "booking": {
+      "enabled": true,
+      "versions": {
+        "2.0.4": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "1601798776",
+              "name": "Booking Conformance Scenarios (CEP26)",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "booking-and-ebl": {
+      "enabled": false,
+      "versions": {
+        "2.0.4-3.0.3": {
+          "enabled": false,
+          "pages": [
+            {
+              "id": "REPLACE_WITH_PAGE_ID",
+              "name": "Booking and EBL Spec",
+              "slug": "conformance-scenarios",
+              "enabled": false,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "commercial-schedules": {
+      "enabled": true,
+      "versions": {
+        "1.0.3": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "1984299065",
+              "name": "Commercial Schedules Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "ebl": {
+      "enabled": true,
+      "versions": {
+        "3.0.3": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "1984299010",
+              "name": "EBL SI Conformance Scenarios",
+              "slug": "si-conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            },
+            {
+              "id": "1984299095",
+              "name": "EBL TD Conformance Scenarios",
+              "slug": "td-conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "ebl-endorsement-chain": {
+      "enabled": true,
+      "versions": {
+        "3.0.3": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "2005368942",
+              "name": "EBL Endorsement Chain Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "ebl-issuance": {
+      "enabled": true,
+      "versions": {
+        "3.0.3": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "2005368834",
+              "name": "EBL Issuance Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "ebl-surrender": {
+      "enabled": true,
+      "versions": {
+        "3.0.3": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "2005368888",
+              "name": "EBL Surrender Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "ovs": {
+      "enabled": true,
+      "versions": {
+        "3.0.3": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "2052653603",
+              "name": "OVS Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "pint": {
+      "enabled": true,
+      "versions": {
+        "3.0.0": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "1638432796",
+              "name": "PINT Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "port-call": {
+      "enabled": true,
+      "versions": {
+        "2.0.0": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "1740144652",
+              "name": "Port Call Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "tnt": {
+      "enabled": true,
+      "versions": {
+        "3.0.0": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "983040229",
+              "name": "TNT Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    },
+    "vgm": {
+      "enabled": true,
+      "versions": {
+        "1.0.1": {
+          "enabled": true,
+          "pages": [
+            {
+              "id": "1673003009",
+              "name": "VGM Spec",
+              "slug": "conformance-scenarios",
+              "enabled": true,
+              "download_excel_attachments": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "notes": [
+    "Use Confluence page id as numeric id only",
+    "Pages are written under specifications/confluence-sync/{standard}/{version}/",
+    "Only excel files referenced in the page body are downloaded",
+    "Excel attachments are saved under specifications/confluence-sync/{standard}/{version}/excel/*.xlsx",
+    "Slugs follow conformance-scenarios pattern (SI/TD use suffixed slugs)"
+  ]
+}

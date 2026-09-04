@@ -1,14 +1,6 @@
 package org.dcsa.conformance.end.checks;
 
-import static org.dcsa.conformance.end.checks.EndChainDataSets.VALID_ACTION_CODES;
-import static org.dcsa.conformance.end.checks.EndChainDataSets.VALID_CODE_LIST_PROVIDERS;
-import static org.dcsa.conformance.end.checks.EndChainDataSets.VALID_EBL_PLATFORMS;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.UUID;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheckResult;
 import org.dcsa.conformance.core.check.ConformanceError;
@@ -16,6 +8,15 @@ import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.end.party.EndorsementChainRole;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.dcsa.conformance.end.checks.EndChainDataSets.VALID_ACTION_CODES;
+import static org.dcsa.conformance.end.checks.EndChainDataSets.VALID_CODE_LIST_PROVIDERS;
+import static org.dcsa.conformance.end.checks.EndChainDataSets.VALID_EBL_PLATFORMS;
 
 public class EndorsementChainChecks {
 
@@ -28,35 +29,32 @@ public class EndorsementChainChecks {
   private static final String EBL_PLATFORM = "eblPlatform";
   private static final String ACTION_CODE = "actionCode";
 
-  private static final String DATASET_VALIDATION_MESSAGE =
-      "All '%s' values must be one of the predefined dataset values.";
-
   public static ActionCheck getENDGetResponseChecks(
-      UUID matchedExchangeUuid, String expectedApiVersion) {
+    UUID matchedExchangeUuid, String expectedApiVersion) {
 
     var checks = new ArrayList<JsonContentCheck>();
-    checks.add(validResponseIsEmpty());
+    checks.add(validResponseIsNonEmptyArray());
     checks.add(validActionCode());
     checks.add(validEblPlatformPseudoEnum());
     checks.add(validCodeListProviderPseudoEnumEverywhere());
     return JsonAttribute.contentChecks(
-        "",
-        "Validate the payload from the Provider",
-        EndorsementChainRole::isProvider,
-        matchedExchangeUuid,
-        HttpMessageType.RESPONSE,
-        expectedApiVersion,
-        checks);
+      "",
+      "Validate the payload from the Provider",
+      EndorsementChainRole::isProvider,
+      matchedExchangeUuid,
+      HttpMessageType.RESPONSE,
+      expectedApiVersion,
+      checks);
   }
 
-  private static JsonContentCheck validResponseIsEmpty() {
+  private static JsonContentCheck validResponseIsNonEmptyArray() {
     return JsonAttribute.customValidator(
-      "Response must be a non empty array",
+      "Response must be a non-empty array",
       body -> {
         Set<String> errors = new LinkedHashSet<>();
 
         if (body.isEmpty() || !body.isArray()) {
-          errors.add("Response must be a non empty array");
+          errors.add("Response must be a non-empty array");
         }
 
         return ConformanceCheckResult.simple(errors);
@@ -65,131 +63,130 @@ public class EndorsementChainChecks {
 
   private static JsonContentCheck validActionCode() {
     return JsonAttribute.customValidator(
-        DATASET_VALIDATION_MESSAGE.formatted(ACTION_CODE),
-        body -> {
-          Set<String> errors = new LinkedHashSet<>();
+      "All 'endorsementChain.actionCode' values must be one of the values defined by the END standard",
+      body -> {
+        Set<String> errors = new LinkedHashSet<>();
 
-          if (body.isEmpty() || !body.isArray()) {
-            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+        if (body.isEmpty() || !body.isArray()) {
+          return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+        }
+
+        for (int docIdx = 0; docIdx < body.size(); docIdx++) {
+          JsonNode endorsementChain = body.get(docIdx).path(ENDORSEMENT_CHAIN);
+          if (!endorsementChain.isArray() || endorsementChain.isEmpty()) {
+            continue;
           }
 
-          for (int docIdx = 0; docIdx < body.size(); docIdx++) {
-            JsonNode endorsementChain = body.get(docIdx).path(ENDORSEMENT_CHAIN);
-            if (!endorsementChain.isArray() || endorsementChain.isEmpty()) {
+          for (int entryIdx = 0; entryIdx < endorsementChain.size(); entryIdx++) {
+            JsonNode actionCodeNode = endorsementChain.get(entryIdx).path(ACTION_CODE);
+
+            if (actionCodeNode.isMissingNode() || actionCodeNode.isNull()) {
               continue;
             }
 
-            for (int entryIdx = 0; entryIdx < endorsementChain.size(); entryIdx++) {
-              JsonNode actionCodeNode = endorsementChain.get(entryIdx).path(ACTION_CODE);
+            String actionCode = actionCodeNode.asText();
+            if (actionCode.isBlank()) {
+              continue;
+            }
 
-              if (actionCodeNode.isMissingNode() || actionCodeNode.isNull()) {
-                continue;
-              }
-
-              String actionCode = actionCodeNode.asText();
-              if (actionCode.isBlank()) {
-                continue;
-              }
-
-              if (!VALID_ACTION_CODES.contains(actionCode)) {
-                errors.add(
-                    "[%d].endorsementChain[%d].actionCode: '%s' is not a valid action code. Must be one of: %s"
-                        .formatted(docIdx, entryIdx, actionCode, VALID_ACTION_CODES));
-              }
+            if (!VALID_ACTION_CODES.contains(actionCode)) {
+              errors.add(
+                "[%d].endorsementChain[%d].actionCode: '%s' is not a valid action code. Must be one of: %s"
+                  .formatted(docIdx, entryIdx, actionCode, VALID_ACTION_CODES));
             }
           }
-          return ConformanceCheckResult.simple(errors);
-        });
+        }
+        return ConformanceCheckResult.simple(errors);
+      });
   }
 
   private static JsonContentCheck validEblPlatformPseudoEnum() {
     return JsonAttribute.customValidator(
-        DATASET_VALIDATION_MESSAGE.formatted(EBL_PLATFORM),
-        body -> {
-          if (body.isEmpty() || !body.isArray()) {
-            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
-          }
-          Set<String> errors = new LinkedHashSet<>();
+      "All 'eblPlatform' values must be from the DCSA eBL solution providers code list",
+      body -> {
+        if (body.isEmpty() || !body.isArray()) {
+          return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+        }
+        Set<String> errors = new LinkedHashSet<>();
 
-          for (int docIdx = 0; docIdx < body.size(); docIdx++) {
-            JsonNode endorsementChain = body.get(docIdx).path(ENDORSEMENT_CHAIN);
-            if (!endorsementChain.isArray()) {
-              continue;
-            }
-
-            for (int entryIdx = 0; entryIdx < endorsementChain.size(); entryIdx++) {
-              JsonNode entry = endorsementChain.get(entryIdx);
-
-              validatePseudoEnumIfPresent(
-                  errors,
-                  entry.path(ACTOR).path(EBL_PLATFORM),
-                  "[%d].endorsementChain[%d].actor.eblPlatform".formatted(docIdx, entryIdx),
-                  VALID_EBL_PLATFORMS);
-
-              validatePseudoEnumIfPresent(
-                  errors,
-                  entry.path(RECIPIENT).path(EBL_PLATFORM),
-                  "[%d].endorsementChain[%d].recipient.eblPlatform".formatted(docIdx, entryIdx),
-                  VALID_EBL_PLATFORMS);
-            }
+        for (int docIdx = 0; docIdx < body.size(); docIdx++) {
+          JsonNode endorsementChain = body.get(docIdx).path(ENDORSEMENT_CHAIN);
+          if (!endorsementChain.isArray()) {
+            continue;
           }
 
-          return ConformanceCheckResult.simple(errors);
-        });
+          for (int entryIdx = 0; entryIdx < endorsementChain.size(); entryIdx++) {
+            JsonNode entry = endorsementChain.get(entryIdx);
+
+            validatePseudoEnumIfPresent(
+              errors,
+              entry.path(ACTOR).path(EBL_PLATFORM),
+              "[%d].endorsementChain[%d].actor.eblPlatform".formatted(docIdx, entryIdx),
+              VALID_EBL_PLATFORMS);
+
+            validatePseudoEnumIfPresent(
+              errors,
+              entry.path(RECIPIENT).path(EBL_PLATFORM),
+              "[%d].endorsementChain[%d].recipient.eblPlatform".formatted(docIdx, entryIdx),
+              VALID_EBL_PLATFORMS);
+          }
+        }
+
+        return ConformanceCheckResult.simple(errors);
+      });
   }
 
   private static JsonContentCheck validCodeListProviderPseudoEnumEverywhere() {
     return JsonAttribute.customValidator(
-        DATASET_VALIDATION_MESSAGE.formatted(CODE_LIST_PROVIDER),
-        body -> {
-          if (body.isEmpty() || !body.isArray()) {
-            return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
-          }
-          Set<String> errors = new LinkedHashSet<>();
+      "All 'codeListProvider' values must be from the DCSA party code list providers code list",
+      body -> {
+        if (body.isEmpty() || !body.isArray()) {
+          return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
+        }
+        Set<String> errors = new LinkedHashSet<>();
 
-          for (int docIdx = 0; docIdx < body.size(); docIdx++) {
-            JsonNode endorsementChain = body.get(docIdx).path(ENDORSEMENT_CHAIN);
-            if (!endorsementChain.isArray()) {
-              continue;
-            }
-
-            for (int entryIdx = 0; entryIdx < endorsementChain.size(); entryIdx++) {
-              JsonNode entry = endorsementChain.get(entryIdx);
-
-              validateCodeListProviderForPartyAndRepresentedParty(
-                  errors,
-                  entry.path(ACTOR),
-                  "[%d].endorsementChain[%d].actor".formatted(docIdx, entryIdx),
-                  VALID_CODE_LIST_PROVIDERS);
-
-              validateCodeListProviderForPartyAndRepresentedParty(
-                  errors,
-                  entry.path(RECIPIENT),
-                  "[%d].endorsementChain[%d].recipient".formatted(docIdx, entryIdx),
-                  VALID_CODE_LIST_PROVIDERS);
-            }
+        for (int docIdx = 0; docIdx < body.size(); docIdx++) {
+          JsonNode endorsementChain = body.get(docIdx).path(ENDORSEMENT_CHAIN);
+          if (!endorsementChain.isArray()) {
+            continue;
           }
 
-          return ConformanceCheckResult.simple(errors);
-        });
+          for (int entryIdx = 0; entryIdx < endorsementChain.size(); entryIdx++) {
+            JsonNode entry = endorsementChain.get(entryIdx);
+
+            validateCodeListProviderForPartyAndRepresentedParty(
+              errors,
+              entry.path(ACTOR),
+              "[%d].endorsementChain[%d].actor".formatted(docIdx, entryIdx));
+
+            validateCodeListProviderForPartyAndRepresentedParty(
+              errors,
+              entry.path(RECIPIENT),
+              "[%d].endorsementChain[%d].recipient".formatted(docIdx, entryIdx));
+          }
+        }
+
+        return ConformanceCheckResult.simple(errors);
+      });
   }
+
   private static void validateCodeListProviderForPartyAndRepresentedParty(
-      Set<String> errors, JsonNode partyNode, String partyPath, Set<String> allowedValues) {
+    Set<String> errors, JsonNode partyNode, String partyPath) {
 
     if (partyNode.isMissingNode() || partyNode.isNull()) {
       return;
     }
-    validateCodeListProvidersUnderParty(errors, partyNode, partyPath, allowedValues);
+    validateCodeListProvidersUnderParty(errors, partyNode, partyPath);
 
     JsonNode representedParty = partyNode.path(REPRESENTED_PARTY);
     if (!representedParty.isMissingNode() && !representedParty.isNull()) {
       validateCodeListProvidersUnderParty(
-          errors, representedParty, partyPath + "." + REPRESENTED_PARTY, allowedValues);
+        errors, representedParty, partyPath + "." + REPRESENTED_PARTY);
     }
   }
 
   private static void validateCodeListProvidersUnderParty(
-      Set<String> errors, JsonNode partyNode, String partyPath, Set<String> allowedValues) {
+    Set<String> errors, JsonNode partyNode, String partyPath) {
 
     JsonNode identifyingCodes = partyNode.path(IDENTIFYING_CODES);
     if (!identifyingCodes.isArray()) {
@@ -200,30 +197,30 @@ public class EndorsementChainChecks {
       JsonNode clpNode = identifyingCodes.get(idIdx).path(CODE_LIST_PROVIDER);
 
       validatePseudoEnumIfPresent(
-          errors,
-          clpNode,
-          "%s.identifyingCodes[%d].codeListProvider".formatted(partyPath, idIdx),
-          allowedValues);
+        errors,
+        clpNode,
+        "%s.identifyingCodes[%d].codeListProvider".formatted(partyPath, idIdx),
+        VALID_CODE_LIST_PROVIDERS);
     }
   }
 
   private static void validatePseudoEnumIfPresent(
-      Set<String> errors, JsonNode node, String jsonPathForError, Set<String> allowedValues) {
+    Set<String> errors, JsonNode node, String jsonPathForError, Set<String> allowedValues) {
 
     if (node.isMissingNode() || node.isNull()) {
       return;
     }
 
     String value = node.asText();
-    if (value == null || value.isBlank()) {
+    if (value.isBlank()) {
       errors.add("%s: must be a non-empty string".formatted(jsonPathForError));
       return;
     }
 
     if (!allowedValues.contains(value)) {
       errors.add(
-          "%s: '%s' is not allowed. Must be one of: %s"
-              .formatted(jsonPathForError, value, allowedValues));
+        "%s: '%s' is not allowed. Must be one of: %s"
+          .formatted(jsonPathForError, value, allowedValues));
     }
   }
 }

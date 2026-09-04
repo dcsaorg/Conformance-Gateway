@@ -47,7 +47,7 @@ class ConformanceApplicationTest {
         "ebl-300-conformance-td-auto-all-in-one",
         "eblissuance-300-conformance-auto-all-in-one",
         "eblsurrender-300-conformance-auto-all-in-one",
-        "eblendorsementchain-300-conformance-auto-all-in-one",
+        "eblendorsementchain-303-conformance-auto-all-in-one",
         "ovs-300-conformance-auto-all-in-one",
         "portcall-200-conformance-auto-all-in-one",
         "pint-300-conformance-auto-all-in-one",

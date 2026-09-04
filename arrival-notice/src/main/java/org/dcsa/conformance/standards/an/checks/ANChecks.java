@@ -22,6 +22,9 @@ import java.util.stream.StreamSupport;
 
 public final class ANChecks {
 
+  private static final String NON_EMPTY_ARRIVAL_NOTICES_DESCRIPTION =
+    "At least one Arrival Notice must be included in the message's 'arrivalNotices' list.";
+
   private static final String ARRIVAL_NOTICES = "arrivalNotices";
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
   private static final String CARRIER_CODE = "carrierCode";
@@ -129,6 +132,10 @@ public final class ANChecks {
       payloadChecksForScenario(dspSupplier.get().scenarioType()));
   }
 
+  public static JsonContentCheck nonEmptyArrivalNotices() {
+    return rule(NON_EMPTY_ARRIVAL_NOTICES_DESCRIPTION, path(), node -> nonEmptyArray(node, ARRIVAL_NOTICES));
+  }
+
   static List<JsonContentCheck> payloadChecksForScenario(String scenarioType) {
     List<JsonContentCheck> checks = new ArrayList<>(commonChecks());
     if (ScenarioType.FREE_TIME.name().equals(scenarioType)) {
@@ -142,7 +149,7 @@ public final class ANChecks {
 
   private static List<JsonContentCheck> commonChecks() {
     return List.of(
-      rule("At least one Arrival Notice must be included in the message's 'arrivalNotices' list.", path(), node -> nonEmptyArray(node, ARRIVAL_NOTICES)),
+      nonEmptyArrivalNotices(),
       rule("At least one Arrival Notice must demonstrate the correct use of 'transportDocumentReference' (not empty or blank).", path(ARRIVAL_NOTICES), node -> nonBlank(node, TRANSPORT_DOCUMENT_REFERENCE)),
       rule("At least one Arrival Notice must demonstrate the correct use of 'carrierCode' (not empty or blank).", path(ARRIVAL_NOTICES), node -> nonBlank(node, CARRIER_CODE)),
       rule("At least one Arrival Notice must demonstrate the correct use of 'carrierCodeListProvider' ('NMFTA' or 'SMDG').", path(ARRIVAL_NOTICES), node -> allowed(node, CARRIER_CODE_LIST_PROVIDER, ANDatasets.CARRIER_CODE_LIST_PROVIDER)),

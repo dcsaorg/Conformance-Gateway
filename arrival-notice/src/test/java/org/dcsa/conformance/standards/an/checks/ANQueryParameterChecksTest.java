@@ -55,6 +55,9 @@ class ANQueryParameterChecksTest {
     assertFalse(
       ANQueryParameterChecks.matchesAll(
         notice, Map.of("portOfDischargeArrivalDateMin", "not-a-date")));
+    assertFalse(
+      ANQueryParameterChecks.matchesAll(
+        notice, Map.of("unsupportedFilter", "value")));
   }
 
   private static JsonNode firstArrivalNotice() throws IOException {

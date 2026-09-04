@@ -89,11 +89,7 @@ public class PublisherPostANAction extends ANAction {
             HttpMessageType.REQUEST,
             requestSchemaValidator));
         return validateProducerPayload
-          ? Stream.concat(
-          defaultChecks,
-          Stream.of(
-            ANChecks.getANPostPayloadChecks(
-              getMatchedExchangeUuid(), expectedApiVersion, scenarioType.name())))
+          ? Stream.concat(defaultChecks, Stream.of(ANChecks.getANPostPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion, scenarioType.name())))
           : defaultChecks;
       }
     };

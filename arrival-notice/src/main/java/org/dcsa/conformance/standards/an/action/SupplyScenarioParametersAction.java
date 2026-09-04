@@ -66,7 +66,14 @@ public class SupplyScenarioParametersAction extends ANAction {
       throw new UserFacingException("The input must contain a non-null object at 'input'.");
     }
     LinkedHashMap<String, String> supplied = new LinkedHashMap<>();
-    input.properties().forEach(entry -> supplied.put(entry.getKey(), parameterValue(entry)));
+    input.properties().forEach(entry -> {
+      ANFilterParameter parameter = ANFilterParameter.BY_QUERY_PARAM_NAME.get(entry.getKey());
+      if (parameter == null) {
+        throw new UserFacingException(
+          "Unknown query parameter '%s'".formatted(entry.getKey()));
+      }
+      supplied.put(entry.getKey(), parameterValue(parameter, entry.getValue()));
+    });
     for (ANFilterParameter parameter : requiredParameters) {
       if (!supplied.containsKey(parameter.getQueryParamName())) {
         throw new UserFacingException(
@@ -76,22 +83,44 @@ public class SupplyScenarioParametersAction extends ANAction {
     this.getDspConsumer().accept(getDspSupplier().get().withSuppliedQueryParameters(supplied));
   }
 
-  private static String parameterValue(Map.Entry<String, JsonNode> entry) {
-    JsonNode value = entry.getValue();
+  private static String parameterValue(ANFilterParameter parameter, JsonNode value) {
     String result;
     if (value.isArray()) {
+      if (parameter == ANFilterParameter.LIMIT) {
+        throw new UserFacingException("The value of 'limit' must be a single integer");
+      }
       result = java.util.stream.StreamSupport.stream(value.spliterator(), false)
+        .peek(element -> {
+          if (!element.isTextual()) {
+            throw new UserFacingException(
+              "The value of '%s' must contain only strings when provided as an array"
+                .formatted(parameter.getQueryParamName()));
+          }
+        })
         .map(JsonNode::asText)
         .collect(Collectors.joining(","));
     } else if (value.isValueNode()) {
       result = value.asText();
     } else {
       throw new UserFacingException(
-        "The value of '%s' must be a scalar or an array of scalar values".formatted(entry.getKey()));
+        "The value of '%s' must be a scalar or an array of scalar values"
+          .formatted(parameter.getQueryParamName()));
     }
     if (result.isBlank() || !result.equals(result.trim())) {
       throw new UserFacingException(
-        "The value of '%s' must not be blank or surrounded by whitespace".formatted(entry.getKey()));
+        "The value of '%s' must not be blank or surrounded by whitespace"
+          .formatted(parameter.getQueryParamName()));
+    }
+    if (parameter == ANFilterParameter.LIMIT) {
+      int parsedLimit;
+      try {
+        parsedLimit = Integer.parseInt(result);
+      } catch (NumberFormatException e) {
+        throw new UserFacingException("The value of 'limit' must be an integer");
+      }
+      if (parsedLimit < 1) {
+        throw new UserFacingException("The value of 'limit' must be greater than or equal to 1");
+      }
     }
     return result;
   }

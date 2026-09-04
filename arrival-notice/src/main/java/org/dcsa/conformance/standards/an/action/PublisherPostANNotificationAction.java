@@ -36,8 +36,7 @@ public class PublisherPostANNotificationAction extends ANAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-          new UrlPathCheck(
-            ANRole::isProducer, getMatchedExchangeUuid(), "/arrival-notice-notifications"),
+          new UrlPathCheck(ANRole::isProducer, getMatchedExchangeUuid(), "/arrival-notice-notifications"),
           new ResponseStatusCheck(ANRole::isConsumer, getMatchedExchangeUuid(), 200),
           new ApiHeaderCheck(
             ANRole::isConsumer,

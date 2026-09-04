@@ -69,6 +69,9 @@ public final class ANQueryParameterChecks {
 
   private static boolean matches(JsonNode notice, Map.Entry<String, String> entry) {
     ANFilterParameter parameter = ANFilterParameter.BY_QUERY_PARAM_NAME.get(entry.getKey());
+    if (parameter == null) {
+      return false;
+    }
     return switch (parameter) {
       case TRANSPORT_DOCUMENT_REFERENCES ->
         containsCsvValue(entry.getValue(), notice.path(TRANSPORT_DOCUMENT_REFERENCE).asText());

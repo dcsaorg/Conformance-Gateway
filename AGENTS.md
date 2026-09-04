@@ -43,16 +43,16 @@ Do not temporarily comment out parameterized standards/scenarios or remove `@Dis
 
 ## Standard specifications are authoritative
 
-Before changing a standard module, locate and read its standard-specific Markdown resources (for example, `booking.md`). When such documentation is present, treat it as the source of truth for that standard's conformance behavior. Scenario coverage and sequencing, actions, checks, validation applicability, role behavior, synthetic-party state transitions, prompts, and tests must all agree with the documented requirements. Do not alter or weaken documented behavior merely to make an existing test pass.
+Before changing a standard module, locate and read its synced standard-specific Markdown documentation under `specifications/confluence-sync/<standard>/<version>/` (for example, `specifications/confluence-sync/booking/2.0.4/conformance-scenarios.md`). Treat this synced documentation as the source of truth for that standard's conformance behavior. Scenario coverage and sequencing, actions, checks, validation applicability, role behavior, synthetic-party state transitions, prompts, and tests must all agree with the documented requirements. Do not alter or weaken documented behavior merely to make an existing test pass.
 
-If the Markdown references an Excel workbook for validations, the workbook is an authoritative part of the specification and must be analyzed directly; filenames or summaries are not sufficient. Inspect every relevant worksheet, including notes, merged cells, formulas or displayed values, alternatives such as “A or B,” optional or conditional fields, and state-dependent rules. Then trace every applicable workbook row and condition to both:
+If the synced Markdown references an Excel workbook for validations, the workbook is an authoritative part of the specification and must be analyzed directly; filenames or summaries are not sufficient. Use the synced files under `specifications/confluence-sync/<standard>/<version>/excel/`. Inspect every relevant worksheet, including notes, merged cells, formulas or displayed values, alternatives such as “A or B,” optional or conditional fields, and state-dependent rules. Then trace every applicable workbook row and condition to both:
 
 - the conformance checks and validators that accept and reject exchanges; and
 - the internal synthetic-party implementation that creates payloads and performs state transitions.
 
 The implementation must map exactly to the workbook within the applicability and exceptions defined by the Markdown. Preserve distinctions between required and optional scenarios and any explicitly documented validation bypasses. Add table-driven regression coverage where practical for every allowed combination, required/forbidden field, conditional branch, and representative invalid combination. If documentation, workbook, code, and tests disagree, resolve the discrepancy against the documented specification and workbook rather than assuming the current implementation is correct, and record any genuine ambiguity that cannot be resolved from those sources.
 
-For changes driven by multiple artifacts, reconcile them before coding in this order: scenario Markdown (module names, action paths, role ownership, required/optional classification and scope), each role-specific validation workbook (exact report labels and applicability), any status/state-transition sheet (allowed preconditions and expected postconditions), and the referenced OpenAPI schemas/endpoints. Maintain a working matrix from every requirement to its scenario builder, action/check, synthetic-party behavior, and regression test. A generated green report is the final cross-check, not a substitute for this artifact-by-artifact reconciliation.
+For changes driven by multiple artifacts, reconcile them before coding in this order: synced scenario Markdown (module names, action paths, role ownership, required/optional classification and scope), each role-specific validation workbook (exact report labels and applicability), any status/state-transition sheet (allowed preconditions and expected postconditions), and the referenced OpenAPI schemas/endpoints. Maintain a working matrix from every requirement to its scenario builder, action/check, synthetic-party behavior, and regression test. A generated green report is the final cross-check, not a substitute for this artifact-by-artifact reconciliation.
 
 Keep report titles distinct from conformance expectations. Scenario and action titles should contain only identifiers explicitly intended as labels, such as `confirm`, `decline`, or `amended content`. Expected HTTP classes/codes and expected document states belong in checks and explanatory prose unless the authoritative Markdown explicitly includes them in the title. Assert exact module, scenario, action, and validation labels in tests when report wording is part of the requirement.
 
@@ -211,7 +211,7 @@ This starts backend port `8080` and frontend port `4200`. Prefer the manual Spri
 Before finishing a change, verify:
 
 - [ ] Existing user changes were preserved.
-- [ ] The affected standard's Markdown was reviewed and scenarios, checks, parties, and tests match it.
+- [ ] The affected standard's synced Markdown in `specifications/confluence-sync/<standard>/<version>/` was reviewed and scenarios, checks, parties, and tests match it.
 - [ ] Every referenced validation workbook was directly analyzed and its applicable rows and conditions map exactly to validators, synthetic-party behavior, and regression tests.
 - [ ] New behavior has a focused regression test.
 - [ ] No role-specific scenario modules are lost to key collisions.

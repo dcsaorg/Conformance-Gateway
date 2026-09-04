@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.an.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
@@ -13,21 +12,44 @@ import org.dcsa.conformance.standards.an.checks.ANChecks;
 import org.dcsa.conformance.standards.an.checks.ScenarioType;
 import org.dcsa.conformance.standards.an.party.ANRole;
 
+import java.util.stream.Stream;
+
 public class PublisherPostANAction extends ANAction {
 
   private final JsonSchemaValidator requestSchemaValidator;
   private final ScenarioType scenarioType;
+  private final boolean validateProducerPayload;
 
   public PublisherPostANAction(
-      String publisherPartyName,
-      String subscriberPartyName,
-      ANAction previousAction,
-      ScenarioType scenarioType,
-      JsonSchemaValidator requestSchemaValidator) {
+    String publisherPartyName,
+    String subscriberPartyName,
+    ANAction previousAction,
+    ScenarioType scenarioType,
+    JsonSchemaValidator requestSchemaValidator,
+    String title) {
+    this(
+      publisherPartyName,
+      subscriberPartyName,
+      previousAction,
+      scenarioType,
+      requestSchemaValidator,
+      title,
+      true);
+  }
 
-    super(publisherPartyName, subscriberPartyName, previousAction, computeTitle(scenarioType));
+  public PublisherPostANAction(
+    String publisherPartyName,
+    String subscriberPartyName,
+    ANAction previousAction,
+    ScenarioType scenarioType,
+    JsonSchemaValidator requestSchemaValidator,
+    String title,
+    boolean validateProducerPayload) {
+
+    super(publisherPartyName, subscriberPartyName, previousAction, title);
     this.requestSchemaValidator = requestSchemaValidator;
     this.scenarioType = scenarioType;
+    this.validateProducerPayload = validateProducerPayload;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
@@ -48,43 +70,33 @@ public class PublisherPostANAction extends ANAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
-            new UrlPathCheck(ANRole::isPublisher, getMatchedExchangeUuid(), "/arrival-notices"),
-            new ResponseStatusCheck(ANRole::isSubscriber, getMatchedExchangeUuid(), 200),
-            new ApiHeaderCheck(
-                ANRole::isSubscriber,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new ApiHeaderCheck(
-                ANRole::isPublisher,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-                ANRole::isPublisher,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator),
-            new ApiHeaderCheck(
-                ANRole::isSubscriber,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
+        Stream<ConformanceCheck> defaultChecks = Stream.of(
+          new UrlPathCheck(ANRole::isProducer, getMatchedExchangeUuid(), "/arrival-notices"),
+          new ResponseStatusCheck(ANRole::isConsumer, getMatchedExchangeUuid(), 200),
+          new ApiHeaderCheck(
+            ANRole::isConsumer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            expectedApiVersion),
+          new ApiHeaderCheck(
+            ANRole::isProducer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+          new JsonSchemaCheck(
+            ANRole::isProducer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            requestSchemaValidator));
+        return validateProducerPayload
+          ? Stream.concat(
+          defaultChecks,
+          Stream.of(
             ANChecks.getANPostPayloadChecks(
-                getMatchedExchangeUuid(), expectedApiVersion, scenarioType.name()));
+              getMatchedExchangeUuid(), expectedApiVersion, scenarioType.name())))
+          : defaultChecks;
       }
     };
   }
 
-
-  private static String computeTitle(ScenarioType scenarioType) {
-    if (scenarioType == ScenarioType.FREIGHTED) {
-      return "POST AN [%s]".formatted("FREIGHTED");
-    } else if (scenarioType == ScenarioType.FREE_TIME) {
-      return "POST AN [%s]".formatted("FREE_TIME");
-    } else {
-      return "POST AN";
-    }
-  }
 }

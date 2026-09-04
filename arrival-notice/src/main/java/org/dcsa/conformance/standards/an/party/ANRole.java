@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ANRole {
-  PUBLISHER("Publisher"),
-  SUBSCRIBER("Subscriber");
+  PRODUCER("Producer"),
+  CONSUMER("Consumer");
 
   private final String configName;
 
@@ -13,11 +13,11 @@ public enum ANRole {
     this.configName = configName;
   }
 
-  public static boolean isPublisher(String configName) {
-    return ANRole.PUBLISHER.configName.equals(configName);
+  public static boolean isProducer(String configName) {
+    return ANRole.PRODUCER.configName.equals(configName);
   }
 
-  public static boolean isSubscriber(String configName) {
-    return ANRole.SUBSCRIBER.configName.equals(configName);
+  public static boolean isConsumer(String configName) {
+    return ANRole.CONSUMER.configName.equals(configName);
   }
 }

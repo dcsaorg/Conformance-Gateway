@@ -1,0 +1,1 @@
+Perform a GET operation: Request the transport document with an invalid/non-existing document reference.

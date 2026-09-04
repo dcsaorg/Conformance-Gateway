@@ -85,9 +85,6 @@ public class EndorsementChainChecks {
             }
 
             String actionCode = actionCodeNode.asText();
-            if (actionCode.isBlank()) {
-              continue;
-            }
 
             if (!VALID_ACTION_CODES.contains(actionCode)) {
               errors.add(

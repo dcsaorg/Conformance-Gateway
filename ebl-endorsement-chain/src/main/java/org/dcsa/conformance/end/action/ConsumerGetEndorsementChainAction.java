@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.end.checks.EndorsementChainChecks;
+import org.dcsa.conformance.end.party.EndorsementChainFilterParameter;
 import org.dcsa.conformance.end.party.EndorsementChainRole;
 import org.dcsa.conformance.end.party.SuppliedScenarioParameters;
 
@@ -57,8 +58,11 @@ public class ConsumerGetEndorsementChainAction extends EndorsementChainAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var dsp = getDspSupplier().get();
-        var tdr = dsp.transportDocumentReference() != null ? dsp.transportDocumentReference() : "";
+        String tdr =
+          sspSupplier
+            .get()
+            .getMap()
+            .getOrDefault(EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_REFERENCE, "");
         return
           Stream.of(
             new UrlPathCheck(

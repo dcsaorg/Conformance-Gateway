@@ -5,6 +5,8 @@ import org.dcsa.conformance.core.traffic.ConformanceMessage;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,23 @@ class EndorsementChainProviderTest {
     assertTrue(
       SCHEMA_VALIDATOR.validate(responseBody).isEmpty(),
       () -> "Schema errors: " + SCHEMA_VALIDATOR.validate(responseBody));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    delimiter = '|',
+    value = {
+      "ABC%2FDEF | ABC/DEF",
+      "ABC%252FDEF | ABC%2FDEF",
+      "ABC+DEF | ABC+DEF"
+    })
+  void responsePreservesTdrPathComponentSemantics(String encodedTdr, String expectedTdr) {
+    var responseBody =
+      EndorsementChainProvider.createResponseBody(
+        request("https://provider.example/endorsement-chains/" + encodedTdr, Map.of()), "300");
+
+    assertEquals(
+      expectedTdr, responseBody.path(0).path("transportDocumentReference").asText());
   }
 
   private static ConformanceRequest request(

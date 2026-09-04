@@ -17,8 +17,6 @@ import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.end.action.SupplyScenarioParametersAction;
 
 import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -125,8 +123,8 @@ public class EndorsementChainProvider extends ConformanceParty {
   }
 
   static String transportDocumentReferenceFrom(ConformanceRequest request) {
-    String path = URI.create(request.url()).getPath();
-    int lastSlash = path.lastIndexOf('/');
-    return URLDecoder.decode(path.substring(lastSlash + 1), StandardCharsets.UTF_8);
+    String rawPath = URI.create(request.url()).getRawPath();
+    String rawTdr = rawPath.substring(rawPath.lastIndexOf('/') + 1);
+    return URI.create("/" + rawTdr).getPath().substring(1);
   }
 }

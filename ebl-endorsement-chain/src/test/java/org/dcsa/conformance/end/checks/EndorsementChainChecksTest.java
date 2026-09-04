@@ -45,6 +45,14 @@ class EndorsementChainChecksTest {
   }
 
   @Test
+  void actionCodeValidationRejectsBlankValues() {
+    JsonContentCheck check = privateCheck("validActionCode");
+
+    assertInvalidWithMessage(
+      check, json("[{\"endorsementChain\": [{\"actionCode\": \" \"}]}]"), "actionCode: ' '");
+  }
+
+  @Test
   void eblPlatformValidationCoversIrrelevantStructuralAndValueBranches() {
     JsonContentCheck check = privateCheck("validEblPlatformPseudoEnum");
 

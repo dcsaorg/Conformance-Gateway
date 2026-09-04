@@ -75,8 +75,8 @@ test('derives the same all-in-one sandbox identifier as the Java application', (
     'example+standard-200+300-conformance-auto-all-in-one',
   );
   assert.equal(
-    sandboxIdFor('eBL', '3.0.0', 'Conformance TD-only'),
-    'ebl-300-conformance-td-only-auto-all-in-one',
+    sandboxIdFor('eBL', '3.0.0', 'Conformance TD'),
+    'ebl-300-conformance-td-auto-all-in-one',
   );
 });
 
@@ -88,7 +88,7 @@ test('parses CLI selection and rejects incomplete selectors', () => {
   assert.equal(options?.notificationMode, 'both');
   assert.equal(
     parseArguments([
-      '--standard', 'eBL', '--version', '3.0.0', '--suite', 'Conformance TD-only',
+      '--standard', 'eBL', '--version', '3.0.0', '--suite', 'Conformance TD',
     ])?.notificationMode,
     'both',
   );

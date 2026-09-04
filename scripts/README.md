@@ -66,7 +66,7 @@ For suite names containing shell metacharacters or spaces, quote the value:
 npm --prefix scripts run run-conformance-suite -- \
   --standard eBL \
   --version 3.0.0 \
-  --suite 'Conformance TD-only'
+  --suite 'Conformance TD'
 ```
 
 The runner can also start and stop the application itself. Quote the whole start command:

@@ -27,15 +27,15 @@ import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 @Slf4j
 public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder> {
 
-  public static final String SCENARIO_SUITE_CONFORMANCE_SI_ONLY = "Conformance SI-only";
-  public static final String SCENARIO_SUITE_CONFORMANCE_TD_ONLY = "Conformance TD-only";
+  public static final String SCENARIO_SUITE_CONFORMANCE_SI = "Conformance SI";
+  public static final String SCENARIO_SUITE_CONFORMANCE_TD = "Conformance TD";
   static final String SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS = "Conformance TD Amendments";
   static final String SCENARIO_SUITE_SI_TD_COMBINED = "Conformance SI + TD";
 
   static final Set<String> SCENARIO_SUITES =
       Set.of(
-          SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
-          SCENARIO_SUITE_CONFORMANCE_TD_ONLY);
+          SCENARIO_SUITE_CONFORMANCE_SI,
+          SCENARIO_SUITE_CONFORMANCE_TD);
 
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -73,10 +73,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     threadLocalShipperPartyName.set(shipperPartyName);
     threadLocalIsWithNotifications.set(isWithNotifications);
 
-    if (SCENARIO_SUITE_CONFORMANCE_SI_ONLY.equals(componentFactory.getScenarioSuite())) {
+    if (SCENARIO_SUITE_CONFORMANCE_SI.equals(componentFactory.getScenarioSuite())) {
       return createConformanceSiOnlyScenarios(false);
     }
-    if (SCENARIO_SUITE_CONFORMANCE_TD_ONLY.equals(componentFactory.getScenarioSuite())) {
+    if (SCENARIO_SUITE_CONFORMANCE_TD.equals(componentFactory.getScenarioSuite())) {
       return createConformanceTdOnlyScenarios(testedPartyRoleNames);
     }
     // Disabled legacy suites (implementation retained for possible future re-enablement):

@@ -28,8 +28,8 @@ class EblScenarioListBuilderTest {
   void onlySiOnlyAndTdOnlySuitesAreExposed() {
     assertEquals(
         Set.of(
-            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
-            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY),
+            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI,
+            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD),
         EblStandard.INSTANCE.getScenarioSuitesByStandardVersion().get("3.0.0"));
 
     for (String disabledSuite :
@@ -191,7 +191,7 @@ class EblScenarioListBuilderTest {
   private Map<String, List<ConformanceScenario>> buildModules(Set<String> roles) {
     EblComponentFactory componentFactory =
         new EblComponentFactory(
-            "Ebl", "3.0.0", EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY);
+            "Ebl", "3.0.0", EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD);
     LinkedHashMap<String, EblScenarioListBuilder> builders =
         EblScenarioListBuilder.createModuleScenarioListBuilders(
             componentFactory, roles, true, "3.0.0", CARRIER, SHIPPER);

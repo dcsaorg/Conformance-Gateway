@@ -34,7 +34,6 @@ import org.dcsa.conformance.end.EblEndorsementChainStandard;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
-import org.dcsa.conformance.standards.adoption.AdoptionStandard;
 import org.dcsa.conformance.standards.an.AnStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
 // import org.dcsa.conformance.standards.bookingandebl.BookingAndEblStandard;
@@ -58,7 +57,6 @@ public class ConformanceSandbox {
   public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
-    AdoptionStandard.INSTANCE,
     AnStandard.INSTANCE,
     BookingStandard.INSTANCE,
     CsStandard.INSTANCE,

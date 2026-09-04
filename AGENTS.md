@@ -142,7 +142,7 @@ Or let the runner own the backend lifecycle:
 npm --prefix scripts run run-conformance-suite -- \
   --standard eBL \
   --version 3.0.0 \
-  --suite 'Conformance TD-only' \
+  --suite 'Conformance TD' \
   --start-command './mvnw -pl spring-boot -am spring-boot:run'
 ```
 

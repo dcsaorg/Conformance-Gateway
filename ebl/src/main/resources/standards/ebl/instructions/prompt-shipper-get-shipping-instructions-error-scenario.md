@@ -1,1 +1,0 @@
-Perform a GET operation: Request the shipping instructions with an invalid/non-existing document reference.

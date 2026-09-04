@@ -1,2 +1,0 @@
-Perform Use Case 1: Submit BOOKING_TYPE_PLACEHOLDER.
-

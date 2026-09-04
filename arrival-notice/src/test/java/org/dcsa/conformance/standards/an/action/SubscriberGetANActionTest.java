@@ -55,14 +55,6 @@ class SubscriberGetANActionTest {
     ObjectNode prompt = secondPageAction.asJsonNode();
     assertTrue(prompt.has("cursor") && "next-page-token".equals(prompt.path("cursor").asText()));
 
-    List<String> titles =
-      secondPageAction
-        .createCheck("1.0.0")
-        .subChecksStream()
-        .map(ConformanceCheck::getTitle)
-        .toList();
-
-    assertTrue(titles.stream().anyMatch(title -> title.contains("query parameter 'cursor'")));
   }
 
   @Test

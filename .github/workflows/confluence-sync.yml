@@ -6,7 +6,7 @@ on:
     - cron: '0 2 * * 1'
 
   workflow_dispatch:
-    # Allow manual trigger from GitHub UI
+  # Allow manual trigger from GitHub UI
 
   # Optional: trigger on push to main branch if confluence-config.json changes
   push:

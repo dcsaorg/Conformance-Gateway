@@ -34,10 +34,9 @@ import org.dcsa.conformance.end.EblEndorsementChainStandard;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
-import org.dcsa.conformance.standards.adoption.AdoptionStandard;
 import org.dcsa.conformance.standards.an.AnStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
-import org.dcsa.conformance.standards.bookingandebl.BookingAndEblStandard;
+// import org.dcsa.conformance.standards.bookingandebl.BookingAndEblStandard;
 import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
@@ -58,7 +57,6 @@ public class ConformanceSandbox {
   public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
-    AdoptionStandard.INSTANCE,
     AnStandard.INSTANCE,
     BookingStandard.INSTANCE,
     CsStandard.INSTANCE,
@@ -66,7 +64,7 @@ public class ConformanceSandbox {
     EblEndorsementChainStandard.INSTANCE,
     EblIssuanceStandard.INSTANCE,
     EblSurrenderStandard.INSTANCE,
-    BookingAndEblStandard.INSTANCE,
+    // BookingAndEblStandard.INSTANCE, // Disabled legacy combined standard
     OvsStandard.INSTANCE,
     PintStandard.INSTANCE,
     PortCallStandard.INSTANCE,
@@ -350,7 +348,19 @@ public class ConformanceSandbox {
       return _handleGenerateReport(
           persistenceProvider, deferredSandboxTaskConsumer, sandboxId, true);
     } else if (remainingUri.equals("/reset")) {
-      return _handleReset(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+      Collection<String> suppressNotificationsValues =
+          webRequest.queryParameters().get("suppressNotifications");
+      boolean suppressNotifications =
+          suppressNotificationsValues != null
+              && suppressNotificationsValues.stream()
+              .findFirst()
+              .map(Boolean::parseBoolean)
+              .orElse(false);
+      return _handleReset(
+          persistenceProvider,
+          deferredSandboxTaskConsumer,
+          sandboxId,
+          suppressNotifications);
     }
     throw new IllegalArgumentException("Unhandled URI: " + webRequest.url());
   }
@@ -1055,6 +1065,14 @@ public class ConformanceSandbox {
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId) {
+    return _handleReset(persistenceProvider, deferredSandboxTaskConsumer, sandboxId, false);
+  }
+
+  private static ConformanceWebResponse _handleReset(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
+      String sandboxId,
+      boolean suppressNotifications) {
     String newSessionId = UUID.randomUUID().toString();
     persistenceProvider
         .getStatefulExecutor()
@@ -1073,6 +1091,19 @@ public class ConformanceSandbox {
 
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
+    for (var partyConfiguration : sandboxConfiguration.getParties()) {
+      new PartyTask(
+              persistenceProvider,
+              deferredSandboxTaskConsumer,
+              sandboxId,
+              partyConfiguration.getName(),
+              "configuring notification mode for party " + partyConfiguration.getName(),
+              party -> {
+                party.setCurrentSessionId(newSessionId);
+                party.setSuppressNotifications(suppressNotifications);
+              })
+          .run();
+    }
     if (sandboxConfiguration.getOrchestrator().isActive()) {
       new OrchestratorTask(
               persistenceProvider,
@@ -1081,7 +1112,7 @@ public class ConformanceSandbox {
                       deferredSandboxTaskConsumer, conformanceWebRequest),
               sandboxId,
               "starting session",
-              ConformanceOrchestrator::notifyNextActionParty)
+              orchestrator -> orchestrator.startSession(newSessionId))
           .run();
     }
 

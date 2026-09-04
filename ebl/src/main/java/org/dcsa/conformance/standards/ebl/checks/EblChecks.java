@@ -136,7 +136,6 @@ public class EblChecks {
   private static final String FEEDBACKS = "feedbacks";
   private static final String SEVERITY = "severity";
   private static final String CODE = "code";
-  private static final String IS_SHIPPED_ON_BOARD_TYPE = "isShippedOnBoardType";
   private static final String SHIPPED_ON_BOARD_DATE = "shippedOnBoardDate";
   private static final String RECEIVED_FOR_SHIPMENT_DATE = "receivedForShipmentDate";
   private static final String CARGO_MOVEMENT_TYPE_AT_ORIGIN = "cargoMovementTypeAtOrigin";
@@ -182,7 +181,6 @@ public class EblChecks {
   private static final String SHIPPING_INSTRUCTIONS = "shippingInstructions";
   private static final String IS_CARRIERS_AGENT_AT_DESTINATION_REQUIRED =
       "isCarriersAgentAtDestinationRequired";
-  private static final String IS_SHIPPER_OWNED = "isShipperOwned";
   private static final String METHOD_OF_PAYMENT = "methodOfPayment";
 
   private static final String SWB = "SWB";
@@ -425,7 +423,7 @@ public class EblChecks {
   static final JsonRebasableContentCheck EBL_AT_MOST_ONE_ORIGINAL_TOTAL =
       JsonAttribute.ifThen(
           "Cannot have more than one original in total when '%s'.".formatted(IS_ELECTRONIC),
-          IS_ELECTRONIC_PREDICATE,
+          IS_AN_EBL,
           JsonAttribute.customValidator(
               "Sum of '%s' and '%s' must be at most 1 for Electronic original Bills of Ladings."
                   .formatted(NUMBER_OF_ORIGINALS_WITHOUT_CHARGES, NUMBER_OF_ORIGINALS_WITH_CHARGES),
@@ -814,16 +812,6 @@ public class EblChecks {
               JsonAttribute.presenceImpliesOtherField(
                   ACTIVE_REEFER_SETTINGS, IS_NON_OPERATING_REEFER)));
 
-  private static final JsonRebasableContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER =
-      JsonAttribute.allIndividualMatchesMustBeValid(
-          "All '%s' where '%s' is false must have '%s'."
-              .formatted(
-                  UTILIZED_TRANSPORT_EQUIPMENTS, IS_NON_OPERATING_REEFER, ACTIVE_REEFER_SETTINGS),
-          ALL_UTE,
-          JsonAttribute.ifMatchedThen(
-              JsonAttribute.isFalse(IS_NON_OPERATING_REEFER),
-              JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBePresent())));
-
   private static final JsonRebasableContentCheck NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "All '%s' where '%s' is true cannot have '%s'."
@@ -990,32 +978,6 @@ public class EblChecks {
       return ConformanceCheckResult.simple(Set.of());
     };
   }
-
-  static final JsonRebasableContentCheck SHIPMENT_DATE_REQUIRED_WHEN_TYPE_PRESENT =
-      JsonAttribute.customValidator(
-          "When '%s' is present, '%s' or '%s' is required."
-              .formatted(
-                  IS_SHIPPED_ON_BOARD_TYPE,
-                  SHIPPED_ON_BOARD_DATE,
-                  RECEIVED_FOR_SHIPMENT_DATE),
-          (body, contextPath) -> {
-            JsonNode type = body.path(IS_SHIPPED_ON_BOARD_TYPE);
-            if (type.isMissingNode()) {
-              return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
-            }
-            if (body.path(SHIPPED_ON_BOARD_DATE).isMissingNode()
-                && body.path(RECEIVED_FOR_SHIPMENT_DATE).isMissingNode()) {
-              return ConformanceCheckResult.simple(
-                  Set.of(
-                      "Either '%s' or '%s' is required by '%s' at '%s'."
-                          .formatted(
-                              SHIPPED_ON_BOARD_DATE,
-                              RECEIVED_FOR_SHIPMENT_DATE,
-                              IS_SHIPPED_ON_BOARD_TYPE,
-                              contextPath)));
-            }
-            return ConformanceCheckResult.simple(Set.of());
-          });
 
   public static final JsonRebasableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE =
       JsonAttribute.customValidator(
@@ -1476,18 +1438,18 @@ public class EblChecks {
   private static JsonRebasableContentCheck describedTdCheck(
       String description, JsonRebasableContentCheck validation) {
     return JsonAttribute.customValidator(
-        description, (JsonContentMatchedValidation) validation::validate);
+        tdDisplayDescription(description), (JsonContentMatchedValidation) validation::validate);
   }
 
   private static JsonRebasableContentCheck describedTdCheck(
       String description, JsonContentMatchedValidation validation) {
-    return JsonAttribute.customValidator(description, validation);
+    return JsonAttribute.customValidator(tdDisplayDescription(description), validation);
   }
 
   private static JsonRebasableContentCheck describedTdCheck(
       String description, JsonRebasableContentCheck... validations) {
     return JsonAttribute.customValidator(
-        description,
+        tdDisplayDescription(description),
         (body, contextPath) -> {
           Set<ConformanceCheckResult> results =
               Arrays.stream(validations)
@@ -1500,6 +1462,10 @@ public class EblChecks {
           return ConformanceCheckResult.from(
               relevantResults.isEmpty() ? results : relevantResults);
         });
+  }
+
+  private static String tdDisplayDescription(String workbookDescription) {
+    return workbookDescription.replace('`', '\'');
   }
 
   private static final Set<String> TRANSPORT_DOCUMENT_STATUSES =
@@ -1534,23 +1500,12 @@ public class EblChecks {
   private static final String SEGREGATION_GROUPS_DESCRIPTION =
       "If present, `segregationGroups[]` must be an integer from 1 through 18.";
   private static final String AMENDMENT_SEGREGATION_GROUPS_DESCRIPTION =
-      "If present,`segregationGroups[]` must be an integer from 1 through 18.";
-
-  private static final Set<String> AMENDED_NOTIFICATION_EXCLUDED_TD_CHECK_DESCRIPTIONS =
-      Set.of(
-          "If `transportDocumentStatus='ISSUED'`, then `issueDate` must be present",
-          "If isShippedOnBoardType is present then shippedOnBoardDate or receivedForShipmentDate must be present",
-          "shippedOnBoardDate and receivedForShipmentDate must not both be present.",
-          "If `isElectronic=true`, then `numberOfRiderPages` must not be present.",
-          "For every item in `transports.vesselVoyages[]`, `role` must equal `FIRST_SEA_GOING` or `MOTHER`.",
-          "For every cargo item containing `dangerousGoods`, `imoPackagingCode` or `packageCode` must be present.",
-          "For every `innerPackaging` object, `quantity` must be a positive integer greater than 0.",
-          "Every cargo gross-weight and cargo net-weight value must contain no more than 3 decimal places, and every cargo gross-volume value must contain no more than 4 decimal places.");
+      "If present, `segregationGroups[]` must be an integer from 1 through 18.";
 
   enum TdPayloadContext {
     STANDARD,
     TRANSPORT_DOCUMENT_NOTIFICATION,
-    AMENDED_TRANSPORT_DOCUMENT_NOTIFICATION
+    AMENDED_TRANSPORT_DOCUMENT
   }
 
   private static final JsonRebasableContentCheck TD_CONSIGNEE_AND_ENDORSEE_CONDITIONS =
@@ -1612,16 +1567,6 @@ public class EblChecks {
                     CONSIGNMENT_ITEMS, CARGO_ITEMS, NATIONAL_COMMODITY_CODES, TYPE));
           },
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_CODES_SET));
-
-  private static final JsonRebasableContentCheck
-      VALID_AMENDED_NOTIFICATION_NATIONAL_COMMODITY_CODE_TYPES =
-          JsonAttribute.allIndividualMatchesMustBeValid(
-              "Every cargo-item national commodity-code type is valid.",
-              mav ->
-                  mav.submitAllMatching(
-                      S_x_S_x_S_x_S.formatted(
-                          CONSIGNMENT_ITEMS, CARGO_ITEMS, NATIONAL_COMMODITY_CODES, TYPE)),
-              JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_CODES_SET));
 
   private static final JsonRebasableContentCheck VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -1703,10 +1648,10 @@ public class EblChecks {
               "If `transportDocumentStatus='ISSUED'`, then `issueDate` must be present",
               ISSUE_DATE_REQUIRED_WHEN_ISSUED),
           describedTdCheck(
-              "If isShippedOnBoardType is present then shippedOnBoardDate or receivedForShipmentDate must be present",
-              SHIPMENT_DATE_REQUIRED_WHEN_TYPE_PRESENT),
-          describedTdCheck(
-              "shippedOnBoardDate and receivedForShipmentDate must not both be present.",
+              "Exactly one of `shippedOnBoardDate` and `receivedForShipmentDate` must be present.",
+              JsonAttribute.atLeastOneOf(
+                  JsonPointer.compile(S.formatted(SHIPPED_ON_BOARD_DATE)),
+                  JsonPointer.compile(S.formatted(RECEIVED_FOR_SHIPMENT_DATE))),
               JsonAttribute.atMostOneOf(
                   JsonPointer.compile(S.formatted(SHIPPED_ON_BOARD_DATE)),
                   JsonPointer.compile(S.formatted(RECEIVED_FOR_SHIPMENT_DATE)))),
@@ -1762,10 +1707,6 @@ public class EblChecks {
           describedTdCheck(
               "For each `documentParty`—`shipper`, `consignee`, `endorsee`, `notifyParties`, `other`, `onBehalfOfShipper`—at least one of `address`, `addressLines`, or `identifyingCodes` must be provided.",
               VALIDATE_DOCUMENT_PARTY),
-          describedTdCheck(
-              "For every provided `displayedAddress[]`, a physical B/L (`isElectronic=false`) must contain no more than 2 lines and an electronic B/L  (`isElectronic=true`) must contain no more than 6 lines; every line must contain no more than 35 characters.",
-              EBL_DISPLAYED_ADDRESS_LIMIT,
-              DISPLAYED_ADDRESS_LINE_COUNT),
           TD_CONSIGNEE_AND_ENDORSEE_CONDITIONS,
           TD_CONSIGNEE_AND_ENDORSEE_MUTUALLY_EXCLUSIVE,
           describedTdCheck(
@@ -1774,8 +1715,8 @@ public class EblChecks {
           describedTdCheck(
               "For every item in `documentParties.other[]`, `partyFunction` must equal `SCO`, `DDR`, `DDS`, `COW`, or `COX`.",
               VALID_TD_PARTY_FUNCTION),
-          VALID_TD_TYPE_OF_PERSON,
-          VALID_TD_EBL_PLATFORMS,
+          describedTdCheck(VALID_TD_TYPE_OF_PERSON.description(), VALID_TD_TYPE_OF_PERSON),
+          describedTdCheck(VALID_TD_EBL_PLATFORMS.description(), VALID_TD_EBL_PLATFORMS),
           describedTdCheck(
               "If present, `codeListProvider` must equal  `WAVE`, `CARX`, `ESSD`, `IDT`, `BOLE`, `EDOX`, `IQAX`, `SECR`, `TRGO`, `ETEU`, `TRAC`, `BRIT`, `COVA`, `ETIT`, `KTNE`, `CRED`, `BLOC`, `DOCU`, `AEOT`, `SGTD`, `GSBN`, `WISE`, `GLEIF`, `W3C`, `DNB`, `FMC`, `DCSA`, or `ZZZ`.",
               TD_DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS),
@@ -1785,8 +1726,12 @@ public class EblChecks {
           describedTdCheck(
               "For every item in a consignment-item `references[]` collection, `type` must equal `CR`, `AKG`, `SPO`, or `CPO`.",
               VALID_CONSIGNMENT_ITEMS_REFERENCE_TYPES),
-          VALID_NATIONAL_COMMODITY_CODE_TYPES,
-          VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES,
+          describedTdCheck(
+              VALID_NATIONAL_COMMODITY_CODE_TYPES.description(),
+              VALID_NATIONAL_COMMODITY_CODE_TYPES),
+          describedTdCheck(
+              VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES.description(),
+              VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES),
           describedTdCheck(
               "For every cargo item containing `dangerousGoods`, `imoPackagingCode` or `packageCode` must be present.",
               JsonAttribute.allIndividualMatchesMustBeValid(
@@ -1834,8 +1779,7 @@ public class EblChecks {
               "For every `innerPackaging` object, `quantity` must be a positive integer greater than 0.",
               VALID_INNER_PACKAGING_QUANTITIES),
           describedTdCheck(
-              "For every item in `utilizedTransportEquipments[]`, if `isNonOperatingReefer=true`, then `activeReeferSettings` must not be present; if `isNonOperatingReefer=false`, then `activeReeferSettings` must be present.",
-              NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
+              "For every item in `utilizedTransportEquipments[]`, if `isNonOperatingReefer=true`, then `activeReeferSettings` must not be present.",
               NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER),
           describedTdCheck(
               "`temperatureSetpoint` and `temperatureUnit` must either both be present or both be absent.",
@@ -2147,6 +2091,13 @@ public class EblChecks {
 
   public static List<JsonContentCheck> getTdNotificationChecks(
       TransportDocumentStatusScenario statusScenario, JsonContentCheck... extraChecks) {
+    return getTdNotificationChecks(statusScenario, null, extraChecks);
+  }
+
+  public static List<JsonContentCheck> getTdNotificationChecks(
+      TransportDocumentStatusScenario statusScenario,
+      Supplier<EblDynamicScenarioParameters> dspSupplier,
+      JsonContentCheck... extraChecks) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>(Arrays.asList(extraChecks));
 
     jsonContentChecks.add(
@@ -2163,6 +2114,15 @@ public class EblChecks {
                     KeywordDataset.staticDataset(
                         AMENDED_TRANSPORT_DOCUMENT_STATUSES.toArray(String[]::new))))));
     jsonContentChecks.addAll(statusScenario.checks(true));
+    if (statusScenario.requiresUnchangedPrimaryStatus() && dspSupplier != null) {
+      jsonContentChecks.add(
+          describedTdCheck(
+              "After `%s`, `transportDocumentStatus` must equal its value from before the action."
+                  .formatted(statusScenario.useCase()),
+              JsonAttribute.mustEqual(
+                  TD_TRANSPORT_DOCUMENT_STATUS,
+                  () -> dspSupplier.get().transportDocumentStatus())));
+    }
 
     jsonContentChecks.add(
         describedTdCheck(
@@ -2201,19 +2161,17 @@ public class EblChecks {
     addTransportDocumentCarrierChecks(jsonContentChecks, payloadContext);
   }
 
-  private static void addTransportDocumentCarrierChecks(List<? super JsonRebasableContentCheck> jsonContentChecks, TdPayloadContext payloadContext) {
-    boolean amendedNotification = payloadContext == TdPayloadContext.AMENDED_TRANSPORT_DOCUMENT_NOTIFICATION;
+  private static void addTransportDocumentCarrierChecks(
+      List<? super JsonRebasableContentCheck> jsonContentChecks, TdPayloadContext payloadContext) {
     STATIC_TD_CHECKS.stream()
-      .filter(check -> !amendedNotification || !AMENDED_NOTIFICATION_EXCLUDED_TD_CHECK_DESCRIPTIONS.contains(check.description()))
-      .map(check -> {
-        if (amendedNotification && check.description().equals("For every `NationalCommodityCode` object, `type` must equal `NCM`, `HTS`, `SCHEDULE_B`, `TARIC`, `CN`, or `CUS`.")) {
-          return describedTdCheck(check.description(), VALID_AMENDED_NOTIFICATION_NATIONAL_COMMODITY_CODE_TYPES);
-        }
-        return payloadContext != TdPayloadContext.STANDARD && SEGREGATION_GROUPS_DESCRIPTION.equals(check.description())
-          ? describedTdCheck(AMENDMENT_SEGREGATION_GROUPS_DESCRIPTION, check)
-          : check;
-      })
-      .forEach(jsonContentChecks::add);
+        .map(
+            check ->
+                payloadContext != TdPayloadContext.STANDARD
+                        && tdDisplayDescription(SEGREGATION_GROUPS_DESCRIPTION)
+                            .equals(check.description())
+                    ? describedTdCheck(AMENDMENT_SEGREGATION_GROUPS_DESCRIPTION, check)
+                    : check)
+        .forEach(jsonContentChecks::add);
   }
 
   public static List<JsonRebasableContentCheck> genericTDContentChecks(
@@ -2228,6 +2186,14 @@ public class EblChecks {
 
   public static List<JsonRebasableContentCheck> transportDocumentCarrierContentChecks() {
     return List.copyOf(STATIC_TD_CHECKS);
+  }
+
+  public static List<JsonContentCheck> transportDocumentCarrierContentChecks(
+      ScenarioType scenarioType) {
+    List<JsonContentCheck> checks = new ArrayList<>(STATIC_TD_CHECKS);
+    checks.removeIf(check -> !tdCheckAppliesToScenario(check, scenarioType));
+    checks.addAll(tdScopeChecks(scenarioType));
+    return List.copyOf(checks);
   }
 
   public static ActionCheck tdPlusScenarioContentChecks(
@@ -2257,7 +2223,9 @@ public class EblChecks {
       Supplier<EblDynamicScenarioParameters> dspSupplier,
       TdPayloadContext payloadContext) {
 
-    var scenarioType = ScenarioType.valueOf(dspSupplier.get().scenarioType());
+    String scenarioTypeName = dspSupplier.get().scenarioType();
+    ScenarioType scenarioType =
+        scenarioTypeName == null ? null : ScenarioType.valueOf(scenarioTypeName);
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
 
     if (payloadContext == TdPayloadContext.STANDARD) {
@@ -2265,75 +2233,133 @@ public class EblChecks {
     } else {
       addTransportDocumentCarrierChecks(jsonContentChecks, payloadContext);
     }
-
-    jsonContentChecks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-            "[%s] Validate the containers reefer settings.".formatted(SCENARIO),
-            mav -> mav.submitAllMatching(S_x.formatted(UTILIZED_TRANSPORT_EQUIPMENTS)),
-            (nodeToValidate, contextPath) -> {
-              var issues = new LinkedHashSet<ConformanceError>();
-
-              switch (scenarioType) {
-                case ACTIVE_REEFER -> {
-                  if (!nodeToValidate.path(ACTIVE_REEFER_SETTINGS).isObject()) {
-                    issues.add(
-                        ConformanceError.error(
-                            "The scenario requires '%s' to have an active reefer"
-                                .formatted(contextPath)));
-                  }
-                }
-                case NON_OPERATING_REEFER -> {
-                  if (!nodeToValidate.path(IS_NON_OPERATING_REEFER).asBoolean(false)) {
-                    issues.add(
-                        ConformanceError.error(
-                            "The scenario requires '%s.%s' to be true"
-                                .formatted(contextPath, IS_NON_OPERATING_REEFER)));
-                  }
-                }
-                default -> issues.add(ConformanceError.irrelevant());
-              }
-              return ConformanceCheckResult.withRelevance(issues);
-            }));
-
-    jsonContentChecks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-            "[%s] Whether the cargo should be DG.".formatted(SCENARIO),
-            ScenarioType.DG.equals(scenarioType),
-            mav ->
-                mav.submitAllMatching(
-                    S_x_S_x_S_x_S.formatted(
-                        CONSIGNMENT_ITEMS, CARGO_ITEMS, OUTER_PACKAGING, DANGEROUS_GOODS)),
-            (nodeToValidate, contextPath) -> {
-              if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
-                return ConformanceCheckResult.simple(
-                    Set.of(
-                        "The scenario requires '%s' to contain '%s'."
-                            .formatted(contextPath, DANGEROUS_GOODS)));
-              }
-              return ConformanceCheckResult.simple(Set.of());
-            }));
-
-    jsonContentChecks.add(
-        JsonAttribute.allIndividualMatchesMustBeValid(
-            "[%s] The '%s' should be true for SOC scenarios.".formatted(SCENARIO, IS_SHIPPER_OWNED),
-            ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES.equals(scenarioType),
-            mav -> mav.submitAllMatching(S_x.formatted(UTILIZED_TRANSPORT_EQUIPMENTS)),
-            (nodeToValidate, contextPath) -> {
-              if (!nodeToValidate.path(IS_SHIPPER_OWNED).asBoolean(false)) {
-                return ConformanceCheckResult.simple(
-                    Set.of(
-                        "The scenario requires '%s.%s' to be true."
-                            .formatted(contextPath, IS_SHIPPER_OWNED)));
-              }
-              return ConformanceCheckResult.simple(Set.of());
-            }));
-
-    jsonContentChecks.addAll(
-        generateScenarioRelatedChecks(
-            ScenarioType.valueOf(dspSupplier.get().scenarioType()),
-            true,
-            dspSupplier.get().isCladInSI()));
+    if (scenarioType != null) {
+      jsonContentChecks.removeIf(check -> !tdCheckAppliesToScenario(check, scenarioType));
+      jsonContentChecks.addAll(tdScopeChecks(scenarioType));
+    }
     return jsonContentChecks;
+  }
+
+  private static boolean tdCheckAppliesToScenario(JsonContentCheck check, ScenarioType scenarioType) {
+    String description = check.description();
+    if (description.startsWith("When 'isElectronic' is 'true', no more than one original")
+        || description.startsWith("When isElectronic is true and transportDocumentTypeCode is BOL")) {
+      return !scenarioType.isSWB();
+    }
+    if (description.equals("Consignee and endorsee must never both be present (mutually exclusive).")
+        || description.startsWith("If 'isToOrder=true', then at least one notify party")) {
+      return scenarioType.isToOrder();
+    }
+    return true;
+  }
+
+  private static List<JsonContentCheck> tdScopeChecks(ScenarioType scenarioType) {
+    List<JsonContentCheck> checks = new ArrayList<>();
+    checks.add(
+        describedTdCheck(
+            "[Scope] `transportDocumentTypeCode` must equal `%s`."
+                .formatted(scenarioType.transportDocumentTypeCode()),
+            JsonAttribute.path(
+                TRANSPORT_DOCUMENT_TYPE_CODE,
+                JsonAttribute.matchedMustEqual(scenarioType::transportDocumentTypeCode))));
+    checks.add(
+        describedTdCheck(
+            "[Scope] `isToOrder` must equal `%s`.".formatted(scenarioType.isToOrder()),
+            JsonAttribute.path(
+                IS_TO_ORDER,
+                scenarioType.isToOrder()
+                    ? JsonAttribute.matchedMustBeTrue()
+                    : (node, contextPath) ->
+                        node.isBoolean() && !node.booleanValue()
+                            ? ConformanceCheckResult.simple(Set.of())
+                            : ConformanceCheckResult.simple(
+                                Set.of(
+                                    "The value of '%s' was '%s' instead of 'false'"
+                                        .formatted(contextPath, node))))));
+    return checks;
+  }
+
+  public static ActionCheck shipperApprovalContentChecks(
+      UUID matched, String standardVersion) {
+    return JsonAttribute.contentChecks(
+        EblRole::isShipper,
+        matched,
+        HttpMessageType.REQUEST,
+        standardVersion,
+        List.of(
+            describedTdCheck(
+                "`transportDocumentStatus` must equal `APPROVED`.",
+                JsonAttribute.mustEqual(TD_TRANSPORT_DOCUMENT_STATUS, "APPROVED"))));
+  }
+
+  public static ActionCheck shipperAmendmentContentChecks(
+      UUID matched,
+      String standardVersion,
+      Supplier<EblDynamicScenarioParameters> dspSupplier) {
+    String scenarioTypeName = dspSupplier.get().scenarioType();
+    ScenarioType scenarioType =
+        scenarioTypeName == null ? null : ScenarioType.valueOf(scenarioTypeName);
+    List<JsonContentCheck> checks = new ArrayList<>(STATIC_TD_CHECKS);
+    checks.removeIf(
+        check ->
+            check.description().startsWith("'transportDocumentStatus' must equal")
+                || (scenarioType != null && !tdCheckAppliesToScenario(check, scenarioType)));
+    checks.add(
+        describedTdCheck(
+            "`transportDocumentStatus` must equal `DRAFT`, `ISSUED`, or `PENDING_SURRENDER_FOR_AMENDMENT`.",
+            JsonAttribute.mustBeOneOf(
+                TD_TRANSPORT_DOCUMENT_STATUS,
+                Set.of("DRAFT", "ISSUED", "PENDING_SURRENDER_FOR_AMENDMENT"))));
+    checks.add(
+        describedTdCheck(
+            "`transportDocumentStatus` must equal its value from before the action.",
+            JsonAttribute.mustEqual(
+                TD_TRANSPORT_DOCUMENT_STATUS,
+                () -> dspSupplier.get().transportDocumentStatus())));
+    if (scenarioType != null) {
+      checks.addAll(tdScopeChecks(scenarioType));
+    }
+    return JsonAttribute.contentChecks(
+        EblRole::isShipper, matched, HttpMessageType.REQUEST, standardVersion, checks);
+  }
+
+  public static List<JsonRebasableContentCheck> amendedTransportDocumentCarrierContentChecks(
+      Supplier<EblDynamicScenarioParameters> dspSupplier) {
+    String scenarioTypeName = dspSupplier.get().scenarioType();
+    ScenarioType scenarioType =
+        scenarioTypeName == null ? null : ScenarioType.valueOf(scenarioTypeName);
+    List<JsonRebasableContentCheck> checks = new ArrayList<>();
+    addTransportDocumentCarrierChecks(checks, TdPayloadContext.AMENDED_TRANSPORT_DOCUMENT);
+    if (scenarioType != null) {
+      checks.removeIf(check -> !tdCheckAppliesToScenario(check, scenarioType));
+      tdScopeChecks(scenarioType).stream()
+          .map(JsonRebasableContentCheck.class::cast)
+          .forEach(checks::add);
+    }
+    return checks;
+  }
+
+  public static ActionCheck amendedTransportDocumentStatusChecks(
+      UUID matched,
+      String standardVersion,
+      AmendedTransportDocumentStatus expectedStatus) {
+    List<JsonContentCheck> checks = new ArrayList<>();
+    checks.add(
+        describedTdCheck(
+            "If `amendedTransportDocumentStatus` is present, then it must equal `AMENDMENT_RECEIVED`, `AMENDMENT_CONFIRMED`, `AMENDMENT_CANCELLED`, or `AMENDMENT_DECLINED`.",
+            JsonAttribute.path(
+                AMENDED_TRANSPORT_DOCUMENT_STATUS,
+                JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+                    KeywordDataset.staticDataset(
+                        AMENDED_TRANSPORT_DOCUMENT_STATUSES.toArray(String[]::new))))));
+    checks.add(
+        describedTdCheck(
+            "The `amendedTransportDocumentStatus` must equal `%s`.".formatted(expectedStatus),
+            JsonAttribute.path(
+                AMENDED_TRANSPORT_DOCUMENT_STATUS,
+                JsonAttribute.matchedMustEqual(expectedStatus::name))));
+    return JsonAttribute.contentChecks(
+        EblRole::isCarrier, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
   public static JsonContentMatchedValidation utilizedTransportEquipmentsScenarioSizeCheck(

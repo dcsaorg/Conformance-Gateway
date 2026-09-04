@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -56,43 +55,48 @@ public class CarrierTdNotificationPayloadRequestConformanceCheck
 
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
-    return Stream.of(
+    Stream<? extends ConformanceCheck> subChecks =
+        Stream.concat(
             buildChecks(
                 ROOT_LABEL,
                 DATA_PATH,
                 () -> {
                   List<JsonContentCheck> checks =
-                      new ArrayList<>(EblChecks.getTdNotificationChecks(statusScenario));
+                      new ArrayList<>(
+                          EblChecks.getTdNotificationChecks(statusScenario, dspSupplier));
                   getTdrCheck().ifPresent(checks::add);
                   return checks;
                 }),
-            buildChecks(
+            buildTransportDocumentChecks(
                 TRANSPORT_DOCUMENT_LABEL,
                 TRANSPORT_DOCUMENT_PATH,
-                () -> {
-                  List<JsonContentCheck> checks = new ArrayList<>();
-                  getTdrCheck().ifPresent(checks::add);
-                  checks.addAll(
-                      EblChecks.getTdPayloadChecks(
-                          List.copyOf(statusScenario.transportDocumentStatuses()),
-                          dspSupplier,
-                          EblChecks.TdPayloadContext.TRANSPORT_DOCUMENT_NOTIFICATION));
-                  return checks;
-                }),
-            buildChecks(
-                AMENDED_TRANSPORT_DOCUMENT_LABEL,
-                AMENDED_TRANSPORT_DOCUMENT_PATH,
-                () -> {
-                  List<JsonContentCheck> checks = new ArrayList<>();
-                  getTdrCheck().ifPresent(checks::add);
-                  checks.addAll(
-                      EblChecks.getTdPayloadChecks(
-                          List.copyOf(statusScenario.transportDocumentStatuses()),
-                          dspSupplier,
-                          EblChecks.TdPayloadContext.AMENDED_TRANSPORT_DOCUMENT_NOTIFICATION));
-                  return checks;
-                }))
-        .flatMap(Function.identity());
+                EblChecks.TdPayloadContext.TRANSPORT_DOCUMENT_NOTIFICATION));
+    if (statusScenario.amendedTransportDocumentStatus() == null) {
+      return subChecks;
+    }
+    return Stream.concat(
+        subChecks,
+        buildTransportDocumentChecks(
+            AMENDED_TRANSPORT_DOCUMENT_LABEL,
+            AMENDED_TRANSPORT_DOCUMENT_PATH,
+            EblChecks.TdPayloadContext.AMENDED_TRANSPORT_DOCUMENT));
+  }
+
+  private Stream<? extends ConformanceCheck> buildTransportDocumentChecks(
+      String label, String path, EblChecks.TdPayloadContext payloadContext) {
+    return buildChecks(
+        label,
+        path,
+        () -> {
+          List<JsonContentCheck> checks = new ArrayList<>();
+          getTdrCheck().ifPresent(checks::add);
+          checks.addAll(
+              EblChecks.getTdPayloadChecks(
+                  List.copyOf(statusScenario.transportDocumentStatuses()),
+                  dspSupplier,
+                  payloadContext));
+          return checks;
+        });
   }
 
   private Optional<JsonContentCheck> getTdrCheck() {

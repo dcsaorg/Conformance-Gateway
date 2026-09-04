@@ -33,6 +33,11 @@ Do not hardcode the random local auth token.
 5. Run focused tests first, then tests for all affected reactor modules.
 6. If the change can affect scenario construction, actions, parties, orchestration, validation, reports, API traffic, or standard resources, run the complete affected conformance suite and inspect its HTML report. Unit tests alone are not sufficient.
 7. Summarize commands run, report path, and any testing that could not be performed. Never claim a pass without running the command.
+8. Maintain this guide iteratively when a change reveals a durable, repository-wide convention or a
+   non-obvious failure mode likely to recur. Add only concise, actionable guidance that will help
+   future work; do not record one-off implementation details, duplicate existing rules, or expand
+   the file merely because code changed. Refine an existing rule instead of adding another when
+   that communicates the lesson more clearly.
 
 Do not temporarily comment out parameterized standards/scenarios or remove `@Disabled` and commit that change. Use focused Maven selectors or IDE run configurations instead.
 
@@ -47,6 +52,16 @@ If the Markdown references an Excel workbook for validations, the workbook is an
 
 The implementation must map exactly to the workbook within the applicability and exceptions defined by the Markdown. Preserve distinctions between required and optional scenarios and any explicitly documented validation bypasses. Add table-driven regression coverage where practical for every allowed combination, required/forbidden field, conditional branch, and representative invalid combination. If documentation, workbook, code, and tests disagree, resolve the discrepancy against the documented specification and workbook rather than assuming the current implementation is correct, and record any genuine ambiguity that cannot be resolved from those sources.
 
+For changes driven by multiple artifacts, reconcile them before coding in this order: scenario Markdown (module names, action paths, role ownership, required/optional classification and scope), each role-specific validation workbook (exact report labels and applicability), any status/state-transition sheet (allowed preconditions and expected postconditions), and the referenced OpenAPI schemas/endpoints. Maintain a working matrix from every requirement to its scenario builder, action/check, synthetic-party behavior, and regression test. A generated green report is the final cross-check, not a substitute for this artifact-by-artifact reconciliation.
+
+Keep report titles distinct from conformance expectations. Scenario and action titles should contain only identifiers explicitly intended as labels, such as `confirm`, `decline`, or `amended content`. Expected HTTP classes/codes and expected document states belong in checks and explanatory prose unless the authoritative Markdown explicitly includes them in the title. Assert exact module, scenario, action, and validation labels in tests when report wording is part of the requirement.
+
+When a specification permits any successful HTTP response, use
+`ResponseStatusCheck.forSuccessfulResponse(...)` rather than enumerating common values such as
+`200`, `202`, and `204`. Keep successful retrieval (`GET`) checks exact when the specification
+requires `200`, and preserve exact non-success status checks for negative scenarios. Apply this
+consistently to primary exchanges and notification acknowledgements.
+
 ## Scenario builder correctness
 
 `AbstractComponentFactory.generateConformanceScenarios` requires globally unique scenario titles. Module labels are also significant because they become report sections.
@@ -60,6 +75,10 @@ When combining role-specific module maps for an all-in-one sandbox:
 - Add tests for both each individual role and the all-roles selection whenever role module maps change.
 - Do not weaken duplicate scenario-title validation to make an all-in-one suite start. Fix the colliding titles so both scenarios remain identifiable.
 
+Standalone root actions that synthesize references or payloads must re-establish the relationship between those values after reset and JSON-state import. Keep prompt URL/reference fields and payload references atomic, and add a regression test that imports stale dynamic scenario parameters before serializing the prompt; constructor-only initialization is not sufficient.
+
+To disable a scenario suite without deleting its implementation: remove it from the standard's advertised suite set, disable/comment its scenario-builder dispatch branch, remove or comment any explicitly hard-coded Spring/manual/Selenium integration case, and replace documentation or runner examples that advertise it. Keep dormant builders and endpoint metadata only when useful for straightforward re-enablement. Add a contract test for the exact advertised suite set and verify the disabled sandbox ID is absent from the generated homepage.
+
 When adding a standard/version/suite, ensure it is exposed by the relevant `ConformanceStandard`, generated on the Spring Boot homepage, represented in `ConformanceApplicationTest`, and runnable through the conformance runner.
 
 ## Java build and test commands
@@ -71,6 +90,8 @@ Focused module tests (also builds dependencies):
 ```bash
 ./mvnw -pl booking -am test
 ```
+
+When a shared module API changes, a direct downstream command without `-am` can resolve an older locally installed snapshot even if the working tree compiles in a reactor. Prefer the reactor command; if an unrelated upstream test configuration prevents it, first install the changed shared modules with tests skipped, then run the downstream module tests normally. Treat that install only as dependency preparation, never as test validation.
 
 A specific test across a reactor (the extra property prevents dependency modules with no matching test from failing):
 
@@ -119,9 +140,9 @@ Or let the runner own the backend lifecycle:
 
 ```bash
 npm --prefix scripts run run-conformance-suite -- \
-  --standard Booking \
-  --version 2.0.0 \
-  --suite Conformance \
+  --standard eBL \
+  --version 3.0.0 \
+  --suite 'Conformance TD' \
   --start-command './mvnw -pl spring-boot -am spring-boot:run'
 ```
 
@@ -133,6 +154,13 @@ The runner:
 - saves HTML under root `target/conformance-reports/` by default;
 - exits non-zero for HTTP/startup/timeout/report parsing errors or any top-level role that is not conformant;
 - retains the HTML report when conformance validation fails.
+- automatically creates both `with-notifications` and `without-notifications` reports for Booking
+  and eBL; notification suppression must be applied atomically as part of reset, before scenario
+  execution, to avoid race-dependent coverage.
+- Suppressing optional notification traffic must still advance orchestration and mark the action as
+  completed without traffic. Cover both standalone notification actions carrying an action ID and
+  follow-up notifications without one; preserve any required action input and validate the
+  notification sender role before completing the current action.
 
 Open a failing report and inspect the first non-conformant scenario/action and its recorded exchange errors. Fix the cause and rerun until green; do not merely loosen the runner's status parsing or assertions.
 
@@ -164,6 +192,11 @@ npm start
 ```
 
 The local UI is served at `http://localhost:4200/environment` and the backend at `http://localhost:8080`. Add or update Jest tests for components/services you change. Backend report success does not replace frontend tests.
+
+For automatically refreshed views, update component data in place without clearing the currently
+rendered model or navigating/reloading the page. Prevent overlapping polls, stop timers on
+component destruction, preserve the last successful state when a background refresh fails, and
+refresh immediately after successful mutations such as reset.
 
 ## Local Docker option
 

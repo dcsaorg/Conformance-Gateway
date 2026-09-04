@@ -23,7 +23,6 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
   @SuppressWarnings("unused")
   private static Stream<String> testStandards() {
     return Stream.of(
-        "Adoption",
         "AN",
         "Booking",
         "CS",
@@ -35,7 +34,7 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
         "eBL Issuance",
         "eBL Surrender",
         "Ebl Endorsement Chain",
-        "Booking + eBL",
+        // "Booking + eBL", // Disabled legacy combined standard
         "VGM");
   }
 
@@ -78,7 +77,7 @@ class ManualScenarioWithNotificationsTest extends ManualTestBase {
         EblStandard.INSTANCE.getScenarioSuitesByStandardVersion().keySet().stream()
             .findFirst()
             .orElseThrow(),
-        EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
+        EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD,
         EblRole.CARRIER.getConfigName());
   }
 }

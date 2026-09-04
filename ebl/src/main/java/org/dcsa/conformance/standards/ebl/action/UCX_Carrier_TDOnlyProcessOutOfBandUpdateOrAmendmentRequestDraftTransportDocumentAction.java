@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction
-    extends StateChangingSIAction {
+    extends CarrierNotificationEblAction {
 
   public UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction(
       String carrierPartyName, String shipperPartyName, EblAction previousAction) {

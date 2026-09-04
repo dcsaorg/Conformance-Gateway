@@ -75,7 +75,7 @@ class EndorsementChainScenarioListBuilderTest {
   @Test
   void supportedVersionMatchesSyncedConformanceDocument() {
     assertEquals(
-      Set.of("3.0.3"),
+      Set.of("3.0.0"),
       EblEndorsementChainStandard.INSTANCE.getScenarioSuitesByStandardVersion().keySet());
   }
 

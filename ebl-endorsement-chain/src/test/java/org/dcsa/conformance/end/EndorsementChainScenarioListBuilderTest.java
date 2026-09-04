@@ -18,7 +18,7 @@ class EndorsementChainScenarioListBuilderTest {
   private static final EndorsementChainComponentFactory COMPONENT_FACTORY =
     new EndorsementChainComponentFactory(
       "Ebl Endorsement Chain",
-      "3.0.3",
+      "3.0.0",
       EblEndorsementChainStandard.SCENARIO_SUITE_CONFORMANCE);
 
   @Test

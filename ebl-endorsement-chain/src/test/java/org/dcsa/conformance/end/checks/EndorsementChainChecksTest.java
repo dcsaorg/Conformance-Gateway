@@ -20,7 +20,7 @@ class EndorsementChainChecksTest {
   void publicFactoryBuildsAllPayloadChecks() {
     new EndorsementChainChecks();
 
-    ActionCheck check = EndorsementChainChecks.getENDGetResponseChecks(UUID.randomUUID(), "3.0.3");
+    ActionCheck check = EndorsementChainChecks.getENDGetResponseChecks(UUID.randomUUID(), "3.0.0");
 
     assertEquals(4, check.subChecksStream().count());
   }

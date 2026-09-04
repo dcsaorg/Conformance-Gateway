@@ -26,7 +26,7 @@ class ConsumerGetEndorsementChainActionTest {
   private static final EndorsementChainComponentFactory COMPONENT_FACTORY =
     new EndorsementChainComponentFactory(
       "Ebl Endorsement Chain",
-      "3.0.3",
+      "3.0.0",
       EblEndorsementChainStandard.SCENARIO_SUITE_CONFORMANCE);
 
   @ParameterizedTest
@@ -47,7 +47,7 @@ class ConsumerGetEndorsementChainActionTest {
     action.handleExchange(exchange);
 
     ResponseStatusCheck statusCheck =
-      allChecks(action.createCheck("3.0.3"))
+      allChecks(action.createCheck("3.0.0"))
         .filter(ResponseStatusCheck.class::isInstance)
         .map(ResponseStatusCheck.class::cast)
         .findFirst()

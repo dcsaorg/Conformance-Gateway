@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, ChangeDetectionStrategy } from "@angular/core";
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { firstValueFrom } from "rxjs";
 
@@ -12,6 +12,7 @@ export interface MessageDialogData {
     selector: 'app-message-dialog',
     templateUrl: './message-dialog.component.html',
     styleUrls: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class MessageDialog {

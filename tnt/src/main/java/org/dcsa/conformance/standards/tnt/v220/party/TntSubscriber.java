@@ -2,9 +2,6 @@ package org.dcsa.conformance.standards.tnt.v220.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -17,33 +14,44 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.tnt.v220.action.TntGetEventsAction;
 import org.dcsa.conformance.standards.tnt.v220.action.TntGetEventsBadRequestAction;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 @Slf4j
 public class TntSubscriber extends ConformanceParty {
   private static final String CURSOR = "cursor";
+
   public TntSubscriber(
-      String apiVersion,
-      PartyConfiguration partyConfiguration,
-      CounterpartConfiguration counterpartConfiguration,
-      JsonNodeMap persistentMap,
-      PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    String apiVersion,
+    PartyConfiguration partyConfiguration,
+    CounterpartConfiguration counterpartConfiguration,
+    JsonNodeMap persistentMap,
+    PartyWebClient webClient,
+    Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
-        apiVersion,
-        partyConfiguration,
-        counterpartConfiguration,
-        persistentMap,
-        webClient,
-        orchestratorAuthHeader);
+      apiVersion,
+      partyConfiguration,
+      counterpartConfiguration,
+      persistentMap,
+      webClient,
+      orchestratorAuthHeader);
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {}
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+  }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {}
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+  }
 
   @Override
-  protected void doReset() {}
+  protected void doReset() {
+  }
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
@@ -55,7 +63,7 @@ public class TntSubscriber extends ConformanceParty {
   private void getEvents(JsonNode actionPrompt) {
     log.info("TntSubscriber.getEvents(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
-        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+      SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
     Map<String, Collection<String>> queryParams = ssp.getMap().entrySet().stream()
       .collect(
@@ -67,11 +75,11 @@ public class TntSubscriber extends ConformanceParty {
     }
 
     syncCounterpartGet(
-        "/v2/events",queryParams
-);
+      "/v2/events", queryParams
+    );
 
     addOperatorLogEntry(
-        "Sent GET events request with parameters %s".formatted(ssp.toJson().toPrettyString()));
+      "Sent GET events request with parameters %s".formatted(ssp.toJson().toPrettyString()));
   }
 
   @Override

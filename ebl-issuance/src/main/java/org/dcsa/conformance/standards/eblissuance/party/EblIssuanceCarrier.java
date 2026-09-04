@@ -1,15 +1,7 @@
 package org.dcsa.conformance.standards.eblissuance.party;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
@@ -31,9 +23,20 @@ import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestErrorResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestResponseAction;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Consumer;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class EblIssuanceCarrier extends ConformanceParty {
@@ -41,22 +44,22 @@ public class EblIssuanceCarrier extends ConformanceParty {
   private final Map<String, String> sirsByTdr = new HashMap<>();
   private final Map<String, String> brsByTdr = new HashMap<>();
   private static final PayloadSignerWithKey PAYLOAD_SIGNER =
-      PayloadSignerFactory.carrierPayloadSigner();
+    PayloadSignerFactory.carrierPayloadSigner();
 
   public EblIssuanceCarrier(
-      String apiVersion,
-      PartyConfiguration partyConfiguration,
-      CounterpartConfiguration counterpartConfiguration,
-      JsonNodeMap persistentMap,
-      PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    String apiVersion,
+    PartyConfiguration partyConfiguration,
+    CounterpartConfiguration counterpartConfiguration,
+    JsonNodeMap persistentMap,
+    PartyWebClient webClient,
+    Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
-        apiVersion,
-        partyConfiguration,
-        counterpartConfiguration,
-        persistentMap,
-        webClient,
-        orchestratorAuthHeader);
+      apiVersion,
+      partyConfiguration,
+      counterpartConfiguration,
+      persistentMap,
+      webClient,
+      orchestratorAuthHeader);
   }
 
   private static byte[] generateDocument() {
@@ -67,7 +70,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
       }
       RandomAccessReadBuffer randomAccessReadBuffer = new RandomAccessReadBuffer(inputStream);
       try (PDDocument document = Loader.loadPDF(randomAccessReadBuffer);
-          ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+           ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
         // Updating the title of the document
         String uuidHex = UUID.randomUUID().toString();
         String newTitle = "DCSA - " + uuidHex + " shipping";
@@ -86,7 +89,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set(
-        "eblStatesByTdr", StateManagementUtil.storeMap(eblStatesByTdr, EblIssuanceState::name));
+      "eblStatesByTdr", StateManagementUtil.storeMap(eblStatesByTdr, EblIssuanceState::name));
     targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(sirsByTdr));
     targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(brsByTdr));
   }
@@ -94,7 +97,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
     StateManagementUtil.restoreIntoMap(
-        eblStatesByTdr, sourceObjectNode.get("eblStatesByTdr"), EblIssuanceState::valueOf);
+      eblStatesByTdr, sourceObjectNode.get("eblStatesByTdr"), EblIssuanceState::valueOf);
     StateManagementUtil.restoreIntoMap(sirsByTdr, sourceObjectNode.get("sirsByTdr"));
     StateManagementUtil.restoreIntoMap(brsByTdr, sourceObjectNode.get("brsByTdr"));
   }
@@ -109,32 +112,28 @@ public class EblIssuanceCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(IssuanceRequestResponseAction.class, this::sendIssuanceRequest),
-        Map.entry(CarrierScenarioParametersAction.class, this::supplyScenarioParameters),
-        Map.entry(IssuanceRequestErrorResponseAction.class, this::sendIssuanceRequest));
+      Map.entry(IssuanceRequestResponseAction.class, this::sendIssuanceRequest),
+      Map.entry(CarrierScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info(
-        "EblIssuanceCarrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+      "EblIssuanceCarrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var carrierScenarioParameters =
-        new CarrierScenarioParameters(PAYLOAD_SIGNER.getPublicKeyInPemFormat());
+      new CarrierScenarioParameters(PAYLOAD_SIGNER.getPublicKeyInPemFormat());
     asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
+      actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
-        "Prompt answer for CarrierScenarioParameters: %s"
-            .formatted(carrierScenarioParameters.toJson().toPrettyString()));
+      "Prompt answer for CarrierScenarioParameters: %s"
+        .formatted(carrierScenarioParameters.toJson().toPrettyString()));
   }
 
   private void sendIssuanceRequest(JsonNode actionPrompt) {
     log.info("EblIssuanceCarrier.sendIssuanceRequest(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("ssp"));
-    var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
-    var eblType = dsp.eblType();
-    String tdr =
-        actionPrompt.has("tdr")
-            ? actionPrompt.path("tdr").asText()
-            : ReferenceGenerator.newReference();
+    String tdr = actionPrompt.has("tdr")
+      ? actionPrompt.path("tdr").asText()
+      : ReferenceGenerator.newReference();
     String tdsr = ReferenceGenerator.newReference();
     String sir = sirsByTdr.computeIfAbsent(tdr, ignoredTdr -> ReferenceGenerator.newReference());
     String br = brsByTdr.computeIfAbsent(tdr, ignoredTdr -> ReferenceGenerator.newReference());
@@ -142,135 +141,94 @@ public class EblIssuanceCarrier extends ConformanceParty {
     eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
 
     var jsonRequestBody =
-        (ObjectNode)
-            JsonToolkit.templateFileToJsonNode(
-                "/standards/eblissuance/messages/eblissuance-v%s-request.json"
-                    .formatted(apiVersion),
-                Map.ofEntries(
-                    Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
-                    Map.entry("TRANSPORT_DOCUMENT_SUB_REFERENCE_PLACEHOLDER", tdsr),
-                    Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
-                    Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
-                    Map.entry(
-                        "SEND_TO_PLATFORM_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.issueToSendToPlatform(), "")),
-                    Map.entry(
-                        "ISSUE_TO_LEGAL_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.issueToPartyName(), "")),
-                    Map.entry(
-                        "ISSUE_TO_CODE_LIST_PROVIDER",
-                        Objects.requireNonNullElse(ssp.issueToCodeListProvider(), "")),
-                    Map.entry(
-                        "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.issueToPartyCode(), "")),
-                    Map.entry(
-                        "ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.issueToCodeListName(), "")),
-                    Map.entry(
-                        "SHIPPER_LEGAL_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.shipperLegalName(), "")),
-                    Map.entry(
-                        "SHIPPER_CODE_LIST_PROVIDER",
-                        Objects.requireNonNullElse(ssp.shipperCodeListProvider(), "")),
-                    Map.entry(
-                        "SHIPPER_PARTY_CODE_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.shipperPartyCode(), "")),
-                    Map.entry(
-                        "SHIPPER_CODE_LIST_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.shipperCodeListName(), "")),
-                    Map.entry(
-                        "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.consigneeOrEndorseeLegalName(), "")),
-                    Map.entry(
-                        "CONSIGNEE_CODE_LIST_PROVIDER",
-                        Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListProvider(), "")),
-                    Map.entry(
-                        "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.consigneeOrEndorseePartyCode(), "")),
-                    Map.entry(
-                        "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListName(), "")),
-                    Map.entry(
-                        "ISSUING_PARTY_LEGAL_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.issuingPartyLegalName(), "")),
-                    Map.entry(
-                        "ISSUING_PARTY_CODE_LIST_PROVIDER",
-                        Objects.requireNonNullElse(ssp.issuingPartyCodeListProvider(), "")),
-                    Map.entry(
-                        "ISSUING_PARTY_PARTY_CODE_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.issuingPartyPartyCode(), "")),
-                    Map.entry(
-                        "ISSUING_PARTY_CODE_LIST_NAME_PLACEHOLDER",
-                        Objects.requireNonNullElse(ssp.issuingPartyCodeListName(), ""))));
-
-    boolean errorScenario =
-        actionPrompt
-            .path(IssuanceRequestErrorResponseAction.SEND_NO_ISSUING_PARTY)
-            .asBoolean(false);
-    if (errorScenario) {
-      ((ObjectNode) jsonRequestBody.path("document").path("documentParties"))
-          .remove("issuingParty");
-    }
-
-    if (eblType.isToOrder()) {
-      var td = (ObjectNode) jsonRequestBody.path("document");
-      td.put("isToOrder", true);
-      if (apiVersion.startsWith("2.")) {
-        var documentParties = (ArrayNode) td.path("documentParties");
-        var cnIdx = -1;
-        for (int i = 0; i < documentParties.size(); i++) {
-          if (documentParties.path(i).path("partyFunction").asText("?").equals("CN")) {
-            cnIdx = i;
-            break;
-          }
-        }
-        if (eblType.isBlankEbl()) {
-          documentParties.remove(cnIdx);
-        } else {
-          ((ObjectNode) documentParties.path(cnIdx)).put("partyFunction", "END");
-        }
-      } else {
-        var documentParties = (ObjectNode) td.path("documentParties");
-        if (eblType.isBlankEbl()) {
-          documentParties.remove("consignee");
-          documentParties.remove("endorsee");
-        } else {
-          var consignee = documentParties.remove("consignee");
-          documentParties.set("endorsee", consignee);
-        }
-      }
-    }
+      (ObjectNode)
+        JsonToolkit.templateFileToJsonNode(
+          "/standards/eblissuance/messages/eblissuance-v%s-request.json"
+            .formatted(apiVersion),
+          Map.ofEntries(
+            Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
+            Map.entry("TRANSPORT_DOCUMENT_SUB_REFERENCE_PLACEHOLDER", tdsr),
+            Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
+            Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
+            Map.entry(
+              "SEND_TO_PLATFORM_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.issueToSendToPlatform(), "")),
+            Map.entry(
+              "ISSUE_TO_LEGAL_NAME_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.issueToPartyName(), "")),
+            Map.entry(
+              "ISSUE_TO_CODE_LIST_PROVIDER",
+              Objects.requireNonNullElse(ssp.issueToCodeListProvider(), "")),
+            Map.entry(
+              "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.issueToPartyCode(), "")),
+            Map.entry(
+              "ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.issueToCodeListName(), "")),
+            Map.entry(
+              "SHIPPER_LEGAL_NAME_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.shipperLegalName(), "")),
+            Map.entry(
+              "SHIPPER_CODE_LIST_PROVIDER",
+              Objects.requireNonNullElse(ssp.shipperCodeListProvider(), "")),
+            Map.entry(
+              "SHIPPER_PARTY_CODE_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.shipperPartyCode(), "")),
+            Map.entry(
+              "SHIPPER_CODE_LIST_NAME_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.shipperCodeListName(), "")),
+            Map.entry(
+              "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.consigneeOrEndorseeLegalName(), "")),
+            Map.entry(
+              "CONSIGNEE_CODE_LIST_PROVIDER",
+              Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListProvider(), "")),
+            Map.entry(
+              "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.consigneeOrEndorseePartyCode(), "")),
+            Map.entry(
+              "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListName(), "")),
+            Map.entry(
+              "ISSUING_PARTY_LEGAL_NAME_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.issuingPartyLegalName(), "")),
+            Map.entry(
+              "ISSUING_PARTY_CODE_LIST_PROVIDER",
+              Objects.requireNonNullElse(ssp.issuingPartyCodeListProvider(), "")),
+            Map.entry(
+              "ISSUING_PARTY_PARTY_CODE_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.issuingPartyPartyCode(), "")),
+            Map.entry(
+              "ISSUING_PARTY_CODE_LIST_NAME_PLACEHOLDER",
+              Objects.requireNonNullElse(ssp.issuingPartyCodeListName(), ""))));
 
     var tdChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("document"));
     var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
     var eblVisualization = generateDocument();
-    jsonRequestBody.set(
-        "eBLVisualisationByCarrier", wrapInSupportingDocumentObject(eblVisualization));
+    jsonRequestBody.set("eBLVisualisationByCarrier", wrapInSupportingDocumentObject(eblVisualization));
     var eBLVisualisationByCarrierChecksum = Checksums.sha256(eblVisualization);
-    var issuanceManifest =
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("documentChecksum", tdChecksum)
-            .put("issueToChecksum", issueToChecksum)
-            .put("eBLVisualisationByCarrierChecksum", eBLVisualisationByCarrierChecksum);
+    var issuanceManifest = OBJECT_MAPPER
+      .createObjectNode()
+      .put("documentChecksum", tdChecksum)
+      .put("issueToChecksum", issueToChecksum)
+      .put("eBLVisualisationByCarrierChecksum", eBLVisualisationByCarrierChecksum);
 
-    jsonRequestBody.put(
-        "issuanceManifestSignedContent", PAYLOAD_SIGNER.sign(issuanceManifest.toString()));
+    jsonRequestBody.put("issuanceManifestSignedContent", PAYLOAD_SIGNER.sign(issuanceManifest.toString()));
 
     syncCounterpartPut(
-        "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)), jsonRequestBody);
+      "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)), jsonRequestBody);
 
     addOperatorLogEntry(
-        "Sent an issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(tdr, eblStatesByTdr.get(tdr)));
+      "Sent an issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
+        .formatted(tdr, eblStatesByTdr.get(tdr)));
   }
 
   private static ObjectNode wrapInSupportingDocumentObject(byte[] document) {
     return OBJECT_MAPPER
-        .createObjectNode()
-        .put("name", "test-iss-document")
-        .put("content", document)
-        .put("contentType", "application/pdf");
+      .createObjectNode()
+      .put("name", "test-iss-document")
+      .put("content", document)
+      .put("contentType", "application/pdf");
   }
 
   @Override
@@ -281,27 +239,27 @@ public class EblIssuanceCarrier extends ConformanceParty {
     String irc = jsonRequest.path("issuanceResponseCode").asText();
 
     if (Objects.equals(EblIssuanceState.ISSUANCE_REQUESTED, eblStatesByTdr.get(tdr))) {
-      if (Objects.equals(IssuanceResponseCode.ACCEPTED.standardCode, irc)) {
+      if (Objects.equals("ISSU", irc)) {
         eblStatesByTdr.put(tdr, EblIssuanceState.ISSUED);
       }
       addOperatorLogEntry(
-          "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
+        "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
 
       return request.createResponse(
-          204,
-          Map.of(API_VERSION, List.of(apiVersion)),
-          new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
+        204,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
     } else {
       return request.createResponse(
-          409,
-          Map.of(API_VERSION, List.of(apiVersion)),
-          new ConformanceMessageBody(
-              OBJECT_MAPPER
-                  .createObjectNode()
-                  .put(
-                      "message",
-                      "Rejecting '%s' for eBL '%s' because it is in state '%s'"
-                          .formatted(irc, tdr, eblStatesByTdr.get(tdr)))));
+        409,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(
+          OBJECT_MAPPER
+            .createObjectNode()
+            .put(
+              "message",
+              "Rejecting '%s' for eBL '%s' because it is in state '%s'"
+                .formatted(irc, tdr, eblStatesByTdr.get(tdr)))));
     }
   }
 

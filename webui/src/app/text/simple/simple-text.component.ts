@@ -1,9 +1,10 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 
 @Component({
     selector: 'app-simple-text',
     templateUrl: './simple-text.component.html',
     styleUrls: ['./simple-text.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SimpleTextComponent {

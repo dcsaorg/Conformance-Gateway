@@ -13,7 +13,7 @@
       },
       "eventID": "evt-ship-001",
       "eventDateTime": "2026-01-20T10:00:00Z",
-      "eventUpdatedDateTime": "2025-01-23T01:23:45Z",
+      "eventUpdatedDateTime": "2026-01-20T10:05:00Z",
       "eventClassification": {
         "eventType": "SHIPMENT",
         "eventClassifier": "ACTUAL",

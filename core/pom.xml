@@ -32,6 +32,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.networknt</groupId>
+			<!-- Do not upgrade to 2.x/3.x without a code migration: 2.x restructures the API
+			     (com.networknt.schema.oas / Keyword / JsonSchema) and 3.x switches to Jackson 3 -->
 			<artifactId>json-schema-validator</artifactId>
 			<version>1.5.9</version>
 		</dependency>

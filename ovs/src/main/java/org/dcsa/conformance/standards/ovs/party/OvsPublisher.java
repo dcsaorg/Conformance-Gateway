@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
 
@@ -115,19 +116,8 @@ public class OvsPublisher extends ConformanceParty {
       }
     }
 
-    int limit =
-        Integer.parseInt(
-            request.queryParams().containsKey("limit")
-                ? request.queryParams().get("limit").iterator().next()
-                : "100");
-
-    if (filteredArray.size() > limit) {
-      ArrayNode limitedArray = OBJECT_MAPPER.createArrayNode();
-      for (int i = 0; i < limit; i++) {
-        limitedArray.add(filteredArray.get(i));
-      }
-      filteredArray = limitedArray;
-    }
+    String limitValue = JsonUtil.getFirstQueryParamValue(request.queryParams(), OvsFilterParameter.LIMIT.getQueryParamName());
+    JsonNode limitedResponse = JsonUtil.trimRootArrayByLimit(filteredArray, limitValue);
 
     Map<String, Collection<String>> headers = new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
 
@@ -136,7 +126,7 @@ public class OvsPublisher extends ConformanceParty {
       headers.put("Next-Page-Cursor", List.of(ReferenceGenerator.newReference()));
     }
 
-    return request.createResponse(200, headers, new ConformanceMessageBody(filteredArray));
+    return request.createResponse(200, headers, new ConformanceMessageBody(limitedResponse));
   }
 
   private ArrayNode applyFilter(

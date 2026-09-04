@@ -85,10 +85,7 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
             "GET scenario - Required",
             noAction().then(getSchedules())))));
 
-    LinkedHashMap<String, OvsScenarioListBuilder> scenarios = new LinkedHashMap<>();
-    testedPartyRoleNames.forEach(party -> scenarios.putAll(partyScenariosMap.get(party)));
-
-    return scenarios;
+    return MapUtils.mergePartyScenarioModules(partyScenariosMap, testedPartyRoleNames);
   }
 
   private OvsScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {

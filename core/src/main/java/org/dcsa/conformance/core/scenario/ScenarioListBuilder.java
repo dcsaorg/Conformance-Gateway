@@ -16,6 +16,7 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
   private final LinkedList<T> children = new LinkedList<>();
   protected final Function<ConformanceAction, ConformanceAction> actionBuilder;
   private ScenarioConformanceType conformanceType = ScenarioConformanceType.REQUIRED;
+  private String scenarioTitlePrefix = "";
 
   protected ScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
     this.actionBuilder = actionBuilder;
@@ -44,13 +45,26 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
                       moduleIndex,
                       nextScenarioIndex.getAndIncrement(),
                       actionList,
-                      conformanceType);
+                      conformanceType,
+                      scenarioTitlePrefix);
                 })
             .toList();
   }
 
+  protected void withScenarioTitlePrefix(String scenarioTitlePrefix) {
+    this.scenarioTitlePrefix = scenarioTitlePrefix;
+  }
+
   protected T asOptionalReportOnlyScenario() {
-    this.conformanceType = ScenarioConformanceType.OPTIONAL;
+    return withConformanceType(ScenarioConformanceType.OPTIONAL);
+  }
+
+  protected T asInterchangeableScenarios() {
+    return withConformanceType(ScenarioConformanceType.INTERCHANGEABLE);
+  }
+
+  private T withConformanceType(ScenarioConformanceType conformanceType) {
+    this.conformanceType = conformanceType;
     return thisAsT();
   }
 

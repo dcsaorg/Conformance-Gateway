@@ -15,6 +15,7 @@ public class ScenarioCheck extends ConformanceCheck {
     this.scenario = scenario;
     this.expectedApiVersion = expectedApiVersion;
     this.setRelevantForAggregation(scenario.getConformanceType().affectsOverallConformance());
+    this.setInterchangeable(scenario.getConformanceType().isInterchangeable());
   }
 
   @Override

@@ -36,15 +36,32 @@ public class ConformanceScenario implements StatefulEntity {
       long scenarioIndex,
       Collection<ConformanceAction> actions,
       ScenarioConformanceType conformanceType) {
-    this(new UUID(moduleIndex, scenarioIndex), actions, conformanceType);
+    this(moduleIndex, scenarioIndex, actions, conformanceType, "");
+  }
+
+  public ConformanceScenario(
+      long moduleIndex,
+      long scenarioIndex,
+      Collection<ConformanceAction> actions,
+      ScenarioConformanceType conformanceType,
+      String titlePrefix) {
+    this(new UUID(moduleIndex, scenarioIndex), actions, conformanceType, titlePrefix);
   }
 
   public ConformanceScenario(UUID id, Collection<ConformanceAction> actions, ScenarioConformanceType conformanceType) {
+    this(id, actions, conformanceType, "");
+  }
+
+  private ConformanceScenario(
+      UUID id,
+      Collection<ConformanceAction> actions,
+      ScenarioConformanceType conformanceType,
+      String titlePrefix) {
     this.id = id;
     this.conformanceType = conformanceType;
     this.allActions.addAll(actions);
     this.nextActions.addAll(actions);
-    this.title = allActions.isEmpty() ? "" : allActions.peekLast().getActionPath();
+    this.title = allActions.isEmpty() ? "" : titlePrefix + allActions.peekLast().getActionPath();
   }
 
   public void reset() {

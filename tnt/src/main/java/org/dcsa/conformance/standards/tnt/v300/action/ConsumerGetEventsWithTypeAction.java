@@ -1,8 +1,6 @@
 package org.dcsa.conformance.standards.tnt.v300.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
@@ -17,17 +15,20 @@ import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
 import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
+import java.util.Map;
+import java.util.stream.Stream;
+
 public class ConsumerGetEventsWithTypeAction extends TntAction {
 
   private final TntEventType eventType;
   private final JsonSchemaValidator responseSchemaValidator;
 
   public ConsumerGetEventsWithTypeAction(
-      String sourcePartyName,
-      String targetPartyName,
-      TntAction previousAction,
-      TntEventType eventType,
-      JsonSchemaValidator schemaValidator) {
+    String sourcePartyName,
+    String targetPartyName,
+    TntAction previousAction,
+    TntEventType eventType,
+    JsonSchemaValidator schemaValidator) {
     super(sourcePartyName, targetPartyName, previousAction, "GET Events (%s)".formatted(eventType));
     this.eventType = eventType;
     this.responseSchemaValidator = schemaValidator;
@@ -36,16 +37,19 @@ public class ConsumerGetEventsWithTypeAction extends TntAction {
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of(
-            "EVENT_TYPE_PARAM_NAME", TntQueryParameters.ET.getParameterName(),
-            "EVENT_TYPE_VALUE", eventType.name()),
-        "prompt-consumer-get-with-event-type.md");
+      Map.of(
+        "EVENT_TYPE_PARAM_NAME", TntQueryParameters.ET.getParameterName(),
+        "EVENT_TYPE_VALUE", eventType.name()),
+      "prompt-consumer-get-with-event-type.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put(TntConstants.EVENT_TYPE, eventType.name());
+    if (!sspSupplier.get().getMap().isEmpty()) {
+      jsonNode.set(TntConstants.SUPPLIED_SCENARIO_PARAMETERS, sspSupplier.get().toJson());
+    }
     return jsonNode;
   }
 
@@ -55,29 +59,29 @@ public class ConsumerGetEventsWithTypeAction extends TntAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new UrlPathCheck(TntRole::isConsumer, getMatchedExchangeUuid(), TntStandard.API_PATH),
-            new ResponseStatusCheck(TntRole::isProducer, getMatchedExchangeUuid(), 200),
-            new JsonSchemaCheck(
-                TntRole::isProducer,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator),
-            new ApiHeaderCheck(
-                TntRole::isConsumer,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new ApiHeaderCheck(
-                TntRole::isProducer,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new QueryParamCheck(
-                TntRole::isConsumer,
-                getMatchedExchangeUuid(),
-                TntQueryParameters.ET.getParameterName(),
-                eventType.name()),
-            TntChecks.getTntGetResponseChecks(getMatchedExchangeUuid(), expectedApiVersion, eventType));
+          new UrlPathCheck(TntRole::isConsumer, getMatchedExchangeUuid(), TntStandard.API_PATH),
+          new ResponseStatusCheck(TntRole::isProducer, getMatchedExchangeUuid(), 200),
+          new JsonSchemaCheck(
+            TntRole::isProducer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            responseSchemaValidator),
+          new ApiHeaderCheck(
+            TntRole::isConsumer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+          new ApiHeaderCheck(
+            TntRole::isProducer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            expectedApiVersion),
+          new QueryParamCheck(
+            TntRole::isConsumer,
+            getMatchedExchangeUuid(),
+            TntQueryParameters.ET.getParameterName(),
+            eventType.name()),
+          TntChecks.getTntGetResponseChecks(getMatchedExchangeUuid(), expectedApiVersion, eventType));
       }
     };
   }

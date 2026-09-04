@@ -5,6 +5,7 @@ import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.*
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,8 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.util.MapUtils;
 import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standards.ebl.party.EblRole;
+import org.dcsa.conformance.standards.ebl.party.AmendedTransportDocumentStatus;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
@@ -24,17 +28,15 @@ import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 @Slf4j
 public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder> {
 
-  public static final String SCENARIO_SUITE_CONFORMANCE_SI_ONLY = "Conformance SI-only";
-  public static final String SCENARIO_SUITE_CONFORMANCE_TD_ONLY = "Conformance TD-only";
+  public static final String SCENARIO_SUITE_CONFORMANCE_SI = "Conformance SI";
+  public static final String SCENARIO_SUITE_CONFORMANCE_TD = "Conformance TD";
   static final String SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS = "Conformance TD Amendments";
   static final String SCENARIO_SUITE_SI_TD_COMBINED = "Conformance SI + TD";
 
   static final Set<String> SCENARIO_SUITES =
       Set.of(
-          SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
-          SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
-          SCENARIO_SUITE_SI_TD_COMBINED,
-          SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS);
+          SCENARIO_SUITE_CONFORMANCE_SI,
+          SCENARIO_SUITE_CONFORMANCE_TD);
 
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -46,6 +48,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String EBL_NOTIFICATIONS_API = "api";
   public static final String GET_EBL_SCHEMA_NAME = "ShippingInstructions";
   public static final String GET_TD_SCHEMA_NAME = "TransportDocument";
+  public static final String GET_TD_AMENDMENT_SCHEMA_NAME = "TransportDocumentAmend";
   public static final String POST_EBL_SCHEMA_NAME = "CreateShippingInstructions";
   private static final String PUT_EBL_SCHEMA_NAME = "UpdateShippingInstructions";
   private static final String PATCH_SI_SCHEMA_NAME = "CancelShippingInstructionsUpdate";
@@ -74,15 +77,16 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     if (SCENARIO_SUITE_CONFORMANCE_SI_ONLY.equals(componentFactory.getScenarioSuite())) {
       return createConformanceSiOnlyScenarios(testedPartyRoleNames, false);
     }
-    if (SCENARIO_SUITE_CONFORMANCE_TD_ONLY.equals(componentFactory.getScenarioSuite())) {
-      return createConformanceTdOnlyScenarios();
+    if (SCENARIO_SUITE_CONFORMANCE_TD.equals(componentFactory.getScenarioSuite())) {
+      return createConformanceTdOnlyScenarios(testedPartyRoleNames);
     }
-    if (SCENARIO_SUITE_SI_TD_COMBINED.equals(componentFactory.getScenarioSuite())) {
-      return createSIandTDCombinedScenarios(false);
-    }
-    if (SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS.equals(componentFactory.getScenarioSuite())) {
-      return createTDAmendmentScenarios(false);
-    }
+    // Disabled legacy suites (implementation retained for possible future re-enablement):
+    // if (SCENARIO_SUITE_SI_TD_COMBINED.equals(componentFactory.getScenarioSuite())) {
+    //   return createSIandTDCombinedScenarios(false);
+    // }
+    // if (SCENARIO_SUITE_CONFORMANCE_TD_AMENDMENTS.equals(componentFactory.getScenarioSuite())) {
+    //   return createTDAmendmentScenarios(false);
+    // }
     throw new IllegalArgumentException(
         "Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
   }
@@ -221,43 +225,117 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         && scenarioType != ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE;
   }
 
-  private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceTdOnlyScenarios() {
-    return Stream.of(
+  private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceTdOnlyScenarios(
+      Set<String> testedPartyRoleNames) {
+    Map<String, Map<String, EblScenarioListBuilder>> partyScenarios =
+        MapUtils.orderedMap(
             Map.entry(
-                "Supported shipment types scenarios",
-                noAction()
-                    .thenEither(
-                        Arrays.stream(ScenarioType.values())
-                            .filter(
-                                scenarioType ->
-                                    scenarioType != ScenarioType.REGULAR_SWB_AMF
-                                        && scenarioType
-                                            != ScenarioType.REGULAR_NO_COMMODITY_SUBREFERENCE)
-                            .map(EblScenarioListBuilder::buildScenarioForType)
-                            .toArray(EblScenarioListBuilder[]::new))),
+                EblRole.CARRIER.getConfigName(),
+                MapUtils.orderedMap(
+                    Map.entry(
+                        "Required Sea Waybill scenario",
+                        carrierRequiredTdScenario(ScenarioType.REGULAR_SWB)),
+                    Map.entry(
+                        "Required Straight B/L scenario",
+                        carrierRequiredTdScenario(ScenarioType.REGULAR_STRAIGHT_BL)),
+                    Map.entry(
+                        "Required Negotiable B/L scenario",
+                        carrierRequiredTdScenario(ScenarioType.REGULAR_NEGOTIABLE_BL)),
+                    Map.entry(
+                        "Optional (report-only) scenarios",
+                        noAction()
+                            .thenEither(
+                                carrierGetDirectAmendmentScenario(),
+                                carrierProcessDirectAmendmentScenario(true),
+                                carrierProcessDirectAmendmentScenario(false),
+                                carrierCancelDirectAmendmentScenario())
+                            .asOptionalReportOnlyScenario()))),
             Map.entry(
-                "Shipper interactions with transport document",
-                noAction()
-                    .then(
-                        uc6Get(
-                            true,
-                            ScenarioType.REGULAR_STRAIGHT_BL,
-                            oobAmendment(
-                                uc6Get(
-                                    true,
-                                    ScenarioType.REGULAR_STRAIGHT_BL,
-                                    uc8Get(uc12Get(uc13Get())))),
-                            uc8Get(oobAmendment(uc9Get(uc10Get(uc11Get()))))))),
-            Map.entry(
-                "Carrier error response conformance",
-                noAction()
-                    .then(
-                        uc6CarrierPublishDraftTransportDocument(
-                                true, ScenarioType.REGULAR_STRAIGHT_BL)
-                            .then(shipperGetTransportDocumentErrorScenario()))))
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                EblRole.SHIPPER.getConfigName(),
+                MapUtils.orderedMap(
+                    Map.entry(
+                        "Required Sea Waybill scenario",
+                        shipperRequiredTdScenario(ScenarioType.REGULAR_SWB)),
+                    Map.entry(
+                        "Required Straight B/L scenario",
+                        shipperRequiredTdScenario(ScenarioType.REGULAR_STRAIGHT_BL)),
+                    Map.entry(
+                        "Required Negotiable B/L scenario",
+                        shipperRequiredTdScenario(ScenarioType.REGULAR_NEGOTIABLE_BL)),
+                    Map.entry(
+                        "Optional (report-only) scenarios",
+                        noAction()
+                            .thenEither(
+                                shipperGetConfirmedDirectAmendmentScenario(),
+                                shipperCancelDirectAmendmentScenario())
+                            .asOptionalReportOnlyScenario()))));
+    List<String> orderedTestedRoles =
+        Stream.of(EblRole.CARRIER, EblRole.SHIPPER)
+            .map(EblRole::getConfigName)
+            .filter(testedPartyRoleNames::contains)
+            .toList();
+    return MapUtils.mergePartyScenarioModules(partyScenarios, orderedTestedRoles);
+  }
+
+  private static EblScenarioListBuilder carrierRequiredTdScenario(ScenarioType scenarioType) {
+    return carrierSupplyScenarioParameters(scenarioType, true)
+        .then(
+            uc6CarrierPublishDraftTransportDocument(true, scenarioType, false)
+                .then(
+                    uc7ShipperApproveDraftTransportDocument()
+                        .then(
+                            uc8CarrierIssueTransportDocument()
+                                .then(shipperGetTransportDocument(TD_ISSUED)))));
+  }
+
+  private static EblScenarioListBuilder shipperRequiredTdScenario(ScenarioType scenarioType) {
+    return uc6CarrierPublishDraftTransportDocument(true, scenarioType, true)
+        .then(
+            uc7ShipperApproveDraftTransportDocument()
+                .then(shipperGetTransportDocument(TD_APPROVED)));
+  }
+
+  private static EblScenarioListBuilder carrierGetDirectAmendmentScenario() {
+    return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, true, true)
+        .then(
+            uc17ShipperSubmitTransportDocumentAmendment()
+                .then(
+                    shipperGetTransportDocumentAmendment(
+                        AmendedTransportDocumentStatus.AMENDMENT_RECEIVED)));
+  }
+
+  private static EblScenarioListBuilder carrierProcessDirectAmendmentScenario(boolean confirm) {
+    return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, true, true)
+        .then(
+            uc17ShipperSubmitTransportDocumentAmendment()
+                .then(
+                    uc19CarrierProcessTransportDocumentAmendment(confirm)
+                        .then(
+                            shipperGetTransportDocumentAmendment(
+                                confirm
+                                    ? AmendedTransportDocumentStatus.AMENDMENT_CONFIRMED
+                                    : AmendedTransportDocumentStatus.AMENDMENT_DECLINED))));
+  }
+
+  private static EblScenarioListBuilder carrierCancelDirectAmendmentScenario() {
+    return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, true, true)
+        .then(
+            uc17ShipperSubmitTransportDocumentAmendment()
+                .then(uc18ShipperCancelTransportDocumentAmendment()));
+  }
+
+  private static EblScenarioListBuilder shipperGetConfirmedDirectAmendmentScenario() {
+    return uc17ShipperSubmitTransportDocumentAmendment()
+        .then(
+            uc19CarrierProcessTransportDocumentAmendment(true)
+                .then(
+                    shipperGetTransportDocumentAmendment(
+                        AmendedTransportDocumentStatus.AMENDMENT_CONFIRMED)));
+  }
+
+  private static EblScenarioListBuilder shipperCancelDirectAmendmentScenario() {
+    return uc17ShipperSubmitTransportDocumentAmendment()
+        .then(uc18ShipperCancelTransportDocumentAmendment());
   }
 
   private static LinkedHashMap<String, EblScenarioListBuilder> createTDAmendmentScenarios(
@@ -630,14 +708,24 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static EblScenarioListBuilder carrierSupplyScenarioParameters(
       ScenarioType scenarioType, boolean isTd) {
+    return carrierSupplyScenarioParameters(scenarioType, isTd, false);
+  }
+
+  private static EblScenarioListBuilder carrierSupplyScenarioParameters(
+      ScenarioType scenarioType, boolean isTd, boolean includeAmendment) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String standardVersion = STANDARD_VERSION.get();
     JsonSchemaValidator requestSchemaValidator =
-        resolveMessageSchemaValidator(EBL_API, POST_EBL_SCHEMA_NAME);
+        resolveMessageSchemaValidator(EBL_API, isTd ? GET_TD_SCHEMA_NAME : POST_EBL_SCHEMA_NAME);
     return new EblScenarioListBuilder(
         previousAction ->
             new CarrierSupplyPayloadAction(
-                carrierPartyName, scenarioType, standardVersion, requestSchemaValidator, isTd));
+                carrierPartyName,
+                scenarioType,
+                standardVersion,
+                requestSchemaValidator,
+                isTd,
+                includeAmendment));
   }
 
   private static EblScenarioListBuilder shipperGetShippingInstructions(
@@ -756,6 +844,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 (EblAction) previousAction,
                 Arrays.stream(expectedTdStatus).toList(),
                 resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder shipperGetTransportDocumentAmendment(
+      AmendedTransportDocumentStatus expectedAmendmentStatus) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new Shipper_GetTransportDocumentAmendmentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(EBL_API, GET_TD_AMENDMENT_SCHEMA_NAME),
+                expectedAmendmentStatus));
   }
 
   private static EblScenarioListBuilder shipperGetTransportDocumentErrorScenario() {
@@ -914,6 +1016,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static EblScenarioListBuilder uc6CarrierPublishDraftTransportDocument(
       boolean skipSI, ScenarioType scenarioType) {
+    return uc6CarrierPublishDraftTransportDocument(skipSI, scenarioType, true);
+  }
+
+  private static EblScenarioListBuilder uc6CarrierPublishDraftTransportDocument(
+      boolean skipSI, ScenarioType scenarioType, boolean includeScenarioTypeInTitle) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     boolean isWithNotifications = threadLocalIsWithNotifications.get();
@@ -927,7 +1034,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 resolveMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
                 skipSI,
-                isWithNotifications));
+                isWithNotifications,
+                includeScenarioTypeInTitle));
   }
 
   private static EblScenarioListBuilder uc7ShipperApproveDraftTransportDocument() {
@@ -958,6 +1066,56 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 (EblAction) previousAction,
                 resolveMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
+  }
+
+  private static EblScenarioListBuilder uc17ShipperSubmitTransportDocumentAmendment() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
+    String standardVersion = STANDARD_VERSION.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC17_Shipper_SubmitTransportDocumentAmendmentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME),
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications,
+                standardVersion));
+  }
+
+  private static EblScenarioListBuilder uc18ShipperCancelTransportDocumentAmendment() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC18_Shipper_CancelTransportDocumentAmendmentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                isWithNotifications));
+  }
+
+  private static EblScenarioListBuilder uc19CarrierProcessTransportDocumentAmendment(
+      boolean confirm) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    boolean isWithNotifications = threadLocalIsWithNotifications.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC19_Carrier_ProcessTransportDocumentAmendmentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                confirm,
                 isWithNotifications));
   }
 

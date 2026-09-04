@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.cs.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.cs.model.CsDateUtils;
 
@@ -56,14 +57,13 @@ public class CsProducer extends ConformanceParty {
     String filePath;
     Map<String, List<String>> initialIMap = Map.of(API_VERSION, List.of(apiVersion));
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
-    if (request.queryParams().containsKey("limit")
-        && !request.queryParams().containsKey("cursor")) {
+    if (request.queryParams().containsKey("limit") && !request.queryParams().containsKey("cursor")) {
       String cursor = "fE9mZnNldHw9MTAmbGltaXQ9MTA"; //example value for a cursor
       headers.put("Next-Page-Cursor", List.of(cursor));
     }
     boolean hasCursor = request.queryParams().containsKey("cursor");
 
-    String baseFilePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-"; // NOSONAR
+    String baseFilePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-";
     String suffix = hasCursor ? "nextpage.json" : ".json";
     String routeType = "vs";
 
@@ -76,6 +76,8 @@ public class CsProducer extends ConformanceParty {
     filePath = baseFilePath + routeType + suffix;
 
     JsonNode jsonResponseBody = replacePlaceHolders(filePath, request);
+    String limit = JsonUtil.getFirstQueryParamValue(request.queryParams(), "limit");
+    jsonResponseBody = JsonUtil.trimRootArrayByLimit(jsonResponseBody, limit);
     return request.createResponse(200, headers, new ConformanceMessageBody(jsonResponseBody));
   }
 

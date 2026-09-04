@@ -9,7 +9,7 @@ import org.dcsa.conformance.core.check.HeaderCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.PayloadPaginationCheck;
-import org.dcsa.conformance.core.check.QueryParamCheck;
+import org.dcsa.conformance.core.check.ResponseLimitCheck;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -21,7 +21,6 @@ import org.dcsa.conformance.standards.vgm.party.VgmRole;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HexFormat;
 import java.util.Map;
@@ -168,6 +167,13 @@ public class ConsumerGetVgmDeclarationAction extends VgmAction {
             getDspSupplier().get().firstPage(),
             getDspSupplier().get().secondPage())
             .withApplicability(previousAction instanceof ConsumerGetVgmDeclarationAction previous && previous.hasNextPage),
+          new ResponseLimitCheck(
+            VgmRole::isProducer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            () -> sspSupplier.get().getMap().get(VgmQueryParameters.LIMIT),
+            "VGM Declaration",
+            "VGMDeclarations"),
           VgmChecks.getVGMGetPayloadChecks(getMatchedExchangeUuid(), expectedApiVersion));
       }
     };

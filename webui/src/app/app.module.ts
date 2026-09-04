@@ -14,6 +14,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSelectModule} from '@angular/material/select';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatTabsModule} from "@angular/material/tabs";
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
@@ -25,7 +26,7 @@ import {LoginComponent} from './pages/login/login.component';
 import {MessageDialog} from './dialogs/message/message-dialog.component';
 import {SimpleTextComponent} from './text/simple/simple-text.component';
 import {EnvironmentComponent} from './pages/environment/environment.component';
-import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {provideHttpClient, withInterceptorsFromDi, withXhr} from '@angular/common/http';
 import {SandboxComponent} from './pages/sandbox/sandbox.component';
 import {ScenarioComponent} from './pages/scenario/scenario.component';
 import {CreateSandboxComponent} from './pages/create-sandbox/create-sandbox.component';
@@ -74,9 +75,10 @@ import {TextDialog} from "./dialogs/text/text-dialog.component";
     MatSelectModule,
     MatTabsModule,
     MatToolbarModule,
+    MatTooltipModule,
     ReactiveFormsModule,
     // import as last module!
-    AppRoutingModule], providers: [provideHttpClient(withInterceptorsFromDi())]
+    AppRoutingModule], providers: [provideHttpClient(withXhr(), withInterceptorsFromDi())]
 })
 export class AppModule {
 }

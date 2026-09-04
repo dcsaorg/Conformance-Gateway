@@ -65,12 +65,16 @@ public class UC7_Shipper_SubmitBookingAmendment extends ShipperNotificationBooki
         String cbrr = dsp.carrierBookingRequestReference();
         String cbr = dsp.carrierBookingReference();
         return Stream.of(
-            createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", requestSchemaValidator, cbrr, cbr),
-            Stream.of(
-              BookingChecks.updateRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())
-            ),
-            getNotificationChecks(expectedApiVersion, notificationSchemaValidator, expectedBookingStatus, expectedAmendedBookingStatus)
-          ).flatMap(Function.identity());
+          createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/", requestSchemaValidator, cbrr, cbr),
+          Stream.of(
+            BookingChecks.updateRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier())
+          ),
+          getNotificationChecks(
+            expectedApiVersion,
+            notificationSchemaValidator,
+            expectedBookingStatus,
+            expectedAmendedBookingStatus)
+        ).flatMap(Function.identity());
       }
     };
   }

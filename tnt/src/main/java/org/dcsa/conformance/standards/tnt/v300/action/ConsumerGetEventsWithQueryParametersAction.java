@@ -1,8 +1,6 @@
 package org.dcsa.conformance.standards.tnt.v300.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Map;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -10,7 +8,7 @@ import org.dcsa.conformance.core.check.HeaderCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.PayloadPaginationCheck;
-import org.dcsa.conformance.core.check.QueryParamCheck;
+import org.dcsa.conformance.core.check.ResponseLimitCheck;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -20,24 +18,28 @@ import org.dcsa.conformance.standards.tnt.v300.party.TntConstants;
 import org.dcsa.conformance.standards.tnt.v300.party.TntQueryParameters;
 import org.dcsa.conformance.standards.tnt.v300.party.TntRole;
 
+import java.util.Map;
+import java.util.stream.Stream;
+
 public class ConsumerGetEventsWithQueryParametersAction extends TntAction {
 
-  @Getter private final boolean hasNextPage;
+  @Getter
+  private final boolean hasNextPage;
   private final JsonSchemaValidator responseSchemaValidator;
 
   public ConsumerGetEventsWithQueryParametersAction(
-      String sourcePartyName,
-      String targetPartyName,
-      TntAction previousAction,
-      boolean hasNextPage,
-      JsonSchemaValidator schemaValidator) {
+    String sourcePartyName,
+    String targetPartyName,
+    TntAction previousAction,
+    boolean hasNextPage,
+    JsonSchemaValidator schemaValidator) {
     super(
-        sourcePartyName,
-        targetPartyName,
-        previousAction,
-        previousAction instanceof ConsumerGetEventsWithQueryParametersAction
-            ? "GET Events (next page)"
-            : "GET Events");
+      sourcePartyName,
+      targetPartyName,
+      previousAction,
+      previousAction instanceof ConsumerGetEventsWithQueryParametersAction
+        ? "GET Events (next page)"
+        : "GET Events");
     this.responseSchemaValidator = schemaValidator;
     this.hasNextPage = hasNextPage;
   }
@@ -95,6 +97,13 @@ public class ConsumerGetEventsWithQueryParametersAction extends TntAction {
             getDspSupplier().get().firstPage(),
             getDspSupplier().get().secondPage())
             .withApplicability(previousAction instanceof ConsumerGetEventsWithQueryParametersAction previous && previous.hasNextPage),
+          new ResponseLimitCheck(
+            TntRole::isProducer,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            () -> sspSupplier.get().getMap().get(TntQueryParameters.LIMIT),
+            "Event",
+            TntConstants.EVENTS),
           TntChecks.getTntGetResponseChecks(getMatchedExchangeUuid(), expectedApiVersion, null));
       }
     };

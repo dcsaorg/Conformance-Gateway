@@ -21,7 +21,7 @@ class SeleniumWithoutNotificationsTest extends SeleniumTestBase {
       strings = {
         "Ebl",
         "Booking",
-        "Booking + eBL",
+        // "Booking + eBL", // Disabled legacy combined standard
       })
   void testStandardWithAllVersions(String standardName) {
     app.setSimulatedLambdaDelay(lambdaDelay);

@@ -85,6 +85,15 @@ public class EblShipper extends ConformanceParty {
         Map.entry(
             UC7_Shipper_ApproveDraftTransportDocumentAction.class,
             this::approveDraftTransportDocument),
+        Map.entry(
+            UC17_Shipper_SubmitTransportDocumentAmendmentAction.class,
+            this::submitTransportDocumentAmendment),
+        Map.entry(
+            UC18_Shipper_CancelTransportDocumentAmendmentAction.class,
+            this::cancelTransportDocumentAmendment),
+        Map.entry(
+            Shipper_GetTransportDocumentAmendmentAction.class,
+            this::getTransportDocumentAmendment),
         Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument),
         Map.entry(
             ShipperGetShippingInstructionsErrorAction.class, this::getShippingInstructionsRequest));
@@ -225,6 +234,41 @@ public class EblShipper extends ConformanceParty {
 
     addOperatorLogEntry(
         "Approved transport document the parameters: %s".formatted(actionPrompt.toPrettyString()));
+  }
+
+  private void submitTransportDocumentAmendment(JsonNode actionPrompt) {
+    log.info(
+        "Shipper.submitTransportDocumentAmendment(%s)"
+            .formatted(actionPrompt.toPrettyString()));
+    String tdr = actionPrompt.required("tdr").asText();
+    JsonNode amendment = actionPrompt.required("amendedTransportDocument");
+    syncCounterpartPut(
+        "/v3/transport-documents/%s/amendment"
+            .formatted(URLEncoder.encode(tdr, StandardCharsets.UTF_8)),
+        amendment);
+    addOperatorLogEntry("Submitted an amendment for transport document '%s'".formatted(tdr));
+  }
+
+  private void cancelTransportDocumentAmendment(JsonNode actionPrompt) {
+    log.info(
+        "Shipper.cancelTransportDocumentAmendment(%s)"
+            .formatted(actionPrompt.toPrettyString()));
+    String tdr = actionPrompt.required("tdr").asText();
+    syncCounterpartDelete(
+        "/v3/transport-documents/%s/amendment"
+            .formatted(URLEncoder.encode(tdr, StandardCharsets.UTF_8)));
+    addOperatorLogEntry("Cancelled the amendment for transport document '%s'".formatted(tdr));
+  }
+
+  private void getTransportDocumentAmendment(JsonNode actionPrompt) {
+    log.info(
+        "Shipper.getTransportDocumentAmendment(%s)".formatted(actionPrompt.toPrettyString()));
+    String tdr = actionPrompt.required("tdr").asText();
+    syncCounterpartGet(
+        "/v3/transport-documents/%s/amendment"
+            .formatted(URLEncoder.encode(tdr, StandardCharsets.UTF_8)),
+        Collections.emptyMap());
+    addOperatorLogEntry("Retrieved the amendment for transport document '%s'".formatted(tdr));
   }
 
   private void getShippingInstructionsRequest(JsonNode actionPrompt) {

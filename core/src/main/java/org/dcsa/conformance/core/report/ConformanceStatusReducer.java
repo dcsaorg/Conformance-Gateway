@@ -2,6 +2,7 @@ package org.dcsa.conformance.core.report;
 
 import lombok.experimental.UtilityClass;
 
+import java.util.Collection;
 import java.util.List;
 
 @UtilityClass
@@ -30,5 +31,21 @@ public class ConformanceStatusReducer {
       return ConformanceStatus.NO_TRAFFIC;
     }
     return ConformanceStatus.PARTIALLY_CONFORMANT;
+  }
+
+  public static ConformanceStatus reduceInterchangeable(Collection<ConformanceStatus> statuses) {
+    if (statuses.isEmpty()) {
+      return ConformanceStatus.IRRELEVANT;
+    }
+    return statuses.stream()
+      .map(ConformanceStatus::forAggregation)
+      .filter(ConformanceStatusReducer::wasExecuted)
+      .reduce(ConformanceStatusReducer::reduce)
+      .orElse(ConformanceStatus.NO_TRAFFIC);
+  }
+
+  private static boolean wasExecuted(ConformanceStatus aggregationStatus) {
+    return aggregationStatus != ConformanceStatus.NO_TRAFFIC
+      && aggregationStatus != ConformanceStatus.IRRELEVANT;
   }
 }

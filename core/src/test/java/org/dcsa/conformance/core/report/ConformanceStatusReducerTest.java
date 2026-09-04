@@ -2,6 +2,7 @@ package org.dcsa.conformance.core.report;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ConformanceStatusReducerTest {
@@ -200,5 +201,57 @@ class ConformanceStatusReducerTest {
         ConformanceStatusReducer.reduce(
             ConformanceStatus.NO_TRAFFIC, ConformanceStatus.IRRELEVANT);
     assertEquals(ConformanceStatus.NO_TRAFFIC, result);
+  }
+
+  @Test
+  void reduceInterchangeable_oneConformantAmongNotExecuted_returnsConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduceInterchangeable(
+            List.of(
+                ConformanceStatus.NO_TRAFFIC,
+                ConformanceStatus.CONFORMANT,
+                ConformanceStatus.NO_TRAFFIC));
+    assertEquals(ConformanceStatus.CONFORMANT, result);
+  }
+
+  @Test
+  void reduceInterchangeable_noneExecuted_returnsNoTraffic() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduceInterchangeable(
+            List.of(ConformanceStatus.NO_TRAFFIC, ConformanceStatus.NO_TRAFFIC));
+    assertEquals(ConformanceStatus.NO_TRAFFIC, result);
+  }
+
+  @Test
+  void reduceInterchangeable_allIrrelevant_returnsNoTraffic() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduceInterchangeable(
+            List.of(ConformanceStatus.IRRELEVANT, ConformanceStatus.IRRELEVANT));
+    assertEquals(ConformanceStatus.NO_TRAFFIC, result);
+  }
+
+  @Test
+  void reduceInterchangeable_anExecutedAlternativeFailed_returnsNonConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduceInterchangeable(
+            List.of(
+                ConformanceStatus.CONFORMANT,
+                ConformanceStatus.NON_CONFORMANT,
+                ConformanceStatus.NO_TRAFFIC));
+    assertEquals(ConformanceStatus.NON_CONFORMANT, result);
+  }
+
+  @Test
+  void reduceInterchangeable_skippedAlternativeCountsAsExecuted_returnsConformant() {
+    ConformanceStatus result =
+        ConformanceStatusReducer.reduceInterchangeable(
+            List.of(ConformanceStatus.SKIPPED, ConformanceStatus.NO_TRAFFIC));
+    assertEquals(ConformanceStatus.CONFORMANT, result);
+  }
+
+  @Test
+  void reduceInterchangeable_noAlternatives_returnsIrrelevant() {
+    assertEquals(
+        ConformanceStatus.IRRELEVANT, ConformanceStatusReducer.reduceInterchangeable(List.of()));
   }
 }

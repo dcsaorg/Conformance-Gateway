@@ -1,8 +1,5 @@
 package org.dcsa.conformance.standards.eblissuance;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -11,111 +8,121 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceCarrier;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuancePlatform;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 class EblIssuanceComponentFactory extends AbstractComponentFactory {
   EblIssuanceComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
-    super(standardName, standardVersion, scenarioSuite, "Carrier", "Platform");
+    super(
+      standardName,
+      standardVersion,
+      scenarioSuite,
+      EblIssuanceRole.CARRIER.getConfigName(),
+      EblIssuanceRole.PLATFORM.getConfigName());
   }
 
   public List<ConformanceParty> createParties(
-      PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations,
-      JsonNodeMap persistentMap,
-      PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    PartyConfiguration[] partyConfigurations,
+    CounterpartConfiguration[] counterpartConfigurations,
+    JsonNodeMap persistentMap,
+    PartyWebClient webClient,
+    Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     Map<String, PartyConfiguration> partyConfigurationsByRoleName =
-        Arrays.stream(partyConfigurations)
-            .collect(Collectors.toMap(PartyConfiguration::getRole, Function.identity()));
+      Arrays.stream(partyConfigurations)
+        .collect(Collectors.toMap(PartyConfiguration::getRole, Function.identity()));
     Map<String, CounterpartConfiguration> counterpartConfigurationsByRoleName =
-        Arrays.stream(counterpartConfigurations)
-            .collect(Collectors.toMap(CounterpartConfiguration::getRole, Function.identity()));
+      Arrays.stream(counterpartConfigurations)
+        .collect(Collectors.toMap(CounterpartConfiguration::getRole, Function.identity()));
 
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration carrierConfiguration =
-        partyConfigurationsByRoleName.get(EblIssuanceRole.CARRIER.getConfigName());
+      partyConfigurationsByRoleName.get(EblIssuanceRole.CARRIER.getConfigName());
     if (carrierConfiguration != null) {
       parties.add(
-          new EblIssuanceCarrier(
-              standardVersion,
-              carrierConfiguration,
-              counterpartConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName()),
-              persistentMap,
-              webClient,
-              orchestratorAuthHeader));
+        new EblIssuanceCarrier(
+          standardVersion,
+          carrierConfiguration,
+          counterpartConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName()),
+          persistentMap,
+          webClient,
+          orchestratorAuthHeader));
     }
 
     PartyConfiguration platformConfiguration =
-        partyConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName());
+      partyConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName());
     if (platformConfiguration != null) {
       parties.add(
-          new EblIssuancePlatform(
-              standardVersion,
-              platformConfiguration,
-              counterpartConfigurationsByRoleName.get(EblIssuanceRole.CARRIER.getConfigName()),
-              persistentMap,
-              webClient,
-              orchestratorAuthHeader));
+        new EblIssuancePlatform(
+          standardVersion,
+          platformConfiguration,
+          counterpartConfigurationsByRoleName.get(EblIssuanceRole.CARRIER.getConfigName()),
+          persistentMap,
+          webClient,
+          orchestratorAuthHeader));
     }
 
     return parties;
   }
 
   public Map<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
-      PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations,
-      boolean isWithNotifications) {
+    PartyConfiguration[] partyConfigurations,
+    CounterpartConfiguration[] counterpartConfigurations,
+    boolean isWithNotifications) {
     return EblIssuanceScenarioListBuilder.createModuleScenarioListBuilders(
-        this,
-        _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblIssuanceRole::isCarrier),
-        _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblIssuanceRole::isPlatform));
+      this,
+      getReportRoleNames(partyConfigurations, counterpartConfigurations),
+      _findPartyOrCounterpartName(
+        partyConfigurations, counterpartConfigurations, EblIssuanceRole::isCarrier),
+      _findPartyOrCounterpartName(
+        partyConfigurations, counterpartConfigurations, EblIssuanceRole::isPlatform));
   }
 
   @Override
   public SortedSet<String> getRoleNames() {
     return Arrays.stream(EblIssuanceRole.values())
-        .map(EblIssuanceRole::getConfigName)
-        .collect(Collectors.toCollection(TreeSet::new));
+      .map(EblIssuanceRole::getConfigName)
+      .collect(Collectors.toCollection(TreeSet::new));
   }
 
   public Set<String> getReportRoleNames(
-      PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
+    PartyConfiguration[] partyConfigurations,
+    CounterpartConfiguration[] counterpartConfigurations) {
     return (partyConfigurations.length == EblIssuanceRole.values().length
-            ? Arrays.stream(EblIssuanceRole.values()).map(EblIssuanceRole::getConfigName)
-            : Arrays.stream(counterpartConfigurations)
-                .map(CounterpartConfiguration::getRole)
-                .filter(
-                    counterpartRole ->
-                        Arrays.stream(partyConfigurations)
-                            .map(PartyConfiguration::getRole)
-                            .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
-        .collect(Collectors.toSet());
+      ? Arrays.stream(EblIssuanceRole.values()).map(EblIssuanceRole::getConfigName)
+      : Arrays.stream(counterpartConfigurations)
+      .map(CounterpartConfiguration::getRole)
+      .filter(
+        counterpartRole ->
+          Arrays.stream(partyConfigurations)
+            .map(PartyConfiguration::getRole)
+            .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
+      .collect(Collectors.toSet());
   }
 
   public JsonSchemaValidator getMessageSchemaValidator(
-      String apiProviderRole, boolean forRequest, boolean issuanceManifest) {
-    String schemaFilePath =
-        "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml".formatted(standardVersion);
+    String apiProviderRole, boolean forRequest, boolean issuanceManifest) {
+    String schemaFilePath = "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml".formatted(standardVersion);
     String schemaName =
-        EblIssuanceRole.isCarrier(apiProviderRole)
-            ? (forRequest ? "IssuanceRequest" : null)
-            : (forRequest ? "IssuanceResponse" : null);
+      EblIssuanceRole.isCarrier(apiProviderRole)
+        ? (forRequest ? "IssuanceRequest" : null)
+        : (forRequest ? "IssuanceResponse" : null);
     if (issuanceManifest) {
       schemaName = "IssuanceManifest";
     }
-    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
-  }
-
-  public JsonSchemaValidator getMessageSchemaValidator(String schemaName) {
-    String schemaFilePath =
-        "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 }

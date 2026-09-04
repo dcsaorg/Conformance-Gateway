@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HexFormat;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -17,6 +18,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.standards.cs.party.CsFilterParameter;
 import org.dcsa.conformance.standards.cs.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
 
@@ -64,6 +66,20 @@ public abstract class CsAction extends ConformanceAction {
 
   protected Supplier<DynamicScenarioParameters> getDspSupplier() {
     return dsp::get;
+  }
+
+  protected SuppliedScenarioParameters getSuppliedScenarioParameters() {
+    return Objects.requireNonNullElseGet(
+        sspSupplier.get(), () -> SuppliedScenarioParameters.fromMap(Map.of()));
+  }
+
+  protected DynamicScenarioParameters getDynamicScenarioParameters() {
+    return Objects.requireNonNullElseGet(
+        getDspSupplier().get(), () -> new DynamicScenarioParameters(null, null, null));
+  }
+
+  protected String getSuppliedScenarioParameterValue(CsFilterParameter filterParameter) {
+    return getSuppliedScenarioParameters().getMap().get(filterParameter);
   }
 
   @Override

@@ -13,6 +13,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.portcall.action.PostPortCallEventsAction;
 import org.dcsa.conformance.standards.portcall.action.SupplyScenarioParametersAction;
@@ -103,6 +104,9 @@ public class PortCallProducer extends ConformanceParty {
     JsonNode jsonResponseBody = JsonToolkit.templateFileToJsonNode(
       "/standards/portcall/messages/portcall-api-%s-get-response%s.json"
         .formatted(apiVersion.toLowerCase().replaceAll("[.-]", ""), hasCursor ? "-nextpage" : ""), Map.of());
+
+    String limitValue = JsonUtil.getFirstQueryParamValue(request.queryParams(), PortCallFilterParameter.LIMIT.getQueryParamName());
+    jsonResponseBody = JsonUtil.trimNestedArrayByLimit(jsonResponseBody, "events", limitValue);
 
     Map<String, Collection<String>> responseHeaders = new LinkedHashMap<>();
     responseHeaders.put(API_VERSION, List.of(apiVersion));

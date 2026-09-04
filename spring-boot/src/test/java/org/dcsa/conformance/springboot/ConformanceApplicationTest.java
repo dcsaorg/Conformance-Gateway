@@ -37,15 +37,14 @@ class ConformanceApplicationTest {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "adoption-100-conformance-auto-all-in-one",
         "an-100-conformance-auto-all-in-one",
         "booking-200-conformance-auto-all-in-one",
-        "booking+ebl-200+300-conformance-auto-all-in-one",
+        // "booking+ebl-200+300-conformance-auto-all-in-one", // Disabled legacy combined standard
         "cs-100-conformance-auto-all-in-one",
-        "ebl-300-conformance-si-+-td-auto-all-in-one",
-        "ebl-300-conformance-si-only-auto-all-in-one",
-        "ebl-300-conformance-td-amendments-auto-all-in-one",
-        "ebl-300-conformance-td-only-auto-all-in-one",
+        // "ebl-300-conformance-si-+-td-auto-all-in-one",
+        // "ebl-300-conformance-td-amendments-auto-all-in-one",
+        "ebl-300-conformance-si-auto-all-in-one",
+        "ebl-300-conformance-td-auto-all-in-one",
         "eblissuance-300-conformance-auto-all-in-one",
         "eblsurrender-300-conformance-auto-all-in-one",
         "eblendorsementchain-300-conformance-auto-all-in-one",

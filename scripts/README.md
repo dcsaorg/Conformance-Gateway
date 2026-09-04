@@ -1,6 +1,6 @@
 # conformance-scripts
 
-TypeScript console scripts for performing AWS operations against the Conformance Gateway infrastructure (Cognito & DynamoDB).
+TypeScript console scripts for local conformance execution and AWS operations against the Conformance Gateway infrastructure (Cognito & DynamoDB).
 
 ## Prerequisites
 
@@ -36,6 +36,70 @@ Known environment values:
 | test  | `eu-north-1_VRXXJfTsv`    | `test-Conformance`    |
 
 ## Available Scripts
+
+### Run a local conformance suite
+
+This command uses the gateway's existing auto all-in-one sandbox API to reset one complete
+standard/version/suite, wait for all scenarios, save the HTML report, and verify every top-level
+party result. For standards with optional notifications (currently Booking and eBL), it runs the
+suite twice by default and writes separate `-with-notifications.html` and
+`-without-notifications.html` reports. The latter suppresses synthetic-party notifications before
+scenario execution starts. Other standards produce one report. The runner exits non-zero for a
+non-conformant, partial, missing, malformed, or timed-out result. A report is still saved when its
+conformance validation fails.
+
+Start the application separately. From the repository root, run:
+
+```bash
+npm --prefix scripts run run-conformance-suite -- \
+  --standard Booking \
+  --version 2.0.0 \
+  --suite Conformance
+```
+
+The default Booking reports are written under `target/conformance-reports/` as
+`booking-200-conformance-auto-all-in-one-with-notifications.html` and
+`booking-200-conformance-auto-all-in-one-without-notifications.html`.
+For suite names containing shell metacharacters or spaces, quote the value:
+
+```bash
+npm --prefix scripts run run-conformance-suite -- \
+  --standard eBL \
+  --version 3.0.0 \
+  --suite 'Conformance TD'
+```
+
+The runner can also start and stop the application itself. Quote the whole start command:
+
+```bash
+npm --prefix scripts run run-conformance-suite -- \
+  --standard Booking \
+  --version 2.0.0 \
+  --suite Conformance \
+  --start-command './mvnw -pl spring-boot -am spring-boot:run'
+```
+
+Useful overrides:
+
+```bash
+npm --prefix scripts run run-conformance-suite -- \
+  --sandbox-id booking-200-conformance-auto-all-in-one \
+  --base-url http://localhost:8080 \
+  --output ../target/conformance-reports/booking.html \
+  --timeout-seconds 1200
+```
+
+Use `--notification-mode with`, `--notification-mode without`, or
+`--notification-mode both` to override automatic mode selection. When only one mode is selected,
+the exact `--output` path is used without adding a mode suffix.
+
+Run the scripts module checks with:
+
+```bash
+npm --prefix scripts test
+```
+
+---
 
 ### List all Cognito users
 

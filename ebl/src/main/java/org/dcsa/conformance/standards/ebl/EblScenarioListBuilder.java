@@ -132,98 +132,86 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     return carrierSupplyScenarioParameters(scenarioType, isTd)
         .then(
             uc1ShipperSubmitShippingInstructions(roleTitlePrefix)
-                .then(
-                    shipperGetShippingInstructions(SI_RECEIVED, false)
-                        .then(
-                            uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
-                                .then(
-                                    shipperGetShippingInstructionsSkippable(
-                                            SI_RECEIVED, SI_UPDATE_RECEIVED, false, false)
-                                        .then(
-                                            uc4aCarrierAcceptUpdatedShippingInstructions()
-                                                .then(
-                                                    shipperGetShippingInstructionsSkippable(
-                                                        SI_RECEIVED,
-                                                        SI_UPDATE_CONFIRMED,
-                                                        false,
-                                                        false)))))));
+                .then(shipperGetShippingInstructions(SI_RECEIVED, false)));
   }
 
   private static EblScenarioListBuilder carrierOptionalSiScenarios(boolean isTd) {
     return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
         .then(
             uc1ShipperSubmitShippingInstructions("Carrier")
-                .then(
-                    shipperGetShippingInstructionsSkippable(SI_RECEIVED, false)
-                        .thenEither(
-                uc2CarrierRequestedUpdatePath(),
-                retriveUpdatedSiContentPath(),
-                uc5UpdateCancelledPath(),
-                uc16DeclinedSiPath(),
-                uc15CancelledSiPath())));
+                .thenEither(
+                    uc2CarrierRequestedUpdateThenGetPendingPath(),
+                    uc3ShipperSubmitUpdateAcceptedPath(),
+                    uc4aCarrierConfirmUpdatedShippingInstructionsPath(),
+                    uc4dCarrierDeclineUpdatedShippingInstructionsPath(),
+                    retrieveUpdatedSiContentPath(),
+                    uc5UpdateCancelled2xxPath(),
+                    uc16DeclinedSiPath(),
+                    uc15CancelledSi2xxPath(),
+                    uc14ConfirmSiCompletedPath()));
   }
 
   private static EblScenarioListBuilder shipperOptionalSiScenarios(boolean isTd) {
     return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, isTd)
         .then(
             uc1ShipperSubmitShippingInstructions("Shipper")
-                .then(
-                    shipperGetShippingInstructionsSkippable(SI_RECEIVED, false)
-                        .thenEither(
-                uc2CarrierRequestedThenShipperUpdatePath(),
-                retriveUpdatedSiContentPath(),
-                uc5UpdateCancelledPath(),
-                uc15CancelledSiPath())));
+                .thenEither(
+                    uc2CarrierRequestedThenShipperUpdatePath(),
+                    retrieveUpdatedSiContentPath(),
+                    uc5UpdateCancelled2xxPath(),
+                    uc15CancelledSi2xxPath()));
   }
 
-  private static EblScenarioListBuilder uc2CarrierRequestedUpdatePath() {
+  private static EblScenarioListBuilder uc2CarrierRequestedUpdateThenGetPendingPath() {
     return uc2CarrierRequestUpdateToShippingInstruction()
         .then(shipperGetShippingInstructionsSkippable(SI_PENDING_UPDATE, false));
   }
 
   private static EblScenarioListBuilder uc2CarrierRequestedThenShipperUpdatePath() {
     return uc2CarrierRequestUpdateToShippingInstruction()
-        .then(
-            shipperGetShippingInstructionsSkippable(SI_PENDING_UPDATE, false)
-                .then(
-                    uc3ShipperSubmitUpdatedShippingInstructions(SI_PENDING_UPDATE, false)
-                        .then(
-                            shipperGetShippingInstructionsSkippable(
-                                SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, false, false))));
+        .then(uc3ShipperSubmitUpdatedShippingInstructions(SI_PENDING_UPDATE, false));
   }
 
-  private static EblScenarioListBuilder retriveUpdatedSiContentPath() {
-    return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
-        .then(
-            shipperGetShippingInstructionsSkippable(SI_RECEIVED, SI_UPDATE_RECEIVED, false, false)
-                .then(
-                    shipperGetShippingInstructionsSkippable(
-                        SI_RECEIVED, SI_UPDATE_RECEIVED, true, false)));
+  private static EblScenarioListBuilder uc3ShipperSubmitUpdateAcceptedPath() {
+    return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false);
   }
 
-  private static EblScenarioListBuilder uc5UpdateCancelledPath() {
+  private static EblScenarioListBuilder retrieveUpdatedSiContentPath() {
+    return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
+        .then(shipperGetShippingInstructionsSkippable(SI_RECEIVED, SI_UPDATE_RECEIVED, true, false));
+  }
+
+  private static EblScenarioListBuilder uc4aCarrierConfirmUpdatedShippingInstructionsPath() {
     return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
         .then(
-            shipperGetShippingInstructionsSkippable(SI_RECEIVED, SI_UPDATE_RECEIVED, false, false)
-                .then(
-                    uc5ShipperCancelUpdateToShippingInstructions(SI_RECEIVED, false)
-                        .then(
-                            shipperGetShippingInstructionsSkippable(
-                                SI_RECEIVED, SI_UPDATE_CANCELLED, false))));
+            uc4aCarrierAcceptUpdatedShippingInstructions()
+                .then(shipperGetShippingInstructionsSkippable(SI_RECEIVED, false)));
+  }
+
+  private static EblScenarioListBuilder uc4dCarrierDeclineUpdatedShippingInstructionsPath() {
+    return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
+        .then(
+            uc4dCarrierDeclineUpdatedShippingInstructions(SI_RECEIVED)
+                .then(shipperGetShippingInstructionsSkippable(SI_RECEIVED, false)));
+  }
+
+  private static EblScenarioListBuilder uc5UpdateCancelled2xxPath() {
+    return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
+        .then(uc5ShipperCancelUpdateToShippingInstructions(SI_RECEIVED, false));
   }
 
   private static EblScenarioListBuilder uc16DeclinedSiPath() {
-    return uc3ShipperSubmitUpdatedShippingInstructions(SI_RECEIVED, false)
-        .then(
-            shipperGetShippingInstructionsSkippable(SI_RECEIVED, SI_UPDATE_RECEIVED, false, false)
-                .then(
-                    uc16CarrierDeclineShippingInstructions()
-                        .then(shipperGetShippingInstructionsSkippable(SI_DECLINED, false))));
+    return uc16CarrierDeclineShippingInstructions()
+        .then(shipperGetShippingInstructionsSkippable(SI_DECLINED, false));
   }
 
-  private static EblScenarioListBuilder uc15CancelledSiPath() {
-    return uc15ShipperCancelShippingInstructions()
-        .then(shipperGetShippingInstructionsSkippable(SI_CANCELLED, false));
+  private static EblScenarioListBuilder uc15CancelledSi2xxPath() {
+    return uc15ShipperCancelShippingInstructions();
+  }
+
+  private static EblScenarioListBuilder uc14ConfirmSiCompletedPath() {
+    return uc14CarrierConfirmShippingInstructionsComplete()
+        .then(shipperGetShippingInstructionsSkippable(SI_COMPLETED, false));
   }
 
   private static boolean isSupportedScenarioType(ScenarioType scenarioType) {

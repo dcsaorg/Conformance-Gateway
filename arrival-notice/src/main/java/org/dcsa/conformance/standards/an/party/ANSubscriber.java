@@ -1,15 +1,7 @@
 package org.dcsa.conformance.standards.an.party;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -20,6 +12,14 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.an.action.SubscriberGetANAction;
+
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 public class ANSubscriber extends ConformanceParty {
   public ANSubscriber(String apiVersion, PartyConfiguration partyConfiguration, CounterpartConfiguration counterpartConfiguration, JsonNodeMap persistentMap, PartyWebClient webClient, Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
@@ -52,27 +52,26 @@ public class ANSubscriber extends ConformanceParty {
     responseNode.putArray("feedbackElements");
 
     ConformanceResponse response =
-        request.createResponse(
-            200,
-            Map.of(API_VERSION, List.of(apiVersion)),
-            new ConformanceMessageBody(responseNode));
+      request.createResponse(
+        200,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(responseNode));
 
     addOperatorLogEntry(
-        "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
+      "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
 
   private void getArrivalNotices(JsonNode actionPrompt) {
-    if (actionPrompt.has("references")) {
-      ArrayNode tdrs = (ArrayNode) actionPrompt.required("references");
-      List<String> references = new ArrayList<>();
-      for (JsonNode node : tdrs) {
-        references.add(node.asText());
-      }
-      syncCounterpartGet("/arrival-notices", Map.of("transportDocumentReferences", references));
-    } else {
-      syncCounterpartGet("/arrival-notices", Map.of());
+    Map<String, Collection<String>> queryParameters = new LinkedHashMap<>();
+    actionPrompt
+      .path("suppliedQueryParameters")
+      .properties()
+      .forEach(entry -> queryParameters.put(entry.getKey(), List.of(entry.getValue().asText())));
+    if (actionPrompt.has("cursor")) {
+      queryParameters.put("cursor", List.of(actionPrompt.required("cursor").asText()));
     }
+    syncCounterpartGet("/arrival-notices", queryParameters);
     addOperatorLogEntry("Sent a GET Arrival Notices request");
   }
 }

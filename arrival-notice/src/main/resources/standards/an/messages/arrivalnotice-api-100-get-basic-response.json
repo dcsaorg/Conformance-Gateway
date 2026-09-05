@@ -102,7 +102,11 @@
           {
             "vesselVoyage": {
               "vesselName": "YM MASCULINITY",
-              "carrierImportVoyageNumber": "097E"
+              "vesselIMONumber": "9321483",
+              "carrierServiceCode": "FE1",
+              "universalServiceReference": "SR12345A",
+              "carrierImportVoyageNumber": "097E",
+              "universalImportVoyageReference": "2301W"
             }
           }
         ]

@@ -1,4 +1,12 @@
-# DCSA Conformance Framework
+# DCSA Conformance Gateway
+
+## Documentation & Specifications
+
+- Documentation index: [`docs/README.md`](./docs/README.md)
+- Synced Confluence pages: [`specifications/confluence-sync/`](./specifications/confluence-sync/)
+- Sync setup: [`specifications/SETUP.md`](./specifications/SETUP.md)
+
+---
 
 ## Overview
 The DCSA Conformance Framework is used by the adopters of each DCSA standard to measure the conformance of their

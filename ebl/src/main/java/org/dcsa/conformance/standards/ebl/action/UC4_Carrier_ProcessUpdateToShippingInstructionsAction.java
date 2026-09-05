@@ -26,7 +26,7 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends Carri
         carrierPartyName,
         shipperPartyName,
         previousAction,
-        acceptChanges ? "UC4a" : "UC4d",
+        acceptChanges ? "UC4(confirm)" : "UC4(decline)",
         204,
         isWithNotifications);
     this.expectedSIStatus = expectedSIStatus;

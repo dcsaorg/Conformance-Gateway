@@ -17,6 +17,7 @@ class ShipperNotificationEblActionTest {
             UC3ShipperSubmitUpdatedShippingInstructionsAction.class,
             UC5_Shipper_CancelUpdateToShippingInstructionsAction.class,
             UC7_Shipper_ApproveDraftTransportDocumentAction.class,
+            UC15_Shipper_CancelShippingInstructionsAction.class,
             UC17_Shipper_SubmitTransportDocumentAmendmentAction.class,
             UC18_Shipper_CancelTransportDocumentAmendmentAction.class);
 

@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -102,7 +103,13 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends Shippe
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    requestSchemaValidator));
+                    requestSchemaValidator),
+                JsonAttribute.contentChecks(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    expectedApiVersion,
+                    List.of(EblChecks.UPDATED_SI_STATUS_UPDATE_CANCELLED_ONLY_CHECK)));
         return Stream.concat(
             primaryExchangeChecks,
             getSINotificationChecks(

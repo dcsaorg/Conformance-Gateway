@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -12,7 +13,7 @@ import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
-public class UC15_Shipper_CancelShippingInstructionsAction extends StateChangingSIAction {
+public class UC15_Shipper_CancelShippingInstructionsAction extends ShipperNotificationEblAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
@@ -79,7 +80,13 @@ public class UC15_Shipper_CancelShippingInstructionsAction extends StateChanging
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    requestSchemaValidator));
+                    requestSchemaValidator),
+                JsonAttribute.contentChecks(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    expectedApiVersion,
+                    List.of(EblChecks.SI_STATUS_CANCELLED_ONLY_CHECK)));
         return Stream.concat(
             primaryExchangeChecks,
             getSINotificationChecks(
@@ -92,5 +99,4 @@ public class UC15_Shipper_CancelShippingInstructionsAction extends StateChanging
     };
   }
 }
-
 

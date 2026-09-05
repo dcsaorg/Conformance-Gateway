@@ -27,7 +27,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
     var flag = (requestAmendedStatus ? FLAG_REQUEST_AMENDMENT : FLAG_NONE);
     return switch (flag) {
       case FLAG_NONE -> "GET SI";
-      case FLAG_REQUEST_AMENDMENT -> "GET aSI";
+      case FLAG_REQUEST_AMENDMENT -> "GET SI (amended content)";
       default -> throw new AssertionError("Missing case for 0x" + Integer.toHexString(flag));
     };
   }

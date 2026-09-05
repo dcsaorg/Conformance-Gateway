@@ -37,6 +37,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean isTd;
   private final boolean includeAmendment;
+  private final boolean allowAnySiType;
 
   public CarrierSupplyPayloadAction(
       String carrierPartyName,
@@ -44,7 +45,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
       String standardVersion,
       JsonSchemaValidator requestSchemaValidator,
       boolean isTd) {
-    this(carrierPartyName, scenarioType, standardVersion, requestSchemaValidator, isTd, false);
+    this(carrierPartyName, scenarioType, standardVersion, requestSchemaValidator, isTd, false, false);
   }
 
   public CarrierSupplyPayloadAction(
@@ -54,14 +55,34 @@ public class CarrierSupplyPayloadAction extends EblAction {
       JsonSchemaValidator requestSchemaValidator,
       boolean isTd,
       boolean includeAmendment) {
+    this(
+        carrierPartyName,
+        scenarioType,
+        standardVersion,
+        requestSchemaValidator,
+        isTd,
+        includeAmendment,
+        false);
+  }
+
+  public CarrierSupplyPayloadAction(
+      String carrierPartyName,
+      @NonNull ScenarioType scenarioType,
+      String standardVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isTd,
+      boolean includeAmendment,
+      boolean allowAnySiType) {
     super(
         carrierPartyName,
         null,
         null,
         includeAmendment
             ? "SupplyCSP [any TD + any TD amendment]"
+            : allowAnySiType && !isTd
+                ? "SupplyCSP [any SI]"
             : "SupplyCSP [%s]"
-                .formatted(isTd ? scenarioType.tdScopeName() : scenarioType.name()),
+                .formatted(scenarioType.tdScopeName()),
         -1,
         true);
     this.scenarioType = scenarioType;
@@ -69,6 +90,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
     this.includeAmendment = includeAmendment;
+    this.allowAnySiType = allowAnySiType;
     initializeScenarioType();
   }
 
@@ -83,7 +105,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
         carrierPartyName,
         null,
         previousAction,
-        "SupplyCSP [%s]".formatted(scenarioType.name()),
+        "SupplyCSP [%s]".formatted(scenarioType.tdScopeName()),
         -1,
         true);
     this.scenarioType = scenarioType;
@@ -91,6 +113,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
     this.includeAmendment = false;
+    this.allowAnySiType = false;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
@@ -136,12 +159,19 @@ public class CarrierSupplyPayloadAction extends EblAction {
       return getMarkdownHumanReadablePrompt(
           Map.of(), "prompt-carrier-supply-csp-any-td-amendment.md");
     }
+    var scenarioTypeRule =
+        allowAnySiType && !isTd
+            ? "You may provide any SI type (Sea Waybill, Straight B/L, or Negotiable B/L)."
+            : "Make sure the ebl type remains %s.".formatted(scenarioType.tdScopeName());
     return shouldIncludeCbr()
         ? getMarkdownHumanReadablePrompt(
-            Map.of("SCENARIO_TYPE", scenarioType.name(), CBR_PLACEHOLDER, getCbrValue()),
+            Map.of(
+                "SCENARIO_TYPE_RULE", scenarioTypeRule,
+                CBR_PLACEHOLDER, getCbrValue()),
             "prompt-carrier-supply-csp-with-cbr.md")
         : getMarkdownHumanReadablePrompt(
-            Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
+            Map.of("SCENARIO_TYPE_RULE", scenarioTypeRule),
+            "prompt-carrier-supply-csp.md");
   }
 
   @Override

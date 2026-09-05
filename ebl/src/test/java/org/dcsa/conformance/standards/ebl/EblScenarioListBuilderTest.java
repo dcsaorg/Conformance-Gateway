@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioConformanceType;
 import org.dcsa.conformance.standards.ebl.action.CarrierSupplyPayloadAction;
+import org.dcsa.conformance.standards.ebl.action.UC1_Shipper_SubmitShippingInstructionsAction;
 import org.dcsa.conformance.standards.ebl.action.UC17_Shipper_SubmitTransportDocumentAmendmentAction;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.junit.jupiter.api.Test;
@@ -49,11 +50,12 @@ class EblScenarioListBuilderTest {
   @Test
   void standaloneSupplyPromptsDoNotAssumeABookingFlowOrRestrictAnyTdAmendments() {
     var standaloneTdSupply =
-        new CarrierSupplyPayloadAction(
-            CARRIER, ScenarioType.REGULAR_SWB, "3.0.0", null, true);
+        new CarrierSupplyPayloadAction(CARRIER, ScenarioType.REGULAR_SWB, "3.0.0", null, true);
     String standalonePrompt = standaloneTdSupply.getHumanReadablePrompt();
     assertFalse(standalonePrompt.contains("previous booking step"));
     assertFalse(standalonePrompt.contains("BOOKING202507041234567890123456"));
+    assertTrue(standalonePrompt.contains("Make sure the ebl type remains Sea Waybill."));
+    assertFalse(standalonePrompt.contains("_RULE"));
 
     var anyTdAmendmentSupply =
         new CarrierSupplyPayloadAction(
@@ -62,11 +64,33 @@ class EblScenarioListBuilderTest {
     assertTrue(amendmentPrompt.contains("Sea Waybill, Straight B/L, or Negotiable B/L"));
     assertFalse(amendmentPrompt.contains("Make sure the ebl type remains"));
     assertFalse(amendmentPrompt.contains("REGULAR_STRAIGHT_BL"));
+
+    var anySiSupply =
+        new CarrierSupplyPayloadAction(
+            CARRIER, ScenarioType.REGULAR_STRAIGHT_BL, "3.0.0", null, false, false, true);
+    String anySiPrompt = anySiSupply.getHumanReadablePrompt();
+    assertTrue(anySiPrompt.contains("You may provide any SI type"));
+    assertFalse(anySiPrompt.contains("Make sure the ebl type remains REGULAR_STRAIGHT_BL"));
+    assertFalse(anySiPrompt.contains("_RULE"));
+  }
+
+  @Test
+  void carrierSiOptionalScenariosUseAnySiLabelAndDocumentedPaths() {
+    Map<String, List<ConformanceScenario>> modules =
+        buildModules(Set.of(CARRIER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI);
+
+    List<String> optionalTitles = titles(modules.get("Optional (report-only) scenarios"));
+    assertEquals(9, optionalTitles.size());
+    assertTrue(optionalTitles.stream().allMatch(title -> title.startsWith("SupplyCSP [any SI]")));
+    assertTrue(optionalTitles.stream().noneMatch(title -> title.contains("Straight B/L")));
+    assertTrue(optionalTitles.stream().noneMatch(title -> title.contains("Negotiable B/L")));
+    assertTrue(optionalTitles.stream().noneMatch(title -> title.contains("Sea Waybill")));
   }
 
   @Test
   void carrierTdOnlyScenariosMatchDocumentation() {
-    Map<String, List<ConformanceScenario>> modules = buildModules(Set.of(CARRIER));
+    Map<String, List<ConformanceScenario>> modules =
+        buildModules(Set.of(CARRIER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD);
 
     assertEquals(
         List.of(
@@ -93,14 +117,13 @@ class EblScenarioListBuilderTest {
         titles(modules.get("Optional (report-only) scenarios")));
     assertTrue(
         modules.get("Optional (report-only) scenarios").stream()
-            .allMatch(
-                scenario ->
-                    scenario.getConformanceType() == ScenarioConformanceType.OPTIONAL));
+            .allMatch(scenario -> scenario.getConformanceType() == ScenarioConformanceType.OPTIONAL));
   }
 
   @Test
   void shipperTdOnlyScenariosMatchDocumentation() {
-    Map<String, List<ConformanceScenario>> modules = buildModules(Set.of(SHIPPER));
+    Map<String, List<ConformanceScenario>> modules =
+        buildModules(Set.of(SHIPPER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD);
 
     assertEquals(
         List.of(
@@ -110,38 +133,34 @@ class EblScenarioListBuilderTest {
             "Optional (report-only) scenarios"),
         List.copyOf(modules.keySet()));
     assertEquals(
-        List.of("UC6 [REGULAR_SWB] - UC7 - GET TD"),
+        List.of("UC6 [Sea Waybill] - UC7 - GET TD"),
         titles(modules.get("Required Sea Waybill scenario")));
     assertEquals(
-        List.of("UC6 [REGULAR_STRAIGHT_BL] - UC7 - GET TD"),
+        List.of("UC6 [Straight B/L] - UC7 - GET TD"),
         titles(modules.get("Required Straight B/L scenario")));
     assertEquals(
-        List.of("UC6 [REGULAR_NEGOTIABLE_BL] - UC7 - GET TD"),
+        List.of("UC6 [Negotiable B/L] - UC7 - GET TD"),
         titles(modules.get("Required Negotiable B/L scenario")));
     assertEquals(
-        List.of(
-            "UC17 - UC19 (confirm) - GET TD (amended content)",
-            "UC17 - UC18"),
+        List.of("UC17 - UC19 (confirm) - GET TD (amended content)", "UC17 - UC18"),
         titles(modules.get("Optional (report-only) scenarios")));
     assertTrue(
         modules.get("Optional (report-only) scenarios").stream()
-            .allMatch(
-                scenario ->
-                    scenario.getConformanceType() == ScenarioConformanceType.OPTIONAL));
+            .allMatch(scenario -> scenario.getConformanceType() == ScenarioConformanceType.OPTIONAL));
   }
 
   @Test
   void allInOneTdOnlyScenariosKeepBothRolesWithoutModuleCollisions() {
-    Map<String, List<ConformanceScenario>> modules = buildModules(Set.of(SHIPPER, CARRIER));
+    Map<String, List<ConformanceScenario>> modules =
+        buildModules(Set.of(SHIPPER, CARRIER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD);
 
     assertEquals(8, modules.size());
     assertTrue(modules.containsKey("Carrier: Optional (report-only) scenarios"));
     assertTrue(modules.containsKey("Shipper: Optional (report-only) scenarios"));
-    assertEquals(
-        4, modules.get("Carrier: Optional (report-only) scenarios").size());
-    assertEquals(
-        2, modules.get("Shipper: Optional (report-only) scenarios").size());
-    List<String> allTitles = modules.values().stream().flatMap(List::stream).map(ConformanceScenario::getTitle).toList();
+    assertEquals(4, modules.get("Carrier: Optional (report-only) scenarios").size());
+    assertEquals(2, modules.get("Shipper: Optional (report-only) scenarios").size());
+    List<String> allTitles =
+        modules.values().stream().flatMap(List::stream).map(ConformanceScenario::getTitle).toList();
     assertEquals(allTitles.size(), Set.copyOf(allTitles).size());
   }
 
@@ -188,10 +207,43 @@ class EblScenarioListBuilderTest {
             .asText());
   }
 
-  private Map<String, List<ConformanceScenario>> buildModules(Set<String> roles) {
-    EblComponentFactory componentFactory =
-        new EblComponentFactory(
-            "Ebl", "3.0.0", EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD);
+  @Test
+  void standaloneUc1SeedsScenarioTypeInDspState() {
+    var action =
+        new UC1_Shipper_SubmitShippingInstructionsAction(
+            CARRIER,
+            SHIPPER,
+            null,
+            null,
+            null,
+            null,
+            true,
+            ScenarioType.REGULAR_SWB,
+            "3.0.0",
+            "UC1[Sea Waybill]");
+
+    var state = action.exportJsonState();
+    assertEquals("REGULAR_SWB", state.required("currentDsp").required("scenarioType").asText());
+
+    var straightBlAction =
+        new UC1_Shipper_SubmitShippingInstructionsAction(
+            CARRIER,
+            SHIPPER,
+            null,
+            null,
+            null,
+            null,
+            true,
+            ScenarioType.REGULAR_STRAIGHT_BL,
+            "3.0.0",
+            "UC1[Straight B/L]");
+    String straightBlPrompt = straightBlAction.getHumanReadablePrompt();
+    assertTrue(straightBlPrompt.contains("for Straight B/L"));
+    assertFalse(straightBlPrompt.contains("Regular Straight BL"));
+  }
+
+  private Map<String, List<ConformanceScenario>> buildModules(Set<String> roles, String scenarioSuite) {
+    EblComponentFactory componentFactory = new EblComponentFactory("Ebl", "3.0.0", scenarioSuite);
     LinkedHashMap<String, EblScenarioListBuilder> builders =
         EblScenarioListBuilder.createModuleScenarioListBuilders(
             componentFactory, roles, true, "3.0.0", CARRIER, SHIPPER);
@@ -208,6 +260,22 @@ class EblScenarioListBuilderTest {
   private List<String> titles(List<ConformanceScenario> scenarios) {
     return scenarios.stream().map(ConformanceScenario::getTitle).toList();
   }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

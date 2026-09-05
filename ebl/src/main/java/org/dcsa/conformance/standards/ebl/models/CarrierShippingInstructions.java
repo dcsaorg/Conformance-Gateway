@@ -428,7 +428,7 @@ public class CarrierShippingInstructions {
   }
 
   public void declineShippingInstructions(String documentReference) {
-    checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
+    checkState(documentReference, getShippingInstructionsState(), s -> s == SI_RECEIVED);
     clearUpdatedShippingInstructions();
     mutateShippingInstructionsAndUpdate(siData -> siData.remove(FEEDBACKS));
     changeSIState(UPDATED_SI_STATUS, null);

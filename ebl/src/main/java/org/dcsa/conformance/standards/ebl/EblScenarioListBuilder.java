@@ -92,24 +92,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceSiOnlyScenarios(
       Set<String> testedPartyRoleNames, boolean isTd) {
-    var scenarios = new LinkedHashMap<String, EblScenarioListBuilder>();
-    boolean includeCarrier = testedPartyRoleNames.contains(EblRole.CARRIER.getConfigName());
-    boolean includeShipper = testedPartyRoleNames.contains(EblRole.SHIPPER.getConfigName());
-    boolean includeBoth = includeCarrier && includeShipper;
-
-    if (includeCarrier) {
-      carrierConformanceSiOnlyScenarios(isTd)
-          .forEach(
-              (name, builder) ->
-                  scenarios.put(includeBoth ? "Carrier - " + name : name, builder));
-    }
-    if (includeShipper) {
-      shipperConformanceSiOnlyScenarios(isTd)
-          .forEach(
-              (name, builder) ->
-                  scenarios.put(includeBoth ? "Shipper - " + name : name, builder));
-    }
-    return scenarios;
+    Map<String, Map<String, EblScenarioListBuilder>> partyScenarios =
+        MapUtils.orderedMap(
+            Map.entry(
+                EblRole.CARRIER.getConfigName(),
+                carrierConformanceSiOnlyScenarios(isTd)),
+            Map.entry(
+                EblRole.SHIPPER.getConfigName(),
+                shipperConformanceSiOnlyScenarios(isTd)));
+    List<String> orderedTestedRoles =
+        Stream.of(EblRole.CARRIER, EblRole.SHIPPER)
+            .map(EblRole::getConfigName)
+            .filter(testedPartyRoleNames::contains)
+            .toList();
+    return MapUtils.mergePartyScenarioModules(partyScenarios, orderedTestedRoles);
   }
 
   private static Map<String, EblScenarioListBuilder> carrierConformanceSiOnlyScenarios(boolean isTd) {

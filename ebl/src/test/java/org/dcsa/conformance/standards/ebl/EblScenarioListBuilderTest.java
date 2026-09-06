@@ -149,20 +149,34 @@ class EblScenarioListBuilderTest {
             .allMatch(scenario -> scenario.getConformanceType() == ScenarioConformanceType.OPTIONAL));
   }
 
-  @Test
-  void allInOneTdOnlyScenariosKeepBothRolesWithoutModuleCollisions() {
-    Map<String, List<ConformanceScenario>> modules =
-        buildModules(Set.of(SHIPPER, CARRIER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD);
+   @Test
+   void allInOneSiOnlyScenariosKeepBothRolesWithoutModuleCollisions() {
+     Map<String, List<ConformanceScenario>> modules =
+         buildModules(Set.of(SHIPPER, CARRIER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI);
 
-    assertEquals(8, modules.size());
-    assertTrue(modules.containsKey("Carrier: Optional (report-only) scenarios"));
-    assertTrue(modules.containsKey("Shipper: Optional (report-only) scenarios"));
-    assertEquals(4, modules.get("Carrier: Optional (report-only) scenarios").size());
-    assertEquals(2, modules.get("Shipper: Optional (report-only) scenarios").size());
-    List<String> allTitles =
-        modules.values().stream().flatMap(List::stream).map(ConformanceScenario::getTitle).toList();
-    assertEquals(allTitles.size(), Set.copyOf(allTitles).size());
-  }
+     assertEquals(8, modules.size());
+     assertTrue(modules.containsKey("Carrier: Optional (report-only) scenarios"));
+     assertTrue(modules.containsKey("Shipper: Optional (report-only) scenarios"));
+     assertEquals(9, modules.get("Carrier: Optional (report-only) scenarios").size());
+     List<String> allTitles =
+         modules.values().stream().flatMap(List::stream).map(ConformanceScenario::getTitle).toList();
+     assertEquals(allTitles.size(), Set.copyOf(allTitles).size());
+   }
+
+   @Test
+   void allInOneTdOnlyScenariosKeepBothRolesWithoutModuleCollisions() {
+     Map<String, List<ConformanceScenario>> modules =
+         buildModules(Set.of(SHIPPER, CARRIER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD);
+
+     assertEquals(8, modules.size());
+     assertTrue(modules.containsKey("Carrier: Optional (report-only) scenarios"));
+     assertTrue(modules.containsKey("Shipper: Optional (report-only) scenarios"));
+     assertEquals(4, modules.get("Carrier: Optional (report-only) scenarios").size());
+     assertEquals(2, modules.get("Shipper: Optional (report-only) scenarios").size());
+     List<String> allTitles =
+         modules.values().stream().flatMap(List::stream).map(ConformanceScenario::getTitle).toList();
+     assertEquals(allTitles.size(), Set.copyOf(allTitles).size());
+   }
 
   @Test
   void standaloneShipperUc17SuppliesMatchingAmendmentDataAfterReset() {
@@ -262,6 +276,7 @@ class EblScenarioListBuilderTest {
   }
 
 }
+
 
 
 

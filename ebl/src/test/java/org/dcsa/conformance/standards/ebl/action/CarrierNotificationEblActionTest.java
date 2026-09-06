@@ -23,6 +23,7 @@ class CarrierNotificationEblActionTest {
             UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class,
             UC13_Carrier_ProcessSurrenderRequestForDeliveryAction.class,
             UC14_Carrier_ConfirmShippingInstructionsCompleteAction.class,
+            UC16_Carrier_DeclineShippingInstructionsAction.class,
             UC19_Carrier_ProcessTransportDocumentAmendmentAction.class,
             UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction
                 .class);

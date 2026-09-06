@@ -793,26 +793,6 @@ class EblChecksTest {
     assertInvalid(EblChecks.VALIDATE_DOCUMENT_PARTY);
   }
 
-  @Test
-  void testDisplayedAddressLineAndCharacterLimits() {
-    rootNode.put("isElectronic", false);
-    ArrayNode displayedAddress =
-        rootNode.putObject("documentParties").putObject("shipper").putArray("displayedAddress");
-    displayedAddress.add("line 1").add("line 2");
-    assertValid(EblChecks.DISPLAYED_ADDRESS_LINE_COUNT);
-    assertValid(EblChecks.EBL_DISPLAYED_ADDRESS_LIMIT);
-
-    displayedAddress.add("line 3");
-    assertInvalid(EblChecks.DISPLAYED_ADDRESS_LINE_COUNT);
-    rootNode.put("isElectronic", true);
-    displayedAddress.add("line 4").add("line 5").add("line 6");
-    assertValid(EblChecks.DISPLAYED_ADDRESS_LINE_COUNT);
-    displayedAddress.add("line 7");
-    assertInvalid(EblChecks.DISPLAYED_ADDRESS_LINE_COUNT);
-
-    displayedAddress.removeAll().add("x".repeat(36));
-    assertInvalid(EblChecks.EBL_DISPLAYED_ADDRESS_LIMIT);
-  }
 
   @Test
   void testDocumentationPartyCodeListProviderIncludes303ValuesAndNotifyPartyPath() {

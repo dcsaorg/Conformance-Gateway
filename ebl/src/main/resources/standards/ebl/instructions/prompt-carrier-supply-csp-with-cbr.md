@@ -6,4 +6,4 @@ compatibility with your system.
 
 **Important:** Use the carrier booking reference that was created in the previous booking step in your payload: `{CBR}`
 
-Make sure the ebl type remains SCENARIO_TYPE.
+SCENARIO_TYPE_RULE

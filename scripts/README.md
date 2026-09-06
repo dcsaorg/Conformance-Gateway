@@ -57,6 +57,15 @@ npm --prefix scripts run run-conformance-suite -- \
   --suite Conformance
 ```
 
+In PowerShell, use the backtick line-continuation character instead of `\`:
+
+```powershell
+npm --prefix scripts run run-conformance-suite -- `
+  --standard Booking `
+  --version 2.0.0 `
+  --suite Conformance
+```
+
 The default Booking reports are written under `target/conformance-reports/` as
 `booking-200-conformance-auto-all-in-one-with-notifications.html` and
 `booking-200-conformance-auto-all-in-one-without-notifications.html`.
@@ -66,6 +75,15 @@ For suite names containing shell metacharacters or spaces, quote the value:
 npm --prefix scripts run run-conformance-suite -- \
   --standard eBL \
   --version 3.0.0 \
+  --suite 'Conformance TD'
+```
+
+PowerShell equivalent:
+
+```powershell
+npm --prefix scripts run run-conformance-suite -- `
+  --standard eBL `
+  --version 3.0.0 `
   --suite 'Conformance TD'
 ```
 

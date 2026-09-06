@@ -53,7 +53,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends CarrierNoti
         carrierPartyName,
         shipperPartyName,
         previousAction,
-        includeScenarioTypeInTitle ? "UC6 [%s]".formatted(scenarioType.name()) : ACTION_TITLE,
+        includeScenarioTypeInTitle ? "UC6 [%s]".formatted(scenarioType.tdScopeName()) : ACTION_TITLE,
         204,
         isWithNotifications);
     this.notificationSchemaValidator = notificationSchemaValidator;

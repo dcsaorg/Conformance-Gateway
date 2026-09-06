@@ -114,6 +114,9 @@ public class EblCarrier extends ConformanceParty {
             UC19_Carrier_ProcessTransportDocumentAmendmentAction.class,
             this::processDirectTransportDocumentAmendment),
         Map.entry(
+            UC16_Carrier_DeclineShippingInstructionsAction.class,
+            this::declineShippingInstructions),
+        Map.entry(
             UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction
                 .class,
             this::processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction));
@@ -412,6 +415,21 @@ public class EblCarrier extends ConformanceParty {
             .formatted(documentReference));
   }
 
+  private void declineShippingInstructions(JsonNode actionPrompt) {
+    log.info("Carrier.declineShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.declineShippingInstructions(documentReference);
+    si.save(persistentMap);
+    generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
+
+    addOperatorLogEntry(
+        "Declined shipping instructions with reference %s".formatted(documentReference));
+  }
+
   private void generateAndEmitNotificationFromShippingInstructions(
       JsonNode actionPrompt,
       CarrierShippingInstructions shippingInstructions,
@@ -690,7 +708,12 @@ public class EblCarrier extends ConformanceParty {
       return return404(request);
     }
     var si = CarrierShippingInstructions.fromPersistentStore(persistedSi);
-    si.cancelShippingInstructionsUpdate(documentReference);
+    var requestBody = request.message().body().getJsonBody();
+    if (requestBody.has("shippingInstructionsStatus")) {
+      si.cancelShippingInstructions(documentReference);
+    } else {
+      si.cancelShippingInstructionsUpdate(documentReference);
+    }
     si.save(persistentMap);
     var siData = si.getShippingInstructions();
 

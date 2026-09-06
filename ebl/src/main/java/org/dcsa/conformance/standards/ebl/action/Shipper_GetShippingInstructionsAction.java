@@ -16,18 +16,18 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
   private static final int FLAG_NONE = 0;
   private static final int FLAG_REQUEST_AMENDMENT = 1;
 
-  private final ShippingInstructionsStatus expectedSiStatus;
-  private final ShippingInstructionsStatus expectedAmendedSiStatus;
-  private final JsonSchemaValidator responseSchemaValidator;
-  private final boolean requestAmendedStatus;
-  private final boolean recordTDR;
-  private final boolean useBothRef;
+  protected final ShippingInstructionsStatus expectedSiStatus;
+  protected final ShippingInstructionsStatus expectedAmendedSiStatus;
+  protected final JsonSchemaValidator responseSchemaValidator;
+  protected final boolean requestAmendedStatus;
+  protected final boolean recordTDR;
+  protected final boolean useBothRef;
 
   private static String name(boolean requestAmendedStatus) {
     var flag = (requestAmendedStatus ? FLAG_REQUEST_AMENDMENT : FLAG_NONE);
     return switch (flag) {
       case FLAG_NONE -> "GET SI";
-      case FLAG_REQUEST_AMENDMENT -> "GET aSI";
+      case FLAG_REQUEST_AMENDMENT -> "GET SI (amended content)";
       default -> throw new AssertionError("Missing case for 0x" + Integer.toHexString(flag));
     };
   }
@@ -100,10 +100,6 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
     }
   }
 
-  @Override
-  public Set<String> skippableForRoles() {
-    return Set.of(EblRole.SHIPPER.getConfigName());
-  }
 
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {

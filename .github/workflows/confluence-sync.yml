@@ -1,0 +1,165 @@
+name: Confluence Sync
+
+on:
+  schedule:
+    # Runs every Monday at 02:00 UTC
+    - cron: '0 2 * * 1'
+
+  workflow_dispatch:
+  # Allow manual trigger from GitHub UI
+
+  # Optional: trigger on push to main branch if confluence-config.json changes
+  push:
+    paths:
+      - 'scripts/src/confluence/confluence-config.json'
+      - 'scripts/src/confluence/sync-confluence.py'
+      - 'scripts/src/confluence/requirements.txt'
+      - '.github/workflows/confluence-sync.yml'
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    name: Sync Confluence to Git
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/src/confluence/requirements.txt
+
+      - name: Run converter self-test
+        run: |
+          python scripts/src/confluence/sync-confluence.py --self-test
+
+      - name: Configure git
+        run: |
+          git config --local user.email "bot@dcsa.org"
+          git config --local user.name "DCSA Bot"
+
+      - name: Run Confluence Sync
+        env:
+          CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
+          CONFLUENCE_USERNAME: ${{ secrets.CONFLUENCE_USERNAME }}
+          CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
+          CONFLUENCE_SPACE_KEY: SD
+        run: |
+          python scripts/src/confluence/sync-confluence.py
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.git-check.outputs.has_changes == 'true'
+        run: |
+          git add specifications/confluence-sync/
+          git commit -m "docs: auto-sync Confluence documentation
+
+          - Synced specifications from Confluence space SD
+          - Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          - Workflow: Confluence Sync"
+          git push
+
+      - name: Create Pull Request
+        if: steps.git-check.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: 'docs: auto-sync Confluence documentation'
+          title: 'docs: Auto-sync Confluence documentation'
+          body: |
+            ## Automated Confluence Sync
+
+            This PR contains automatically synced documentation from Confluence.
+
+            **Sync Details:**
+            - Source: Confluence Space `SD` (Standards Development)
+            - Destination: `specifications/confluence-sync/`
+            - Timestamp: ${{ github.event.head_commit.timestamp }}
+            - Trigger: ${{ github.event_name }}
+
+            ### What to check:
+            - [ ] Files have expected content
+            - [ ] No sensitive data exposed
+            - [ ] Markdown formatting looks correct
+            - [ ] Links are preserved
+
+            ### Merge Instructions:
+            If everything looks good, merge this PR to keep specifications current.
+          branch: confluence-sync-${{ github.run_number }}
+          delete-branch: true
+          labels: |
+            documentation
+            automated
+            confluence-sync
+
+      - name: Workflow Status
+        if: always()
+        run: |
+          echo "## Confluence Sync Status"
+          echo "- Scheduled: Every Monday at 02:00 UTC"
+          echo "- Last Run: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          echo "- Changes Detected: ${{ steps.git-check.outputs.has_changes }}"
+          echo "- Configuration: scripts/src/confluence/confluence-config.json"
+
+  verify:
+    runs-on: ubuntu-latest
+    name: Verify Sync Output
+    needs: sync
+    if: always()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check sync directory exists
+        run: |
+          if [ -d "specifications/confluence-sync" ]; then
+            echo "✓ Sync directory exists"
+            ls -la specifications/confluence-sync/
+          else
+            echo "⚠ Sync directory not found (may be first run)"
+          fi
+
+      - name: Validate markdown files
+        run: |
+          if find specifications/confluence-sync -type f -name '*.md' | grep -q .; then
+            count=$(find specifications/confluence-sync -type f -name '*.md' | wc -l)
+            echo "✓ Found ${count} markdown files"
+            while IFS= read -r file; do
+              if [ -s "$file" ]; then
+                echo "  ✓ ${file} - $(wc -l < "$file") lines"
+              fi
+            done < <(find specifications/confluence-sync -type f -name '*.md' | sort)
+          else
+            echo "ℹ No markdown files found (check config or Confluence connectivity)"
+          fi
+
+      - name: Summary
+        run: |
+          echo "## Sync Verification Complete"
+          echo "- Documentation location: specifications/confluence-sync/"
+          echo "- Config file: scripts/src/confluence/confluence-config.json"
+          echo "- Next sync: Monday 02:00 UTC"
+          echo ""
+          echo "To manually trigger sync:"
+          echo "  1. Go to: Actions → Confluence Sync"
+          echo "  2. Click: Run workflow"
+

@@ -1,17 +1,6 @@
 package org.dcsa.conformance.standards.an;
 
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -23,15 +12,27 @@ import org.dcsa.conformance.standards.an.party.ANPublisher;
 import org.dcsa.conformance.standards.an.party.ANRole;
 import org.dcsa.conformance.standards.an.party.ANSubscriber;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public class ANComponentFactory extends AbstractComponentFactory {
 
   public ANComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
     super(
-        standardName,
-        standardVersion,
-        scenarioSuite,
-        ANRole.PUBLISHER.getConfigName(),
-        ANRole.SUBSCRIBER.getConfigName());
+      standardName,
+      standardVersion,
+      scenarioSuite,
+      ANRole.PRODUCER.getConfigName(),
+      ANRole.CONSUMER.getConfigName());
   }
 
   @Override
@@ -46,26 +47,26 @@ public class ANComponentFactory extends AbstractComponentFactory {
     List<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration publisherConfiguration =
-      partyConfigurationsByRoleName.get(ANRole.PUBLISHER.getConfigName());
+      partyConfigurationsByRoleName.get(ANRole.PRODUCER.getConfigName());
     if (publisherConfiguration != null) {
       parties.add(
         new ANPublisher(
           standardVersion,
           publisherConfiguration,
-          counterpartConfigurationsByRoleName.get(ANRole.SUBSCRIBER.getConfigName()),
+          counterpartConfigurationsByRoleName.get(ANRole.CONSUMER.getConfigName()),
           persistentMap,
           webClient,
           orchestratorAuthHeader));
     }
 
     PartyConfiguration consumerConfiguration =
-      partyConfigurationsByRoleName.get(ANRole.SUBSCRIBER.getConfigName());
+      partyConfigurationsByRoleName.get(ANRole.CONSUMER.getConfigName());
     if (consumerConfiguration != null) {
       parties.add(
         new ANSubscriber(
           standardVersion,
           consumerConfiguration,
-          counterpartConfigurationsByRoleName.get(ANRole.PUBLISHER.getConfigName()),
+          counterpartConfigurationsByRoleName.get(ANRole.PRODUCER.getConfigName()),
           persistentMap,
           webClient,
           orchestratorAuthHeader));
@@ -75,16 +76,17 @@ public class ANComponentFactory extends AbstractComponentFactory {
 
   @Override
   protected Map<String, ANScenarioListBuilder> createModuleScenarioListBuilders(
-      PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations,
-      boolean isWithNotifications) {
+    PartyConfiguration[] partyConfigurations,
+    CounterpartConfiguration[] counterpartConfigurations,
+    boolean isWithNotifications) {
 
     return ANScenarioListBuilder.createModuleScenarioListBuilders(
       this,
+      getReportRoleNames(partyConfigurations, counterpartConfigurations),
       _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, ANRole::isPublisher),
+        partyConfigurations, counterpartConfigurations, ANRole::isProducer),
       _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, ANRole::isSubscriber));
+        partyConfigurations, counterpartConfigurations, ANRole::isConsumer));
   }
 
   @Override
@@ -97,15 +99,15 @@ public class ANComponentFactory extends AbstractComponentFactory {
   @Override
   public Set<String> getReportRoleNames(PartyConfiguration[] partyConfigurations, CounterpartConfiguration[] counterpartConfigurations) {
     return (partyConfigurations.length == ANRole.values().length
-            ? Arrays.stream(ANRole.values()).map(ANRole::getConfigName)
-            : Arrays.stream(counterpartConfigurations)
-                .map(CounterpartConfiguration::getRole)
-                .filter(
-                    counterpartRole ->
-                        Arrays.stream(partyConfigurations)
-                            .map(PartyConfiguration::getRole)
-                            .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
-        .collect(Collectors.toSet());
+      ? Arrays.stream(ANRole.values()).map(ANRole::getConfigName)
+      : Arrays.stream(counterpartConfigurations)
+      .map(CounterpartConfiguration::getRole)
+      .filter(
+        counterpartRole ->
+          Arrays.stream(partyConfigurations)
+            .map(PartyConfiguration::getRole)
+            .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
+      .collect(Collectors.toSet());
   }
 
   public JsonSchemaValidator getMessageSchemaValidator(String jsonSchema) {

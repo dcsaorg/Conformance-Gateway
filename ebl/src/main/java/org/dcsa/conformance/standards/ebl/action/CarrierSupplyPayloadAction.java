@@ -2,6 +2,8 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -16,6 +18,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.util.ErrorFormatter;
 import org.dcsa.conformance.standards.ebl.checks.EblInputPayloadValidations;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 public class CarrierSupplyPayloadAction extends EblAction {
@@ -25,12 +28,16 @@ public class CarrierSupplyPayloadAction extends EblAction {
   private static final String INPUT = "input";
   private static final String CBR_PLACEHOLDER = "{CBR}";
   private static final String DEFAULT_CBR = "BOOKING202507041234567890123456";
+  private static final Set<String> DIRECT_AMENDMENT_STATUSES =
+      Set.of("DRAFT", "ISSUED", "PENDING_SURRENDER_FOR_AMENDMENT");
 
   private ScenarioType scenarioType;
   private JsonNode carrierPayload;
   private final String standardVersion;
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean isTd;
+  private final boolean includeAmendment;
+  private final boolean allowAnySiType;
 
   public CarrierSupplyPayloadAction(
       String carrierPartyName,
@@ -38,19 +45,53 @@ public class CarrierSupplyPayloadAction extends EblAction {
       String standardVersion,
       JsonSchemaValidator requestSchemaValidator,
       boolean isTd) {
+    this(carrierPartyName, scenarioType, standardVersion, requestSchemaValidator, isTd, false, false);
+  }
+
+  public CarrierSupplyPayloadAction(
+      String carrierPartyName,
+      @NonNull ScenarioType scenarioType,
+      String standardVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isTd,
+      boolean includeAmendment) {
+    this(
+        carrierPartyName,
+        scenarioType,
+        standardVersion,
+        requestSchemaValidator,
+        isTd,
+        includeAmendment,
+        false);
+  }
+
+  public CarrierSupplyPayloadAction(
+      String carrierPartyName,
+      @NonNull ScenarioType scenarioType,
+      String standardVersion,
+      JsonSchemaValidator requestSchemaValidator,
+      boolean isTd,
+      boolean includeAmendment,
+      boolean allowAnySiType) {
     super(
         carrierPartyName,
         null,
         null,
-        "SupplyCSP [%s]"
-            .formatted(isTd ? scenarioType.getTDScenarioTypeName() : scenarioType.name()),
+        includeAmendment
+            ? "SupplyCSP [any amended TD]"
+            : allowAnySiType && !isTd
+                ? "SupplyCSP [any SI]"
+            : "SupplyCSP [%s]"
+                .formatted(scenarioType.tdScopeName()),
         -1,
         true);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
-    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+    this.includeAmendment = includeAmendment;
+    this.allowAnySiType = allowAnySiType;
+    initializeScenarioType();
   }
 
   public CarrierSupplyPayloadAction(
@@ -64,13 +105,15 @@ public class CarrierSupplyPayloadAction extends EblAction {
         carrierPartyName,
         null,
         previousAction,
-        "SupplyCSP [%s]".formatted(scenarioType.name()),
+        "SupplyCSP [%s]".formatted(scenarioType.tdScopeName()),
         -1,
         true);
     this.scenarioType = scenarioType;
     this.standardVersion = standardVersion;
     this.requestSchemaValidator = requestSchemaValidator;
     this.isTd = isTd;
+    this.includeAmendment = false;
+    this.allowAnySiType = false;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
   }
 
@@ -79,13 +122,16 @@ public class CarrierSupplyPayloadAction extends EblAction {
     super.reset();
     carrierPayload = null;
     if (scenarioType != null) {
-      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+      initializeScenarioType();
     }
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put(SCENARIO_TYPE, scenarioType.name());
+    return super.asJsonNode()
+        .put(SCENARIO_TYPE, scenarioType.name())
+        .put("isTd", isTd)
+        .put("includeAmendment", includeAmendment);
   }
 
   @Override
@@ -109,19 +155,44 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   @Override
   public String getHumanReadablePrompt() {
+    if (includeAmendment) {
+      return getMarkdownHumanReadablePrompt(
+          Map.of(), "prompt-carrier-supply-csp-any-td-amendment.md");
+    }
+    var scenarioTypeRule =
+        allowAnySiType && !isTd
+            ? "You may provide any SI type (Sea Waybill, Straight B/L, or Negotiable B/L)."
+            : "Make sure the ebl type remains %s.".formatted(scenarioType.tdScopeName());
     return shouldIncludeCbr()
         ? getMarkdownHumanReadablePrompt(
-            Map.of("SCENARIO_TYPE", scenarioType.name(), CBR_PLACEHOLDER, getCbrValue()),
+            Map.of(
+                "SCENARIO_TYPE_RULE", scenarioTypeRule,
+                CBR_PLACEHOLDER, getCbrValue()),
             "prompt-carrier-supply-csp-with-cbr.md")
         : getMarkdownHumanReadablePrompt(
-            Map.of("SCENARIO_TYPE", scenarioType.name()), "prompt-carrier-supply-csp.md");
+            Map.of("SCENARIO_TYPE_RULE", scenarioTypeRule),
+            "prompt-carrier-supply-csp.md");
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return JsonToolkit.templateFileToJsonNode(
+    JsonNode fixture = JsonToolkit.templateFileToJsonNode(
         "/standards/ebl/messages/" + scenarioType.eblPayload(standardVersion),
         Map.of(CBR_PLACEHOLDER, getCbrValue()));
+    if (!isTd) {
+      return fixture;
+    }
+    ObjectNode transportDocument =
+        CarrierShippingInstructions.createTransportDocumentFromShippingInstructions(
+            (ObjectNode) fixture, standardVersion, scenarioType);
+    if (!includeAmendment) {
+      return transportDocument;
+    }
+    ObjectNode amendment = transportDocument.deepCopy();
+    amendment.put(
+        "serviceContractReference",
+        amendment.path("serviceContractReference").asText("Ref-123") + "-AMENDED");
+    return amendment;
   }
 
   @Override
@@ -140,16 +211,33 @@ public class CarrierSupplyPayloadAction extends EblAction {
   @Override
   public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
     JsonNode inputNode = partyInput.get(INPUT);
+    if (inputNode == null || inputNode.isNull()) {
+      throw new UserFacingException("The party input must contain a non-null 'input' value.");
+    }
+    ScenarioType inputScenarioType = inputScenarioType(inputNode);
+    List<JsonNode> payloads = List.of(inputNode);
 
     Set<String> schemaChecksErrors =
-        EblInputPayloadValidations.validateEblSchema(inputNode, requestSchemaValidator);
+        payloads.stream()
+            .flatMap(
+                payload ->
+                    EblInputPayloadValidations.validateEblSchema(payload, requestSchemaValidator)
+                        .stream())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
     Set<String> contentChecksErrors =
-        EblInputPayloadValidations.validateEblContent(
-            inputNode, scenarioType, isTd, getDspSupplier().get());
+        payloads.stream()
+            .flatMap(
+                payload ->
+                    EblInputPayloadValidations.validateEblContent(
+                            payload, inputScenarioType, isTd, getDspSupplier().get())
+                        .stream())
+            .collect(Collectors.toSet());
+
+    Set<String> amendmentErrors = validateAmendedTransportDocument(inputNode);
 
     Set<String> allErrors =
-        Stream.of(schemaChecksErrors, contentChecksErrors)
+        Stream.of(schemaChecksErrors, contentChecksErrors, amendmentErrors)
             .flatMap(Set::stream)
             .collect(Collectors.toSet());
 
@@ -161,7 +249,27 @@ public class CarrierSupplyPayloadAction extends EblAction {
 
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
-    getCarrierPayloadConsumer().accept(partyInput.get(INPUT));
+    JsonNode input = partyInput.get(INPUT);
+    getCarrierPayloadConsumer().accept(input);
+    if (includeAmendment) {
+      getDspConsumer()
+          .accept(getDspSupplier().get().withScenarioType(inputScenarioType(input).name()));
+    }
+    if (isTd && input.has("transportDocumentReference")) {
+      getDspConsumer()
+          .accept(
+              getDspSupplier()
+                  .get()
+                  .withTransportDocumentReference(
+                      input.required("transportDocumentReference").asText()));
+    }
+    if (includeAmendment && input.hasNonNull("transportDocumentStatus")) {
+      getDspConsumer()
+          .accept(
+              getDspSupplier()
+                  .get()
+                  .withTransportDocumentStatus(input.required("transportDocumentStatus").asText()));
+    }
   }
 
   @Override
@@ -175,7 +283,40 @@ public class CarrierSupplyPayloadAction extends EblAction {
   }
 
   private boolean shouldIncludeCbr() {
-    return !(previousAction instanceof EblAction);
+    return previousAction != null && !(previousAction instanceof EblAction);
+  }
+
+  private void initializeScenarioType() {
+    getDspConsumer()
+        .accept(
+            getDspSupplier()
+                .get()
+                .withScenarioType(includeAmendment ? null : scenarioType.name()));
+  }
+
+  ScenarioType inputScenarioType(JsonNode input) {
+    if (!includeAmendment) {
+      return scenarioType;
+    }
+    return switch (input.path("transportDocumentTypeCode").asText()) {
+      case "SWB" -> ScenarioType.REGULAR_SWB;
+      case "BOL" ->
+          input.path("isToOrder").asBoolean(false)
+              ? ScenarioType.REGULAR_NEGOTIABLE_BL
+              : ScenarioType.REGULAR_STRAIGHT_BL;
+      default -> scenarioType;
+    };
+  }
+
+  Set<String> validateAmendedTransportDocument(JsonNode input) {
+    if (!includeAmendment) {
+      return Set.of();
+    }
+    String status = input.path("transportDocumentStatus").asText(null);
+    return DIRECT_AMENDMENT_STATUSES.contains(status)
+        ? Set.of()
+        : Set.of(
+            "The amended Transport Document `transportDocumentStatus` must equal `DRAFT`, `ISSUED`, or `PENDING_SURRENDER_FOR_AMENDMENT`.");
   }
 
   private String getCbrValue() {

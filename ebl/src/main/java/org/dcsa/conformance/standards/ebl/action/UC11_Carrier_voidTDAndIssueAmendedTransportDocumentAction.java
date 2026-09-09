@@ -12,7 +12,7 @@ import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 @Getter
 public class UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction
-    extends StateChangingSIAction {
+    extends CarrierNotificationEblAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction(
@@ -43,7 +43,6 @@ public class UC11_Carrier_voidTDAndIssueAmendedTransportDocumentAction
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDspSupplier().get();
-    // This is a re-issuance; those will de facto change the TD.
     if (!dsp.newTransportDocumentContent()) {
       getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
     }

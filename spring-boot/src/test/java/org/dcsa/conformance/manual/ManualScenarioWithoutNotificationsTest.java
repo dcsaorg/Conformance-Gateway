@@ -18,7 +18,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 class ManualScenarioWithoutNotificationsTest extends ManualTestBase {
 
   private static Stream<String> testStandards() {
-    return Stream.of("Booking", "Ebl", "Booking + eBL");
+    return Stream.of(
+        "Booking",
+        "Ebl"
+        // "Booking + eBL" // Disabled legacy combined standard
+        );
   }
 
   @ParameterizedTest(name = "Standard: {0}")

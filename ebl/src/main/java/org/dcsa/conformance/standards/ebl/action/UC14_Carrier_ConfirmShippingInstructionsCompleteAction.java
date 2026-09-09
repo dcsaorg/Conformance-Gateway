@@ -8,7 +8,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
-public class UC14_Carrier_ConfirmShippingInstructionsCompleteAction extends StateChangingSIAction {
+public class UC14_Carrier_ConfirmShippingInstructionsCompleteAction extends CarrierNotificationEblAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC14_Carrier_ConfirmShippingInstructionsCompleteAction(
@@ -40,9 +40,6 @@ public class UC14_Carrier_ConfirmShippingInstructionsCompleteAction extends Stat
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        // Does the carrier use SI reference, TD Reference or both? Well, both is allowed, and we do
-        // not support
-        // checking that, so meh.
         return getSINotificationChecks(
             getMatchedExchangeUuid(),
             expectedApiVersion,

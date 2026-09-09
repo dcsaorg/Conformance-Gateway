@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum EndorsementChainRole {
-  CARRIER("Carrier"),
+  CONSUMER("Consumer"),
   PROVIDER("Provider");
 
   private final String configName;
@@ -13,8 +13,8 @@ public enum EndorsementChainRole {
     this.configName = configName;
   }
 
-  public static boolean isCarrier(String configName) {
-    return EndorsementChainRole.CARRIER.configName.equals(configName);
+  public static boolean isConsumer(String configName) {
+    return EndorsementChainRole.CONSUMER.configName.equals(configName);
   }
 
   public static boolean isProvider(String configName) {

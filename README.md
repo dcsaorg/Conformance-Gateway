@@ -1,4 +1,12 @@
-# DCSA Conformance Framework
+# DCSA Conformance Gateway
+
+## Documentation & Specifications
+
+- Documentation index: [`docs/README.md`](./docs/README.md)
+- Synced Confluence pages: [`specifications/confluence-sync/`](./specifications/confluence-sync/)
+- Sync setup: [`specifications/SETUP.md`](./specifications/SETUP.md)
+
+---
 
 ## Overview
 The DCSA Conformance Framework is used by the adopters of each DCSA standard to measure the conformance of their
@@ -80,7 +88,7 @@ There are 4 types of tests in the project:
    tested in this way.
 3. Web UI testing, which is done by using Selenium. This can be found in the `SeleniumTest` class. It requires NodeJS to
    be running. These tests take quite a while, because it often needs to wait before the UI is ready.
-4. AWS testing, which only runs the EBL Conformance TD-only test on the Carrier role, by using the UI. This is also
+4. AWS testing, which only runs the EBL Conformance TD test on the Carrier role, by using the UI. This is also
    performed by Selenium. This can be found in the `AWSEnvironmentTest` class. It needs several environment variables to
    be set, which are not in the repository. Those you can set in your IDE, or by temporarily changing the code.
 

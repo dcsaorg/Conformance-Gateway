@@ -142,7 +142,7 @@ class EblIssuanceContractTest {
           check ->
             check.description()
               .equals(
-                "`transportDocumentStatus` must equal `DRAFT`, `APPROVED`, `ISSUED`, `PENDING_SURRENDER_FOR_AMENDMENT`, `SURRENDERED_FOR_AMENDMENT`, `PENDING_SURRENDER_FOR_DELIVERY`, `SURRENDERED_FOR_DELIVERY`, or `VOIDED`.")));
+                "'transportDocumentStatus' must equal 'DRAFT', 'APPROVED', 'ISSUED', 'PENDING_SURRENDER_FOR_AMENDMENT', 'SURRENDERED_FOR_AMENDMENT', 'PENDING_SURRENDER_FOR_DELIVERY', 'SURRENDERED_FOR_DELIVERY', or 'VOIDED'.")));
     assertFalse(
       carrierChecks.stream()
         .anyMatch(

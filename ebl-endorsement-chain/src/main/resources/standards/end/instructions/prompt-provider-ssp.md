@@ -1,2 +1,2 @@
-Provide the Transport document reference and any applicable query parameters for the scenario. The synthetic carrier
-will use them to perform the GET request.
+Provide the `transportDocumentReference` and, when required by the scenario, the
+`transportDocumentSubReference`. The synthetic Consumer will use these values to perform the GET request.

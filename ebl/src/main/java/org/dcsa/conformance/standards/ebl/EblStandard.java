@@ -24,7 +24,7 @@ public class EblStandard extends AbstractStandard {
       getEndpointUrisAndMethodsByScenarioSuiteAndRoleName() {
     return Map.ofEntries(
         Map.entry(
-            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
+            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI,
             Map.ofEntries(
                 Map.entry(
                     EblRole.CARRIER.getConfigName(),
@@ -42,7 +42,7 @@ public class EblStandard extends AbstractStandard {
                                 "/v3/shipping-instructions-notifications",
                                 new TreeSet<>(Set.of("POST")))))))),
         Map.entry(
-            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
+            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD,
             Map.ofEntries(
                 Map.entry(
                     EblRole.CARRIER.getConfigName(),
@@ -50,7 +50,10 @@ public class EblStandard extends AbstractStandard {
                         Map.ofEntries(
                             Map.entry(
                                 "/v3/transport-documents/{transportDocumentReference}",
-                                new TreeSet<>(Set.of("GET", "PATCH")))))),
+                                new TreeSet<>(Set.of("GET", "PATCH"))),
+                            Map.entry(
+                                "/v3/transport-documents/{transportDocumentReference}/amendment",
+                                new TreeSet<>(Set.of("GET", "PUT", "DELETE")))))),
                 Map.entry(
                     EblRole.SHIPPER.getConfigName(),
                     new TreeMap<>(

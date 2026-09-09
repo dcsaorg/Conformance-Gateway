@@ -31,21 +31,16 @@ import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.IOT_EVENT_TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.ISO_EQUIPMENT_CODE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.MODE_OF_TRANSPORT;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.RAIL_TRANSPORT;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.REEFER_EVENT_TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.REFERENCE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.SHIPMENT_DETAILS;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.SHIPMENT_EVENT_TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_CALL;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_CALL_REFERENCE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_DETAILS;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRANSPORT_EVENT_TYPE;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TRUCK_TRANSPORT;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.TYPE;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventAttributes.VESSEL_TRANSPORT;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.BARGE;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.RAIL;
-import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.TRUCK;
 import static org.dcsa.conformance.standards.tnt.v300.checks.TntEventValues.VESSEL;
 
 @UtilityClass
@@ -253,40 +248,14 @@ public class TntChecks {
           isEventOfType(TntEventType.TRANSPORT),
           JsonAttribute.path(EVENT_LOCATION, JsonAttribute.matchedMustBeNonEmpty()))));
 
-    checks.add(
-      JsonAttribute.allIndividualMatchesMustBeValid(
-        "The `%s.%s.%s` attribute within every Transport event must be present and not empty or blank."
-          .formatted(TRANSPORT_DETAILS, TRANSPORT_CALL, TRANSPORT_CALL_REFERENCE),
-        mav -> mav.submitAllMatching(EVENTS + ".*"),
-        JsonAttribute.ifMatchedThen(
-          isEventOfType(TntEventType.TRANSPORT),
-          JsonAttribute.path(
-            TRANSPORT_DETAILS,
-            JsonAttribute.path(
-              TRANSPORT_CALL,
-              JsonAttribute.path(
-                TRANSPORT_CALL_REFERENCE, JsonAttribute.matchedMustBeNonEmpty()))))));
-
-    checks.add(transportObjectCheck(
-      "When `transportDetails.transportCall.modeOfTransport` is `VESSEL` or `BARGE`, every applicable Transport event must demonstrate the correct use of `transportDetails.transportCall.vesselTransport`: it must be present and not empty",
-      Set.of(VESSEL, BARGE),
-      VESSEL_TRANSPORT));
-    checks.add(transportObjectCheck(
-      "When `transportDetails.transportCall.modeOfTransport` is `TRUCK`, every applicable Transport event must demonstrate the correct use of `transportDetails.transportCall.truckTransport`: it must be present and not empty",
-      Set.of(TRUCK),
-      TRUCK_TRANSPORT));
-    checks.add(transportObjectCheck(
-      "When `transportDetails.transportCall.modeOfTransport` is `RAIL`, every applicable Transport event must demonstrate the correct use of `transportDetails.transportCall.railTransport`: it must be present and not empty",
-      Set.of(RAIL),
-      RAIL_TRANSPORT));
+    checks.add(vesselTransportCheck());
 
     return checks;
   }
 
-  private static JsonContentCheck transportObjectCheck(
-    String description, Set<String> modesOfTransport, String transportObject) {
+  private static JsonContentCheck vesselTransportCheck() {
     return JsonAttribute.allIndividualMatchesMustBeValid(
-      description,
+      "When `transportDetails.transportCall.modeOfTransport` is `VESSEL` or `BARGE`, every applicable Transport event must demonstrate the correct use of `transportDetails.transportCall.vesselTransport`: it must be present and not empty",
       mav -> mav.submitAllMatching(EVENTS + ".*"),
       JsonAttribute.ifMatchedThen(
         isEventOfType(TntEventType.TRANSPORT),
@@ -295,7 +264,7 @@ public class TntChecks {
           JsonAttribute.path(
             TRANSPORT_CALL,
             JsonAttribute.ifMatchedThen(
-              JsonAttribute.isOneOf(MODE_OF_TRANSPORT, modesOfTransport),
-              JsonAttribute.path(transportObject, JsonAttribute.matchedMustBeNonEmpty()))))));
+              JsonAttribute.isOneOf(MODE_OF_TRANSPORT, Set.of(VESSEL, BARGE)),
+              JsonAttribute.path(VESSEL_TRANSPORT, JsonAttribute.matchedMustBeNonEmpty()))))));
   }
 }

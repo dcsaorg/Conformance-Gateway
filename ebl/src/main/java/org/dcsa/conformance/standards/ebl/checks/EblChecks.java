@@ -2026,23 +2026,6 @@ public class EblChecks {
               JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
                   KeywordDataset.staticVersionedDataset("UPDATE_CANCELLED"))));
 
-  public static ActionCheck tdRefStatusChecks(
-      UUID matched,
-      String standardVersion,
-      Supplier<EblDynamicScenarioParameters> dspSupplier,
-      TransportDocumentStatusScenario statusScenario) {
-    List<JsonContentCheck> checks = new ArrayList<>();
-    checks.add(
-        JsonAttribute.mustEqual(
-            TD_TDR, () -> dspSupplier.get().transportDocumentReference()));
-    checks.addAll(statusScenario.checks(false));
-    return JsonAttribute.contentChecks(
-        EblRole::isCarrier,
-        matched,
-        HttpMessageType.RESPONSE,
-        standardVersion,
-        checks);
-  }
 
   public static List<JsonContentCheck> getSiNotificationChecks(
       ShippingInstructionsStatus shippingInstructionsStatus,

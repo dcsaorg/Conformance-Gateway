@@ -94,12 +94,7 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends ShipperNoti
                     HttpMessageType.REQUEST,
                     requestSchemaValidator),
                 EblChecks.shipperApprovalContentChecks(
-                    getMatchedExchangeUuid(), expectedApiVersion),
-                EblChecks.tdRefStatusChecks(
-                    getMatchedExchangeUuid(),
-                    expectedApiVersion,
-                    getDspSupplier(),
-                    TransportDocumentStatusScenario.uc7()));
+                    getMatchedExchangeUuid(), expectedApiVersion));
         return Stream.concat(
             primaryExchangeChecks,
             getTDNotificationChecks(

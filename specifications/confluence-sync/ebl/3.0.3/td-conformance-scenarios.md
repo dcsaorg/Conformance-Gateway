@@ -1,8 +1,8 @@
 # DCSA Interface Standard for EBL (TD) 3.x - Conformance Scenarios (CEP26)
 
 - Confluence page id: `1984299095`
-- Confluence version: `15`
-- Synced at: `2026-09-04T13:07:39.183627Z`
+- Confluence version: `19`
+- Synced at: `2026-09-09T10:24:11.324531Z`
 
 # **0. Document metadata**
 
@@ -80,7 +80,7 @@ All conformance scenarios performed and validation results will be part of the C
 
 **GET TD** is the default GET `/v3/transport-documents/{transportDocumentReference}` endpoint action that retrieves the Transport Document.
 
-**GET TD (amended content)** is the GET `/v3/transport-documents/{transportDocumentReference}/amendment` endpoint action that retrieves the latest amendment to the Transport Document.
+**GET TD amendment** is the GET `/v3/transport-documents/{transportDocumentReference}/amendment` endpoint action that retrieves the latest amendment to the Transport Document.
 
 ## 3.1 Carrier Conformance Scenarios
 
@@ -88,7 +88,7 @@ All conformance scenarios performed and validation results will be part of the C
 
 |  |  |
 | --- | --- |
-| **SupplyCSP [Sea Waybill] - UC6 - UC7 - UC8 - GET TD (ISSUED)** | This scenario verifies that the Carrier can publish a draft Sea Waybill; it can accept the approval of the draft; it can mark the Sea Waybill as issued; it can return the content of the issued Sea Waybill. |
+| **UC6 [Sea Waybill]** **- UC7 - UC8 - GET TD (ISSUED)** | This scenario verifies that the Carrier can publish a draft Sea Waybill; it can accept the approval of the draft; it can mark the Sea Waybill as issued; it can return the content of the issued Sea Waybill. |
 
 ## Required Straight B/L scenario
 
@@ -102,10 +102,10 @@ Same as “Required Sea Waybill scenarios” but with “Negotiable B/L” inste
 
 |  |  |
 | --- | --- |
-| **SupplyCSP [any TD + any TD** **amendment] -** **UC17 - GET TD (amended content) (2xx)** | This scenario verifies that the Carrier can return the content of a direct Transport Document amendment request (UC17 introduced in EBL v3.0.3). |
-| **SupplyCSP [any TD + any TD** **amendment] -** **UC17 - UC19 (confirm) - GET TD (DRAFT or ISSUED or PENDING\_SURRENDER\_FOR\_AMENDMENT)** | This scenario verifies that the Carrier can confirm a direct Transport Document amendment (UC17 and UC19 introduced in EBL v3.0.3). |
-| **SupplyCSP [any TD + any TD** **amendment] -** **UC17 - UC19 (decline) - GET TD (DRAFT or ISSUED or PENDING\_SURRENDER\_FOR\_AMENDMENT)** | This scenario verifies that the Carrier can decline a direct Transport Document amendment (UC17 and UC19 introduced in EBL v3.0.3). |
-| **SupplyCSP [any TD + any TD** **amendment]** - **UC17 - UC18 (2xx)** | This scenario verifies that the Carrier can process the cancellation of a direct Transport Document amendment (UC17 and UC 18 introduced in EBL v3.0.3). |
+| **SupplyCSP [any amended TD] -** **UC17 - GET TD amendment (2xx)** | This scenario verifies that the Carrier can return the content of a direct Transport Document amendment request (UC17 introduced in EBL v3.0.3). |
+| **SupplyCSP [any amended TD] -** **UC17 - UC19 (confirm) - GET TD (DRAFT or ISSUED or PENDING\_SURRENDER\_FOR\_AMENDMENT)** | This scenario verifies that the Carrier can confirm a direct Transport Document amendment (UC17 and UC19 introduced in EBL v3.0.3). |
+| **SupplyCSP [any amended TD] -** **UC17 - UC19 (decline) - GET TD (DRAFT or ISSUED or PENDING\_SURRENDER\_FOR\_AMENDMENT)** | This scenario verifies that the Carrier can decline a direct Transport Document amendment (UC17 and UC19 introduced in EBL v3.0.3). |
+| **SupplyCSP [any amended TD]** - **UC17 - UC18 - GET TD (DRAFT or ISSUED or PENDING\_SURRENDER\_FOR\_AMENDMENT)** | This scenario verifies that the Carrier can process the cancellation of a direct Transport Document amendment (UC17 and UC 18 introduced in EBL v3.0.3). |
 
 **Transport Document notifications:** Checked by verifying the presence and conformance of at least one Transport Document notification sent by the Carrier in any of the executed scenarios above.
 
@@ -117,7 +117,7 @@ Same as “Required Sea Waybill scenarios” but with “Negotiable B/L” inste
 
 |  |  |
 | --- | --- |
-| **UC6 - UC7 - GET TD** | This scenario verifies that the Shipper can approve and retrieve a draft Sea Waybill. |
+| **UC6 [Sea Waybill] - UC7 - GET TD** | This scenario verifies that the Shipper can approve and retrieve a draft Sea Waybill. |
 
 ## Required Straight B/L scenario
 
@@ -131,7 +131,7 @@ Same as “Required Sea Waybill scenario” but with “Negotiable B/L” instea
 
 |  |  |
 | --- | --- |
-| **UC17 - UC19 (confirm) - GET TD (amended content)** | This scenario verifies that the Shipper can submit a direct Transport Document amendment and can retrieve amended Transport Document content (UC17 and UC19 introduced in EBL v3.0.3). |
+| **UC17 - UC19 (confirm) - GET TD amendment** | This scenario verifies that the Shipper can submit a direct Transport Document amendment and can retrieve amended Transport Document content (UC17 and UC19 introduced in EBL v3.0.3). |
 | **UC17 - UC18** | This scenario verifies that the Shipper can cancel a direct Transport Document amendment (UC17 and UC 18 introduced in EBL v3.0.3). |
 
 **Transport Document notifications:** Checked by verifying the correct API response to at least one Transport Document notification received in any of the executed scenarios above.

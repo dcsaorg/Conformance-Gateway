@@ -215,7 +215,7 @@
       }
     },
     "tnt": {
-      "enabled": true,
+      "enabled": false,
       "versions": {
         "3.0.0": {
           "enabled": true,

@@ -43,7 +43,7 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
         shipperPartyName,
         carrierPartyName,
         previousAction,
-        "GET TD (amended content)",
+        "GET TD amendment",
         200,
         true);
     this.responseSchemaValidator = responseSchemaValidator;

@@ -100,20 +100,20 @@ class EblScenarioListBuilderTest {
             "Optional (report-only) scenarios"),
         List.copyOf(modules.keySet()));
     assertEquals(
-        List.of("SupplyCSP [Sea Waybill] - UC6 - UC7 - UC8 - GET TD"),
+        List.of("UC6 [Sea Waybill] - UC7 - UC8 - GET TD"),
         titles(modules.get("Required Sea Waybill scenario")));
     assertEquals(
-        List.of("SupplyCSP [Straight B/L] - UC6 - UC7 - UC8 - GET TD"),
+        List.of("UC6 [Straight B/L] - UC7 - UC8 - GET TD"),
         titles(modules.get("Required Straight B/L scenario")));
     assertEquals(
-        List.of("SupplyCSP [Negotiable B/L] - UC6 - UC7 - UC8 - GET TD"),
+        List.of("UC6 [Negotiable B/L] - UC7 - UC8 - GET TD"),
         titles(modules.get("Required Negotiable B/L scenario")));
     assertEquals(
         List.of(
-            "SupplyCSP [any TD + any TD amendment] - UC17 - GET TD (amended content)",
-            "SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (confirm) - GET TD (amended content)",
-            "SupplyCSP [any TD + any TD amendment] - UC17 - UC19 (decline) - GET TD (amended content)",
-            "SupplyCSP [any TD + any TD amendment] - UC17 - UC18"),
+            "SupplyCSP [any amended TD] - UC17 - GET TD amendment",
+            "SupplyCSP [any amended TD] - UC17 - UC19 (confirm) - GET TD",
+            "SupplyCSP [any amended TD] - UC17 - UC19 (decline) - GET TD",
+            "SupplyCSP [any amended TD] - UC17 - UC18 - GET TD"),
         titles(modules.get("Optional (report-only) scenarios")));
     assertTrue(
         modules.get("Optional (report-only) scenarios").stream()
@@ -142,7 +142,7 @@ class EblScenarioListBuilderTest {
         List.of("UC6 [Negotiable B/L] - UC7 - GET TD"),
         titles(modules.get("Required Negotiable B/L scenario")));
     assertEquals(
-        List.of("UC17 - UC19 (confirm) - GET TD (amended content)", "UC17 - UC18"),
+        List.of("UC17 - UC19 (confirm) - GET TD amendment", "UC17 - UC18"),
         titles(modules.get("Optional (report-only) scenarios")));
     assertTrue(
         modules.get("Optional (report-only) scenarios").stream()

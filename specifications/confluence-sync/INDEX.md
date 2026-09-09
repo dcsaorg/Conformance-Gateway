@@ -1,6 +1,6 @@
 # Confluence Sync Index
 
-Generated at `2026-09-04T13:07:49.631390Z`
+Generated at `2026-09-09T10:24:16.252434Z`
 
 ## arrival-notice / 1.0.1
 
@@ -42,10 +42,6 @@ Generated at `2026-09-04T13:07:49.631390Z`
 ## port-call / 2.0.0
 
 - [Port Call Spec](port-call/2.0.0/conformance-scenarios.md) (`1740144652`)
-
-## tnt / 3.0.0
-
-- [TNT Spec](tnt/3.0.0/conformance-scenarios.md) (`983040229`)
 
 ## vgm / 1.0.1
 

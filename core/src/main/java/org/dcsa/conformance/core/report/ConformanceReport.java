@@ -52,7 +52,7 @@ public class ConformanceReport {
             .filter(check -> check.isRelevantForRole(roleName))
             .map(
                 subCheck ->
-                    new ConformanceReport(
+                    new ConformanceReport (
                         subCheck,
                         roleName,
                         conformanceCheck.isStatusOverridePropagated()

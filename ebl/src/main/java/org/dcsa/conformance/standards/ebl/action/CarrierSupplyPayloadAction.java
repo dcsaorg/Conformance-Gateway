@@ -259,7 +259,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
     JsonNode input = partyInput.get(INPUT);
     getCarrierPayloadConsumer().accept(input);
     JsonNode td = includeAmendment ? input.path("transportDocument") : input;
-    if (includeAmendment) {
+    if (includeAmendment || (allowAnySiType && !isTd)) {
       getDspConsumer()
           .accept(getDspSupplier().get().withScenarioType(inputScenarioType(td).name()));
     }
@@ -303,7 +303,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
   }
 
   ScenarioType inputScenarioType(JsonNode input) {
-    if (!includeAmendment) {
+    if (!includeAmendment && !(allowAnySiType && !isTd)) {
       return scenarioType;
     }
     JsonNode transportDocument =
@@ -317,6 +317,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
       default -> scenarioType;
     };
   }
+
 
   Set<String> validateAmendmentPair(JsonNode input) {
     if (!includeAmendment) {

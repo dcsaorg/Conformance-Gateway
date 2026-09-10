@@ -201,6 +201,34 @@ class CarrierSupplyPayloadActionTest {
             .isEmpty());
   }
 
+  @Test
+  void anySiModeInfersAndPersistsScenarioTypeFromSuppliedSiPayload() {
+    CarrierSupplyPayloadAction anySiAction =
+        new CarrierSupplyPayloadAction(
+            "Carrier", ScenarioType.REGULAR_STRAIGHT_BL, "3.0.0", null, false, false, true);
+
+    assertAnySiScenarioType(anySiAction, "SWB", false, ScenarioType.REGULAR_SWB);
+    assertAnySiScenarioType(anySiAction, "BOL", false, ScenarioType.REGULAR_STRAIGHT_BL);
+    assertAnySiScenarioType(anySiAction, "BOL", true, ScenarioType.REGULAR_NEGOTIABLE_BL);
+  }
+
+  private void assertAnySiScenarioType(
+      CarrierSupplyPayloadAction action,
+      String transportDocumentTypeCode,
+      boolean isToOrder,
+      ScenarioType expectedScenarioType) {
+    ObjectNode input =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("transportDocumentTypeCode", transportDocumentTypeCode)
+            .put("isToOrder", isToOrder);
+    ObjectNode partyInput = OBJECT_MAPPER.createObjectNode();
+    partyInput.set("input", input);
+    action.doHandlePartyInput(partyInput);
+    assertEquals(expectedScenarioType.name(), action.getDSP().scenarioType());
+    action.reset();
+  }
+
   private static JsonNode tdPair(
       String originalType,
       boolean originalIsToOrder,

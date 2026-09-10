@@ -1326,6 +1326,34 @@ class EblChecksTest {
             "Consignee and endorsee must never both be present (mutually exclusive)."));
   }
 
+  @Test
+  void siScopeRulesUseScenarioSpecificDescriptions() {
+    assertTrue(
+        siDescriptionsFor(ScenarioType.REGULAR_SWB)
+            .contains(
+                "For Sea Waybill: transportDocumentTypeCode must equal SWB and isToOrder must equal false."));
+    assertTrue(
+        siDescriptionsFor(ScenarioType.REGULAR_STRAIGHT_BL)
+            .contains(
+                "For Straight B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal false."));
+    assertTrue(
+        siDescriptionsFor(ScenarioType.REGULAR_NEGOTIABLE_BL)
+            .contains(
+                "For Negotiable B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal true."));
+  }
+
+  @Test
+  void siScopeRulesEnforceScenarioSpecificTransportDocumentTypeCodeAndIsToOrder() {
+    assertScenarioRelatedChecks(ScenarioType.REGULAR_SWB, "SWB", false, true);
+    assertScenarioRelatedChecks(ScenarioType.REGULAR_SWB, "SWB", true, false);
+
+    assertScenarioRelatedChecks(ScenarioType.REGULAR_STRAIGHT_BL, "BOL", false, true);
+    assertScenarioRelatedChecks(ScenarioType.REGULAR_STRAIGHT_BL, "BOL", true, false);
+
+    assertScenarioRelatedChecks(ScenarioType.REGULAR_NEGOTIABLE_BL, "BOL", true, true);
+    assertScenarioRelatedChecks(ScenarioType.REGULAR_NEGOTIABLE_BL, "BOL", false, false);
+  }
+
   private List<String> tdDescriptionsFor(ScenarioType scenarioType) {
     var dsp =
         new EblDynamicScenarioParameters(
@@ -1335,6 +1363,27 @@ class EblChecksTest {
         .stream()
         .map(JsonContentCheck::description)
         .toList();
+  }
+
+  private List<String> siDescriptionsFor(ScenarioType scenarioType) {
+    return EblChecks.generateScenarioRelatedChecks(scenarioType, false, false).stream()
+        .map(JsonContentCheck::description)
+        .toList();
+  }
+
+  private void assertScenarioRelatedChecks(
+      ScenarioType scenarioType,
+      String transportDocumentTypeCode,
+      boolean isToOrder,
+      boolean expectedValid) {
+    rootNode.removeAll();
+    rootNode.put("transportDocumentTypeCode", transportDocumentTypeCode);
+    rootNode.put("isToOrder", isToOrder);
+    boolean valid =
+        EblChecks.generateScenarioRelatedChecks(scenarioType, false, false).stream()
+            .map(check -> check.validate(rootNode))
+            .allMatch(ConformanceCheckResult::isConformant);
+    assertEquals(expectedValid, valid);
   }
 
   private void assertStatusScenario(

@@ -201,9 +201,6 @@ public class EblChecks {
   private static final JsonPointer SI_REF_SI_STATUS_PTR =
       JsonPointer.compile(S.formatted(SHIPPING_INSTRUCTIONS_STATUS));
 
-  private static final JsonPointer SI_REF_UPDATED_SI_STATUS_PTR =
-      JsonPointer.compile(S.formatted(UPDATED_SHIPPING_INSTRUCTIONS_STATUS));
-
   private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM =
       JsonPointer.compile(SSS.formatted(DOCUMENT_PARTIES, ISSUE_TO, SEND_TO_PLATFORM));
 
@@ -336,13 +333,6 @@ public class EblChecks {
             arrayNodeHandler.accept(
                 rootNode, REQUESTED_CARRIER_CLAUSES, ArrayOrderHandler.toStringSortableArray());
           };
-
-  private static final JsonRebasableContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE =
-      JsonAttribute.ifThen(
-          "Validate '%s' vs '%s'.".formatted(TRANSPORT_DOCUMENT_TYPE_CODE, IS_TO_ORDER),
-          JsonAttribute.isTrue(JsonPointer.compile(S.formatted(IS_TO_ORDER))),
-          JsonAttribute.mustEqual(
-              JsonPointer.compile(S.formatted(TRANSPORT_DOCUMENT_TYPE_CODE)), BOL));
 
   static final JsonRebasableContentCheck SWBS_CANNOT_BE_NEGOTIABLE =
       JsonAttribute.ifThen(
@@ -1410,6 +1400,23 @@ public class EblChecks {
         });
   }
 
+  private static JsonRebasableContentCheck describedSiCheck(
+      String description, JsonContentMatchedValidation... validations) {
+    return JsonAttribute.customValidator(
+        description,
+        (body, contextPath) -> {
+          Set<ConformanceCheckResult> results =
+              Arrays.stream(validations)
+                  .map(validation -> validation.validate(body, contextPath))
+                  .collect(Collectors.toSet());
+          Set<ConformanceCheckResult> relevantResults =
+              results.stream()
+                  .filter(ConformanceCheckResult::isRelevant)
+                  .collect(Collectors.toSet());
+          return ConformanceCheckResult.from(relevantResults.isEmpty() ? results : relevantResults);
+        });
+  }
+
   private static JsonRebasableContentCheck describedTdCheck(
       String description, JsonRebasableContentCheck validation) {
     return JsonAttribute.customValidator(
@@ -1587,10 +1594,6 @@ public class EblChecks {
               BUYER_AND_SELLER_CONDITIONAL_CHECK),
           VALID_PARTY_FUNCTION,
           VALID_PARTY_FUNCTION_HBL,
-          describedSiCheck(
-              "Validate that the combination of transportDocumentTypeCode and isToOrder is allowed (scope-defined validation).",
-              ONLY_EBLS_CAN_BE_NEGOTIABLE,
-              SWBS_CANNOT_BE_NEGOTIABLE),
           EBL_AT_MOST_ONE_ORIGINAL_TOTAL,
           EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
           EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
@@ -1823,14 +1826,7 @@ public class EblChecks {
 
   public static List<JsonContentCheck> generateScenarioRelatedChecks(
       ScenarioType scenarioType, boolean isTD, boolean isCladInSI) {
-    List<JsonContentCheck> checks = new ArrayList<>();
-
-    checks.add(
-        JsonAttribute.mustEqual(
-            "[%s] Verify that the correct '%s' is used"
-                .formatted(SCENARIO, TRANSPORT_DOCUMENT_TYPE_CODE),
-            TRANSPORT_DOCUMENT_TYPE_CODE,
-            scenarioType::transportDocumentTypeCode));
+    List<JsonContentCheck> checks = new ArrayList<>(siScopeChecks(scenarioType));
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
@@ -1841,6 +1837,40 @@ public class EblChecks {
                 JsonAttribute.path(OUTER_PACKAGING, JsonAttribute.matchedMustBePresent()))));
 
     return checks;
+  }
+
+  private static List<JsonContentCheck> siScopeChecks(ScenarioType scenarioType) {
+    return List.of(
+        describedSiCheck(
+            siScopeDescription(scenarioType),
+            JsonAttribute.path(
+                TRANSPORT_DOCUMENT_TYPE_CODE,
+                JsonAttribute.matchedMustEqual(scenarioType::transportDocumentTypeCode)),
+            JsonAttribute.path(
+                IS_TO_ORDER,
+                scenarioType.isToOrder()
+                    ? JsonAttribute.matchedMustBeTrue()
+                    : (node, contextPath) ->
+                        node.isBoolean() && !node.booleanValue()
+                            ? ConformanceCheckResult.simple(Set.of())
+                            : ConformanceCheckResult.simple(
+                                Set.of(
+                                    "The value of '%s' was '%s' instead of 'false'"
+                                        .formatted(contextPath, node))))));
+  }
+
+  private static String siScopeDescription(ScenarioType scenarioType) {
+    if (SWB.equals(scenarioType.transportDocumentTypeCode()) && !scenarioType.isToOrder()) {
+      return "For Sea Waybill: transportDocumentTypeCode must equal SWB and isToOrder must equal false.";
+    }
+    if (BOL.equals(scenarioType.transportDocumentTypeCode()) && scenarioType.isToOrder()) {
+      return "For Negotiable B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal true.";
+    }
+    if (BOL.equals(scenarioType.transportDocumentTypeCode())) {
+      return "For Straight B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal false.";
+    }
+    return "[Scope] transportDocumentTypeCode must equal %s and isToOrder must equal %s."
+        .formatted(scenarioType.transportDocumentTypeCode(), scenarioType.isToOrder());
   }
 
   private static JsonContentMatchedValidation scenarioCustomsReferencesCheck(
@@ -1937,21 +1967,10 @@ public class EblChecks {
     var checks = new ArrayList<JsonContentCheck>();
 
     checks.add(
-        JsonAttribute.mustEqual(
-            SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference()));
-
-    checks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
-
-    if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
-      var updatedStatusCheck =
-          getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus);
-      checks.add(updatedStatusCheck);
-    }
 
     checks.addAll(STATIC_SI_CHECKS);
     checks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
-    checks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
 
     checks.add(FEEDBACKS_PRESENCE);
 
@@ -1959,14 +1978,6 @@ public class EblChecks {
         generateScenarioRelatedChecks(
             ScenarioType.valueOf(dspSupplier.get().scenarioType()), false, false));
     return checks;
-  }
-
-  private static JsonRebasableContentCheck getUpdatedShippingInstructionsStatusCheck(
-      ShippingInstructionsStatus updatedShippingInstructionsStatus) {
-    return updatedShippingInstructionsStatus != null
-        ? JsonAttribute.mustEqual(
-            SI_REF_UPDATED_SI_STATUS_PTR, updatedShippingInstructionsStatus.wireName())
-        : JsonAttribute.mustBeAbsent(SI_REF_UPDATED_SI_STATUS_PTR);
   }
 
   static final JsonContentCheck FEEDBACKS_PRESENCE =
@@ -1997,18 +2008,6 @@ public class EblChecks {
               JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
                   KeywordDataset.staticDataset(
                       "RECEIVED", "PENDING_UPDATE", "COMPLETED", "CANCELLED", "DECLINED"))));
-
-  static final JsonContentCheck UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK =
-      JsonAttribute.customValidator(
-          "If `updatedShippingInstructionsStatus` is present, then it must equal `UPDATE_RECEIVED`, `UPDATE_CONFIRMED`, `UPDATE_CANCELLED`, or `UPDATE_DECLINED`.",
-          JsonAttribute.path(
-              UPDATED_SHIPPING_INSTRUCTIONS_STATUS,
-              JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
-                  KeywordDataset.staticDataset(
-                      "UPDATE_RECEIVED",
-                      "UPDATE_CONFIRMED",
-                      "UPDATE_CANCELLED",
-                      "UPDATE_DECLINED"))));
 
   public static final JsonContentCheck SI_STATUS_CANCELLED_ONLY_CHECK =
       JsonAttribute.customValidator(
@@ -2053,11 +2052,7 @@ public class EblChecks {
     jsonContentChecks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
-    jsonContentChecks.add(
-        getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
-
     jsonContentChecks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
-    jsonContentChecks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     jsonContentChecks.add(FEEDBACKS_PRESENCE);
     jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY);
     jsonContentChecks.add(VALID_FEEDBACKS_CODE);
@@ -2399,6 +2394,7 @@ public class EblChecks {
     };
   }
 
+
   private static Set<String> allEquipmentReferences(JsonNode body) {
     return allEquipmentReferences(body, null);
   }
@@ -2428,3 +2424,4 @@ public class EblChecks {
     return codeChar == 'R' || codeChar == 'H';
   }
 }
+

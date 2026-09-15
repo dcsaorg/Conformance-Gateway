@@ -1,0 +1,71 @@
+name: OWASP ZAP Authenticated Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: Non-production GitHub Environment that provides the Conformance scan configuration
+        required: true
+        type: choice
+        options:
+          - conformance-dev
+
+permissions:
+  contents: read
+
+jobs:
+  authenticated-scan:
+    name: Authenticated scan (${{ inputs.target_environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment }}
+    env:
+      APP_URL: ${{ vars.APP_URL }}
+      API_URL: ${{ vars.API_URL }}
+      CONFORMANCE_USER_EMAIL: ${{ secrets.CONFORMANCE_USER_EMAIL }}
+      CONFORMANCE_USER_PASSWORD: ${{ secrets.CONFORMANCE_USER_PASSWORD }}
+    steps:
+      - name: Check out the scan plan
+        uses: actions/checkout@v6.0.2
+
+      - name: Create a fallback report
+        shell: bash
+        run: printf '%s\n' '<!doctype html><title>ZAP authenticated scan did not produce a report</title><p>Review this workflow run for failure details.</p>' > zap-authenticated-report-fallback.html
+
+      - name: Require authenticated scan configuration
+        shell: bash
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$API_URL" ] || [ -z "$CONFORMANCE_USER_EMAIL" ] || [ -z "$CONFORMANCE_USER_PASSWORD" ]; then
+            echo "APP_URL, API_URL, CONFORMANCE_USER_EMAIL, and CONFORMANCE_USER_PASSWORD must be configured for this GitHub Environment."
+            exit 1
+          fi
+
+          if [ "$APP_URL" != "https://dev.conformance-development-1.dcsa.org" ] || [ "$API_URL" != "https://dev-webui.conformance-development-1.dcsa.org" ]; then
+            echo "The initial authenticated scan is restricted to the approved Conformance Dev origins."
+            exit 1
+          fi
+
+      - name: Run authenticated passive scan
+        uses: zaproxy/action-af@v0.3.0
+        with:
+          plan: .github/workflows/zap/zap-authenticated-plan.yaml
+          docker_env_vars: |
+            APP_URL
+            API_URL
+            CONFORMANCE_USER_EMAIL
+            CONFORMANCE_USER_PASSWORD
+
+      - name: Select authenticated HTML report
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -f zap-authenticated-report.html ]; then
+            mv zap-authenticated-report-fallback.html zap-authenticated-report.html
+          fi
+
+      - name: Upload authenticated HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-authenticated-report-${{ inputs.target_environment }}
+          path: zap-authenticated-report.html
+          if-no-files-found: error

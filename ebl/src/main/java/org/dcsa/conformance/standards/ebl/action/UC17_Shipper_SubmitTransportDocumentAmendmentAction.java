@@ -67,8 +67,8 @@ public class UC17_Shipper_SubmitTransportDocumentAmendmentAction extends Shipper
       prompt.set("amendedTransportDocument", standaloneAmendedTransportDocument.deepCopy());
     } else {
       var suppliedPayload = getCarrierPayloadSupplier().get();
-      if (suppliedPayload != null && suppliedPayload.has("amendedTransportDocument")) {
-        prompt.set("amendedTransportDocument", suppliedPayload.required("amendedTransportDocument"));
+      if (suppliedPayload != null) {
+        prompt.set("amendedTransportDocument", suppliedPayload);
       }
     }
     return prompt;

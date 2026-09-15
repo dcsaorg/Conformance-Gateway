@@ -87,7 +87,12 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends CarrierNoti
   public String getHumanReadablePrompt() {
     if (skipSI) {
       return getMarkdownHumanReadablePrompt(
-          null, "prompt-carrier-uc6.md", "prompt-carrier-notification.md");
+          Map.of(
+              "DOCUMENT_TYPE_NAME", scenarioType.tdScopeName(),
+              "DOCUMENT_TYPE_CODE", scenarioType.transportDocumentTypeCode(),
+              "TO_ORDER_VALUE", Boolean.toString(scenarioType.isToOrder())),
+          "prompt-carrier-uc6.md",
+          "prompt-carrier-notification.md");
     }
     String reference =
         getDSP().shippingInstructionsReference() != null

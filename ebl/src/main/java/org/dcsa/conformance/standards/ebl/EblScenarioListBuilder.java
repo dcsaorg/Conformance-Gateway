@@ -281,14 +281,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder carrierRequiredTdScenario(ScenarioType scenarioType) {
-    return carrierSupplyScenarioParameters(scenarioType, true)
+    return uc6CarrierPublishDraftTransportDocument(true, scenarioType)
         .then(
-            uc6CarrierPublishDraftTransportDocument(true, scenarioType, false)
+            uc7ShipperApproveDraftTransportDocument()
                 .then(
-                    uc7ShipperApproveDraftTransportDocument()
-                        .then(
-                            uc8CarrierIssueTransportDocument()
-                                .then(shipperGetTransportDocument(TD_ISSUED)))));
+                    uc8CarrierIssueTransportDocument()
+                        .then(shipperGetTransportDocument(TD_ISSUED))));
   }
 
   private static EblScenarioListBuilder shipperRequiredTdScenario(ScenarioType scenarioType) {
@@ -314,17 +312,19 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 .then(
                     uc19CarrierProcessTransportDocumentAmendment(confirm)
                         .then(
-                            shipperGetTransportDocumentAmendment(
-                                confirm
-                                    ? AmendedTransportDocumentStatus.AMENDMENT_CONFIRMED
-                                    : AmendedTransportDocumentStatus.AMENDMENT_DECLINED))));
+                            shipperGetTransportDocument(
+                                TD_DRAFT, TD_ISSUED, TD_PENDING_SURRENDER_FOR_AMENDMENT))));
   }
 
   private static EblScenarioListBuilder carrierCancelDirectAmendmentScenario() {
     return carrierSupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL, true, true)
         .then(
             uc17ShipperSubmitTransportDocumentAmendment()
-                .then(uc18ShipperCancelTransportDocumentAmendment()));
+                .then(
+                    uc18ShipperCancelTransportDocumentAmendment()
+                        .then(
+                            shipperGetTransportDocument(
+                                TD_DRAFT, TD_ISSUED, TD_PENDING_SURRENDER_FOR_AMENDMENT))));
   }
 
   private static EblScenarioListBuilder shipperGetConfirmedDirectAmendmentScenario() {

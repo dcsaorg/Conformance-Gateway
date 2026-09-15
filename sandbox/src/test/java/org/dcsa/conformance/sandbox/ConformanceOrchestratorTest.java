@@ -86,6 +86,67 @@ class ConformanceOrchestratorTest {
   }
 
   @Test
+  void roleQualifiedPartyInputWorksWithoutAnExternalCounterpart() {
+    var carrierAction =
+      new TestAction("Carrier", "Shipper", null, "UC6", Set.of(), Set.of("Carrier"));
+    var getAction =
+      new TestAction("Shipper", "Carrier", carrierAction, "GET", Set.of(), Set.of());
+    var scenario = new ConformanceScenario(0, 0, List.of(carrierAction, getAction));
+    var orchestrator = orchestrator(scenario, allInOneSandboxConfiguration());
+
+    var partyInput =
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("actionId", carrierAction.getId().toString())
+        .put("completeCurrentActionWithoutTraffic", "Carrier");
+    partyInput.set("input", OBJECT_MAPPER.createObjectNode());
+    orchestrator.handlePartyInput(partyInput);
+
+    assertEquals(
+      ConformanceAction.CompletionOutcome.COMPLETED_WITHOUT_TRAFFIC,
+      carrierAction.getCompletionOutcome());
+    assertSame(getAction, scenario.peekNextAction());
+  }
+
+  @Test
+  void manualPartyInputMarksOptionalActionCompletedWithoutTrafficForExternalRole() {
+    var carrierAction =
+      new TestAction("Carrier", "Shipper", null, "UC6", Set.of(), Set.of("Carrier"));
+    var getAction =
+      new TestAction("Shipper", "Carrier", carrierAction, "GET", Set.of(), Set.of());
+    var scenario = new ConformanceScenario(0, 0, List.of(carrierAction, getAction));
+    var orchestrator = orchestrator(scenario, "Carrier");
+
+    var partyInput =
+      OBJECT_MAPPER.createObjectNode().put("actionId", carrierAction.getId().toString());
+    partyInput.set("input", OBJECT_MAPPER.createObjectNode());
+    orchestrator.handlePartyInput(partyInput);
+
+    assertEquals(
+      ConformanceAction.CompletionOutcome.COMPLETED_WITHOUT_TRAFFIC,
+      carrierAction.getCompletionOutcome());
+    assertSame(getAction, scenario.peekNextAction());
+  }
+
+  @Test
+  void manualPartyInputDoesNotInferCompletionForUnauthorizedExternalRole() {
+    var carrierAction =
+      new TestAction("Carrier", "Shipper", null, "UC6", Set.of(), Set.of("Carrier"));
+    var getAction =
+      new TestAction("Shipper", "Carrier", carrierAction, "GET", Set.of(), Set.of());
+    var scenario = new ConformanceScenario(0, 0, List.of(carrierAction, getAction));
+    var orchestrator = orchestrator(scenario, "Shipper");
+
+    var partyInput =
+      OBJECT_MAPPER.createObjectNode().put("actionId", carrierAction.getId().toString());
+    partyInput.set("input", OBJECT_MAPPER.createObjectNode());
+    orchestrator.handlePartyInput(partyInput);
+
+    assertEquals(ConformanceAction.CompletionOutcome.NONE, carrierAction.getCompletionOutcome());
+    assertSame(getAction, scenario.peekNextAction());
+  }
+
+  @Test
   void suppressedFollowUpCompletesActionThatHasPrimaryTrafficAndAllowsCarrierNotificationOmission() {
     var shipperAction =
       new TestAction(
@@ -181,8 +242,13 @@ class ConformanceOrchestratorTest {
 
   private static ConformanceOrchestrator orchestrator(
       ConformanceScenario scenario, String externalRole) {
+    return orchestrator(scenario, sandboxConfiguration(externalRole));
+  }
+
+  private static ConformanceOrchestrator orchestrator(
+      ConformanceScenario scenario, SandboxConfiguration sandboxConfiguration) {
     var orchestrator = new ConformanceOrchestrator(
-      sandboxConfiguration(externalRole),
+      sandboxConfiguration,
       new TestComponentFactory(scenario),
       new TrafficRecorder(null, ""),
       new EmptyJsonNodeMap(),
@@ -204,6 +270,23 @@ class ConformanceOrchestratorTest {
     var configuration = new SandboxConfiguration();
     configuration.setParties(new PartyConfiguration[]{internalParty});
     configuration.setCounterparts(new CounterpartConfiguration[]{shipperCounterpart, carrierCounterpart});
+    return configuration;
+  }
+
+  private static SandboxConfiguration allInOneSandboxConfiguration() {
+    var carrierParty = new PartyConfiguration();
+    carrierParty.setName("Carrier");
+    carrierParty.setRole("Carrier");
+    var shipperParty = new PartyConfiguration();
+    shipperParty.setName("Shipper");
+    shipperParty.setRole("Shipper");
+
+    var configuration = new SandboxConfiguration();
+    configuration.setParties(new PartyConfiguration[]{carrierParty, shipperParty});
+    configuration.setCounterparts(
+      new CounterpartConfiguration[]{
+        counterpart("Carrier", "Carrier"), counterpart("Shipper", "Shipper")
+      });
     return configuration;
   }
 

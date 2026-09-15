@@ -1,3 +1,7 @@
-Perform Use Case 6: Publish a draft transport document and provide the transport document reference here.
+Perform Use Case 6: Publish a draft **DOCUMENT_TYPE_NAME**, then provide its `transportDocumentReference` here.
 
-* Set the transport document status to `DRAFT`.
+The published Transport Document must have:
+
+* `transportDocumentTypeCode`: `DOCUMENT_TYPE_CODE`
+* `isToOrder`: `TO_ORDER_VALUE`
+* `transportDocumentStatus`: `DRAFT`

@@ -52,14 +52,8 @@ class TntChecksTest {
     "The `shipmentDetails.documentReference.reference` attribute within every Shipment event must be present and not empty or blank.";
   private static final String EVENT_LOCATION =
     "Every Transport event must demonstrate the correct use of the `eventLocation` object: it must be present and not empty";
-  private static final String TRANSPORT_CALL_REFERENCE =
-    "The `transportDetails.transportCall.transportCallReference` attribute within every Transport event must be present and not empty or blank.";
   private static final String VESSEL_TRANSPORT =
     "When `transportDetails.transportCall.modeOfTransport` is `VESSEL` or `BARGE`, every applicable Transport event must demonstrate the correct use of `transportDetails.transportCall.vesselTransport`: it must be present and not empty";
-  private static final String TRUCK_TRANSPORT =
-    "When `transportDetails.transportCall.modeOfTransport` is `TRUCK`, every applicable Transport event must demonstrate the correct use of `transportDetails.transportCall.truckTransport`: it must be present and not empty";
-  private static final String RAIL_TRANSPORT =
-    "When `transportDetails.transportCall.modeOfTransport` is `RAIL`, every applicable Transport event must demonstrate the correct use of `transportDetails.transportCall.railTransport`: it must be present and not empty";
   private static final String EQUIPMENT_REFERENCE =
     "The `equipmentDetails.equipmentReference` attribute within every applicable event must be present and not empty or blank.";
   private static final String ISO_EQUIPMENT_CODE =
@@ -75,10 +69,7 @@ class TntChecksTest {
     DOCUMENT_REFERENCE_TYPE,
     DOCUMENT_REFERENCE,
     EVENT_LOCATION,
-    TRANSPORT_CALL_REFERENCE,
     VESSEL_TRANSPORT,
-    TRUCK_TRANSPORT,
-    RAIL_TRANSPORT,
     EQUIPMENT_REFERENCE,
     ISO_EQUIPMENT_CODE);
 
@@ -181,8 +172,8 @@ class TntChecksTest {
   }
 
   @ParameterizedTest
-  @MethodSource("transportModeCases")
-  void eachTransportObjectRuleFailsIndependentlyWhenItsObjectIsMissing(
+  @MethodSource("vesselTransportModeCases")
+  void vesselTransportRuleFailsWhenItsObjectIsMissing(
     String modeOfTransport, String transportObject, String description) {
     ObjectNode event = transportEvent(modeOfTransport, transportObject);
     transportCall(event).remove(transportObject);
@@ -190,14 +181,11 @@ class TntChecksTest {
     Map<String, ConformanceResult> results = runGetChecks(body(event), null);
 
     assertFails(results, description);
-    transportModeDescriptions().stream()
-      .filter(otherDescription -> !otherDescription.equals(description))
-      .forEach(otherDescription -> assertTrue(results.get(otherDescription).isConformant()));
   }
 
   @ParameterizedTest
-  @MethodSource("transportModeCases")
-  void eachTransportObjectRuleRejectsAnEmptyObject(
+  @MethodSource("vesselTransportModeCases")
+  void vesselTransportRuleRejectsAnEmptyObject(
     String modeOfTransport, String transportObject, String description) {
     ObjectNode event = transportEvent(modeOfTransport, transportObject);
     transportCall(event).set(transportObject, JsonToolkit.OBJECT_MAPPER.createObjectNode());
@@ -206,7 +194,7 @@ class TntChecksTest {
   }
 
   @Test
-  void transportObjectRulesAreConditionalOnModeOfTransport() {
+  void vesselTransportRuleIsConditionalOnModeOfTransport() {
     ObjectNode event = validEvent(TntEventType.TRANSPORT);
     ObjectNode transportCall = transportCall(event);
     transportCall.remove("modeOfTransport");
@@ -214,10 +202,23 @@ class TntChecksTest {
 
     Map<String, ConformanceResult> results = runGetChecks(body(event), null);
 
-    transportModeDescriptions().forEach(description -> {
-      assertTrue(results.get(description).isConformant());
-      assertFalse(results.get(description).isRelevant());
-    });
+    assertTrue(results.get(VESSEL_TRANSPORT).isConformant());
+    assertFalse(results.get(VESSEL_TRANSPORT).isRelevant());
+  }
+
+  @Test
+  void removedTransportCustomValidationsAreNotApplied() {
+    ObjectNode truckEvent = transportEvent("TRUCK", "truckTransport");
+    transportCall(truckEvent).remove("transportCallReference");
+    transportCall(truckEvent).remove("truckTransport");
+    ObjectNode railEvent = transportEvent("RAIL", "railTransport");
+    transportCall(railEvent).remove("transportCallReference");
+    transportCall(railEvent).remove("railTransport");
+
+    Map<String, ConformanceResult> results =
+      runGetChecks(body(truckEvent, railEvent), null);
+
+    assertTrue(results.values().stream().allMatch(ConformanceResult::isConformant));
   }
 
   @Test
@@ -247,8 +248,7 @@ class TntChecksTest {
     Map<String, ConformanceResult> results =
       runGetChecks(body(validEvent(TntEventType.SHIPMENT)), null);
 
-    Stream.of(EVENT_LOCATION, TRANSPORT_CALL_REFERENCE, VESSEL_TRANSPORT, TRUCK_TRANSPORT,
-        RAIL_TRANSPORT, EQUIPMENT_REFERENCE, ISO_EQUIPMENT_CODE)
+    Stream.of(EVENT_LOCATION, VESSEL_TRANSPORT, EQUIPMENT_REFERENCE, ISO_EQUIPMENT_CODE)
       .forEach(description -> {
         assertTrue(results.get(description).isConformant());
         assertFalse(results.get(description).isRelevant());
@@ -287,17 +287,13 @@ class TntChecksTest {
     return Stream.of(
       Arguments.of(EVENT_LOCATION,
         (Consumer<ObjectNode>) event ->
-          event.set("eventLocation", JsonToolkit.OBJECT_MAPPER.createObjectNode())),
-      Arguments.of(TRANSPORT_CALL_REFERENCE,
-        (Consumer<ObjectNode>) event -> transportCall(event).put("transportCallReference", "")));
+          event.set("eventLocation", JsonToolkit.OBJECT_MAPPER.createObjectNode())));
   }
 
-  private static Stream<Arguments> transportModeCases() {
+  private static Stream<Arguments> vesselTransportModeCases() {
     return Stream.of(
       Arguments.of("VESSEL", "vesselTransport", VESSEL_TRANSPORT),
-      Arguments.of("BARGE", "vesselTransport", VESSEL_TRANSPORT),
-      Arguments.of("TRUCK", "truckTransport", TRUCK_TRANSPORT),
-      Arguments.of("RAIL", "railTransport", RAIL_TRANSPORT));
+      Arguments.of("BARGE", "vesselTransport", VESSEL_TRANSPORT));
   }
 
   private static Stream<Arguments> equipmentDetailCases() {
@@ -307,9 +303,6 @@ class TntChecksTest {
         Arguments.of(eventType, "ISOEquipmentCode", ISO_EQUIPMENT_CODE)));
   }
 
-  private static List<String> transportModeDescriptions() {
-    return List.of(VESSEL_TRANSPORT, TRUCK_TRANSPORT, RAIL_TRANSPORT);
-  }
 
   private static ObjectNode validEvent(TntEventType eventType) {
     return switch (eventType) {

@@ -141,9 +141,7 @@ public class EblCarrier extends ConformanceParty {
         amendment.put(
             "serviceContractReference",
             amendment.path("serviceContractReference").asText("Ref-123") + "-AMENDED");
-        eblPayload = OBJECT_MAPPER.createObjectNode();
-        eblPayload.set("transportDocument", transportDocument);
-        eblPayload.set("amendedTransportDocument", amendment);
+        eblPayload = amendment;
       } else {
         eblPayload = transportDocument;
       }

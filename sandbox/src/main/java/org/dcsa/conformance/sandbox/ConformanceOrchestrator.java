@@ -300,7 +300,13 @@ public class ConformanceOrchestrator implements StatefulEntity {
     currentScenario.popNextAction();
     try {
       nextAction.handlePartyInput(partyInput);
-      if (completionWithoutTrafficRole != null) {
+      var externalPartyCounterpartConfiguration = sandboxConfiguration.getExternalPartyCounterpartConfiguration();
+      boolean inferCompletionWithoutTraffic = completionWithoutTrafficRole == null
+        && externalPartyCounterpartConfiguration != null
+        && nextAction.isMissingMatchedExchange()
+        && nextAction.completableWithoutTrafficForRoles()
+        .contains(externalPartyCounterpartConfiguration.getRole());
+      if (completionWithoutTrafficRole != null || inferCompletionWithoutTraffic) {
         nextAction.markCompletedWithoutTraffic();
       }
     } catch (UserFacingException e) {

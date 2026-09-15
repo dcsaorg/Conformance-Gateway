@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.junit.jupiter.api.Test;
 
 class CarrierNotificationEblActionTest {
@@ -38,6 +40,28 @@ class CarrierNotificationEblActionTest {
         new UC19_Carrier_ProcessTransportDocumentAmendmentAction(
             "Carrier", "Shipper", null, null, true, false);
     assertEquals(Set.of("Carrier"), action.completableWithoutTrafficForRoles());
+  }
+
+  @Test
+  void mandatoryUc6PromptIdentifiesTheRequiredTransportDocumentType() {
+    Map.of(
+            ScenarioType.REGULAR_SWB,
+                List.of("draft **Sea Waybill**", "`transportDocumentTypeCode`: `SWB`", "`isToOrder`: `false`"),
+            ScenarioType.REGULAR_STRAIGHT_BL,
+                List.of("draft **Straight B/L**", "`transportDocumentTypeCode`: `BOL`", "`isToOrder`: `false`"),
+            ScenarioType.REGULAR_NEGOTIABLE_BL,
+                List.of("draft **Negotiable B/L**", "`transportDocumentTypeCode`: `BOL`", "`isToOrder`: `true`"))
+        .forEach(
+            (scenarioType, expectedPromptText) -> {
+              var action =
+                  new UC6_Carrier_PublishDraftTransportDocumentAction(
+                      "Carrier", "Shipper", null, scenarioType, null, true, false);
+
+              String prompt = action.getHumanReadablePrompt();
+
+              expectedPromptText.forEach(text -> assertTrue(prompt.contains(text), prompt));
+              assertTrue(prompt.contains("`transportDocumentStatus`: `DRAFT`"), prompt);
+            });
   }
 }
 

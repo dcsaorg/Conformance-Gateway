@@ -78,7 +78,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
         null,
         null,
         includeAmendment
-            ? "SupplyCSP [any amended TD]"
+            ? "SupplyCSP [any TD + any TD amendment]"
             : allowAnySiType && !isTd
                 ? "SupplyCSP [any SI]"
             : "SupplyCSP [%s]"
@@ -192,7 +192,10 @@ public class CarrierSupplyPayloadAction extends EblAction {
     amendment.put(
         "serviceContractReference",
         amendment.path("serviceContractReference").asText("Ref-123") + "-AMENDED");
-    return amendment;
+    ObjectNode payload = JsonToolkit.OBJECT_MAPPER.createObjectNode();
+    payload.set("transportDocument", transportDocument);
+    payload.set("amendedTransportDocument", amendment);
+    return payload;
   }
 
   @Override
@@ -215,7 +218,11 @@ public class CarrierSupplyPayloadAction extends EblAction {
       throw new UserFacingException("The party input must contain a non-null 'input' value.");
     }
     ScenarioType inputScenarioType = inputScenarioType(inputNode);
-    List<JsonNode> payloads = List.of(inputNode);
+    List<JsonNode> payloads =
+        includeAmendment
+            ? List.of(
+                inputNode.path("transportDocument"), inputNode.path("amendedTransportDocument"))
+            : List.of(inputNode);
 
     Set<String> schemaChecksErrors =
         payloads.stream()
@@ -234,10 +241,10 @@ public class CarrierSupplyPayloadAction extends EblAction {
                         .stream())
             .collect(Collectors.toSet());
 
-    Set<String> amendmentErrors = validateAmendedTransportDocument(inputNode);
+    Set<String> amendmentPairErrors = validateAmendmentPair(inputNode);
 
     Set<String> allErrors =
-        Stream.of(schemaChecksErrors, contentChecksErrors, amendmentErrors)
+        Stream.of(schemaChecksErrors, contentChecksErrors, amendmentPairErrors)
             .flatMap(Set::stream)
             .collect(Collectors.toSet());
 
@@ -251,24 +258,25 @@ public class CarrierSupplyPayloadAction extends EblAction {
   protected void doHandlePartyInput(JsonNode partyInput) {
     JsonNode input = partyInput.get(INPUT);
     getCarrierPayloadConsumer().accept(input);
-    if (includeAmendment) {
+    JsonNode td = includeAmendment ? input.path("transportDocument") : input;
+    if (includeAmendment || (allowAnySiType && !isTd)) {
       getDspConsumer()
-          .accept(getDspSupplier().get().withScenarioType(inputScenarioType(input).name()));
+          .accept(getDspSupplier().get().withScenarioType(inputScenarioType(td).name()));
     }
-    if (isTd && input.has("transportDocumentReference")) {
+    if (isTd && td.has("transportDocumentReference")) {
       getDspConsumer()
           .accept(
               getDspSupplier()
                   .get()
                   .withTransportDocumentReference(
-                      input.required("transportDocumentReference").asText()));
+                      td.required("transportDocumentReference").asText()));
     }
-    if (includeAmendment && input.hasNonNull("transportDocumentStatus")) {
+    if (includeAmendment && td.hasNonNull("transportDocumentStatus")) {
       getDspConsumer()
           .accept(
               getDspSupplier()
                   .get()
-                  .withTransportDocumentStatus(input.required("transportDocumentStatus").asText()));
+                  .withTransportDocumentStatus(td.required("transportDocumentStatus").asText()));
     }
   }
 
@@ -295,28 +303,53 @@ public class CarrierSupplyPayloadAction extends EblAction {
   }
 
   ScenarioType inputScenarioType(JsonNode input) {
-    if (!includeAmendment) {
+    if (!includeAmendment && !(allowAnySiType && !isTd)) {
       return scenarioType;
     }
-    return switch (input.path("transportDocumentTypeCode").asText()) {
+    JsonNode transportDocument =
+        input.has("transportDocument") ? input.path("transportDocument") : input;
+    return switch (transportDocument.path("transportDocumentTypeCode").asText()) {
       case "SWB" -> ScenarioType.REGULAR_SWB;
       case "BOL" ->
-          input.path("isToOrder").asBoolean(false)
+          transportDocument.path("isToOrder").asBoolean(false)
               ? ScenarioType.REGULAR_NEGOTIABLE_BL
               : ScenarioType.REGULAR_STRAIGHT_BL;
       default -> scenarioType;
     };
   }
 
-  Set<String> validateAmendedTransportDocument(JsonNode input) {
+
+  Set<String> validateAmendmentPair(JsonNode input) {
     if (!includeAmendment) {
       return Set.of();
     }
-    String status = input.path("transportDocumentStatus").asText(null);
-    return DIRECT_AMENDMENT_STATUSES.contains(status)
-        ? Set.of()
-        : Set.of(
-            "The amended Transport Document `transportDocumentStatus` must equal `DRAFT`, `ISSUED`, or `PENDING_SURRENDER_FOR_AMENDMENT`.");
+    JsonNode transportDocument = input.path("transportDocument");
+    JsonNode amendedTransportDocument = input.path("amendedTransportDocument");
+    Set<String> errors =
+        Stream.of(
+                "transportDocumentTypeCode",
+                "isToOrder",
+                "transportDocumentReference",
+                "transportDocumentStatus")
+            .filter(
+                fieldName ->
+                    !transportDocument
+                        .path(fieldName)
+                        .equals(amendedTransportDocument.path(fieldName)))
+            .map(
+                fieldName ->
+                    "The original and amended Transport Documents must have the same `%s` value."
+                        .formatted(fieldName))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    String originalStatus = transportDocument.path("transportDocumentStatus").asText(null);
+    if (!DIRECT_AMENDMENT_STATUSES.contains(originalStatus)) {
+      errors.add(
+          "The original Transport Document `transportDocumentStatus` must equal `DRAFT`, `ISSUED`, or `PENDING_SURRENDER_FOR_AMENDMENT`.");
+    }
+    if (transportDocument.equals(amendedTransportDocument)) {
+      errors.add("The amended Transport Document must differ from the original.");
+    }
+    return errors;
   }
 
   private String getCbrValue() {

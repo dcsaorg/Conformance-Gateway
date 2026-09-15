@@ -26,28 +26,56 @@ class CarrierSupplyPayloadActionTest {
   void infersEverySupportedTransportDocumentScope() throws Exception {
     assertEquals(
         ScenarioType.REGULAR_SWB,
-        action.inputScenarioType(amendedTd("SWB", false, "TDR-1", "DRAFT")));
+        action.inputScenarioType(tdPair("SWB", false, "TDR-1", "SWB", false, "TDR-1")));
     assertEquals(
         ScenarioType.REGULAR_STRAIGHT_BL,
-        action.inputScenarioType(amendedTd("BOL", false, "TDR-1", "DRAFT")));
+        action.inputScenarioType(tdPair("BOL", false, "TDR-1", "BOL", false, "TDR-1")));
     assertEquals(
         ScenarioType.REGULAR_NEGOTIABLE_BL,
-        action.inputScenarioType(amendedTd("BOL", true, "TDR-1", "DRAFT")));
+        action.inputScenarioType(tdPair("BOL", true, "TDR-1", "BOL", true, "TDR-1")));
   }
 
   @Test
-  void validatesAllowedAmendedTransportDocumentStatuses() throws Exception {
-    for (String status : Set.of("DRAFT", "ISSUED", "PENDING_SURRENDER_FOR_AMENDMENT")) {
-      assertTrue(
-          action
-              .validateAmendedTransportDocument(amendedTd("BOL", false, "TDR-1", status))
-              .isEmpty());
-    }
+  void validatesThatAnAmendmentRetainsTheOriginalDocumentIdentity() throws Exception {
+    JsonNode validPair = tdPair("BOL", false, "TDR-1", "BOL", false, "TDR-1");
+    ((ObjectNode) validPair.required("amendedTransportDocument"))
+        .put("serviceContractReference", "AMENDED-SERVICE-CONTRACT");
+    assertTrue(action.validateAmendmentPair(validPair).isEmpty());
+
+    Set<String> errors =
+        action.validateAmendmentPair(
+            tdPair("SWB", false, "TDR-1", "BOL", true, "TDR-2"));
+    assertEquals(3, errors.size());
+    assertTrue(errors.stream().anyMatch(error -> error.contains("transportDocumentTypeCode")));
+    assertTrue(errors.stream().anyMatch(error -> error.contains("isToOrder")));
+    assertTrue(errors.stream().anyMatch(error -> error.contains("transportDocumentReference")));
+  }
+
+  @Test
+  void validatesThatAnAmendmentRetainsAnAllowedOriginalStatus() throws Exception {
+    ObjectNode changedStatusPair =
+        (ObjectNode) tdPair("BOL", false, "TDR-1", "BOL", false, "TDR-1");
+    ((ObjectNode) changedStatusPair.required("amendedTransportDocument"))
+        .put("transportDocumentStatus", "ISSUED");
     assertTrue(
-        action
-            .validateAmendedTransportDocument(amendedTd("BOL", false, "TDR-1", "APPROVED"))
-            .stream()
+        action.validateAmendmentPair(changedStatusPair).stream()
+            .anyMatch(error -> error.contains("same `transportDocumentStatus`")));
+
+    ObjectNode invalidStatusPair = changedStatusPair.deepCopy();
+    ((ObjectNode) invalidStatusPair.required("transportDocument"))
+        .put("transportDocumentStatus", "APPROVED");
+    assertTrue(
+        action.validateAmendmentPair(invalidStatusPair).stream()
             .anyMatch(error -> error.contains("must equal `DRAFT`, `ISSUED`")));
+  }
+
+  @Test
+  void rejectsAnAmendmentWithoutAnyChangedValue() throws Exception {
+    Set<String> errors =
+        action.validateAmendmentPair(
+            tdPair("BOL", false, "TDR-1", "BOL", false, "TDR-1"));
+
+    assertEquals(Set.of("The amended Transport Document must differ from the original."), errors);
   }
 
   @Test
@@ -116,36 +144,34 @@ class CarrierSupplyPayloadActionTest {
       CarrierSupplyPayloadAction supplyAction =
           new CarrierSupplyPayloadAction(
               "Carrier", scenarioType, "3.0.0", schemaValidator, true, true);
-      JsonNode amendedTransportDocument = supplyAction.getJsonForHumanReadablePrompt();
-      var dsp =
-          new EblDynamicScenarioParameters(
-              scenarioType.name(),
-              null,
-              amendedTransportDocument.required("transportDocumentReference").asText(),
-              amendedTransportDocument.required("transportDocumentStatus").asText(),
-              null,
-              null,
-              false,
-              false);
-      assertTrue(schemaValidator.validate(amendedTransportDocument).isEmpty(), scenarioType.name());
-      assertTrue(
-          EblInputPayloadValidations.validateEblContent(
-                  amendedTransportDocument, scenarioType, true, dsp)
-              .isEmpty(),
-          scenarioType.name());
-      assertTrue(
-          supplyAction.validateAmendedTransportDocument(amendedTransportDocument).isEmpty(),
-          scenarioType.name());
+      JsonNode pair = supplyAction.getJsonForHumanReadablePrompt();
+
+      for (String field : Set.of("transportDocument", "amendedTransportDocument")) {
+        JsonNode transportDocument = pair.required(field);
+        var dsp =
+            new EblDynamicScenarioParameters(
+                scenarioType.name(),
+                null,
+                transportDocument.required("transportDocumentReference").asText(),
+                transportDocument.required("transportDocumentStatus").asText(),
+                null,
+                null,
+                false,
+                false);
+        assertTrue(schemaValidator.validate(transportDocument).isEmpty(), scenarioType.name());
+        assertTrue(
+            EblInputPayloadValidations.validateEblContent(
+                    transportDocument, scenarioType, true, dsp)
+                .isEmpty(),
+            scenarioType.name());
+      }
+      assertTrue(supplyAction.validateAmendmentPair(pair).isEmpty(), scenarioType.name());
       ObjectNode partyInput = OBJECT_MAPPER.createObjectNode();
-      partyInput.set("input", amendedTransportDocument);
+      partyInput.set("input", pair);
       supplyAction.handlePartyInput(partyInput);
       assertEquals(
-          amendedTransportDocument.required("transportDocumentStatus").asText(),
+          pair.required("transportDocument").required("transportDocumentStatus").asText(),
           supplyAction.getDSP().transportDocumentStatus(),
-          scenarioType.name());
-      assertEquals(
-          amendedTransportDocument.required("transportDocumentReference").asText(),
-          supplyAction.getDSP().transportDocumentReference(),
           scenarioType.name());
     }
   }
@@ -175,19 +201,66 @@ class CarrierSupplyPayloadActionTest {
             .isEmpty());
   }
 
-  private static JsonNode amendedTd(
-      String type, boolean isToOrder, String reference, String status)
+  @Test
+  void anySiModeInfersAndPersistsScenarioTypeFromSuppliedSiPayload() {
+    CarrierSupplyPayloadAction anySiAction =
+        new CarrierSupplyPayloadAction(
+            "Carrier", ScenarioType.REGULAR_STRAIGHT_BL, "3.0.0", null, false, false, true);
+
+    assertAnySiScenarioType(anySiAction, "SWB", false, ScenarioType.REGULAR_SWB);
+    assertAnySiScenarioType(anySiAction, "BOL", false, ScenarioType.REGULAR_STRAIGHT_BL);
+    assertAnySiScenarioType(anySiAction, "BOL", true, ScenarioType.REGULAR_NEGOTIABLE_BL);
+  }
+
+  private void assertAnySiScenarioType(
+      CarrierSupplyPayloadAction action,
+      String transportDocumentTypeCode,
+      boolean isToOrder,
+      ScenarioType expectedScenarioType) {
+    ObjectNode input =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("transportDocumentTypeCode", transportDocumentTypeCode)
+            .put("isToOrder", isToOrder);
+    ObjectNode partyInput = OBJECT_MAPPER.createObjectNode();
+    partyInput.set("input", input);
+    action.doHandlePartyInput(partyInput);
+    assertEquals(expectedScenarioType.name(), action.getDSP().scenarioType());
+    action.reset();
+  }
+
+  private static JsonNode tdPair(
+      String originalType,
+      boolean originalIsToOrder,
+      String originalReference,
+      String amendedType,
+      boolean amendedIsToOrder,
+      String amendedReference)
       throws Exception {
     return OBJECT_MAPPER.readTree(
         """
         {
-          "transportDocumentTypeCode": "%s",
-          "isToOrder": %s,
-          "transportDocumentReference": "%s",
-          "transportDocumentStatus": "%s"
+          "transportDocument": {
+            "transportDocumentTypeCode": "%s",
+            "isToOrder": %s,
+            "transportDocumentReference": "%s",
+            "transportDocumentStatus": "DRAFT"
+          },
+          "amendedTransportDocument": {
+            "transportDocumentTypeCode": "%s",
+            "isToOrder": %s,
+            "transportDocumentReference": "%s",
+            "transportDocumentStatus": "DRAFT"
+          }
         }
         """
-            .formatted(type, isToOrder, reference, status));
+            .formatted(
+                originalType,
+                originalIsToOrder,
+                originalReference,
+                amendedType,
+                amendedIsToOrder,
+                amendedReference));
   }
 }
 

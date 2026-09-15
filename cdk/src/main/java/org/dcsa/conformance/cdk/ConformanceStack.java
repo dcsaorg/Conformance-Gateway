@@ -403,6 +403,12 @@ public class ConformanceStack extends Stack {
 
     Bucket ngBucket = new Bucket(this, prefix + "NgBucket", BucketProps.builder().build());
     IOrigin s3Origin = S3BucketOrigin.withOriginAccessControl(ngBucket);
+    String contentSecurityPolicy =
+        "default-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; "
+            + "frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            + "font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; "
+            + "connect-src 'self' https://%s https://cognito-idp.%s.amazonaws.com https://fonts.gstatic.com;"
+                .formatted(webuiApiGatewayUrl, this.getRegion());
     ResponseHeadersPolicy webuiResponseHeadersPolicy =
         ResponseHeadersPolicy.Builder.create(this, prefix + "WebuiResponseHeadersPolicy")
             .securityHeadersBehavior(
@@ -414,7 +420,7 @@ public class ConformanceStack extends Stack {
                             .build())
                     .contentSecurityPolicy(
                         ResponseHeadersContentSecurityPolicy.builder()
-                            .contentSecurityPolicy("frame-ancestors 'none';")
+                            .contentSecurityPolicy(contentSecurityPolicy)
                             .override(true)
                             .build())
                     .build())

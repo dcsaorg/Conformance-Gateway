@@ -55,6 +55,14 @@ env:
             password: ${CONFORMANCE_USER_PASSWORD}
 
 jobs:
+  # Angular requires inline styles unless the application and edge layer coordinate
+  # per-response nonces. Scripts remain restricted to the application's own origin.
+  - type: alertFilter
+    alertFilters:
+      - ruleId: '10055-6'
+        ruleName: CSP style-src unsafe-inline
+        newRisk: Info
+
   - type: passiveScan-config
     parameters:
       scanOnlyInScope: true

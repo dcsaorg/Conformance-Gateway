@@ -1,0 +1,59 @@
+env:
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+  contexts:
+    - name: Conformance baseline application
+      urls:
+        - ${APP_URL}
+      includePaths:
+        - 'https://(?:dev\.conformance-development-1|dt\.conformance-dt-1|test\.conformance-test-1)\.dcsa\.org(?:/.*)?'
+
+jobs:
+  - type: passiveScan-config
+    parameters:
+      scanOnlyInScope: true
+
+  # Conformance is an Angular SPA. Request the known route entry points directly
+  # so the scan is deterministic and cannot submit application forms.
+  - type: requestor
+    requests:
+      - name: Application root
+        url: ${APP_URL}/
+        method: GET
+        responseCode: 200
+      - name: Login route
+        url: ${APP_URL}/login
+        method: GET
+        responseCode: 200
+      - name: Authenticated landing route
+        url: ${APP_URL}/environment
+        method: GET
+        responseCode: 200
+      - name: Sandbox creation route
+        url: ${APP_URL}/create-sandbox
+        method: GET
+        responseCode: 200
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk
+      reportFile: zap-baseline-report.html
+      reportTitle: Conformance baseline ZAP scan
+      reportDescription: Unauthenticated passive scan limited to known Conformance application routes.
+    sites:
+      - ${APP_URL}
+    alwaysRun: true
+
+  - type: exitStatus
+    parameters:
+      warnLevel: Medium
+      errorLevel: High
+      warnExitValue: 0
+    alwaysRun: true

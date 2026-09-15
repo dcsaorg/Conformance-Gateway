@@ -1,0 +1,73 @@
+name: OWASP ZAP Baseline Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: GitHub Environment that provides the Conformance application URL
+        required: true
+        type: choice
+        options:
+          - conformance-dev
+          - conformance-dt
+          - conformance-test
+
+permissions:
+  contents: read
+
+jobs:
+  baseline-scan:
+    name: Baseline scan (${{ inputs.target_environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment }}
+    env:
+      APP_URL: ${{ vars.APP_URL }}
+    steps:
+      - name: Check out the scan plan
+        uses: actions/checkout@v6.0.2
+
+      - name: Create a fallback report
+        shell: bash
+        run: printf '%s\n' '<!doctype html><title>ZAP baseline scan did not produce a report</title><p>Review this workflow run for failure details.</p>' > zap-baseline-report-fallback.html
+
+      - name: Require the approved target URL
+        shell: bash
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "APP_URL must be configured as a GitHub Environment variable."
+            exit 1
+          fi
+
+          case "${{ inputs.target_environment }}" in
+            conformance-dev) expected_url="https://dev.conformance-development-1.dcsa.org" ;;
+            conformance-dt) expected_url="https://dt.conformance-dt-1.dcsa.org" ;;
+            conformance-test) expected_url="https://test.conformance-test-1.dcsa.org" ;;
+            *) echo "Unsupported target environment."; exit 1 ;;
+          esac
+
+          if [ "$APP_URL" != "$expected_url" ]; then
+            echo "APP_URL does not match the approved URL for ${{ inputs.target_environment }}."
+            exit 1
+          fi
+
+      - name: Run passive baseline scan
+        uses: zaproxy/action-af@v0.3.0
+        with:
+          plan: .github/workflows/zap/zap-baseline-plan.yaml
+          docker_env_vars: APP_URL
+
+      - name: Select baseline HTML report
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -f zap-baseline-report.html ]; then
+            mv zap-baseline-report-fallback.html zap-baseline-report.html
+          fi
+
+      - name: Upload baseline HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report-${{ inputs.target_environment }}
+          path: zap-baseline-report.html
+          if-no-files-found: error

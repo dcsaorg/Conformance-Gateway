@@ -52,7 +52,12 @@ import software.amazon.awscdk.services.cloudfront.CachePolicy;
 import software.amazon.awscdk.services.cloudfront.Distribution;
 import software.amazon.awscdk.services.cloudfront.DistributionProps;
 import software.amazon.awscdk.services.cloudfront.ErrorResponse;
+import software.amazon.awscdk.services.cloudfront.HeadersFrameOption;
 import software.amazon.awscdk.services.cloudfront.IOrigin;
+import software.amazon.awscdk.services.cloudfront.ResponseHeadersContentSecurityPolicy;
+import software.amazon.awscdk.services.cloudfront.ResponseHeadersFrameOptions;
+import software.amazon.awscdk.services.cloudfront.ResponseHeadersPolicy;
+import software.amazon.awscdk.services.cloudfront.ResponseSecurityHeadersBehavior;
 import software.amazon.awscdk.services.cloudfront.ViewerProtocolPolicy;
 import software.amazon.awscdk.services.cloudfront.origins.S3BucketOrigin;
 import software.amazon.awscdk.services.cognito.AccountRecovery;
@@ -398,6 +403,22 @@ public class ConformanceStack extends Stack {
 
     Bucket ngBucket = new Bucket(this, prefix + "NgBucket", BucketProps.builder().build());
     IOrigin s3Origin = S3BucketOrigin.withOriginAccessControl(ngBucket);
+    ResponseHeadersPolicy webuiResponseHeadersPolicy =
+        ResponseHeadersPolicy.Builder.create(this, prefix + "WebuiResponseHeadersPolicy")
+            .securityHeadersBehavior(
+                ResponseSecurityHeadersBehavior.builder()
+                    .frameOptions(
+                        ResponseHeadersFrameOptions.builder()
+                            .frameOption(HeadersFrameOption.DENY)
+                            .override(true)
+                            .build())
+                    .contentSecurityPolicy(
+                        ResponseHeadersContentSecurityPolicy.builder()
+                            .contentSecurityPolicy("frame-ancestors 'none';")
+                            .override(true)
+                            .build())
+                    .build())
+            .build();
     Distribution distribution =
         new Distribution(
             this,
@@ -407,6 +428,7 @@ public class ConformanceStack extends Stack {
                     BehaviorOptions.builder()
                         .cachePolicy(CachePolicy.CACHING_DISABLED)
                         .origin(s3Origin)
+                        .responseHeadersPolicy(webuiResponseHeadersPolicy)
                         .viewerProtocolPolicy(ViewerProtocolPolicy.REDIRECT_TO_HTTPS)
                         .build())
                 .domainNames(List.of(webuiDistributionUrl))

@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -14,7 +15,7 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
 @Slf4j
-public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateChangingSIAction {
+public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends ShipperNotificationEblAction {
   private final ShippingInstructionsStatus expectedSIStatus;
   private final boolean useTDRef;
   private final JsonSchemaValidator requestSchemaValidator;
@@ -86,8 +87,8 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
                     "/v3/shipping-instructions/%s".formatted(documentReference)),
-                new ResponseStatusCheck(
-                    EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+                ResponseStatusCheck.forSuccessfulResponse(
+                    EblRole::isCarrier, getMatchedExchangeUuid()),
                 new ApiHeaderCheck(
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
@@ -102,7 +103,13 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    requestSchemaValidator));
+                    requestSchemaValidator),
+                JsonAttribute.contentChecks(
+                    EblRole::isShipper,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    expectedApiVersion,
+                    List.of(EblChecks.UPDATED_SI_STATUS_UPDATE_CANCELLED_ONLY_CHECK)));
         return Stream.concat(
             primaryExchangeChecks,
             getSINotificationChecks(

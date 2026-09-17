@@ -39,6 +39,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   protected static WebDriver driver;
   protected static FluentWait<WebDriver> wait;
   private static boolean alreadyLoggedIn = false;
+  private static final int OPERATOR_LOG_AUTO_REFRESH_RETRIES = 20;
 
   protected String baseUrl = "http://localhost:4200";
   protected String loginEmail = "selenium-test@dcsa.org";
@@ -195,8 +196,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     waitForUIReadiness();
     waitForAsyncCalls(lambdaDelay);
 
-    safeClick(By.cssSelector("[testId='refreshButton']"));
-    waitForUIReadiness();
+    // Internal sandbox activity now auto-refreshes in place; just wait for the async reset to settle.
     waitForAsyncCalls(lambdaDelay);
 
     switchToTab(0);
@@ -259,17 +259,8 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     handlePromptText();
     switchToTab(1);
 
-    safeClick(By.cssSelector("[testId='refreshButton']"));
-    waitForUIReadiness();
-    waitForAsyncCalls(lambdaDelay);
-
     var prompt = "Prompt answer for %s:".formatted(answerFor);
-    String operatorLog =
-        driver.findElements(By.cssSelector("[testId='operatorLog']")).stream()
-            .map(WebElement::getText)
-            .filter(log -> log.contains(prompt))
-            .findFirst()
-            .orElseThrow();
+    String operatorLog = waitForOperatorLogContaining(prompt);
 
     String foundAnswer = operatorLog.substring(prompt.length() + 1);
     switchToTab(0);
@@ -280,12 +271,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     handlePromptText();
     switchToTab(1);
 
-    safeClick(By.cssSelector("[testId='refreshButton']"));
-    waitForUIReadiness();
-    waitForAsyncCalls(lambdaDelay);
-
-    String operatorLog = wait.until(
-        ExpectedConditions.presenceOfElementLocated(By.cssSelector("[testId='operatorLog']"))).getText();
+    String operatorLog = waitForOperatorLogContaining("transport document '");
     String reference = extractTransportDocumentReference(operatorLog);
     switchToTab(0);
     return promptText.replace("Insert TDR here", reference);
@@ -301,9 +287,6 @@ public abstract class SeleniumTestBase extends ManualTestBase {
         log.debug("Notify party");
         waitForAsyncCalls(lambdaDelay);
 
-        safeClick(By.cssSelector("[testId='refreshButton']"));
-        waitForUIReadiness();
-
         switchToTab(0);
         // refresh page 1 - only if button exists
         if (!driver.findElements(By.id("refreshStatusButton")).isEmpty()) {
@@ -316,6 +299,23 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     } catch (org.openqa.selenium.NoSuchElementException ignored) {
       // No prompt text, is fine.
     }
+  }
+
+  private String waitForOperatorLogContaining(String expectedText) {
+    for (int attempt = 0; attempt < OPERATOR_LOG_AUTO_REFRESH_RETRIES; attempt++) {
+      String matchingLog =
+          driver.findElements(By.cssSelector("[testId='operatorLog']")).stream()
+              .map(WebElement::getText)
+              .filter(log -> log.contains(expectedText))
+              .findFirst()
+              .orElse(null);
+      if (matchingLog != null) {
+        return matchingLog;
+      }
+      waitForAsyncCalls(lambdaDelay > 0 ? lambdaDelay : 500L);
+      waitForUIReadiness();
+    }
+    throw new IllegalStateException("Could not find operator log containing: " + expectedText);
   }
 
   // If there are no more actions, the scenario is finished and should be conformant.

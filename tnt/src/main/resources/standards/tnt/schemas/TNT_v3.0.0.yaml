@@ -250,51 +250,44 @@ components:
       type: "object"
       properties:
         street:
-          maxLength: 70
           type: "string"
           description: "The name of the street."
           example: "Ruijggoordweg"
         streetNumber:
-          maxLength: 50
           type: "string"
           description: "The number of the street."
           example: "100"
         floor:
-          maxLength: 50
           type: "string"
           description: "The floor of the street number."
           example: "N/A"
         postCode:
-          maxLength: 10
           type: "string"
           description: "The post code of the address."
           example: "1047 HM"
         POBox:
-          maxLength: 20
           type: "string"
           description: "A numbered box at a post office where a person or business can have mail or parcels delivered."
           example: "123"
         city:
-          maxLength: 35
           type: "string"
           description: "The name of the city."
           example: "Amsterdam"
         stateRegion:
-          maxLength: 65
           type: "string"
           description: "The name of the state/region."
           example: "North Holland"
         countryCode:
-          maxLength: 2
           type: "string"
-          description: "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)"
+          description: |
+            The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            When the country code is required but not applicable, use the code `ZZ`.
           example: "NL"
         addressLines:
-          maxItems: 5
           type: "array"
           description: "Unstructured address lines, used as a fallback when structured address fields are unavailable."
           items:
-            maxLength: 250
             type: "string"
             description: "One line of an unstructured `Address`."
             example: "123 Example Rd"
@@ -322,7 +315,6 @@ components:
           format: "float"
           example: -12.3
         sensorLabel:
-          maxLength: 100
           type: "string"
           description: |
             Label of the physical air temperature sensor (a COA property id, a vendor-specific id, or another identifier).
@@ -332,14 +324,12 @@ components:
       type: "object"
       properties:
         value:
-          maxLength: 30
           type: "string"
           description: |
             Timestamp representation [in RFC 3339 format](https://swagger.io/docs/specification/v3_0/data-models/data-types/#strings)
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         classifier:
-          maxLength: 10
           type: "string"
           description: |-
             Classifier denoting whether a timestamp or event is planned, estimated or actual
@@ -352,7 +342,6 @@ components:
       type: "object"
       properties:
         type:
-          maxLength: 100
           type: "string"
           description: |-
             Code used to denote the type of a document reference
@@ -383,7 +372,6 @@ components:
             - `VETERINARY_CERTIFICATE` - Veterinary Certificate
           example: "BOOKING"
         reference:
-          maxLength: 100
           type: "string"
           description: "Reference identifying the document"
           example: "123e4567e89b"
@@ -411,7 +399,6 @@ components:
       type: "object"
       properties:
         equipmentReference:
-          maxLength: 11
           type: "string"
           description: |
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
@@ -424,7 +411,6 @@ components:
             from SMDG.
           example: "APZU4812090"
         ISOEquipmentCode:
-          maxLength: 4
           type: "string"
           description: |
             Unique code identifying the equipment size and type used to transport commodities.
@@ -460,7 +446,6 @@ components:
           allOf:
             - $ref: "#/components/schemas/EventRouting"
         eventID:
-          maxLength: 500
           type: "string"
           description: |
             ID of the event, unique among all the events published by a T&T Event Producer.
@@ -469,10 +454,8 @@ components:
 
             Each event is uniquely identified within each T&T 3.x standard ecosystem of connected implementers
             by a composite key including:
-            - `eventRouting.originatingParties[*].partyCode`
-            - `eventRouting.originatingParties[*].codeListProvider`
-            - `eventRouting.originatingParties[*].codeListName`
-            - `eventID`
+            - the `partyCode`, `codeListProvider` and `codeListName` of all `eventRouting.originatingParties` (if present)
+            - the `eventID`
           example: "event-HHL71800000-APZU4812090-IoT-DRO-2025-01-23T01:23:45Z"
         isRetracted:
           type: "boolean"
@@ -481,15 +464,15 @@ components:
 
             The data in this and all previously transmitted events with the same `eventID` must be discarded or ignored.
 
-            If this flag is set, any event data other than the `eventID` is irrelevant (if present).
+            If this flag is `true`, any event data other than the `eventID` is irrelevant (if present).
+
+            An event with the same `eventID`, a later `eventUpdatedDateTime`, and `isRetracted=false` supersedes the retraction and is treated as a new active representation of the event. It must contain a complete, valid event payload; `isRetracted=false` alone does not restore data that was discarded or ignored.
         eventDateTime:
-          maxLength: 30
           type: "string"
           description: "The date and time when the real-world event has occurred or will occur."
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         eventUpdatedDateTime:
-          maxLength: 30
           type: "string"
           description: "The date and time when the technical event was last updated."
           format: "date-time"
@@ -499,7 +482,6 @@ components:
           allOf:
             - $ref: "#/components/schemas/Location"
         reason:
-          maxLength: 250
           type: "string"
           description: "Free text information explaining why this event was sent"
         eventClassification:
@@ -541,7 +523,6 @@ components:
             - `REEFER` - Reefer event
           example: "EQUIPMENT"
         eventClassifier:
-          maxLength: 10
           type: "string"
           description: |-
             Classifier denoting whether a timestamp or event is planned, estimated or actual
@@ -666,18 +647,16 @@ components:
       type: "object"
       properties:
         facilityName:
-          maxLength: 100
           type: "string"
           description: "The name of the facility."
           example: "Building 123"
         facilityCode:
-          maxLength: 6
           type: "string"
           description: |
             Code identifying a specific facility, as defined by the `facilityCodeListProvider`.
-          example: "ADT"
+            The value should be provided according to the format defined by the relevant code list provider.
+          example: "AUMELNWQL"
         facilityCodeListProvider:
-          maxLength: 10
           type: "string"
           description: |
             Code list provider (each with its relevant code list) defining the `facilityCode`:
@@ -690,7 +669,6 @@ components:
       type: "object"
       properties:
         severity:
-          maxLength: 50
           type: "string"
           description: |-
             Code denoting the severity of a `FeedbackElement`
@@ -700,13 +678,11 @@ components:
             - `INFO` - Informational message about how the request is processed
           example: "ERROR"
         message:
-          maxLength: 5000
           type: "string"
           description: |
             Human readable feedback message that can be programmatically relayed to a user of the event publishing organization
           example: "The facility SMDG code does not match the location UN/LOCODE"
         propertyPath:
-          maxLength: 1000
           type: "string"
           description: |
             [JSONPath](https://github.com/json-path/JsonPath) within the request message of the specific property
@@ -718,16 +694,84 @@ components:
       type: "object"
       properties:
         latitude:
-          maxLength: 20
           type: "string"
           description: "Latitude expressed as decimal degrees using the ISO 6709 data interchange numeric format."
           example: "33.629152"
         longitude:
-          maxLength: 20
           type: "string"
           description: "Longitude expressed as decimal degrees using the ISO 6709 data interchange numeric format."
           example: "-118.587187"
       description: "An object used to express a location using its geographic coordinates."
+    GeofenceDetails:
+      type: "object"
+      properties:
+        geofenceId:
+          type: "string"
+          description: |
+            Identifier of the geofence within the collection identified by `geofenceCollectionCode` (and,
+            when supplied, `geofenceCollectionVersion`).
+
+            This identifier is stable for the logical geofence: it must not change merely because the
+            geofence boundary/polygon itself is edited. It is not globally unique by itself; it is only
+            unambiguous when combined with `geofenceCollectionCode` (and `geofenceCollectionVersion`, if
+            applicable).
+          example: "geofence-042"
+        geofenceCollectionCode:
+          type: "string"
+          description: |
+            Identifier of the geofence collection, dataset, or namespace in which `geofenceId` is defined and
+            which was used by the detection process.
+
+            This code alone fully qualifies the collection, so that a single provider can maintain multiple,
+            independently identified collections (e.g. one per yard, per customer, or per purpose), and so
+            that collection ownership does not need to be, and must not be, inferred from `deviceVendor` or
+            `deviceModel`.
+          example: "acme-yard-geofences"
+        geofenceCollectionVersion:
+          type: "string"
+          description: |
+            Identifier of the exact revision of the `geofenceCollectionCode` collection that was used to
+            detect or generate this event.
+
+            Should be supplied whenever multiple revisions of the same collection may coexist over time (for
+            example, after a geofence boundary is redrawn), so that the exact revision used for detection can
+            be traced.
+          example: "2026-05-01"
+        customerGeofenceCode:
+          type: "string"
+          description: |
+            Business identifier/alias assigned by the receiving customer to this geofence, for use as a
+            correlation reference alongside the technical geofence reference (`geofenceId`,
+            `geofenceCollectionCode` and, if supplied, `geofenceCollectionVersion`).
+
+            It allows the receiving customer to correlate this event with location references already used in
+            its own systems and processes, without having to maintain a mapping to the technical geofence
+            reference itself.
+
+            This code is optional, is assigned by and scoped to the receiving customer, and is not globally
+            unique: it must not be interpreted without the context of the event/integration through which it
+            was received, i.e. without knowing which customer assigned it. It must only be included when that
+            customer-assigned meaning is preserved and relevant to the receiving customer. When an event is
+            forwarded, or otherwise consumed outside of its original customer context, this code must be
+            omitted if the assigning customer cannot be determined unambiguously.
+
+            It is not a technical geofence identity and is not part of any DCSA-controlled code list. The
+            mapping between the technical geofence reference and this customer alias may be maintained by the
+            system managing the geofence definitions.
+          example: "JAX-AREA1"
+      description: |
+        Reference to the external geofence definition used by the detection process that produced this
+        event (e.g. an `IotEventType` of `GEOFENCE_ENTRY` or `GEOFENCE_EXIT`).
+
+        `iotDetails.geofenceDetails` is distinct from `eventLocation.facility`:
+        - `eventLocation.facility` identifies a physical facility/location.
+        - `iotDetails.geofenceDetails` identifies the external geofence definition (an arbitrary,
+          possibly virtual, boundary maintained by a geofence provider) that was used to detect the event.
+
+        Both may be present on the same event, e.g. when a geofence happens to be drawn around a facility.
+
+        The geofence geometry/boundary itself (polygon, radius, etc.) is not part of this API and remains
+        managed outside of the T&T event payload, by whichever system owns the referenced collection.
     GetEventsError:
       type: "object"
       properties:
@@ -772,7 +816,6 @@ components:
             - `UNKNOWN` - It is not known whether the equipment has IoT technology, or of what type.
           example: "SMART_CONTAINER"
         powerStatus:
-          maxLength: 20
           type: "string"
           description: |-
             The power status of an IoT device or reefer container
@@ -782,24 +825,37 @@ components:
             - `UNKNOWN` - The power status of the device could not be determined.
           example: "POWER_ON"
         deviceVendor:
-          maxLength: 100
           type: "string"
           description: "Brand name of the IoT device"
         deviceModel:
-          maxLength: 100
           type: "string"
           description: "Model of the IoT device"
+        detectionSource:
+          type: "string"
+          description: |-
+            Where the detection logic that produced this event was executed.
+
+            This is unrelated to the `eventRouting`, the Event Producer, or any originating/forwarding party: those describe who is transmitting the event, whereas `detectionSource` describes where the detection or inference itself took place.
+
+            - `DEVICE` - Detected or inferred locally by the physical IoT/telematics device.
+            - `PLATFORM` - Detected or inferred by the Event Producer's backend platform using data from devices or systems.
+            - `THIRD_PARTY` - Detected or inferred by an external system/service and then provided to the Event Producer.
+          example: "DEVICE"
+        geofenceDetails:
+          description: |
+            Reference to the external geofence definition used by the detection process, e.g. for an
+            `IotEventType` of `GEOFENCE_ENTRY` or `GEOFENCE_EXIT`.
+          allOf:
+            - $ref: "#/components/schemas/GeofenceDetails"
       description: "IoT-specific details"
     Location:
       type: "object"
       properties:
         locationName:
-          maxLength: 100
           type: "string"
           description: "The name of the location."
           example: "Port of Amsterdam"
         facilityType:
-          maxLength: 100
           type: "string"
           description: |-
             A specific type of facility
@@ -818,7 +874,6 @@ components:
           allOf:
             - $ref: "#/components/schemas/Address"
         UNLocationCode:
-          maxLength: 5
           type: "string"
           description: |
             The UN Location code specifying where the place is located. The pattern used must be
@@ -842,13 +897,11 @@ components:
       type: "object"
       properties:
         partyCode:
-          maxLength: 150
           type: "string"
           description: |
             Code identifying the party as per the `codeListProvider` and `codeListName`.
           example: "MSK"
         codeListProvider:
-          maxLength: 100
           type: "string"
           description: |
             Code of the provider of a list of codes identifying a party, including but not limited to:
@@ -859,7 +912,6 @@ components:
             [DCSA Code List Providers](https://dcsa.atlassian.net/wiki/external/ZjA4M2I3MjA4MDg1NDEwYzlkYTcxNDRhYWQwNzFiYzY).
           example: "W3C"
         codeListName:
-          maxLength: 100
           type: "string"
           description: |
             Name of the code list in which the `codeListProvider` defines the `partyCode`, including but not limited to:
@@ -868,7 +920,6 @@ components:
             - `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`
           example: "DID"
         partyFunction:
-          maxLength: 3
           type: "string"
           description: |
             Code identifying the function of the party, as defined in
@@ -926,17 +977,14 @@ components:
       type: "object"
       properties:
         railCarReference:
-          maxLength: 50
           type: "string"
           description: |
             Reference of the rail car on which the equipment is transported.
         railServiceReference:
-          maxLength: 50
           type: "string"
           description: |
             Reference of the rail service on which the equipment is transported.
         departureID:
-          maxLength: 100
           type: "string"
           description: |
             Unique identifying number or code that is assigned to a specific departure of a rail.
@@ -946,21 +994,17 @@ components:
       type: "object"
       properties:
         code:
-          maxLength: 50
           type: "string"
           description: "Code of the alarm, as defined typically by the device manufacturer"
         description:
-          maxLength: 500
           type: "string"
           description: "Free-text description of the alarm"
         startDateTime:
-          maxLength: 30
           type: "string"
           description: "The date and time when the alarm became active"
           format: "date-time"
           example: "2025-01-23T01:23:45Z"
         endDateTime:
-          maxLength: 30
           type: "string"
           description: "The date and time when the alarm became inactive"
           format: "date-time"
@@ -970,7 +1014,6 @@ components:
       type: "object"
       properties:
         powerStatus:
-          maxLength: 20
           type: "string"
           description: |-
             The power status of an IoT device or reefer container
@@ -1018,7 +1061,6 @@ components:
           allOf:
             - $ref: "#/components/schemas/ReeferParameters"
         lastDefrostDateTime:
-          maxLength: 30
           type: "string"
           description: "The date and time when the last defrost was completed"
           format: "date-time"
@@ -1033,15 +1075,12 @@ components:
           description: "The number of alarms that are currently active"
           format: "int32"
         unitManufacturer:
-          maxLength: 100
           type: "string"
           description: "Manufacturer name of the reefer unit"
         unitModel:
-          maxLength: 100
           type: "string"
           description: "Model of the reefer unit"
         controllerModel:
-          maxLength: 100
           type: "string"
           description: "Model of the reefer controller"
       description: "Reefer-specific details"
@@ -1102,12 +1141,10 @@ components:
       type: "object"
       properties:
         number:
-          maxLength: 15
           type: "string"
           description: "Identifies a seal affixed to the container."
           example: "VET123"
         source:
-          maxLength: 100
           type: "string"
           description: |-
             The source of a seal, indicating who has affixed the seal.
@@ -1124,7 +1161,6 @@ components:
             - `VETERINARY` - Veterinary
           example: "CUSTOMER"
         type:
-          maxLength: 100
           type: "string"
           description: |-
             The type of a seal.
@@ -1133,7 +1169,6 @@ components:
             - `WIRE` - Wire
           example: "BOLT"
         placement:
-          maxLength: 100
           type: "string"
           description: |-
             The placement of a seal.
@@ -1149,7 +1184,6 @@ components:
           description: "Carrier-specific identifier of a service."
           example: "FE1"
         universalServiceReference:
-          maxLength: 8
           type: "string"
           description: |
             Globally unique identifier of a liner service, assigned by carriers as specified by DCSA.
@@ -1221,7 +1255,6 @@ components:
       type: "object"
       properties:
         type:
-          maxLength: 100
           type: "string"
           description: |-
             Type of a shipment reference
@@ -1241,7 +1274,6 @@ components:
             - `SHIPPERS_REFERENCE` - Shipper’s Reference
           example: "FREIGHT_FORWARDERS_REFERENCE"
         reference:
-          maxLength: 100
           type: "string"
           description: "The actual reference value"
           example: "123e4567e89b"
@@ -1251,7 +1283,7 @@ components:
         Customers can use these references to track shipments in their internal systems.
 
         In addition to the References provided by the shipper or freight forwarder,
-        the carrier can provide an extra type called `EQ` which is a reference to an Equipment.
+        the carrier can provide an extra type called `EQUIPMENT_REFERENCE` which is a reference to an Equipment.
     ShipmentReferenceReplacement:
       type: "object"
       properties:
@@ -1294,7 +1326,6 @@ components:
             - `P22` (Cargo probe)
           example: "P20"
         probeLabel:
-          maxLength: 100
           type: "string"
           description: "Label identifying the probe other than through a USDA number or COA UDM key"
           example: "Pulp probe B"
@@ -1321,7 +1352,6 @@ components:
             The maximum `transportCallSequenceNumber` value to be expected within the set of events emitted as a result of the transport plan change that has triggered this event.
           format: "int32"
         modeOfTransport:
-          maxLength: 50
           type: "string"
           description: |-
             The mode of transport as defined by DCSA
@@ -1368,7 +1398,6 @@ components:
           type: "array"
           description: "Codes identifying the reasons for a delay"
           items:
-            maxLength: 3
             type: "string"
             description: |
               Code identifying the reason for a delay,
@@ -1398,13 +1427,11 @@ components:
       type: "object"
       properties:
         licensePlate:
-          maxLength: 15
           type: "string"
           description: |
             A license plate is a tag that is attached to a vehicle and displays a unique number or code assigned to the vehicle.
             The format, design, and issuing authority for license plates vary by country, state, and province.
         vehicleIdentificationNumber:
-          maxLength: 15
           type: "string"
           description: |
             A chassis number is a unique identifying number or code assigned to the chassis of a vehicle.
@@ -1414,26 +1441,22 @@ components:
       type: "object"
       properties:
         vesselIMONumber:
-          maxLength: 8
           type: "string"
           description: |
             The unique reference for a registered vessel, which remains unchanged throughout the entire lifetime of the vessel.
             The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code.
           example: "9321483"
         vesselMMSINumber:
-          maxLength: 9
           type: "string"
           description: |
             Maritime Mobile Service Identities (MMSIs) are nine-digit numbers used by maritime digital selective calling (DSC),
             automatic identification systems (AIS) and certain other equipment to uniquely identify a ship or a coast radio station.
           example: "278111222"
         vesselName:
-          maxLength: 50
           type: "string"
           description: "Vessel name"
           example: "King of the Seas"
         vesselFlag:
-          maxLength: 2
           type: "string"
           description: |
             The national flag of the country under which a vessel is registered,
@@ -1441,7 +1464,6 @@ components:
             [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en).
           example: "NL"
         vesselCallSign:
-          maxLength: 10
           type: "string"
           description: |
             A unique alphanumeric identity that belongs to the vessel
@@ -1450,13 +1472,11 @@ components:
             followed by one to four characters to identify the individual vessel.
           example: "NCVV"
         operatorCarrierCode:
-          maxLength: 10
           type: "string"
           description: |
             The carrier who is in charge of the vessel operation based on `operatorCarrierCodeListProvider`
           example: "MAEU"
         operatorCarrierCodeListProvider:
-          maxLength: 10
           type: "string"
           description: |
             The code list provider used for the `operatorCarrierCode` (SMDG or NMFTA)
@@ -1470,7 +1490,6 @@ components:
           description: "Carrier-specific identifier of the voyage"
           example: "2103S"
         universalVoyageReference:
-          maxLength: 5
           type: "string"
           description: |
             Unique identifier of the voyage within a service, assigned by carriers as specified by DCSA.

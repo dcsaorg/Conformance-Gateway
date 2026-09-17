@@ -186,14 +186,6 @@
         <div class="pageSubtitle">Activity</div>
         <div class="activityDescription">Latest message first</div>
       </div>
-      <div>
-        <button
-          mat-stroked-button
-          testId="refreshButton"
-          color="primary"
-          (click)="onClickRefresh()"
-        ><mat-icon>refresh</mat-icon> Refresh</button>
-      </div>
     </div>
     @if (sandbox?.operatorLog?.length) {
       <div class="activityLog" role="log" aria-label="Sandbox activity">

@@ -1,0 +1,120 @@
+env:
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+  contexts:
+    - name: Conformance authenticated application
+      urls:
+        - ${APP_URL}
+        - ${API_URL}/conformance/webui
+      includePaths:
+        - 'https://(?:dev\.conformance-development-1|dt\.conformance-dt-1|test\.conformance-test-1)\.dcsa\.org(?:/.*)?'
+        - 'https://(?:dev-webui\.conformance-development-1|dt-webui\.conformance-dt-1|test-webui\.conformance-test-1)\.dcsa\.org(?:/.*)?'
+      authentication:
+        method: browser
+        parameters:
+          loginPageUrl: ${APP_URL}/login
+          loginPageWait: 20
+          browserId: firefox-headless
+          diagnostics: false
+          steps:
+            - description: Enter the Conformance account email
+              type: USERNAME
+              cssSelector: '#login_email'
+              timeout: 10000
+            - description: Enter the Conformance account password
+              type: PASSWORD
+              cssSelector: '#login_password'
+              timeout: 10000
+            - description: Submit the login form
+              type: CLICK
+              cssSelector: '#login_button'
+              timeout: 10000
+        verification:
+          method: poll
+          loggedInRegex: '\Q200 OK\E'
+          loggedOutRegex: '\Q401 Unauthorized\E|\Q403 Forbidden\E'
+          pollFrequency: 60
+          pollUnits: seconds
+          pollUrl: ${API_URL}/conformance/webui
+          pollPostData: '{"operation":"getAvailableStandards"}'
+          pollAdditionalHeaders:
+            - header: Content-Type
+              value: application/json
+      # amazon-cognito-identity-js uses the Cognito ID token, without a Bearer
+      # prefix, as the Authorization value for the Web UI API.
+      sessionManagement:
+        method: headers
+        parameters:
+          Authorization: '{%json:AuthenticationResult.IdToken%}'
+      users:
+        - name: Conformance ZAP test account
+          credentials:
+            username: ${CONFORMANCE_USER_EMAIL}
+            password: ${CONFORMANCE_USER_PASSWORD}
+
+jobs:
+  # Angular requires inline styles unless the application and edge layer coordinate
+  # per-response nonces. Scripts remain restricted to the application's own origin.
+  - type: alertFilter
+    alertFilters:
+      - ruleId: '10055-6'
+        ruleName: CSP style-src unsafe-inline
+        newRisk: Info
+
+  - type: passiveScan-config
+    parameters:
+      scanOnlyInScope: true
+
+  # Use only read-only requests in this initial profile. A generic crawler can
+  # interact with sandbox-management controls even when no active scan runs.
+  - type: requestor
+    parameters:
+      user: Conformance ZAP test account
+    requests:
+      - name: Authenticated application root
+        url: ${APP_URL}/
+        method: GET
+        responseCode: 200
+      - name: Authenticated landing route
+        url: ${APP_URL}/environment
+        method: GET
+        responseCode: 200
+      - name: Read available standards from the authenticated API
+        url: ${API_URL}/conformance/webui
+        method: POST
+        headers:
+          - 'Content-Type: application/json'
+        data: '{"operation":"getAvailableStandards"}'
+        responseCode: 200
+    tests:
+      - name: Authenticated API request must return 200
+        type: url
+        url: ${API_URL}/conformance/webui
+        operator: or
+        responseHeaderRegex: '\Q200 OK\E'
+        onFail: error
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk
+      reportFile: zap-authenticated-report.html
+      reportTitle: Conformance authenticated ZAP scan
+      reportDescription: Authenticated passive scan using the Cognito ID token and read-only Conformance requests.
+    sites:
+      - ${APP_URL}
+      - ${API_URL}
+    alwaysRun: true
+
+  - type: exitStatus
+    parameters:
+      warnLevel: Medium
+      errorLevel: High
+      warnExitValue: 0
+    alwaysRun: true

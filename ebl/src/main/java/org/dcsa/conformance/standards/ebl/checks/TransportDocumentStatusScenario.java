@@ -61,6 +61,16 @@ public record TransportDocumentStatusScenario(
         true);
   }
 
+  public static TransportDocumentStatusScenario uc19(boolean confirm) {
+    return new TransportDocumentStatusScenario(
+        "UC19",
+        DIRECT_AMENDMENT_PRIMARY_STATUSES,
+        confirm
+            ? AmendedTransportDocumentStatus.AMENDMENT_CONFIRMED
+            : AmendedTransportDocumentStatus.AMENDMENT_DECLINED,
+        true);
+  }
+
   public static TransportDocumentStatusScenario primaryStatusOnly(
       String useCase, TransportDocumentStatus transportDocumentStatus) {
     return new TransportDocumentStatusScenario(
@@ -71,6 +81,10 @@ public record TransportDocumentStatusScenario(
       Set<TransportDocumentStatus> transportDocumentStatuses) {
     return new TransportDocumentStatusScenario(
         null, transportDocumentStatuses, null, false);
+  }
+
+  public boolean requiresUnchangedPrimaryStatus() {
+    return "UC17".equals(useCase) || "UC18".equals(useCase);
   }
 
   public List<JsonRebasableContentCheck> checks(boolean notification) {

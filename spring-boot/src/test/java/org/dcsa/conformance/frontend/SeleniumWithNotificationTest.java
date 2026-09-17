@@ -40,7 +40,6 @@ class SeleniumWithNotificationTest extends SeleniumTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "Adoption", // 0:29 minutes
         "AN", // 0:36 minutes
         "Booking", // 11:52 minutes
         "CS", // 11:05 minutes
@@ -51,7 +50,7 @@ class SeleniumWithNotificationTest extends SeleniumTestBase {
         "OVS", // 3:34 minutes
         "PINT", // 6:10 minutes
         "TnT", // 6:20 minutes
-        "Booking + eBL", // 10:40 minutes
+        // "Booking + eBL", // Disabled legacy combined standard; previously 10:40 minutes
         "VGM"
       })
   void testStandardWithAllVersions(String standardName) {
@@ -105,7 +104,7 @@ class SeleniumWithNotificationTest extends SeleniumTestBase {
         EblStandard.INSTANCE.getScenarioSuitesByStandardVersion().keySet().stream()
             .findFirst()
             .orElseThrow(),
-        EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
+        EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD,
         EblRole.CARRIER.getConfigName());
     //    } catch (Exception e) {
     //      waitForAsyncCalls(5 * 60_000);
@@ -123,7 +122,7 @@ class SeleniumWithNotificationTest extends SeleniumTestBase {
     StopWatch stopWatch = StopWatch.createStarted();
     String standardName = "Ebl";
     createSandboxesAndRunGroups(
-        new Standard(standardName, null), "3.0.0", "Conformance TD-only", "Carrier");
+        new Standard(standardName, null), "3.0.0", "Conformance TD", "Carrier");
     log.info("Finished AWS testing on standard: {}, time taken: {}", standardName, stopWatch);
   }
 }

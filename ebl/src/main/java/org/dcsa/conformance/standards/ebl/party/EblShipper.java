@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.core.util.ReferenceGenerator;
 import org.dcsa.conformance.standards.ebl.action.*;
+import org.dcsa.conformance.standards.ebl.action.ShipperGetShippingInstructionsSkippableAction;
 import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 
 @Slf4j
@@ -68,6 +69,8 @@ public class EblShipper extends ConformanceParty {
             this::sendShippingInstructionsRequest),
         Map.entry(
             Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
+        Map.entry(
+            ShipperGetShippingInstructionsSkippableAction.class, this::getShippingInstructionsRequest),
         Map.entry(Shipper_GetTransportDocumentAction.class, this::getTransportDocument),
         Map.entry(AUC_Shipper_SendOutOfOrderSIMessageAction.class, this::sendOutOfOrderMessage),
         Map.entry(
@@ -77,8 +80,20 @@ public class EblShipper extends ConformanceParty {
             UC5_Shipper_CancelUpdateToShippingInstructionsAction.class,
             this::cancelUpdateToShippingInstructions),
         Map.entry(
+            UC15_Shipper_CancelShippingInstructionsAction.class,
+            this::cancelShippingInstructions),
+        Map.entry(
             UC7_Shipper_ApproveDraftTransportDocumentAction.class,
             this::approveDraftTransportDocument),
+        Map.entry(
+            UC17_Shipper_SubmitTransportDocumentAmendmentAction.class,
+            this::submitTransportDocumentAmendment),
+        Map.entry(
+            UC18_Shipper_CancelTransportDocumentAmendmentAction.class,
+            this::cancelTransportDocumentAmendment),
+        Map.entry(
+            Shipper_GetTransportDocumentAmendmentAction.class,
+            this::getTransportDocumentAmendment),
         Map.entry(ShipperGetTransportDocumentErrorAction.class, this::getTransportDocument),
         Map.entry(
             ShipperGetShippingInstructionsErrorAction.class, this::getShippingInstructionsRequest));
@@ -169,6 +184,21 @@ public class EblShipper extends ConformanceParty {
             .formatted(actionPrompt.toPrettyString()));
   }
 
+  private void cancelShippingInstructions(JsonNode actionPrompt) {
+    log.info("Shipper.cancelShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    syncCounterpartPatch(
+        "/v3/shipping-instructions/%s"
+            .formatted(URLEncoder.encode(documentReference, StandardCharsets.UTF_8)),
+        Collections.emptyMap(),
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("shippingInstructionsStatus", ShippingInstructionsStatus.SI_CANCELLED.wireName()));
+    addOperatorLogEntry(
+        "Cancelled shipping instructions with documentReference: %s".formatted(documentReference));
+  }
+
   private void sendOutOfOrderMessage(JsonNode actionPrompt) {
     var outOfOrderMessageType =
         OutOfOrderMessageType.valueOf(actionPrompt.required("outOfOrderMessageType").asText("<?>"));
@@ -204,6 +234,41 @@ public class EblShipper extends ConformanceParty {
 
     addOperatorLogEntry(
         "Approved transport document the parameters: %s".formatted(actionPrompt.toPrettyString()));
+  }
+
+  private void submitTransportDocumentAmendment(JsonNode actionPrompt) {
+    log.info(
+        "Shipper.submitTransportDocumentAmendment(%s)"
+            .formatted(actionPrompt.toPrettyString()));
+    String tdr = actionPrompt.required("tdr").asText();
+    JsonNode amendment = actionPrompt.required("amendedTransportDocument");
+    syncCounterpartPut(
+        "/v3/transport-documents/%s/amendment"
+            .formatted(URLEncoder.encode(tdr, StandardCharsets.UTF_8)),
+        amendment);
+    addOperatorLogEntry("Submitted an amendment for transport document '%s'".formatted(tdr));
+  }
+
+  private void cancelTransportDocumentAmendment(JsonNode actionPrompt) {
+    log.info(
+        "Shipper.cancelTransportDocumentAmendment(%s)"
+            .formatted(actionPrompt.toPrettyString()));
+    String tdr = actionPrompt.required("tdr").asText();
+    syncCounterpartDelete(
+        "/v3/transport-documents/%s/amendment"
+            .formatted(URLEncoder.encode(tdr, StandardCharsets.UTF_8)));
+    addOperatorLogEntry("Cancelled the amendment for transport document '%s'".formatted(tdr));
+  }
+
+  private void getTransportDocumentAmendment(JsonNode actionPrompt) {
+    log.info(
+        "Shipper.getTransportDocumentAmendment(%s)".formatted(actionPrompt.toPrettyString()));
+    String tdr = actionPrompt.required("tdr").asText();
+    syncCounterpartGet(
+        "/v3/transport-documents/%s/amendment"
+            .formatted(URLEncoder.encode(tdr, StandardCharsets.UTF_8)),
+        Collections.emptyMap());
+    addOperatorLogEntry("Retrieved the amendment for transport document '%s'".formatted(tdr));
   }
 
   private void getShippingInstructionsRequest(JsonNode actionPrompt) {

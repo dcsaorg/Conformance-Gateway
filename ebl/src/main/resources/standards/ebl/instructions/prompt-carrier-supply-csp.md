@@ -4,4 +4,4 @@ the DCSA shipper does not have any predefined knowledge of your organization's d
 Therefore, please use the example ebl provided below as a template, and modify the values as necessary to ensure
 compatibility with your system.
 
-Make sure the ebl type remains SCENARIO_TYPE.
+SCENARIO_TYPE_RULE

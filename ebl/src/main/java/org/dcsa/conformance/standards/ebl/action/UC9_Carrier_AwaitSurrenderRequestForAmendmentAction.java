@@ -10,7 +10,7 @@ import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 
 @Getter
-public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends StateChangingSIAction {
+public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends CarrierNotificationEblAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
@@ -41,7 +41,6 @@ public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends StateCh
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDspSupplier().get();
-    // Clear the flag if set.
     if (dsp.newTransportDocumentContent()) {
       getDspConsumer().accept(dsp.withNewTransportDocumentContent(false));
     }

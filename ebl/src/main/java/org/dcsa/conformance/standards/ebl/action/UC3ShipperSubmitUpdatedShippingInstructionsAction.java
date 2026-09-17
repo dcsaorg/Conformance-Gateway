@@ -14,7 +14,7 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
 @Slf4j
-public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChangingSIAction {
+public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends ShipperNotificationEblAction {
   private final ShippingInstructionsStatus expectedSiStatus;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
@@ -85,8 +85,8 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
                         "/v3/shipping-instructions/",
                         dsp.shippingInstructionsReference(),
                         dsp.transportDocumentReference())),
-                new ResponseStatusCheck(
-                    EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+                ResponseStatusCheck.forSuccessfulResponse(
+                    EblRole::isCarrier, getMatchedExchangeUuid()),
                 new ApiHeaderCheck(
                     EblRole::isShipper,
                     getMatchedExchangeUuid(),

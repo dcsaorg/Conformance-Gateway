@@ -24,6 +24,8 @@ import {MessageDialog} from "../../dialogs/message/message-dialog.component";
     standalone: false
 })
 export class SandboxComponent implements OnInit, OnDestroy {
+  private static readonly INTERNAL_SANDBOX_REFRESH_INTERVAL_MS = 2_000;
+
   sandboxId: string = '';
   sandbox: Sandbox | undefined;
   standardModules: StandardModule[] = [];
@@ -37,6 +39,8 @@ export class SandboxComponent implements OnInit, OnDestroy {
   displayedReportContent: any | null = null;
 
   activatedRouteSubscription: Subscription | undefined;
+  private internalSandboxRefreshTimer: ReturnType<typeof setInterval> | undefined;
+  private isRefreshingInternalSandbox = false;
 
   getConformanceStatusEmoji = getConformanceStatusEmoji;
   getConformanceStatusTitle = getConformanceStatusTitle;
@@ -64,6 +68,7 @@ export class SandboxComponent implements OnInit, OnDestroy {
       async params => {
         this.sandboxId = params['sandboxId'];
         await this._loadData();
+        this.startInternalSandboxAutoRefresh();
       });
   }
 
@@ -85,8 +90,38 @@ export class SandboxComponent implements OnInit, OnDestroy {
   }
 
   async ngOnDestroy() {
+    this.stopInternalSandboxAutoRefresh();
     if (this.activatedRouteSubscription) {
       this.activatedRouteSubscription.unsubscribe();
+    }
+  }
+
+  private startInternalSandboxAutoRefresh() {
+    this.stopInternalSandboxAutoRefresh();
+    if (!this.isInternalSandbox()) return;
+    this.internalSandboxRefreshTimer = setInterval(
+      () => void this.refreshInternalSandbox(),
+      SandboxComponent.INTERNAL_SANDBOX_REFRESH_INTERVAL_MS,
+    );
+  }
+
+  private stopInternalSandboxAutoRefresh() {
+    if (this.internalSandboxRefreshTimer !== undefined) {
+      clearInterval(this.internalSandboxRefreshTimer);
+      this.internalSandboxRefreshTimer = undefined;
+    }
+  }
+
+  private async refreshInternalSandbox() {
+    if (!this.isInternalSandbox() || this.isRefreshingInternalSandbox) return;
+    this.isRefreshingInternalSandbox = true;
+    try {
+      this.sandbox = await this.conformanceService.getSandbox(this.sandboxId, true);
+      this.cdr.detectChanges();
+    } catch {
+      // Preserve the last successfully loaded state and try again on the next interval.
+    } finally {
+      this.isRefreshingInternalSandbox = false;
     }
   }
 
@@ -198,7 +233,9 @@ export class SandboxComponent implements OnInit, OnDestroy {
     const response: any = await this.conformanceService.notifyParty(this.sandbox!.id);
     if (await MessageDialog.showIfError(response, this.dialog, "Error notifying party")) {
       this.cdr.detectChanges();
+      return;
     }
+    await this.refreshInternalSandbox();
   }
 
   async onClickToggleNotifications() {
@@ -224,13 +261,10 @@ export class SandboxComponent implements OnInit, OnDestroy {
       const response: any = await this.conformanceService.resetParty(this.sandbox!.id);
       if (await MessageDialog.showIfError(response, this.dialog, "Error resetting party")) {
         this.cdr.detectChanges();
+        return;
       }
+      await this.refreshInternalSandbox();
     }
-  }
-
-  onClickRefresh() {
-    this.sandbox = undefined;
-    this._loadData();
   }
 
   async onClickCreateReport() {

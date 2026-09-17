@@ -46,8 +46,8 @@
       "equipmentDetails": {
         "equipmentReference": "APZU4812090",
         "ISOEquipmentCode": "22GP",
-        "emptyIndicatorCode": "LADEN",
-        "movementType": "EXPORT"
+        "emptyIndicator": "LADEN",
+        "transportPhase": "EXPORT"
       }
     }
   ]

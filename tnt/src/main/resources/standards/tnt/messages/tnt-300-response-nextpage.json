@@ -130,8 +130,8 @@
       "equipmentDetails": {
         "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
         "ISOEquipmentCode": "22GP",
-        "emptyIndicatorCode": "LADEN",
-        "movementType": "TRANSSHIPMENT"
+        "emptyIndicator": "LADEN",
+        "transportPhase": "TRANSSHIPMENT"
       }
     },
     {

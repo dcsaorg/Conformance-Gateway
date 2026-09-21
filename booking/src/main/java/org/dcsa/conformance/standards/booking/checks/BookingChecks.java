@@ -77,8 +77,6 @@ public class BookingChecks {
   private static final String COMMODITY_SUB_REFERENCE = "commoditySubReference";
   private static final String CUT_OFF_DATE_TIME_CODE = "cutOffDateTimeCode";
   private static final String COUNTRY_CODE = "countryCode";
-  private static final String MANIFEST_TYPE_CODE = "manifestTypeCode";
-  private static final String ADVANCE_MANIFEST_FILINGS = "advanceManifestFilings";
   private static final String SHIPMENT_LOCATIONS = "shipmentLocations";
   private static final String DELIVERY_TYPE_AT_DESTINATION = "deliveryTypeAtDestination";
   private static final String CONTAINER_POSITIONINGS = "containerPositionings";
@@ -453,19 +451,6 @@ public class BookingChecks {
         }
         return ConformanceCheckResult.simple(Set.of());
       });
-
-  private static final Consumer<MultiAttributeValidator> ALL_AMF =
-    mav -> mav.submitAllMatching(ADVANCE_MANIFEST_FILINGS);
-
-  private static final JsonContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE =
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The %s object must demonstrate the correct use of this conditional requirement: the combination of %s and %s MUST be unique"
-        .formatted(
-          jsonPath(ADVANCE_MANIFEST_FILINGS),
-          jsonPath(COUNTRY_CODE),
-          jsonPath(MANIFEST_TYPE_CODE)),
-      ALL_AMF,
-      JsonAttribute.unique(COUNTRY_CODE, MANIFEST_TYPE_CODE));
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS =
     JsonAttribute.customValidator(
@@ -1729,7 +1714,6 @@ public class BookingChecks {
 
   private static final List<JsonContentCheck> BOOKING_RESPONSE_CONTENT_CHECKS =
     Arrays.asList(
-      ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
       CONFIRMED_EQUIPMENTS_REQUIRED_BY_STATE,
       TRANSPORT_PLAN_REQUIRED_BY_STATE,
       SHIPMENT_CUTOFF_TIMES_REQUIRED_BY_STATE,

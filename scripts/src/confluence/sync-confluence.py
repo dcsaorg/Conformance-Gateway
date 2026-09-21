@@ -135,7 +135,7 @@ class ConfluenceClient:
             logger.error("Page fetch failed (%s): %s", page_id, exc)
             return None
 
-    def list_attachments(self, page_id: str) -> List[Dict]:
+    def list_attachments(self, page_id: str) -> Optional[List[Dict]]:
         items: List[Dict] = []
         url = urljoin(self.cfg.base_url, f"/wiki/rest/api/content/{page_id}/child/attachment")
         params = {"limit": 200}
@@ -150,7 +150,7 @@ class ConfluenceClient:
                 params = None
             except requests.RequestException as exc:
                 logger.error("Attachment listing failed (%s): %s", page_id, exc)
-                return items
+                return None
         return items
 
     def download_file(self, download_path: str) -> Optional[bytes]:
@@ -163,7 +163,11 @@ class ConfluenceClient:
                 normalized = "/wiki" + normalized
             url = urljoin(self.cfg.base_url, normalized)
         try:
-            r = self.session.get(url, timeout=90)
+            r = self.session.get(
+                url,
+                headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                timeout=90,
+            )
             r.raise_for_status()
             return r.content
         except requests.RequestException as exc:
@@ -209,6 +213,8 @@ class SyncManager:
             (p.standard, p.version) for p in self.cfg.pages if p.enabled
         )
         self.expected_excel_by_bucket = defaultdict(set)
+        self.failed_excel_buckets = set()
+        self.excel_stats = Counter()
 
     def ensure_standard_version_folders(self) -> None:
         for standard, versions in self.cfg.standard_versions.items():
@@ -228,7 +234,15 @@ class SyncManager:
                 ok += 1
         self._cleanup_excel_outputs(only_standard)
         self.write_index(only_standard)
-        logger.info("Sync complete: %d/%d pages", ok, total)
+        logger.info(
+            "Sync complete: %d/%d pages; Excel added=%d, updated=%d, unchanged=%d, failed=%d",
+            ok,
+            total,
+            self.excel_stats["added"],
+            self.excel_stats["updated"],
+            self.excel_stats["unchanged"],
+            self.excel_stats["failed"],
+        )
         return ok, total
 
     def _cleanup_excel_outputs(self, only_standard: Optional[str]) -> None:
@@ -238,6 +252,9 @@ class SyncManager:
             if p.enabled and (not only_standard or p.standard == only_standard)
         }
         for standard, version in buckets:
+            if (standard, version) in self.failed_excel_buckets:
+                logger.warning("Skipping Excel cleanup for %s/%s because synchronization failed", standard, version)
+                continue
             out_dir = self.output_root / standard / version / "excel"
             if not out_dir.exists():
                 continue
@@ -261,8 +278,8 @@ class SyncManager:
         md_path.write_text(markdown, encoding="utf-8")
         logger.info("Wrote markdown: %s", md_path)
 
-        if page_spec.download_excel_attachments:
-            self._download_excels(page_spec, page)
+        if page_spec.download_excel_attachments and not self._download_excels(page_spec, page):
+            return False
 
         return True
 
@@ -283,48 +300,13 @@ class SyncManager:
                 names.add(file_name)
         return names
 
-    @staticmethod
-    def _parse_attachment_datetime(att: Dict) -> datetime:
-        when = att.get("version", {}).get("when", "")
-        if when:
-            try:
-                return datetime.fromisoformat(when.replace("Z", "+00:00")).replace(tzinfo=None)
-            except ValueError:
-                pass
-        name = att.get("title", "")
-        m = re.search(r"(20\d{2})(\d{2})(\d{2})", name)
-        if m:
-            try:
-                return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
-            except ValueError:
-                pass
-        return datetime.min
-
-    @staticmethod
-    def _pick_latest_role_files(attachments: List[Dict]) -> List[Dict]:
-        role_buckets = {"carrier": [], "shipper": []}
-        for att in attachments:
-            title = att.get("title", "")
-            lower = title.lower()
-            if "carrier" in lower:
-                role_buckets["carrier"].append(att)
-            elif "shipper" in lower:
-                role_buckets["shipper"].append(att)
-
-        selected = []
-        for role in ("carrier", "shipper"):
-            candidates = role_buckets[role]
-            if not candidates:
-                logger.warning("No %s excel attachment found for current page", role)
-                continue
-            candidates.sort(key=SyncManager._parse_attachment_datetime, reverse=True)
-            selected.append(candidates[0])
-        return selected
-
-    def _download_excels(self, page_spec: PageSpec, page: Dict) -> None:
+    def _download_excels(self, page_spec: PageSpec, page: Dict) -> bool:
+        bucket = (page_spec.standard, page_spec.version)
         attachments = self.client.list_attachments(page_spec.page_id)
-        if not attachments:
-            return
+        if attachments is None:
+            self.excel_stats["failed"] += 1
+            self.failed_excel_buckets.add(bucket)
+            return False
 
         out_dir = self.output_root / page_spec.standard / page_spec.version / "excel"
 
@@ -337,13 +319,19 @@ class SyncManager:
         referenced_names = self._extract_referenced_excel_names(page)
         if not referenced_names:
             logger.info("No excel links referenced in page %s; skipping excel export", page_spec.page_id)
-            return
+            return True
 
         excel_attachments = [att for att in excel_attachments if att.get("title", "") in referenced_names]
-
-        target_attachments = self._pick_latest_role_files(excel_attachments)
-        if not target_attachments:
-            return
+        matched_names = {att.get("title", "") for att in excel_attachments}
+        missing_names = referenced_names - matched_names
+        if missing_names:
+            logger.error(
+                "Referenced Excel attachments not returned by Confluence for page %s: %s",
+                page_spec.page_id,
+                ", ".join(sorted(missing_names)),
+            )
+            self.excel_stats["failed"] += len(missing_names)
+            self.failed_excel_buckets.add(bucket)
 
         out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -357,18 +345,40 @@ class SyncManager:
             if "__" in legacy_file.name:
                 legacy_file.unlink(missing_ok=True)
 
-        for att in target_attachments:
+        success = not missing_names
+        for att in sorted(excel_attachments, key=lambda item: item.get("title", "")):
             name = att.get("title", "")
+            self.expected_excel_by_bucket[bucket].add(name)
             download_path = att.get("_links", {}).get("download")
             if not download_path:
+                logger.error("No download link for Excel attachment %s", name)
+                self.excel_stats["failed"] += 1
+                self.failed_excel_buckets.add(bucket)
+                success = False
                 continue
             data = self.client.download_file(download_path)
             if data is None:
+                self.excel_stats["failed"] += 1
+                self.failed_excel_buckets.add(bucket)
+                success = False
                 continue
             file_path = out_dir / name
-            file_path.write_bytes(data)
-            self.expected_excel_by_bucket[(page_spec.standard, page_spec.version)].add(name)
-            logger.info("Saved Excel: %s", file_path)
+            if file_path.exists() and file_path.read_bytes() == data:
+                self.excel_stats["unchanged"] += 1
+                logger.info("Excel unchanged: %s", file_path)
+                continue
+
+            state = "updated" if file_path.exists() else "added"
+            temp_path = file_path.with_name(f".{file_path.name}.tmp")
+            try:
+                temp_path.write_bytes(data)
+                temp_path.replace(file_path)
+            finally:
+                temp_path.unlink(missing_ok=True)
+            self.excel_stats[state] += 1
+            logger.info("Excel %s: %s", state, file_path)
+
+        return success
 
     def write_index(self, only_standard: Optional[str]) -> None:
         lines = ["# Confluence Sync Index", "", f"Generated at `{datetime.utcnow().isoformat()}Z`", ""]

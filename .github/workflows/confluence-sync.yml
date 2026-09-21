@@ -40,9 +40,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r scripts/src/confluence/requirements.txt
 
-      - name: Run converter self-test
+      - name: Run sync tests
         run: |
           python scripts/src/confluence/sync-confluence.py --self-test
+          python -m unittest -v scripts/src/confluence/test_sync_confluence.py
 
       - name: Configure git
         run: |

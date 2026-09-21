@@ -1,6 +1,6 @@
 # Confluence Sync Index
 
-Generated at `2026-09-21T02:23:29.728768Z`
+Generated at `2026-09-21T09:14:10.616867Z`
 
 ## arrival-notice / 1.0.1
 

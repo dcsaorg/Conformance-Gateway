@@ -2,7 +2,7 @@
 
 - Confluence page id: `1740144652`
 - Confluence version: `11`
-- Synced at: `2026-09-21T02:23:28.544921Z`
+- Synced at: `2026-09-21T09:14:10.188103Z`
 
 # 1. What is Conformance?
 

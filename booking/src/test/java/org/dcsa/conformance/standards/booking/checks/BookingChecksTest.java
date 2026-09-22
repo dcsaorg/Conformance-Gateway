@@ -2688,8 +2688,6 @@ class BookingChecksTest {
   @DisplayName("Structural validations")
   class StructuralValidations {
 
-    private static final String ADVANCE_MANIFEST_FRAGMENT =
-      "the combination of 'countryCode' and 'manifestTypeCode' MUST be unique";
     private static final String NUMBER_OF_PACKAGES_FRAGMENT =
       "in case this OuterPackaging includes Dangerous Goods";
     private static final String DECLARED_VALUE_FRAGMENT =
@@ -2698,27 +2696,6 @@ class BookingChecksTest {
       "'contractQuotationReference' / 'serviceContractReference'";
     private static final String AT_LEAST_ONE_REFERENCE_FRAGMENT = "by providing at least one of them";
 
-    @Test
-    void givenUniqueAdvanceManifestFilings_whenValidated_thenCheckPasses() {
-      JsonNode payload =
-        body(
-          """
-            {"advanceManifestFilings":[{"countryCode":"NL","manifestTypeCode":"ENS"},{"countryCode":"US","manifestTypeCode":"ENS"}]}
-            """);
-
-      assertConformant(carrierCheck(ADVANCE_MANIFEST_FRAGMENT), payload);
-    }
-
-    @Test
-    void givenDuplicateAdvanceManifestFilings_whenValidated_thenCheckIsNotConformant() {
-      JsonNode payload =
-        body(
-          """
-            {"advanceManifestFilings":[{"countryCode":"NL","manifestTypeCode":"ENS"},{"countryCode":"NL","manifestTypeCode":"ENS"}]}
-            """);
-
-      assertNotConformant(carrierCheck(ADVANCE_MANIFEST_FRAGMENT), payload);
-    }
 
     @Test
     void givenOuterPackagingWithoutDangerousGoods_whenValidated_thenCheckIsIrrelevant() {

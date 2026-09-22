@@ -3,39 +3,41 @@ package org.dcsa.conformance.end.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import org.dcsa.conformance.end.party.EndorsementChainFilterParameter;
 import org.dcsa.conformance.end.party.SuppliedScenarioParameters;
 
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Getter
-public class SupplyScenarioParametersAction extends EndorsementChainAction{
+public class SupplyScenarioParametersAction extends EndorsementChainAction {
 
   private final LinkedHashSet<EndorsementChainFilterParameter> endorsementChainFilterParameters;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private static final String SUPPLIED_SCENARIO_PARAMETERS = "suppliedScenarioParameters";
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
   private static final String END_FILTER_PARAM_QUERY_PARAM_NAMES =
-      "endorsementChainFilterParamQueryParamNames";
+    "endorsementChainFilterParamQueryParamNames";
 
-  public SupplyScenarioParametersAction(String providerPartyName, EndorsementChainFilterParameter...endorsementChainFilterParameters) {
+  public SupplyScenarioParametersAction(
+    String providerPartyName,
+    String actionTitle,
+    EndorsementChainFilterParameter... endorsementChainFilterParameters) {
     super(
-        providerPartyName,
-        null,
-        null,
-        "SupplyScenarioParameters(%s)"
-            .formatted(
-                Arrays.stream(endorsementChainFilterParameters)
-                    .map(EndorsementChainFilterParameter::getParamName)
-                    .collect(Collectors.joining(", "))));
+      providerPartyName,
+      null,
+      null,
+      actionTitle);
 
     this.endorsementChainFilterParameters = new LinkedHashSet<>(Arrays.asList(endorsementChainFilterParameters));
 
   }
+
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
@@ -50,7 +52,7 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
     super.importJsonState(jsonState);
     if (jsonState.has(SUPPLIED_SCENARIO_PARAMETERS)) {
       suppliedScenarioParameters =
-          SuppliedScenarioParameters.fromJson(jsonState.required(SUPPLIED_SCENARIO_PARAMETERS));
+        SuppliedScenarioParameters.fromJson(jsonState.required(SUPPLIED_SCENARIO_PARAMETERS));
     }
   }
 
@@ -58,45 +60,43 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
   public ObjectNode asJsonNode() {
     ObjectNode objectNode = super.asJsonNode();
     ArrayNode jsonEndorsementChainFilterParam =
-        objectNode.putArray(END_FILTER_PARAM_QUERY_PARAM_NAMES);
+      objectNode.putArray(END_FILTER_PARAM_QUERY_PARAM_NAMES);
     endorsementChainFilterParameters.forEach(
-        endorsementChainFilterParameter ->
-            jsonEndorsementChainFilterParam.add(endorsementChainFilterParameter.getParamName()));
+      endorsementChainFilterParameter ->
+        jsonEndorsementChainFilterParam.add(endorsementChainFilterParameter.getParamName()));
     return objectNode;
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        null,
-        "prompt-provider-ssp.md");
+      null,
+      "prompt-provider-ssp.md");
   }
-
 
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
 
     return SuppliedScenarioParameters.fromMap(
-            endorsementChainFilterParameters.stream()
-                .collect(
-                    Collectors.toMap(
-                        Function.identity(),
-                        endorsementChainFilterParameter ->
-                            switch (endorsementChainFilterParameter) {
-                              case TRANSPORT_DOCUMENT_REFERENCE -> "HHL71800000";
-                              case TRANSPORT_DOCUMENT_SUB_REFERENCE ->
-                                  "fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9";
-                              case CARRIER_SCAC_CODE -> "YMLU";
-                              default -> "TODO";
-                            })))
-        .toJson();
+        endorsementChainFilterParameters.stream()
+          .collect(
+            Collectors.toMap(
+              Function.identity(),
+              endorsementChainFilterParameter ->
+                switch (endorsementChainFilterParameter) {
+                  case TRANSPORT_DOCUMENT_REFERENCE -> "HHL71800000";
+                  case TRANSPORT_DOCUMENT_SUB_REFERENCE -> "fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9";
+                  case CARRIER_SCAC_CODE -> "YMLU";
+                })))
+      .toJson();
   }
 
   @Override
   public Map<String, Boolean> getExpectedInputAttributes() {
-    Map<String, Boolean> expectedAttributes = super.getExpectedInputAttributes();
-    expectedAttributes.put("transportDocumentReference", true);
+    Map<String, Boolean> expectedAttributes = new LinkedHashMap<>();
+    endorsementChainFilterParameters.forEach(
+      filterParameter -> expectedAttributes.put(filterParameter.getParamName(), true));
     return expectedAttributes;
   }
 
@@ -104,11 +104,11 @@ public class SupplyScenarioParametersAction extends EndorsementChainAction{
   protected void doHandlePartyInput(JsonNode partyInput) {
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
     this.getDspConsumer()
-        .accept(
-            getDspSupplier()
-                .get()
-                .withTransportDocumentReference(
-                    partyInput.get("input").get(TRANSPORT_DOCUMENT_REFERENCE).asText()));
+      .accept(
+        getDspSupplier()
+          .get()
+          .withTransportDocumentReference(
+            partyInput.get("input").get(TRANSPORT_DOCUMENT_REFERENCE).asText()));
   }
 
   @Override

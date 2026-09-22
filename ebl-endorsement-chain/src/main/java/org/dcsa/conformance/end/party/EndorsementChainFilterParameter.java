@@ -1,10 +1,11 @@
 package org.dcsa.conformance.end.party;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.Getter;
 
 @Getter
 public enum EndorsementChainFilterParameter {
@@ -13,10 +14,10 @@ public enum EndorsementChainFilterParameter {
   CARRIER_SCAC_CODE("carrierSCACCode");
 
   public static final Map<String, EndorsementChainFilterParameter> byParamName =
-      Arrays.stream(values())
-          .collect(
-              Collectors.toUnmodifiableMap(
-                  EndorsementChainFilterParameter::getParamName, Function.identity()));
+    Arrays.stream(values())
+      .collect(
+        Collectors.toUnmodifiableMap(
+          EndorsementChainFilterParameter::getParamName, Function.identity()));
   private final String paramName;
 
   EndorsementChainFilterParameter(String paramName) {

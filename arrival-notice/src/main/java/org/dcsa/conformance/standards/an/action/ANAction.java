@@ -2,27 +2,30 @@ package org.dcsa.conformance.standards.an.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.core.util.JsonUtil;
 import org.dcsa.conformance.standards.an.party.DynamicScenarioParameters;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ANAction extends ConformanceAction {
 
   private final OverwritingReference<DynamicScenarioParameters> dsp;
 
   protected ANAction(
-      String sourcePartyName, String targetPartyName, ANAction previousAction, String actionTitle) {
+    String sourcePartyName, String targetPartyName, ANAction previousAction, String actionTitle) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.dsp =
-        previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null))
-            : new OverwritingReference<>(previousAction.dsp, null);
+      previousAction == null
+        ? new OverwritingReference<>(
+        null, new DynamicScenarioParameters(null, null, null, null, null))
+        : new OverwritingReference<>(previousAction.dsp, null);
   }
 
   @Override
@@ -44,7 +47,7 @@ public class ANAction extends ConformanceAction {
     if (previousAction != null) {
       this.dsp.set(null);
     } else {
-      this.dsp.set(new DynamicScenarioParameters(null, null));
+      this.dsp.set(new DynamicScenarioParameters(null, null, null, null, null));
     }
   }
 
@@ -53,34 +56,33 @@ public class ANAction extends ConformanceAction {
     super.doHandleExchange(exchange);
 
     if (this instanceof SubscriberGetANAction) {
-      return;
+      updatePaginationState(exchange);
     }
+  }
 
-    DynamicScenarioParameters dspReference = getDspSupplier().get();
-
-    var updatedDsp = dspReference;
-
-    JsonNode jsonBody = exchange.getRequest().message().body().getJsonBody();
-
-    List<String> transportDocumentReferences = new ArrayList<>();
-    JsonNode arrivalNotices = null;
-    if (this instanceof PublisherPostANNotificationAction) {
-      arrivalNotices = jsonBody.get("arrivalNoticeNotifications");
-    } else {
-      arrivalNotices = jsonBody.get("arrivalNotices");
+  private void updatePaginationState(ConformanceExchange exchange) {
+    DynamicScenarioParameters current = getDspSupplier().get();
+    DynamicScenarioParameters updated = current;
+    var cursorValues = exchange.getResponse().message().headers().get("Next-Page-Cursor");
+    if (cursorValues != null && !cursorValues.isEmpty()) {
+      updated = updated.withCursor(cursorValues.iterator().next());
     }
-    if (!JsonUtil.isMissingOrEmpty(arrivalNotices)) {
-      for (JsonNode arrivalNotice : arrivalNotices) {
-        JsonNode tdr = arrivalNotice.get("transportDocumentReference");
-        if (tdr != null && tdr.isTextual()) {
-          transportDocumentReferences.add(tdr.asText());
-        }
-      }
-    updatedDsp =
-        getDspSupplier().get().withTransportDocumentReferences(transportDocumentReferences);
+    String pageHash = hash(exchange.getResponse().message().body().toString());
+    updated =
+      previousAction instanceof SubscriberGetANAction
+        ? updated.withSecondPageHash(pageHash)
+        : updated.withFirstPageHash(pageHash);
+    if (!current.equals(updated)) {
+      dsp.set(updated);
     }
-    if (!dspReference.equals(updatedDsp)) {
-      dsp.set(updatedDsp);
+  }
+
+  private static String hash(String value) {
+    try {
+      return HexFormat.of()
+        .formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 is not available", e);
     }
   }
 

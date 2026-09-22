@@ -9,7 +9,10 @@ export interface RunnerOptions {
   timeoutMs: number;
   pollIntervalMs: number;
   startCommand?: string;
+  notificationMode?: NotificationMode;
 }
+
+export type NotificationMode = 'with' | 'without' | 'both';
 
 export interface RoleResult {
   role: string;
@@ -21,6 +24,7 @@ export interface RunnerResult {
   outputPath: string;
   durationMs: number;
   roles: RoleResult[];
+  notificationMode: Exclude<NotificationMode, 'both'>;
 }
 
 const PASSING_STATUSES = new Set(['CONFORMANT', 'COMPLETED WITHOUT OPTIONAL TRAFFIC']);
@@ -29,6 +33,7 @@ const STATUS_PATTERN =
   /<h2>(.*?) conformance<\/h2><details open><summary>.*? (CONFORMANT|PARTIALLY CONFORMANT|COMPLETED WITHOUT OPTIONAL TRAFFIC|SKIPPED|NON-CONFORMANT|IRRELEVANT|NO TRAFFIC) <\/summary>/g;
 const REQUEST_TIMEOUT_MS = 30_000;
 const EXPECTED_ALL_IN_ONE_ROLE_RESULTS = 2;
+const OPTIONAL_NOTIFICATION_SANDBOX_PREFIXES = ['booking-', 'ebl-'];
 
 function usage(): string {
   return `Run one local all-in-one conformance suite and save its HTML report.
@@ -39,7 +44,8 @@ Usage:
 
 Options:
   --base-url <url>          Gateway URL (default: http://localhost:8080)
-  --output <file>           HTML output path (default: target/conformance-reports/<id>.html)
+  --output <file>           HTML output path (notification mode suffixes are added for two reports)
+  --notification-mode <m>  with, without, both, or auto (default: auto)
   --timeout-seconds <n>     Overall startup/execution timeout (default: 900)
   --poll-interval-ms <n>    Status polling interval (default: 500)
   --start-command <command> Start the application, then stop it after the run
@@ -94,6 +100,21 @@ async function requestText(url: string, deadline: number): Promise<string> {
 
 function endpoint(baseUrl: string, token: string, sandboxId: string, operation: string): string {
   return `${baseUrl}/conformance/${encodeURIComponent(token)}/sandbox/${encodeURIComponent(sandboxId)}/${operation}`;
+}
+
+function outputPathForMode(
+  outputPath: string,
+  mode: Exclude<NotificationMode, 'both'>,
+  addModeSuffix: boolean,
+): string {
+  if (!addModeSuffix) return outputPath;
+  const extension = path.extname(outputPath);
+  const base = extension ? outputPath.slice(0, -extension.length) : outputPath;
+  return `${base}-${mode}-notifications${extension || '.html'}`;
+}
+
+export function supportsOptionalNotifications(sandboxId: string): boolean {
+  return OPTIONAL_NOTIFICATION_SANDBOX_PREFIXES.some(prefix => sandboxId.startsWith(prefix));
 }
 
 function discoverToken(homepage: string, sandboxId: string): string {
@@ -187,55 +208,96 @@ export async function stopApplication(
   await exited;
 }
 
-export async function runConformanceSuite(options: RunnerOptions): Promise<RunnerResult> {
+async function runConformanceSuiteMode(
+  options: RunnerOptions,
+  notificationMode: Exclude<NotificationMode, 'both'>,
+  outputPath: string,
+  deadline: number,
+): Promise<RunnerResult> {
   const startedAt = Date.now();
-  const deadline = startedAt + options.timeoutMs;
+  const homepage = await waitForGateway(options.baseUrl, deadline);
+  const token = discoverToken(homepage, options.sandboxId);
+
+  console.log(`Running conformance suite (${notificationMode} notifications): ${options.sandboxId}`);
+  const resetOperation =
+    notificationMode === 'without' ? 'reset?suppressNotifications=true' : 'reset';
+  await requestText(endpoint(options.baseUrl, token, options.sandboxId, resetOperation), deadline);
+  await waitForCompletion(
+    options.baseUrl,
+    token,
+    options.sandboxId,
+    deadline,
+    options.pollIntervalMs,
+  );
+
+  const report = await requestText(
+    endpoint(options.baseUrl, token, options.sandboxId, 'report'),
+    deadline,
+  );
+  await mkdir(path.dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, report, 'utf8');
+  const roles = parseRoleResults(report);
+  if (roles.length === 0) {
+    throw new Error(`Report contains no top-level role results; saved diagnostic report to ${outputPath}`);
+  }
+  if (roles.length !== EXPECTED_ALL_IN_ONE_ROLE_RESULTS) {
+    throw new Error(
+      `Expected ${EXPECTED_ALL_IN_ONE_ROLE_RESULTS} top-level role results but parsed ${roles.length}; ` +
+        `saved diagnostic report to ${outputPath}`,
+    );
+  }
+  const failures = roles.filter(result => !PASSING_STATUSES.has(result.status));
+  if (failures.length > 0) {
+    throw new Error(
+      `Conformance failed (${failures.map(result => `${result.role}: ${result.status}`).join(', ')}); ` +
+        `report saved to ${outputPath}`,
+    );
+  }
+
+  return {
+    sandboxId: options.sandboxId,
+    outputPath,
+    durationMs: Date.now() - startedAt,
+    roles,
+    notificationMode,
+  };
+}
+
+export async function runConformanceSuite(options: RunnerOptions): Promise<RunnerResult> {
+  if (options.notificationMode === 'both') {
+    throw new Error("runConformanceSuite cannot return notificationMode 'both'; use runConformanceSuites");
+  }
+  const deadline = Date.now() + options.timeoutMs;
   let application: ChildProcess | undefined;
   try {
     if (options.startCommand) application = startApplication(options.startCommand);
-    const homepage = await waitForGateway(options.baseUrl, deadline);
-    const token = discoverToken(homepage, options.sandboxId);
+    const mode = options.notificationMode === 'without' ? 'without' : 'with';
+    return await runConformanceSuiteMode(options, mode, options.outputPath, deadline);
+  } finally {
+    await stopApplication(application);
+  }
+}
 
-    console.log(`Running conformance suite: ${options.sandboxId}`);
-    await requestText(endpoint(options.baseUrl, token, options.sandboxId, 'reset'), deadline);
-    await waitForCompletion(
-      options.baseUrl,
-      token,
-      options.sandboxId,
-      deadline,
-      options.pollIntervalMs,
-    );
-
-    const report = await requestText(
-      endpoint(options.baseUrl, token, options.sandboxId, 'report'),
-      deadline,
-    );
-    await mkdir(path.dirname(options.outputPath), { recursive: true });
-    await writeFile(options.outputPath, report, 'utf8');
-    const roles = parseRoleResults(report);
-    if (roles.length === 0) {
-      throw new Error(`Report contains no top-level role results; saved diagnostic report to ${options.outputPath}`);
-    }
-    if (roles.length !== EXPECTED_ALL_IN_ONE_ROLE_RESULTS) {
-      throw new Error(
-        `Expected ${EXPECTED_ALL_IN_ONE_ROLE_RESULTS} top-level role results but parsed ${roles.length}; ` +
-          `saved diagnostic report to ${options.outputPath}`,
+export async function runConformanceSuites(options: RunnerOptions): Promise<RunnerResult[]> {
+  const deadline = Date.now() + options.timeoutMs;
+  let application: ChildProcess | undefined;
+  try {
+    if (options.startCommand) application = startApplication(options.startCommand);
+    const notificationMode = options.notificationMode ?? 'with';
+    const modes: Array<Exclude<NotificationMode, 'both'>> =
+      notificationMode === 'both' ? ['with', 'without'] : [notificationMode];
+    const results: RunnerResult[] = [];
+    for (const mode of modes) {
+      results.push(
+        await runConformanceSuiteMode(
+          options,
+          mode,
+          outputPathForMode(options.outputPath, mode, modes.length > 1),
+          deadline,
+        ),
       );
     }
-    const failures = roles.filter(result => !PASSING_STATUSES.has(result.status));
-    if (failures.length > 0) {
-      throw new Error(
-        `Conformance failed (${failures.map(result => `${result.role}: ${result.status}`).join(', ')}); ` +
-          `report saved to ${options.outputPath}`,
-      );
-    }
-
-    return {
-      sandboxId: options.sandboxId,
-      outputPath: options.outputPath,
-      durationMs: Date.now() - startedAt,
-      roles,
-    };
+    return results;
   } finally {
     await stopApplication(application);
   }
@@ -257,6 +319,7 @@ export function parseArguments(args: string[]): RunnerOptions | undefined {
   let timeoutMs = 900_000;
   let pollIntervalMs = 500;
   let startCommand: string | undefined;
+  let requestedNotificationMode: NotificationMode | 'auto' = 'auto';
 
   for (let index = 0; index < args.length; index += 1) {
     const option = args[index];
@@ -273,6 +336,12 @@ export function parseArguments(args: string[]): RunnerOptions | undefined {
       case '--timeout-seconds': timeoutMs = Number(value) * 1_000; break;
       case '--poll-interval-ms': pollIntervalMs = Number(value); break;
       case '--start-command': startCommand = value; break;
+      case '--notification-mode':
+        if (!['auto', 'with', 'without', 'both'].includes(value)) {
+          throw new Error('--notification-mode must be auto, with, without, or both');
+        }
+        requestedNotificationMode = value as NotificationMode | 'auto';
+        break;
       default: throw new Error(`Unknown option: ${option}`);
     }
   }
@@ -290,6 +359,10 @@ export function parseArguments(args: string[]): RunnerOptions | undefined {
   if (!Number.isFinite(pollIntervalMs) || pollIntervalMs <= 0) {
     throw new Error('--poll-interval-ms must be positive');
   }
+  const notificationMode =
+    requestedNotificationMode === 'auto'
+      ? supportsOptionalNotifications(sandboxId) ? 'both' : 'with'
+      : requestedNotificationMode;
 
   return {
     baseUrl,
@@ -299,6 +372,7 @@ export function parseArguments(args: string[]): RunnerOptions | undefined {
     timeoutMs,
     pollIntervalMs,
     startCommand,
+    notificationMode,
   };
 }
 
@@ -309,12 +383,15 @@ async function main(): Promise<void> {
       console.log(usage());
       return;
     }
-    const result = await runConformanceSuite(options);
-    console.log(
-      `Conformance passed in ${(result.durationMs / 1_000).toFixed(1)}s: ` +
-        result.roles.map(role => `${role.role}: ${role.status}`).join(', '),
-    );
-    console.log(`Report: ${result.outputPath}`);
+    const results = await runConformanceSuites(options);
+    for (const result of results) {
+      console.log(
+        `Conformance passed (${result.notificationMode} notifications) in ` +
+          `${(result.durationMs / 1_000).toFixed(1)}s: ` +
+          result.roles.map(role => `${role.role}: ${role.status}`).join(', '),
+      );
+      console.log(`Report: ${result.outputPath}`);
+    }
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;

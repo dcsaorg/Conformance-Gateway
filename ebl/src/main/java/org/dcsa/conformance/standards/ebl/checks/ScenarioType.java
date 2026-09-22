@@ -76,4 +76,13 @@ public enum ScenarioType {
       default -> "";
     };
   }
+
+  public String tdScopeName() {
+    return switch (this) {
+      case REGULAR_SWB -> "Sea Waybill";
+      case REGULAR_STRAIGHT_BL -> "Straight B/L";
+      case REGULAR_NEGOTIABLE_BL -> "Negotiable B/L";
+      default -> getTDScenarioTypeName();
+    };
+  }
 }

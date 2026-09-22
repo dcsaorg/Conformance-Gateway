@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -21,19 +20,8 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
-      TransportDocumentStatus expectedTdStatus,
+      List<TransportDocumentStatus> expectedTdStatus,
       JsonSchemaValidator responseSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "GET TD", 200, true);
-    this.expectedTdStatus = List.of(expectedTdStatus);
-    this.responseSchemaValidator = responseSchemaValidator;
-  }
-
-  public Shipper_GetTransportDocumentAction(
-          String carrierPartyName,
-          String shipperPartyName,
-          EblAction previousAction,
-          List<TransportDocumentStatus> expectedTdStatus,
-          JsonSchemaValidator responseSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "GET TD", 200, true);
     this.expectedTdStatus = expectedTdStatus;
     this.responseSchemaValidator = responseSchemaValidator;
@@ -41,13 +29,13 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("tdr", getDspSupplier().get().transportDocumentReference());
+    return super.asJsonNode().put("tdr", getTransportDocumentReference());
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        Map.of("REFERENCE", getTransportDocumentReference()),
         "prompt-shipper-get-td.md",
         "prompt-shipper-refresh-complete.md");
   }
@@ -59,24 +47,16 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
     getDspConsumer().accept(dsp);
   }
 
-  @Override
-  public Set<String> skippableForRoles() {
-    return Set.of(EblRole.SHIPPER.getConfigName());
-  }
 
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {
-    var dsp = getDspSupplier().get();
-    var tdr =
-        dsp.transportDocumentReference() != null
-            ? dsp.transportDocumentReference()
-            : "<UNKNOWN-TDR>";
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
+            new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "GET"),
             new UrlPathCheck(
-                EblRole::isShipper, getMatchedExchangeUuid(), "/v3/transport-documents/" + tdr),
+                EblRole::isShipper, getMatchedExchangeUuid(), getTransportDocumentEndpoint()),
             new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,

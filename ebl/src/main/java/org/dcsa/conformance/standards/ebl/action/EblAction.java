@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -26,6 +27,8 @@ import org.dcsa.conformance.standardscommons.party.EblDynamicScenarioParameters;
 
 @Getter
 public abstract class EblAction extends BookingAndEblAction {
+
+  private static final String TRANSPORT_DOCUMENTS_ENDPOINT = "/v3/transport-documents/";
 
   protected final Set<Integer> expectedStatus;
   private final boolean isWithNotifications;
@@ -65,7 +68,7 @@ public abstract class EblAction extends BookingAndEblAction {
       getEblDspReference().set(null);
     } else {
       getEblDspReference()
-          .set(new EblDynamicScenarioParameters(null, null, null, null, null, false, false));
+          .set(new EblDynamicScenarioParameters(null, null, null, null, null, null, false, false));
     }
   }
 
@@ -89,6 +92,19 @@ public abstract class EblAction extends BookingAndEblAction {
 
   protected EblDynamicScenarioParameters getDSP() {
     return getDspSupplier().get();
+  }
+
+  protected String getTransportDocumentReference() {
+    return getDSP().transportDocumentReference();
+  }
+
+  protected String getTransportDocumentEndpoint() {
+    return TRANSPORT_DOCUMENTS_ENDPOINT
+        + Objects.toString(getTransportDocumentReference(), "<UNKNOWN-TDR>");
+  }
+
+  protected String getTransportDocumentAmendmentEndpoint() {
+    return getTransportDocumentEndpoint() + "/amendment";
   }
 
   protected String getMarkdownHumanReadablePrompt(
@@ -195,7 +211,8 @@ public abstract class EblAction extends BookingAndEblAction {
             EblRole::isCarrier,
             notificationExchangeUuid,
             "/v3/shipping-instructions-notifications"),
-        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204)
+        ResponseStatusCheck.forSuccessfulResponse(
+                titlePrefix, EblRole::isShipper, notificationExchangeUuid)
             .withRelevance(isWithNotifications),
         ApiHeaderCheck.createNotificationCheck(
             titlePrefix,
@@ -279,7 +296,8 @@ public abstract class EblAction extends BookingAndEblAction {
             EblRole::isCarrier,
             notificationExchangeUuid,
             "/v3/transport-document-notifications"),
-        new ResponseStatusCheck(titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204)
+        ResponseStatusCheck.forSuccessfulResponse(
+                titlePrefix, EblRole::isShipper, notificationExchangeUuid)
             .withRelevance(isWithNotifications),
         ApiHeaderCheck.createNotificationCheck(
             titlePrefix,

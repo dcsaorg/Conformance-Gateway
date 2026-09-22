@@ -70,6 +70,7 @@ class EblComponentFactory extends AbstractComponentFactory {
       boolean isWithNotifications) {
     return EblScenarioListBuilder.createModuleScenarioListBuilders(
         this,
+        getReportRoleNames(partyConfigurations, counterpartConfigurations),
         isWithNotifications,
         this.standardVersion,
         _findPartyOrCounterpartName(

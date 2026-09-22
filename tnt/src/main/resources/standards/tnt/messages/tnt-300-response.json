@@ -145,8 +145,8 @@
       "equipmentDetails": {
         "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
         "ISOEquipmentCode": "45G1",
-        "emptyIndicatorCode": "EMPTY",
-        "movementType": "IMPORT"
+        "emptyIndicator": "EMPTY",
+        "transportPhase": "IMPORT"
       }
     },
     {

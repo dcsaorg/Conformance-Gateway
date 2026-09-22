@@ -2,16 +2,6 @@ package org.dcsa.conformance.standards.an.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -28,6 +18,17 @@ import org.dcsa.conformance.standards.an.action.PublisherPostANAction;
 import org.dcsa.conformance.standards.an.action.PublisherPostANNotificationAction;
 import org.dcsa.conformance.standards.an.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.an.checks.ScenarioType;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ANPublisher extends ConformanceParty {
@@ -53,18 +54,18 @@ public class ANPublisher extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-        Map.entry(PublisherPostANAction.class, this::sendArrivalNotices),
-        Map.entry(PublisherPostANNotificationAction.class, this::sendArrivalNoticeNotification));
+      Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+      Map.entry(PublisherPostANAction.class, this::sendArrivalNotices),
+      Map.entry(PublisherPostANNotificationAction.class, this::sendArrivalNoticeNotification));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info(
-        "{}.supplyScenarioParameters({})",
-        getClass().getSimpleName(),
-        actionPrompt.toPrettyString());
+      "{}.supplyScenarioParameters({})",
+      getClass().getSimpleName(),
+      actionPrompt.toPrettyString());
 
-    ObjectNode ssp = SupplyScenarioParametersAction.examplePrompt();
+    ObjectNode ssp = (ObjectNode) actionPrompt.required("exampleQueryParameters");
     asyncOrchestratorPostPartyInput(actionPrompt.required("actionId").asText(), ssp);
 
     addOperatorLogEntry("Supplying scenario parameters: %s".formatted(ssp.toPrettyString()));
@@ -75,7 +76,7 @@ public class ANPublisher extends ConformanceParty {
     String filePath = getAnPayloadFilepath(scenarioType);
 
     JsonNode jsonRequestBody = JsonToolkit.templateFileToJsonNode(filePath,
-        Map.of("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
+      Map.of("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
     syncCounterpartPost("/arrival-notices", jsonRequestBody);
     addOperatorLogEntry("Sent Arrival Notices ");
   }
@@ -83,21 +84,21 @@ public class ANPublisher extends ConformanceParty {
   private String getAnPayloadFilepath(ScenarioType scenarioType) {
 
     return "/standards/an/messages/"
-        + scenarioType.arrivalNoticePayload(apiVersion.toLowerCase().replaceAll("[.-]", ""));
+      + scenarioType.arrivalNoticePayload(apiVersion.toLowerCase().replaceAll("[.-]", ""));
   }
 
   private String getAnRegularResponseFilepath() {
 
     return "/standards/an/messages/"
-        + ScenarioType.BASIC.arrivalNoticeResponse(apiVersion.toLowerCase().replaceAll("[.-]", ""));
+      + ScenarioType.BASIC.arrivalNoticeResponse(apiVersion.toLowerCase().replaceAll("[.-]", ""));
   }
 
   private void sendArrivalNoticeNotification(JsonNode actionPrompt) {
     JsonNode jsonRequestBody =
-        JsonToolkit.templateFileToJsonNode(
-            "/standards/an/messages/arrivalnotice-api-%s-post-notification-request.json"
-                .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
-            Map.of("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
+      JsonToolkit.templateFileToJsonNode(
+        "/standards/an/messages/arrivalnotice-api-%s-post-notification-request.json"
+          .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
+        Map.of("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", ReferenceGenerator.newReference()));
 
     syncCounterpartPost("/arrival-notice-notifications", jsonRequestBody);
     addOperatorLogEntry("Sent Arrival Notice Notifications");
@@ -107,22 +108,33 @@ public class ANPublisher extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
 
     Collection<String> tdrValues = request.queryParams().get("transportDocumentReferences");
-    Optional<String> tdrParam =
-        (tdrValues == null ? Collections.<String>emptyList() : tdrValues).stream().findFirst();
+    String tdrParam =
+      (tdrValues == null ? Collections.<String>emptyList() : tdrValues).stream()
+        .findFirst()
+        .orElse("");
 
     Set<String> requestedTdrs =
-        tdrParam.stream()
-            .flatMap(s -> Arrays.stream(s.split(",")))
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+      Arrays.stream(tdrParam.split(","))
+        .map(String::trim)
+        .filter(s -> !s.isEmpty())
+        .collect(Collectors.toCollection(LinkedHashSet::new));
 
-    String chosenTdr = requestedTdrs.stream().findFirst().orElse("");
+    String chosenTdr = requestedTdrs.stream().findFirst().orElse("HHL71800000");
     Map<String, String> templateVars = Map.of("TRANSPORT_DOCUMENT_REFERENCE", chosenTdr);
 
     String filePath = getAnRegularResponseFilepath();
     JsonNode responseObject = JsonToolkit.templateFileToJsonNode(filePath, templateVars);
+    boolean isSecondPage = request.queryParams().containsKey("cursor");
+    if (isSecondPage) {
+      ((ObjectNode) responseObject.path("arrivalNotices").path(0))
+        .put("issueDateTime", "2024-03-05T00:00:00Z");
+    }
+    Map<String, Collection<String>> headers =
+      new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
+    if (request.queryParams().containsKey("limit") && !isSecondPage) {
+      headers.put("Next-Page-Cursor", List.of("AN-page-2"));
+    }
     return request.createResponse(
-        200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(responseObject));
+      200, headers, new ConformanceMessageBody(responseObject));
   }
 }

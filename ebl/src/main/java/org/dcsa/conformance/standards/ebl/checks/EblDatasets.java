@@ -70,6 +70,34 @@ public class EblDatasets {
           "SHIPPERSLOADSTOWWEIGHTANDCOUNT",
           "INTRANSITCLAUSE");
 
+  public static final KeywordDataset REQUESTED_CARRIER_CERTIFICATES_SET =
+      KeywordDataset.staticDataset(
+          "SHIPMENT_VOYAGE_PARTICULARS_1",
+          "SHIPMENT_VOYAGE_PARTICULARS_2",
+          "SHIPMENT_VOYAGE_PARTICULARS_3",
+          "SHIPMENT_VOYAGE_PARTICULARS_4",
+          "SHIPMENT_VOYAGE_PARTICULARS_5",
+          "SHIPMENT_VOYAGE_PARTICULARS_6",
+          "SHIPMENT_VOYAGE_PARTICULARS_7",
+          "VESSEL_PARTICULARS_1",
+          "VESSEL_PARTICULARS_2",
+          "VESSEL_PARTICULARS_3",
+          "VESSEL_PARTICULARS_4",
+          "VESSEL_PARTICULARS_5",
+          "VESSEL_PARTICULARS_6",
+          "VESSEL_PARTICULARS_7",
+          "VESSEL_PARTICULARS_8",
+          "VESSEL_PARTICULARS_9",
+          "VESSEL_PARTICULARS_10",
+          "VESSEL_PARTICULARS_11",
+          "VESSEL_PARTICULARS_12",
+          "VESSEL_PARTICULARS_13",
+          "VESSEL_PARTICULARS_14",
+          "VESSEL_PARTICULARS_15",
+          "VESSEL_PARTICULARS_16",
+          "VESSEL_PARTICULARS_17",
+          "VESSEL_PARTICULARS_18");
+
   public static final KeywordDataset PARTY_FUNCTION_CODE =
       KeywordDataset.staticDataset("SCO", "DDR", "DDS", "COW", "COX", "CS", "MF", "WH");
   public static final KeywordDataset PARTY_FUNCTION_CODE_HBL =

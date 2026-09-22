@@ -40,7 +40,15 @@
               "@aws-crypto/sha256-js",
               "js-cookie",
               "isomorphic-unfetch"
-            ]
+            ],
+            "optimization": {
+              "scripts": true,
+              "styles": {
+                "minify": true,
+                "inlineCritical": false
+              },
+              "fonts": true
+            }
           },
           "configurations": {
             "production": {

@@ -2410,4 +2410,16 @@ public class EblChecks {
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';
   }
+
+  public static String scenarioSpecificSiValidationMessage(ScenarioType scenarioType) {
+    return switch (scenarioType) {
+      case REGULAR_SWB ->
+          "For Sea Waybill: transportDocumentTypeCode must equal SWB and isToOrder must equal false.";
+      case REGULAR_STRAIGHT_BL ->
+          "For Straight B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal false.";
+      case REGULAR_NEGOTIABLE_BL ->
+          "For Negotiable B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal true.";
+      default -> "Invalid scenario type for SI validation.";
+    };
+  }
 }

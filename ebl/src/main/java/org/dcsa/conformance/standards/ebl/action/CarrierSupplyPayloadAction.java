@@ -250,10 +250,11 @@ public class CarrierSupplyPayloadAction extends EblAction {
   @Override
   protected void doHandlePartyInput(JsonNode partyInput) {
     JsonNode input = partyInput.get(INPUT);
+    ScenarioType effectiveScenarioType = inputScenarioType(input);
     getCarrierPayloadConsumer().accept(input);
-    if (includeAmendment) {
+    if (includeAmendment || allowsAnySiTypeValidation()) {
       getDspConsumer()
-          .accept(getDspSupplier().get().withScenarioType(inputScenarioType(input).name()));
+          .accept(getDspSupplier().get().withScenarioType(effectiveScenarioType.name()));
     }
     if (isTd && input.has("transportDocumentReference")) {
       getDspConsumer()
@@ -295,7 +296,7 @@ public class CarrierSupplyPayloadAction extends EblAction {
   }
 
   ScenarioType inputScenarioType(JsonNode input) {
-    if (!includeAmendment) {
+    if (!includeAmendment && !allowsAnySiTypeValidation()) {
       return scenarioType;
     }
     return switch (input.path("transportDocumentTypeCode").asText()) {
@@ -306,6 +307,10 @@ public class CarrierSupplyPayloadAction extends EblAction {
               : ScenarioType.REGULAR_STRAIGHT_BL;
       default -> scenarioType;
     };
+  }
+
+  private boolean allowsAnySiTypeValidation() {
+    return allowAnySiType && !isTd;
   }
 
   Set<String> validateAmendedTransportDocument(JsonNode input) {

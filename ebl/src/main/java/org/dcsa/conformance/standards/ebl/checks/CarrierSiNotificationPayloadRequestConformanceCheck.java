@@ -65,7 +65,8 @@ public class CarrierSiNotificationPayloadRequestConformanceCheck
             buildChecksWithCondition(
                 UPDATED_SHIPPING_INSTRUCTIONS_LABEL,
                 UPDATED_SHIPPING_INSTRUCTIONS_PATH,
-                updatedShippingInstructionsStatus != null,
+                updatedShippingInstructionsStatus != null
+                    && updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY,
                 () ->
                     EblChecks.getSiPayloadChecks(
                         shippingInstructionsStatus,

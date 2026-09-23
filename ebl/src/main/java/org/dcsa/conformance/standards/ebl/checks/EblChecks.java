@@ -1826,11 +1826,13 @@ public class EblChecks {
     List<JsonContentCheck> checks = new ArrayList<>();
 
     checks.add(
-        JsonAttribute.mustEqual(
-            "[%s] Verify that the correct '%s' is used"
-                .formatted(SCENARIO, TRANSPORT_DOCUMENT_TYPE_CODE),
-            TRANSPORT_DOCUMENT_TYPE_CODE,
-            scenarioType::transportDocumentTypeCode));
+        isTD
+            ? JsonAttribute.mustEqual(
+                "[%s] Verify that the correct '%s' is used"
+                    .formatted(SCENARIO, TRANSPORT_DOCUMENT_TYPE_CODE),
+                TRANSPORT_DOCUMENT_TYPE_CODE,
+                scenarioType::transportDocumentTypeCode)
+            : siScopeCheck(scenarioType));
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
@@ -1841,6 +1843,18 @@ public class EblChecks {
                 JsonAttribute.path(OUTER_PACKAGING, JsonAttribute.matchedMustBePresent()))));
 
     return checks;
+  }
+
+  private static JsonContentCheck siScopeCheck(ScenarioType scenarioType) {
+    return describedSiCheck(
+        scenarioSpecificSiValidationMessage(scenarioType),
+        JsonAttribute.mustEqual(
+            JsonPointer.compile(S.formatted(TRANSPORT_DOCUMENT_TYPE_CODE)),
+            scenarioType.transportDocumentTypeCode()),
+        JsonAttribute.mustEqual(
+            "Validate scenario-specific '%s'.".formatted(IS_TO_ORDER),
+            JsonPointer.compile(S.formatted(IS_TO_ORDER)),
+            scenarioType.isToOrder()));
   }
 
   private static JsonContentMatchedValidation scenarioCustomsReferencesCheck(
@@ -1937,21 +1951,15 @@ public class EblChecks {
     var checks = new ArrayList<JsonContentCheck>();
 
     checks.add(
-        JsonAttribute.mustEqual(
-            SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference()));
-
-    checks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
     if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
-      var updatedStatusCheck =
-          getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus);
-      checks.add(updatedStatusCheck);
+      checks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+      checks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     }
 
     checks.addAll(STATIC_SI_CHECKS);
     checks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
-    checks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
 
     checks.add(FEEDBACKS_PRESENCE);
 
@@ -2036,11 +2044,12 @@ public class EblChecks {
     jsonContentChecks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
-    jsonContentChecks.add(
-        getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+    if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
+      jsonContentChecks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+      jsonContentChecks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
+    }
 
     jsonContentChecks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
-    jsonContentChecks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     jsonContentChecks.add(FEEDBACKS_PRESENCE);
     jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY);
     jsonContentChecks.add(VALID_FEEDBACKS_CODE);
@@ -2409,5 +2418,18 @@ public class EblChecks {
     // DT-437
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';
+  }
+
+  public static String scenarioSpecificSiValidationMessage(ScenarioType scenarioType) {
+    return switch (scenarioType.transportDocumentTypeCode()) {
+      case SWB ->
+          "For Sea Waybill: transportDocumentTypeCode must equal SWB and isToOrder must equal false.";
+      case BOL ->
+          scenarioType.isToOrder()
+              ? "For Negotiable B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal true."
+              : "For Straight B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal false.";
+      default ->
+          "For this scenario: transportDocumentTypeCode and isToOrder must match the scope definition.";
+    };
   }
 }

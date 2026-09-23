@@ -131,13 +131,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     return carrierSupplyScenarioParameters(scenarioType, isTd)
         .then(
             uc1ShipperSubmitShippingInstructions()
-                .then(shipperGetShippingInstructions(SI_RECEIVED, false)));
+                .then(shipperGetShippingInstructions(SI_RECEIVED, SI_ANY, false)));
   }
 
   private static EblScenarioListBuilder shipperRequiredSiScenarios(
       ScenarioType scenarioType, boolean isTd) {
     return uc1ShipperSubmitShippingInstructionsStandalone(scenarioType, uc1TitleFor(scenarioType))
-        .then(shipperGetShippingInstructions(SI_RECEIVED, false));
+        .then(shipperGetShippingInstructions(SI_RECEIVED, SI_ANY, false));
   }
 
   private static EblScenarioListBuilder carrierOptionalSiScenarios(boolean isTd) {

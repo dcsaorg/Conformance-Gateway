@@ -69,6 +69,52 @@ class CarrierSupplyPayloadActionTest {
   }
 
   @Test
+  void anySiOptionalScenarioInfersEverySupportedShippingInstructionsScope() {
+    CarrierSupplyPayloadAction anySiAction =
+        new CarrierSupplyPayloadAction(
+            "Carrier", ScenarioType.REGULAR_STRAIGHT_BL, "3.0.0", null, false, false, true);
+
+    assertEquals(
+        ScenarioType.REGULAR_SWB,
+        anySiAction.inputScenarioType(shippingInstructionsFor(ScenarioType.REGULAR_SWB)));
+    assertEquals(
+        ScenarioType.REGULAR_STRAIGHT_BL,
+        anySiAction.inputScenarioType(shippingInstructionsFor(ScenarioType.REGULAR_STRAIGHT_BL)));
+    assertEquals(
+        ScenarioType.REGULAR_NEGOTIABLE_BL,
+        anySiAction.inputScenarioType(shippingInstructionsFor(ScenarioType.REGULAR_NEGOTIABLE_BL)));
+  }
+
+  @Test
+  void anySiOptionalScenarioAcceptsEverySupportedShippingInstructionsTypeAndUpdatesDsp() {
+    JsonSchemaValidator schemaValidator =
+        JsonSchemaValidator.getInstance(
+            "/standards/ebl/schemas/EBL_v3.0.0.yaml", "CreateShippingInstructions");
+
+    for (ScenarioType scenarioType :
+        Set.of(
+            ScenarioType.REGULAR_SWB,
+            ScenarioType.REGULAR_STRAIGHT_BL,
+            ScenarioType.REGULAR_NEGOTIABLE_BL)) {
+      CarrierSupplyPayloadAction anySiAction =
+          new CarrierSupplyPayloadAction(
+              "Carrier",
+              ScenarioType.REGULAR_STRAIGHT_BL,
+              "3.0.0",
+              schemaValidator,
+              false,
+              false,
+              true);
+      ObjectNode partyInput = OBJECT_MAPPER.createObjectNode();
+      partyInput.set("input", shippingInstructionsFor(scenarioType));
+
+      anySiAction.handlePartyInput(partyInput);
+
+      assertEquals(scenarioType.name(), anySiAction.getDSP().scenarioType(), scenarioType.name());
+    }
+  }
+
+  @Test
   void generatedTransportDocumentsMatchLatestSchemaAndWorkbookRules() {
     JsonSchemaValidator schemaValidator =
         JsonSchemaValidator.getInstance(
@@ -188,6 +234,11 @@ class CarrierSupplyPayloadActionTest {
         }
         """
             .formatted(type, isToOrder, reference, status));
+  }
+
+  private static JsonNode shippingInstructionsFor(ScenarioType scenarioType) {
+    return new CarrierSupplyPayloadAction("Carrier", scenarioType, "3.0.0", null, false)
+        .getJsonForHumanReadablePrompt();
   }
 }
 

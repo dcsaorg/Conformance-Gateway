@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.SI_ANY;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -182,6 +183,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends ShipperNotific
                 expectedApiVersion,
                 notificationSchemaValidator,
                 ShippingInstructionsStatus.SI_RECEIVED,
+                SI_ANY,
                 EblChecks.SIR_OR_TDR_REQUIRED_IN_NOTIFICATION));
       }
     };

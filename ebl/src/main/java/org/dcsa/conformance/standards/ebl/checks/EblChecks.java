@@ -1826,11 +1826,13 @@ public class EblChecks {
     List<JsonContentCheck> checks = new ArrayList<>();
 
     checks.add(
-        JsonAttribute.mustEqual(
-            "[%s] Verify that the correct '%s' is used"
-                .formatted(SCENARIO, TRANSPORT_DOCUMENT_TYPE_CODE),
-            TRANSPORT_DOCUMENT_TYPE_CODE,
-            scenarioType::transportDocumentTypeCode));
+        isTD
+            ? JsonAttribute.mustEqual(
+                "[%s] Verify that the correct '%s' is used"
+                    .formatted(SCENARIO, TRANSPORT_DOCUMENT_TYPE_CODE),
+                TRANSPORT_DOCUMENT_TYPE_CODE,
+                scenarioType::transportDocumentTypeCode)
+            : siScopeCheck(scenarioType));
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
@@ -1841,6 +1843,18 @@ public class EblChecks {
                 JsonAttribute.path(OUTER_PACKAGING, JsonAttribute.matchedMustBePresent()))));
 
     return checks;
+  }
+
+  private static JsonContentCheck siScopeCheck(ScenarioType scenarioType) {
+    return describedSiCheck(
+        scenarioSpecificSiValidationMessage(scenarioType),
+        JsonAttribute.mustEqual(
+            JsonPointer.compile(S.formatted(TRANSPORT_DOCUMENT_TYPE_CODE)),
+            scenarioType.transportDocumentTypeCode()),
+        JsonAttribute.mustEqual(
+            "Validate scenario-specific '%s'.".formatted(IS_TO_ORDER),
+            JsonPointer.compile(S.formatted(IS_TO_ORDER)),
+            scenarioType.isToOrder()));
   }
 
   private static JsonContentMatchedValidation scenarioCustomsReferencesCheck(
@@ -2407,14 +2421,15 @@ public class EblChecks {
   }
 
   public static String scenarioSpecificSiValidationMessage(ScenarioType scenarioType) {
-    return switch (scenarioType) {
-      case REGULAR_SWB ->
+    return switch (scenarioType.transportDocumentTypeCode()) {
+      case SWB ->
           "For Sea Waybill: transportDocumentTypeCode must equal SWB and isToOrder must equal false.";
-      case REGULAR_STRAIGHT_BL ->
-          "For Straight B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal false.";
-      case REGULAR_NEGOTIABLE_BL ->
-          "For Negotiable B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal true.";
-      default -> "Invalid scenario type for SI validation.";
+      case BOL ->
+          scenarioType.isToOrder()
+              ? "For Negotiable B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal true."
+              : "For Straight B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal false.";
+      default ->
+          "For this scenario: transportDocumentTypeCode and isToOrder must match the scope definition.";
     };
   }
 }

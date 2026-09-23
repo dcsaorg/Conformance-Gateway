@@ -12,12 +12,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioConformanceType;
 import org.dcsa.conformance.standards.ebl.action.CarrierSupplyPayloadAction;
+import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;
 import org.dcsa.conformance.standards.ebl.action.UC1_Shipper_SubmitShippingInstructionsAction;
 import org.dcsa.conformance.standards.ebl.action.UC17_Shipper_SubmitTransportDocumentAmendmentAction;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.junit.jupiter.api.Test;
 
 class EblScenarioListBuilderTest {
@@ -85,6 +90,29 @@ class EblScenarioListBuilderTest {
     assertTrue(optionalTitles.stream().noneMatch(title -> title.contains("Straight B/L")));
     assertTrue(optionalTitles.stream().noneMatch(title -> title.contains("Negotiable B/L")));
     assertTrue(optionalTitles.stream().noneMatch(title -> title.contains("Sea Waybill")));
+  }
+
+  @Test
+  void requiredSiOnlyScenariosDoNotValidateUpdatedShippingInstructionsStatus() throws Exception {
+    Map<String, List<ConformanceScenario>> carrierModules =
+        buildModules(Set.of(CARRIER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI);
+    Map<String, List<ConformanceScenario>> shipperModules =
+        buildModules(Set.of(SHIPPER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI);
+
+    var carrierScenario = carrierModules.get("Required Sea Waybill scenario").getFirst();
+    var shipperScenario = shipperModules.get("Required Sea Waybill scenario").getFirst();
+    var carrierCheckTitles = allCheckTitles(carrierScenario);
+    var shipperCheckTitles = allCheckTitles(shipperScenario);
+
+    assertEquals(ShippingInstructionsStatus.SI_ANY, expectedUpdatedSiStatusOf(carrierScenario));
+    assertEquals(ShippingInstructionsStatus.SI_ANY, expectedUpdatedSiStatusOf(shipperScenario));
+
+    assertFalse(
+        carrierCheckTitles.stream().anyMatch(title -> title.contains("updatedShippingInstructionsStatus")),
+        carrierCheckTitles.toString());
+    assertFalse(
+        shipperCheckTitles.stream().anyMatch(title -> title.contains("updatedShippingInstructionsStatus")),
+        shipperCheckTitles.toString());
   }
 
   @Test
@@ -273,6 +301,31 @@ class EblScenarioListBuilderTest {
 
   private List<String> titles(List<ConformanceScenario> scenarios) {
     return scenarios.stream().map(ConformanceScenario::getTitle).toList();
+  }
+
+  private ShippingInstructionsStatus expectedUpdatedSiStatusOf(ConformanceScenario scenario)
+      throws Exception {
+    ConformanceAction getSiAction =
+        scenario.allActionsStream()
+            .filter(Shipper_GetShippingInstructionsAction.class::isInstance)
+            .findFirst()
+            .orElseThrow();
+    var field = Shipper_GetShippingInstructionsAction.class.getDeclaredField("expectedAmendedSiStatus");
+    field.setAccessible(true);
+    return (ShippingInstructionsStatus) field.get(getSiAction);
+  }
+
+  private List<String> allCheckTitles(ConformanceScenario scenario) {
+    return scenario.allActionsStream()
+        .map(action -> action.createCheck("3.0.0"))
+        .filter(java.util.Objects::nonNull)
+        .flatMap(this::flattenCheckTitles)
+        .toList();
+  }
+
+  private Stream<String> flattenCheckTitles(ConformanceCheck check) {
+    return Stream.concat(
+        Stream.of(check.getTitle()), check.subChecksStream().flatMap(this::flattenCheckTitles));
   }
 
 }

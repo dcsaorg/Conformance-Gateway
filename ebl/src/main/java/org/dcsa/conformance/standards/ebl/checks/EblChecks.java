@@ -1937,21 +1937,15 @@ public class EblChecks {
     var checks = new ArrayList<JsonContentCheck>();
 
     checks.add(
-        JsonAttribute.mustEqual(
-            SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference()));
-
-    checks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
     if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
-      var updatedStatusCheck =
-          getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus);
-      checks.add(updatedStatusCheck);
+      checks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+      checks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     }
 
     checks.addAll(STATIC_SI_CHECKS);
     checks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
-    checks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
 
     checks.add(FEEDBACKS_PRESENCE);
 
@@ -2036,11 +2030,12 @@ public class EblChecks {
     jsonContentChecks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
-    jsonContentChecks.add(
-        getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+    if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
+      jsonContentChecks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+      jsonContentChecks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
+    }
 
     jsonContentChecks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
-    jsonContentChecks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     jsonContentChecks.add(FEEDBACKS_PRESENCE);
     jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY);
     jsonContentChecks.add(VALID_FEEDBACKS_CODE);

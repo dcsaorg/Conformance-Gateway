@@ -1,8 +1,8 @@
 # DCSA Interface Standard for PINT 3.x - Conformance Scenarios (CEP26)
 
 - Confluence page id: `1638432796`
-- Confluence version: `22`
-- Synced at: `2026-09-21T09:14:09.876019Z`
+- Confluence version: `24`
+- Synced at: `2026-09-28T02:28:56.491639Z`
 
 ## **1. What is Conformance?**
 
@@ -18,15 +18,17 @@ Conformance testing validates the minimum interoperability requirements exercise
 
 # 2. Conformance Criteria
 
-One conformance certification badge is available for the standard role:
+One conformance certification badge is available, based on two complementary standard roles defined below:
 
-- **eBL Platform**
+- **Sending eBL Platform**
+- **Receiving eBL Platform**
 
-To receive the badge, an adopter must demonstrate the mandatory PINT capabilities both when sending and when receiving eBL envelope transfers. Sending Platform and Receiving Platform are the two execution perspectives of the same eBL Platform role.
+To receive the badge, an adopter must demonstrate the mandatory PINT capabilities both when sending and when receiving eBL envelope transfers.
 
 | Standard role | Business type (example) | Mandatory features to get a badge 🏅 | Optional features | Scope qualifiers |
 | --- | --- | --- | --- | --- |
-| eBL Platform | eBL Solution Provider | It is mandatory to support all the following capabilities:   1. Can send and receive an eBL envelope transfer from another eBL Platform through the **POST** `/v3/envelopes` endpoint | May additionally support the following capabilities:   1. Can send and receive a party validation request through the **POST** `/v3/receiver-validation` endpoint 2. Can send and receive additional documents associated with an eBL envelope through the **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}` endpoint 3. Can finalize an eBL envelope transfer through the **PUT** `/v3/envelopes/{envelopeReference}/finish-transfer` endpoint | None |
+| Sending eBL Platform | eBL Solution Provider | It is mandatory to support all the following capabilities:   1. Can send an eBL envelope transfer to another eBL Platform through the **POST** `/v3/envelopes` endpoint | May additionally support the following capabilities:   1. Can send a party validation request through the **POST** `/v3/receiver-validation` endpoint 2. Can send additional documents associated with an eBL envelope through the **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}` endpoint 3. Can finalize an eBL envelope transfer through the **PUT** `/v3/envelopes/{envelopeReference}/finish-transfer` endpoint | None |
+| Receiving eBL Platform | eBL Solution Provider | It is mandatory to support all the following capabilities:   1. Can receive an eBL envelope transfer from another eBL Platform through the **POST** `/v3/envelopes` endpoint | May additionally support the following capabilities:   1. Can receive a party validation request through the **POST** `/v3/receiver-validation` endpoint 2. Can receive additional documents associated with an eBL envelope through the **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}` endpoint | None |
 
 **Standard role**
 
@@ -60,29 +62,41 @@ This allows an adopter to be certified as conformant for correctly implementing 
 
 # 3. Conformance Scenarios
 
-This section is organised into mandatory and optional **eBL Platform** scenarios.
+This section is organised into **Sending eBL Platform** scenarios and **Receiving eBL Platform** scenarios.
 
-**eBL Platform** scenarios measure the conformance of adopters who implement the **POST** `/v3/envelopes`, **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}` and **PUT** `/v3/envelopes/{envelopeReference}/finish-transfer` endpoints. eBL Platforms may additionally implement the **POST** `/v3/receiver-validation` endpoint to allow the sending user to validate the identity of the receiver, before they transfer the eBL.
+**Sending eBL Platform** and **Receiving eBL Platform** scenarios measure the conformance of adopters who implement the **POST** `/v3/envelopes`, **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}` and **PUT** `/v3/envelopes/{envelopeReference}/finish-transfer` endpoints. eBL Platforms may additionally implement the **POST** `/v3/receiver-validation` endpoint to allow the sending user to validate the identity of the receiver, before they transfer the eBL.
 
 All conformance scenarios performed and validation results will be part of the Conformance report, whether they are required or optional. All the required scenarios below must be completed to obtain a conformance badge. Passing, failing, or not running an optional scenario does not affect certification. Each attempted result will be included in the conformance report.
 
-## 3.1. eBL Platform Conformance Scenarios
+## 3.1. Sending eBL Platform Conformance Scenarios
 
 ## Required scenarios
 
-| Acting as | Scenario | Description |
-| --- | --- | --- |
-| **Sending Platform** | **SupplyCSP [Certificate]** - **Start eBL envelope transfer - (200)** | This scenario verifies that the eBL Platform can transfer an eBL without any additional documents. |
-| **Sending Platform** | **SupplyCSP [Certificate]** - **Start eBL envelope transfer - (201) - Transfer additional documents** **- (204) -** **Send finish-transfer request (200)** | This scenario verifies that the eBL Platform can transfer an eBL with additional documents. |
-| **Receiving Platform** | **SupplyCSP [Document Parties]** - **Start eBL envelope transfer - (200)** | This scenario verifies that the eBL Platform can accept the transfer of an eBL without any additional documents. |
-| **Receiving Platform** | **SupplyCSP [Document Parties]** - **Start eBL envelope transfer - (201) - Transfer additional documents** **- (204) -** **Send finish-transfer request (200)** | This scenario verifies that the eBL Platform can accept the transfer of an eBL with additional documents. |
+| Scenario | Description |
+| --- | --- |
+| **SupplyCSP [Certificate]** - **Start eBL envelope transfer - (200)** | This scenario verifies that the eBL Platform can transfer an eBL without any additional documents. |
 
 ## Optional (report-only) scenarios
 
-| Acting as | Scenario | Description |
-| --- | --- | --- |
-| **Sending Platform** | **Send party validation request** **- (200)** | This scenario verifies that the eBL Platform can send a party validation request. |
-| **Receiving Platform** | **SupplyCSP [Identifying Code]** - **Receive party validation request - (200)** | This scenario verifies that the eBL Platform can accept a party validation request. |
+| Scenario | Description |  |  |
+| --- | --- | --- | --- |
+| **SupplyCSP [Certificate]** - **Start eBL envelope transfer - (201) - Transfer additional documents** **- (204) -** **Send finish-transfer request (200)** | This scenario verifies that the eBL Platform can transfer an eBL with additional documents. |  |  |
+| **Send party validation request** **- (200)** | This scenario verifies that the eBL Platform can send a party validation request. |  |  |
+
+## 3.2. Receiving eBL Platform Conformance Scenarios
+
+## Required scenarios
+
+| Scenario | Description |
+| --- | --- |
+| **SupplyCSP [Document Parties]** - **Start eBL envelope transfer - (200)** | This scenario verifies that the eBL Platform can accept the transfer of an eBL without any additional documents. |
+
+## Optional (report-only) scenarios
+
+| Scenario | Description |
+| --- | --- |
+| **SupplyCSP [Document Parties]** - **Start eBL envelope transfer - (201) - Transfer additional documents** **- (204) -** **Send finish-transfer request (200)** | This scenario verifies that the eBL Platform can accept the transfer of an eBL with additional documents. |
+| **SupplyCSP [Identifying Code]** - **Receive party validation request - (200)** | This scenario verifies that the eBL Platform can accept a party validation request. |
 
 # 4. Conformance Validations
 
@@ -97,7 +111,7 @@ Sending Platform and Receiving Platform describe the execution perspective in wh
 
 Failures in required scenarios affect certification. Results from optional/report-only scenarios are included in the conformance report but do not affect the badge decision.
 
-## 4.1 Validations when acting as Sending Platform
+## 4.1 Sending eBL Platform Validations
 
 These validations apply when the eBL Platform sends or retries an envelope transfer, sends an additional document, completes a transfer, or requests receiver validation. Their effect on certification follows the status of the scenario in which they are evaluated.
 
@@ -157,7 +171,7 @@ Object validations
 | `EnvelopeManifest.lastEnvelopeTransferChainEntrySignedContentChecksum` | Checksum must match checksum of last entry in |
 | `EnvelopeTransferChainEntry.xxx` |  |
 
-## 4.2 Validations when acting as Receiving Platform
+## 4.2 Receiving eBL Platform Validations
 
 These validations apply to the responses produced when the eBL Platform receives an envelope transfer, an additional document, a completion request, or a receiver-validation request. Their effect on certification follows the status of the scenario in which they are evaluated.
 

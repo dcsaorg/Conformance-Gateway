@@ -1,8 +1,8 @@
 # DCSA Interface Standard for EBL (TD) 3.x - Conformance Scenarios (CEP26)
 
 - Confluence page id: `1984299095`
-- Confluence version: `19`
-- Synced at: `2026-09-21T09:14:07.442540Z`
+- Confluence version: `20`
+- Synced at: `2026-09-28T02:28:51.494248Z`
 
 # **0. Document metadata**
 

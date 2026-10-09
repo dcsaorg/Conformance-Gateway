@@ -1,8 +1,8 @@
 # DCSA Interface Standard for PINT 3.x - Conformance Scenarios (CEP26)
 
 - Confluence page id: `1638432796`
-- Confluence version: `24`
-- Synced at: `2026-09-28T02:28:56.491639Z`
+- Confluence version: `25`
+- Synced at: `2026-10-05T02:31:37.491844Z`
 
 ## **1. What is Conformance?**
 

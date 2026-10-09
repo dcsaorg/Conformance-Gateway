@@ -10,6 +10,8 @@ import org.dcsa.conformance.standardscommons.party.BookingDynamicScenarioParamet
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.Set;
@@ -157,6 +159,23 @@ class BookingChecksTest {
       assertFalse(
         checks.stream()
           .anyMatch(check -> check.description().contains("must match the active scenario")));
+    }
+
+    @Test
+    void givenBookingStatusOnlyScenario_whenBuildingFullPayloadChecks_thenSecondaryCodesAreNotValidated() {
+      List<JsonContentCheck> checks =
+        BookingChecks.fullPayloadChecks(
+          DRY_CARGO_PARAMETERS, CarrierStatusScenario.bookingStatusOnly(BookingState.CONFIRMED));
+
+      assertFalse(
+        checks.stream().anyMatch(check -> check.description().contains("status code:")
+          && !check.description().contains("'bookingStatus'")));
+      JsonNode payload = body("""
+        {"bookingStatus":"CONFIRMED","amendedBookingStatus":"UNKNOWN","bookingCancellationStatus":"UNKNOWN"}
+        """);
+      assertConformant(findCheck(checks, "must match the active scenario"), payload);
+      assertConformant(findCheck(checks, "'amendedBookingStatus' attribute in the Booking response"), payload);
+      assertConformant(findCheck(checks, "'bookingCancellationStatus' attribute in the Booking response"), payload);
     }
 
     @Test
@@ -2312,6 +2331,109 @@ class BookingChecksTest {
   // ---------------------------------------------------------------------------------------------
   // Dataset driven validations
   // ---------------------------------------------------------------------------------------------
+
+  @Nested
+  @DisplayName("sendToPlatform eBL platform codes")
+  class SendToPlatformCodes {
+
+    private static final String FRAGMENT = "correct use of an eBL platform code:";
+    private static final String DESCRIPTION =
+      "The 'documentParties.issueTo.sendToPlatform' attribute must demonstrate the correct use of an eBL platform code: WAVE, CARX, ESSD, IDT, BOLE, EDOX, IQAX, SECR, TRGO, ETEU, TRAC, BRIT, COVA, ETIT, KTNE, CRED, BLOC, DOCU, AEOT, SGTD";
+
+    private ObjectNode payloadWithPlatform(String platform) {
+      ObjectNode payload = body("""
+        {"transportDocumentTypeCode":"BOL","isElectronic":true,"documentParties":{"issueTo":{}}}
+        """);
+      ((ObjectNode) payload.path("documentParties").path("issueTo"))
+        .put("sendToPlatform", platform);
+      return payload;
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+      "WAVE", "CARX", "ESSD", "IDT", "BOLE", "EDOX", "IQAX", "SECR", "TRGO", "ETEU",
+      "TRAC", "BRIT", "COVA", "ETIT", "KTNE", "CRED", "BLOC", "DOCU", "AEOT", "SGTD"
+    })
+    void givenApprovedPlatform_whenValidated_thenCheckPasses(String platform) {
+      ConformanceCheckResult result = carrierCheck(FRAGMENT).validate(payloadWithPlatform(platform));
+
+      assertTrue(result.isRelevant());
+      assertTrue(result.isConformant(), () -> "Unexpected errors: " + result.getErrorMessages());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+      "XXXX", "wave", "Wave", " WAVE", "WAVE ", "WAVE,CARX", "WAV", "WAVEE",
+      "GSBN", "WISE", "GLEIF", "W3C", "DNB", "FMC", "DCSA", "ZZZ"
+    })
+    void givenUnapprovedPlatform_whenValidated_thenErrorIdentifiesAttributeAndValue(String platform) {
+      JsonContentCheck check = carrierCheck(FRAGMENT);
+      ObjectNode payload = payloadWithPlatform(platform);
+
+      assertNotConformant(check, payload);
+      assertTrue(check.validate(payload).getErrorMessages().stream()
+        .anyMatch(error -> error.contains("documentParties.issueTo.sendToPlatform")
+          && error.contains(platform)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"123", "true", "[\"WAVE\"]", "{\"code\":\"WAVE\"}"})
+    void givenNonTextPlatform_whenValidated_thenCheckIsNotConformant(String platformJson) {
+      JsonNode payload = body(
+        "{\"documentParties\":{\"issueTo\":{\"sendToPlatform\":%s}}}".formatted(platformJson));
+
+      assertNotConformant(carrierCheck(FRAGMENT), payload);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+      "{}", "{\"documentParties\":{}}", "{\"documentParties\":{\"issueTo\":{}}}",
+      "{\"documentParties\":{\"issueTo\":{\"sendToPlatform\":null}}}",
+      "{\"documentParties\":{\"issueTo\":{\"sendToPlatform\":\"\"}}}",
+      "{\"documentParties\":{\"issueTo\":{\"sendToPlatform\":\"   \"}}}"
+    })
+    void givenMissingOrEmptyPlatform_whenValidated_thenDatasetCheckIsIrrelevant(String json) {
+      // Invalid schema values remain the responsibility of the separate schema check.
+      assertIrrelevant(carrierCheck(FRAGMENT), body(json));
+    }
+
+    @Test
+    void givenPlatformCheck_whenReadingDescription_thenExactApprovedCodesAreListed() {
+      assertEquals(DESCRIPTION, carrierCheck(FRAGMENT).description());
+    }
+
+    @Test
+    void givenPlatformCheck_whenBuildingContentChecks_thenAllBookingFactoriesIncludeIt() {
+      var matched = UUID.randomUUID();
+      var factories = List.of(
+        BookingChecks.requestContentChecks(matched, "2.0.4", DRY_CARGO_PARAMETERS),
+        BookingChecks.updateRequestContentChecks(matched, "2.0.4", DRY_CARGO_PARAMETERS),
+        BookingChecks.responseContentChecks(matched, "2.0.4", DRY_CARGO_PARAMETERS,
+          CarrierStatusScenario.from(BookingState.CONFIRMED, null, null)));
+
+      factories.forEach(factory -> assertEquals(1L,
+        factory.subChecksStream().filter(check -> DESCRIPTION.equals(check.getTitle().trim())).count()));
+    }
+
+    @Test
+    void givenUnknownPlatform_whenValidatingNotificationBooking_thenCheckIsNotConformant() {
+      JsonContentCheck check = findCheck(
+        BookingChecks.nestedNotificationPayloadChecks(DRY_CARGO_PARAMETERS), FRAGMENT);
+
+      assertNotConformant(check, payloadWithPlatform("XXXX"));
+      assertConformant(check, payloadWithPlatform("IDT"));
+      assertIrrelevant(check, emptyBody());
+    }
+
+    @Test
+    void givenUnknownPlatform_whenValidatingBookingInput_thenPlatformErrorIsReported() {
+      Set<String> errors = BookingInputPayloadValidations.validateBookingContent(
+        payloadWithPlatform("XXXX"), DRY_CARGO_PARAMETERS);
+
+      assertTrue(errors.stream().anyMatch(error -> error.contains("sendToPlatform")
+        && error.contains("XXXX")));
+    }
+  }
 
   @Nested
   @DisplayName("Dataset validations")

@@ -1,8 +1,8 @@
 # DCSA Interface Standard for PINT 3.x - Conformance Scenarios (CEP26)
 
 - Confluence page id: `1638432796`
-- Confluence version: `25`
-- Synced at: `2026-10-05T02:31:37.491844Z`
+- Confluence version: `26`
+- Synced at: `2026-10-12T02:37:04.302207Z`
 
 ## **1. What is Conformance?**
 
@@ -134,13 +134,16 @@ These validations apply when the eBL Platform sends or retries an envelope trans
 | The `transportDocumentChecksum` in every decoded `envelopeTransferChain[]` entry must equal the same expected transport-document checksum. | ***Original.** This is a cross-entry integrity check and is not established by schema validation.* |
 | The first transfer-chain entry must not contain `previousEnvelopeTransferChainEntrySignedContentChecksum`. | ***Clarified/restored.** The original page included this rule inside the combined chain-linkage bullet. It was separated so the first-entry condition is explicit.* |
 | Every subsequent transfer-chain entry must contain `previousEnvelopeTransferChainEntrySignedContentChecksum` equal to the SHA-256 checksum of the preceding signed entry. | ***Clarified/restored.** The original chain-linkage rule was retained and separated from the first-entry condition for readability.* |
+| `lastEnvelopeTransferChainEntrySignedContentChecksum` must contain the checksum of the last transfer-chain entry |  |
 
 **Transactions and parties**
 
 | Validation | *Review comment* |
 | --- | --- |
-| The `codeListProvider` of every `identifyingCodes[]` entry for both the `actor` and the `recipient`, if present, of every transaction must be a known Documentation Party code-list-provider code. | ***Original; restored after omission in an intermediate draft.** The current conformance checks perform a separate dataset validation, so this is not safely replaced by schema validation.* |
-| Add eBL platform validation |  |
+| The `codeListProvider` of every `identifyingCodes[]` entry for the `actor`, the `recipient` and the `representedParty` , if present, of every transaction must be a known Documentation Party code-list-provider code. | ***Original; restored after omission in an intermediate draft.** The current conformance checks perform a separate dataset validation, so this is not safely replaced by schema validation.* |
+| `eblPlatform` attribute must be a known a Platform from: <https://reference.dcsa.org/content/standards/dcsa-code-lists/ebl-solution-providers> | PseudoEnum validation needed |
+| `actionCode` attribute must be a known value: `ISSUE`, `TRANSFER`, `ENDORSE`, `ENDORSE_TO_ORDER`, `BLANK_ENDORSE`, `SURRENDER_FOR_DELIVERY`, `SURRENDER_FOR_AMENDMENT`, `SACC`, `SREJ`, `SIGN` | PseudoEnum validation needed |
+| `reasonCode` attribute must be a known value: `SWTP`, `COD`, `SWI` | PseudoEnum validation needed |
 
 **Issuance**
 
@@ -156,21 +159,6 @@ These validations apply when the eBL Platform sends or retries an envelope trans
 | The request URL must match **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}`, using the `envelopeReference` returned when the transfer was initiated. | **Original; corrected/clarified.** The original page contained the URL rule. The proposal adds the `/v3` prefix, uses the API's `documentChecksum` parameter name, and retains the returned `envelopeReference` relationship. |
 | The SHA-256 checksum of the base64-decoded document body must equal the `documentChecksum` path parameter and the corresponding checksum declared in the envelope manifest. | **Expanded from original.** The original page checked the decoded body against the checksum in the URL. The manifest comparison was added to make the document bytes, request path, and previously declared document metadata consistent. This cross-message comparison is not supplied by schema validation; confirm that the executable suite applies the third comparison exactly as written. |
 
-Endpoint validations
-
-| End Point | Validation |
-| --- | --- |
-| POST `/v3/receiver-validation` | `codeListProvider` value must be in the allowed values |
-| POST `/v3/envelopes` | Content of `EblEnvelope` must validate  Content of `EblEnvelope.envelopeManifestSignedContent` must validate:   - must be a valid JWS - “payload” of JWS must validate against `EnvelopeManifest` schema   Each object in of `EblEnvelope.envelopeTransferChain` must validate:   - must be a valid JWS - “payload” of JWS must validate against `EnvelopeTransferChainEntry` schema |
-
-Object validations
-
-| Object | Validation |
-| --- | --- |
-| `EnvelopeManifest.transportDocumentChecksum` | Checksum must match checksum of `EblEnvelope.transportDocument`  Checksum must match value of `EnvelopeTransferChainEntry.transportDocumentChecksum` of the last entry in `EblEnvelope.envelopeTransferChain` |
-| `EnvelopeManifest.lastEnvelopeTransferChainEntrySignedContentChecksum` | Checksum must match checksum of last entry in |
-| `EnvelopeTransferChainEntry.xxx` |  |
-
 ## 4.2 Receiving eBL Platform Validations
 
 These validations apply to the responses produced when the eBL Platform receives an envelope transfer, an additional document, a completion request, or a receiver-validation request. Their effect on certification follows the status of the scenario in which they are evaluated.
@@ -185,6 +173,7 @@ For an HTTP `201` response from **POST** `/v3/envelopes`:
 | The number of items in `missingAdditionalDocumentChecksums` must equal the number of missing documents expected for the scenario. | ***Original; restored after omission in an intermediate draft.** This compares the response with scenario state and cannot be established by schema validation.* |
 | Every checksum in `missingAdditionalDocumentChecksums` must be one of the document checksums declared in the initial transfer request. | ***Original.** This cross-message subset check prevents the Receiving Platform from inventing document checksums; schema validation cannot establish it.* |
 | `transportDocumentChecksum` must equal the expected transport-document checksum. | ***Original; restored after omission in an intermediate draft.** This is a scenario-specific cross-message equality check.* |
+| `lastEnvelopeTransferChainEntrySignedContentChecksum` must contain the checksum of the last transfer-chain entry |  |
 
 **Signed final response**
 
@@ -195,10 +184,10 @@ For a signed final response from a single-request transfer, finish-transfer requ
 | The response body must match `EnvelopeTransferFinishedResponseSignedContent`. | ***Clarified from original; default-schema overlap for the wrapper.** The original page referred to the signed-content schema without distinguishing the compact JWS wrapper from its decoded payload. The wrapper check is normally covered by default schema validation.* |
 | The response signature must validate against the Receiving Platform's key. | ***Original.** This is a cryptographic validation and is not covered by schema validation.* |
 | The decoded signed content must match the `EnvelopeTransferFinishedResponse` schema. | ***Clarified from original.** The proposal separates decoded-payload validation from outer JWS validation. This is not redundant because the business fields exist inside the signed payload.* |
-| The signed `responseCode` must equal the result expected by the scenario. | ***Original.** This is a scenario-outcome check, not a schema-only check.* |
+| The signed `responseCode` attribute must be a known value: `RECE`, `DUPE`, `BSIG`, `BENV`, `INCD`, `MDOC`, `DISE` | ***Original.** This is a scenario-outcome check, not a schema-only check.* |
 | `duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent` must be present when `responseCode` is `DUPE` and absent otherwise. | ***Original.** This conditional-presence rule goes beyond the structural schema check.* |
-| `receivedAdditionalDocumentChecksums` must be present when `responseCode` is `RECE` or `DUPE` and absent otherwise. | ***Original.** This conditional-presence rule goes beyond the structural schema check.* |
-| `missingAdditionalDocumentChecksums` must be non-empty when `responseCode` is `MDOC` and absent otherwise. | ***Original.** This conditional-presence and non-empty rule is evaluated against the response outcome.* |
+| `receivedAdditionalDocumentChecksums` must be present when `responseCode` is `RECE` or `DUPE` and absent otherwise. If provided, the values in the list must be one of the document checksums declared in the initial transfer request. | ***Original.** This conditional-presence rule goes beyond the structural schema check.* |
+| `missingAdditionalDocumentChecksums` must be non-empty when `responseCode` is `MDOC` and absent otherwise. If provided, the values in the list must be one of the document checksums declared in the initial transfer request. | ***Original.** This conditional-presence and non-empty rule is evaluated against the response outcome.* |
 
 **Additional document responses**
 
@@ -212,9 +201,3 @@ For a signed final response from a single-request transfer, finish-transfer requ
 | Validation | Review comment |
 | --- | --- |
 | A successful response from **POST** `/v3/receiver-validation` must receive HTTP `200` and match the `ReceiverValidationResponse` schema. | **Original; corrected/clarified and default-schema overlap.** The original rule contained the same `200` and schema expectations. The proposal adds the `/v3` prefix. These checks are normally covered by default response validation but are retained for visibility. |
-
-**Invalid-request response**
-
-| Validation | *Review comment* |
-| --- | --- |
-| The scenario-defined invalid transfer request must receive HTTP `400` with a response matching the `ErrorResponse` schema. | ***Original; default-schema overlap.** The original page contained the same outcome. The HTTP status and response schema are normally covered by default validations, but the rule is retained because it identifies the expected scenario result.* |

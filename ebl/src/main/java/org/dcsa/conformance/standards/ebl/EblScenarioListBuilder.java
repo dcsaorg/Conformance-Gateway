@@ -248,6 +248,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                         "Optional (report-only) scenarios",
                         noAction()
                             .thenEither(
+                                optionalDraftTdScenario(true),
                                 carrierGetDirectAmendmentScenario(),
                                 carrierProcessDirectAmendmentScenario(true),
                                 carrierProcessDirectAmendmentScenario(false),
@@ -269,6 +270,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                         "Optional (report-only) scenarios",
                         noAction()
                             .thenEither(
+                                optionalDraftTdScenario(false),
                                 shipperGetConfirmedDirectAmendmentScenario(),
                                 shipperCancelDirectAmendmentScenario())
                             .asOptionalReportOnlyScenario()))));
@@ -281,19 +283,53 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder carrierRequiredTdScenario(ScenarioType scenarioType) {
-    return uc6CarrierPublishDraftTransportDocument(true, scenarioType)
-        .then(
-            uc7ShipperApproveDraftTransportDocument()
-                .then(
-                    uc8CarrierIssueTransportDocument()
-                        .then(shipperGetTransportDocument(TD_ISSUED))));
+    return standaloneIssueTransportDocument(scenarioType)
+        .then(shipperGetTransportDocument("GET TD (ISSUED)", TD_ISSUED));
   }
 
   private static EblScenarioListBuilder shipperRequiredTdScenario(ScenarioType scenarioType) {
-    return uc6CarrierPublishDraftTransportDocument(true, scenarioType, true)
-        .then(
-            uc7ShipperApproveDraftTransportDocument()
-                .then(shipperGetTransportDocument(TD_APPROVED)));
+    return standaloneIssueTransportDocument(scenarioType)
+        .then(shipperGetTransportDocument(TD_ISSUED));
+  }
+
+  private static EblScenarioListBuilder standaloneIssueTransportDocument(ScenarioType scenarioType) {
+    String carrier = threadLocalCarrierPartyName.get();
+    String shipper = threadLocalShipperPartyName.get();
+    boolean notifications = threadLocalIsWithNotifications.get();
+    return new EblScenarioListBuilder(
+        previous ->
+            new UC8_Carrier_IssueTransportDocumentAction(
+                carrier,
+                shipper,
+                (EblAction) previous,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                notifications,
+                scenarioType));
+  }
+
+  private static EblScenarioListBuilder optionalDraftTdScenario(boolean carrierRole) {
+    String carrier = threadLocalCarrierPartyName.get();
+    String shipper = threadLocalShipperPartyName.get();
+    boolean notifications = threadLocalIsWithNotifications.get();
+    EblScenarioListBuilder draft =
+        new EblScenarioListBuilder(
+            previous ->
+                new UC6_Carrier_PublishDraftTransportDocumentAction(
+                    carrier,
+                    shipper,
+                    (EblAction) previous,
+                    ScenarioType.REGULAR_STRAIGHT_BL,
+                    resolveMessageSchemaValidator(
+                        EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                    true,
+                    notifications,
+                    carrierRole ? "UC6 [any TD type]" : "UC6"));
+    return draft.then(
+        carrierRole
+            ? uc7ShipperApproveDraftTransportDocument()
+                .then(shipperGetTransportDocument("GET TD (APPROVED)", TD_APPROVED))
+            : uc7ShipperApproveDraftTransportDocument());
   }
 
   private static EblScenarioListBuilder carrierGetDirectAmendmentScenario() {
@@ -302,7 +338,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             uc17ShipperSubmitTransportDocumentAmendment()
                 .then(
                     shipperGetTransportDocumentAmendment(
-                        AmendedTransportDocumentStatus.AMENDMENT_RECEIVED)));
+                        AmendedTransportDocumentStatus.AMENDMENT_RECEIVED, true)));
   }
 
   private static EblScenarioListBuilder carrierProcessDirectAmendmentScenario(boolean confirm) {
@@ -313,7 +349,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                     uc19CarrierProcessTransportDocumentAmendment(confirm)
                         .then(
                             shipperGetTransportDocument(
-                                TD_DRAFT, TD_ISSUED, TD_PENDING_SURRENDER_FOR_AMENDMENT))));
+                                "GET TD (DRAFT or ISSUED or PENDING_SURRENDER_FOR_AMENDMENT)",
+                                TD_DRAFT,
+                                TD_ISSUED,
+                                TD_PENDING_SURRENDER_FOR_AMENDMENT))));
   }
 
   private static EblScenarioListBuilder carrierCancelDirectAmendmentScenario() {
@@ -324,7 +363,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                     uc18ShipperCancelTransportDocumentAmendment()
                         .then(
                             shipperGetTransportDocument(
-                                TD_DRAFT, TD_ISSUED, TD_PENDING_SURRENDER_FOR_AMENDMENT))));
+                                "GET TD (DRAFT or ISSUED or PENDING_SURRENDER_FOR_AMENDMENT)",
+                                TD_DRAFT,
+                                TD_ISSUED,
+                                TD_PENDING_SURRENDER_FOR_AMENDMENT))));
   }
 
   private static EblScenarioListBuilder shipperGetConfirmedDirectAmendmentScenario() {
@@ -843,6 +885,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static EblScenarioListBuilder shipperGetTransportDocument(
       TransportDocumentStatus... expectedTdStatus) {
+    return shipperGetTransportDocument("GET TD", expectedTdStatus);
+  }
+
+  private static EblScenarioListBuilder shipperGetTransportDocument(
+      String actionTitle, TransportDocumentStatus... expectedTdStatus) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
@@ -852,11 +899,17 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 shipperPartyName,
                 (EblAction) previousAction,
                 Arrays.stream(expectedTdStatus).toList(),
-                resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME)));
+                resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME),
+                actionTitle));
   }
 
   private static EblScenarioListBuilder shipperGetTransportDocumentAmendment(
       AmendedTransportDocumentStatus expectedAmendmentStatus) {
+    return shipperGetTransportDocumentAmendment(expectedAmendmentStatus, false);
+  }
+
+  private static EblScenarioListBuilder shipperGetTransportDocumentAmendment(
+      AmendedTransportDocumentStatus expectedAmendmentStatus, boolean anySuccessfulResponse) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
@@ -866,7 +919,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 shipperPartyName,
                 (EblAction) previousAction,
                 resolveMessageSchemaValidator(EBL_API, GET_TD_AMENDMENT_SCHEMA_NAME),
-                expectedAmendmentStatus));
+                expectedAmendmentStatus,
+                anySuccessfulResponse));
   }
 
   private static EblScenarioListBuilder shipperGetTransportDocumentErrorScenario() {

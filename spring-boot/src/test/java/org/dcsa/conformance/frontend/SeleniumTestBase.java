@@ -14,6 +14,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.dcsa.conformance.manual.ManualTestBase;
 import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.ebl.action.UC6_Carrier_PublishDraftTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.action.UC8_Carrier_IssueTransportDocumentAction;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
 import org.dcsa.conformance.standards.eblinterop.action.ReceiverSupplyScenarioParametersAndStateSetupAction;
@@ -227,8 +228,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
     if (standardName.equals(EblStandard.INSTANCE.getName())) {
       if (testedPartyRole.equals(EblRole.CARRIER.getConfigName())
-          && currentAction.startsWith(
-              UC6_Carrier_PublishDraftTransportDocumentAction.ACTION_TITLE)) {
+          && (currentAction.startsWith(
+                  UC6_Carrier_PublishDraftTransportDocumentAction.ACTION_TITLE)
+              || currentAction.startsWith(
+                  UC8_Carrier_IssueTransportDocumentAction.ACTION_TITLE))) {
         jsonForPrompt = fetchTransportDocument(jsonForPrompt);
       }
     } else if (standardName.equals(PintStandard.INSTANCE.getName())) {

@@ -1,8 +1,8 @@
 # DCSA Interface Standard for PINT 3.x - Conformance Scenarios (CEP26)
 
 - Confluence page id: `1638432796`
-- Confluence version: `26`
-- Synced at: `2026-10-12T02:37:04.302207Z`
+- Confluence version: `27`
+- Synced at: `2026-10-19T02:22:22.428642Z`
 
 ## **1. What is Conformance?**
 
@@ -27,8 +27,8 @@ To receive the badge, an adopter must demonstrate the mandatory PINT capabilitie
 
 | Standard role | Business type (example) | Mandatory features to get a badge 🏅 | Optional features | Scope qualifiers |
 | --- | --- | --- | --- | --- |
-| Sending eBL Platform | eBL Solution Provider | It is mandatory to support all the following capabilities:   1. Can send an eBL envelope transfer to another eBL Platform through the **POST** `/v3/envelopes` endpoint | May additionally support the following capabilities:   1. Can send a party validation request through the **POST** `/v3/receiver-validation` endpoint 2. Can send additional documents associated with an eBL envelope through the **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}` endpoint 3. Can finalize an eBL envelope transfer through the **PUT** `/v3/envelopes/{envelopeReference}/finish-transfer` endpoint | None |
-| Receiving eBL Platform | eBL Solution Provider | It is mandatory to support all the following capabilities:   1. Can receive an eBL envelope transfer from another eBL Platform through the **POST** `/v3/envelopes` endpoint | May additionally support the following capabilities:   1. Can receive a party validation request through the **POST** `/v3/receiver-validation` endpoint 2. Can receive additional documents associated with an eBL envelope through the **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}` endpoint | None |
+| Sending eBL Platform | eBL Solution Provider | It is mandatory to support all the following capabilities:   1. Can send an eBL envelope transfer to another eBL Platform through the **POST** `/v3/envelopes` endpoint | May additionally support the following capabilities:   1. Can send a party validation request through the **POST** `/v3/receiver-validation` endpoint 2. Can send additional documents associated with an eBL envelope through the **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}` endpoint 3. Can finalise an eBL envelope transfer through the **PUT** `/v3/envelopes/{envelopeReference}/finish-transfer` endpoint | None |
+| Receiving eBL Platform | eBL Solution Provider | It is mandatory to support all the following capabilities:   1. Can receive an eBL envelope transfer from another eBL Platform through the **POST** `/v3/envelopes` endpoint | May additionally support the following capabilities:   1. Can receive a party validation request through the **POST** `/v3/receiver-validation` endpoint 2. Can receive additional documents associated with an eBL envelope through the **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}` endpoint 3. Can finalise an eBL envelope transfer through the **PUT** `/v3/envelopes/{envelopeReference}/finish-transfer` endpoint | None |
 
 **Standard role**
 
@@ -74,7 +74,7 @@ All conformance scenarios performed and validation results will be part of the C
 
 | Scenario | Description |
 | --- | --- |
-| **SupplyCSP [Certificate]** - **Start eBL envelope transfer - (200)** | This scenario verifies that the eBL Platform can transfer an eBL without any additional documents. |
+| **SupplyCSP [Certificate]** - **Start eBL envelope transfer** | This scenario verifies that the eBL Platform can transfer an eBL without any additional documents. |
 
 ## Optional (report-only) scenarios
 
@@ -117,47 +117,47 @@ These validations apply when the eBL Platform sends or retries an envelope trans
 
 **Signatures and signed content**
 
-| Validation | *Review comment* |
-| --- | --- |
-| The `envelopeManifestSignedContent` signature must validate against the Sending Platform's key. | ***Original.** Retained without substantive change. This is not covered by schema validation because it verifies the cryptographic signature.* |
-| Every `envelopeTransferChain[]` entry signature must validate against the Sending Platform's key. | ***Original; restored precisely.** An intermediate draft used “applicable key”; the original page and current suite validate the entries against the Sending Platform's key.* |
-| When present, the `issuanceManifestSignedContent` signature must validate against the issuer's key. | ***Clarified/restored.** The signature check was present in the original page. “When present” was added because the field is conditional.* |
-| The decoded `envelopeManifestSignedContent` must match the `EnvelopeManifest` schema. | ***Original.** This is not redundant with the outer API schema: the default schema sees a compact JWS string, while this validation checks the decoded signed payload.* |
-| The decoded content of every `envelopeTransferChain[]` entry must match the `EnvelopeTransferChainEntry` schema. | ***Original.** This checks decoded signed payloads and therefore is not replaced by default schema validation of the outer request.* |
-| When present, the decoded `issuanceManifestSignedContent` must match the `IssuanceManifest` schema. | ***Clarified/restored.** The original rule was retained and made conditional because the signed issuance manifest is not present in every transfer.* |
+| Validation |
+| --- |
+| The `envelopeManifestSignedContent` signature must validate against the Sending Platform's key. |
+| Every `envelopeTransferChain[]` entry signature must validate against the Sending Platform's key. |
+| When present, the `issuanceManifestSignedContent` signature must validate against the issuer's key. |
+| The decoded `envelopeManifestSignedContent` must match the `EnvelopeManifest` schema. |
+| The decoded content of every `envelopeTransferChain[]` entry must match the `EnvelopeTransferChainEntry` schema. |
+| When present, the decoded `issuanceManifestSignedContent` must match the `IssuanceManifest` schema. |
 
 **Checksums and transfer-chain integrity**
 
-| Validation | *Review comment* |
-| --- | --- |
-| The `transportDocumentChecksum` in the decoded `envelopeManifestSignedContent` must equal the checksum of the transferred transport document. | ***Original.** This is a cross-content integrity check and is not established by schema validation.* |
-| The `transportDocumentChecksum` in every decoded `envelopeTransferChain[]` entry must equal the same expected transport-document checksum. | ***Original.** This is a cross-entry integrity check and is not established by schema validation.* |
-| The first transfer-chain entry must not contain `previousEnvelopeTransferChainEntrySignedContentChecksum`. | ***Clarified/restored.** The original page included this rule inside the combined chain-linkage bullet. It was separated so the first-entry condition is explicit.* |
-| Every subsequent transfer-chain entry must contain `previousEnvelopeTransferChainEntrySignedContentChecksum` equal to the SHA-256 checksum of the preceding signed entry. | ***Clarified/restored.** The original chain-linkage rule was retained and separated from the first-entry condition for readability.* |
-| `lastEnvelopeTransferChainEntrySignedContentChecksum` must contain the checksum of the last transfer-chain entry |  |
+| Validation |
+| --- |
+| The `transportDocumentChecksum` in the decoded `envelopeManifestSignedContent` must equal the checksum of the transferred transport document. |
+| The `transportDocumentChecksum` in every decoded `envelopeTransferChain[]` entry must equal the same expected transport-document checksum. |
+| The first transfer-chain entry must not contain `previousEnvelopeTransferChainEntrySignedContentChecksum`. |
+| Every subsequent transfer-chain entry must contain `previousEnvelopeTransferChainEntrySignedContentChecksum` equal to the SHA-256 checksum of the preceding signed entry. |
+| `lastEnvelopeTransferChainEntrySignedContentChecksum` must contain the checksum of the last transfer-chain entry |
 
 **Transactions and parties**
 
-| Validation | *Review comment* |
-| --- | --- |
-| The `codeListProvider` of every `identifyingCodes[]` entry for the `actor`, the `recipient` and the `representedParty` , if present, of every transaction must be a known Documentation Party code-list-provider code. | ***Original; restored after omission in an intermediate draft.** The current conformance checks perform a separate dataset validation, so this is not safely replaced by schema validation.* |
-| `eblPlatform` attribute must be a known a Platform from: <https://reference.dcsa.org/content/standards/dcsa-code-lists/ebl-solution-providers> | PseudoEnum validation needed |
-| `actionCode` attribute must be a known value: `ISSUE`, `TRANSFER`, `ENDORSE`, `ENDORSE_TO_ORDER`, `BLANK_ENDORSE`, `SURRENDER_FOR_DELIVERY`, `SURRENDER_FOR_AMENDMENT`, `SACC`, `SREJ`, `SIGN` | PseudoEnum validation needed |
-| `reasonCode` attribute must be a known value: `SWTP`, `COD`, `SWI` | PseudoEnum validation needed |
+| Validation |
+| --- |
+| The `codeListProvider` of every `identifyingCodes[]` entry for the `actor`, the `recipient` and the `representedParty` , if present, of every transaction must be a known Documentation Party code-list-provider code. |
+| `eblPlatform` attribute must be a known a Platform from: <https://reference.dcsa.org/content/standards/dcsa-code-lists/ebl-solution-providers> |
+| `actionCode` attribute must be a known value: `ISSUE`, `TRANSFER`, `ENDORSE`, `ENDORSE_TO_ORDER`, `BLANK_ENDORSE`, `SURRENDER_FOR_DELIVERY`, `SURRENDER_FOR_AMENDMENT`, `SACC`, `SREJ`, `SIGN` |
+| `reasonCode` attribute must be a known value: `SWTP`, `COD`, `SWI` |
 
 **Issuance**
 
-| Validation | *Review comment* |
-| --- | --- |
-| When an issuance transaction uses `actionCode=ISSUE`, the applicable transfer-chain entry's `issuanceManifestSignedContent` must be present. | **Corrected from original.** The original page used legacy `action=ISSU`. The resolved PINT 3.0.0 API uses the normative property and value `actionCode=ISSUE`. The suite should be aligned if it still evaluates the legacy representation. |
-| When present, the issuance manifest's `documentChecksum` must equal the expected transport-document checksum. | **Original.** Retained without substantive change; this is a cross-content checksum comparison, not a schema-only check. |
+| Validation |
+| --- |
+| When an issuance transaction uses `actionCode=ISSUE`, the applicable transfer-chain entry's `issuanceManifestSignedContent` must be present. |
+| When present, the issuance manifest's `documentChecksum` must equal the expected transport-document checksum. |
 
 **Additional documents**
 
-| Validation | Review comment |
-| --- | --- |
-| The request URL must match **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}`, using the `envelopeReference` returned when the transfer was initiated. | **Original; corrected/clarified.** The original page contained the URL rule. The proposal adds the `/v3` prefix, uses the API's `documentChecksum` parameter name, and retains the returned `envelopeReference` relationship. |
-| The SHA-256 checksum of the base64-decoded document body must equal the `documentChecksum` path parameter and the corresponding checksum declared in the envelope manifest. | **Expanded from original.** The original page checked the decoded body against the checksum in the URL. The manifest comparison was added to make the document bytes, request path, and previously declared document metadata consistent. This cross-message comparison is not supplied by schema validation; confirm that the executable suite applies the third comparison exactly as written. |
+| Validation |
+| --- |
+| The request URL must match **PUT** `/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}`, using the `envelopeReference` returned when the transfer was initiated. |
+| The SHA-256 checksum of the base64-decoded document body must equal the `documentChecksum` path parameter and the corresponding checksum declared in the envelope manifest. |
 
 ## 4.2 Receiving eBL Platform Validations
 
@@ -167,13 +167,13 @@ These validations apply to the responses produced when the eBL Platform receives
 
 For an HTTP `201` response from **POST** `/v3/envelopes`:
 
-| Validation | *Review comment* |
-| --- | --- |
-| The response must match the `EnvelopeTransferStartedResponse` schema. | ***Original; default-schema overlap.** The check is already part of default response-schema validation but is retained here for traceability.* |
-| The number of items in `missingAdditionalDocumentChecksums` must equal the number of missing documents expected for the scenario. | ***Original; restored after omission in an intermediate draft.** This compares the response with scenario state and cannot be established by schema validation.* |
-| Every checksum in `missingAdditionalDocumentChecksums` must be one of the document checksums declared in the initial transfer request. | ***Original.** This cross-message subset check prevents the Receiving Platform from inventing document checksums; schema validation cannot establish it.* |
-| `transportDocumentChecksum` must equal the expected transport-document checksum. | ***Original; restored after omission in an intermediate draft.** This is a scenario-specific cross-message equality check.* |
-| `lastEnvelopeTransferChainEntrySignedContentChecksum` must contain the checksum of the last transfer-chain entry |  |
+| Validation |
+| --- |
+| The response must match the `EnvelopeTransferStartedResponse` schema. |
+| The number of items in `missingAdditionalDocumentChecksums` must equal the number of missing documents expected for the scenario. |
+| Every checksum in `missingAdditionalDocumentChecksums` must be one of the document checksums declared in the initial transfer request. |
+| `transportDocumentChecksum` must equal the expected transport-document checksum. |
+| `lastEnvelopeTransferChainEntrySignedContentChecksum` must contain the checksum of the last transfer-chain entry |
 
 **Signed final response**
 

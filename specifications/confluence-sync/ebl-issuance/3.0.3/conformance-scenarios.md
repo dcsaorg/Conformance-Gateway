@@ -2,7 +2,7 @@
 
 - Confluence page id: `2005368834`
 - Confluence version: `8`
-- Synced at: `2026-10-12T02:37:01.752264Z`
+- Synced at: `2026-10-19T02:22:20.085195Z`
 
 # **0. Document metadata**
 

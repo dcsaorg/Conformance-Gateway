@@ -85,6 +85,10 @@ When combining role-specific module maps for an all-in-one sandbox:
 
 Standalone root actions that synthesize references or payloads must re-establish the relationship between those values after reset and JSON-state import. Keep prompt URL/reference fields and payload references atomic, and add a regression test that imports stale dynamic scenario parameters before serializing the prompt; constructor-only initialization is not sufficient.
 
+When adding an input-requiring action, update both manual and Selenium prompt adapters to supply
+real identifiers instead of submitting placeholder JSON. Compile those harnesses with tests skipped;
+their execution remains reserved for CI/CD or humans.
+
 To disable a scenario suite without deleting its implementation: remove it from the standard's advertised suite set, disable/comment its scenario-builder dispatch branch, remove or comment any explicitly hard-coded Spring/manual/Selenium integration case, and replace documentation or runner examples that advertise it. Keep dormant builders and endpoint metadata only when useful for straightforward re-enablement. Add a contract test for the exact advertised suite set and verify the disabled sandbox ID is absent from the generated homepage.
 
 When adding a standard/version/suite, ensure it is exposed by the relevant `ConformanceStandard`, generated on the Spring Boot homepage, represented in `ConformanceApplicationTest`, and runnable through the conformance runner.

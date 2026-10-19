@@ -21,7 +21,7 @@ public class ConformanceMessageBody {
     JsonNode jsonBody;
     try {
       jsonBody = OBJECT_MAPPER.readTree(this.stringBody);
-      isCorrectJson = true;
+      isCorrectJson = jsonBody != null && !jsonBody.isMissingNode();
     } catch (JsonProcessingException e) {
       jsonBody = OBJECT_MAPPER.createObjectNode();
       isCorrectJson = false;

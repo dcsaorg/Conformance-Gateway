@@ -16,6 +16,8 @@ import org.dcsa.conformance.standardscommons.action.BookingAndEblAction;
 @Getter
 public class UC8_Carrier_IssueTransportDocumentAction extends CarrierNotificationEblAction {
 
+  public static final String ACTION_TITLE = "UC8";
+
   private final JsonSchemaValidator requestSchemaValidator;
   private final ScenarioType standaloneScenarioType;
 
@@ -46,8 +48,8 @@ public class UC8_Carrier_IssueTransportDocumentAction extends CarrierNotificatio
         shipperPartyName,
         previousAction,
         standaloneScenarioType == null
-            ? "UC8"
-            : "UC8 [%s]".formatted(standaloneScenarioType.tdScopeName()),
+            ? ACTION_TITLE
+            : "%s [%s]".formatted(ACTION_TITLE, standaloneScenarioType.tdScopeName()),
         204,
         isWithNotifications);
     this.requestSchemaValidator = requestSchemaValidator;
@@ -142,7 +144,7 @@ public class UC8_Carrier_IssueTransportDocumentAction extends CarrierNotificatio
             .path("data")
             .path("transportDocumentReference")
             .asText(null);
-    if (reference != null) {
+    if (reference != null && dsp.transportDocumentReference() == null) {
       dsp = dsp.withTransportDocumentReference(reference);
     }
     getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));

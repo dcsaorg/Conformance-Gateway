@@ -1091,22 +1091,34 @@ class EblChecksTest {
             .findFirst()
             .orElseThrow();
 
-    rootNode.put("transportDocumentStatus", "DRAFT");
-    assertTrue(shipmentDateCheck.validate(rootNode).isConformant());
-    rootNode.put("transportDocumentStatus", "ISSUED");
-    assertInvalid(shipmentDateCheck);
-    rootNode.put("shippedOnBoardDate", "2026-09-04");
-    assertValid(shipmentDateCheck);
-    rootNode.put("receivedForShipmentDate", "2026-09-03");
     JsonContentCheck mutuallyExclusive =
         EblChecks.transportDocumentCarrierContentChecks().stream()
             .filter(check -> check.description().startsWith("shippedOnBoardDate and"))
             .findFirst()
             .orElseThrow();
-    assertInvalid(mutuallyExclusive);
-    rootNode.remove("shippedOnBoardDate");
-    assertValid(shipmentDateCheck);
-    assertValid(mutuallyExclusive);
+    for (String status :
+        List.of(
+            "DRAFT",
+            "APPROVED",
+            "ISSUED",
+            "PENDING_SURRENDER_FOR_AMENDMENT",
+            "SURRENDERED_FOR_AMENDMENT",
+            "PENDING_SURRENDER_FOR_DELIVERY",
+            "SURRENDERED_FOR_DELIVERY",
+            "VOIDED")) {
+      for (int mask = 0; mask < 4; mask++) {
+        rootNode.removeAll();
+        rootNode.put("transportDocumentStatus", status);
+        if ((mask & 1) != 0) rootNode.put("shippedOnBoardDate", "2026-09-04");
+        if ((mask & 2) != 0) rootNode.put("receivedForShipmentDate", "2026-09-03");
+        assertEquals(
+            !status.equals("ISSUED") || mask != 0,
+            shipmentDateCheck.validate(rootNode).isConformant(),
+            status + ":" + mask);
+        assertEquals(
+            mask != 3, mutuallyExclusive.validate(rootNode).isConformant(), status + ":" + mask);
+      }
+    }
   }
 
   @Test

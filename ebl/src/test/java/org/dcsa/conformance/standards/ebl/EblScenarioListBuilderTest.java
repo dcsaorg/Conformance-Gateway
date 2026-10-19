@@ -19,8 +19,10 @@ import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioConformanceType;
 import org.dcsa.conformance.standards.ebl.action.CarrierSupplyPayloadAction;
 import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;
-import org.dcsa.conformance.standards.ebl.action.UC1_Shipper_SubmitShippingInstructionsAction;
 import org.dcsa.conformance.standards.ebl.action.UC17_Shipper_SubmitTransportDocumentAmendmentAction;
+import org.dcsa.conformance.standards.ebl.action.UC1_Shipper_SubmitShippingInstructionsAction;
+import org.dcsa.conformance.standards.ebl.action.UC6_Carrier_PublishDraftTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.action.UC8_Carrier_IssueTransportDocumentAction;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.junit.jupiter.api.Test;
@@ -108,10 +110,12 @@ class EblScenarioListBuilderTest {
     assertEquals(ShippingInstructionsStatus.SI_ANY, expectedUpdatedSiStatusOf(shipperScenario));
 
     assertFalse(
-        carrierCheckTitles.stream().anyMatch(title -> title.contains("updatedShippingInstructionsStatus")),
+        carrierCheckTitles.stream()
+            .anyMatch(title -> title.contains("updatedShippingInstructionsStatus")),
         carrierCheckTitles.toString());
     assertFalse(
-        shipperCheckTitles.stream().anyMatch(title -> title.contains("updatedShippingInstructionsStatus")),
+        shipperCheckTitles.stream()
+            .anyMatch(title -> title.contains("updatedShippingInstructionsStatus")),
         shipperCheckTitles.toString());
   }
 
@@ -128,20 +132,24 @@ class EblScenarioListBuilderTest {
             "Optional (report-only) scenarios"),
         List.copyOf(modules.keySet()));
     assertEquals(
-        List.of("UC6 [Sea Waybill] - UC7 - UC8 - GET TD"),
+        List.of("UC8 [Sea Waybill] - GET TD (ISSUED)"),
         titles(modules.get("Required Sea Waybill scenario")));
     assertEquals(
-        List.of("UC6 [Straight B/L] - UC7 - UC8 - GET TD"),
+        List.of("UC8 [Straight B/L] - GET TD (ISSUED)"),
         titles(modules.get("Required Straight B/L scenario")));
     assertEquals(
-        List.of("UC6 [Negotiable B/L] - UC7 - UC8 - GET TD"),
+        List.of("UC8 [Negotiable B/L] - GET TD (ISSUED)"),
         titles(modules.get("Required Negotiable B/L scenario")));
     assertEquals(
         List.of(
-            "SupplyCSP [any amended TD] - UC17 - GET TD amendment",
-            "SupplyCSP [any amended TD] - UC17 - UC19 (confirm) - GET TD",
-            "SupplyCSP [any amended TD] - UC17 - UC19 (decline) - GET TD",
-            "SupplyCSP [any amended TD] - UC17 - UC18 - GET TD"),
+            "UC6 [any TD type] - UC7 - GET TD (APPROVED)",
+            "SupplyCSP [any amended TD] - UC17 - GET TD amendment (2xx)",
+            "SupplyCSP [any amended TD] - UC17 - UC19 (confirm) - GET TD (DRAFT or ISSUED or"
+                + " PENDING_SURRENDER_FOR_AMENDMENT)",
+            "SupplyCSP [any amended TD] - UC17 - UC19 (decline) - GET TD (DRAFT or ISSUED or"
+                + " PENDING_SURRENDER_FOR_AMENDMENT)",
+            "SupplyCSP [any amended TD] - UC17 - UC18 - GET TD (DRAFT or ISSUED or"
+                + " PENDING_SURRENDER_FOR_AMENDMENT)"),
         titles(modules.get("Optional (report-only) scenarios")));
     assertTrue(
         modules.get("Optional (report-only) scenarios").stream()
@@ -161,16 +169,16 @@ class EblScenarioListBuilderTest {
             "Optional (report-only) scenarios"),
         List.copyOf(modules.keySet()));
     assertEquals(
-        List.of("UC6 [Sea Waybill] - UC7 - GET TD"),
+        List.of("UC8 [Sea Waybill] - GET TD"),
         titles(modules.get("Required Sea Waybill scenario")));
     assertEquals(
-        List.of("UC6 [Straight B/L] - UC7 - GET TD"),
+        List.of("UC8 [Straight B/L] - GET TD"),
         titles(modules.get("Required Straight B/L scenario")));
     assertEquals(
-        List.of("UC6 [Negotiable B/L] - UC7 - GET TD"),
+        List.of("UC8 [Negotiable B/L] - GET TD"),
         titles(modules.get("Required Negotiable B/L scenario")));
     assertEquals(
-        List.of("UC17 - UC19 (confirm) - GET TD amendment", "UC17 - UC18"),
+        List.of("UC6 - UC7", "UC17 - UC19 (confirm) - GET TD amendment", "UC17 - UC18"),
         titles(modules.get("Optional (report-only) scenarios")));
     assertTrue(
         modules.get("Optional (report-only) scenarios").stream()
@@ -199,12 +207,53 @@ class EblScenarioListBuilderTest {
      assertEquals(8, modules.size());
      assertTrue(modules.containsKey("Carrier: Optional (report-only) scenarios"));
      assertTrue(modules.containsKey("Shipper: Optional (report-only) scenarios"));
-     assertEquals(4, modules.get("Carrier: Optional (report-only) scenarios").size());
-     assertEquals(2, modules.get("Shipper: Optional (report-only) scenarios").size());
+    assertEquals(5, modules.get("Carrier: Optional (report-only) scenarios").size());
+    assertEquals(3, modules.get("Shipper: Optional (report-only) scenarios").size());
      List<String> allTitles =
          modules.values().stream().flatMap(List::stream).map(ConformanceScenario::getTitle).toList();
      assertEquals(allTitles.size(), Set.copyOf(allTitles).size());
    }
+
+  @Test
+  void optionalDraftFlowsDoNotConstrainDocumentTypeAfterResetOrImport() {
+    for (String title : List.of("UC6", "UC6 [any TD type]")) {
+      var action =
+          new UC6_Carrier_PublishDraftTransportDocumentAction(
+              CARRIER, SHIPPER, null, ScenarioType.REGULAR_STRAIGHT_BL, null, true, false, title);
+      assertTrue(
+          action.getHumanReadablePrompt().contains("Sea Waybill, Straight B/L, or Negotiable B/L"));
+      action.reset();
+      ObjectNode state = action.exportJsonState();
+      ((ObjectNode) state.required("currentDsp")).put("scenarioType", "REGULAR_STRAIGHT_BL");
+      action.importJsonState(state);
+      assertEquals(
+          null, action.exportJsonState().required("currentDsp").path("scenarioType").asText(null));
+      assertEquals("REGULAR_STRAIGHT_BL", action.asJsonNode().required("scenarioType").asText());
+    }
+  }
+
+  @Test
+  void standaloneUc8RestoresScopeWithoutRequiringApproval() {
+    for (ScenarioType type :
+        List.of(
+            ScenarioType.REGULAR_SWB,
+            ScenarioType.REGULAR_STRAIGHT_BL,
+            ScenarioType.REGULAR_NEGOTIABLE_BL)) {
+      var action =
+          new UC8_Carrier_IssueTransportDocumentAction(CARRIER, SHIPPER, null, null, false, type);
+      assertTrue(action.isInputRequired());
+      assertTrue(action.getHumanReadablePrompt().contains(type.tdScopeName()));
+      action.reset();
+      ObjectNode staleState = action.exportJsonState();
+      ((ObjectNode) staleState.required("currentDsp")).put("scenarioType", "DG");
+      action.importJsonState(staleState);
+      assertEquals(type.name(), action.asJsonNode().required("scenarioType").asText());
+      assertEquals(
+          type.name(),
+          action.exportJsonState().required("currentDsp").required("scenarioType").asText());
+      assertTrue(action.asJsonNode().required("skipSI").asBoolean());
+    }
+  }
 
   @Test
   void standaloneShipperUc17SuppliesMatchingAmendmentDataAfterReset() {
@@ -310,7 +359,8 @@ class EblScenarioListBuilderTest {
             .filter(Shipper_GetShippingInstructionsAction.class::isInstance)
             .findFirst()
             .orElseThrow();
-    var field = Shipper_GetShippingInstructionsAction.class.getDeclaredField("expectedAmendedSiStatus");
+    var field =
+        Shipper_GetShippingInstructionsAction.class.getDeclaredField("expectedAmendedSiStatus");
     field.setAccessible(true);
     return (ShippingInstructionsStatus) field.get(getSiAction);
   }

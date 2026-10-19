@@ -28,7 +28,7 @@ public class EblDatasets {
       KeywordDataset.staticDataset("VY", "VS", "VR", "VQ", "VO", "VL", "NG", "NF", "NE", "VG");
 
   public static final KeywordDataset DG_INHALATION_ZONES =
-      KeywordDataset.fromCSV("/standards/ebl/datasets/inhalationzones.csv");
+      KeywordDataset.staticDataset("A", "B", "C", "D");
   public static final KeywordDataset DG_SEGREGATION_GROUPS =
       KeywordDataset.fromCSV("/standards/ebl/datasets/segregationgroups.csv");
 

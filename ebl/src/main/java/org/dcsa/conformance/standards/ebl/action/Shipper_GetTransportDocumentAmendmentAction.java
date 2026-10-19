@@ -32,22 +32,25 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
 
   private final JsonSchemaValidator responseSchemaValidator;
   private final AmendedTransportDocumentStatus expectedAmendmentStatus;
+  private final boolean anySuccessfulResponse;
 
   public Shipper_GetTransportDocumentAmendmentAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator responseSchemaValidator,
-      AmendedTransportDocumentStatus expectedAmendmentStatus) {
+      AmendedTransportDocumentStatus expectedAmendmentStatus,
+      boolean anySuccessfulResponse) {
     super(
         shipperPartyName,
         carrierPartyName,
         previousAction,
-        "GET TD amendment",
+        anySuccessfulResponse ? "GET TD amendment (2xx)" : "GET TD amendment",
         200,
         true);
     this.responseSchemaValidator = responseSchemaValidator;
     this.expectedAmendmentStatus = expectedAmendmentStatus;
+    this.anySuccessfulResponse = anySuccessfulResponse;
   }
 
   @Override
@@ -78,7 +81,9 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
                 getTransportDocumentAmendmentEndpoint()),
-            new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+            anySuccessfulResponse
+                ? ResponseStatusCheck.forSuccessfulResponse(EblRole::isCarrier, getMatchedExchangeUuid())
+                : new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),

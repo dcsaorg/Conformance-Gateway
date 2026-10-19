@@ -4,7 +4,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -19,6 +18,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends CarrierNoti
   public static final String ACTION_TITLE = "UC6";
   private final JsonSchemaValidator notificationSchemaValidator;
   private final boolean skipSI;
+  private final boolean anyTdType;
   private ScenarioType scenarioType;
 
   public UC6_Carrier_PublishDraftTransportDocumentAction(
@@ -49,17 +49,58 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends CarrierNoti
       boolean skipSI,
       boolean isWithNotifications,
       boolean includeScenarioTypeInTitle) {
-    super(
+    this(
         carrierPartyName,
         shipperPartyName,
         previousAction,
-        includeScenarioTypeInTitle ? "UC6 [%s]".formatted(scenarioType.tdScopeName()) : ACTION_TITLE,
-        204,
-        isWithNotifications);
+        scenarioType,
+        notificationSchemaValidator,
+        skipSI,
+        isWithNotifications,
+        includeScenarioTypeInTitle
+            ? "UC6 [%s]".formatted(scenarioType.tdScopeName())
+            : ACTION_TITLE,
+        false);
+  }
+
+  public UC6_Carrier_PublishDraftTransportDocumentAction(
+      String carrierPartyName,
+      String shipperPartyName,
+      EblAction previousAction,
+      ScenarioType scenarioType,
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean skipSI,
+      boolean isWithNotifications,
+      String actionTitle) {
+    this(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        scenarioType,
+        notificationSchemaValidator,
+        skipSI,
+        isWithNotifications,
+        actionTitle,
+        true);
+  }
+
+  private UC6_Carrier_PublishDraftTransportDocumentAction(
+      String carrierPartyName,
+      String shipperPartyName,
+      EblAction previousAction,
+      ScenarioType scenarioType,
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean skipSI,
+      boolean isWithNotifications,
+      String actionTitle,
+      boolean anyTdType) {
+    super(
+        carrierPartyName, shipperPartyName, previousAction, actionTitle, 204, isWithNotifications);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
     this.scenarioType = scenarioType;
-    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
+    this.anyTdType = anyTdType;
+    initializeScope();
   }
 
   public UC6_Carrier_PublishDraftTransportDocumentAction(
@@ -73,19 +114,34 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends CarrierNoti
         carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204, isWithNotifications);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
+    this.anyTdType = false;
+  }
+
+  private void initializeScope() {
+    if (scenarioType != null) {
+      getDspConsumer().accept(getDSP().withScenarioType(anyTdType ? null : scenarioType.name()));
+    }
   }
 
   @Override
   public void reset() {
     super.reset();
-    if (scenarioType != null) {
-      this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType.name()));
-    }
+    initializeScope();
+  }
+
+  @Override
+  public void importJsonState(JsonNode state) {
+    super.importJsonState(state);
+    initializeScope();
   }
 
   @Override
   public String getHumanReadablePrompt() {
     if (skipSI) {
+      if (anyTdType) {
+        return getMarkdownHumanReadablePrompt(
+            Map.of(), "prompt-carrier-uc6-any-td.md", "prompt-carrier-notification.md");
+      }
       return getMarkdownHumanReadablePrompt(
           Map.of(
               "DOCUMENT_TYPE_NAME", scenarioType.tdScopeName(),
@@ -155,7 +211,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends CarrierNoti
             : dsp.shippingInstructionsReference();
     return super.asJsonNode()
         .put("documentReference", dr)
-        .put("scenarioType", getDspSupplier().get().scenarioType())
+        .put("scenarioType", scenarioType == null ? getDspSupplier().get().scenarioType() : scenarioType.name())
         .put("skipSI", skipSI);
   }
 

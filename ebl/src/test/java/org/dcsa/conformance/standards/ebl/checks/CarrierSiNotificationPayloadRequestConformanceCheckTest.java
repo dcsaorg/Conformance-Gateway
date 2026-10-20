@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 class CarrierSiNotificationPayloadRequestConformanceCheckTest {
   @Test
-  void notificationChecksIncludeUpdatedPayloadOnlyForUpdateReceived() {
+  void notificationChecksIncludeUpdatedPayloadWhenUpdateStatusIsUnconstrainedOrExpected() {
     for (ShippingInstructionsStatus updated :
         Arrays.asList(
             null,
@@ -30,7 +30,7 @@ class CarrierSiNotificationPayloadRequestConformanceCheckTest {
               () -> dsp("REGULAR_SWB"));
       var checks = check.createSubChecks().toList();
       assertEquals(
-          updated == ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
+          updated != null,
           checks.stream().anyMatch(c -> c.getTitle().contains("[Updated Shipping Instructions]")));
       ObjectNode payload = OBJECT_MAPPER.createObjectNode();
       ObjectNode data = payload.putObject("data");
@@ -62,29 +62,31 @@ class CarrierSiNotificationPayloadRequestConformanceCheckTest {
 
   @Test
   void notificationNestedReferencesMustMatchTheScenario() {
-    for (String field : List.of("shippingInstructions", "updatedShippingInstructions")) {
-      for (String reference : List.of("SIR", "UNRELATED-SIR")) {
-        ObjectNode payload = OBJECT_MAPPER.createObjectNode();
-        ObjectNode data = payload.putObject("data");
-        data.put("shippingInstructionsStatus", "RECEIVED");
-        data.put("updatedShippingInstructionsStatus", "UPDATE_RECEIVED");
-        ObjectNode nested = data.putObject(field);
-        nested
-            .put("shippingInstructionsReference", reference)
-            .put("shippingInstructionsStatus", "RECEIVED")
-            .put("updatedShippingInstructionsStatus", "UPDATE_RECEIVED")
-            .put("transportDocumentTypeCode", "SWB")
-            .put("isToOrder", false);
-        nested.withObject("/documentParties/consignee/address").put("street", "Road");
-        assertNotificationConformance(
-            payload, ShippingInstructionsStatus.SI_UPDATE_RECEIVED, reference.equals("SIR"));
+    for (ShippingInstructionsStatus updated :
+        List.of(ShippingInstructionsStatus.SI_ANY, ShippingInstructionsStatus.SI_UPDATE_RECEIVED)) {
+      for (String field : List.of("shippingInstructions", "updatedShippingInstructions")) {
+        for (String reference : List.of("SIR", "UNRELATED-SIR")) {
+          ObjectNode payload = OBJECT_MAPPER.createObjectNode();
+          ObjectNode data = payload.putObject("data");
+          data.put("shippingInstructionsStatus", "RECEIVED");
+          data.put("updatedShippingInstructionsStatus", "UPDATE_RECEIVED");
+          ObjectNode nested = data.putObject(field);
+          nested
+              .put("shippingInstructionsReference", reference)
+              .put("shippingInstructionsStatus", "RECEIVED")
+              .put("updatedShippingInstructionsStatus", "UPDATE_RECEIVED")
+              .put("transportDocumentTypeCode", "SWB")
+              .put("isToOrder", false);
+          nested.withObject("/documentParties/consignee/address").put("street", "Road");
+          assertNotificationConformance(payload, updated, reference.equals("SIR"));
+        }
       }
     }
   }
 
   @Test
   void notificationSiAnyStillRejectsUnknownUpdatedStatuses() {
-    for (String field : List.of("data", "shippingInstructions")) {
+    for (String field : List.of("data", "shippingInstructions", "updatedShippingInstructions")) {
       for (String status : List.of("UPDATE_RECEIVED", "FOO")) {
         ObjectNode payload = OBJECT_MAPPER.createObjectNode();
         ObjectNode data = payload.putObject("data");
@@ -101,6 +103,39 @@ class CarrierSiNotificationPayloadRequestConformanceCheckTest {
             payload, ShippingInstructionsStatus.SI_ANY, status.equals("UPDATE_RECEIVED"));
       }
     }
+  }
+
+  @Test
+  void notificationSiAnyValidatesSuppliedUpdateCodeListProviders() {
+    for (String provider : List.of("DCSA", "ZZZ", "UNKNOWN")) {
+      ObjectNode payload = OBJECT_MAPPER.createObjectNode();
+      ObjectNode data = payload.putObject("data");
+      data.put("shippingInstructionsStatus", "RECEIVED");
+      ObjectNode updated = data.putObject("updatedShippingInstructions");
+      updated
+          .put("shippingInstructionsReference", "SIR")
+          .put("shippingInstructionsStatus", "RECEIVED")
+          .put("transportDocumentTypeCode", "SWB")
+          .put("isToOrder", false);
+      updated
+          .withObject("/documentParties/consignee")
+          .putArray("identifyingCodes")
+          .addObject()
+          .put("codeListProvider", provider)
+          .put("partyCode", "PARTY");
+      assertNotificationConformance(
+          payload, ShippingInstructionsStatus.SI_ANY, !provider.equals("UNKNOWN"));
+    }
+  }
+
+  @Test
+  void notificationSiAnyAllowsAbsentOrEmptyUpdatePayload() {
+    ObjectNode payload = OBJECT_MAPPER.createObjectNode();
+    ObjectNode data = payload.putObject("data");
+    data.put("shippingInstructionsStatus", "RECEIVED");
+    assertNotificationConformance(payload, ShippingInstructionsStatus.SI_ANY, true);
+    data.putObject("updatedShippingInstructions");
+    assertNotificationConformance(payload, ShippingInstructionsStatus.SI_ANY, true);
   }
 
   private static void assertNotificationConformance(

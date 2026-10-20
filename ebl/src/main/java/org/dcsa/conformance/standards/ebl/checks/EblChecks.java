@@ -2036,14 +2036,20 @@ public class EblChecks {
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
 
+    if (dspSupplier.get().shippingInstructionsReference() != null) {
+      checks.add(
+          JsonAttribute.mustEqual(
+              SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference()));
+    }
+
     checks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
     if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
       checks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
-      checks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     }
 
+    checks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     checks.addAll(STATIC_SI_CHECKS);
     checks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
 
@@ -2134,9 +2140,9 @@ public class EblChecks {
 
     if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
       jsonContentChecks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
-      jsonContentChecks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     }
 
+    jsonContentChecks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     jsonContentChecks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
     jsonContentChecks.add(FEEDBACKS_PRESENCE);
     jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY);

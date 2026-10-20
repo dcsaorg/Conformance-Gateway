@@ -57,14 +57,14 @@ class Shipper_GetTransportDocumentAmendmentActionTest {
         check.check(id -> exchange);
         assertEquals(1, check.resultsStream().count());
         assertEquals(
-            carrierScenario ? status == 200 || status == 202 : status == 200,
+            carrierScenario ? status >= 200 && status < 300 : status == 200,
             check.resultsStream().allMatch(ConformanceResult::isConformant));
       }
     }
   }
 
   @Test
-  void amendmentRetrievalEnforcesPayloadBearing200AndBodyless202() throws Exception {
+  void amendmentRetrievalEnforcesPayloadValidationAndBodyless202() throws Exception {
     var schema =
         JsonSchemaValidator.getInstance(
             "/standards/ebl/schemas/EBL_v3.0.0.yaml", "TransportDocumentAmend");
@@ -122,7 +122,8 @@ class Shipper_GetTransportDocumentAmendmentActionTest {
           var results = results(check).toList();
           assertFalse(results.isEmpty());
           boolean expected =
-              status == 200 && body.equals(amendment.toString())
+              (status == 200 || carrierScenario && status != 202)
+                      && body.equals(amendment.toString())
                   || carrierScenario && status == 202 && body.isEmpty();
           assertEquals(
               expected,

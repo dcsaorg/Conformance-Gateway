@@ -1693,6 +1693,7 @@ class EblChecksTest {
               .put("isToOrder", type.isToOrder())
               .put("transportDocumentStatus", "DRAFT")
               .put("shippingInstructionsStatus", "RECEIVED")
+              .put("shippingInstructionsReference", "SIR")
               .put("transportDocumentReference", "TDR");
       node.withObject("/documentParties/consignee/address").put("street", "Road");
       if (type.isToOrder()) {
@@ -1792,6 +1793,85 @@ class EblChecksTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> TransportDocumentStatusScenario.primaryStatusesOnly(Set.of()));
+  }
+
+  @Test
+  void siResponseReferenceMustMatchWhenKnown() {
+    for (String expectedReference : Stream.of("SIR", (String) null).toList()) {
+      var parameters =
+          dsp("REGULAR_SWB").withShippingInstructionsReference(expectedReference);
+      for (String actualReference : Stream.of("SIR", "UNRELATED-SIR", (String) null).toList()) {
+        ObjectNode payload = validSiPayload();
+        if (actualReference == null) {
+          payload.remove("shippingInstructionsReference");
+        } else {
+          payload.put("shippingInstructionsReference", actualReference);
+        }
+        var exchange = exchange(payload, payload);
+        var check =
+            EblChecks.siResponseContentChecks(
+                exchange.getUuid(),
+                "3.0.0",
+                ShippingInstructionsStatus.SI_RECEIVED,
+                ShippingInstructionsStatus.SI_ANY,
+                () -> parameters);
+        check.check(id -> exchange);
+        assertEquals(
+            expectedReference == null || expectedReference.equals(actualReference),
+            contentResults(check).allMatch(ConformanceResult::isConformant),
+            "expected=" + expectedReference + ", actual=" + actualReference);
+      }
+    }
+  }
+
+  @Test
+  void updatedSiAllowedValuesAreEnforcedRegardlessOfExpectedStatus() {
+    for (ShippingInstructionsStatus expected :
+        Stream.of(
+                ShippingInstructionsStatus.SI_ANY,
+                ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
+                (ShippingInstructionsStatus) null)
+            .toList()) {
+      for (String actual :
+          Stream.of(
+                  (String) null,
+                  "UPDATE_RECEIVED",
+                  "UPDATE_CONFIRMED",
+                  "UPDATE_CANCELLED",
+                  "UPDATE_DECLINED",
+                  "FOO")
+              .toList()) {
+        ObjectNode payload = validSiPayload();
+        if (actual != null) payload.put("updatedShippingInstructionsStatus", actual);
+        boolean allowed = actual == null || actual.startsWith("UPDATE_");
+        boolean valid =
+            allowed
+                && (expected == ShippingInstructionsStatus.SI_ANY
+                    || (expected == null ? actual == null : expected.wireName().equals(actual)));
+        for (List<JsonContentCheck> checks :
+            List.of(
+                EblChecks.getSiPayloadChecks(
+                    ShippingInstructionsStatus.SI_RECEIVED, expected, () -> dsp("REGULAR_SWB")),
+                EblChecks.getSiNotificationChecks(
+                    ShippingInstructionsStatus.SI_RECEIVED, expected, List.of()))) {
+          assertEquals(
+              valid,
+              checks.stream().allMatch(check -> check.validate(payload).isConformant()),
+              "expected=" + expected + ", actual=" + actual);
+        }
+      }
+    }
+  }
+
+  private static ObjectNode validSiPayload() {
+    ObjectNode payload = OBJECT_MAPPER.createObjectNode();
+    payload
+        .put("shippingInstructionsReference", "SIR")
+        .put("shippingInstructionsStatus", "RECEIVED")
+        .put("transportDocumentTypeCode", "SWB")
+        .put("isToOrder", false);
+    payload.withObject("/documentParties/consignee/address").put("street", "Road");
+    return payload;
   }
 
   private static Stream<ConformanceResult> contentResults(ConformanceCheck check) {

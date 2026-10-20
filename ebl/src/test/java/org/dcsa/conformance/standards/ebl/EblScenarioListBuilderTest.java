@@ -95,7 +95,7 @@ class EblScenarioListBuilderTest {
   }
 
   @Test
-  void requiredSiOnlyScenariosDoNotValidateUpdatedShippingInstructionsStatus() throws Exception {
+  void requiredSiOnlyScenariosValidateAllowedUpdatedStatusesWithoutRequiringOne() throws Exception {
     Map<String, List<ConformanceScenario>> carrierModules =
         buildModules(Set.of(CARRIER), EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI);
     Map<String, List<ConformanceScenario>> shipperModules =
@@ -109,14 +109,22 @@ class EblScenarioListBuilderTest {
     assertEquals(ShippingInstructionsStatus.SI_ANY, expectedUpdatedSiStatusOf(carrierScenario));
     assertEquals(ShippingInstructionsStatus.SI_ANY, expectedUpdatedSiStatusOf(shipperScenario));
 
-    assertFalse(
-        carrierCheckTitles.stream()
-            .anyMatch(title -> title.contains("updatedShippingInstructionsStatus")),
-        carrierCheckTitles.toString());
-    assertFalse(
-        shipperCheckTitles.stream()
-            .anyMatch(title -> title.contains("updatedShippingInstructionsStatus")),
-        shipperCheckTitles.toString());
+    for (var titles : List.of(carrierCheckTitles, shipperCheckTitles)) {
+      var updatedStatusTitles =
+          titles.stream()
+              .filter(title -> title.contains("updatedShippingInstructionsStatus"))
+              .toList();
+      assertFalse(updatedStatusTitles.isEmpty());
+      assertTrue(
+          updatedStatusTitles.stream()
+              .allMatch(
+                  title ->
+                      title.contains(
+                          "If `updatedShippingInstructionsStatus` is present, then it must equal"
+                              + " `UPDATE_RECEIVED`, `UPDATE_CONFIRMED`, `UPDATE_CANCELLED`, or"
+                              + " `UPDATE_DECLINED`.")),
+          updatedStatusTitles.toString());
+    }
   }
 
   @Test

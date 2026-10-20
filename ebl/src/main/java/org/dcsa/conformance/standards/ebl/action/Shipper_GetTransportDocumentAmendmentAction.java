@@ -83,10 +83,11 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
                 getTransportDocumentAmendmentEndpoint()),
-            new ResponseStatusCheck(
-                EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                allowAcceptedResponse ? Set.of(200, 202) : expectedStatus),
+            allowAcceptedResponse
+                ? ResponseStatusCheck.forSuccessfulResponse(
+                    EblRole::isCarrier, getMatchedExchangeUuid())
+                : new ResponseStatusCheck(
+                    EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new EmptyResponseBodyCheck(EblRole::isCarrier, getMatchedExchangeUuid(), 202),
             new ApiHeaderCheck(
                 EblRole::isShipper,

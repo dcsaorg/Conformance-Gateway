@@ -43,6 +43,11 @@ public class BookingDataSets {
   public static final KeywordDataset OTHER_PARTY_FUNCTION_CODES =
     KeywordDataset.staticDataset("DDR", "DDS", "COW", "COX", "N1", "N2", "NI", "NAC", "CSR");
 
+  public static final KeywordDataset EBL_PLATFORM_CODES =
+    KeywordDataset.staticDataset(
+      "WAVE", "CARX", "ESSD", "IDT", "BOLE", "EDOX", "IQAX", "SECR", "TRGO", "ETEU", "TRAC",
+      "BRIT", "COVA", "ETIT", "KTNE", "CRED", "BLOC", "DOCU", "AEOT", "SGTD");
+
   public static final KeywordDataset CODE_LIST_PROVIDER_CODES =
     KeywordDataset.staticDataset(
       "WAVE", "CARX", "ESSD", "IDT", "BOLE", "EDOX", "IQAX", "SECR", "TRGO", "ETEU", "TRAC",

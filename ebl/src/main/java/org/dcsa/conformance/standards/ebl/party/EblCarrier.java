@@ -272,10 +272,19 @@ public class EblCarrier extends ConformanceParty {
   private void issueTransportDocument(JsonNode actionPrompt) {
     log.info("Carrier.issueTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
-    var documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
-    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
-
-    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    String documentReference;
+    CarrierShippingInstructions si;
+    if (actionPrompt.path("skipSI").asBoolean(false)) {
+      ScenarioType scenarioType = ScenarioType.valueOf(actionPrompt.required(SCENARIO_TYPE).asText());
+      si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest((ObjectNode) getEblPayload(scenarioType), apiVersion);
+      si.publishDraftTransportDocument(si.getShippingInstructionsReference(), scenarioType);
+      documentReference = si.getTransportDocumentReference();
+      tdrToSir.put(documentReference, si.getShippingInstructionsReference());
+    } else {
+      documentReference = actionPrompt.required(DOCUMENT_REFERENCE).asText();
+      var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+      si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    }
     si.issueTransportDocument(documentReference);
     si.save(persistentMap);
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);

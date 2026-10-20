@@ -7,7 +7,6 @@
     id="create_sandbox_button"
     mat-raised-button
     color="primary"
-    [disabled]="isDeleting"
     (click)="onCreateSandbox()">
     <mat-icon>add</mat-icon>
     Create sandbox
@@ -29,48 +28,14 @@
     />
     <mat-icon matPrefix>search</mat-icon>
   </mat-form-field>
-
-  @if (sandboxes.length > 0) {
-    <div class="sandboxListToolbar">
-      <mat-checkbox
-        id="select_all_sandboxes_checkbox"
-        [checked]="areAllFilteredSandboxesSelected()"
-        [indeterminate]="areSomeFilteredSandboxesSelected()"
-        [disabled]="isDeleting || filteredSandboxes.length === 0"
-        (change)="toggleAllFilteredSandboxes($event.checked)">
-        Select all
-      </mat-checkbox>
-      <button
-        id="delete_selected_sandboxes_button"
-        mat-stroked-button
-        color="warn"
-        title="Delete selected sandboxes"
-        [disabled]="selectedSandboxIds.size === 0 || isDeleting"
-        (click)="onDeleteSelectedSandboxes()">
-        <mat-icon>delete</mat-icon>
-        {{isDeleting ? 'Deleting...' : 'Delete selected'}}
-      </button>
-    </div>
-  }
 }
 
 @for (sandbox of filteredSandboxes; track sandbox.id) {
-  <mat-card
-    class="entityCard withContentPadding sandboxCard"
-    [class.selectedEntityCard]="isSandboxSelected(sandbox.id)">
-    <mat-checkbox
-      class="sandboxCheckbox"
-      [attr.aria-label]="'Select sandbox ' + sandbox.name"
-      [checked]="isSandboxSelected(sandbox.id)"
-      [disabled]="isDeleting"
-      (click)="$event.stopPropagation()"
-      (change)="toggleSandboxSelection(sandbox.id, $event.checked)">
-    </mat-checkbox>
+  <mat-card class="entityCard withContentPadding sandboxCard">
     <button
       type="button"
       class="sandboxCardContent sandboxCardLink"
       [attr.aria-label]="'Open sandbox ' + sandbox.name"
-      [disabled]="isDeleting"
       (click)="onSandboxClick(sandbox)">
       <div>
         <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>

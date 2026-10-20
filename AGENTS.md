@@ -31,17 +31,21 @@ Do not hardcode the random local auth token.
 1. Run `git status --short` before editing. Never overwrite or revert unrelated user changes.
 2. Trace a changed concept through its definitions and usages. For standard behavior, inspect the component factory, scenario-list builder, actions, checks, party implementations, resources, and relevant tests.
 3. Make the smallest coherent change. Preserve public APIs and formatting unless the requirement demands otherwise.
-4. Add a regression test that fails for the original defect. Prefer behavioral assertions over snapshots or implementation details.
-5. Run focused tests first, then tests for all affected reactor modules.
-6. If the change can affect scenario construction, actions, parties, orchestration, validation, reports, API traffic, or standard resources, run the complete affected conformance suite and inspect its HTML report. Unit tests alone are not sufficient.
-7. Summarize commands run, report path, and any testing that could not be performed. Never claim a pass without running the command.
-8. Maintain this guide iteratively when a change reveals a durable, repository-wide convention or a
+4. Run focused unit tests first, then unit tests for all affected reactor modules. For every standard being changed, assess all its check/validation classes (including shared SI/TD checks), not just changed code, and add missing unit tests until each class has 100% branch, line, and method coverage. Verify fresh per-class JaCoCo counters; aggregate coverage, excluded code, and conformance reports are not substitutes.
+5. If the change can affect scenario construction, actions, parties, orchestration, validation, reports, API traffic, or standard resources, run the complete affected conformance suite and inspect its HTML report. Unit tests alone are not sufficient.
+6. Summarize commands run, report path, and any testing that could not be performed. Never claim a pass without running the command.
+7. Maintain this guide iteratively when a change reveals a durable, repository-wide convention or a
    non-obvious failure mode likely to recur. Add only concise, actionable guidance that will help
    future work; do not record one-off implementation details, duplicate existing rules, or expand
    the file merely because code changed. Refine an existing rule instead of adding another when
    that communicates the lesson more clearly.
 
+Keep unsolicited analysis documents, requirement matrices, and implementation notes under root
+`temp/`, not in maintained project documentation. Create permanent documentation only when requested.
+
 Do not temporarily comment out parameterized standards/scenarios or remove `@Disabled` and commit that change. Use focused Maven selectors or IDE run configurations instead.
+
+AI agents must never execute tests under `spring-boot/src/test/java/org/dcsa/conformance/frontend/` or `spring-boot/src/test/java/org/dcsa/conformance/manual/`, directly or through broad Maven/reactor commands. These slow tests are reserved for CI/CD or manual execution by a human. Use unit tests and the supplied conformance-report scripts for agent validation; identify any remaining browser/manual verification for CI or humans without running it.
 
 ## Standard specifications are authoritative
 
@@ -81,6 +85,10 @@ When combining role-specific module maps for an all-in-one sandbox:
 
 Standalone root actions that synthesize references or payloads must re-establish the relationship between those values after reset and JSON-state import. Keep prompt URL/reference fields and payload references atomic, and add a regression test that imports stale dynamic scenario parameters before serializing the prompt; constructor-only initialization is not sufficient.
 
+When adding an input-requiring action, update both manual and Selenium prompt adapters to supply
+real identifiers instead of submitting placeholder JSON. Compile those harnesses with tests skipped;
+their execution remains reserved for CI/CD or humans.
+
 To disable a scenario suite without deleting its implementation: remove it from the standard's advertised suite set, disable/comment its scenario-builder dispatch branch, remove or comment any explicitly hard-coded Spring/manual/Selenium integration case, and replace documentation or runner examples that advertise it. Keep dormant builders and endpoint metadata only when useful for straightforward re-enablement. Add a contract test for the exact advertised suite set and verify the disabled sandbox ID is absent from the generated homepage.
 
 When adding a standard/version/suite, ensure it is exposed by the relevant `ConformanceStandard`, generated on the Spring Boot homepage, represented in `ConformanceApplicationTest`, and runnable through the conformance runner.
@@ -103,10 +111,10 @@ A specific test across a reactor (the extra property prevents dependency modules
 ./mvnw -pl booking -am -Dtest=BookingScenarioListBuilderTest -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
-All Java tests:
+Broad Java unit-test runs must explicitly exclude the prohibited Spring Boot test directories (keep these exclusions when adding selectors):
 
 ```bash
-./mvnw test
+./mvnw '-Dtest=*,!org/dcsa/conformance/frontend/**,!org/dcsa/conformance/manual/**' -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 Build without tests only when a compile/package artifact is specifically needed; it is not validation:
@@ -125,8 +133,8 @@ Useful test layers:
 
 - Unit tests beside each module: fastest regression feedback.
 - `spring-boot/.../ConformanceApplicationTest`: full auto all-in-one suites.
-- `spring-boot/.../manual/ManualScenarioTest`: orchestrator controls one side while test code performs the counterpart; this can expose issues hidden by all-in-one execution.
-- Selenium tests: UI wiring and browser behavior; slower and require the UI runtime.
+- `spring-boot/.../manual/ManualScenarioTest`: CI/human-only counterpart coverage; agents must not run it.
+- `spring-boot/.../frontend/` Selenium tests: CI/human-only browser coverage; agents must not run them. This restriction does not prohibit `webui` Jest unit tests.
 - AWS tests: deployed-environment coverage and credentials; do not run or alter casually.
 
 ## Required end-to-end report validation
@@ -168,7 +176,7 @@ The runner:
 
 Open a failing report and inspect the first non-conformant scenario/action and its recorded exchange errors. Fix the cause and rerun until green; do not merely loosen the runner's status parsing or assertions.
 
-The runner proves backend all-in-one scenario behavior, not every browser interaction. Also run relevant manual or Selenium tests when changing manual prompts/input, Web UI operations/components, authentication/navigation, or behavior where the test counterpart may hide integration assumptions.
+The runner proves backend all-in-one scenario behavior, not every browser interaction. When changing manual prompts/input, Web UI operations/components, authentication/navigation, or behavior where the synthetic counterpart may hide integration assumptions, add relevant unit coverage and use the report scripts. Record the remaining manual/Selenium verification for CI/CD or a human; agents must not execute Spring Boot `frontend/` or `manual/` tests.
 
 ## TypeScript scripts
 
@@ -221,14 +229,14 @@ Before finishing a change, verify:
 - [ ] Existing user changes were preserved.
 - [ ] The affected standard's synced Markdown in `specifications/confluence-sync/<standard>/<version>/` was reviewed and scenarios, checks, parties, and tests match it.
 - [ ] Every referenced validation workbook was directly analyzed and its applicable rows and conditions map exactly to validators, synthetic-party behavior, and regression tests.
-- [ ] New behavior has a focused regression test.
 - [ ] No role-specific scenario modules are lost to key collisions.
 - [ ] Scenario titles remain globally unique.
 - [ ] Focused affected-module tests pass.
+- [ ] Every check/validation class in each affected standard has 100% branch, line, and method coverage, verified with fresh per-class JaCoCo results; no coverage exclusions or weakened checks were used to meet the target.
 - [ ] The Confluence sync self-test and Python unit tests pass if its script or configuration changed; generated specification output was not hand-edited.
 - [ ] `scripts/npm test` passes if scripts changed.
 - [ ] `webui/npm test` and build pass if UI changed.
 - [ ] The affected complete conformance suite passes and its HTML report path is recorded when behavior could affect scenarios or validation.
-- [ ] Manual/Selenium coverage was run when the all-in-one backend cannot prove the changed behavior, or the limitation is explicitly reported.
+- [ ] No Spring Boot `frontend/` or `manual/` tests were run by the agent, including indirectly; any outstanding manual/browser verification is recorded for CI/CD or a human.
 - [ ] No generated `target/`, `dist/`, `.env`, IDE, or OS metadata files are committed.
 

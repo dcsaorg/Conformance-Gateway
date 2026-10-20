@@ -251,13 +251,18 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_REQUESTED_CARRIER_CLAUSES =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every item in `requestedCarrierClauses`, the value must equal CARGO_CARGOSPECIFICS, VESSELCONVEYANCE_COUNTRYSPECIFIC, CARGO_RETURNOFEMPTYCONTAINER, CARGO_CARGOVALUE, CARGO_REEFERTEMPERATURE, CARGO_CONFLICTINGTEMPERATURES_MIXEDLOADS, SHIPPERSLOADSTOWWEIGHTANDCOUNT, or INTRANSITCLAUSE.",
+          "For every item in `requestedCarrierClauses`, the value must equal CARGO_CARGOSPECIFICS,"
+              + " VESSELCONVEYANCE_COUNTRYSPECIFIC, CARGO_RETURNOFEMPTYCONTAINER, CARGO_CARGOVALUE,"
+              + " CARGO_REEFERTEMPERATURE, CARGO_CONFLICTINGTEMPERATURES_MIXEDLOADS,"
+              + " SHIPPERSLOADSTOWWEIGHTANDCOUNT, or INTRANSITCLAUSE.",
           mav -> mav.submitAllMatching(S_x.formatted(REQUESTED_CARRIER_CLAUSES)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(REQUESTED_CARRIER_CLAUSES_SET));
 
   static final JsonRebasableContentCheck VALID_REQUESTED_CARRIER_CERTIFICATES =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every item in `requestedCarrierCertificates[]`, the value must equal SHIPMENT_VOYAGE_PARTICULARS_1 through SHIPMENT_VOYAGE_PARTICULARS_7, or VESSEL_PARTICULARS_1 through VESSEL_PARTICULARS_18.",
+          "For every item in `requestedCarrierCertificates[]`, the value must equal"
+              + " SHIPMENT_VOYAGE_PARTICULARS_1 through SHIPMENT_VOYAGE_PARTICULARS_7, or"
+              + " VESSEL_PARTICULARS_1 through VESSEL_PARTICULARS_18.",
           mav -> mav.submitAllMatching(S_x.formatted(REQUESTED_CARRIER_CERTIFICATES)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(REQUESTED_CARRIER_CERTIFICATES_SET));
 
@@ -432,7 +437,9 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck EBL_AT_MOST_ONE_ORIGINAL_TOTAL =
       JsonAttribute.ifThen(
-          "When `isElectronic` is `true`, no more than one original may be requested. Therefore, the sum of `numberOfOriginalsWithoutCharges` and `numberOfOriginalsWithCharges` cannot be greater than `1`.",
+          "When `isElectronic` is `true`, no more than one original may be requested. Therefore,"
+              + " the sum of `numberOfOriginalsWithoutCharges` and `numberOfOriginalsWithCharges`"
+              + " cannot be greater than `1`.",
           IS_AN_EBL,
           JsonAttribute.customValidator(
               "Sum of '%s' and '%s' must be at most 1 for Electronic original Bills of Ladings."
@@ -459,7 +466,10 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALIDATE_DOCUMENT_PARTY =
       JsonAttribute.customValidator(
-          "For each `documentParty`—`shipper`, `consignee`, `endorsee`, `notifyParties`, `other`, `onBehalfOfShipper`, `onBehalfOfConsignee`, and `shippingInstructionsRequestor`—at least one of `address`, `addressLines`, or `identifyingCodes` must be provided.",
+          "For each `documentParty`—`shipper`, `consignee`, `endorsee`, `notifyParties`, `other`,"
+              + " `onBehalfOfShipper`, `onBehalfOfConsignee`, and"
+              + " `shippingInstructionsRequestor`—at least one of `address`, `addressLines`, or"
+              + " `identifyingCodes` must be provided.",
           (body, ignoredContextPath) -> {
             var documentParties = body.path(DOCUMENT_PARTIES);
             var issues = new LinkedHashSet<ConformanceError>();
@@ -522,7 +532,9 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "If present, `codeListProvider` must equal WAVE, CARX, IDT, BOLE, EDOX, IQAX, SECR, TRGO, ETEU, TRAC, BRIT, COVA, ETIT, KTNE, CRED, BLOC, DOCU, AEOT, SGTD, GSBN, WISE, GLEIF, W3C, DNB, FMC, DCSA, ZZZ or ESSD",
+          "If present, `codeListProvider` must equal WAVE, CARX, IDT, BOLE, EDOX, IQAX, SECR, TRGO,"
+              + " ETEU, TRAC, BRIT, COVA, ETIT, KTNE, CRED, BLOC, DOCU, AEOT, SGTD, GSBN, WISE,"
+              + " GLEIF, W3C, DNB, FMC, DCSA, ZZZ or ESSD",
           mav -> {
             mav.submitAllMatching(
                 S_S_S_x_S.formatted(
@@ -541,10 +553,7 @@ public class EblChecks {
                     DOCUMENT_PARTIES, ISSUING_PARTY, IDENTIFYING_CODES, CODE_LIST_PROVIDER));
             mav.submitAllMatching(
                 S_S_S_x_S.formatted(
-                    DOCUMENT_PARTIES,
-                    ON_BEHALF_OF_SHIPPER,
-                    IDENTIFYING_CODES,
-                    CODE_LIST_PROVIDER));
+                    DOCUMENT_PARTIES, ON_BEHALF_OF_SHIPPER, IDENTIFYING_CODES, CODE_LIST_PROVIDER));
             mav.submitAllMatching(
                 S_S_S_x_S.formatted(
                     DOCUMENT_PARTIES, SELLER, IDENTIFYING_CODES, CODE_LIST_PROVIDER));
@@ -659,7 +668,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_WOOD_DECLARATIONS =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "If `outerPackaging.woodDeclaration` is present, then it must equal `NOT_APPLICABLE`, `NOT_TREATED_AND_NOT_CERTIFIED`, `PROCESSED`, or `TREATED_AND_CERTIFIED`.",
+          "If `outerPackaging.woodDeclaration` is present, then it must equal `NOT_APPLICABLE`,"
+              + " `NOT_TREATED_AND_NOT_CERTIFIED`, `PROCESSED`, or `TREATED_AND_CERTIFIED`.",
           mav ->
               mav.submitAllMatching(
                   S_x_S_x_S_S.formatted(
@@ -680,7 +690,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_CONSIGNMENT_ITEMS_REFERENCE_TYPES =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every item in a consignment-item `references[]` collection, `type` must equal `CR`, `AKG`, `SPO`, or `CPO`.",
+          "For every item in a consignment-item `references[]` collection, `type` must equal `CR`,"
+              + " `AKG`, `SPO`, or `CPO`.",
           mav -> mav.submitAllMatching(S_x_S_x_S.formatted(CONSIGNMENT_ITEMS, REFERENCES, TYPE)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
               EblDatasets.CONSIGNMENT_ITEMS_REFERENCE_TYPE));
@@ -774,13 +785,14 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_EBL_PLATFORMS =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every document party where `eblPlatform` is present, it must equal WAVE, CARX, IDT, BOLE, EDOX, IQAX, SECR, TRGO, ETEU, TRAC, BRIT, COVA, ETIT, KTNE, CRED, BLOC, DOCU, AEOT, or SGTD; ESSD",
+          "For every document party where `eblPlatform` is present, it must equal WAVE, CARX, IDT,"
+              + " BOLE, EDOX, IQAX, SECR, TRGO, ETEU, TRAC, BRIT, COVA, ETIT, KTNE, CRED, BLOC,"
+              + " DOCU, AEOT, or SGTD; ESSD",
           mav -> {
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, SHIPPER, EBL_PLATFORM));
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, CONSIGNEE, EBL_PLATFORM));
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, ENDORSEE, EBL_PLATFORM));
-            mav.submitAllMatching(
-                S_S_S.formatted(DOCUMENT_PARTIES, ISSUING_PARTY, EBL_PLATFORM));
+            mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, ISSUING_PARTY, EBL_PLATFORM));
             mav.submitAllMatching(
                 S_S_S.formatted(DOCUMENT_PARTIES, ON_BEHALF_OF_SHIPPER, EBL_PLATFORM));
             mav.submitAllMatching(
@@ -792,7 +804,8 @@ public class EblChecks {
             mav.submitAllMatching(
                 S_S_x_S_S.formatted(DOCUMENT_PARTIES, OTHER, PARTY, EBL_PLATFORM));
             mav.submitAllMatching(
-                S_x_S_S_S.formatted(HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, SHIPPER, EBL_PLATFORM));
+                S_x_S_S_S.formatted(
+                    HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, SHIPPER, EBL_PLATFORM));
             mav.submitAllMatching(
                 S_x_S_S_S.formatted(
                     HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, CONSIGNEE, EBL_PLATFORM));
@@ -801,7 +814,8 @@ public class EblChecks {
             mav.submitAllMatching(
                 S_x_S_S_S.formatted(HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, BUYER, EBL_PLATFORM));
             mav.submitAllMatching(
-                S_x_S_S_S.formatted(HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, NOTIFY_PARTY, EBL_PLATFORM));
+                S_x_S_S_S.formatted(
+                    HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, NOTIFY_PARTY, EBL_PLATFORM));
             mav.submitAllMatching(
                 S_x_S_S_x_S_S.formatted(
                     HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, OTHER, PARTY, EBL_PLATFORM));
@@ -810,7 +824,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck SI_CONSIGNEE_AND_ENDORSEE_CONDITIONS =
       JsonAttribute.customValidator(
-          "If isToOrder=false, consignee must be present and endorsee must be absent. If endorsee is present, isToOrder must be true.",
+          "If isToOrder=false, consignee must be present and endorsee must be absent. If endorsee"
+              + " is present, isToOrder must be true.",
           (body, contextPath) -> {
             JsonNode documentParties = body.path(DOCUMENT_PARTIES);
             boolean isToOrder = body.path(IS_TO_ORDER).asBoolean(false);
@@ -1054,7 +1069,8 @@ public class EblChecks {
 
   static JsonRebasableContentCheck ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED =
       JsonAttribute.ifThen(
-          "If any advanceManifestFilings has manifestTypeCode='ENS', isHouseBillOfLadingsIssued must be present.",
+          "If any advanceManifestFilings has manifestTypeCode='ENS', isHouseBillOfLadingsIssued"
+              + " must be present.",
           node -> {
             JsonNode advanceManifestFilings = node.path(ADVANCE_MANIFEST_FILINGS);
             if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
@@ -1072,7 +1088,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every House Bill of Lading where isToOrder=true, the HBL notifyParty must be present.",
+          "For every House Bill of Lading where isToOrder=true, the HBL notifyParty must be"
+              + " present.",
           mav -> mav.submitAllMatching(S_x.formatted(HOUSE_BILL_OF_LADINGS)),
           (node, contextPath) -> {
             boolean isToOrder = node.path(IS_TO_ORDER).asBoolean(false);
@@ -1096,13 +1113,15 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_HBL_METHOD_OF_PAYMENT =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every item in `houseBillOfLadings[]`, `methodOfPayment` must equal `A`, `B`, `C`, `D`, `H`, `Y`, or `Z`.",
+          "For every item in `houseBillOfLadings[]`, `methodOfPayment` must equal `A`, `B`, `C`,"
+              + " `D`, `H`, `Y`, or `Z`.",
           mav -> mav.submitAllMatching(S_x_S.formatted(HOUSE_BILL_OF_LADINGS, METHOD_OF_PAYMENT)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.METHOD_OF_PAYMENT_SET));
 
   private static final JsonRebasableContentCheck VALIDATE_CARRIER_CODE_AND_LIST_PROVIDER =
       JsonAttribute.customValidator(
-          "`carrierCode` and `carrierCodeListProvider` must either both be present or both be absent",
+          "`carrierCode` and `carrierCodeListProvider` must either both be present or both be"
+              + " absent",
           (node, contextPath) -> {
             boolean hasCarrierCode = !node.path(CARRIER_CODE).isMissingNode();
             boolean hasProvider = !node.path(CARRIER_CODE_LIST_PROVIDER).isMissingNode();
@@ -1128,14 +1147,14 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_TYPE_OF_PERSON =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every document party where `typeOfPerson` is present, it must equal `NATURAL_PERSON`, `LEGAL_PERSON`, or `ASSOCIATION_OF_PERSONS`.",
+          "For every document party where `typeOfPerson` is present, it must equal"
+              + " `NATURAL_PERSON`, `LEGAL_PERSON`, or `ASSOCIATION_OF_PERSONS`.",
           mav -> {
             // single objects
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, SHIPPER, TYPE_OF_PERSON));
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, CONSIGNEE, TYPE_OF_PERSON));
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, ENDORSEE, TYPE_OF_PERSON));
-            mav.submitAllMatching(
-                S_S_S.formatted(DOCUMENT_PARTIES, ISSUING_PARTY, TYPE_OF_PERSON));
+            mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, ISSUING_PARTY, TYPE_OF_PERSON));
             mav.submitAllMatching(
                 S_S_S.formatted(DOCUMENT_PARTIES, ON_BEHALF_OF_SHIPPER, TYPE_OF_PERSON));
             mav.submitAllMatching(
@@ -1151,19 +1170,24 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_TYPE_OF_PERSON_HBL =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every HBL document party where `typeOfPerson` is present, it must equal `NATURAL_PERSON`, `LEGAL_PERSON`, or `ASSOCIATION_OF_PERSONS`.",
+          "For every HBL document party where `typeOfPerson` is present, it must equal"
+              + " `NATURAL_PERSON`, `LEGAL_PERSON`, or `ASSOCIATION_OF_PERSONS`.",
           mav -> {
             mav.submitAllMatching(
-                S_x_S_S_S.formatted(HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, SHIPPER, TYPE_OF_PERSON));
+                S_x_S_S_S.formatted(
+                    HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, SHIPPER, TYPE_OF_PERSON));
             mav.submitAllMatching(
                 S_x_S_S_S.formatted(
                     HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, CONSIGNEE, TYPE_OF_PERSON));
             mav.submitAllMatching(
-                S_x_S_S_S.formatted(HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, SELLER, TYPE_OF_PERSON));
+                S_x_S_S_S.formatted(
+                    HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, SELLER, TYPE_OF_PERSON));
             mav.submitAllMatching(
-                S_x_S_S_S.formatted(HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, BUYER, TYPE_OF_PERSON));
+                S_x_S_S_S.formatted(
+                    HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, BUYER, TYPE_OF_PERSON));
             mav.submitAllMatching(
-                S_x_S_S_S.formatted(HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, NOTIFY_PARTY, TYPE_OF_PERSON));
+                S_x_S_S_S.formatted(
+                    HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, NOTIFY_PARTY, TYPE_OF_PERSON));
             mav.submitAllMatching(
                 S_x_S_S_x_S_S.formatted(
                     HOUSE_BILL_OF_LADINGS, DOCUMENT_PARTIES, OTHER, PARTY, TYPE_OF_PERSON));
@@ -1178,7 +1202,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck NUMBER_OF_PACKAGES_CONDITIONAL_CHECK =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every HBL outer packaging, numberOfPackages must be present unless packageCode is one of VY, VS, VR, VQ, VO, VL, NG, NF, NE, or VG.",
+          "For every HBL outer packaging, numberOfPackages must be present unless packageCode is"
+              + " one of VY, VS, VR, VQ, VO, VL, NG, NF, NE, or VG.",
           mav ->
               mav.submitAllMatching(
                   S_x_S_x_S_x_S.formatted(
@@ -1194,7 +1219,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "If manifestTypeCode is ENS and advanceManifestFilingsHouseBLPerformedBy is SELF then identificationNumber is required",
+          "If manifestTypeCode is ENS and advanceManifestFilingsHouseBLPerformedBy is SELF then"
+              + " identificationNumber is required",
           mav -> mav.submitAllMatching(S_x.formatted(ADVANCE_MANIFEST_FILINGS)),
           JsonAttribute.ifMatchedThen(
               IDENTIFICATION_NUMBER_REQUIRED,
@@ -1208,7 +1234,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "If manifestTypeCode is 'ACE' or 'ACI' and advanceManifestFilingsHouseBLPerformedBy is 'SELF' then selfFilerCode is required",
+          "If manifestTypeCode is 'ACE' or 'ACI' and advanceManifestFilingsHouseBLPerformedBy is"
+              + " 'SELF' then selfFilerCode is required",
           mav -> mav.submitAllMatching(S_x.formatted(ADVANCE_MANIFEST_FILINGS)),
           JsonAttribute.ifMatchedThen(
               SELF_FILER_CODE_REQUIRED,
@@ -1262,7 +1289,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "If routingOfConsignmentCountries is present,  the first country must equal placeOfAcceptance country and the last must equal placeOfFinalDelivery country.",
+          "If routingOfConsignmentCountries is present,  the first country must equal"
+              + " placeOfAcceptance country and the last must equal placeOfFinalDelivery country.",
           mav -> mav.submitAllMatching(S_x.formatted(HOUSE_BILL_OF_LADINGS)),
           (node, contextPath) -> {
             JsonNode routingOfConsignmentCountries = node.path(ROUTING_OF_CONSIGNMENT_COUNTRIES);
@@ -1296,7 +1324,9 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck BUYER_AND_SELLER_CONDITIONAL_CHECK =
       JsonAttribute.customValidator(
-          "If 'isCargoDeliveredInICS2Zone' is true, 'advanceManifestFilingPerformedBy' is 'CARRIER', 'manifestTypeCode' is 'ENS' and 'isHouseBillOfLadingsIssued' is false, then 'buyer' and 'seller' are required.",
+          "If 'isCargoDeliveredInICS2Zone' is true, 'advanceManifestFilingPerformedBy' is"
+              + " 'CARRIER', 'manifestTypeCode' is 'ENS' and 'isHouseBillOfLadingsIssued' is false,"
+              + " then 'buyer' and 'seller' are required.",
           (node, contextPath) -> {
             JsonNode houseBillOfLadings = node.path(HOUSE_BILL_OF_LADINGS);
             if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
@@ -1350,7 +1380,9 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
       JsonAttribute.ifThenElse(
-          "If documentParties.issueTo.sendToPlatform is present, then isElectronic must equal true and transportDocumentTypeCode must equal BOL. Otherwise, documentParties.issueTo.sendToPlatform must not be present.",
+          "If documentParties.issueTo.sendToPlatform is present, then isElectronic must equal true"
+              + " and transportDocumentTypeCode must equal BOL. Otherwise,"
+              + " documentParties.issueTo.sendToPlatform must not be present.",
           JsonAttribute.isTrue(JsonPointer.compile(S.formatted(IS_ELECTRONIC))),
           JsonAttribute.ifThenElse(
               "'%s' is '%s'.".formatted(TRANSPORT_DOCUMENT_TYPE_CODE, BOL),
@@ -1361,7 +1393,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_PARTY_FUNCTION =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every item in `documentParties.other`, `partyFunction` must equal `SCO`, `DDR`, `DDS`, `COW`, `COX`, `CS`, `MF`, or `WH`.",
+          "For every item in `documentParties.other`, `partyFunction` must equal `SCO`, `DDR`,"
+              + " `DDS`, `COW`, `COX`, `CS`, `MF`, or `WH`.",
           mav -> mav.submitAllMatching(S_S_x_S.formatted(DOCUMENT_PARTIES, OTHER, PARTY_FUNCTION)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(PARTY_FUNCTION_CODE));
 
@@ -1373,7 +1406,8 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_PARTY_FUNCTION_HBL =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every item in `houseBillOfLadings[].documentParties.other[]`, `partyFunction` must equal `DDR`, `DDS`, `CS`, `MF`, or `WH`.",
+          "For every item in `houseBillOfLadings[].documentParties.other[]`, `partyFunction` must"
+              + " equal `DDR`, `DDS`, `CS`, `MF`, or `WH`.",
           mav ->
               mav.submitAllMatching(
                   S_x_S_S_x_S.formatted(
@@ -1388,7 +1422,10 @@ public class EblChecks {
 
   static final JsonRebasableContentCheck VALID_FEEDBACKS_CODE =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every item in `feedbacks[]`, `code` must equal `INFORMATIONAL_MESSAGE`, `PROPERTY_WILL_BE_IGNORED`, `PROPERTY_VALUE_MUST_CHANGE`, `PROPERTY_VALUE_HAS_BEEN_CHANGED`, `PROPERTY_VALUE_MAY_CHANGE`, or `PROPERTY_HAS_BEEN_DELETED`.",
+          "For every item in `feedbacks[]`, `code` must equal `INFORMATIONAL_MESSAGE`,"
+              + " `PROPERTY_WILL_BE_IGNORED`, `PROPERTY_VALUE_MUST_CHANGE`,"
+              + " `PROPERTY_VALUE_HAS_BEEN_CHANGED`, `PROPERTY_VALUE_MAY_CHANGE`, or"
+              + " `PROPERTY_HAS_BEEN_DELETED`.",
           mav -> mav.submitAllMatching(S_x_S.formatted(FEEDBACKS, CODE)),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
@@ -1485,7 +1522,8 @@ public class EblChecks {
 
   private static final JsonRebasableContentCheck TD_CONSIGNEE_AND_ENDORSEE_CONDITIONS =
       JsonAttribute.customValidator(
-          "If isToOrder=false, consignee must be present and endorsee must be absent. If endorsee is present, isToOrder must be true.",
+          "If isToOrder=false, consignee must be present and endorsee must be absent. If endorsee"
+              + " is present, isToOrder must be true.",
           (body, contextPath) -> {
             JsonNode documentParties = body.path(DOCUMENT_PARTIES);
             boolean isToOrder = body.path(IS_TO_ORDER).asBoolean(false);
@@ -1512,7 +1550,8 @@ public class EblChecks {
 
   private static final JsonRebasableContentCheck VALID_TD_TYPE_OF_PERSON =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every document party where `typeOfPerson` is present, it must equal `NATURAL_PERSON`, `LEGAL_PERSON`, or `ASSOCIATION_OF_PERSONS`.",
+          "For every document party where `typeOfPerson` is present, it must equal"
+              + " `NATURAL_PERSON`, `LEGAL_PERSON`, or `ASSOCIATION_OF_PERSONS`.",
           mav -> {
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, SHIPPER, TYPE_OF_PERSON));
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, CONSIGNEE, TYPE_OF_PERSON));
@@ -1523,7 +1562,9 @@ public class EblChecks {
 
   private static final JsonRebasableContentCheck VALID_TD_EBL_PLATFORMS =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every document party where `eblPlatform` is present, the value must equal `WAVE`, `CARX`, `ESSD`, `IDT`, `BOLE`, `EDOX`, `IQAX`, `SECR`, `TRGO`, `ETEU`, `TRAC`, `BRIT`, `COVA`, `ETIT`, `KTNE`, `CRED`, `BLOC`, `DOCU`, `AEOT`, or `SGTD`.",
+          "For every document party where `eblPlatform` is present, the value must equal `WAVE`,"
+              + " `CARX`, `ESSD`, `IDT`, `BOLE`, `EDOX`, `IQAX`, `SECR`, `TRGO`, `ETEU`, `TRAC`,"
+              + " `BRIT`, `COVA`, `ETIT`, `KTNE`, `CRED`, `BLOC`, `DOCU`, `AEOT`, or `SGTD`.",
           mav -> {
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, SHIPPER, EBL_PLATFORM));
             mav.submitAllMatching(S_S_S.formatted(DOCUMENT_PARTIES, CONSIGNEE, EBL_PLATFORM));
@@ -1533,7 +1574,8 @@ public class EblChecks {
 
   private static final JsonRebasableContentCheck VALID_NATIONAL_COMMODITY_CODE_TYPES =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every `NationalCommodityCode` object, `type` must equal `NCM`, `HTS`, `SCHEDULE_B`, `TARIC`, `CN`, or `CUS`.",
+          "For every `NationalCommodityCode` object, `type` must equal `NCM`, `HTS`, `SCHEDULE_B`,"
+              + " `TARIC`, `CN`, or `CUS`.",
           mav -> {
             mav.submitAllMatching(
                 S_x_S_x_S.formatted(CONSIGNMENT_ITEMS, NATIONAL_COMMODITY_CODES, TYPE));
@@ -1545,11 +1587,11 @@ public class EblChecks {
 
   private static final JsonRebasableContentCheck VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "For every `ExtendedNationalCommodityCode` object, `type` must equal `NCM`, `HTS`, `SCHEDULE_B`, `TARIC`, `CN`, or `CUS`.",
+          "For every `ExtendedNationalCommodityCode` object, `type` must equal `NCM`, `HTS`,"
+              + " `SCHEDULE_B`, `TARIC`, `CN`, or `CUS`.",
           mav -> {
             mav.submitAllMatching(
-                S_x_S_x_S.formatted(
-                    CONSIGNMENT_ITEMS, EXTENDED_NATIONAL_COMMODITY_CODES, TYPE));
+                S_x_S_x_S.formatted(CONSIGNMENT_ITEMS, EXTENDED_NATIONAL_COMMODITY_CODES, TYPE));
             mav.submitAllMatching(
                 S_x_S_x_S_x_S.formatted(
                     CONSIGNMENT_ITEMS, CARGO_ITEMS, EXTENDED_NATIONAL_COMMODITY_CODES, TYPE));
@@ -1559,7 +1601,9 @@ public class EblChecks {
   public static final List<JsonContentCheck> STATIC_SI_CHECKS =
       Arrays.asList(
           describedSiCheck(
-              "If `sendToPlatform` is present, then it must equal WAVE, CARX, IDT, BOLE, EDOX, IQAX, SECR, TRGO, ETEU, TRAC, BRIT, COVA, ETIT, KTNE, CRED, BLOC, DOCU, AEOT, SGTD or ESSD",
+              "If `sendToPlatform` is present, then it must equal WAVE, CARX, IDT, BOLE, EDOX,"
+                  + " IQAX, SECR, TRGO, ETEU, TRAC, BRIT, COVA, ETIT, KTNE, CRED, BLOC, DOCU, AEOT,"
+                  + " SGTD or ESSD",
               JsonAttribute.mustBeDatasetKeywordIfPresent(
                   SI_REQUEST_SEND_TO_PLATFORM, EblDatasets.EBL_PLATFORMS_DATASET)),
           SEND_TO_PLATFORM_CONDITIONAL_CHECK,
@@ -1572,23 +1616,28 @@ public class EblChecks {
           IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF,
           SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF,
           describedSiCheck(
-              "For HBL placeOfAcceptance, if UNLocationCode is absent, both locationName and countryCode must be present.",
+              "For HBL placeOfAcceptance, if UNLocationCode is absent, both locationName and"
+                  + " countryCode must be present.",
               LOCATION_NAME_CONDITIONAL_VALIDATION_POA,
               COUNTRY_CODE_CONDITIONAL_VALIDATION_POA),
           describedSiCheck(
-              "For HBL placeOfFinalDelivery, if UNLocationCode is absent, both locationName and countryCode must be present.",
+              "For HBL placeOfFinalDelivery, if UNLocationCode is absent, both locationName and"
+                  + " countryCode must be present.",
               LOCATION_NAME_CONDITIONAL_VALIDATION_POFD,
               COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD),
           ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK,
           VALID_REQUESTED_CARRIER_CLAUSES,
           BUYER_AND_SELLER_CONDITIONAL_CHECK,
           describedSiCheck(
-              "If 'isCargoDeliveredInICS2Zone' is true (on House B/L level) and 'advanceManifestFilingPerformedBy' is 'CARRIER',  then HBL 'buyer' and HBL 'seller' are required.",
+              "If 'isCargoDeliveredInICS2Zone' is true (on House B/L level) and"
+                  + " 'advanceManifestFilingPerformedBy' is 'CARRIER',  then HBL 'buyer' and HBL"
+                  + " 'seller' are required.",
               BUYER_AND_SELLER_CONDITIONAL_CHECK),
           VALID_PARTY_FUNCTION,
           VALID_PARTY_FUNCTION_HBL,
           describedSiCheck(
-              "Validate that the combination of transportDocumentTypeCode and isToOrder is allowed (scope-defined validation).",
+              "Validate that the combination of transportDocumentTypeCode and isToOrder is allowed"
+                  + " (scope-defined validation).",
               ONLY_EBLS_CAN_BE_NEGOTIABLE,
               SWBS_CANNOT_BE_NEGOTIABLE),
           EBL_AT_MOST_ONE_ORIGINAL_TOTAL,
@@ -1616,33 +1665,47 @@ public class EblChecks {
   private static final List<JsonRebasableContentCheck> STATIC_TD_CHECKS =
       Arrays.asList(
           describedTdCheck(
-              "When `isElectronic` is `true`, no more than one original may be requested. Therefore, the sum of `numberOfOriginalsWithoutCharges` and `numberOfOriginalsWithCharges` cannot be greater than `1`.",
+              "When `isElectronic` is `true`, no more than one original may be requested."
+                  + " Therefore, the sum of `numberOfOriginalsWithoutCharges` and"
+                  + " `numberOfOriginalsWithCharges` cannot be greater than `1`.",
               EBL_AT_MOST_ONE_ORIGINAL_TOTAL),
           describedTdCheck(
-              "When isElectronic is true and transportDocumentTypeCode is BOL, neither copies with charges nor copies without charges are allowed. Therefore, both numberOfCopiesWithCharges and numberOfCopiesWithoutCharges must be 0 or absent.",
+              "When isElectronic is true and transportDocumentTypeCode is BOL, neither copies with"
+                  + " charges nor copies without charges are allowed. Therefore, both"
+                  + " numberOfCopiesWithCharges and numberOfCopiesWithoutCharges must be 0 or"
+                  + " absent.",
               EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
               EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES),
           describedTdCheck(
-              "If transportDocumentTypeCode='SWB', then numberOfOriginalsWithCharges and numberOfOriginalsWithoutCharges must be absent",
+              "If transportDocumentTypeCode='SWB', then numberOfOriginalsWithCharges and"
+                  + " numberOfOriginalsWithoutCharges must be absent",
               SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
               SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES),
           describedTdCheck(
-              "`transportDocumentStatus` must equal `DRAFT`, `APPROVED`, `ISSUED`, `PENDING_SURRENDER_FOR_AMENDMENT`, `SURRENDERED_FOR_AMENDMENT`, `PENDING_SURRENDER_FOR_DELIVERY`, `SURRENDERED_FOR_DELIVERY`, or `VOIDED`.",
-              JsonAttribute.mustBeOneOf(
-                  TD_TRANSPORT_DOCUMENT_STATUS, TRANSPORT_DOCUMENT_STATUSES)),
+              "`transportDocumentStatus` must equal `DRAFT`, `APPROVED`, `ISSUED`,"
+                  + " `PENDING_SURRENDER_FOR_AMENDMENT`, `SURRENDERED_FOR_AMENDMENT`,"
+                  + " `PENDING_SURRENDER_FOR_DELIVERY`, `SURRENDERED_FOR_DELIVERY`, or `VOIDED`.",
+              JsonAttribute.mustBeOneOf(TD_TRANSPORT_DOCUMENT_STATUS, TRANSPORT_DOCUMENT_STATUSES)),
           describedTdCheck(
               "If `transportDocumentStatus='ISSUED'`, then `issueDate` must be present",
               ISSUE_DATE_REQUIRED_WHEN_ISSUED),
           describedTdCheck(
-              "Exactly one of `shippedOnBoardDate` and `receivedForShipmentDate` must be present.",
-              JsonAttribute.atLeastOneOf(
-                  JsonPointer.compile(S.formatted(SHIPPED_ON_BOARD_DATE)),
-                  JsonPointer.compile(S.formatted(RECEIVED_FOR_SHIPMENT_DATE))),
+              "shippedOnBoardDate and receivedForShipmentDate must not both be present.",
               JsonAttribute.atMostOneOf(
                   JsonPointer.compile(S.formatted(SHIPPED_ON_BOARD_DATE)),
                   JsonPointer.compile(S.formatted(RECEIVED_FOR_SHIPMENT_DATE)))),
           describedTdCheck(
-              "`declaredValue` and `declaredValueCurrency` must either both be present or both be absent.",
+              "If `transportDocumentStatus='ISSUED'`, exactly one of `shippedOnBoardDate` and"
+                  + " `receivedForShipmentDate` must be present.",
+              JsonAttribute.ifThen(
+                  "Issued documents require a shipment date.",
+                  body -> "ISSUED".equals(body.path(TRANSPORT_DOCUMENT_STATUS).asText()),
+                  JsonAttribute.atLeastOneOf(
+                      JsonPointer.compile(S.formatted(SHIPPED_ON_BOARD_DATE)),
+                      JsonPointer.compile(S.formatted(RECEIVED_FOR_SHIPMENT_DATE))))),
+          describedTdCheck(
+              "`declaredValue` and `declaredValueCurrency` must either both be present or both be"
+                  + " absent.",
               JsonAttribute.allOrNoneArePresent(
                   JsonPointer.compile(S.formatted(DECLARED_VALUE)),
                   JsonPointer.compile(S.formatted(DECLARED_VALUE_CURRENCY)))),
@@ -1669,17 +1732,20 @@ public class EblChecks {
                       JsonPointer.compile(SS.formatted(TRANSPORTS, PLACE_OF_RECEIPT)),
                       "'%s' is present.".formatted(PRE_CARRIAGE_BY)))),
           describedTdCheck(
-              "If `preCarriageBy` is present, then it must equal `VESSEL`, `RAIL`, `TRUCK`, `BARGE`, or `MULTIMODAL`.",
+              "If `preCarriageBy` is present, then it must equal `VESSEL`, `RAIL`, `TRUCK`,"
+                  + " `BARGE`, or `MULTIMODAL`.",
               JsonAttribute.mustBeDatasetKeywordIfPresent(
                   JsonPointer.compile(SS.formatted(TRANSPORTS, PRE_CARRIAGE_BY)),
                   MODE_OF_TRANSPORT)),
           describedTdCheck(
-              "If `onCarriageBy` is present, then it must equal `VESSEL`, `RAIL`, `TRUCK`, `BARGE`, or `MULTIMODAL`.",
+              "If `onCarriageBy` is present, then it must equal `VESSEL`, `RAIL`, `TRUCK`, `BARGE`,"
+                  + " or `MULTIMODAL`.",
               JsonAttribute.mustBeDatasetKeywordIfPresent(
                   JsonPointer.compile(SS.formatted(TRANSPORTS, ON_CARRIAGE_BY)),
                   MODE_OF_TRANSPORT)),
           describedTdCheck(
-              "For every item in `transports.vesselVoyages[]`, `role` must equal `FIRST_SEA_GOING` or `MOTHER`.",
+              "For every item in `transports.vesselVoyages[]`, `role` must equal `FIRST_SEA_GOING`"
+                  + " or `MOTHER`.",
               VALID_VESSEL_VOYAGE_ROLES),
           describedTdCheck(
               "If `onCarriageBy` is present, then `placeOfDelivery` must be present.",
@@ -1691,26 +1757,35 @@ public class EblChecks {
                       JsonPointer.compile(SS.formatted(TRANSPORTS, PLACE_OF_DELIVERY)),
                       "'%s' is present.".formatted(ON_CARRIAGE_BY)))),
           describedTdCheck(
-              "For each `documentParty`—`shipper`, `consignee`, `endorsee`, `notifyParties`, `other`, `onBehalfOfShipper`—at least one of `address`, `addressLines`, or `identifyingCodes` must be provided.",
+              "For each `documentParty`—`shipper`, `consignee`, `endorsee`, `notifyParties`,"
+                  + " `other`, `onBehalfOfShipper`—at least one of `address`, `addressLines`, or"
+                  + " `identifyingCodes` must be provided.",
               VALIDATE_DOCUMENT_PARTY),
           TD_CONSIGNEE_AND_ENDORSEE_CONDITIONS,
           TD_CONSIGNEE_AND_ENDORSEE_MUTUALLY_EXCLUSIVE,
           describedTdCheck(
-              "If `isToOrder=true`, then at least one notify party must exist: `documentParties.notifyParties` must be present.",
+              "If `isToOrder=true`, then at least one notify party must exist:"
+                  + " `documentParties.notifyParties` must be present.",
               NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS),
           describedTdCheck(
-              "For every item in `documentParties.other[]`, `partyFunction` must equal `SCO`, `DDR`, `DDS`, `COW`, or `COX`.",
+              "For every item in `documentParties.other[]`, `partyFunction` must equal `SCO`,"
+                  + " `DDR`, `DDS`, `COW`, or `COX`.",
               VALID_TD_PARTY_FUNCTION),
           describedTdCheck(VALID_TD_TYPE_OF_PERSON.description(), VALID_TD_TYPE_OF_PERSON),
           describedTdCheck(VALID_TD_EBL_PLATFORMS.description(), VALID_TD_EBL_PLATFORMS),
           describedTdCheck(
-              "If present, `codeListProvider` must equal  `WAVE`, `CARX`, `ESSD`, `IDT`, `BOLE`, `EDOX`, `IQAX`, `SECR`, `TRGO`, `ETEU`, `TRAC`, `BRIT`, `COVA`, `ETIT`, `KTNE`, `CRED`, `BLOC`, `DOCU`, `AEOT`, `SGTD`, `GSBN`, `WISE`, `GLEIF`, `W3C`, `DNB`, `FMC`, `DCSA`, or `ZZZ`.",
+              "If present, `codeListProvider` must equal  `WAVE`, `CARX`, `ESSD`, `IDT`, `BOLE`,"
+                  + " `EDOX`, `IQAX`, `SECR`, `TRGO`, `ETEU`, `TRAC`, `BRIT`, `COVA`, `ETIT`,"
+                  + " `KTNE`, `CRED`, `BLOC`, `DOCU`, `AEOT`, `SGTD`, `GSBN`, `WISE`, `GLEIF`,"
+                  + " `W3C`, `DNB`, `FMC`, `DCSA`, or `ZZZ`.",
               TD_DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS),
           describedTdCheck(
-              "For every item in a general `references[]` collection, `type` must equal `CR` or `AKG`.",
+              "For every item in a general `references[]` collection, `type` must equal `CR` or"
+                  + " `AKG`.",
               VALID_TD_REFERENCE_TYPES),
           describedTdCheck(
-              "For every item in a consignment-item `references[]` collection, `type` must equal `CR`, `AKG`, `SPO`, or `CPO`.",
+              "For every item in a consignment-item `references[]` collection, `type` must equal"
+                  + " `CR`, `AKG`, `SPO`, or `CPO`.",
               VALID_CONSIGNMENT_ITEMS_REFERENCE_TYPES),
           describedTdCheck(
               VALID_NATIONAL_COMMODITY_CODE_TYPES.description(),
@@ -1719,7 +1794,8 @@ public class EblChecks {
               VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES.description(),
               VALID_EXTENDED_NATIONAL_COMMODITY_CODE_TYPES),
           describedTdCheck(
-              "For every cargo item containing `dangerousGoods`, `imoPackagingCode` or `packageCode` must be present.",
+              "For every cargo item containing `dangerousGoods`, `imoPackagingCode` or"
+                  + " `packageCode` must be present.",
               JsonAttribute.allIndividualMatchesMustBeValid(
                   "Dangerous-goods packaging code is present.",
                   mav ->
@@ -1745,7 +1821,8 @@ public class EblChecks {
                     return ConformanceCheckResult.simple(Set.of());
                   })),
           describedTdCheck(
-              "If `woodDeclaration` is present, then it must equal `NOT_APPLICABLE`, `NOT_TREATED_AND_NOT_CERTIFIED`, `PROCESSED`, or `TREATED_AND_CERTIFIED`.",
+              "If `woodDeclaration` is present, then it must equal `NOT_APPLICABLE`,"
+                  + " `NOT_TREATED_AND_NOT_CERTIFIED`, `PROCESSED`, or `TREATED_AND_CERTIFIED`.",
               VALID_WOOD_DECLARATIONS),
           describedTdCheck(
               SEGREGATION_GROUPS_DESCRIPTION,
@@ -1762,52 +1839,61 @@ public class EblChecks {
                   JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
                       EblDatasets.DG_INHALATION_ZONES))),
           describedTdCheck(
-              "For every `innerPackaging` object, `quantity` must be a positive integer greater than 0.",
+              "For every `innerPackaging` object, `quantity` must be a positive integer greater"
+                  + " than 0.",
               VALID_INNER_PACKAGING_QUANTITIES),
           describedTdCheck(
-              "For every item in `utilizedTransportEquipments[]`, if `isNonOperatingReefer=true`, then `activeReeferSettings` must not be present.",
+              "For every item in `utilizedTransportEquipments[]`, if `isNonOperatingReefer=true`,"
+                  + " then `activeReeferSettings` must not be present.",
               NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER),
           describedTdCheck(
-              "`temperatureSetpoint` and `temperatureUnit` must either both be present or both be absent.",
+              "`temperatureSetpoint` and `temperatureUnit` must either both be present or both be"
+                  + " absent.",
               JsonAttribute.allIndividualMatchesMustBeValid(
                   "Temperature setpoint and unit have matching presence.",
                   mav ->
                       mav.submitAllMatching(
-                          S_x_S.formatted(
-                              UTILIZED_TRANSPORT_EQUIPMENTS, ACTIVE_REEFER_SETTINGS)),
+                          S_x_S.formatted(UTILIZED_TRANSPORT_EQUIPMENTS, ACTIVE_REEFER_SETTINGS)),
                   JsonAttribute.combine(
                       JsonAttribute.presenceImpliesOtherField(
                           TEMPERATURE_SETPOINT, TEMPERATURE_UNIT),
                       JsonAttribute.presenceImpliesOtherField(
                           TEMPERATURE_UNIT, TEMPERATURE_SETPOINT)))),
           describedTdCheck(
-              "`airExchangeSetpoint` and `airExchangeUnit` must either both be present or both be absent.",
+              "`airExchangeSetpoint` and `airExchangeUnit` must either both be present or both be"
+                  + " absent.",
               JsonAttribute.allIndividualMatchesMustBeValid(
                   "Air-exchange setpoint and unit have matching presence.",
                   mav ->
                       mav.submitAllMatching(
-                          S_x_S.formatted(
-                              UTILIZED_TRANSPORT_EQUIPMENTS, ACTIVE_REEFER_SETTINGS)),
+                          S_x_S.formatted(UTILIZED_TRANSPORT_EQUIPMENTS, ACTIVE_REEFER_SETTINGS)),
                   JsonAttribute.combine(
                       JsonAttribute.presenceImpliesOtherField(
                           AIR_EXCHANGE_SETPOINT, AIR_EXCHANGE_UNIT),
                       JsonAttribute.presenceImpliesOtherField(
                           AIR_EXCHANGE_UNIT, AIR_EXCHANGE_SETPOINT)))),
           describedTdCheck(
-              "Every cargo gross-weight and cargo net-weight value must contain no more than 3 decimal places, and every cargo gross-volume value must contain no more than 4 decimal places.",
+              "Every cargo gross-weight and cargo net-weight value must contain no more than 3"
+                  + " decimal places, and every cargo gross-volume value must contain no more than"
+                  + " 4 decimal places.",
               VALID_CARGO_MEASUREMENT_PRECISION,
               VALID_CARGO_VOLUME_PRECISION),
           describedTdCheck(
               "For every item in `feedbacks[]`, `severity` must equal `INFO`, `WARN`, or `ERROR`.",
               VALID_FEEDBACKS_SEVERITY),
           describedTdCheck(
-              "For every item in `feedbacks[]`, `code` must equal `INFORMATIONAL_MESSAGE`, `PROPERTY_WILL_BE_IGNORED`, `PROPERTY_VALUE_MUST_CHANGE`, `PROPERTY_VALUE_HAS_BEEN_CHANGED`, `PROPERTY_VALUE_MAY_CHANGE`, or `PROPERTY_HAS_BEEN_DELETED`.",
+              "For every item in `feedbacks[]`, `code` must equal `INFORMATIONAL_MESSAGE`,"
+                  + " `PROPERTY_WILL_BE_IGNORED`, `PROPERTY_VALUE_MUST_CHANGE`,"
+                  + " `PROPERTY_VALUE_HAS_BEEN_CHANGED`, `PROPERTY_VALUE_MAY_CHANGE`, or"
+                  + " `PROPERTY_HAS_BEEN_DELETED`.",
               VALID_FEEDBACKS_CODE));
 
   public static final JsonContentCheck SIR_OR_TDR_REQUIRED_IN_NOTIFICATION =
       JsonAttribute.customValidator(
-          "Every SI notification must contain at least one of data.shippingInstructionsReference or data.transportDocumentReference.",
-          (JsonContentMatchedValidation) JsonAttribute.atLeastOneOf(SI_REF_SIR_PTR, TD_TDR)::validate);
+          "Every SI notification must contain at least one of data.shippingInstructionsReference or"
+              + " data.transportDocumentReference.",
+          (JsonContentMatchedValidation)
+              JsonAttribute.atLeastOneOf(SI_REF_SIR_PTR, TD_TDR)::validate);
 
   public static JsonContentCheck sirInNotificationMustMatchDSP(
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
@@ -1826,11 +1912,13 @@ public class EblChecks {
     List<JsonContentCheck> checks = new ArrayList<>();
 
     checks.add(
-        JsonAttribute.mustEqual(
-            "[%s] Verify that the correct '%s' is used"
-                .formatted(SCENARIO, TRANSPORT_DOCUMENT_TYPE_CODE),
-            TRANSPORT_DOCUMENT_TYPE_CODE,
-            scenarioType::transportDocumentTypeCode));
+        isTD
+            ? JsonAttribute.mustEqual(
+                "[%s] Verify that the correct '%s' is used"
+                    .formatted(SCENARIO, TRANSPORT_DOCUMENT_TYPE_CODE),
+                TRANSPORT_DOCUMENT_TYPE_CODE,
+                scenarioType::transportDocumentTypeCode)
+            : siScopeCheck(scenarioType));
 
     checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
@@ -1841,6 +1929,18 @@ public class EblChecks {
                 JsonAttribute.path(OUTER_PACKAGING, JsonAttribute.matchedMustBePresent()))));
 
     return checks;
+  }
+
+  private static JsonContentCheck siScopeCheck(ScenarioType scenarioType) {
+    return describedSiCheck(
+        scenarioSpecificSiValidationMessage(scenarioType),
+        JsonAttribute.mustEqual(
+            JsonPointer.compile(S.formatted(TRANSPORT_DOCUMENT_TYPE_CODE)),
+            scenarioType.transportDocumentTypeCode()),
+        JsonAttribute.mustEqual(
+            "Validate scenario-specific '%s'.".formatted(IS_TO_ORDER),
+            JsonPointer.compile(S.formatted(IS_TO_ORDER)),
+            scenarioType.isToOrder()));
   }
 
   private static JsonContentMatchedValidation scenarioCustomsReferencesCheck(
@@ -1936,22 +2036,22 @@ public class EblChecks {
       Supplier<EblDynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
 
-    checks.add(
-        JsonAttribute.mustEqual(
-            SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference()));
+    if (dspSupplier.get().shippingInstructionsReference() != null) {
+      checks.add(
+          JsonAttribute.mustEqual(
+              SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference()));
+    }
 
     checks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
     if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
-      var updatedStatusCheck =
-          getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus);
-      checks.add(updatedStatusCheck);
+      checks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
     }
 
+    checks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
     checks.addAll(STATIC_SI_CHECKS);
     checks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
-    checks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
 
     checks.add(FEEDBACKS_PRESENCE);
 
@@ -1991,7 +2091,8 @@ public class EblChecks {
 
   static final JsonContentCheck SI_STATUS_ALLOWED_VALUES_CHECK =
       JsonAttribute.customValidator(
-          "If `shippingInstructionsStatus` is present, then it must equal `RECEIVED`, `PENDING_UPDATE`, `COMPLETED`, `CANCELLED`, or `DECLINED`.",
+          "If `shippingInstructionsStatus` is present, then it must equal `RECEIVED`,"
+              + " `PENDING_UPDATE`, `COMPLETED`, `CANCELLED`, or `DECLINED`.",
           JsonAttribute.path(
               SHIPPING_INSTRUCTIONS_STATUS,
               JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
@@ -2000,7 +2101,8 @@ public class EblChecks {
 
   static final JsonContentCheck UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK =
       JsonAttribute.customValidator(
-          "If `updatedShippingInstructionsStatus` is present, then it must equal `UPDATE_RECEIVED`, `UPDATE_CONFIRMED`, `UPDATE_CANCELLED`, or `UPDATE_DECLINED`.",
+          "If `updatedShippingInstructionsStatus` is present, then it must equal `UPDATE_RECEIVED`,"
+              + " `UPDATE_CONFIRMED`, `UPDATE_CANCELLED`, or `UPDATE_DECLINED`.",
           JsonAttribute.path(
               UPDATED_SHIPPING_INSTRUCTIONS_STATUS,
               JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
@@ -2036,11 +2138,12 @@ public class EblChecks {
     jsonContentChecks.add(
         JsonAttribute.mustEqual(SI_REF_SI_STATUS_PTR, shippingInstructionsStatus.wireName()));
 
-    jsonContentChecks.add(
-        getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+    if (updatedShippingInstructionsStatus != ShippingInstructionsStatus.SI_ANY) {
+      jsonContentChecks.add(getUpdatedShippingInstructionsStatusCheck(updatedShippingInstructionsStatus));
+    }
 
-    jsonContentChecks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
     jsonContentChecks.add(UPDATED_SI_STATUS_ALLOWED_VALUES_CHECK);
+    jsonContentChecks.add(SI_STATUS_ALLOWED_VALUES_CHECK);
     jsonContentChecks.add(FEEDBACKS_PRESENCE);
     jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY);
     jsonContentChecks.add(VALID_FEEDBACKS_CODE);
@@ -2068,12 +2171,16 @@ public class EblChecks {
 
     jsonContentChecks.add(
         describedTdCheck(
-            "`data.transportDocumentStatus` must equal `DRAFT`, `APPROVED`, `ISSUED`, `PENDING_SURRENDER_FOR_AMENDMENT`, `SURRENDER_FOR_AMENDMENT`, `VOID`, `PENDING_SURRENDER_FOR_DELIVERY`, or `SURRENDER_FOR_DELIVERY`.",
+            "`data.transportDocumentStatus` must equal `DRAFT`, `APPROVED`, `ISSUED`,"
+                + " `PENDING_SURRENDER_FOR_AMENDMENT`, `SURRENDER_FOR_AMENDMENT`, `VOID`,"
+                + " `PENDING_SURRENDER_FOR_DELIVERY`, or `SURRENDER_FOR_DELIVERY`.",
             JsonAttribute.mustBeOneOf(
                 TD_TRANSPORT_DOCUMENT_STATUS, TRANSPORT_DOCUMENT_NOTIFICATION_STATUSES)));
     jsonContentChecks.add(
         describedTdCheck(
-            "If `amendedTransportDocumentStatus` is present, then it must equal `AMENDMENT_RECEIVED`, `AMENDMENT_CONFIRMED`, `AMENDMENT_CANCELLED`, or `AMENDMENT_DECLINED`.",
+            "If `amendedTransportDocumentStatus` is present, then it must equal"
+                + " `AMENDMENT_RECEIVED`, `AMENDMENT_CONFIRMED`, `AMENDMENT_CANCELLED`, or"
+                + " `AMENDMENT_DECLINED`.",
             JsonAttribute.path(
                 AMENDED_TRANSPORT_DOCUMENT_STATUS,
                 JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
@@ -2096,7 +2203,10 @@ public class EblChecks {
             VALID_FEEDBACKS_SEVERITY));
     jsonContentChecks.add(
         describedTdCheck(
-            "For every item in `feedbacks[]`, `code` must equal `INFORMATIONAL_MESSAGE`, `PROPERTY_WILL_BE_IGNORED`, `PROPERTY_VALUE_MUST_CHANGE`, `PROPERTY_VALUE_HAS_BEEN_CHANGED`, `PROPERTY_VALUE_MAY_CHANGE`, or `PROPERTY_HAS_BEEN_DELETED`.",
+            "For every item in `feedbacks[]`, `code` must equal `INFORMATIONAL_MESSAGE`,"
+                + " `PROPERTY_WILL_BE_IGNORED`, `PROPERTY_VALUE_MUST_CHANGE`,"
+                + " `PROPERTY_VALUE_HAS_BEEN_CHANGED`, `PROPERTY_VALUE_MAY_CHANGE`, or"
+                + " `PROPERTY_HAS_BEEN_DELETED`.",
             VALID_FEEDBACKS_CODE));
     return jsonContentChecks;
   }
@@ -2209,10 +2319,12 @@ public class EblChecks {
   private static boolean tdCheckAppliesToScenario(JsonContentCheck check, ScenarioType scenarioType) {
     String description = check.description();
     if (description.startsWith("When 'isElectronic' is 'true', no more than one original")
-        || description.startsWith("When isElectronic is true and transportDocumentTypeCode is BOL")) {
+        || description.startsWith(
+            "When isElectronic is true and transportDocumentTypeCode is BOL")) {
       return !scenarioType.isSWB();
     }
-    if (description.equals("Consignee and endorsee must never both be present (mutually exclusive).")
+    if (description.equals(
+            "Consignee and endorsee must never both be present (mutually exclusive).")
         || description.startsWith("If 'isToOrder=true', then at least one notify party")) {
       return scenarioType.isToOrder();
     }
@@ -2272,7 +2384,8 @@ public class EblChecks {
                 || (scenarioType != null && !tdCheckAppliesToScenario(check, scenarioType)));
     checks.add(
         describedTdCheck(
-            "`transportDocumentStatus` must equal `DRAFT`, `ISSUED`, or `PENDING_SURRENDER_FOR_AMENDMENT`.",
+            "`transportDocumentStatus` must equal `DRAFT`, `ISSUED`, or"
+                + " `PENDING_SURRENDER_FOR_AMENDMENT`.",
             JsonAttribute.mustBeOneOf(
                 TD_TRANSPORT_DOCUMENT_STATUS,
                 Set.of("DRAFT", "ISSUED", "PENDING_SURRENDER_FOR_AMENDMENT"))));
@@ -2312,7 +2425,9 @@ public class EblChecks {
     List<JsonContentCheck> checks = new ArrayList<>();
     checks.add(
         describedTdCheck(
-            "If `amendedTransportDocumentStatus` is present, then it must equal `AMENDMENT_RECEIVED`, `AMENDMENT_CONFIRMED`, `AMENDMENT_CANCELLED`, or `AMENDMENT_DECLINED`.",
+            "If `amendedTransportDocumentStatus` is present, then it must equal"
+                + " `AMENDMENT_RECEIVED`, `AMENDMENT_CONFIRMED`, `AMENDMENT_CANCELLED`, or"
+                + " `AMENDMENT_DECLINED`.",
             JsonAttribute.path(
                 AMENDED_TRANSPORT_DOCUMENT_STATUS,
                 JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
@@ -2339,12 +2454,7 @@ public class EblChecks {
         return ConformanceCheckResult.withRelevance(Set.of(ConformanceError.irrelevant()));
       }
 
-      Integer expectedSize =
-          switch (scenarioType) {
-            case ScenarioType.REGULAR_2C_1U -> 1;
-            case ScenarioType.REGULAR_2C_2U -> 2;
-            default -> null;
-          };
+      int expectedSize = scenarioType == ScenarioType.REGULAR_2C_1U ? 1 : 2;
 
       if (actualSize != expectedSize) {
         String path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
@@ -2409,5 +2519,19 @@ public class EblChecks {
     // DT-437
     var codeChar = isoEquipmentCode.length() > 2 ? isoEquipmentCode.charAt(2) : '?';
     return codeChar == 'R' || codeChar == 'H';
+  }
+
+  public static String scenarioSpecificSiValidationMessage(ScenarioType scenarioType) {
+    return switch (scenarioType) {
+      case REGULAR_STRAIGHT_BL ->
+          "For Straight B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal"
+              + " false.";
+      case REGULAR_NEGOTIABLE_BL ->
+          "For Negotiable B/L: transportDocumentTypeCode must equal BOL and isToOrder must equal"
+              + " true.";
+      default ->
+          "For Sea Waybill: transportDocumentTypeCode must equal SWB and isToOrder must equal"
+              + " false.";
+    };
   }
 }

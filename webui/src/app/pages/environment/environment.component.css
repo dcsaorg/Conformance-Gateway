@@ -25,19 +25,6 @@
   margin-top: 1.5rem;
 }
 
-.sandboxListToolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 0.5rem;
-  background-color: #fafafa;
-  color: #555;
-}
-
 .sandboxCard {
   display: flex;
   flex-direction: row;
@@ -49,15 +36,6 @@
 
 .sandboxCard:hover {
   box-shadow: 0 3px 10px rgb(0 0 0 / 12%);
-}
-
-.selectedEntityCard {
-  border-color: #3f51b5;
-  background-color: #f3f4fb;
-}
-
-.sandboxCheckbox {
-  flex: 0 0 auto;
 }
 
 .sandboxCardContent {
@@ -80,10 +58,6 @@
   outline-offset: 4px;
 }
 
-.sandboxCardLink:disabled {
-  cursor: default;
-}
-
 .sandboxName {
   margin-top: 0.25rem;
   color: grey;
@@ -97,15 +71,6 @@
   }
 
   .sandboxPageHeader button {
-    width: 100%;
-  }
-
-  .sandboxListToolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .sandboxListToolbar button {
     width: 100%;
   }
 }

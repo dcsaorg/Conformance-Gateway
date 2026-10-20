@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -22,7 +21,23 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
       EblAction previousAction,
       List<TransportDocumentStatus> expectedTdStatus,
       JsonSchemaValidator responseSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "GET TD", 200, true);
+    this(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        expectedTdStatus,
+        responseSchemaValidator,
+        "GET TD");
+  }
+
+  public Shipper_GetTransportDocumentAction(
+      String carrierPartyName,
+      String shipperPartyName,
+      EblAction previousAction,
+      List<TransportDocumentStatus> expectedTdStatus,
+      JsonSchemaValidator responseSchemaValidator,
+      String actionTitle) {
+    super(shipperPartyName, carrierPartyName, previousAction, actionTitle, 200, true);
     this.expectedTdStatus = expectedTdStatus;
     this.responseSchemaValidator = responseSchemaValidator;
   }

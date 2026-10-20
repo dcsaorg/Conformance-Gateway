@@ -1412,6 +1412,15 @@ public class BookingChecks {
         return ConformanceCheckResult.simple(Set.of());
       });
 
+  private static final JsonContentCheck SEND_TO_PLATFORM_CODE_VALIDATION =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "The %s attribute must demonstrate the correct use of an eBL platform code: %s"
+        .formatted(
+          jsonPath(DOCUMENT_PARTIES, ISSUE_TO, SEND_TO_PLATFORM),
+          datasetValues(BookingDataSets.EBL_PLATFORM_CODES)),
+      mav -> mav.submitAllMatching(path(DOCUMENT_PARTIES, ISSUE_TO, SEND_TO_PLATFORM)),
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.EBL_PLATFORM_CODES));
+
   private static final JsonContentCheck SEND_TO_PLATFORM_ONLY_FOR_ELECTRONIC_BOL =
     JsonAttribute.customValidator(
       "(if included) The %s attribute must only be used when the standard allows it: only applicable when %s=true and %s=BOL; the property must be absent for paper B/Ls"
@@ -1638,6 +1647,7 @@ public class BookingChecks {
       ACTIVE_REEFER_TEMPERATURE_UNIT_CONDITIONAL,
       ACTIVE_REEFER_AIR_EXCHANGE_UNIT_CONDITIONAL,
       SEND_TO_PLATFORM_ONLY_FOR_ELECTRONIC_BOL,
+      SEND_TO_PLATFORM_CODE_VALIDATION,
       PLACE_OF_BL_ISSUE_UNLOCATION_XOR_COUNTRY,
       PARTY_CONTACT_DETAILS_NAME_AND_PHONE_OR_EMAIL,
       NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,

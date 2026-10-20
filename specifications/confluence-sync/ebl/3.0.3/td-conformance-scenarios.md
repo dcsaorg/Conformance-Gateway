@@ -1,8 +1,8 @@
 # DCSA Interface Standard for EBL (TD) 3.x - Conformance Scenarios (CEP26)
 
 - Confluence page id: `1984299095`
-- Confluence version: `19`
-- Synced at: `2026-09-21T09:14:07.442540Z`
+- Confluence version: `23`
+- Synced at: `2026-10-19T02:22:16.564840Z`
 
 # **0. Document metadata**
 
@@ -34,8 +34,8 @@ To receive a badge, adopters implementing either role must support the required 
 
 | Standard role | Business type (example) | Mandatory features to get a badge 🏅 | Optional features | Scope qualifiers |
 | --- | --- | --- | --- | --- |
-| Carrier | Ocean Carrier | It is mandatory to support all of the following Transport Document capabilities:   1. Can return the content of draft or issued Transport Documents through **GET** `/v3/transport-documents/{transportDocumentReference}` 2. Can accept the approval of draft Transport Documents through **PATCH** `/v3/transport-documents/{transportDocumentReference}` | May additionally support the following capabilities:   1. Can send Transport Document notifications by calling the **POST** `/v3/transport-document-notifications` endpoint implemented by the Shipper 2. Can receive and process direct Transport Document amendments, through the following endpoints:  - **PUT** `/v3/transport-documents/{transportDocumentReference}/amendment` to receive a Transport Document amendment request - **GET** `/v3/transport-documents/{transportDocumentReference}/amendment` to return the content of a Transport Document amendment - **DELETE** `/v3/transport-documents/{transportDocumentReference}/amendment` to receive a Transport Document amendment cancellation request | **Document type:**   - Sea Waybill - Straight BL - Negotiable BL |
-| Shipper | Freight Forwarder / Shipper | It is mandatory to support all of the following Transport Document capabilities:   1. Can retrieve a draft or issued Transport Document by calling the **GET** `/v3/transport-documents/{transportDocumentReference}` endpoint implemented by the Carrier 2. Can approve a draft Transport Document by calling the **PATCH** `/v3/transport-documents/{transportDocumentReference}` endpoint implemented by the Carrier | May additionally support the following capabilities:   1. Can receive Transport Document notifications from the Carrier through **POST** `/v3/transport-document-notifications` 2. Can support Direct Transport Document amendments by calling the following endpoints implemented by the Carrier:  - **PUT** `/v3/transport-documents/{transportDocumentReference}/amendment` to submit a Transport Document amendment request - **GET** `/v3/transport-documents/{transportDocumentReference}/amendment` to retrieve an amended Transport Document - **DELETE** `/v3/transport-documents/{transportDocumentReference}/amendment` to cancel a Transport Document amendment request | **Document type:**   - Sea Waybill - Straight BL - Negotiable BL |
+| Carrier | Ocean Carrier | It is mandatory to support the following Transport Document capabilities:   1. Can return the content of an issued Transport Document through **GET** `/v3/transport-documents/{transportDocumentReference}` | May additionally support the following capabilities:   1. Can accept the approval of draft Transport Documents through **PATCH** `/v3/transport-documents/{transportDocumentReference}` 2. Can return the content of a draft Transport Document through **GET** `/v3/transport-documents/{transportDocumentReference}` 3. Can send Transport Document notifications by calling the **POST** `/v3/transport-document-notifications` endpoint implemented by the Shipper 4. Can receive and process direct Transport Document amendments, through the following endpoints:  - **PUT** `/v3/transport-documents/{transportDocumentReference}/amendment` to receive a Transport Document amendment request - **GET** `/v3/transport-documents/{transportDocumentReference}/amendment` to return the content of a Transport Document amendment - **DELETE** `/v3/transport-documents/{transportDocumentReference}/amendment` to receive a Transport Document amendment cancellation request | **Document type:**   - Sea Waybill - Straight BL - Negotiable BL |
+| Shipper | Freight Forwarder / Shipper | It is mandatory to support the following Transport Document capabilities:   1. Can retrieve a Transport Document by calling the **GET** `/v3/transport-documents/{transportDocumentReference}` endpoint implemented by the Carrier | May additionally support the following capabilities:   1. Can approve a draft Transport Document by calling the **PATCH** `/v3/transport-documents/{transportDocumentReference}` endpoint implemented by the Carrier 2. Can receive Transport Document notifications from the Carrier through **POST** `/v3/transport-document-notifications` 3. Can support Direct Transport Document amendments by calling the following endpoints implemented by the Carrier:  - **PUT** `/v3/transport-documents/{transportDocumentReference}/amendment` to submit a Transport Document amendment request - **GET** `/v3/transport-documents/{transportDocumentReference}/amendment` to retrieve an amended Transport Document - **DELETE** `/v3/transport-documents/{transportDocumentReference}/amendment` to cancel a Transport Document amendment request | **Document type:**   - Sea Waybill - Straight BL - Negotiable BL |
 
 **Standard role**
 
@@ -88,7 +88,7 @@ All conformance scenarios performed and validation results will be part of the C
 
 |  |  |
 | --- | --- |
-| **UC6 [Sea Waybill]** **- UC7 - UC8 - GET TD (ISSUED)** | This scenario verifies that the Carrier can publish a draft Sea Waybill; it can accept the approval of the draft; it can mark the Sea Waybill as issued; it can return the content of the issued Sea Waybill. |
+| **UC8 [Sea Waybill]** **- GET TD (ISSUED)** | This scenario verifies that the Carrier can mark the Sea Waybill as issued and can return its content. |
 
 ## Required Straight B/L scenario
 
@@ -102,6 +102,7 @@ Same as “Required Sea Waybill scenarios” but with “Negotiable B/L” inste
 
 |  |  |
 | --- | --- |
+| **UC6 [any TD type]** **- UC7 - GET TD (APPROVED)** | This scenario verifies that the Carrier can publish a draft Transport Document; it can accept the approval of the draft; it can return the content of the draft Transport Document. |
 | **SupplyCSP [any amended TD] -** **UC17 - GET TD amendment (2xx)** | This scenario verifies that the Carrier can return the content of a direct Transport Document amendment request (UC17 introduced in EBL v3.0.3). |
 | **SupplyCSP [any amended TD] -** **UC17 - UC19 (confirm) - GET TD (DRAFT or ISSUED or PENDING\_SURRENDER\_FOR\_AMENDMENT)** | This scenario verifies that the Carrier can confirm a direct Transport Document amendment (UC17 and UC19 introduced in EBL v3.0.3). |
 | **SupplyCSP [any amended TD] -** **UC17 - UC19 (decline) - GET TD (DRAFT or ISSUED or PENDING\_SURRENDER\_FOR\_AMENDMENT)** | This scenario verifies that the Carrier can decline a direct Transport Document amendment (UC17 and UC19 introduced in EBL v3.0.3). |
@@ -117,7 +118,7 @@ Same as “Required Sea Waybill scenarios” but with “Negotiable B/L” inste
 
 |  |  |
 | --- | --- |
-| **UC6 [Sea Waybill] - UC7 - GET TD** | This scenario verifies that the Shipper can approve and retrieve a draft Sea Waybill. |
+| **UC8 [Sea Waybill]** **- GET TD** | This scenario verifies that the Shipper can retrieve a Sea Waybill. |
 
 ## Required Straight B/L scenario
 
@@ -131,6 +132,7 @@ Same as “Required Sea Waybill scenario” but with “Negotiable B/L” instea
 
 |  |  |
 | --- | --- |
+| **UC6 - UC7** | This scenario verifies that the Shipper can approve a draft Transport Document. |
 | **UC17 - UC19 (confirm) - GET TD amendment** | This scenario verifies that the Shipper can submit a direct Transport Document amendment and can retrieve amended Transport Document content (UC17 and UC19 introduced in EBL v3.0.3). |
 | **UC17 - UC18** | This scenario verifies that the Shipper can cancel a direct Transport Document amendment (UC17 and UC 18 introduced in EBL v3.0.3). |
 

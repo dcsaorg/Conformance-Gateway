@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.EmptyResponseBodyCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheckRebaser;
@@ -32,22 +33,25 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
 
   private final JsonSchemaValidator responseSchemaValidator;
   private final AmendedTransportDocumentStatus expectedAmendmentStatus;
+  private final boolean allowAcceptedResponse;
 
   public Shipper_GetTransportDocumentAmendmentAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator responseSchemaValidator,
-      AmendedTransportDocumentStatus expectedAmendmentStatus) {
+      AmendedTransportDocumentStatus expectedAmendmentStatus,
+      boolean allowAcceptedResponse) {
     super(
         shipperPartyName,
         carrierPartyName,
         previousAction,
-        "GET TD amendment",
+        allowAcceptedResponse ? "GET TD amendment (2xx)" : "GET TD amendment",
         200,
         true);
     this.responseSchemaValidator = responseSchemaValidator;
     this.expectedAmendmentStatus = expectedAmendmentStatus;
+    this.allowAcceptedResponse = allowAcceptedResponse;
   }
 
   @Override
@@ -69,7 +73,8 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         List<JsonRebasableContentCheck> nestedChecks =
-            new ArrayList<>(EblChecks.amendedTransportDocumentCarrierContentChecks(getDspSupplier()));
+            new ArrayList<>(
+                EblChecks.amendedTransportDocumentCarrierContentChecks(getDspSupplier()));
         nestedChecks.addAll(
             TransportDocumentStatusScenario.primaryStatusesOnly(PRIMARY_STATUSES).checks(false));
         return Stream.of(
@@ -78,7 +83,12 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
                 getTransportDocumentAmendmentEndpoint()),
-            new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+            allowAcceptedResponse
+                ? ResponseStatusCheck.forSuccessfulResponse(
+                    EblRole::isCarrier, getMatchedExchangeUuid())
+                : new ResponseStatusCheck(
+                    EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+            new EmptyResponseBodyCheck(EblRole::isCarrier, getMatchedExchangeUuid(), 202),
             new ApiHeaderCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -109,4 +119,3 @@ public class Shipper_GetTransportDocumentAmendmentAction extends EblAction {
     };
   }
 }
-

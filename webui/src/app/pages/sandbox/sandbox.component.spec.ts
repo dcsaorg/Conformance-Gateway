@@ -3,11 +3,38 @@ import { SandboxComponent } from './sandbox.component';
 import { Sandbox } from '../../model/sandbox';
 import { ConfirmationDialog } from '../../dialogs/confirmation/confirmation-dialog.component';
 import { MessageDialog } from '../../dialogs/message/message-dialog.component';
+import { ScenarioConformanceType } from '../../model/scenario';
+import { ConformanceStatus } from '../../model/conformance-status';
 
 describe('SandboxComponent', () => {
   afterEach(() => {
     jest.useRealTimers();
     jest.restoreAllMocks();
+  });
+
+  it('explains that at least one alternative and every attempted alternative must pass', () => {
+    expect(createComponent().interchangeableScenariosHint).toBe(
+      'At least one interchangeable scenario in this module must pass. Every attempted alternative must pass; unexecuted alternatives are ignored.',
+    );
+  });
+
+  it.each<{ types: ScenarioConformanceType[]; expected: boolean }>([
+    { types: ['INTERCHANGEABLE', 'INTERCHANGEABLE'], expected: true },
+    { types: ['REQUIRED', 'OPTIONAL', 'INTERCHANGEABLE'], expected: true },
+    { types: ['REQUIRED', 'OPTIONAL'], expected: false },
+    { types: [], expected: false },
+  ])('detects interchangeable scenarios for $types: $expected', ({ types, expected }) => {
+    const component = createComponent();
+    expect(component.hasInterchangeableScenarios({
+      moduleName: 'Module',
+      scenarios: types.map((conformanceType, index) => ({
+        id: String(index),
+        name: `Scenario ${index}`,
+        isRunning: 'false',
+        conformanceStatus: ConformanceStatus.NO_TRAFFIC,
+        conformanceType,
+      })),
+    })).toBe(expected);
   });
 
   it('shows the no-scenarios state only for a loaded regular sandbox with no modules', () => {

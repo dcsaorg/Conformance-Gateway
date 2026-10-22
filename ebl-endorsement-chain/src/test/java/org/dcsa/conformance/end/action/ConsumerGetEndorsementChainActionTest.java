@@ -4,6 +4,8 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.ConformanceResult;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
 import org.dcsa.conformance.core.check.UrlPathCheck;
+import org.dcsa.conformance.core.report.ConformanceReport;
+import org.dcsa.conformance.core.report.ConformanceStatus;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.ConformanceMessage;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
@@ -86,6 +88,48 @@ class ConsumerGetEndorsementChainActionTest {
     urlPathCheck.check(ignored -> exchange);
 
     assertFalse(urlPathCheck.resultsStream().findFirst().orElseThrow().isConformant());
+  }
+
+  @Test
+  void providerBackedActionHasNoTrafficBeforeSetupAndAfterResetButStillValidatesTraffic() {
+    SupplyScenarioParametersAction supplyAction = new SupplyScenarioParametersAction(
+      "Provider", "SupplyCSP", EndorsementChainFilterParameter.TRANSPORT_DOCUMENT_REFERENCE);
+    ConsumerGetEndorsementChainAction action = new ConsumerGetEndorsementChainAction(
+      "Provider", "Consumer", supplyAction,
+      COMPONENT_FACTORY.getMessageSchemaValidator("endorsementChains"),
+      "GET EndorsementChain", null);
+    assertNoTraffic(action);
+
+    var input = OBJECT_MAPPER.createObjectNode();
+    input.putObject("input").put("transportDocumentReference", "HHL71800000");
+    supplyAction.handlePartyInput(input);
+    assertNoTraffic(action);
+
+    ConformanceExchange exchange = exchange(200);
+    action.handleExchange(exchange);
+    ConformanceCheck check = action.createFullCheck("3.0.3");
+    check.check(ignored -> exchange);
+    assertEquals(ConformanceStatus.CONFORMANT,
+      new ConformanceReport(check, "Consumer").getConformanceStatus());
+    // The empty response array is invalid for the Provider and must not be hidden by the guard.
+    assertEquals(ConformanceStatus.NON_CONFORMANT,
+      new ConformanceReport(check, "Provider").getConformanceStatus());
+
+    supplyAction.reset();
+    action.reset();
+    assertNoTraffic(action);
+    action.importJsonState(action.exportJsonState());
+    assertNoTraffic(action);
+  }
+
+  private static void assertNoTraffic(ConsumerGetEndorsementChainAction action) {
+    ConformanceCheck check = action.createFullCheck("3.0.3");
+    check.check(ignored -> null);
+    for (String role : List.of("Consumer", "Provider")) {
+      ConformanceReport report = new ConformanceReport(check, role);
+      assertEquals(ConformanceStatus.NO_TRAFFIC, report.getConformanceStatus(),
+        report.toJsonReport().toPrettyString());
+    }
   }
 
   private static Stream<ConformanceCheck> allChecks(ConformanceCheck check) {

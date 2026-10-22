@@ -20,8 +20,12 @@ public enum ScenarioConformanceType {
    * any one of them conformantly is enough for the whole set to be conformant, and the alternatives
    * that were not executed are ignored.
    *
+   * <p>All interchangeable scenarios in a module form a single group. Independent alternative
+   * requirements must belong to separate modules; satisfying one module does not satisfy another.
+   *
    * <p>Alternatives that <em>were</em> executed must still be conformant: not running a scenario is
-   * allowed, failing it is not.
+   * allowed, but a failed or partially conformant alternative prevents the group from being fully
+   * conformant, even when another alternative passed.
    */
   INTERCHANGEABLE;
 

@@ -72,7 +72,8 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
                 scenarioWithParameters(
                   parameters(
                     Map.entry(UNIVERSAL_SERVICE_REFERENCE, "SR54321C"),
-                    Map.entry(UNIVERSAL_VOYAGE_REFERENCE, "2105N"))))),
+                    Map.entry(UNIVERSAL_VOYAGE_REFERENCE, "2105N"))))
+              .asInterchangeableScenarios()),
           Map.entry(
             "GET scenario for pagination - Optional/report-only",
             scenarioWithPagination(

@@ -6,6 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.dcsa.conformance.core.scenario.ConformanceScenario;
+import org.dcsa.conformance.core.scenario.ScenarioConformanceType;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
 import org.junit.jupiter.api.Test;
 
@@ -43,11 +45,33 @@ class OvsScenarioListBuilderTest {
                     OvsRole.PRODUCER.getConfigName(), OvsRole.CONSUMER.getConfigName()))));
   }
 
+  @Test
+  void scenarioClassificationsMatchRequirementsForEveryRoleSelection() {
+    Map<String, ScenarioConformanceType> expectedTypes = Map.of(
+        PRODUCER_MODULES.get(0), ScenarioConformanceType.INTERCHANGEABLE,
+        PRODUCER_MODULES.get(1), ScenarioConformanceType.OPTIONAL,
+        CONSUMER_MODULES.get(0), ScenarioConformanceType.REQUIRED);
+    for (Set<String> roles : List.of(
+        Set.of(OvsRole.PRODUCER.getConfigName()),
+        Set.of(OvsRole.CONSUMER.getConfigName()),
+        Set.of(OvsRole.PRODUCER.getConfigName(), OvsRole.CONSUMER.getConfigName()))) {
+      buildersFor(roles).forEach((moduleName, builder) -> {
+        List<ConformanceScenario> scenarios = builder.buildScenarioList(0);
+        assertEquals(moduleName.equals(PRODUCER_MODULES.get(0)) ? 10 : 1,
+            scenarios.size(), moduleName);
+        scenarios.forEach(scenario -> assertEquals(expectedTypes.get(moduleName),
+            scenario.getConformanceType(), moduleName + " / " + scenario.getTitle()));
+      });
+    }
+  }
+
   private static List<String> moduleNamesFor(Set<String> roles) {
-    Map<String, OvsScenarioListBuilder> builders =
-        OvsScenarioListBuilder.createModuleScenarioListBuilders(
-            COMPONENT_FACTORY, roles, "Producer1", "Consumer1");
-    return List.copyOf(builders.keySet());
+    return List.copyOf(buildersFor(roles).keySet());
+  }
+
+  private static Map<String, OvsScenarioListBuilder> buildersFor(Set<String> roles) {
+    return OvsScenarioListBuilder.createModuleScenarioListBuilders(
+        COMPONENT_FACTORY, roles, "Producer1", "Consumer1");
   }
 }
 

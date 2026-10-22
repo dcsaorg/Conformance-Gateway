@@ -91,23 +91,33 @@ class BookingScenarioListBuilderTest {
     assertTrue(builders.containsKey("Shipper: Required Dangerous Goods scenario"));
     assertTrue(builders.containsKey("Carrier: " + OPTIONAL_SCENARIOS));
     assertTrue(builders.containsKey("Shipper: " + OPTIONAL_SCENARIOS));
+    assertScenarioClassifications(builders);
   }
 
   @Test
-  void optionalScenariosAreReportOnlyAndNoScenarioUsesSkippableGet() {
+  void scenarioClassificationsMatchConformanceRequirementsAndNoScenarioUsesSkippableGet() {
     for (BookingRole role : BookingRole.values()) {
       Map<String, BookingScenarioListBuilder> builders = buildersFor(role);
+      assertScenarioClassifications(builders);
       builders.forEach((section, builder) ->
         builder.buildScenarioList(0).forEach(scenario -> {
-          assertEquals(
-            section.equals(OPTIONAL_SCENARIOS)
-              ? ScenarioConformanceType.OPTIONAL
-              : ScenarioConformanceType.REQUIRED,
-            scenario.getConformanceType());
           assertFalse(
             scenario.allActionsStream()
               .anyMatch(ShipperGetBookingSkippableAction.class::isInstance));
         }));
+    }
+  }
+
+  @Test
+  void eachCarrierCargoQualifierHasItsOwnPairOfInterchangeableScenarios() {
+    Map<String, BookingScenarioListBuilder> builders = buildersFor(BookingRole.CARRIER);
+    for (String cargoQualifier : List.of("Dry Cargo", "Reefer", "Dangerous Goods")) {
+      String section = "Additional required %s scenarios (execute at least one of these two)"
+        .formatted(cargoQualifier);
+      List<ConformanceScenario> scenarios = builders.get(section).buildScenarioList(0);
+      assertEquals(2, scenarios.size(), section);
+      scenarios.forEach(scenario -> assertEquals(
+        ScenarioConformanceType.INTERCHANGEABLE, scenario.getConformanceType(), scenario.getTitle()));
     }
   }
 
@@ -141,6 +151,18 @@ class BookingScenarioListBuilderTest {
     assertTrue(
       allTitles.stream().anyMatch(title -> title.startsWith("UC1[Dry cargo]")),
       "Expected dry cargo shipper title prefix");
+  }
+
+  private static void assertScenarioClassifications(Map<String, BookingScenarioListBuilder> builders) {
+    builders.forEach((section, builder) -> {
+      ScenarioConformanceType expected = section.endsWith(OPTIONAL_SCENARIOS)
+        ? ScenarioConformanceType.OPTIONAL
+        : section.startsWith("Additional required ")
+          ? ScenarioConformanceType.INTERCHANGEABLE
+          : ScenarioConformanceType.REQUIRED;
+      builder.buildScenarioList(0).forEach(scenario ->
+        assertEquals(expected, scenario.getConformanceType(), section + " / " + scenario.getTitle()));
+    });
   }
 
   private static Map<String, BookingScenarioListBuilder> buildersFor(BookingRole role) {

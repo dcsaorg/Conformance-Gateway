@@ -139,7 +139,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           .thenEither(
             uc3ShipperSubmitUpdatedBookingRequest(false),
             uc5CarrierConfirmBookingRequest(false)
-              .then(uc7ShipperSubmitBookingAmendment(false))));
+              .then(uc7ShipperSubmitBookingAmendment(false))))
+      .asInterchangeableScenarios();
   }
 
   private static BookingScenarioListBuilder confirmedBookingScenario(boolean validateSecondaryStatuses) {

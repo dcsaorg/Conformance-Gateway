@@ -46,7 +46,7 @@ export class SandboxComponent implements OnInit, OnDestroy {
   getConformanceStatusTitle = getConformanceStatusTitle;
 
   readonly interchangeableScenariosHint =
-    "Running any one of the scenarios of this module is sufficient for conformance.";
+    "At least one interchangeable scenario in this module must pass. Every attempted alternative must pass; unexecuted alternatives are ignored.";
 
   constructor(
     public activatedRoute: ActivatedRoute,

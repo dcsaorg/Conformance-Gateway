@@ -1,10 +1,15 @@
 package org.dcsa.conformance.end;
 
+import org.dcsa.conformance.core.check.ScenarioCheck;
+import org.dcsa.conformance.core.report.ConformanceReport;
+import org.dcsa.conformance.core.report.ConformanceStatus;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioConformanceType;
 import org.dcsa.conformance.end.action.ConsumerGetEndorsementChainAction;
 import org.dcsa.conformance.end.action.SupplyScenarioParametersAction;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.Map;
@@ -70,6 +75,22 @@ class EndorsementChainScenarioListBuilderTest {
     assertTrue(builders.containsKey("Provider Conformance Scenarios"));
     assertTrue(builders.containsKey("Consumer Conformance Scenarios"));
     assertEquals(2, builders.size());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"Consumer", "Provider"})
+  void unexecutedScenariosHaveNoTrafficForEachRole(String role) {
+    EndorsementChainScenarioListBuilder.createModuleScenarioListBuilders(
+        COMPONENT_FACTORY, Set.of(role), "Provider", "Consumer")
+      .values().stream()
+      .flatMap(builder -> builder.buildScenarioList(0).stream())
+      .forEach(scenario -> {
+        ScenarioCheck check = new ScenarioCheck(scenario, "3.0.0");
+        check.check(ignored -> null);
+        ConformanceReport report = new ConformanceReport(check, role);
+        assertEquals(ConformanceStatus.NO_TRAFFIC, report.getConformanceStatus(),
+          report.toJsonReport().toPrettyString());
+      });
   }
 
   @Test

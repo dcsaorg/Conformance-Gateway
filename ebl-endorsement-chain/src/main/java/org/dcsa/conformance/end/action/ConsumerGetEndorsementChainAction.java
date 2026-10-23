@@ -58,6 +58,9 @@ public class ConsumerGetEndorsementChainAction extends EndorsementChainAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        if (getMatchedExchangeUuid() == null) {
+          return Stream.empty();
+        }
         String tdr =
           sspSupplier
             .get()

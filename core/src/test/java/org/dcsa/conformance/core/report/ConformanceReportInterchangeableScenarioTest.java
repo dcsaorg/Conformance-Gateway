@@ -60,6 +60,74 @@ class ConformanceReportInterchangeableScenarioTest {
   }
 
   @Test
+  void everyPairOfAlternativeOutcomesPreservesAttemptedFailuresAndIncompleteResults() {
+    Outcome[] outcomes = Outcome.values();
+    ConformanceStatus[][] expected = {
+      {ConformanceStatus.CONFORMANT, ConformanceStatus.NON_CONFORMANT,
+        ConformanceStatus.CONFORMANT, ConformanceStatus.PARTIALLY_CONFORMANT},
+      {ConformanceStatus.NON_CONFORMANT, ConformanceStatus.NON_CONFORMANT,
+        ConformanceStatus.NON_CONFORMANT, ConformanceStatus.NON_CONFORMANT},
+      {ConformanceStatus.CONFORMANT, ConformanceStatus.NON_CONFORMANT,
+        ConformanceStatus.NO_TRAFFIC, ConformanceStatus.PARTIALLY_CONFORMANT},
+      {ConformanceStatus.PARTIALLY_CONFORMANT, ConformanceStatus.NON_CONFORMANT,
+        ConformanceStatus.PARTIALLY_CONFORMANT, ConformanceStatus.PARTIALLY_CONFORMANT}
+    };
+    for (int first = 0; first < outcomes.length; first++) {
+      for (int second = 0; second < outcomes.length; second++) {
+        ConformanceReport report = reportForAlternatives(outcomes[first], outcomes[second],
+          Outcome.NOT_EXECUTED, Outcome.NOT_EXECUTED, Outcome.NOT_EXECUTED);
+        assertEquals(expected[first][second], report.getConformanceStatus(),
+          outcomes[first] + " / " + outcomes[second]);
+      }
+    }
+  }
+
+  @Test
+  void partiallyExecutedAlternativePreventsFullConformanceEvenWhenAnotherPassed() {
+    ScenarioCheck incompleteAlternative = new ScenarioCheck(
+      new ConformanceScenario(UUID.randomUUID(), List.of(
+        new StubAction("Completed action", Outcome.CONFORMANT),
+        new StubAction("Unexecuted action", Outcome.NOT_EXECUTED)),
+        ScenarioConformanceType.INTERCHANGEABLE), "1.0.0");
+    ConformanceReport report = reportFor(moduleCheck(
+      scenarioCheck("Passing alternative", Outcome.CONFORMANT, ScenarioConformanceType.INTERCHANGEABLE),
+      incompleteAlternative));
+
+    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT, report.getConformanceStatus());
+    assertEquals(ConformanceStatus.PARTIALLY_CONFORMANT,
+      report.getSubReports().get(1).getConformanceStatus());
+    assertEquals(ConformanceStatus.NO_TRAFFIC,
+      report.getSubReports().get(1).getSubReports().get(1).getConformanceStatus());
+  }
+
+  @Test
+  void interchangeableRequirementsAreIndependentAcrossModules() {
+    for (Outcome secondModuleOutcome : Outcome.values()) {
+      ConformanceReport report = reportFor(moduleCheck(
+        moduleCheck(
+          scenarioCheck("Dry update", Outcome.CONFORMANT, ScenarioConformanceType.INTERCHANGEABLE),
+          scenarioCheck("Dry amendment", Outcome.NOT_EXECUTED, ScenarioConformanceType.INTERCHANGEABLE)),
+        moduleCheck(
+          scenarioCheck("Reefer update", secondModuleOutcome, ScenarioConformanceType.INTERCHANGEABLE),
+          scenarioCheck("Reefer amendment", Outcome.NOT_EXECUTED, ScenarioConformanceType.INTERCHANGEABLE))));
+
+      ConformanceStatus expectedModuleStatus = switch (secondModuleOutcome) {
+        case CONFORMANT -> ConformanceStatus.CONFORMANT;
+        case NON_CONFORMANT -> ConformanceStatus.NON_CONFORMANT;
+        case NOT_EXECUTED -> ConformanceStatus.NO_TRAFFIC;
+        case PARTIALLY_CONFORMANT -> ConformanceStatus.PARTIALLY_CONFORMANT;
+      };
+      ConformanceStatus expectedOverallStatus = secondModuleOutcome == Outcome.NOT_EXECUTED
+        ? ConformanceStatus.PARTIALLY_CONFORMANT : expectedModuleStatus;
+      assertEquals(ConformanceStatus.CONFORMANT,
+        report.getSubReports().get(0).getConformanceStatus());
+      assertEquals(expectedModuleStatus,
+        report.getSubReports().get(1).getConformanceStatus(), secondModuleOutcome.name());
+      assertEquals(expectedOverallStatus, report.getConformanceStatus(), secondModuleOutcome.name());
+    }
+  }
+
+  @Test
   void requiredScenariosOfTheSameModuleStillAllHaveToBeExecuted() {
     ConformanceCheck moduleCheck =
       moduleCheck(
@@ -123,7 +191,8 @@ class ConformanceReportInterchangeableScenarioTest {
   private enum Outcome {
     CONFORMANT,
     NON_CONFORMANT,
-    NOT_EXECUTED
+    NOT_EXECUTED,
+    PARTIALLY_CONFORMANT
   }
 
   private static final class StubAction extends ConformanceAction {
@@ -150,6 +219,10 @@ class ConformanceReportInterchangeableScenarioTest {
             case CONFORMANT -> addResult(ConformanceResult.withErrors(Set.of()));
             case NON_CONFORMANT ->
               addResult(ConformanceResult.withErrors(Set.of("Alternative failed")));
+            case PARTIALLY_CONFORMANT -> {
+              addResult(ConformanceResult.withErrors(Set.of()));
+              addResult(ConformanceResult.withErrors(Set.of("Alternative incomplete or invalid")));
+            }
             case NOT_EXECUTED -> {
               // no traffic
             }

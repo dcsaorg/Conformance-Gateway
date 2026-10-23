@@ -44,7 +44,6 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
   protected String baseUrl = "http://localhost:4200";
   protected String loginEmail = "selenium-test@dcsa.org";
-  protected String loginPassword = "selenium-test-fake-password";
   protected boolean stopAfterFirstScenarioGroup = false;
 
   @BeforeAll
@@ -536,9 +535,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     assertEquals(baseUrl + "/login", driver.getCurrentUrl());
 
     WebElement textBoxEmail = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login_email")));
-    WebElement textBoxPassword = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login_password")));
     textBoxEmail.sendKeys(loginEmail);
-    textBoxPassword.sendKeys(loginPassword);
 
     log.info("Logging in user into environment: {}", baseUrl);
     WebElement submitButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("login_button")));

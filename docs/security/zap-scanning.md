@@ -6,7 +6,7 @@ The repository provides manually triggered OWASP ZAP scans for the deployed Conf
 
 `OWASP ZAP Baseline Scan` performs unauthenticated passive scanning of known Angular route entry points. It supports Dev, DT, and Test.
 
-`OWASP ZAP Authenticated Scan` signs in through the application's existing Cognito login form, verifies the session against the Web UI API, and passively scans a small set of read-only requests. Its initial profile supports Dev only.
+`OWASP ZAP Authenticated Scan` uses an operator-supplied Auth0 API access token for a fixed read-only API request and passively scans known static routes. Its initial profile supports Dev only. It does not automate Universal Login or token renewal.
 
 Neither workflow performs an active scan. The Conformance Web UI API multiplexes read and write operations through one POST endpoint, and a generic crawler or active scanner could create, update, reset, or delete sandbox data. Broader authenticated crawling and active scanning require a separately reviewed request allowlist and cleanup strategy.
 
@@ -24,10 +24,9 @@ Store these secrets in `conformance-dev` for the authenticated scan:
 
 | Secret | Purpose |
 | --- | --- |
-| `CONFORMANCE_USER_EMAIL` | Dedicated non-production Conformance scan account |
-| `CONFORMANCE_USER_PASSWORD` | Password for the scan account |
+| `CONFORMANCE_ACCESS_TOKEN` | Fresh Auth0 API access token, without the Bearer prefix, for a dedicated non-production scan account |
 
-Do not store credentials in repository files or GitHub Environment variables. The account should be dedicated to security scanning and should not own valuable sandbox data.
+Do not store credentials in repository files or GitHub Environment variables. Obtain the token through the approved Auth0 login flow, not a password grant or a custom token issuer. It must have the Dev audience/client, organization context, and Conformance permission, and remain valid for the scan. Use an already reconciled account without valuable sandbox data so the read-only probe does not trigger first-use identity linking. Replace/remove the secret after use; no refresh token is stored. Retire the old scan username/password secrets separately.
 
 ## Running a scan
 
@@ -42,8 +41,8 @@ Medium findings make the ZAP plan warn without failing the job. High findings fa
 
 ## Scope and limitations
 
-The scan contexts include only the selected Conformance application origin and, for the authenticated scan, its matching Web UI API origin. Cognito and other third-party origins used while loading or authenticating the application are not part of the scan context.
+The scan contexts include only the selected Conformance application origin and, for the authenticated scan, its matching Web UI API origin. Auth0 and other third-party origins are not part of the scan context. The access token is attached only to the approved API request, not static route requests.
 
-The browser authentication plan intentionally uses the Cognito `AuthenticationResult.IdToken` as the API's raw `Authorization` header value, matching the Web UI implementation. Authentication diagnostics are disabled because they are unnecessary for routine runs and can contain sensitive session evidence.
+The API request uses `Authorization: Bearer <access-token>`. Invalid/expired tokens fail the scan rather than falling back to anonymous coverage. The uploaded HTML is redacted for the supplied token; restrict artifact access and review reports before sharing. Real Universal Login, organization selection, callback and renewal coverage still requires the staging browser fixture once Auth0 registration is available. This revised plan has not yet been exercised against live Auth0.
 
 A successful ZAP scan does not replace focused authentication, authorization, or access-control tests. The first Dev reports should be reviewed before extending authenticated scanning to DT or Test or enabling any active-scan behavior.

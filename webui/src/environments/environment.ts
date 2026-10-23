@@ -6,9 +6,6 @@ export const environment = {
   name: "local",
   production: false,
   apiBaseUrl: 'http://localhost:8080/',
-  useCognito: false,
-  cognitoUserPoolId: '',
-  cognitoClientId: '',
   siteTitle: 'DCSA Conformance 💻',
 };
 

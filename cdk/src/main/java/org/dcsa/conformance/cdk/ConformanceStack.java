@@ -5,7 +5,9 @@ import static software.amazon.awscdk.BundlingOutput.ARCHIVED;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import software.amazon.awscdk.BundlingOptions;
@@ -14,18 +16,12 @@ import software.amazon.awscdk.CfnOutputProps;
 import software.amazon.awscdk.DockerVolume;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Fn;
+import software.amazon.awscdk.RemovalPolicy;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.aws_apigatewayv2_authorizers.HttpUserPoolAuthorizer;
-import software.amazon.awscdk.aws_apigatewayv2_authorizers.HttpUserPoolAuthorizerProps;
+import software.amazon.awscdk.aws_apigatewayv2_authorizers.HttpJwtAuthorizer;
+import software.amazon.awscdk.aws_apigatewayv2_authorizers.HttpJwtAuthorizerProps;
 import software.amazon.awscdk.aws_apigatewayv2_integrations.HttpLambdaIntegration;
-import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationLoadBalancer;
-import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationProtocol;
-import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationTargetGroup;
-import software.amazon.awscdk.services.elasticloadbalancingv2.BaseApplicationListenerProps;
-import software.amazon.awscdk.services.elasticloadbalancingv2.HealthCheck;
-import software.amazon.awscdk.services.elasticloadbalancingv2.ListenerCertificate;
-import software.amazon.awscdk.services.elasticloadbalancingv2.targets.LambdaTarget;
 import software.amazon.awscdk.services.apigatewayv2.AddRoutesOptions;
 import software.amazon.awscdk.services.apigatewayv2.CfnStage;
 import software.amazon.awscdk.services.apigatewayv2.CorsHttpMethod;
@@ -37,17 +33,9 @@ import software.amazon.awscdk.services.apigatewayv2.HttpApi;
 import software.amazon.awscdk.services.apigatewayv2.HttpApiProps;
 import software.amazon.awscdk.services.apigatewayv2.HttpMethod;
 import software.amazon.awscdk.services.apigatewayv2.IDomainName;
+import software.amazon.awscdk.services.apigatewayv2.IHttpRouteAuthorizer;
 import software.amazon.awscdk.services.certificatemanager.Certificate;
 import software.amazon.awscdk.services.cloudfront.BehaviorOptions;
-import software.amazon.awscdk.services.globalaccelerator.Accelerator;
-import software.amazon.awscdk.services.globalaccelerator.AcceleratorProps;
-import software.amazon.awscdk.services.globalaccelerator.CfnEndpointGroup;
-import software.amazon.awscdk.services.globalaccelerator.CfnEndpointGroupProps;
-import software.amazon.awscdk.services.globalaccelerator.ConnectionProtocol;
-import software.amazon.awscdk.services.globalaccelerator.Listener;
-import software.amazon.awscdk.services.globalaccelerator.ListenerProps;
-import software.amazon.awscdk.services.globalaccelerator.PortRange;
-
 import software.amazon.awscdk.services.cloudfront.CachePolicy;
 import software.amazon.awscdk.services.cloudfront.Distribution;
 import software.amazon.awscdk.services.cloudfront.DistributionProps;
@@ -60,13 +48,6 @@ import software.amazon.awscdk.services.cloudfront.ResponseHeadersPolicy;
 import software.amazon.awscdk.services.cloudfront.ResponseSecurityHeadersBehavior;
 import software.amazon.awscdk.services.cloudfront.ViewerProtocolPolicy;
 import software.amazon.awscdk.services.cloudfront.origins.S3BucketOrigin;
-import software.amazon.awscdk.services.cognito.AccountRecovery;
-import software.amazon.awscdk.services.cognito.AuthFlow;
-import software.amazon.awscdk.services.cognito.PasswordPolicy;
-import software.amazon.awscdk.services.cognito.SignInAliases;
-import software.amazon.awscdk.services.cognito.UserPool;
-import software.amazon.awscdk.services.cognito.UserPoolClient;
-import software.amazon.awscdk.services.cognito.UserPoolClientOptions;
 import software.amazon.awscdk.services.dynamodb.Attribute;
 import software.amazon.awscdk.services.dynamodb.AttributeType;
 import software.amazon.awscdk.services.dynamodb.BillingMode;
@@ -76,11 +57,29 @@ import software.amazon.awscdk.services.dynamodb.TableProps;
 import software.amazon.awscdk.services.ec2.SubnetSelection;
 import software.amazon.awscdk.services.ec2.SubnetType;
 import software.amazon.awscdk.services.ec2.Vpc;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationLoadBalancer;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationProtocol;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationTargetGroup;
+import software.amazon.awscdk.services.elasticloadbalancingv2.BaseApplicationListenerProps;
+import software.amazon.awscdk.services.elasticloadbalancingv2.HealthCheck;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ListenerCertificate;
+import software.amazon.awscdk.services.elasticloadbalancingv2.targets.LambdaTarget;
+import software.amazon.awscdk.services.globalaccelerator.Accelerator;
+import software.amazon.awscdk.services.globalaccelerator.AcceleratorProps;
+import software.amazon.awscdk.services.globalaccelerator.CfnEndpointGroup;
+import software.amazon.awscdk.services.globalaccelerator.CfnEndpointGroupProps;
+import software.amazon.awscdk.services.globalaccelerator.ConnectionProtocol;
+import software.amazon.awscdk.services.globalaccelerator.Listener;
+import software.amazon.awscdk.services.globalaccelerator.ListenerProps;
+import software.amazon.awscdk.services.globalaccelerator.PortRange;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
 import software.amazon.awscdk.services.iam.Policy;
 import software.amazon.awscdk.services.iam.PolicyProps;
 import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.amazon.awscdk.services.iam.ServicePrincipal;
+import software.amazon.awscdk.services.kms.Key;
+import software.amazon.awscdk.services.kms.KeySpec;
+import software.amazon.awscdk.services.kms.KeyUsage;
 import software.amazon.awscdk.services.lambda.AssetCode;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
@@ -121,38 +120,18 @@ public class ConformanceStack extends Stack {
       String restApiCertificateArn,
       String webuiApiCertificateArn,
       String webuiDistCertificateArn,
-      boolean inVpc) {
+      boolean inVpc,
+      AuthenticationSettings auth) {
     super(parent, stackName, stackProps);
+    Objects.requireNonNull(auth, "Auth0 settings are required");
 
-    UserPool userPool =
-        UserPool.Builder.create(this, prefix + "UserPool")
-            .userPoolName(prefix + "UserPool")
-            .selfSignUpEnabled(false)
-            .signInAliases(SignInAliases.builder().email(true).build())
-            .accountRecovery(AccountRecovery.EMAIL_ONLY)
-            .passwordPolicy(
-                PasswordPolicy.builder()
-                    .minLength(8)
-                    .requireLowercase(true)
-                    .requireUppercase(true)
-                    .requireDigits(true)
-                    .requireSymbols(false)
-                    .build())
-            .build();
+    LegacyCognitoResources.retain(this, prefix);
 
-    UserPoolClient userPoolClient =
-        userPool.addClient(
-            prefix + "UserPoolClient",
-            UserPoolClientOptions.builder()
-                .authFlows(AuthFlow.builder().userSrp(true).build())
-                .preventUserExistenceErrors(true)
-                .build());
-
-    HttpUserPoolAuthorizer httpUserPoolAuthorizer =
-        new HttpUserPoolAuthorizer(
-            prefix + "HttpUserPoolAuthorizer",
-            userPool,
-            HttpUserPoolAuthorizerProps.builder().userPoolClients(List.of(userPoolClient)).build());
+    IHttpRouteAuthorizer webuiAuthorizer = new HttpJwtAuthorizer(
+      prefix + "Auth0Authorizer",
+      auth.issuer(),
+      HttpJwtAuthorizerProps.builder().jwtAudience(List.of(auth.audience())).build()
+    );
 
     String tableName = prefix + "Conformance";
     Table table =
@@ -170,6 +149,18 @@ public class ConformanceStack extends Stack {
                         .build())
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .build());
+
+    Key identityHmacKey = Key.Builder.create(this, prefix + "IdentityHmacKey")
+            .keySpec(KeySpec.HMAC_256)
+            .keyUsage(KeyUsage.GENERATE_VERIFY_MAC)
+            .removalPolicy(RemovalPolicy.RETAIN)
+            .build();
+
+    new CfnOutput(
+        this,
+        prefix + "IdentityHmacKeyArn",
+        CfnOutputProps.builder().value(identityHmacKey.getKeyArn()).build()
+    );
 
     Vpc vpc =
         inVpc
@@ -223,6 +214,12 @@ public class ConformanceStack extends Stack {
             "org.dcsa.conformance.lambda.WebuiLambda",
             vpc);
 
+    webuiLambda.addEnvironment("AUTH_ISSUER", auth.issuer());
+    webuiLambda.addEnvironment("AUTH_AUDIENCE", auth.audience());
+    webuiLambda.addEnvironment("AUTH_CLIENT_ID", auth.clientId());
+    webuiLambda.addEnvironment("IDENTITY_HMAC_KEY_ARN", identityHmacKey.getKeyArn());
+    identityHmacKey.grant(webuiLambda, "kms:GenerateMac");
+
     Function adminLambda =
         createLambda(
             prefix + "AdminLambda",
@@ -266,11 +263,7 @@ public class ConformanceStack extends Stack {
     String lambdaRestApiUrl = "%s-api.%s".formatted(prefix, hostedZoneName);
 
     // --- REST API via ALB + Global Accelerator (static IPs) ---
-    Vpc albVpc =
-        Vpc.Builder.create(this, prefix + "AlbVpc")
-            .maxAzs(2)
-            .natGateways(0)
-            .build();
+    Vpc albVpc = Vpc.Builder.create(this, prefix + "AlbVpc").maxAzs(2).natGateways(0).build();
 
     ApplicationLoadBalancer alb =
         ApplicationLoadBalancer.Builder.create(this, prefix + "Alb")
@@ -368,7 +361,7 @@ public class ConformanceStack extends Stack {
                 .build());
     httpApi.addRoutes(
         AddRoutesOptions.builder()
-            .authorizer(httpUserPoolAuthorizer)
+            .authorizer(webuiAuthorizer)
             .path("/conformance/webui")
             .methods(List.of(HttpMethod.GET, HttpMethod.POST))
             .integration(new HttpLambdaIntegration(prefix + "WebuiLambdaIntegration", webuiLambda))
@@ -408,8 +401,8 @@ public class ConformanceStack extends Stack {
             + "frame-ancestors 'none'; script-src 'self'; script-src-attr 'none'; "
             + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             + "font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; "
-            + "connect-src 'self' https://%s https://cognito-idp.%s.amazonaws.com https://fonts.gstatic.com;"
-                .formatted(webuiApiGatewayUrl, this.getRegion());
+            + "connect-src 'self' https://%s %s https://fonts.gstatic.com; frame-src %s; worker-src 'self' blob:;"
+                .formatted(webuiApiGatewayUrl, auth.issuer(), auth.issuer());
     ResponseHeadersPolicy webuiResponseHeadersPolicy =
         ResponseHeadersPolicy.Builder.create(this, prefix + "WebuiResponseHeadersPolicy")
             .securityHeadersBehavior(
@@ -459,13 +452,21 @@ public class ConformanceStack extends Stack {
                             .build()))
                 .build());
 
+    Map<String, Object> frontendAuth = new HashMap<>();
+    frontendAuth.put("provider", "auth0");
+    frontendAuth.put("environment", prefix);
+    frontendAuth.put("apiBaseUrl", "https://" + webuiApiGatewayUrl + "/");
+    frontendAuth.put("issuer", auth.issuer());
+    frontendAuth.put("audience", auth.audience());
+    frontendAuth.put("clientId", auth.clientId());
+
     new BucketDeployment(
         this,
         prefix + "BucketDeployment",
         BucketDeploymentProps.builder()
             .destinationBucket(ngBucket)
             .distribution(distribution)
-            .sources(List.of(Source.asset("../webui/dist/webui/browser")))
+            .sources(List.of(Source.asset("../webui/dist/webui/browser"), Source.jsonData("auth-config.json", frontendAuth)))
             .build());
 
     IPublicHostedZone publicHostedZone =
@@ -482,9 +483,7 @@ public class ConformanceStack extends Stack {
         ARecordProps.builder()
             .zone(publicHostedZone)
             .recordName(lambdaRestApiUrl)
-            .target(
-                RecordTarget.fromAlias(
-                    new GlobalAcceleratorDomainTarget(accelerator.getDnsName())))
+            .target(RecordTarget.fromAlias(new GlobalAcceleratorDomainTarget(accelerator.getDnsName())))
             .build());
     new ARecord(
         this,

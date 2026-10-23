@@ -1,7 +1,11 @@
 import { platformBrowser } from '@angular/platform-browser';
 
-import { AppModule } from './app/app.module';
+import { loadAuthenticationConfig } from './app/auth/auth-config';
 
 
-platformBrowser().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+loadAuthenticationConfig()
+  .then(() => import('./app/app.module'))
+  .then(({ AppModule }) => platformBrowser().bootstrapModule(AppModule))
+  .catch(() => {
+    document.body.textContent = 'Conformance could not start. Please reload or contact DCSA support.';
+  });

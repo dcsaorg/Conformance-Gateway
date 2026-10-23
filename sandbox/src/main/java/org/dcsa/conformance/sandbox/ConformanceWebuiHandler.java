@@ -62,9 +62,9 @@ public class ConformanceWebuiHandler {
   }
 
   public JsonNode _doHandleRequest(String userId, JsonNode requestNode) {
-    log.info("ConformanceWebuiHandler.handleRequest({})", requestNode.toPrettyString());
     String operation = requestNode.get("operation").asText();
-    JsonNode resultNode = switch (operation) {
+    return switch (operation) {
+          case "checkAccess" -> OBJECT_MAPPER.createObjectNode();
           case "createSandbox" -> _createSandbox(userId, requestNode);
           case "getSandboxConfig" -> _getSandboxConfig(userId, requestNode);
           case "getSandboxStatus" -> _getSandboxStatus(userId, requestNode);
@@ -88,8 +88,6 @@ public class ConformanceWebuiHandler {
           case "deleteSandbox" -> deleteSandbox(userId, requestNode);
           default -> throw new UnsupportedOperationException(operation);
         };
-    log.debug("ConformanceWebuiHandler.handleRequest() returning: {}", resultNode.toPrettyString());
-    return resultNode;
   }
 
   private JsonNode _createSandbox(String userId, JsonNode requestNode) {
@@ -179,7 +177,7 @@ public class ConformanceWebuiHandler {
         accessChecker.getUserEnvironmentId(userId),
         sandboxConfiguration);
 
-    log.info("Created sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
+    log.info("Created sandbox: {}", sandboxId);
 
     return OBJECT_MAPPER.createObjectNode().put(SANDBOX_ID, sandboxId);
   }
@@ -301,13 +299,13 @@ public class ConformanceWebuiHandler {
     SandboxConfiguration sandboxConfiguration =
         ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
 
-    log.info("Deleting sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
+    log.info("Deleting sandbox: {}", sandboxId);
 
     sandboxConfiguration.setDeleted(true);
 
     ConformanceSandbox.saveSandboxConfiguration(persistenceProvider, userId, sandboxConfiguration);
 
-    log.info("Deleted sandbox: {}", sandboxConfiguration.toJsonNode().toPrettyString());
+    log.info("Deleted sandbox: {}", sandboxId);
 
     return OBJECT_MAPPER.createObjectNode();
   }
@@ -328,7 +326,7 @@ public class ConformanceWebuiHandler {
     SandboxConfiguration sandboxConfiguration =
         ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
 
-    log.info("Updating sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
+    log.info("Updating sandbox: {}", sandboxId);
 
     CounterpartConfiguration externalPartyCounterpartConfig =
         Arrays.stream(sandboxConfiguration.getCounterparts())
@@ -415,31 +413,12 @@ public class ConformanceWebuiHandler {
 
     ConformanceSandbox.saveSandboxConfiguration(persistenceProvider, userId, sandboxConfiguration);
 
-    log.info("Updated sandbox: {}", sandboxConfiguration.toJsonNode().toPrettyString());
+    log.info("Updated sandbox: {}", sandboxId);
 
     return OBJECT_MAPPER.createObjectNode();
   }
 
   private JsonNode _getAvailableStandards() {
-    /*
-    [
-      {
-        "name": "Booking",
-        "versions": [
-            {
-              "number": "2.0.0",
-              "suites": [
-                "Conformance",
-                "Reference Implementation"
-              ],
-              "roles": [
-                "Carrier",
-                "Shipper"
-              ]
-            }
-        ]
-      },
-     */
     ArrayNode standardsNode = OBJECT_MAPPER.createArrayNode();
     TreeSet<String> sortedStandardNames = new TreeSet<>(String::compareToIgnoreCase);
     sortedStandardNames.addAll(standardsByName.keySet());

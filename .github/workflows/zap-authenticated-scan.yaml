@@ -21,8 +21,7 @@ jobs:
     env:
       APP_URL: ${{ vars.APP_URL }}
       API_URL: ${{ vars.API_URL }}
-      CONFORMANCE_USER_EMAIL: ${{ secrets.CONFORMANCE_USER_EMAIL }}
-      CONFORMANCE_USER_PASSWORD: ${{ secrets.CONFORMANCE_USER_PASSWORD }}
+      CONFORMANCE_ACCESS_TOKEN: ${{ secrets.CONFORMANCE_ACCESS_TOKEN }}
     steps:
       - name: Check out the scan plan
         uses: actions/checkout@v6.0.2
@@ -34,8 +33,8 @@ jobs:
       - name: Require authenticated scan configuration
         shell: bash
         run: |
-          if [ -z "$APP_URL" ] || [ -z "$API_URL" ] || [ -z "$CONFORMANCE_USER_EMAIL" ] || [ -z "$CONFORMANCE_USER_PASSWORD" ]; then
-            echo "APP_URL, API_URL, CONFORMANCE_USER_EMAIL, and CONFORMANCE_USER_PASSWORD must be configured for this GitHub Environment."
+          if [ -z "$APP_URL" ] || [ -z "$API_URL" ] || [ -z "$CONFORMANCE_ACCESS_TOKEN" ]; then
+            echo "APP_URL, API_URL, and a fresh CONFORMANCE_ACCESS_TOKEN must be configured for this GitHub Environment."
             exit 1
           fi
 
@@ -51,8 +50,7 @@ jobs:
           docker_env_vars: |
             APP_URL
             API_URL
-            CONFORMANCE_USER_EMAIL
-            CONFORMANCE_USER_PASSWORD
+            CONFORMANCE_ACCESS_TOKEN
 
       - name: Select authenticated HTML report
         if: always()
@@ -61,6 +59,14 @@ jobs:
           if [ ! -f zap-authenticated-report.html ]; then
             mv zap-authenticated-report-fallback.html zap-authenticated-report.html
           fi
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          path = Path('zap-authenticated-report.html')
+          token = os.environ.get('CONFORMANCE_ACCESS_TOKEN', '')
+          if token:
+              path.write_text(path.read_text().replace(token, '[REDACTED]'))
+          PY
 
       - name: Upload authenticated HTML report
         if: always()

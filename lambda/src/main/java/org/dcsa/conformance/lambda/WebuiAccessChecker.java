@@ -5,6 +5,7 @@ import org.dcsa.conformance.sandbox.ConformanceAccessException;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 
 public class WebuiAccessChecker implements ConformanceAccessChecker {
+
   private final ConformancePersistenceProvider persistenceProvider;
 
   public WebuiAccessChecker(ConformancePersistenceProvider persistenceProvider) {
@@ -18,12 +19,11 @@ public class WebuiAccessChecker implements ConformanceAccessChecker {
 
   @Override
   public void checkUserSandboxAccess(String userId, String sandboxId) {
-    if (!persistenceProvider
-        .getNonLockingMap()
-        .getItemValue("environment#" + userId, "sandbox#" + sandboxId)
-        .has("id")) {
-      throw new ConformanceAccessException(
-          "User '%s' has no access to sandbox '%s'".formatted(userId, sandboxId));
+    var ownership = persistenceProvider
+            .getNonLockingMap()
+            .getItemValue("environment#" + userId, "sandbox#" + sandboxId);
+    if (ownership == null || !ownership.has("id")) {
+      throw new ConformanceAccessException("User '%s' has no access to sandbox '%s'".formatted(userId, sandboxId));
     }
   }
 }

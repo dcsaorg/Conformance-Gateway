@@ -7,15 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
 @Tag("Integration")
+@Disabled("Requires an Auth0 Universal Login browser fixture and approved staging accounts; local DummyAuth login is not valid in AWS")
 class AWSEnvironmentTest extends SeleniumTestBase {
   private static final String ENV_BASE_URL = "TEST_BASE_URL";
-  private static final String ENV_LOGIN_EMAIL = "TEST_LOGIN_EMAIL";
-  private static final String ENV_LOGIN_PASSWORD = "TEST_LOGIN_PASSWORD";
 
   @Override
   @BeforeEach
@@ -30,8 +30,6 @@ class AWSEnvironmentTest extends SeleniumTestBase {
   @Test
   void testStandardOnDevEnvironment() {
     baseUrl = getRequiredProperty(ENV_BASE_URL);
-    loginEmail = getRequiredProperty(ENV_LOGIN_EMAIL);
-    loginPassword = getRequiredProperty(ENV_LOGIN_PASSWORD);
 
     StopWatch stopWatch = StopWatch.createStarted();
     String standardName = "Ebl";

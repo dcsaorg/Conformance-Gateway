@@ -11,48 +11,6 @@ env:
       includePaths:
         - 'https://(?:dev\.conformance-development-1|dt\.conformance-dt-1|test\.conformance-test-1)\.dcsa\.org(?:/.*)?'
         - 'https://(?:dev-webui\.conformance-development-1|dt-webui\.conformance-dt-1|test-webui\.conformance-test-1)\.dcsa\.org(?:/.*)?'
-      authentication:
-        method: browser
-        parameters:
-          loginPageUrl: ${APP_URL}/login
-          loginPageWait: 20
-          browserId: firefox-headless
-          diagnostics: false
-          steps:
-            - description: Enter the Conformance account email
-              type: USERNAME
-              cssSelector: '#login_email'
-              timeout: 10000
-            - description: Enter the Conformance account password
-              type: PASSWORD
-              cssSelector: '#login_password'
-              timeout: 10000
-            - description: Submit the login form
-              type: CLICK
-              cssSelector: '#login_button'
-              timeout: 10000
-        verification:
-          method: poll
-          loggedInRegex: '\Q200 OK\E'
-          loggedOutRegex: '\Q401 Unauthorized\E|\Q403 Forbidden\E'
-          pollFrequency: 60
-          pollUnits: seconds
-          pollUrl: ${API_URL}/conformance/webui
-          pollPostData: '{"operation":"getAvailableStandards"}'
-          pollAdditionalHeaders:
-            - header: Content-Type
-              value: application/json
-      # amazon-cognito-identity-js uses the Cognito ID token, without a Bearer
-      # prefix, as the Authorization value for the Web UI API.
-      sessionManagement:
-        method: headers
-        parameters:
-          Authorization: '{%json:AuthenticationResult.IdToken%}'
-      users:
-        - name: Conformance ZAP test account
-          credentials:
-            username: ${CONFORMANCE_USER_EMAIL}
-            password: ${CONFORMANCE_USER_PASSWORD}
 
 jobs:
   # Angular requires inline styles unless the application and edge layer coordinate
@@ -70,8 +28,6 @@ jobs:
   # Use only read-only requests in this initial profile. A generic crawler can
   # interact with sandbox-management controls even when no active scan runs.
   - type: requestor
-    parameters:
-      user: Conformance ZAP test account
     requests:
       - name: Authenticated application root
         url: ${APP_URL}/
@@ -86,6 +42,7 @@ jobs:
         method: POST
         headers:
           - 'Content-Type: application/json'
+          - 'Authorization: Bearer ${CONFORMANCE_ACCESS_TOKEN}'
         data: '{"operation":"getAvailableStandards"}'
         responseCode: 200
     tests:
@@ -106,7 +63,7 @@ jobs:
       reportDir: /zap/wrk
       reportFile: zap-authenticated-report.html
       reportTitle: Conformance authenticated ZAP scan
-      reportDescription: Authenticated passive scan using the Cognito ID token and read-only Conformance requests.
+      reportDescription: Passive scan of static routes and read-only API requests using an operator-supplied Auth0 access token; does not test browser sign-in.
     sites:
       - ${APP_URL}
       - ${API_URL}

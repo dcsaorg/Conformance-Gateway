@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
+    "auth0-identity-migration": "ts-node src/scripts/auth0-identity-migration.ts",
     "get-cognito-user": "ts-node src/scripts/get-cognito-user.ts",
     "get-current-sandbox-session": "ts-node src/scripts/get-current-sandbox-session.ts",
     "get-sandbox-metadata": "ts-node src/scripts/get-sandbox-metadata.ts",
@@ -27,6 +28,8 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.1050.0",
     "@aws-sdk/client-dynamodb": "^3.1050.0",
+    "@aws-sdk/client-kms": "^3.1155.0",
+    "@aws-sdk/client-sts": "^3.1155.0",
     "@aws-sdk/util-dynamodb": "^3.996.2",
     "dotenv": "^17.4.2"
   },

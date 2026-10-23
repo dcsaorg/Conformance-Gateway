@@ -46,21 +46,12 @@ jobs:
           if [ "${{ env.AWS_ENVIRONMENT }}" = "dt" ]; then
             echo "AWS_ACCESS_KEY_ID=${{ secrets.DT_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DT_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-            echo "CONFORMANCE_USER_EMAIL=${{ secrets.DT_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
-            echo "CONFORMANCE_USER_PASSWORD=${{ secrets.DT_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
-            echo "CONFORMANCE_WEB_URL=${{ secrets.DT_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
           elif [ "${{ env.AWS_ENVIRONMENT }}" = "dev" ]; then
             echo "AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-            echo "CONFORMANCE_USER_EMAIL=${{ secrets.DEV_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
-            echo "CONFORMANCE_USER_PASSWORD=${{ secrets.DEV_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
-            echo "CONFORMANCE_WEB_URL=${{ secrets.DEV_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
           else
             echo "AWS_ACCESS_KEY_ID=${{ secrets.TEST_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-            echo "CONFORMANCE_USER_EMAIL=${{ secrets.TEST_CONFORMANCE_USER_EMAIL }}" >> $GITHUB_ENV
-            echo "CONFORMANCE_USER_PASSWORD=${{ secrets.TEST_CONFORMANCE_USER_PASSWORD }}" >> $GITHUB_ENV
-            echo "CONFORMANCE_WEB_URL=${{ secrets.TEST_CONFORMANCE_WEB_URL }}" >> $GITHUB_ENV
           fi
 
       - name: Set up Java JDK
@@ -226,10 +217,7 @@ jobs:
           cd cdk/
           cdk deploy ${{ env.AWS_ENVIRONMENT }}ConformanceStack --require-approval never
 
-      - name: Verify a scenario in AWS ${{ env.AWS_ENVIRONMENT }} environment
-        env:
-          TEST_LOGIN_EMAIL: ${{ env.CONFORMANCE_USER_EMAIL }}
-          TEST_LOGIN_PASSWORD: ${{ env.CONFORMANCE_USER_PASSWORD }}
-          TEST_BASE_URL: ${{ env.CONFORMANCE_WEB_URL }}
+      - name: Run integration tests (Auth0 browser acceptance pending)
         run: |
+          echo "::warning::AWS browser sign-in coverage is disabled pending the Auth0 fixture and staging accounts. Integration test success is not Auth0 deployment acceptance."
           ./mvnw -B test -Pintegration

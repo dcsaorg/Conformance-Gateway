@@ -1,5 +1,5 @@
-import { Observable, Subject } from "rxjs";
-import { AuthInterface } from "./auth-interface";
+import { Observable, Subject } from 'rxjs';
+import { AuthInterface } from './auth-interface';
 
 class DummyAuthStatus {
   constructor(
@@ -15,23 +15,18 @@ class DummyAuthStatus {
   }
 
   load(): void {
-    this.userConfirmed = (localStorage.getItem('DummyAuthStatus.userConfirmed') || 'false') === 'true';
-    this.isAuthenticated = (localStorage.getItem('DummyAuthStatus.isAuthenticated') || 'false') === 'true';
+    this.userConfirmed =
+      (localStorage.getItem('DummyAuthStatus.userConfirmed') || 'false') === 'true';
+    this.isAuthenticated =
+      (localStorage.getItem('DummyAuthStatus.isAuthenticated') || 'false') === 'true';
     this.userEmail = localStorage.getItem('DummyAuthStatus.userEmail') || '';
   }
 }
 
 export class DummyAuth implements AuthInterface {
-
-  private readonly _authStatus: DummyAuthStatus = new DummyAuthStatus(
-    false,
-    false,
-    ''
-  );
+  private readonly _authStatus: DummyAuthStatus = new DummyAuthStatus(false, false, '');
 
   private readonly _authStatusSubject = new Subject<boolean>();
-
-  private emailToVerify: string = '';
 
   constructor() {
     console.warn('Using DUMMY authenticator!');
@@ -41,11 +36,11 @@ export class DummyAuth implements AuthInterface {
     return this._authStatusSubject.asObservable();
   }
 
-
-  async login(username: string, password: string): Promise<void> {
+  async login(localEmail = ''): Promise<void> {
+    if (!localEmail.trim()) throw new Error('Enter a local development email');
     this._authStatus.userConfirmed = true;
     this._authStatus.isAuthenticated = true;
-    this._authStatus.userEmail = username;
+    this._authStatus.userEmail = localEmail;
     this._authStatus.save();
     this._authStatusSubject.next(this._authStatus.isAuthenticated);
   }
@@ -62,11 +57,15 @@ export class DummyAuth implements AuthInterface {
     return this._authStatus.isAuthenticated;
   }
 
-  async getUserIdToken(): Promise<string | null> {
+  async getApiAuthorization(): Promise<string | null> {
     if (!this._authStatus.isAuthenticated) {
-      return "";
+      return '';
     }
-    const userId: string = this._authStatus.userEmail.split('@').join('-at-').split('.').join('-dot-');
+    const userId: string = this._authStatus.userEmail
+      .split('@')
+      .join('-at-')
+      .split('.')
+      .join('-dot-');
     return `DummyAuthToken#${userId}`;
   }
 
